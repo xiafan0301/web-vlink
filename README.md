@@ -1,4 +1,4 @@
-# vlink-web
+# web-vlink
 
 ## Project setup
 ```
