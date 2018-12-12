@@ -8,7 +8,7 @@ console.log('process.env.VUE_APP_PROJECTNAME', process.env.VUE_APP_PROJECTNAME)
 // vue.config.js
 module.exports = {
     // 部署应用包时的基本 URL  Default: '/'
-    baseUrl: process.env.NODE_ENV === 'production' ? './' : './',
+    baseUrl: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : './',
     // (build)生产环境构建文件的目录 // 'dist/web-test'
     // outputDir: 'dist',
     // outputDir: 'dist/' + ((process.env && process.env.VUE_APP_PROJECTNAME) ? process.env.VUE_APP_PROJECTNAME : 'web'),
@@ -21,6 +21,7 @@ module.exports = {
     indexPath: 'index.html',
     filenameHashing: true,
     devServer: {
+        contentBase: process.env.VUE_APP_PROJECTNAME,
         host: 'localhost',
         port: 9101,
         hot: true,          // 开启热更新
@@ -47,6 +48,8 @@ module.exports = {
             template: 'public/index.html',
             // 在 dist/index.html 的输出
             filename: 'index.html',
+            // ctx设置，用于.html文件中静态资源的引入
+            ctx: (process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : ''),
             // 当使用 title 选项时，
             // template 中的 title 标签需要是 <title><%= htmlWebpackPlugin.options.title %></title>
             // title: 'web test',

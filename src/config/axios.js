@@ -7,15 +7,18 @@ import ElementUI from 'element-ui';
 // import store from '@/store/store.js';
 import { ajaxCtx } from '@/config/config.js';
 // axios支持跨域cookie
-axios.defaults.withCredentials = true;
-// axios添加一个请求拦截器u
-axios.interceptors.request.use((config) => {
-  if (config.url.indexOf('http') !== 0 && config.url.indexOf('https') !== 0) {
-    if (config.url.indexOf('@user/') === 0 || config.url.indexOf('/@user/') === 0) {
-      config.url = ajaxCtx.domain_user + config.url.substring(3);
-    } else {
-      config.url = ajaxCtx.domain + config.url;
-    }
+// axios.defaults.withCredentials = true;
+// create an axios instance
+const service = axios.create({
+	baseURL: ajaxCtx.base, // api的base_url
+	timeout: 30000, // request timeout
+  withCredentials: true
+})
+// axios添加一个请求拦截器
+service.interceptors.request.use((config) => {
+  // console.log('axios request config', config);
+  if (config.mode && ajaxCtx[config.mode]) {
+    config.baseURL = ajaxCtx[config.mode];
   }
   let r = '_r=' + new Date().getTime();
   if (config.url.indexOf('?') > 0) {
@@ -30,8 +33,8 @@ axios.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 // axios添加一个响应拦截器
-axios.interceptors.response.use(function (response) {
-  // console.log('response', response)
+service.interceptors.response.use(function (response) {
+  console.log('response', response)
   if (response && response.data) {
     let _data = response.data;
     if (_data.code === '00000000') {
@@ -58,4 +61,5 @@ axios.interceptors.response.use(function (response) {
   });
   return Promise.reject(error);
 });
-Vue.prototype.axios = axios;
+Vue.prototype.axios = service;
+export default service
