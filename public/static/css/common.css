@@ -129,6 +129,35 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
   0% { opacity: 0; -webkit-transform: translate3d(0, -100%, 0); transform: translate3d(0, -100%, 0); }
   100%{opacity:1; -webkit-transform:none; transform:none; }
 }
+/* fadeInLeft */
+@-webkit-keyframes fadeInLeft {
+  0% { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+@keyframes fadeInLeft {
+  0% { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+/* fadeInRight */
+@-webkit-keyframes fadeInRight {
+  0% { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+@keyframes fadeInRight {
+  0% { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+/* 闪烁 */
+@-webkit-keyframes twinkle {
+  0% { opacity: 1; }
+  50%{ opacity: 0; }
+  100%{ opacity: 1; }
+}
+@keyframes twinkle {
+  0% { opacity: 1; }
+  50%{ opacity: 0; }
+  100%{ opacity: 1; }
+}
 
 
 

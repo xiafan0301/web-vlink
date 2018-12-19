@@ -44,6 +44,7 @@ export default {
     width: 200px; height: 100%;
     box-shadow:4px 0px 10px 0px #838383;
     box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
+    animation: fadeInLeft .4s ease-out .3s both;
     > li {
       height: 60px; line-height: 60px;
       text-align: center;

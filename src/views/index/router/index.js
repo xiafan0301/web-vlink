@@ -7,11 +7,12 @@ export default new Router({
     // mode: 'history',
     base: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : '',
     routes: [
-        { path: '*', redirect: 'index' }, // 404
+        { path: '*', redirect: {name: 'index'} }, // 404
         { 
             path: '/',
             name: 'index',
             component: () => import('@/views/index/components/default.vue'),
+            redirect: {name: 'video'},
             children: [
                 {
                     path: 'video',
@@ -80,6 +81,16 @@ export default new Router({
             path: '/login',
             name: 'login',
             component: () => import('@/views/index/components/login.vue')
+        },
+        { 
+            path: '/register',
+            name: 'register',
+            component: () => import('@/views/index/components/register.vue')
+        },
+        { 
+            path: '/findPwd',
+            name: 'findPwd',
+            component: () => import('@/views/index/components/findPwd.vue')
         }
     ]
 })
