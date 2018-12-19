@@ -1,5 +1,5 @@
 // 全局过滤器
-import Vue from 'vue';
+import Vue from 'vue/dist/vue.js';
 import {formatDate} from './util.js';
 /*
  * 时间戳处理
@@ -9,14 +9,16 @@ Vue.filter('fmTimestamp', function (timestamp, fm) {
 });
 /*
  * 数量处理
+ * @param {int} number 熟练
+ * @param {string} currency 单位
  * */
-Vue.filter('fmTenThousand', function (numer, currency) {
-  if (isNaN(numer)) { return 0; }
-  if (numer < 10000) { return numer; }
+Vue.filter('fmTenThousand', function (number, currency) {
+  if (isNaN(number)) { return 0; }
+  if (number < 10000) { return number; }
   if (!currency) { currency = '万'; }
-  numer = Math.round((numer / 10000) * 100) / 100;
-  numer = numer + currency;
-  return numer;
+  number = Math.round((number / 10000) * 100) / 100;
+  number = number + currency;
+  return number;
 });
 /*
  * 截取字符串

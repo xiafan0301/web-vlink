@@ -17,8 +17,10 @@
     "axios": "^0.18.0",
     "element-ui": "^2.4.11",
     "node-sass": "^4.10.0",
+    "qrcodejs2": "0.0.2",
     "sass-loader": "^7.1.0",
     "vue": "^2.5.17",
+    "vue-qart": "^2.2.0",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
