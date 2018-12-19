@@ -2,24 +2,11 @@
   <div class="vl_vid">
     <div class="vid_title">
       <ul class="vid_show_type">
-        <li @click="showType = 1">
-          样式1
-        </li>
-        <li @click="showType = 2">
-          样式2
-        </li>
-        <li @click="showType = 3">
-          样式3
-        </li>
-        <li @click="showType = 4">
-          样式4
-        </li>
-        <li @click="showType = 5">
-          样式5
-        </li>
-        <li @click="showType = 6">
-          样式5
-        </li>
+        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="showType = 1"></li>
+        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
+        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
+        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
+        <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li>
       </ul>
     </div>
     <div class="vid_content">
@@ -51,16 +38,19 @@ export default {
   > .vid_title {
     position: absolute; top: 0; left: 0;
     width: 100%;
-    height: 50px;
+    height: 60px;
+    padding-top: 10px;
     .vid_show_type {
       overflow: hidden;
+      padding-left: 20px;
       > li {
-        height: 50px;
-        line-height: 50px;
+        height: 40px;
         float: left;
-        margin-right: 10px;
+        margin-top: 5px; margin-right: 10px;
         cursor: pointer;
-        padding: 0 10px;
+        &.vl_icon_sed {
+          cursor: default;
+        }
       }
     }
   }
@@ -91,21 +81,18 @@ export default {
     width: 50%; height: 50%;
   }
   &.vid_list_st3 > li {
-    width: 33.33%; height: 33.33%;
+    width: 33.33%; height: 40%;
+    &:nth-child(1) {
+      width: 50%; height: 60%;
+    }
+    &:nth-child(2) {
+      width: 50%; height: 60%;
+    }
   }
   &.vid_list_st4 > li {
     width: 33.33%; height: 33.33%;
-    &:first-child {
-      width: 100%; height: 66.66%;
-    }
   }
   &.vid_list_st5 > li {
-    width: 50%; height: 40%;
-    &:first-child {
-      width: 100%; height: 60%;
-    }
-  }
-  &.vid_list_st6 > li {
     width: 25%; height: 25%;
   }
 }

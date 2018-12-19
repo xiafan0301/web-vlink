@@ -16,9 +16,9 @@ export const validatePhone = (rule, value, callback) => {
 // 密码验证
 export const validatePwd = (rule, value, callback) => {
     if (value) {
-        let reg = /^[a-zA-Z0-9]{6,32}$/;
+        let reg = /^[a-zA-Z0-9]{6,16}$/;
         if (!reg.test(value)) {
-            callback(new Error('密码为6-32个数字或英文字母组合'));
+            callback(new Error('密码为6-16个数字或英文字母组合'));
         } else {
             callback();
         }

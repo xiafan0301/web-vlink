@@ -588,6 +588,7 @@ export default {
     position: absolute; top: 0; left: 0; z-index: 2;
     padding: 20px 0 20px 20px;
     width: 280px; height: 100%;
+    animation: fadeInLeft .4s ease-out .4s both;
     > div {
       position: relative;
       width: 260px; height: 100%;
@@ -667,6 +668,7 @@ export default {
       padding: 15px 30px;
       background:rgba(255,255,255,1); 
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
+      animation: fadeInDown .4s ease-out .4s both;
       > li {
         float: left;
       }
@@ -676,6 +678,7 @@ export default {
       height: 510px;
       margin-top: -255px;
       transition: right .3s ease-out;
+      animation: fadeInRight .4s ease-out .4s both;
       > ul {
         padding: 0 10px;
         background-color: #fff;

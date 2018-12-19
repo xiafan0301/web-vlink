@@ -7,21 +7,42 @@
    display: inline-block;
    background-repeat: no-repeat;
    background-image: url(../img/icons.png);
+   transition: .4s ease-out;
 }
+.vl_icon_logo { width: 170px; height: 48px; background-position: -96px -521px; }
+/* header */
+.vl_icon_011 { width: 36px; height: 38px; background-position: -702px -65px; }
+.vl_icon_012 { width: 36px; height: 38px; background-position: -762px -65px; }
+/* login */
+.vl_icon_lg_logo { width: 350px; height: 90px; background-position: -93px -609px; }
+.vl_icon_lg_01 { width: 14px; height: 16px; background-position: -100px -715px; }
+.vl_icon_lg_02 { width: 14px; height: 16px; background-position: -131px -715px; }
+.vl_icon_lg_03 { width: 16px; height: 16px; background-position: -162px -715px; }
 /* 一级导航菜单 */
 .vl_icon_001 { width: 36px; height: 36px; background-position: -103px -66px; }
-.vl_icon_002 { width: 36px; height: 36px; background-position: -219px -66px; }
-.vl_icon_003 { width: 36px; height: 36px; background-position: -335px -66px; }
-.vl_icon_004 { width: 36px; height: 36px; background-position: -451px -66px; }
-.vl_icon_005 { width: 36px; height: 36px; background-position: -567px -66px; }
-.vl_icon_006 { width: 36px; height: 36px; background-position: -683px -66px; }
-.vl_icon_007 { width: 36px; height: 36px; background-position: -799px -66px; }
-.vl_icon_008 { width: 36px; height: 36px; background-position: -915px -66px; }
+.vl_icon_002 { width: 36px; height: 36px; background-position: -179px -66px; }
+.vl_icon_003 { width: 36px; height: 36px; background-position: -255px -66px; }
+.vl_icon_004 { width: 36px; height: 36px; background-position: -331px -66px; }
+.vl_icon_005 { width: 36px; height: 36px; background-position: -407px -66px; }
+.vl_icon_006 { width: 36px; height: 36px; background-position: -483px -66px; }
+.vl_icon_007 { width: 36px; height: 36px; background-position: -559px -66px; }
+.vl_icon_008 { width: 36px; height: 36px; background-position: -636px -66px; }
+/* 视频板块 */
+.vl_icon_061 { width: 40px; height: 40px; background-position: -98px -466px; }
+.vl_icon_062 { width: 40px; height: 40px; background-position: -156px -466px; }
+.vl_icon_063 { width: 40px; height: 40px; background-position: -214px -466px; }
+.vl_icon_064 { width: 40px; height: 40px; background-position: -272px -466px; }
+.vl_icon_065 { width: 40px; height: 40px; background-position: -330px -466px; }
+.vl_icon_061.vl_icon_sed { background-position: -98px -418px; }
+.vl_icon_062.vl_icon_sed { background-position: -156px -418px; }
+.vl_icon_063.vl_icon_sed { background-position: -214px -418px; }
+.vl_icon_064.vl_icon_sed { background-position: -272px -418px; }
+.vl_icon_065.vl_icon_sed { background-position: -330px -418px; }
 /* 地图标记 */
-.vl_icon_ry { width: 41px; height: 48px; background-position: -90px -275px; }
-.vl_icon_kk { width: 41px; height: 48px; background-position: -173px -275px; }
-.vl_icon_cl { width: 41px; height: 48px; background-position: -256px -275px; }
-.vl_icon_sxt { width: 41px; height: 48px; background-position: -339px -275px; }
+.vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
+.vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
+.vl_icon_cl { width: 41px; height: 48px; background-position: -217px -188px; }
+.vl_icon_sxt { width: 41px; height: 48px; background-position: -280px -188px; }
 /* 地图板块 工具栏 */
 .vl_icon_041 { width: 20px; height: 20px; background-position: -96px -560px; }
 .vl_icon_sed .vl_icon_041 { background-position: -96px -496px; }
@@ -34,7 +55,14 @@
 .vl_icon_045 { width: 20px; height: 20px; background-position: -396px -560px; }
 .vl_icon_sed .vl_icon_045 { background-position: -396px -496px; }
 /* 地图板块 标注 */
-.vl_icon_051 { width: 30px; height: 32px; background-position: -597px -285px; }
+.vl_icon_051 { width: 31px; height: 34px; background-position: -477px -196px; }
+
+/* ========== element ui reset ========== */
+.el-badge__content {
+   border: 0 !important;
+   background-color: #FA453A;
+}
+
 
 /* ========== 地图板块 ========== */
  .vl_map_lc_dt_inp {
@@ -187,3 +215,5 @@
 .vl_map .amap-ranging-label > span > img{
    padding-left: 2px;
 }
+
+.login_form_item .el-input__inner { padding: 0 30px; }
