@@ -1,7 +1,7 @@
 /*
  * vue全局方法
  */
-import Vue from 'vue';
+import Vue from 'vue/dist/vue.js';
 /*
  * 获取字符串长度
  * @param {string} str 字符串
