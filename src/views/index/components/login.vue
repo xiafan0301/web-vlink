@@ -86,7 +86,7 @@ export default {
           setTimeout(() => {
             this.loginBtnLoading = false;
             this.$router.push({name: 'index'});
-          }, 2000);
+          }, 1000);
           // return false;
         }
       });

@@ -15,6 +15,7 @@ export default new Router({
             redirect: {name: 'video'},
             children: [
                 {
+                    /* 视频板块 */
                     path: 'video',
                     name: 'video',
                     component: () => import('@/views/index/components/video/video.vue'),
@@ -47,13 +48,39 @@ export default new Router({
                         }
                     ]
                 }, {
+                    /* 地图板块 */
                     path: 'map',
                     name: 'map',
                     component: () => import('@/views/index/components/map/map.vue')
                 }, {
+                    /* 事件板块 */
                     path: 'event',
                     name: 'event',
-                    component: () => import('@/views/index/components/event/event.vue')
+                    component: () => import('@/views/index/components/event/event.vue'),
+                    redirect: {name: 'event_audit'},
+                    children: [
+                        {
+                            path: 'audit',
+                            name: 'event_audit',
+                            component: () => import('@/views/index/components/event/audit.vue')
+                        }, {
+                            path: 'manage',
+                            name: 'event_manage',
+                            component: () => import('@/views/index/components/event/manage.vue')
+                        }, {
+                            path: 'ctc',
+                            name: 'event_ctc',
+                            component: () => import('@/views/index/components/event/ctc.vue')
+                        }, {
+                            path: 'ctcplan',
+                            name: 'event_ctcplan',
+                            component: () => import('@/views/index/components/event/ctcplan.vue')
+                        }, {
+                            path: 'statistics',
+                            name: 'event_statistics',
+                            component: () => import('@/views/index/components/event/statistics.vue')
+                        }
+                    ]
                 }, { 
                     path: 'judge',
                     name: 'judge',

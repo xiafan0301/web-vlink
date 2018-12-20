@@ -67,7 +67,7 @@
 </template>
 <script>
 import headerNormal from '@/components/headerNormal.vue';
-import {validatePhone, validatePwd} from '@/utils/validator.js';
+import {validatePhone} from '@/utils/validator.js';
 export default {
     components: {headerNormal},
     data () {
@@ -165,7 +165,7 @@ export default {
                 }
             });
         },
-        getRegCode (formName) {
+        getRegCode () {
             this.regCodeDis = true;
             this.regCodeTip = this.regCodeTime;
             this.regCodeVal = setInterval(() => {
