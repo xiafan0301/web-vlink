@@ -51,3 +51,23 @@ Vue.filter('strCutWithLen', function (str, len, clen, siff) {
   }
   return srtn;
 });
+/*
+ * 手机号安全处理
+ * @param {int|string} mobile 手机号
+ * */
+Vue.filter('mobileSecurity', function (mobile) {
+  if (mobile && mobile > 0) {
+    if (!mobile || mobile.length < 7) { return mobile; }
+    mobile = mobile + '';
+    if (mobile.length > 7) {
+      let str = '';
+      str = mobile.substring(0, 3);
+      for (let i = 0; i < mobile.length - 7; i++) {
+        str += '*';
+      }
+      str += mobile.substring(mobile.length - 4, mobile.length);
+      return str;
+    }
+  }
+  return mobile;
+});
