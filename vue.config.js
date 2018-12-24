@@ -49,7 +49,7 @@ module.exports = {
             // 在 dist/index.html 的输出
             filename: 'index.html',
             // ctx设置，用于.html文件中静态资源的引入
-            ctx: (process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : ''),
+            // ctx: (process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : ''),
             // 当使用 title 选项时，
             // template 中的 title 标签需要是 <title><%= htmlWebpackPlugin.options.title %></title>
             // title: 'web test',

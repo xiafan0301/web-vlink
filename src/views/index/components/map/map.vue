@@ -431,6 +431,7 @@ export default {
         let infoWindow = new window.AMap.Marker({
           map: _this.map,
           position: e.lnglat,
+          zIndex: 111,
           offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
           content: '<div class="vl_map_mk" id="' + sid + '"><div class="vl_map_mk_main">' +
             '<textarea placeholder="标注内容" rows="4"></textarea>' +
