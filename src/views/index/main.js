@@ -7,7 +7,24 @@ import '@/config/axios.js';
 import router from './router/index.js'
 // include
 import '@/config/include.js'
-
+// 自定义滚动条
+import vuescroll from 'vuescroll/dist/vuescroll-native';
+import 'vuescroll/dist/vuescroll.css';
+Vue.use(vuescroll, {
+  ops: {
+    // 滚动条滚动的地方
+    rail: {
+      size: '6px',
+      opacity: 0
+    },
+    // 滚动条
+    bar: {
+      background: '#CCC',
+      onlyShowBarOnScroll: false
+      // keepShow: true
+    }
+  }
+});
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

@@ -79,6 +79,10 @@ export default new Router({
                             path: 'statistics',
                             name: 'event_statistics',
                             component: () => import('@/views/index/components/event/statistics.vue')
+                        }, {
+                            path: 'addEvent',
+                            name: 'add_event',
+                            component: () => import('@/views/index/components/event/addEvent.vue')
                         }
                     ]
                 }, { 

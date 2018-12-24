@@ -24,6 +24,7 @@ export default {
   > .vl_content {
     padding-top: 100px;
     height: 100%;
+    background-color: #fafafa;
   }
 }
 </style>
