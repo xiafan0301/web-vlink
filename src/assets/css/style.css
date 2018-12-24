@@ -65,6 +65,7 @@
 
 /* 左侧二级菜单样式 */
 .vl_smenu {
+  background-color: #ffffff;
   position: absolute; top: 0; left: 0;
   width: 200px; height: 100%;
   box-shadow:4px 0px 10px 0px #838383;
@@ -247,3 +248,97 @@
 }
 
 .login_form_item .el-input__inner { padding: 0 30px; }
+
+/** 表格样式 **/
+.el-table {
+  color: #666666;
+}
+.el-table th {
+  background-color: #F7F7F7;
+}
+.el-table thead {
+  color: #333333;
+}
+.el-table .hover-row>td {
+  background-color: #E1F9FF !important;
+}
+.el-table th>.cell {
+  font-weight: bolder;
+}
+
+/** 分页样式 **/
+.el-pagination {
+  text-align: right;
+  padding: 20px;
+}
+.el-pagination .btn-prev, .el-pagination .btn-next {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+}
+.el-pager li.active {
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  background-color: #0C70F8;
+  border-radius: 5px;
+}
+.el-pager li {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+  margin: 0 5px;
+  font-weight: 500;
+}
+
+/** 面包屑导航样式 **/
+.breadcrumb_heaer {
+  padding: 20px;
+}
+.el-breadcrumb__inner a, .el-breadcrumb__inner.is-link {
+  color: #999999;
+  font-weight: 400;
+}
+.el-breadcrumb__item:last-child .el-breadcrumb__inner, .el-breadcrumb__item:last-child .el-breadcrumb__inner a, .el-breadcrumb__item:last-child .el-breadcrumb__inner a:hover, .el-breadcrumb__item:last-child .el-breadcrumb__inner:hover {
+  color: #333333;
+  font-weight: 400;
+}
+.el-breadcrumb__separator {
+  color: #999999;
+}
+
+/** 上传图片组件 **/
+.el-upload--picture-card {
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  background-color: #F5F5F5;
+  border: 1px solid #F5F5F5;
+  position: relative;
+}
+.el-upload--picture-card  i {
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  color: #9F9F9F;
+}
+.el-upload--picture-card .add-img-text {
+  color: #666666;
+  font-size: 14px;
+  display: block;
+  width: 28px;
+  height: 22px;
+  position: absolute;
+  top: 25%;
+  left: 35%;
+}
+.el-upload-list--picture-card .el-upload-list__item {
+  width: 104px;
+  height: 104px;
+}

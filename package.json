@@ -21,7 +21,8 @@
     "sass-loader": "^7.1.0",
     "vue": "^2.5.17",
     "vue-qart": "^2.2.0",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vuescroll": "^4.9.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.4",
