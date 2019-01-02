@@ -12,7 +12,7 @@ module.exports = {
     // (build)生产环境构建文件的目录 // 'dist/web-test'
     // outputDir: 'dist',
     // outputDir: 'dist/' + ((process.env && process.env.VUE_APP_PROJECTNAME) ? process.env.VUE_APP_PROJECTNAME : 'web'),
-    outputDir: 'dist/web',
+    outputDir: 'dist/web/' + process.env.VUE_APP_PROJECTNAME,
     // (build)放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录  Default: ''
     // dev 模式下不起作用
     assetsDir: 'assets',

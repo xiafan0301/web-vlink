@@ -80,7 +80,13 @@
       <!-- 右侧摄像头列表 -->
       <ul :style="{'margin-top': (-rightSxtList.length * 154 / 2 ) + 'px'}" class="map_rrc" v-if="rightSxtList && rightSxtList.length > 0">
         <li v-for="(item, index) in rightSxtList" :key="'sxt_' + index">
-          <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+          <div>
+            <video class="com_trans50_t" src="../../../../assets/video/video.mp4" autoplay loop></video>
+            <i class="el-icon-error" @click="videoRemove(index)"></i>
+            <div>
+              <div>摄像头001 2018-09-23</div>
+            </div>
+          </div>
         </li>
       </ul>
     </div>
@@ -554,6 +560,12 @@ export default {
       }
     },
 
+    // 视频操作
+    videoRemove (_index) {
+      // rightSxtList
+      this.rightSxtList.splice(_index, 1);
+    },
+
     testAddSxt () {
       if ( this.rightSxtList.length < this.rightSxtLimit) {
         this.rightSxtList.push(new Date().getTime());
@@ -730,9 +742,43 @@ export default {
       > li {
         width: 231px; height: 144px;
         padding: 5px;
-        > img {
-          max-width: 100%;
-          max-height: 100%;
+        > div {
+          position: relative;
+          width: 100%; height: 100%;
+          background-color: #000;
+          vertical-align: middle;
+          overflow: hidden;
+          > img { max-width: 100%; max-height: 100%; }
+          > video {
+            display: inline-block;
+            position: absolute; top: 50%;
+            max-width: 100%; max-height: 100%; 
+            vertical-align: middle;
+          }
+          > i {
+            display: none;
+            position: absolute; top: 0px; right: 0px; z-index: 3;
+            font-size: 16px;
+            cursor: pointer;
+            background: #fff;
+            border-radius: 50%;
+            animation: fadeInDown .4s ease-out both;
+          }
+          > div {
+            display: none;
+            position: absolute; bottom: 0; left: 0;
+            width: 100%;
+            animation: fadeInUp .4s ease-out both;
+            > div {
+              background-color: rgba(0, 0, 0, 0.6);
+              color: #fff;
+              padding: 5px 5px;
+            }
+          }
+          &:hover {
+            > div { display: block; }
+            > i { display: block; }
+          }
         }
       }
     }
