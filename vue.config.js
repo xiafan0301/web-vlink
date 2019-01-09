@@ -23,6 +23,7 @@ module.exports = {
     devServer: {
         contentBase: process.env.VUE_APP_PROJECTNAME,
         host: 'localhost',
+        disableHostCheck: true,
         port: 9101,
         hot: true,          // 开启热更新
         overlay: true,      // 开启报错提示显示在浏览器遮罩层
