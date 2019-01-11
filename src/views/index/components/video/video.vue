@@ -45,6 +45,7 @@ export default {
   > .vi_content {
     height: 100%;
     padding-left: 200px;
+    overflow: auto;
   }
 }
 </style>

@@ -32,7 +32,8 @@ export default new Router({
                         }, {
                             path: 'query',
                             name: 'video_query',
-                            component: () => import('@/views/index/components/video/query.vue')
+                            // component: () => import('@/views/index/components/video/query.vue')
+                            component: () => import('@/views/index/components/construction.vue')
                         }, {
                             path: 'signList',
                             name: 'video_signList',
