@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    智能查看
+    人像对比
   </div>
 </template>
 <script>

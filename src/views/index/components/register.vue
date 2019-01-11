@@ -70,7 +70,7 @@ export default {
             },
             regFormRules: {
                 mobile: [
-                    { required: true, message: '输入手机号', trigger: 'blur' },
+                    { required: true, message: '请输入手机号', trigger: 'blur' },
                     { validator: validatePhone, trigger: 'blur' }
                 ],
                 pass: [

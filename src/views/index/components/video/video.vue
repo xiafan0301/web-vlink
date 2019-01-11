@@ -16,8 +16,11 @@
       <li>
         <router-link :to="{name: 'video_download'}">下载记录</router-link>
       </li>
-      <li>
+      <!-- <li>
         <router-link :to="{name: 'video_setting'}">视频设置</router-link>
+      </li> -->
+      <li>
+        <router-link :to="{name: 'video_statistics'}">设备概览</router-link>
       </li>
     </ul>
     <div class="vi_content">

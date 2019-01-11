@@ -45,6 +45,10 @@ export default new Router({
                             path: 'setting',
                             name: 'video_setting',
                             component: () => import('@/views/index/components/video/setting.vue')
+                        }, {
+                            path: 'statistics',
+                            name: 'video_statistics',
+                            component: () => import('@/views/index/components/video/statistics.vue')
                         }
                     ]
                 }, {
@@ -92,7 +96,27 @@ export default new Router({
                 }, {
                     path: 'search',
                     name: 'search',
-                    component: () => import('@/views/index/components/search/search.vue')
+                    redirect: {name: 'search_capture'},
+                    component: () => import('@/views/index/components/search/search.vue'),
+                    children: [
+                        {
+                            path: 'capture',
+                            name: 'search_capture',
+                            component: () => import('@/views/index/components/search/capture.vue')
+                        }, {
+                            path: 'portrait',
+                            name: 'search_portrait',
+                            component: () => import('@/views/index/components/search/portrait.vue')
+                        }, {
+                            path: 'contrast ',
+                            name: 'search_contrast',
+                            component: () => import('@/views/index/components/search/contrast.vue')
+                        }, {
+                            path: 'history',
+                            name: 'search_history',
+                            component: () => import('@/views/index/components/search/history.vue')
+                        }
+                    ]
                 }, {
                     path: 'control',
                     name: 'control',

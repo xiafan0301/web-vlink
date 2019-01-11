@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    智能查看
+    设备概览
   </div>
 </template>
 <script>

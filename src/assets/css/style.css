@@ -342,3 +342,9 @@
   width: 104px;
   height: 104px;
 }
+
+/* element-ui reset */
+.el-date-editor .el-range-separator {
+  width: 30px;
+  text-align: center;
+}
