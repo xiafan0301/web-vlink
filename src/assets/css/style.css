@@ -74,7 +74,24 @@
 .vl_icon_transcribe{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_list{width: 20px; height: 28px; background-position: -400px -134px;}
 .vl_icon_video_close{width: 28px; height: 28px; background-position: -504px -132px;}
+/* 布控状态 */
+.vl_control_state{
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-image: url(../img/temp/con_state.jpg);
+  transition: .4s ease-out;
+}
+.vl_control_s{width: 120px; height: 120px; background-position: -18px -10px;}
+.vl_control_o{width: 120px; height: 120px; background-position: -18px -130px;}
+.vl_control_e{width: 120px; height: 120px; background-position: -18px -250px;}
 
+/* 全局字体颜色 */
+.vl_f_333{color: #333;}
+.vl_f_666{color: #666;}
+.vl_f_999 {color: #999;}
+/* 全局字体大小 */
+.vl_f_16{font-size: 16px;}
+.vl_f_12{font-size: 12px;}
 
 /* ========== element ui reset ========== */
 .el-badge__content {

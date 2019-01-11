@@ -92,3 +92,26 @@ export const testData = [
       ]
   }
 ]
+export const conData = [
+  {
+      name: '摄像头111',
+      addr: '长沙市天心区君逸路', 
+      latitude: 28.100253,
+      longitude: 112.981563
+  }, {
+      name: '摄像头222',
+      addr: '天心区雀园路568号', 
+      latitude: 28.099481,
+      longitude: 112.981627
+  }, {
+      name: '摄像头333',
+      addr: '天心区君逸路九峰安置小区19栋3号门面', 
+      latitude: 28.099711,
+      longitude: 112.979254
+  }, {
+      name: '摄像头444',
+      addr: '天心区雀园路', 
+      latitude: 28.099139,
+      longitude: 112.979826
+  }
+]
