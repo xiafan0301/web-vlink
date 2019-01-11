@@ -57,6 +57,7 @@ export default {
   > .vid_content {
     height: 100%;
     padding: 60px 10px 10px 10px;
+    overflow: hidden;
   }
 }
 .vid_list {

@@ -19,6 +19,6 @@ html, body {
   min-width: 1200px;
   /* min-height: 675px; */
   min-height: 625px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 </style>
