@@ -13,7 +13,7 @@
       <ul class="vid_list" :class="'vid_list_st' + showType">
         <li v-for="item in 16" :key="item">
           <div>
-            <img src="../../../../assets/img/temp/video_pic.png" alt="">
+            <video class="com_trans50_lt" src="../../../../assets/video/video.mp4" autoplay loop controls></video>
           </div>
         </li>
       </ul>
@@ -71,7 +71,15 @@ export default {
       position: relative;
       width: 100%; height: 100%;
       overflow: hidden;
+      text-align: center;
+      background-color: #000;
       > img {
+      }
+      > video {
+        position: absolute;
+        display: block;
+        max-width: 100%; max-height: 100%;
+        margin: 0 auto;
       }
     }
   }
