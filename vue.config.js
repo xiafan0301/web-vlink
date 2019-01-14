@@ -63,9 +63,12 @@ module.exports = {
     productionSourceMap: true,
     configureWebpack: {
         performance: {
-            hints: "warning", // 枚举
-            maxAssetSize: 10240000, // build时静态文件和入口文件大小设置（字节）
-            maxEntrypointSize: 10240000, // 整数类型（以字节为单位）
+            // 提示
+            hints: "warning", // 提示， true / false
+            // maxBundleSize: 250,
+            // warnAtPercent: 80,
+            maxAssetSize: 1024000 * 20, // build时静态文件和入口文件大小设置（字节）
+            maxEntrypointSize: 1024000 * 20, // 整数类型（以字节为单位）
             assetFilter: function(assetFilename) {
                 // 提供资源文件名的断言函数
                 return assetFilename.endsWith('.css') || assetFilename.endsWith('.js');

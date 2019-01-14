@@ -221,7 +221,7 @@ export default {
             overflow: hidden;
             > h2 {
               float: left;
-              font-weight: bold; font-size: 16px; color: #333;
+              font-weight: bold; font-size: 15px; color: #333;
               height: 80px; line-height: 80px;
               padding-left: 30px;
             }

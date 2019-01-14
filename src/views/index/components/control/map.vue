@@ -230,7 +230,7 @@ export default {
           content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control"></div>';
         }
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48], selClass = '';
+          let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
