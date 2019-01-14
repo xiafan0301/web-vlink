@@ -273,7 +273,7 @@ export default {
         chart = new G2.Chart({
           container: 'charContainer11',
           forceFit: true,
-          padding: [ 12, 108, 12, 6 ],
+          padding: [ 12, 120, 12, 6 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -495,8 +495,8 @@ export default {
         }
       });
       // Step 3：创建图形语法，绘制柱状图，由 genre 和 sold 两个属性决定图形位置，genre 映射至 x 轴，sold 映射至 y 轴
-      chart.area().position('name*value').color('type').shape('smooth');
-      chart.line().position('name*value').color('type').size(2).shape('smooth');
+      chart.area().position('name*value').color('type', ['#8949f3', '#0c70f8']).shape('smooth').opacity(0.6);
+      chart.line().position('name*value').color('type', ['#8949f3', '#0c70f8']).size(2).shape('smooth');
       chart.render();
       this.charts.chart4 = chart;
     },
