@@ -78,7 +78,7 @@
 .vl_control_state{
   display: inline-block;
   background-repeat: no-repeat;
-  background-image: url(../img/temp/con_state.jpg);
+  background-image: url(../img/temp/con_state.png);
   transition: .4s ease-out;
 }
 .vl_control_s{width: 120px; height: 120px; background-position: -18px -10px;}

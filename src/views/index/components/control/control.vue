@@ -41,7 +41,7 @@ export default {
       width: 100%;
       height: 100%;
       position: relative;
-      #mapBox{
+      > div:nth-child(1){
         width: 100%;
         height: 802px;
       }
@@ -63,6 +63,9 @@ export default {
           p{
             margin-top: 12px;
           }
+        }
+        .equ_h{
+          height: 80px!important;
         }
         > div:nth-child(2){
           width: 100%;
@@ -139,10 +142,9 @@ export default {
       }
       .manage_d_s_m_r{
         width: 78px;
-        height: 221px;
         position: absolute;
         right: 20px;
-        bottom: 62px;
+        bottom: 20px;
         .top, .bottom > li{
           width: 100%;
           height: 70px;
@@ -160,11 +162,14 @@ export default {
             }
           }
         }
+        .top{
+          margin-bottom: 10px;
+          p.active{
+            color: #0C70F8;
+          }
+        }
         .top, .bottom{
           box-shadow:4px 0px 15px 0px rgba(131,131,131,0.23),0px 0px 13px 0px rgba(255,255,255,0.55);
-        }
-        .bottom{
-          margin-top: 10px;
         }
         .bottom > li:nth-child(1){
           border-bottom: 1px solid #F1F1F1;

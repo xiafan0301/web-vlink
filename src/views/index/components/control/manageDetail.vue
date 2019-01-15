@@ -44,7 +44,7 @@
             </div>
           </div>
         </div>
-        <div class="vl_control_state vl_control_s"></div>
+        <div :class="['vl_control_state', controlState === '0' ? 'vl_control_s' : controlState === '1' ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="dpType = '布控范围'">
@@ -95,13 +95,14 @@
           </el-collapse-transition>
         </div>
         <!-- 运行情况 -->
-        <div class="manage_d_c_situ">
+        <div class="manage_d_c_situ" v-if="controlState !== '0'">
           <div class="situ_title">运行情况</div>
           <div class="situ_time">
             <div><span>开始时间：</span><span>2018-11-21 10:00:00</span></div>
+            <div v-if="controlState === '2'"><span>结束时间：</span><span>2018-11-21 10:00:00</span></div>
             <div><span>持续时间：</span><span>110:00:00</span></div>
           </div>
-          <div class="situ_box">
+          <div class="situ_box" v-if="controlState === '1'">
             <div class="situ_top" @click="dpType = '运行情况'">
               <div>实时监控</div>
               <div class="vl_icon vl_icon_camera"></div>
@@ -161,7 +162,7 @@
           </div>
         </div>
         <!-- 布控结果 -->
-        <div class="manage_d_c_result">
+        <div class="manage_d_c_result" v-if="controlState !== '0'">
           <div class="result_title" @click="dpType = '布控结果'">
             <div>布控结果（200个）</div>
             <div>
@@ -199,8 +200,19 @@
       </div>
     </div>
     <!-- 底部操作按钮 -->
-    <div class="manage_f_box">
+    <!-- 待开始 -->
+    <div class="manage_f_box" v-if="controlState === '0'">
       <el-button type="primary">编辑</el-button>
+      <el-button>删除</el-button>
+    </div>
+    <!-- 进行中 -->
+    <div class="manage_f_box" v-if="controlState === '1'">
+      <el-button type="primary">终止</el-button>
+      <el-button>返回</el-button>
+    </div>
+    <!-- 已结束 -->
+    <div class="manage_f_box" v-if="controlState === '2'">
+      <el-button type="primary">复用</el-button>
       <el-button>删除</el-button>
     </div>
   </div>
@@ -211,6 +223,7 @@ import {random14} from '../../../../utils/util.js';
 export default {
   data () {
     return {
+      controlState: null,//布控状态
       // 布控对象列表数据
       controlObjList: [
         {id: '1', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
@@ -284,6 +297,7 @@ export default {
   },
   mounted () {
     let _this = this;
+    _this.controlState = _this.$route.query.state;
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -445,10 +459,11 @@ export default {
           }
         }
       }
-      .vl_control_s{
+      .vl_control_state{
         position: absolute;
         right: 0;
         top: 0;
+        transition: none!important;
       }
       .manage_d_c_scope{
         width:calc(100% - 20px);

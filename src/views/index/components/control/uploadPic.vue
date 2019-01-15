@@ -1,5 +1,5 @@
 <template>
-  <div class="upload-pic-components" :class="{hidden: maxSize === picNum}">
+  <div class="upload_pic_components" :class="{hidden: maxSize === picNum}">
     <el-upload
       ref="uploadPic"
       multiple
@@ -18,13 +18,14 @@
       <i class="el-icon-plus"></i>
       <p>添加</p>
     </el-upload>
-    <div class="dialog-pic" v-show="dialogVisible" @click="dialogVisible = false">
+    <div class="dialog_pic" v-show="dialogVisible" @click="dialogVisible = false">
       <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
     </div>
   </div>
 </template>
 <script>
 export default {
+  name: 'uploadPic',
   props: ['maxSize', 'fileList'],
   data () {
     return {
@@ -78,7 +79,7 @@ export default {
 }
 </script>
 <style lang="scss">
-  .upload-pic-components{
+  .upload_pic_components{
     .el-upload-list__item{
       width:104px !important;
       height:104px !important;
@@ -86,7 +87,7 @@ export default {
     &.hidden .el-upload--picture-card{
       display: none;
     }
-    .dialog-pic{
+    .dialog_pic{
       position: fixed;
       top: 0;
       right: 0;
