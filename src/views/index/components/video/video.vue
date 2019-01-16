@@ -8,7 +8,8 @@
         <router-link :to="{name: 'video_playback'}">录像回放</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'video_query'}">智能查看</router-link>
+        <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a>
+        <!-- <router-link :to="{name: 'video_query'}">智能查看</router-link> -->
       </li>
       <li>
         <router-link :to="{name: 'video_signList'}">标记列表</router-link>

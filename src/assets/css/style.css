@@ -113,6 +113,10 @@
 .vl_smenu > li > a:hover {
   color: #0C70F8;
 }
+.vl_smenu .vl_smenu_dis {
+  cursor: not-allowed;
+  color: #999 !important;
+}
 
 /* ========== 地图板块 ========== */
  .vl_map_lc_dt_inp {
