@@ -1,17 +1,63 @@
 <template>
   <div class="vl_vid">
-    <div class="vid_title">
-      <ul class="vid_show_type">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="showType = 1"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
-        <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li>
-      </ul>
+    <div class="sign_list">
+      <div>
+        <div class="show_search">
+          <div class="show_search_ti">
+            <span>开始</span>
+            <el-date-picker
+              style="width: 175px"
+              size="small"
+              v-model="startTime"
+              type="datetime"
+              placeholder="选择开始时间">
+            </el-date-picker>
+          </div>
+          <div class="show_search_ti">
+            <span>结束</span>
+            <el-date-picker
+              style="width: 175px"
+              size="small"
+              v-model="startTime"
+              type="datetime"
+              placeholder="选择结束时间">
+            </el-date-picker>
+          </div>
+          <div class="show_search_ti" style="padding-left: 20px;">
+            <el-select style="width: 190px;" v-model="signer" filterable placeholder="选择标记人" size="small">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div class="show_search_se">
+            <el-input
+              class="vl_map_lc_dt_inp"
+              size="small"
+              placeholder="请输入内容"
+              v-model="searchVal">
+            </el-input>
+            <i class="el-icon-search"></i>
+          </div>
+        </div>
+        <ul class="sign_content_list">
+          <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
+            <p :title="item.title">
+              <i v-if="item.type === 1">最新</i>
+              <i v-if="item.type === 3">已过期</i>
+              {{item.title | strCutWithLen(45)}}
+            </p>
+            <div>{{item.name}}&nbsp;&nbsp;{{item.time}}<i class="el-icon-delete"></i></div>
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="vid_content">
-      <ul class="vid_list" :class="'vid_list_st' + showType">
-        <li v-for="item in 16" :key="item">
+      <ul class="vid_show_list vid_list_st2">
+        <li v-for="item in 4" :key="item">
           <div>
             <video class="com_trans50_lt" src="../../../../assets/video/video.mp4" autoplay loop controls></video>
           </div>
@@ -24,7 +70,45 @@
 export default {
   data () {
     return {
-      showType: 2
+      signList: [
+        {
+          type: 1,
+          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
+          name: '李奕明',
+          time: '18-11-25 09:12'
+        }, {
+          type: 2,
+          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
+          name: '李奕明',
+          time: '18-11-25 09:12'
+        }, {
+          type: 3,
+          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
+          name: '李奕明',
+          time: '18-11-25 09:12'
+        }
+      ],
+      searchVal: '',
+      startTime: '',
+      endTime: '',
+      signer: '',
+      options: [{
+          value: '选项1',
+          label: '黄金糕'
+        }, {
+          value: '选项2',
+          label: '双皮奶'
+        }, {
+          value: '选项3',
+          label: '蚵仔煎'
+        }, {
+          value: '选项4',
+          label: '龙须面'
+        }, {
+          value: '选项5',
+          label: '北京烤鸭'
+        }
+      ]
     }
   },
   methods: {
@@ -35,74 +119,83 @@ export default {
 .vl_vid {
   height: 100%;
   position: relative;
-  > .vid_title {
-    position: absolute; top: 0; left: 0;
-    width: 100%;
-    height: 60px;
-    padding-top: 10px;
-    .vid_show_type {
-      overflow: hidden;
-      padding-left: 20px;
-      > li {
-        height: 40px;
-        float: left;
-        margin-top: 5px; margin-right: 10px;
-        cursor: pointer;
-        &.vl_icon_sed {
-          cursor: default;
-        }
-      }
+  > .sign_list {
+    position: absolute; top: 0; left: 20px;
+    width: 230px; height: 100%;
+    padding: 20px 0;
+    > div {
+      width: 100%; height: 100%;
+      background: #fff;
+      box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
     }
   }
   > .vid_content {
     height: 100%;
-    padding: 60px 10px 10px 10px;
     overflow: hidden;
+    padding-left: 250px;
   }
 }
-.vid_list {
-  width: 100%; height: 100%;
+.show_search {
+  position: absolute; top: 24px; left: 0;
+  width: 100%;  height: 66px;
+  padding-top: 15px;
+  > div {
+    position: relative;
+    width: 100%; height: 36px;
+    padding: 2px 15px;
+    > i {
+      position: absolute; top: 11px; right: 35px;
+      color: #999;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
+  > .show_search_se { margin-bottom: 10px; }
+  > .show_search_ti {
+    position: relative;
+    padding-left: 36px;
+    margin-bottom: 10px;
+    > span {
+      position: absolute; top: 2px; left: 17px;
+      width: 18px;
+      color: #666; font-size: 12px;
+    }
+  }
+}
+.sign_content_list {
+  height: 100%; padding-top: 200px;
   > li {
-    float: left;
-    padding: 10px;
-    width: 50%; height: 50%;
-    transition: all .3s;
+    padding: 15px 10px;
+    border-bottom: 1px dotted #ddd;
+    > p {
+      cursor: pointer;
+      > i {
+        display: inline-block;
+        font-style: normal;
+        border: 1px solid #186DFB;
+        font-size: 12px;
+        border-radius: 2px;
+        color: #186DFB;
+      }
+    }
     > div {
       position: relative;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      text-align: center;
-      background-color: #000;
-      > img {
-      }
-      > video {
-        position: absolute;
-        display: block;
-        max-width: 100%; max-height: 100%;
-        margin: 0 auto;
+      height: 20px; line-height: 20px;
+      font-size: 12px;
+      > i {
+        position: absolute; top: 4px; right: 0;
+        font-size: 14px;
+        cursor: pointer;
       }
     }
-  }
-  &.vid_list_st1 > li {
-    width: 100%; height: 100%;
-  }
-  &.vid_list_st2 > li {
-    width: 50%; height: 50%;
-  }
-  &.vid_list_st3 > li {
-    width: 33.33%; height: 40%;
-    &:nth-child(1) {
-      width: 50%; height: 60%;
+    &.sigin_list_dis {
+      color: #999;
+      > p > i { border-color: #999; color: #999; }
     }
-    &:nth-child(2) {
-      width: 50%; height: 60%;
+    &:hover {
+      color: #186DFB;
     }
-  }
-  &.vid_list_st4 > li {
-    width: 33.33%; height: 33.33%;
-  }
-  &.vid_list_st5 > li {
-    width: 25%; height: 25%;
   }
 }
 </style>
