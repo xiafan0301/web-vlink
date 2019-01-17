@@ -101,6 +101,7 @@ export default {
         site: null,
         content: null
       },
+      templateList: [],
       addRules: {
         recipient: [
           {required: true, message: '不能为空', trigger: 'blur'}
