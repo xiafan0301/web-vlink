@@ -282,15 +282,6 @@ export default {
           background: #A9A9A9;
         }
       }
-      .operation_btn{
-        color: #0C70F8;
-        cursor: pointer;
-      }
-      .operation_wire{
-        display: inline-block;
-        padding: 0 5px;
-        color: #F2F2F2;
-      }
     }
   }
 }

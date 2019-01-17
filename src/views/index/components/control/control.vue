@@ -84,6 +84,7 @@ export default {
               cursor: pointer;
               i{
                 margin-right: 10px;
+                margin-top: 2px;
               }
               &.active{
                 color: #0C70F8;
@@ -106,15 +107,14 @@ export default {
                 text-align: center;
                 background: #fff;
                 color: #666;
+                cursor: pointer;
                 &.active{
                   background: rgba(235,239,242,1);
                   color: #0C70F8;
-                  cursor: pointer;
                 }
                 &:hover{
                   background: rgba(235,239,242,1);
                   color: #0C70F8;
-                  cursor: pointer;
                 }
 
               }
@@ -133,7 +133,9 @@ export default {
                   background: rgba(235,239,242,1);
                 }
                 &:hover{
-                  background: rgba(235,239,242,1);
+                  span, i{
+                    color: #B2B2B2;
+                  }
                 }
               }
             }

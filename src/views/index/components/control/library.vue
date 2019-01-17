@@ -18,12 +18,12 @@
       </div>
       <div class="add_group">
         <div @click="popAddGroupDialog(1)" :class="['group_title', {'active': groupIndex === -1 }]">
-          <i class="el-icon-circle-plus-outline vl_f_999"></i><span class="vl_f_333">添加分组</span>
+          <i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span>
         </div>
         <div class="group_list">
           <div v-for="(item, index) in groupList" :key="item.id"  :class="{'active': groupIndex === index }">
             <div @click="groupIndex = index"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-            <i @click="groupId = item.id;pageType = '2'" :class="['el-icon-menu', {'active': groupId === item.id}]"></i>
+            <i @click="groupId = item.id;pageType = '2'" :class="['vl_icon', groupId === item.id ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="el-icon-edit-outline"></i>
+                  <i class="vl_icon vl_icon_control_20"></i>
                 </div>
                 <div class="data_list">
                   <span>里默默</span>
@@ -137,7 +137,7 @@
                   <span>汉族</span>
                 </div>
                 <div class="data_list">
-                  <span>43068419970215013X <i class="el-icon-tickets"></i></span>
+                  <span>43068419970215013X <i class="vl_icon vl_icon_control_29"></i></span>
                 </div>
                 <div class="data_list">
                   <span>失踪儿童</span>
@@ -155,7 +155,7 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="el-icon-edit-outline"></i>
+                  <i class="vl_icon vl_icon_control_20"></i>
                 </div>
                 <div class="data_list">
                   <span>湘A12345</span><span>小型汽车号牌</span>
@@ -189,7 +189,7 @@
       </div>
       <div class="member_list" v-if="pageType === '2'">
         <div class="member_title">
-          <div><span class="vl_f_333">{{tabType === '1' ? '失踪儿童' : '全部车辆'}}</span><i class="el-icon-edit" @click="popAddGroupDialog(2)"></i><i class="el-icon-delete" @click="delGroupDialog = true;"></i></div>
+          <div><span class="vl_f_333">{{tabType === '1' ? '失踪儿童' : '全部车辆'}}</span><i class="vl_icon vl_icon_control_25" @click="popAddGroupDialog(2)"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
           <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
           <div>
             <el-button @click="isShowGroupCopy = !isShowGroupCopy;">复制</el-button>
@@ -219,7 +219,7 @@
                   <span>汉族</span>
                 </div>
                 <div class="data_list">
-                  <span>43068419970215013X <i class="el-icon-tickets"></i></span>
+                  <span>43068419970215013X <i class="vl_icon vl_icon_control_29"></i></span>
                 </div>
                 <div class="data_list">
                   <span>失踪儿童</span>
@@ -275,7 +275,7 @@
         :visible.sync="addPortraitDialog"
         :close-on-click-modal="false"
         width="722px"
-        top="40vh"
+        top="20vh"
         :title="tabType === '1' ? '新增人像' : '新增车像'">
         <div class="add_portrait">
           <div class="portrait_update">
@@ -294,7 +294,7 @@
                 :on-remove="handleRemove"
                 :on-error="uploadPicError"
                 :before-upload="beforeAvatarUpload">
-                <img v-show="!dialogImageUrl" src="//via.placeholder.com/158x158" alt="">
+                <i v-show="!dialogImageUrl" class="vl_icon vl_icon_control_14"></i>
               </el-upload>
               <div class="dialog_pic" v-show="dialogVisible" @click="dialogVisible = false">
                 <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
@@ -357,8 +357,8 @@
           </div>
           <div class="portrait_shoot">
             <template v-if="!isShowCamera">
-              <img src="//via.placeholder.com/158x158" alt=""><br/>
-              <el-button id="camera" @click="startCamera()">启动摄像头</el-button>
+              <div><i class="vl_icon vl_icon_control_15"></i></div>
+              <el-button id="camera" @click="startCamera()" style="margin-top: 10px;margin-left: 23px;">启动摄像头</el-button>
             </template>
             <template v-if="isShowCamera">
               <canvas id="canvas" width="160" height="120"></canvas><br/>
@@ -472,7 +472,7 @@ export default {
         // 车像库参数
         carNum: null,
         carColor: null,
-        cardType: null,
+        cadType: null,
         numType: null,
         numColor: null,
         carOwnerGroup: null,
@@ -492,6 +492,7 @@ export default {
       imgSelectedList: {},
       picHeight: null,
       isShowCamera: false,//是否启动摄像头
+      video: null,
 
       // 右边列表参数
       allChecked: false,
@@ -557,21 +558,21 @@ export default {
     handleCurrentChange () {
 
     },
-    handleRemove (file, fileList) {
+    handleRemove () {
       this.dialogImageUrl = null;
     },
     handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-    uploadPicSuccess (response, file, fileList) {
+    uploadPicSuccess (file) {
       this.dialogImageUrl = file.url;
       this.$message.success('上传成功！');
     },
     uploadPicError () {
       this.$message.error('上传失败！');
     },
-    uploadPicExceed (files, fileList) {
+    uploadPicExceed () {
       this.$message.warning('最多一次可上传1张图片,不能上传非图片文件');
     },
     beforeAvatarUpload (file) {
@@ -588,8 +589,7 @@ export default {
     },
     // 绑定事件
     addTakPictureEvent () {
-      let video = document.getElementById('video');
-      let Camera= document.getElementById('camera');
+      this.video = document.getElementById('video');
       window.addEventListener("DOMContentLoaded", function(){
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       }) 
@@ -600,9 +600,8 @@ export default {
       let context2D = canvas.getContext("2d");
       context2D.fillStyle = "#ffffff";
       context2D.fillRect(0, 0, 160, 120);
-      context2D.drawImage(video, 0, 0, 160, 120);
-      let image_code =canvas.toDataURL("image/png");//要传给后台的base64
-	    console.log(image_code)
+      context2D.drawImage(this.video, 0, 0, 160, 120);
+      // let imageCode = canvas.toDataURL("image/png");//要传给后台的base64
     },
     // 启动摄像头
     startCamera(){
@@ -612,9 +611,9 @@ export default {
         navigator.getUserMedia({video:true},
           function(stream) {
             _this.track = stream.getTracks()[0];  // 通过这个关闭摄像头
-            video.src = window.URL.createObjectURL(stream);
-            video.onloadedmetadata = function(e) {
-                video.play();
+            _this.video.src = window.URL.createObjectURL(stream);
+            _this.video.onloadedmetadata = function() {
+                _this.video.play();
               };
           },
           function(err) {
@@ -723,12 +722,9 @@ export default {
           justify-content: space-between;
           cursor: pointer;
           i{
-            margin-top: 12px;
-            &.active{
-              color: #0C70F8;
-            }
+            margin-top: 10px;
             &:hover{
-              color: #0C70F8;
+              background-position: -414px -346px!important;
             }
           }
           &.active{
@@ -782,6 +778,12 @@ export default {
             .data_title{
               display: flex;
               justify-content: space-between;
+              i{
+                cursor: pointer;
+                &:hover{
+                  background-position: -584px -347px!important;
+                }
+              }
             }
             .data_list{
               display: flex;
@@ -906,6 +908,16 @@ export default {
         top: 50%;
         left: -250px;
         margin-top: -80px;
+        > div{
+          width: 160px;
+          height: 160px;
+          background:rgba(12,112,248,.7);
+          border-radius:20px;
+          > i{
+            width: 158px;
+            height: 158px;
+          }
+        }
       }
     }
   }
@@ -935,6 +947,12 @@ export default {
       .el-upload--picture-card{
         width: 160px;
         height: 160px;
+        background: rgba(67,140,238,1);
+        border-radius: 20px;
+        i{
+          width: 158px;
+          height: 158px;
+        }
       }
       &.hidden .el-upload--picture-card{
         display: none!important;
