@@ -122,7 +122,7 @@
           </el-table-column>
           <el-table-column label="操作" width="140">
             <template slot-scope="scope">
-              <span class="operation_btn" @click="skipIsDetail">查看</span>
+              <span class="operation_btn" @click="skipIsDetail(scope.row.state)">查看</span>
               <!-- 待开始 -->
               <template v-if="scope.row.state === '0'">
                 <span class="operation_wire">|</span>
@@ -247,8 +247,8 @@ export default {
 
     },
     // 跳转至布控详情
-    skipIsDetail () {
-      this.$router.push({name: 'control_manage_detail'});
+    skipIsDetail (state) {
+      this.$router.push({name: 'control_manage_detail', query: {state: state}});
     }
   }
 }
@@ -281,15 +281,6 @@ export default {
         &.gray{
           background: #A9A9A9;
         }
-      }
-      .operation_btn{
-        color: #0C70F8;
-        cursor: pointer;
-      }
-      .operation_wire{
-        display: inline-block;
-        padding: 0 5px;
-        color: #F2F2F2;
       }
     }
   }
