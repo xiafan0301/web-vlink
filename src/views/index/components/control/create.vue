@@ -67,8 +67,8 @@
             </div>
           </el-form-item>
           <el-form-item class="period_time_btn_box">
-            <div class="period_time_btn" @click="addPeriodTime()"><i></i><span>添加布控时间段</span></div>
-            <div class="period_time_btn" @click="removePeriodTime()"><i></i><span>删除布控时间段</span></div>
+            <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
+            <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
           </el-form-item>
           <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
@@ -161,7 +161,7 @@ export default {
       });
     },
     // 删除时间段
-    removePeriodTime(item) {
+    removePeriodTime() {
       this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1)
     }
   }
@@ -237,6 +237,9 @@ export default {
               width: 100%!important;
             }
           }
+          &:last-child{
+            margin-top: 20px;
+          }
         } 
       }
     }
@@ -258,6 +261,16 @@ export default {
           }
           &:nth-child(2){
             color: #F94539;
+          }
+          .vl_icon_control_22{
+            vertical-align: middle;
+            margin-bottom: 5px;
+            margin-right: 5px;
+          }
+          .vl_icon_control_28{
+            vertical-align: middle;
+            margin-bottom: 7px;
+            margin-right: 5px;
           }
         }
       }

@@ -75,15 +75,15 @@
           </div>
           <ul>
             <li>
-              <i class="vl_icon vl_icon_camera"></i>
+              <i class="vl_icon vl_icon_control_26"></i>
               <span>{{item.name}}</span>
             </li>
             <li>
-              <i class="vl_icon vl_icon_camera"></i>
+              <i class="vl_icon vl_icon_control_27"></i>
               <span>{{item.time}}</span>
             </li>
             <li>
-              <i class="vl_icon vl_icon_camera"></i>
+              <i class="vl_icon vl_icon_control_05"></i>
               <span>{{item.monitoring}}</span>
             </li>
           </ul>
@@ -98,17 +98,17 @@
               <div class="toolbar">
                 <div>环岛路摄像头001</div>
                 <div>
-                  <i class="vl_icon vl_icon_play"></i>
-                  <i class="vl_icon vl_icon_volume"></i>
-                  <i class="vl_icon vl_icon_sign"></i>
-                  <i class="vl_icon vl_icon_transcribe"></i>
-                  <i class="vl_icon vl_icon_screen"></i>
-                  <i class="vl_icon vl_icon_unfold"></i>
-                  <i class="vl_icon vl_icon_list"></i>
+                  <i class="vl_icon vl_icon_control_09"></i>
+                  <i class="vl_icon vl_icon_control_10"></i>
+                  <i class="vl_icon vl_icon_control_06"></i>
+                  <i class="vl_icon vl_icon_control_11"></i>
+                  <i class="vl_icon vl_icon_control_07"></i>
+                  <i class="vl_icon vl_icon_control_08"></i>
+                  <i class="vl_icon vl_icon_control_12"></i>
                 </div>
               </div>
               <div class="vl_map_state">进行中</div>
-              <div class="vl_icon vl_icon_video_close" @click="isShowPlayback = !isShowPlayback"></div>
+              <div class="vl_icon vl_icon_control_13" @click="isShowPlayback = !isShowPlayback"></div>
             </div>
           </div>
         </div>
@@ -225,9 +225,9 @@ export default {
         obj.sid = obj.name + '_' + i + '_' + random14();
         let content = '';
         if (obj.controlList[0].alarmRank === '五级') {
-          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_target"><div class="vl_icon_warning">发现可疑目标</div></div>';
+          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_02"><div class="vl_icon_warning">发现可疑目标</div></div>';
         } else {
-          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control"></div>';
+          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>';
         }
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
@@ -241,13 +241,13 @@ export default {
             content: content
           });
           marker.setMap(_this.map);
-          new window.AMap.event.addListener(marker, 'click', function(e) {
+          marker.on('click', function(e) {
             console.log(e.target.C.extData.sid, 'e')
             // 点击切换图标
-            $('#mapBox .vl_icon_click').addClass("vl_icon_control");
-            $('#mapBox .vl_icon_click').removeClass("vl_icon_click");
-            $('#' + e.target.C.extData.sid).addClass("vl_icon_click");
-            $('#' + e.target.C.extData.sid).removeClass("vl_icon_control");
+            $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+            $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
+            $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+            $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_01");
             let sContent = '';
             // 布控进行中
             if (_this.mapForm.state === '1') {
@@ -255,7 +255,7 @@ export default {
               if (obj && obj.controlList.length === 1) {
                 sContent = `
                   <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_fork"></div>
+                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_img">
                         <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop width="100%"></video>
@@ -263,9 +263,9 @@ export default {
                         <div class="vl_map_operate">
                           <div>摄像头12458 </div>
                           <div>
-                            <i class="vl_icon vl_icon_sign"></i>
-                            <i class="vl_icon vl_icon_screen"></i>
-                            <i class="vl_icon vl_icon_unfold"></i>
+                            <i class="vl_icon vl_icon_control_06"></i>
+                            <i class="vl_icon vl_icon_control_07"></i>
+                            <i class="vl_icon vl_icon_control_08"></i>
                           </div>
                         </div>
                       </div>
@@ -295,7 +295,7 @@ export default {
               } else if (obj && obj.controlList.length > 1) {
                 sContent = 
                   '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_fork"></div>' + 
+                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_img">' +
                         '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop width="100%"></video>' +
@@ -303,9 +303,9 @@ export default {
                       ' <div class="vl_map_operate">' +
                           '<div>摄像头12458 </div>' +
                           '<div>' +
-                            '<i class="vl_icon vl_icon_sign"></i>' +
-                            '<i class="vl_icon vl_icon_screen"></i>' +
-                            '<i class="vl_icon vl_icon_unfold"></i>' +
+                            '<i class="vl_icon vl_icon_control_06"></i>' +
+                            '<i class="vl_icon vl_icon_control_07"></i>' +
+                            '<i class="vl_icon vl_icon_control_08"></i>' +
                           '</div>' +
                         '</div>' +
                       '</div>';
@@ -329,7 +329,7 @@ export default {
               if (obj && obj.controlList.length === 1) {
                 sContent = `
                   <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_fork"></div>
+                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_start">
                         <div class="vl_map_state">等待开始</div>
@@ -360,7 +360,7 @@ export default {
               } else if (obj && obj.controlList.length > 1) {
                 sContent = 
                   '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_fork"></div>' + 
+                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_start">' +
                         '<div class="vl_map_state">等待开始</div>' +
@@ -385,7 +385,7 @@ export default {
               if (obj && obj.controlList.length === 1) {
                 sContent = `
                   <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_fork"></div>
+                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_start">
                         <div class="vl_map_state" style="background: #999999;">已结束</div>
@@ -416,7 +416,7 @@ export default {
               } else if (obj && obj.controlList.length > 1) {
                 sContent = 
                   '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_fork"></div>' + 
+                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_start">' +
                         '<div class="vl_map_state" style="background: #999999;">已结束</div>' +
@@ -650,7 +650,7 @@ export default {
                 color: #fff;
                 font-size: 12px;
               }
-              .vl_icon_video_close{
+              .vl_icon_control_13{
                 position: absolute;
                 right: 10px;
                 top: 10px;
