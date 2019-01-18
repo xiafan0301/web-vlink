@@ -88,7 +88,39 @@ export default new Router({
                             path: 'addEvent',
                             name: 'add_event',
                             component: () => import('@/views/index/components/event/addEvent.vue')
-                        }
+                        }, {
+                          path: 'unauditEvent',
+                          name: 'unaudit_event',
+                          component: () => import('@/views/index/components/event/unauditEvent.vue')
+                      }, {
+                        path: 'auditEventDetail',
+                        name: 'audit_event_detail',
+                        component: () => import('@/views/index/components/event/auditEventDetail.vue')
+                      }, {
+                        path: 'treatingEventDetail',
+                        name: 'treating_event_detail',
+                        component: () => import('@/views/index/components/event/treatingEventDetail.vue')
+                      }, {
+                        path: 'untreatEventDetail',
+                        name: 'untreat_event_detail',
+                        component: () => import('@/views/index/components/event/untreatEventDetail.vue')
+                      }, {
+                        path: 'eventReport',
+                        name: 'event_report',
+                        component: () => import('@/views/index/components/event/eventReport.vue')
+                      }, {
+                        path: 'sendOtherUnits',
+                        name: 'send_other_units',
+                        component: () => import('@/views/index/components/event/sendOtherUnits.vue')
+                      }, {
+                        path: 'eventEnd',
+                        name: 'event-end',
+                        component: () => import('@/views/index/components/event/eventEnd.vue')
+                      }, {
+                        path: 'eventCtcDetail',
+                        name: 'event-ctc-detail',
+                        component: () => import('@/views/index/components/event/eventCtcDetail.vue')
+                      }
                     ]
                 }, { 
                     path: 'judge',

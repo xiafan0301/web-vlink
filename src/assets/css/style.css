@@ -163,6 +163,10 @@
    width: 70px;
    text-align: right;
  }
+ .vl_map_hover_main_p {
+   padding: 10px;
+   color: #666666;
+ }
 /* 标注窗口 */
 .vl_map_mk {
    position: relative;
@@ -279,7 +283,7 @@
   color: #333333;
 }
 .el-table .hover-row>td {
-  background-color: #E1F9FF !important;
+  background-color: #E6F7FF !important;
 }
 .el-table th>.cell {
   font-weight: bolder;
@@ -376,4 +380,9 @@
 }
 .el-dialog__wrapper .el-dialog__footer .el-button{
   width: 140px !important;
+}
+/* 滑动开关颜色 */
+.el-switch.is-checked .el-switch__core {
+  border-color: #086BEC;
+  background-color: #086BEC;
 }
