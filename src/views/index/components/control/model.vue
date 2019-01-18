@@ -2,7 +2,7 @@
   <el-form>
     <!-- 图片上传 -->
     <el-form-item label="人员图片:" prop="personnelPic" style="width: 25%;margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit"></div>
+      <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" :maxSize="9"></div>
       <div class="pic_format">
         <div>从库中选择</div>
         <div class="vl_f_999">（支持JPEG、JPG、PNG、每张大小不超过2M）</div>
@@ -23,10 +23,10 @@
     </el-form-item>
     <template v-if="modelMType === '1' || modelMType === '2'">
       <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in createForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
-        <el-input v-model="item.point"></el-input><i class="el-icon-delete" @click="removePoint(item)"></i>
+        <el-input v-model="item.point"></el-input><i class="vl_icon vl_icon_control_28" @click="removePoint(item)"></i>
       </el-form-item>
       <el-form-item style="width: 50%;padding-left: 20px;">
-        <div class="add_point" @click="addPoint"><i class="el-icon-plus"></i>添加追踪点</div>
+        <div class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
       </el-form-item>
     </template>
     <!-- 地图 -->
@@ -48,7 +48,7 @@
           <div class="vl_f_333 top">
             <span>已选设备({{trackPointList.length}})</span>
             <el-tooltip class="item" effect="light" content="恢复默认" placement="top">
-              <i class="el-icon-setting" style="float: right;cursor: pointer;"></i>
+              <i class="vl_icon vl_icon_control_31" style="float: right;cursor: pointer;"></i>
             </el-tooltip>
           </div>
           <div class="dp_box">
@@ -59,19 +59,19 @@
               <el-collapse-transition>
                 <div v-show="trackPoint.isDropdown">
                   <div class="equ_m">
-                    <div @click="getEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
-                    <div @click="getEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
+                    <div @click="changeEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
+                    <div @click="changeEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
                   </div>
                   <ul v-if="type === '0'">
                     <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}">
                       <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_camera"></i><i class="el-icon-delete"></i></div>
+                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
                     </li>
                   </ul>
                   <ul v-else>
                     <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}">
                       <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_camera"></i><i class="el-icon-delete"></i></div>
+                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
                     </li>
                   </ul>
                 </div>  
@@ -81,7 +81,7 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="top" @click="selAreaType()"><i class="el-icon-location"></i></div>
+        <div class="top" @click="selAreaType()"><i class="vl_icon vl_icon_control_23"></i></div>
         <div v-if="modelMType === '4'" style="line-height: 14px;padding-top: 16px;" :class="['top', {'vl_icon_sed': rangingAcitve}]" @click="ranging()">
           <i class="vl_icon vl_icon_042"></i><p :class="{'active': rangingAcitve}">测距</p>
         </div>
@@ -180,6 +180,7 @@ export default {
       isBind: false, // 是否给map绑定点击事件
       scopeRadius: null, // 范围半径
       lnglat: null, // 坐标
+      mapClickEvent: null
     }
   },
   created () {
@@ -234,13 +235,13 @@ export default {
       });
     // 人员追踪/车辆追踪
     } else if (this.modelMType === '1' || this.modelMType === '2') {
-      
+      console.log(11111)
     }
     _this.mapMark();
   },
   methods: {
     // 接收 到上传组件传过来的图片数据
-    uploadPicSubmit (aUploadImg) {
+    uploadPicSubmit () {
       
     },
     // 添加追踪点
@@ -257,7 +258,7 @@ export default {
       }
     },
     // 切换设备类型获得设备列表数据
-    getEquList (type, data) {
+    changeEquList (type, data) {
       this.type = type;
       this.tid = data.tid;
       if (type === '1') {
@@ -272,7 +273,7 @@ export default {
         } else {
           f.isDropdown = false;
         }
-        this.getEquList('0', data);
+        this.changeEquList('0', data);
       })
     },
     // 获得选取范围内的设备列表数据
@@ -285,7 +286,6 @@ export default {
         let obj = data[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48], selClass = '';
           if (graphics && graphics.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
             // 在圆形之中
             _this.$set(obj, 'isDropdown', false);
@@ -297,14 +297,13 @@ export default {
     // 地图标记
     mapMark () {
       let _this = this, hoverWindow = null;
-      _this.trackPointList = [];
       let data = conData;
       console.log(data, 'data')
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48], selClass = '';
+          let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -312,7 +311,7 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_control"></div>'
+            content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>'
           });
           // hover
           marker.on('mouseover', function () {
@@ -355,18 +354,22 @@ export default {
     },
     // 为map绑定点击事件
     mapBindClick () {
-      let _this = this, mapClickEvent = null;
+      let _this = this;
       _this.isBind = !_this.isBind;
       if (_this.isBind) {
         console.log('绑定了')
-        mapClickEvent = _this.map.on('click', function(e) {
+        _this.mapClickEvent = window.AMap.event.addListener(_this.map, 'click', function(e) {
           console.log(e.lnglat.getLng() + ',' + e.lnglat.getLat(), 'target');
           _this.lnglat = [e.lnglat.getLng(), e.lnglat.getLat()];
           _this.mapCircle();
         });
       } else {
-        _this.map.off(mapClickEvent);
-        console.log('解绑了')
+        if (_this.mapClickEvent) {
+          window.AMap.event.removeListener(_this.mapClickEvent);
+          _this.map.remove(this.selAreaCircle);
+          _this.trackPointList = [];
+          console.log('解绑了')
+        }
       }
     },
     // 标记地图范围，圆形覆盖物
@@ -375,8 +378,8 @@ export default {
       if (_this.selAreaCircle) {
         _this.map.remove(_this.selAreaCircle);
       }
-      let circle = new AMap.Circle({
-        center: new AMap.LngLat(_this.lnglat[0], _this.lnglat[1]), // 圆心位置
+      let circle = new window.AMap.Circle({
+        center: new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]), // 圆心位置
         radius: _this.scopeRadius || 400,  //半径
         strokeColor: "#F33",  //线颜色
         strokeOpacity: 1,  //线透明度
@@ -480,25 +483,33 @@ export default {
   }
 }
 .add_point{
+  margin-top: 20px;
   background:rgba(255,255,255,1);
   border-radius:4px;
   text-align: center;
   border:1px dashed rgba(217,217,217,1);
   color: #0C70F8;
   cursor: pointer;
+  .vl_icon_control_22{
+    vertical-align: middle;
+    margin-bottom: 5px;
+    margin-right: 5px;
+  }
 }
 .licenseNum{
   margin-bottom: 0!important;
 }
 </style>
 <style lang="scss">
-.point .el-form-item__content{
-  display: flex;
-  i{
-    margin-top: 12px;
-    margin-left: 10px;
-    color: #F94539;
-    cursor: pointer;
+.point{
+  margin-bottom: 0;
+  .el-form-item__content{
+    display: flex;
+    i{
+      margin-top: 10px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
   }
-}
+} 
 </style>

@@ -39,8 +39,8 @@
           <div>
             <div class="manage_d_c_o_i" v-for="item in controlObjList" :key="item.id">
               <img :src="item.url" alt="">
-              <p><i class="vl_icon vl_icon_camera"></i><span class="vl_f_333">{{item.controlObjName}}</span></p>
-              <p><i class="vl_icon vl_icon_camera"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
+              <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_333">{{item.controlObjName}}</span></p>
+              <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
             </div>
           </div>
         </div>
@@ -49,7 +49,8 @@
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="dpType = '布控范围'">
             <div>布控范围</div>
-            <div class="vl_icon vl_icon_camera"></div>
+            <i class="el-icon-arrow-up" v-show="dpType !== '布控范围'"></i>
+            <i class="el-icon-arrow-down" v-show="dpType === '布控范围'"></i>
           </div>
           <el-collapse-transition>
             <div class="manage_d_s_m" v-show="dpType === '布控范围'">
@@ -73,10 +74,10 @@
                             <div @click="getEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
                           </div>
                           <ul v-if="type === '0'">
-                            <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}"><span>{{equ.sxtName}}</span><i class="vl_icon vl_icon_camera"></i></li>
+                            <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}"><span>{{equ.sxtName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                           </ul>
                           <ul v-else>
-                            <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}"><span>{{equ.kName}}</span><i class="vl_icon vl_icon_camera"></i></li>
+                            <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}"><span>{{equ.kName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                           </ul>
                         </div>
                       </el-collapse-transition>
@@ -85,7 +86,7 @@
                 </div>
               </div>
               <div class="manage_d_s_m_r">
-                <div class="top"><i class="el-icon-plus"></i></div>
+                <div class="top"><i class="vl_icon vl_icon_control_23"></i></div>
                 <ul class="bottom">
                   <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
                   <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -105,56 +106,57 @@
           <div class="situ_box" v-if="controlState === '1'">
             <div class="situ_top" @click="dpType = '运行情况'">
               <div>实时监控</div>
-              <div class="vl_icon vl_icon_camera"></div>
+              <i class="el-icon-arrow-down" v-show="dpType === '运行情况'"></i>
+              <i class="el-icon-arrow-up" v-show="dpType !== '运行情况'"></i>
             </div>
             <el-collapse-transition>
               <div class="situ_content" v-if="dpType === '运行情况'">
                 <div class="situ_left">
                   <div>布控设备（12）</div>
                   <ul>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_camera"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_camera"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_camera"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_camera"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_camera"></i></li>
+                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
                   </ul>
                 </div>
                 <div class="situ_right">
                   <div class="situ_r_video">
                     <video src="../../../../assets/video/video.mp4" autoplay loop></video>
                     <div>
-                      <i class="vl_icon vl_icon_sign"></i>
-                      <i class="vl_icon vl_icon_transcribe"></i>
-                      <i class="vl_icon vl_icon_screen"></i>
+                      <i class="vl_icon vl_icon_control_06"></i>
+                      <i class="vl_icon vl_icon_control_11"></i>
+                      <i class="vl_icon vl_icon_control_07"></i>
                     </div>
-                    <i class="vl_icon vl_icon_video_close"></i>
+                    <i class="vl_icon vl_icon_control_13"></i>
                   </div>
                   <div class="situ_r_video">
                     <video src="../../../../assets/video/video.mp4" autoplay loop></video>
                     <div>
-                      <i class="vl_icon vl_icon_sign"></i>
-                      <i class="vl_icon vl_icon_transcribe"></i>
-                      <i class="vl_icon vl_icon_screen"></i>
+                      <i class="vl_icon vl_icon_control_06"></i>
+                      <i class="vl_icon vl_icon_control_11"></i>
+                      <i class="vl_icon vl_icon_control_07"></i>
                     </div>
-                    <i class="vl_icon vl_icon_video_close"></i>
+                    <i class="vl_icon vl_icon_control_13"></i>
                   </div>
                   <div class="situ_r_video">
                     <video src="../../../../assets/video/video.mp4" autoplay loop></video>
                     <div>
-                      <i class="vl_icon vl_icon_sign"></i>
-                      <i class="vl_icon vl_icon_transcribe"></i>
-                      <i class="vl_icon vl_icon_screen"></i>
+                      <i class="vl_icon vl_icon_control_06"></i>
+                      <i class="vl_icon vl_icon_control_11"></i>
+                      <i class="vl_icon vl_icon_control_07"></i>
                     </div>
-                    <i class="vl_icon vl_icon_video_close"></i>
+                    <i class="vl_icon vl_icon_control_13"></i>
                   </div>
                   <div class="situ_r_video">
                     <video src="../../../../assets/video/video.mp4" autoplay loop></video>
                     <div>
-                      <i class="vl_icon vl_icon_sign"></i>
-                      <i class="vl_icon vl_icon_transcribe"></i>
-                      <i class="vl_icon vl_icon_screen"></i>
+                      <i class="vl_icon vl_icon_control_06"></i>
+                      <i class="vl_icon vl_icon_control_11"></i>
+                      <i class="vl_icon vl_icon_control_07"></i>
                     </div>
-                    <i class="vl_icon vl_icon_video_close"></i>
+                    <i class="vl_icon vl_icon_control_13"></i>
                   </div>
                 </div>
               </div>
@@ -176,13 +178,13 @@
               <div class="result_tool">
                 <div>抓拍设备</div>
                 <div>
-                  <i class="vl_icon vl_icon_sign"></i>
-                  <i class="vl_icon vl_icon_transcribe"></i>
+                  <i class="vl_icon vl_icon_control_06"></i>
+                  <i class="vl_icon vl_icon_control_11"></i>
                 </div>
               </div>
               <div>
-                <p><i class="vl_icon vl_icon_camera"></i><span class="vl_f_333">匹配名称</span></p>
-                <p><i class="vl_icon vl_icon_camera"></i><span class="vl_f_999">抓拍时间</span></p>
+                <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_333">匹配名称</span></p>
+                <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_999">抓拍时间</span></p>
               </div>
             </div>
             <el-pagination
@@ -340,7 +342,7 @@ export default {
         let obj = data[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48], selClass = '';
+          let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -348,7 +350,7 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_control"></div>'
+            content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>'
           });
           // hover
           marker.on('mouseover', function () {
@@ -463,7 +465,6 @@ export default {
         position: absolute;
         right: 0;
         top: 0;
-        transition: none!important;
       }
       .manage_d_c_scope{
         width:calc(100% - 20px);
@@ -478,9 +479,10 @@ export default {
           padding: 0 15px;
           background:rgba(250,250,250,1);
           cursor: pointer;
-          .vl_icon_camera{
+          > i{
             vertical-align: middle;
             margin-top: 10px;
+            font-size: 18px;
           }
         }
       }
@@ -514,9 +516,10 @@ export default {
             padding: 0 15px;
             background:rgba(250,250,250,1);
             cursor: pointer;
-            .vl_icon_camera{
+            i{
               vertical-align: middle;
               margin-top: 10px;
+              font-size: 18px;
             }
           }
           .situ_content{
@@ -596,7 +599,7 @@ export default {
                     }
                   }
                 }
-                > .vl_icon_video_close{
+                > .vl_icon_control_13{
                   position: absolute;
                   right: 8px;
                   top: 30px;
