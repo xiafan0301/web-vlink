@@ -48,7 +48,7 @@
             <p :title="item.title">
               <i v-if="item.type === 1">最新</i>
               <i v-if="item.type === 3">已过期</i>
-              {{item.title | strCutWithLen(45)}}
+              {{item.title | strCutWithLen(45)}} 
             </p>
             <div>{{item.name}}&nbsp;&nbsp;{{item.time}}<i class="el-icon-delete"></i></div>
           </li>

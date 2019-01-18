@@ -12,7 +12,7 @@
               <el-form-item prop="userPassword" class="login_form_item">
                 <el-input v-model="loginForm.userPassword" :type="pwdShow ? 'text' : 'password'" placeholder="请输入密码"></el-input>
                 <i class="vl_icon vl_icon_lg_02"></i>
-                <i class="vl_icon vl_icon_lg_03" @click="pwdShow = !pwdShow"></i>
+                <i class="vl_icon vl_icon_lg_03" @click="pwdShow = !pwdShow" :class="{'vl_icon_sed': !pwdShow}"></i>
               </el-form-item>
             </el-form>
             <div class="lg_info">
@@ -129,7 +129,7 @@ export default {
         box-shadow: 0 0 5px #ddd;
         animation: fadeIn .6s ease-out both;
         .lg_logo {
-          margin: 45px 0 35px 0;
+          margin: 45px 0 35px 10px;
           animation: fadeIn .6s ease-out .2s both;
         }
         .lg_form {

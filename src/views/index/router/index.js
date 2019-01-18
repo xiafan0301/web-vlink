@@ -91,9 +91,11 @@ export default new Router({
                         }
                     ]
                 }, { 
+                    /* 研判模块 */
                     path: 'judge',
                     name: 'judge',
-                    component: () => import('@/views/index/components/judge/judge.vue')
+                    // component: () => import('@/views/index/components/judge/judge.vue')
+                    component: () => import('@/views/index/components/construction.vue')
                 }, {
                     path: 'search',
                     name: 'search',

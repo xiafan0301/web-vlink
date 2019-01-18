@@ -14,10 +14,12 @@
 .vl_icon_011 { width: 36px; height: 38px; background-position: -702px -65px; }
 .vl_icon_012 { width: 36px; height: 38px; background-position: -762px -65px; }
 /* login */
-.vl_icon_lg_logo { width: 350px; height: 90px; background-position: -93px -609px; }
-.vl_icon_lg_01 { width: 14px; height: 16px; background-position: -100px -715px; }
-.vl_icon_lg_02 { width: 14px; height: 16px; background-position: -131px -715px; }
-.vl_icon_lg_03 { width: 16px; height: 16px; background-position: -162px -715px; }
+.vl_icon_lg_logo { width: 350px; height: 90px; background-position: -344px -511px; }
+.vl_icon_lg_01 { width: 14px; height: 16px; background-position: -712px -529px; }
+.vl_icon_lg_02 { width: 14px; height: 16px; background-position: -740px -529px; }
+.vl_icon_lg_03 { width: 16px; height: 16px; background-position: -767px -529px; }
+.vl_icon_sed.vl_icon_lg_03 { background-position: -767px -551px; }
+
 /* 一级导航菜单 */
 .vl_icon_001 { width: 36px; height: 36px; background-position: -103px -66px; }
 .vl_icon_002 { width: 36px; height: 36px; background-position: -179px -66px; }
