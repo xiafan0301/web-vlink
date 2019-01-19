@@ -187,8 +187,8 @@ export default {
   width: 100%;
   height: 100%;
   .content-box {
-    width: 98%;
-    margin: 0 20px;
+    width: 100%;
+    padding: 20px;  
     height: calc(100% - 50px - 100px);
     display: flex;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);

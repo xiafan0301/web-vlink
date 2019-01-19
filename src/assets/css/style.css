@@ -101,7 +101,10 @@
 .vl_icon_control_29{width: 20px; height: 13px; background-position: -621px -376px;}
 .vl_icon_control_30{width: 50px; height: 70px; background-position: -320px -258px;}
 .vl_icon_control_31{width: 20px; height: 20px; background-position: -935px -375px;}
-
+/**事件图标***/
+.vl_icon_event_1{width: 56px; height: 71px; background-position: -580px -428px;}
+.vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
+.vl_icon_event_3{width: 16px; height: 16px; background-position: -785px -375px;}
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -432,4 +435,25 @@
 .el-switch.is-checked .el-switch__core {
   border-color: #086BEC;
   background-color: #086BEC;
+}
+
+/**输入框，下拉框样式**/
+.el-input__inner:hover, .el-textarea__inner:hover, .el-select .el-input__inner:hover{
+  border-color: #0C70F8;
+  cursor: pointer;
+}
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+  background-color: #EDF9FF;
+  color: #333333;
+}
+.el-select-dropdown__item.selected {
+  background-color: #FAFAFA;
+  color: #333333;
+  font-weight: bold;
+}
+.el-form-item.is-success .el-input__inner, 
+.el-form-item.is-success .el-input__inner:focus, 
+.el-form-item.is-success .el-textarea__inner, 
+.el-form-item.is-success .el-textarea__inner:focus {
+  border-color: #D3D3D3;
 }

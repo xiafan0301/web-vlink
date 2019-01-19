@@ -7,70 +7,72 @@
       </el-breadcrumb>
     </div>
     <div class="content_box">
-      <div class="content_left_scroll">
-        <vue-scroll>
-          <div class="content_left">
-            <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-              <el-form-item label="手机号码:" prop="phone" label-width="85px">
-                <el-input type="text" style='width: 95%' placeholder="请输入上报人手机号码" v-model="addEventForm.phone" />
-              </el-form-item>
-              <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
-                <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
-              </el-form-item>
-              <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
-              </el-form-item>
-              <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
-                <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
-              </el-form-item>
-              <el-form-item  label-width="85px" class="img-form-item">
-                <el-upload
-                  action="https://jsonplaceholder.typicode.com/posts/"
-                  list-type="picture-card"
-                  accept=".png,.jpg,.jpeg"
-                  :limit='9'
-                  :before-upload='handleBeforeUpload'
-                  :on-preview="handlePictureCardPreview"
-                  :on-remove="handleRemove"
-                  :on-success='handleSuccess'
-                  :on-exceed="handleImgNumber"
-                >
-                  <i class="el-icon-plus"></i>
-                  <span class='add-img-text'>添加</span>
-                  <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span>
-                </el-upload>
-              </el-form-item>
-              <el-form-item label-width="85px">
-                <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
-              </el-form-item>
-              <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
-                <el-select v-model="addEventForm.eventType" style='width: 95%'>
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="事件等级:" prop="eventLevel" label-width="85px">
-                <el-select v-model="addEventForm.eventLevel" style='width: 95%'>
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                <el-radio-group v-model="addEventForm.casualties" style='width: 95%'>
-                  <el-radio label="无"></el-radio>
-                  <el-radio label="不确定"></el-radio>
-                  <el-radio label="有"></el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-form>
-          </div>
-        </vue-scroll>
+      <div class="content-left">
+        <div class="content_left_scroll">
+          <vue-scroll>
+            <div class="content_left">
+              <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
+                <el-form-item label="手机号码:" prop="phone" label-width="85px">
+                  <el-input type="text" style='width: 95%' placeholder="请输入上报人手机号码" v-model="addEventForm.phone" />
+                </el-form-item>
+                <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
+                  <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
+                </el-form-item>
+                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
+                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
+                </el-form-item>
+                <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
+                </el-form-item>
+                <el-form-item  label-width="85px" class="img-form-item">
+                  <el-upload
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    list-type="picture-card"
+                    accept=".png,.jpg,.jpeg"
+                    :limit='9'
+                    :before-upload='handleBeforeUpload'
+                    :on-preview="handlePictureCardPreview"
+                    :on-remove="handleRemove"
+                    :on-success='handleSuccess'
+                    :on-exceed="handleImgNumber"
+                  >
+                    <i class="el-icon-plus"></i>
+                    <span class='add-img-text'>添加</span>
+                    <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span>
+                  </el-upload>
+                </el-form-item>
+                <el-form-item label-width="85px">
+                  <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
+                </el-form-item>
+                <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
+                  <el-select v-model="addEventForm.eventType" style='width: 95%'>
+                    <el-option label="区域一" value="shanghai"></el-option>
+                    <el-option label="区域二" value="beijing"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="事件等级:" prop="eventLevel" label-width="85px">
+                  <el-select v-model="addEventForm.eventLevel" style='width: 95%'>
+                    <el-option label="区域一" value="shanghai"></el-option>
+                    <el-option label="区域二" value="beijing"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
+                  <el-radio-group v-model="addEventForm.casualties" style='width: 95%'>
+                    <el-radio label="无"></el-radio>
+                    <el-radio label="不确定"></el-radio>
+                    <el-radio label="有"></el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-form>
+            </div>
+          </vue-scroll>
+        </div>
       </div>
       <div class="content_right">
         <div id="mapMap"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -213,8 +215,8 @@ export default {
   width: 100%;
   height: 100%;
   .content_box {
-    width: 100%;
-    padding: 20px;
+    width: 98%;
+    margin: 10px 20px;
     height: calc(100% - 50px - 100px);
     display: flex;
     .content_left_scroll {
@@ -227,7 +229,6 @@ export default {
       .content_left {
         width: 96%;
         margin: 20px 0 0 2%;
-        // background: red;
         .add_event_form {
           width: 100%;
           .imgTips {
@@ -282,6 +283,7 @@ export default {
             padding: 20px 15px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
+            text-align: center;
             >i {
               font-size: 20px;
               color: #0B6FF7;

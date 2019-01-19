@@ -114,12 +114,20 @@ export default new Router({
                         component: () => import('@/views/index/components/event/sendOtherUnits.vue')
                       }, {
                         path: 'eventEnd',
-                        name: 'event-end',
+                        name: 'event_end',
                         component: () => import('@/views/index/components/event/eventEnd.vue')
                       }, {
                         path: 'eventCtcDetail',
-                        name: 'event-ctc-detail',
+                        name: 'event_ctc_detail',
                         component: () => import('@/views/index/components/event/eventCtcDetail.vue')
+                      }, {
+                        path: 'reportDetail',
+                        name: 'report_detail',
+                        component: () => import('@/views/index/components/event/reportDetail.vue')
+                      }, {
+                        path: 'addPlan',
+                        name: 'add_plan',
+                        component: () => import('@/views/index/components/event/addPlan.vue')
                       }
                     ]
                 }, { 

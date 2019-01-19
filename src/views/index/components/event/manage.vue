@@ -45,80 +45,77 @@
         <span>+</span>
         <span>新增事件</span>
       </div>
-      <!-- <vue-scroll> -->
-        <el-table
-          class="event_table"
-          :data="eventList"
+      <el-table
+        class="event_table"
+        :data="eventList"
+        >
+        <el-table-column
+          fixed
+          label="事件编号"
+          prop="eventCode"
+          :show-overflow-tooltip='true'
           >
-          <el-table-column
-            fixed
-            label="事件编号"
-            prop="eventCode"
-            :show-overflow-tooltip='true'
-            >
-          </el-table-column>
-          <el-table-column
-            label="类型"
-            prop="eventType"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="上报者"
-            prop="reportUser"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="身份"
-            prop="idCard"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="上报时间"
-            prop="reportTime"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="事件地点"
-            prop="eventAddress"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="状态"
-            prop="eventStatus"
-           >
-            <template slot-scope="scope">
-              <span class="event_status" :class="[scope.row.eventStatus === '待处理' ? 'untreated_event' : scope.row.eventStatus === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="上报内容"
-            prop="reportContent"
-            :show-overflow-tooltip='true'
+        </el-table-column>
+        <el-table-column
+          label="类型"
+          prop="eventType"
+          show-overflow-tooltip
           >
-          </el-table-column>
-          <el-table-column
-            label="是否有研判结果"
-            width="150"
-            prop="isResult"
-            show-overflow-tooltip
-            align="center"
-           >
-          </el-table-column>
-          <el-table-column label="操作" width="140">
-            <template slot-scope="scope">
-              <span class="operation_btn">查看</span>
-              <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn">布控</span>
-            </template>
-          </el-table-column>
-        </el-table>
-      <!-- </vue-scroll> -->
-      
+        </el-table-column>
+        <el-table-column
+          label="上报者"
+          prop="reportUser"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="身份"
+          prop="idCard"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="上报时间"
+          prop="reportTime"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="事件地点"
+          prop="eventAddress"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="状态"
+          prop="eventStatus"
+          >
+          <template slot-scope="scope">
+            <span class="event_status" :class="[scope.row.eventStatus === '待处理' ? 'untreated_event' : scope.row.eventStatus === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="上报内容"
+          prop="reportContent"
+          :show-overflow-tooltip='true'
+        >
+        </el-table-column>
+        <el-table-column
+          label="是否有研判结果"
+          width="150"
+          prop="isResult"
+          show-overflow-tooltip
+          align="center"
+          >
+        </el-table-column>
+        <el-table-column label="操作" width="140">
+          <template slot-scope="scope">
+            <span class="operation_btn">查看</span>
+            <span style="color: #f2f2f2">|</span>
+            <span class="operation_btn">布控</span>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
     <el-pagination
       @size-change="handleSizeChange"

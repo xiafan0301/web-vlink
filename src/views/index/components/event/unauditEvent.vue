@@ -1,13 +1,13 @@
 <template>
-  <vue-scorll>
-    <div class="unaudit">
-      <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item>事件审核</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
-      <div class="content-box">
+  <div class="unaudit">
+    <div class="breadcrumb_heaer">
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item>事件审核</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <div class="content-box">
+      <div class="content-left">
         <div class="content_left_scroll">
           <vue-scroll>
             <div class="content_left">
@@ -87,32 +87,33 @@
             </div>
           </vue-scroll>
         </div>
-        <div class="content_right">
-          <!--地图-->
-          <div id="mapBox"></div>
-          <div class="right-flag">
-            <ul class="map-rrt">
-              <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-            </ul>
-            <ul class="map-rrt map_rrt_u2">
-              <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-              <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-            </ul>
-          </div>
+      </div>
+      <div class="content_right">
+        <!--地图-->
+        <div id="mapBox"></div>
+        <div class="right-flag">
+          <ul class="map-rrt">
+            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+          </ul>
+          <ul class="map-rrt map_rrt_u2">
+            <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
+            <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
+          </ul>
         </div>
       </div>
-      <div class="operation-footer">
-        <el-button class="operation_btn function_btn">审核通过</el-button>
-        <el-button class="operation_btn back_btn">审核不通过</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
-      </div>
     </div>
-  </vue-scorll>
+    <div class="operation-footer">
+      <el-button class="operation_btn function_btn">审核通过</el-button>
+      <el-button class="operation_btn back_btn">审核不通过</el-button>
+      <el-button class="operation_btn back_btn">返回</el-button>
+    </div>
+  </div>
 </template>
 <script>
 export default {
   data () {
     return {
+      isImgNumber: false,
       addEventForm: {
         phone: null, // 手机号码
         reportTime: null, // 上报时间
@@ -192,6 +193,11 @@ export default {
         // }
       // }
     },
+    handleBeforeUpload () {},
+    handlePictureCardPreview () {},
+    handleRemove () {},
+    handleSuccess () {},
+    handleImgNumber () {},
   }
 }
 </script>
@@ -200,8 +206,8 @@ export default {
   width: 100%;
   height: 100%;
   .content-box {
-    width: 100%;
-    padding: 20px;
+    width: 98%;
+    margin: 10px 20px;
     height: calc(100% - 50px - 100px);
     display: flex;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
@@ -213,8 +219,9 @@ export default {
           width: 100% !important;
         }
         .content_left {
-          width: 96%;
-          margin: 20px 0 0 2%;
+          width: 100%;
+          // margin: 20px 0 0 2%;
+          padding: 20px 10px 0 10px;
           > ul {
             width: 100%;
             font-size: 14px;
@@ -300,6 +307,7 @@ export default {
             padding: 20px 15px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
+            text-align: center;
             >i {
               font-size: 20px;
               color: #0B6FF7;
