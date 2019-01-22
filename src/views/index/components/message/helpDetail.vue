@@ -137,11 +137,14 @@ export default {
       > div{
         display: flex;
         > span:nth-child(1){
-          width: 5%;
+          width: 6%;
+          flex-shrink: 0;
           color: #666;
         }
         > span:nth-child(2){
-          width: 95%;
+          width: 94%;
+          line-height: 20px;
+          flex-shrink: 1;
           color: #333;
         }
       }

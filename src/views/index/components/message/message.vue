@@ -36,6 +36,22 @@ export default {
   > .mes_content {
     height: 100%;
     padding-left: 200px;
+    // 消息模块底部按钮公告样式
+    .add_footer{
+      width: 100%;
+      height: 64px;
+      line-height: 64px;
+      position: absolute;
+      left: 0;
+      bottom: -104px;
+      padding-left: 20px;
+      background:rgba(255,255,255,1);
+      box-shadow:0px -1px 2px 0px rgba(0,0,0,0.03);
+      filter:blur(0px);
+      > .el-button{
+        width: 100px;
+      }
+    }
   }
 }
 </style>

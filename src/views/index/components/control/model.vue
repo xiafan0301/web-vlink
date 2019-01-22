@@ -65,13 +65,13 @@
                   <ul v-if="type === '0'">
                     <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}">
                       <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
+                      <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
                     </li>
                   </ul>
                   <ul v-else>
                     <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}">
                       <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
+                      <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
                     </li>
                   </ul>
                 </div>  

@@ -119,7 +119,7 @@
     <div class="library_content">
       <div class="snap_list" v-if="pageType === '1'">
         <div class="snap_title">
-          <div><span class="vl_f_333">今日抓拍</span><span class="vl_f_666">(123)</span></div>
+          <div><span class="vl_f_333">布控库</span><span class="vl_f_666">(123)</span></div>
           <el-button type="primary" @click="addPortraitDialog = true;">新建{{tabType === '1' ? '人像' : '车像'}}</el-button>
         </div>
         <div class="list_box">
@@ -189,8 +189,10 @@
       </div>
       <div class="member_list" v-if="pageType === '2'">
         <div class="member_title">
-          <div><span class="vl_f_333">{{tabType === '1' ? '失踪儿童' : '全部车辆'}}</span><i class="vl_icon vl_icon_control_25" @click="popAddGroupDialog(2)"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
-          <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
+          <div>
+            <div><span class="vl_f_333">{{tabType === '1' ? '失踪儿童' : '全部车辆'}}</span><i class="vl_icon vl_icon_control_25" @click="popAddGroupDialog(2)"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
+            <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
+          </div>
           <div>
             <el-button @click="isShowGroupCopy = !isShowGroupCopy;">复制</el-button>
             <el-button @click="removeGroupDialog = true;">移出</el-button>
@@ -294,7 +296,7 @@
                 :on-remove="handleRemove"
                 :on-error="uploadPicError"
                 :before-upload="beforeAvatarUpload">
-                <i v-show="!dialogImageUrl" class="vl_icon vl_icon_control_14"></i>
+                <i class="vl_icon vl_icon_control_14"></i>
               </el-upload>
               <div class="dialog_pic" v-show="dialogVisible" @click="dialogVisible = false">
                 <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
@@ -354,18 +356,6 @@
                 <el-input v-model="portraitForm.carDesc" placeholder="描述"></el-input>
               </el-form-item>
             </el-form>
-          </div>
-          <div class="portrait_shoot">
-            <template v-if="!isShowCamera">
-              <div><i class="vl_icon vl_icon_control_15"></i></div>
-              <el-button id="camera" @click="startCamera()" style="margin-top: 10px;margin-left: 23px;">启动摄像头</el-button>
-            </template>
-            <template v-if="isShowCamera">
-              <canvas id="canvas" width="160" height="120"></canvas><br/>
-              <video id="video" width="160" height="160" autoplay></video><br/>
-              <el-button @click="takPicture()">拍照</el-button>    
-              <el-button @click="closeCamera()">取消</el-button>    
-            </template>
           </div>
         </div>
         <div slot="footer">
@@ -488,11 +478,7 @@ export default {
       // 上传人像参数
       dialogImageUrl: null,
       dialogVisible: false,
-      imgToPlaceDialogVisible: false,
-      imgSelectedList: {},
       picHeight: null,
-      isShowCamera: false,//是否启动摄像头
-      video: null,
 
       // 右边列表参数
       allChecked: false,
@@ -515,7 +501,6 @@ export default {
   },
   mounted () {
     this.picHeight = window.screenHeight + 180;
-    this.addTakPictureEvent();
   },
   methods: {
     changeTab (tabType) {
@@ -566,7 +551,7 @@ export default {
       this.dialogVisible = true;
     },
     uploadPicSuccess (file) {
-      this.dialogImageUrl = file.url;
+      this.dialogImageUrl = file.data.fileFullPath;
       this.$message.success('上传成功！');
     },
     uploadPicError () {
@@ -586,48 +571,6 @@ export default {
         this.$message.error('上传图片大小不能超过 2MB!');
       }
       return isJPG && isLt2M;
-    },
-    // 绑定事件
-    addTakPictureEvent () {
-      this.video = document.getElementById('video');
-      window.addEventListener("DOMContentLoaded", function(){
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-      }) 
-    },
-    // 拍照
-    takPicture () {
-      let canvas = document.getElementById('canvas');
-      let context2D = canvas.getContext("2d");
-      context2D.fillStyle = "#ffffff";
-      context2D.fillRect(0, 0, 160, 120);
-      context2D.drawImage(this.video, 0, 0, 160, 120);
-      // let imageCode = canvas.toDataURL("image/png");//要传给后台的base64
-    },
-    // 启动摄像头
-    startCamera(){
-      let _this = this;
-      _this.isShowCamera = true;
-      if (navigator.getUserMedia) {
-        navigator.getUserMedia({video:true},
-          function(stream) {
-            _this.track = stream.getTracks()[0];  // 通过这个关闭摄像头
-            _this.video.src = window.URL.createObjectURL(stream);
-            _this.video.onloadedmetadata = function() {
-                _this.video.play();
-              };
-          },
-          function(err) {
-            alert(err.name);
-          }
-        );
-      }	 
-    },
-    // 关闭摄像头
-    closeCamera () {
-      this.isShowCamera = false;
-      if (this.track !== null) {
-        this.track.stop();//关闭摄像头
-      }
     }
   }
 }
@@ -761,7 +704,7 @@ export default {
         justify-content: space-between;
         align-items: flex-start;
         .list_info{
-          width: 33%;
+          width: 32%;
           padding: 20px;
           margin-bottom: 20px;
           background:rgba(255,255,255,1);
@@ -810,26 +753,28 @@ export default {
         padding: 10px 20px;
         line-height: 40px;
         > div:nth-child(1){
-          width: 10%;
-          > span{
-            font-size: 20px;
-          }
-          > i{
-            margin-left: 10px;
-            color: #186DFB;
-            cursor: pointer;
-          }
-        }
-        > div:nth-child(2){
-          width: 70%;
-          > span{
-            margin-left: 10px;
+          display: flex;
+          > div:nth-child(1){
+            margin-right: 20px;
             > span{
-              color: #0C70F8;
+              font-size: 20px;
+            }
+            > i{
+              margin-left: 10px;
+              color: #186DFB;
+              cursor: pointer;
+            }
+          }
+          > div:nth-child(2){
+            > span{
+              margin-left: 10px;
+              > span{
+                color: #0C70F8;
+              }
             }
           }
         }
-        > div:nth-child(3){
+        > div:nth-child(2){
           position: relative;
           .group_copy{
             width:152px;
@@ -864,6 +809,8 @@ export default {
         text-align: center;
         border-right: 1px solid rgba(242,242,242,1);
         .upload_pic{
+          height: 160px;
+          overflow: hidden;
           margin-bottom: 25px;
           .el-upload{
             img{
@@ -903,23 +850,28 @@ export default {
         width: 480px;
         padding-left: 30px;
       }
-      .portrait_shoot{
-        position: absolute;
-        top: 50%;
-        left: -250px;
-        margin-top: -80px;
-        > div{
-          width: 160px;
-          height: 160px;
-          background:rgba(12,112,248,.7);
-          border-radius:20px;
-          > i{
-            width: 158px;
-            height: 158px;
-          }
-        }
-      }
+      // .portrait_shoot{
+      //   position: absolute;
+      //   top: 50%;
+      //   left: -250px;
+      //   margin-top: -80px;
+      //   > div{
+      //     width: 160px;
+      //     height: 160px;
+      //     background:rgba(12,112,248,.7);
+      //     border-radius:20px;
+      //     > i{
+      //       width: 158px;
+      //       height: 158px;
+      //     }
+      //   }
+      // }
     }
+  }
+}
+@media (max-width: 1400px) {
+  .control_library .list_box .list_info{
+    width: 49%!important;
   }
 }
 </style>
@@ -952,6 +904,11 @@ export default {
         i{
           width: 158px;
           height: 158px;
+        }
+        &:hover{
+          i.vl_icon_control_14{
+            background-position: -207px -570px;
+          }
         }
       }
       &.hidden .el-upload--picture-card{

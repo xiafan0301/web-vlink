@@ -127,6 +127,7 @@ export default {
     height: 100%;
     width: 100%;
     padding: 20px;
+    min-height: 780px;
     background:rgba(255,255,255,1);
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     border-radius:4px;

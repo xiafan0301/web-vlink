@@ -1,13 +1,13 @@
 <template>
-  <div class="mes_notice_add">
+  <div class="mes_system_add">
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)">公共管理</el-breadcrumb-item>
-        <el-breadcrumb-item>新增公告</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)">系统消息</el-breadcrumb-item>
+        <el-breadcrumb-item>新增系统消息</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="notice_add_box">
+    <div class="system_add_box">
       <div class="add_form">
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
           <el-form-item label="消息标题:" prop="title" style="width: 754px;">
@@ -21,24 +21,17 @@
               v-model="addForm.content">
             </el-input>
           </el-form-item>
-          <el-form-item style="width: 736px;">
-            <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M)</p>
-          </el-form-item>
         </el-form>
       </div>
       <div class="add_footer">
         <el-button type="primary">发布</el-button>
-        <el-button>保存</el-button>
         <el-button>返回</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
-import uploadPic from '../control/uploadPic';
 export default {
-  components: {uploadPic},
   data () {
     return {
       addForm: {
@@ -61,19 +54,15 @@ export default {
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
-    },
-    // 接收 到上传组件传过来的图片数据
-    uploadPicSubmit () {
-      
-    },
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
-.mes_notice_add{
+.mes_system_add{
   width: 100%;
   position: relative;
-  .notice_add_box{
+  .system_add_box{
     margin: 0 20px 20px 20px;
     padding: 20px 40px;
     min-height:680px;

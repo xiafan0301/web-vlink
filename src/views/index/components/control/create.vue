@@ -39,7 +39,7 @@
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;" class="period_time">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;" :class="['period_time', {'top': index === 4}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '起始时间不能为空', trigger: 'blur'}" >
                 <el-time-select
                   placeholder="起始时间"
@@ -237,10 +237,10 @@ export default {
               width: 100%!important;
             }
           }
-          &:last-child{
-            margin-top: 20px;
-          }
-        } 
+        }
+        .period_time.top{
+          margin-top: 20px!important;
+        }
       }
     }
     .period_time_btn_box{ 

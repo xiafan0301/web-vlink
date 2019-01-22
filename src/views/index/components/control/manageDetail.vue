@@ -39,8 +39,8 @@
           <div>
             <div class="manage_d_c_o_i" v-for="item in controlObjList" :key="item.id">
               <img :src="item.url" alt="">
-              <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_333">{{item.controlObjName}}</span></p>
-              <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
+              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.controlObjName}}</span></p>
+              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
             </div>
           </div>
         </div>
@@ -183,8 +183,8 @@
                 </div>
               </div>
               <div>
-                <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_333">匹配名称</span></p>
-                <p><i class="vl_icon vl_icon_control_05"></i><span class="vl_f_999">抓拍时间</span></p>
+                <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">匹配名称</span></p>
+                <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">抓拍时间</span></p>
               </div>
             </div>
             <el-pagination
@@ -428,7 +428,14 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         margin-top: 15px;
+        div:nth-child(1){
+          width: 6%;
+          flex-shrink: 0;
+        }
         div:nth-child(2){
+          width: 94%;
+          flex-shrink: 1;
+          line-height: 20px;
           span{
             color: #0C70F8;
             cursor: pointer;

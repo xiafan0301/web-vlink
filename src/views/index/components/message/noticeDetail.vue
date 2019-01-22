@@ -47,6 +47,7 @@ export default {
   .notice_det_box{
     margin: 0 20px 20px 20px;
     padding: 20px;
+    min-height: 740px;
     background:rgba(255,255,255,1);
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     border-radius:4px;
@@ -56,10 +57,13 @@ export default {
     > div:nth-child(2){
       display: flex;
       > div:nth-child(1){
-        width: 77px;
+        width: 6%;
+        flex-shrink: 0;
       }
       > div:nth-child(2){
+        width: 94%;
         line-height: 20px;
+        flex-shrink: 1;
       }
       .det_pic_box{
         width: 400px;
