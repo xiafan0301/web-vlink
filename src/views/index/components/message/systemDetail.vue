@@ -49,14 +49,9 @@ export default {
     }
     > div:nth-child(2){
       display: flex;
-      > span:nth-child(1){
-        width: 11.5%;
-        flex-shrink: 0;
-      }
+      line-height: 20px;
       > span:nth-child(2){
-        width: 88.5%;
-        line-height: 20px;
-        flex-shrink: 1;
+        flex: 1;
       }
     }
   }

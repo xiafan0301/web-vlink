@@ -738,15 +738,8 @@ export default {
               & > div:nth-child(3){
                 display: flex;
                 flex-wrap: nowrap;
-                > span:nth-child(1){
-                  width: 19%;
-                  height: 44px;
-                  overflow: hidden;
-                }
                 > span:nth-child(2){
-                  width: 81%;
-                  height: 44px;
-                  overflow: hidden;
+                  flex: 1;
                 }
               }
             }
@@ -838,13 +831,8 @@ export default {
           & > div:nth-child(3){
             display: flex;
             flex-wrap: nowrap;
-            > span:nth-child(1){
-              width: 20%;
-              flex-shrink: 0;
-            }
             > span:nth-child(2){
-              width: 80%;
-              flex-shrink: 1;
+              flex: 1;
             }
           }
         }

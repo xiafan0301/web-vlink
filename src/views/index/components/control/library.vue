@@ -527,15 +527,19 @@ export default {
     },
     // 全选
     operateAllChecked () {
-      if (!this.allChecked) {
-        this.memberList.map(m => {
-          m.isChecked = true;
-        })
-      } else {
-        this.memberList.map(m => {
-          m.isChecked = false;
-        })
-      }
+      this.$nextTick(() => {
+        if (!this.allChecked) {
+          console.log(1111111)
+          this.memberList.map(m => {
+            m.isChecked = false;
+          })
+          console.log(this.memberList)
+        } else {
+          this.memberList.map(m => {
+            m.isChecked = true;
+          })
+        }
+      })
     },
     handleSizeChange () {
 
@@ -850,22 +854,6 @@ export default {
         width: 480px;
         padding-left: 30px;
       }
-      // .portrait_shoot{
-      //   position: absolute;
-      //   top: 50%;
-      //   left: -250px;
-      //   margin-top: -80px;
-      //   > div{
-      //     width: 160px;
-      //     height: 160px;
-      //     background:rgba(12,112,248,.7);
-      //     border-radius:20px;
-      //     > i{
-      //       width: 158px;
-      //       height: 158px;
-      //     }
-      //   }
-      // }
     }
   }
 }

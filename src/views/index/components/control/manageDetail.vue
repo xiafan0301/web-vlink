@@ -173,18 +173,20 @@
             </div>
           </div>
           <div class="result_content" v-if="dpType === '布控结果'">
-            <div class="result_img_box" v-for="item in '12345678'" :key="item.id">
-              <img src="//via.placeholder.com/395x239" alt="">
-              <div class="result_tool">
-                <div>抓拍设备</div>
-                <div>
-                  <i class="vl_icon vl_icon_control_06"></i>
-                  <i class="vl_icon vl_icon_control_11"></i>
+            <div>
+              <div class="result_img_box" v-for="item in '12345678'" :key="item.id">
+                <img src="//via.placeholder.com/395x239" alt="">
+                <div class="result_tool">
+                  <div>抓拍设备</div>
+                  <div>
+                    <i class="vl_icon vl_icon_control_06"></i>
+                    <i class="vl_icon vl_icon_control_11"></i>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">匹配名称</span></p>
-                <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">抓拍时间</span></p>
+                <div>
+                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">匹配名称</span></p>
+                  <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">抓拍时间</span></p>
+                </div>
               </div>
             </div>
             <el-pagination
@@ -428,14 +430,9 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         margin-top: 15px;
-        div:nth-child(1){
-          width: 6%;
-          flex-shrink: 0;
-        }
+        line-height: 20px;
         div:nth-child(2){
-          width: 94%;
-          flex-shrink: 1;
-          line-height: 20px;
+          flex: 1;
           span{
             color: #0C70F8;
             cursor: pointer;
@@ -640,47 +637,52 @@ export default {
         .result_content{
           width: 100%;
           height: 100%;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-around;
-          .result_img_box{
-            width: 395px;
-            height: 301px;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-            background:rgba(255,255,255,1);
-            border-radius:4px;
-            border:1px solid rgba(211,211,211,1);
-            img{
-              width: 100%;
-            }
-            .result_tool{
-              width: 100%;
-              height: 36px;
-              line-height: 36px;
-              background: rgba(0,0,0,.4);
-              display: flex;
-              justify-content: space-between;
-              padding-left: 15px;
-              position: absolute;
-              bottom: 62px;
-              left: 0;
-              > div{
-                color: #fff;
+          > div:nth-child(1){
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            padding-left: 10px;
+            .result_img_box{
+              width: 395px;
+              height: 301px;
+              margin-top: 20px;
+              margin-right: 7px;
+              position: relative;
+              overflow: hidden;
+              background:rgba(255,255,255,1);
+              border-radius:4px;
+              border:1px solid rgba(211,211,211,1);
+              img{
+                width: 100%;
               }
-              i{
-                margin-top: 6px;
-                margin-right: 10px;
-                cursor: pointer;
-              }
-            }
-            > div:nth-child(3){
-              p{
-                margin-top: 8px;
-                padding-left: 10px;
+              .result_tool{
+                width: 100%;
+                height: 36px;
+                line-height: 36px;
+                background: rgba(0,0,0,.4);
+                display: flex;
+                justify-content: space-between;
+                padding-left: 15px;
+                position: absolute;
+                bottom: 62px;
+                left: 0;
+                > div{
+                  color: #fff;
+                }
                 i{
-                  vertical-align: middle;
+                  margin-top: 6px;
+                  margin-right: 10px;
+                  cursor: pointer;
+                }
+              }
+              > div:nth-child(3){
+                p{
+                  margin-top: 8px;
+                  padding-left: 10px;
+                  i{
+                    vertical-align: middle;
+                  }
                 }
               }
             }

@@ -23,8 +23,8 @@
             <div><span>事件状态：</span><span>13890809908</span></div>
           </li>
         </ul>
-        <div style="margin-bottom: 12px;"><span>事件情况：</span><span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span></div>
-        <div><span>事发地点：</span><span>长沙市天心区创谷广告产业园</span></div>
+        <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span></div>
+        <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">长沙市天心区创谷广告产业园</span></div>
       </div>
       <div class="det_list">
         <div class="list_title">
@@ -136,16 +136,9 @@ export default {
       }
       > div{
         display: flex;
-        > span:nth-child(1){
-          width: 6%;
-          flex-shrink: 0;
-          color: #666;
-        }
+        line-height: 20px;
         > span:nth-child(2){
-          width: 94%;
-          line-height: 20px;
-          flex-shrink: 1;
-          color: #333;
+          flex: 1;
         }
       }
     }

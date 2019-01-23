@@ -56,14 +56,9 @@ export default {
     }
     > div:nth-child(2){
       display: flex;
-      > div:nth-child(1){
-        width: 6%;
-        flex-shrink: 0;
-      }
+      line-height: 20px;
       > div:nth-child(2){
-        width: 94%;
-        line-height: 20px;
-        flex-shrink: 1;
+        flex: 1;
       }
       .det_pic_box{
         width: 400px;
