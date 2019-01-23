@@ -124,7 +124,7 @@
         </div>
         <div class="list_box">
           <template v-if="tabType === '1'">
-            <div class="list_info" v-for="item in '123456'" :key="item.id">
+            <div class="list_info" v-for="item in '1234567'" :key="item.id">
               <div class="list_img"><img src="//via.placeholder.com/200x200" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
@@ -150,7 +150,7 @@
             </div>
           </template>
           <template v-else>
-            <div class="list_info" v-for="item in '123456'" :key="item.id">
+            <div class="list_info" v-for="item in '1234567'" :key="item.id">
               <div class="list_img"><img src="//via.placeholder.com/200x200" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
@@ -488,7 +488,8 @@ export default {
         {isChecked: false, id: '00003'},
         {isChecked: false, id: '00004'},
         {isChecked: false, id: '00005'},
-        {isChecked: false, id: '00006'}
+        {isChecked: false, id: '00006'},
+        {isChecked: false, id: '00007'}
       ],//成员列表数据
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
       track: null

@@ -111,16 +111,22 @@
             </div>
             <el-collapse-transition>
               <div class="situ_content" v-if="dpType === '运行情况'">
-                <div class="situ_left">
-                  <div>布控设备（12）</div>
-                  <ul>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                    <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                  </ul>
-                </div>
+                  <div class="situ_left">
+                    <div>布控设备（12）</div>
+                    <vue-scroll style="width: 100%;max-height: 736px;">
+                      <ul>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                      </ul>
+                    </vue-scroll>
+                  </div>
+                
                 <div class="situ_right">
                   <div class="situ_r_video">
                     <video src="../../../../assets/video/video.mp4" autoplay loop></video>
@@ -165,14 +171,14 @@
         </div>
         <!-- 布控结果 -->
         <div class="manage_d_c_result" v-if="controlState !== '0'">
-          <div class="result_title" @click="dpType = '布控结果'">
+          <div class="result_title">
             <div>布控结果（200个）</div>
             <div>
               <el-input size="small" placeholder="请选择起止时间"></el-input>
               <el-input size="small">请搜索或选择设备</el-input>
             </div>
           </div>
-          <div class="result_content" v-if="dpType === '布控结果'">
+          <div class="result_content">
             <div>
               <div class="result_img_box" v-for="item in '12345678'" :key="item.id">
                 <img src="//via.placeholder.com/395x239" alt="">
@@ -531,7 +537,6 @@ export default {
             flex-wrap: nowrap;
             .situ_left{
               width: 258px;
-              min-height: 764px;
               border-right: 1px solid #F2F2F2;
               > div{
                 width: 100%;
@@ -540,7 +545,7 @@ export default {
                 line-height: 50px;
                 border-bottom: 1px solid #F2F2F2;
               }
-              > ul{
+              ul{
                 margin-top: 10px;
                 li{
                   width: 100%;
@@ -570,27 +575,26 @@ export default {
               width: calc(100% - 258px);
               height: 100%;
               display: flex;
-              flex-wrap: wrap;
-              justify-content: space-between;
-              padding-bottom: 20px;
-              padding-right: 20px;
+              flex-flow: row wrap;
+              align-content: flex-start;
+              padding-top: 20px;
+              padding-right: 1%;
               .situ_r_video{
-                width: 650px;
-                height: 372px;
-                padding: 20px;
+                flex: 0 0 49%;
                 position: relative;
                 overflow: hidden;
+                margin-bottom: 20px;
+                margin-left: 1%;
                 video{
-                  width: 660px;
-                  height: 372px;
+                  width: 100%;
                 }
                 > div{
                   width: 100%;
                   height: 44px;
-                  padding-right: 30px;
+                  padding-right: 10px;
                   position: absolute;
-                  left: 20px;
-                  bottom: 0;
+                  left: 0;
+                  bottom: 2px;
                   background: rgba(0,0,0,.4);
                   opacity: .4;
                   text-align: right;
@@ -606,7 +610,7 @@ export default {
                 > .vl_icon_control_13{
                   position: absolute;
                   right: 8px;
-                  top: 30px;
+                  top: 8px;
                 }
               }
             }
@@ -626,7 +630,6 @@ export default {
           border-bottom: 1px solid #F2F2F2;
           display: flex;
           justify-content: space-between;
-          cursor: pointer;
           > div:nth-child(2){
             display: flex;
             .el-input{
@@ -641,13 +644,15 @@ export default {
             width: 100%;
             height: 100%;
             display: flex;
-            flex-wrap: wrap;
-            padding-left: 10px;
+            flex-flow: row wrap;
+            align-content: flex-start;
+            padding-top: 20px;
+            padding-right: 1%;
             .result_img_box{
-              width: 395px;
-              height: 301px;
-              margin-top: 20px;
-              margin-right: 7px;
+              flex: 0 0 24%;
+              height: 100%;
+              margin-left: 1%;
+              margin-bottom: 20px;
               position: relative;
               overflow: hidden;
               background:rgba(255,255,255,1);
@@ -665,7 +670,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 62px;
+                bottom: 54px;
                 left: 0;
                 > div{
                   color: #fff;

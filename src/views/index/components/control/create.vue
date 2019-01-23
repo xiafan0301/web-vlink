@@ -65,11 +65,12 @@
                 </el-time-select>
               </el-form-item>
             </div>
+            <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
+              <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
+              <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+            </el-form-item>
           </el-form-item>
-          <el-form-item class="period_time_btn_box">
-            <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-            <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
-          </el-form-item>
+       
           <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
               <el-option
@@ -155,6 +156,10 @@ export default {
   methods: {
     // 新增时间段
     addPeriodTime() {
+      if (this.createForm.periodTime.length === 5) {
+        this.$message.error('布控时间段不能超过5个');
+        return false;
+      }
       this.createForm.periodTime.push({
         startTime: null,
         endTime: null
@@ -162,7 +167,11 @@ export default {
     },
     // 删除时间段
     removePeriodTime() {
-      this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1)
+      if (this.createForm.periodTime.length === 1) {
+        this.$message.error('至少要有一个布控时间段');
+        return false;
+      }
+      this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1);
     }
   }
 }
@@ -242,35 +251,40 @@ export default {
           margin-top: 20px!important;
         }
       }
-    }
-    .period_time_btn_box{ 
-      margin-bottom: 0!important;
-      .el-form-item__content{
-        display: flex;
-        .period_time_btn{
-          width: 164px;
-          height:40px;
-          line-height:40px;
-          text-align: center;
-          border-radius:4px;
-          border:1px dashed rgba(217,217,217,1);
-          cursor: pointer;
-          &:nth-child(1){
-            color: #0C70F8;
-            margin-right: 25px;
-          }
-          &:nth-child(2){
-            color: #F94539;
-          }
-          .vl_icon_control_22{
-            vertical-align: middle;
-            margin-bottom: 5px;
-            margin-right: 5px;
-          }
-          .vl_icon_control_28{
-            vertical-align: middle;
-            margin-bottom: 7px;
-            margin-right: 5px;
+      .period_time_btn_box{ 
+        margin-bottom: 0!important;
+        padding-right: 38px!important;
+        padding-top: 40px;
+        &.top{
+          padding-top: 20px;
+        }
+        .el-form-item__content{
+          display: flex;
+          .period_time_btn{
+            width: 164px;
+            height:40px;
+            line-height:40px;
+            text-align: center;
+            border-radius:4px;
+            border:1px dashed rgba(217,217,217,1);
+            cursor: pointer;
+            &:nth-child(1){
+              color: #0C70F8;
+              margin-right: 25px;
+            }
+            &:nth-child(2){
+              color: #F94539;
+            }
+            .vl_icon_control_22{
+              vertical-align: middle;
+              margin-bottom: 5px;
+              margin-right: 5px;
+            }
+            .vl_icon_control_28{
+              vertical-align: middle;
+              margin-bottom: 7px;
+              margin-right: 5px;
+            }
           }
         }
       }
