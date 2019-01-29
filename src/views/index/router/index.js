@@ -130,17 +130,19 @@ export default new Router({
                         component: () => import('@/views/index/components/event/addPlan.vue')
                       }
                     ]
-                }, { 
+                }, {
                     /* 研判模块 */
                     path: 'judge',
                     name: 'judge',
                     // component: () => import('@/views/index/components/judge/judge.vue')
                     component: () => import('@/views/index/components/construction.vue')
                 }, {
+                    /* 检索模块 */
                     path: 'search',
                     name: 'search',
                     redirect: {name: 'search_capture'},
-                    component: () => import('@/views/index/components/search/search.vue'),
+                    // component: () => import('@/views/index/components/search/search.vue'),
+                    component: () => import('@/views/index/components/construction.vue'),
                     children: [
                         {
                             path: 'capture',
