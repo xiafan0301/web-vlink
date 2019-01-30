@@ -32,7 +32,8 @@ export default new Router({
                         }, {
                             path: 'query',
                             name: 'video_query',
-                            component: () => import('@/views/index/components/video/query.vue')
+                            // component: () => import('@/views/index/components/video/query.vue')
+                            component: () => import('@/views/index/components/construction.vue')
                         }, {
                             path: 'signList',
                             name: 'video_signList',
@@ -45,6 +46,10 @@ export default new Router({
                             path: 'setting',
                             name: 'video_setting',
                             component: () => import('@/views/index/components/video/setting.vue')
+                        }, {
+                            path: 'statistics',
+                            name: 'video_statistics',
+                            component: () => import('@/views/index/components/video/statistics.vue')
                         }
                     ]
                 }, {
@@ -83,16 +88,96 @@ export default new Router({
                             path: 'addEvent',
                             name: 'add_event',
                             component: () => import('@/views/index/components/event/addEvent.vue')
-                        }
+                        }, {
+                          path: 'unauditEvent',
+                          name: 'unaudit_event',
+                          component: () => import('@/views/index/components/event/unauditEvent.vue')
+                      }, {
+                        path: 'auditEventDetail',
+                        name: 'audit_event_detail',
+                        component: () => import('@/views/index/components/event/auditEventDetail.vue')
+                      }, {
+                        path: 'treatingEventDetail',
+                        name: 'treating_event_detail',
+                        component: () => import('@/views/index/components/event/treatingEventDetail.vue')
+                      }, {
+                        path: 'untreatEventDetail',
+                        name: 'untreat_event_detail',
+                        component: () => import('@/views/index/components/event/untreatEventDetail.vue')
+                      }, {
+                        path: 'eventReport',
+                        name: 'event_report',
+                        component: () => import('@/views/index/components/event/eventReport.vue')
+                      }, {
+                        path: 'sendOtherUnits',
+                        name: 'send_other_units',
+                        component: () => import('@/views/index/components/event/sendOtherUnits.vue')
+                      }, {
+                        path: 'eventEnd',
+                        name: 'event_end',
+                        component: () => import('@/views/index/components/event/eventEnd.vue')
+                      }, {
+                        path: 'eventCtcDetail',
+                        name: 'event_ctc_detail',
+                        component: () => import('@/views/index/components/event/eventCtcDetail.vue')
+                      }, {
+                        path: 'reportDetail',
+                        name: 'report_detail',
+                        component: () => import('@/views/index/components/event/reportDetail.vue')
+                      }, {
+                        path: 'addPlan',
+                        name: 'add_plan',
+                        component: () => import('@/views/index/components/event/addPlan.vue')
+                      }, {
+                        path: 'planDetail',
+                        name: 'plan_detail',
+                        component: () => import('@/views/index/components/event/planDetail.vue')
+                      }, {
+                        path: 'morePlan',
+                        name: 'more_plan',
+                        component: () => import('@/views/index/components/event/morePlan.vue')
+                      }, {
+                        path: 'enablePlan',
+                        name: 'enable_plan',
+                        component: () => import('@/views/index/components/event/enablePlan.vue')
+                      }, {
+                        path: 'ctcOperation',
+                        name: 'ctc_operation',
+                        component: () => import('@/views/index/components/event/ctcOperation.vue')
+                      }
                     ]
-                }, { 
+                }, {
+                    /* 研判模块 */
                     path: 'judge',
                     name: 'judge',
-                    component: () => import('@/views/index/components/judge/judge.vue')
+                    // component: () => import('@/views/index/components/judge/judge.vue')
+                    component: () => import('@/views/index/components/construction.vue')
                 }, {
+                    /* 检索模块 */
                     path: 'search',
                     name: 'search',
-                    component: () => import('@/views/index/components/search/search.vue')
+                    redirect: {name: 'search_capture'},
+                    // component: () => import('@/views/index/components/search/search.vue'),
+                    component: () => import('@/views/index/components/construction.vue'),
+                    children: [
+                        {
+                            path: 'capture',
+                            name: 'search_capture',
+                            component: () => import('@/views/index/components/search/capture.vue')
+                        }, {
+                            path: 'portrait',
+                            name: 'search_portrait',
+                            component: () => import('@/views/index/components/search/portrait.vue')
+                        }, {
+                            path: 'contrast ',
+                            name: 'search_contrast',
+                            component: () => import('@/views/index/components/search/contrast.vue')
+                        }, {
+                            path: 'history',
+                            name: 'search_history',
+                            component: () => import('@/views/index/components/search/history.vue')
+                        }
+                    ]
                 }, {
                     /* 布控板块 */
                     path: 'control',

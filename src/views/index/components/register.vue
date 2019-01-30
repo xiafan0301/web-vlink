@@ -28,7 +28,7 @@
 </template>
 <script>
 import headerNormal from '@/components/headerNormal.vue';
-import {validatePhone, validatePwd} from '@/utils/validator.js';
+import {validatePhone} from '@/utils/validator.js';
 export default {
     components: {headerNormal},
     data () {
@@ -70,7 +70,7 @@ export default {
             },
             regFormRules: {
                 mobile: [
-                    { required: true, message: '输入手机号', trigger: 'blur' },
+                    { required: true, message: '请输入手机号', trigger: 'blur' },
                     { validator: validatePhone, trigger: 'blur' }
                 ],
                 pass: [

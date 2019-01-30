@@ -185,7 +185,7 @@ export default {
       height: 20px; line-height: 20px;
       cursor: pointer;
       font-size: 16px; color: #fff;
-      margin-top: 40px; padding: 0 10px 0 20px;
+      margin-top: 45px; padding: 0 10px 0 20px;
       border-left: 1px solid #ddd;
     }
     > ul {
@@ -193,7 +193,7 @@ export default {
       height: 100%;
       > li {
         float: left;
-        padding: 25px 20px 0 0;
+        padding: 30px 20px 0 0;
         cursor: pointer;
       }
     }
