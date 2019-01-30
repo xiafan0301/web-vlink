@@ -1,8 +1,8 @@
 <template>
   <div class="basic-info">
     <div class="header">
-      <i></i>
-      <p>事件编号：XPZ180724001</p>
+      <i class="vl_icon vl_icon_event_4"></i>
+      <span>事件编号：XPZ180724001</span>
     </div>
     <div class="event-status-img"></div>
     <div class='basic-detail'>
@@ -54,7 +54,7 @@
       <div class='basic-list'>
         <div style='width: 100%'>
           <span class='title'>事件情况：</span>
-          <span class='content' style="width: 50%;display:inline-block;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span>
+          <span class='content' style="width: 50%;display:inline-block;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span>
           <!-- <span class='content'>{{eventDetailObj.eventDetail}}</span> -->
         </div>
       </div>
@@ -83,8 +83,11 @@
   box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   border-radius:4px;
   .header {
+    display: flex;
     padding: 10px 20px 0 20px;
-    > p {
+    align-items: center;
+    > span {
+      margin-left: 5px;
       color: #333333;
       font-size: 16px;
       font-weight: 600;

@@ -128,6 +128,22 @@ export default new Router({
                         path: 'addPlan',
                         name: 'add_plan',
                         component: () => import('@/views/index/components/event/addPlan.vue')
+                      }, {
+                        path: 'planDetail',
+                        name: 'plan_detail',
+                        component: () => import('@/views/index/components/event/planDetail.vue')
+                      }, {
+                        path: 'morePlan',
+                        name: 'more_plan',
+                        component: () => import('@/views/index/components/event/morePlan.vue')
+                      }, {
+                        path: 'enablePlan',
+                        name: 'enable_plan',
+                        component: () => import('@/views/index/components/event/enablePlan.vue')
+                      }, {
+                        path: 'ctcOperation',
+                        name: 'ctc_operation',
+                        component: () => import('@/views/index/components/event/ctcOperation.vue')
                       }
                     ]
                 }, { 

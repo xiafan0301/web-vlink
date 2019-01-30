@@ -31,7 +31,7 @@
     <div class="table_box">
       <el-table
         class="ctc_table"
-        :data="eventList"
+        :data="ctcList"
         >
         <el-table-column
           fixed
@@ -121,7 +121,7 @@ export default {
         eventStatus: null, // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
-       eventList: [
+       ctcList: [
         {
           eventCode: 'XP1000000000000',
           eventType: '治安事件',
