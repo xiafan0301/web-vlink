@@ -65,7 +65,7 @@
 </template>
 <script>
 export default {
-  data () {
+  data () {78 
     return {
       pickerOptions2: {
         shortcuts: [{
