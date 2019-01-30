@@ -119,8 +119,8 @@ export const conData = [
   {tid: '0', trackPointName: '追踪点001:长沙市天心区创谷广告产业园B3栋',
   name: '摄像头111',
   addr: '长沙市天心区君逸路', 
-  latitude: 28.100253,
-  longitude: 112.981563,
+  latitude: 28.093253,
+  longitude: 112.975163,
     sxt: [
       {sid: '0', sxtName: '摄像头001'},
       {sid: '1', sxtName: '摄像头002'},
@@ -145,8 +145,8 @@ export const conData = [
   {tid: '1', trackPointName: '追踪点002:长沙市天心区创谷广告产业园B4栋',
   name: '摄像头222',
   addr: '天心区雀园路568号', 
-  latitude: 28.099481,
-  longitude: 112.981627,
+  latitude: 28.093281,
+  longitude: 112.975927,
     sxt: [
       {sid: '8', sxtName: '摄像头0011'},
       {sid: '9', sxtName: '摄像头0021'},

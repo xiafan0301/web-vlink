@@ -73,12 +73,14 @@
                             <div @click="getEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
                             <div @click="getEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
                           </div>
-                          <ul v-if="type === '0'">
-                            <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}"><span>{{equ.sxtName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                          </ul>
-                          <ul v-else>
-                            <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}"><span>{{equ.kName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                          </ul>
+                          <vue-scroll>
+                            <ul v-if="type === '0'" style="max-height: 280px;">
+                              <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}"><span>{{equ.sxtName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                            </ul>
+                            <ul v-else style="max-height: 280px;">
+                              <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}"><span>{{equ.kName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                            </ul>
+                          </vue-scroll>
                         </div>
                       </el-collapse-transition>
                     </div>
@@ -86,7 +88,7 @@
                 </div>
               </div>
               <div class="manage_d_s_m_r">
-                <div class="top"><i class="vl_icon vl_icon_control_23"></i></div>
+                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
                 <ul class="bottom">
                   <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
                   <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -110,59 +112,51 @@
               <i class="el-icon-arrow-up" v-show="dpType !== '运行情况'"></i>
             </div>
             <el-collapse-transition>
-              <div class="situ_content" v-if="dpType === '运行情况'">
+              <div class="situ_content">
                   <div class="situ_left">
                     <div>布控设备（12）</div>
-                    <vue-scroll style="width: 100%;max-height: 736px;">
-                      <ul>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
-                        <li><span>摄像头001</span><i class="vl_icon vl_icon_control_05"></i></li>
+                    <vue-scroll>
+                      <ul style="width: 100%;max-height: 736px;">
+                        <template v-for="(item, index) in situList">
+                          <li
+                            v-if="item.name"
+                            :key="'item' + index"
+                            @dragstart="dragstart($event, index)"
+                            @drag="drag"
+                            @dragend="dragend"
+                            @dragenter="dragenter"
+                            @dragleave="dragleave"
+                            @dragover="dragover"
+                            @drop="drop($event, index)"
+                            :draggable="true"
+                          >
+                            <span>{{item.name}}</span><i class="vl_icon vl_icon_control_05"></i>
+                          </li>
+                        </template>
                       </ul>
                     </vue-scroll>
                   </div>
-                
                 <div class="situ_right">
-                  <div class="situ_r_video">
-                    <video src="../../../../assets/video/video.mp4" autoplay loop></video>
-                    <div>
-                      <i class="vl_icon vl_icon_control_06"></i>
-                      <i class="vl_icon vl_icon_control_11"></i>
-                      <i class="vl_icon vl_icon_control_07"></i>
+                  <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="'item' + index"
+                    @dragstart="dragstart($event, index)"
+                    @drag="drag"
+                    @dragend="dragend"
+                    @dragenter="dragenter"
+                    @dragleave="dragleave"
+                    @dragover="dragover"
+                    @drop="drop($event, index)"
+                    :draggable="true"
+                    >
+                    <div class="situ_r_img">
+                      <div></div>
                     </div>
-                    <i class="vl_icon vl_icon_control_13"></i>
-                  </div>
-                  <div class="situ_r_video">
-                    <video src="../../../../assets/video/video.mp4" autoplay loop></video>
-                    <div>
-                      <i class="vl_icon vl_icon_control_06"></i>
-                      <i class="vl_icon vl_icon_control_11"></i>
-                      <i class="vl_icon vl_icon_control_07"></i>
-                    </div>
-                    <i class="vl_icon vl_icon_control_13"></i>
-                  </div>
-                  <div class="situ_r_video">
-                    <video src="../../../../assets/video/video.mp4" autoplay loop></video>
-                    <div>
-                      <i class="vl_icon vl_icon_control_06"></i>
-                      <i class="vl_icon vl_icon_control_11"></i>
-                      <i class="vl_icon vl_icon_control_07"></i>
-                    </div>
-                    <i class="vl_icon vl_icon_control_13"></i>
-                  </div>
-                  <div class="situ_r_video">
-                    <video src="../../../../assets/video/video.mp4" autoplay loop></video>
-                    <div>
-                      <i class="vl_icon vl_icon_control_06"></i>
-                      <i class="vl_icon vl_icon_control_11"></i>
-                      <i class="vl_icon vl_icon_control_07"></i>
-                    </div>
-                    <i class="vl_icon vl_icon_control_13"></i>
+                      <!-- <video src="../../../../assets/video/video.mp4" autoplay loop></video>
+                      <div>
+                        <i class="vl_icon vl_icon_control_06"></i>
+                        <i class="vl_icon vl_icon_control_11"></i>
+                        <i class="vl_icon vl_icon_control_07"></i>
+                      </div>
+                      <i class="vl_icon vl_icon_control_13"></i> -->
                   </div>
                 </div>
               </div>
@@ -302,26 +296,106 @@ export default {
        // 翻页数据
       currentPage: 1,
       pageSzie: 10,
-      pageNum: 1
+      pageNum: 1,
+      // 实时监控设备列表
+      situList: [
+        {name: '设备1', id: '01', src: require('../../../../assets/video/video.mp4'), index: 0},
+        {name: '设备2', id: '02', src: require('../../../../assets/video/video.mp4'), index: 1},
+        {name: '设备3', id: '03', src: require('../../../../assets/video/video.mp4'), index: 2},
+        {name: '设备4', id: '04', src: require('../../../../assets/video/video.mp4'), index: 3}
+      ],
+      dragged: null,//拖拽目标
+      rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频
+      dragstartIndex: null,//左边列表下标
     }
   },
   mounted () {
-    let _this = this;
-    _this.controlState = _this.$route.query.state;
-    let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-      // viewMode: '3D' // 使用3D视图
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    this.map = map;
-
+    this.resetMap();
     this.trackPointList.map(f => {
       this.$set(f, 'isDropdown', false);
     })
-    this.mapMark();
+    // this.reset();
   },
   methods: {
+    dragstart (e, index) {
+      // 保存拖动元素的引用(ref.)
+      this.dragged = e.target;
+      // 使其半透明
+      e.target.style.opacity = .5;
+      this.dragstartIndex = index;
+      console.log(this.dragstartIndex, 'dragstartIndex')
+    },
+    drag (e) {
+      console.log(e);
+    },
+    dragend (e) {
+      // 重置透明度
+      e.target.style.opacity = "";
+    },
+    dragenter (e) {
+      // 当可拖动的元素进入可放置的目标高亮目标节点
+      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
+          e.target.style.background = "purple";
+      }
+    },
+    dragleave (e) {
+      // 当拖动元素离开可放置目标节点，重置其背景
+      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
+          e.target.style.background = "";
+      }
+    },
+    dragover (e) {
+      // 阻止默认动作
+      e.preventDefault();
+    },
+    drop (e, index) {
+      // 阻止默认动作（如打开一些元素的链接）
+      e.preventDefault();
+      e.stopPropagation();
+      // 移动拖动的元素到所选择的放置目标节点
+      console.log(e.target)
+      if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
+          e.target.style.background = "";
+          let videoSrc = this.situList[this.dragstartIndex].src;
+          let sid = this.situList[this.dragstartIndex].id + '_' + random14();
+          let div = document.createElement('div');
+          let video = `<video src="${videoSrc}" autoplay loop></video>
+            <div>
+              <i class="vl_icon vl_icon_control_06"></i>
+              <i class="vl_icon vl_icon_control_11"></i>
+              <i class="vl_icon vl_icon_control_07"></i>
+            </div>
+            <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
+          `;
+          div.innerHTML = video;
+          e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
+          // 从左往右边拖拽逻辑
+          let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
+          if (this.rightVideoList[index].id) {
+            let _video = this.rightVideoList.splice(index, 1)[0];
+            let _index = _video.index;
+            this.situList.splice(_index, 1 , _video);
+            this.rightVideoList.splice(index, 1, ...delVideo);
+          } else {
+            this.rightVideoList.splice(index, 1, ...delVideo);
+          }
+          console.log(this.rightVideoList) 
+          // 防止重复绑定点击事件，先解绑
+          // $('.situ_right').unbind('click');
+          // 利用事件冒泡,绑定关闭按钮的点击事件
+          let _this = this;
+          $('.situ_right').on('click', '#' + sid, function (e) {
+            let _div = document.createElement('div');
+            _div.className = 'situ_r_img';
+            _div.innerHTML = '<div></div>'
+            e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
+            let _video = _this.rightVideoList.splice(index, 1, {})[0];
+            let _index = _video.index;
+            _this.situList.splice(_index, 1, _video);
+          })
+      }
+    },
+
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
       this.type = type;
@@ -339,6 +413,7 @@ export default {
           f.isDropdown = false;
         }
         this.getEquList('0', data);
+        7
       })
     },
     mapMark () {
@@ -365,7 +440,7 @@ export default {
             let sContent = '<div class="vl_map_hover">' +
               '<div class="vl_map_hover_main"><ul>' + 
                 '<li><span>设备名称：</span>' + obj.name + '</li>' + 
-                '<li><span>设备地址：</span>' + obj.addr + '</li>' + 
+                '<li><span>设备地址：</span>' + obj.addr + '</li>' +  
               '</ul></div>';
             hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
@@ -382,14 +457,26 @@ export default {
             if (hoverWindow) { hoverWindow.close(); }
           });
           marker.setMap(_this.map);
-        
         }
       }
     },
+    // 地图缩放
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
+    },
+    // 初始化地图
+    resetMap () {
+      let _this = this;
+      _this.controlState = _this.$route.query.state;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+      _this.mapMark();
     },
     handleSizeChange () {
 
@@ -543,7 +630,6 @@ export default {
                 padding: 0 10px;
                 height: 50px;
                 line-height: 50px;
-                border-bottom: 1px solid #F2F2F2;
               }
               ul{
                 margin-top: 10px;
@@ -580,38 +666,12 @@ export default {
               padding-top: 20px;
               padding-right: 1%;
               .situ_r_video{
+                width: 100%;
                 flex: 0 0 49%;
                 position: relative;
                 overflow: hidden;
                 margin-bottom: 20px;
                 margin-left: 1%;
-                video{
-                  width: 100%;
-                }
-                > div{
-                  width: 100%;
-                  height: 44px;
-                  padding-right: 10px;
-                  position: absolute;
-                  left: 0;
-                  bottom: 2px;
-                  background: rgba(0,0,0,.4);
-                  opacity: .4;
-                  text-align: right;
-                  i{
-                    margin-right: 15px;
-                    margin-top: 10px;
-                    cursor: pointer;
-                    &:last-child{
-                      margin-right: 0;
-                    }
-                  }
-                }
-                > .vl_icon_control_13{
-                  position: absolute;
-                  right: 8px;
-                  top: 8px;
-                }
               }
             }
           }
@@ -709,6 +769,54 @@ export default {
     .el-button{
       width: 100px;
       height: 40px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.control_manage_d{
+  .situ_right{
+    .situ_r_video{
+      .situ_r_img{
+          width: 100%;
+          height: 200px;
+        > div{
+          width: 100%;
+          height: 100%;
+          background: #e6e6e6;
+        }
+      }
+      > div {
+        width: 100%;
+        video{
+          width: 100%;
+        }
+        > div{
+          width: 100%;
+          height: 44px;
+          padding-right: 10px;
+          position: absolute;
+          left: 0;
+          bottom: 2px;
+          background: rgba(0,0,0,.4);
+          opacity: .4;
+          text-align: right;
+          i{
+            margin-right: 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            &:last-child{
+              margin-right: 0;
+            }
+          }
+        }
+        > .vl_icon_control_13{
+          position: absolute;
+          right: 8px;
+          top: 8px;
+          cursor: pointer;
+        }
+      }
     }
   }
 }

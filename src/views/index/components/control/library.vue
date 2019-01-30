@@ -16,17 +16,19 @@
           <i slot="suffix" class="el-input__icon el-icon-search"></i>
         </el-input>
       </div>
-      <div class="add_group">
-        <div @click="popAddGroupDialog(1)" :class="['group_title', {'active': groupIndex === -1 }]">
-          <i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span>
-        </div>
-        <div class="group_list">
-          <div v-for="(item, index) in groupList" :key="item.id"  :class="{'active': groupIndex === index }">
-            <div @click="groupIndex = index"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-            <i @click="groupId = item.id;pageType = '2'" :class="['vl_icon', groupId === item.id ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
+      <vue-scroll>
+        <div class="add_group">
+          <div @click="popAddGroupDialog(1)" :class="['group_title', {'active': groupIndex === -1 }]">
+            <i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span>
+          </div>
+          <div class="group_list">
+            <div v-for="(item, index) in groupList" :key="item.id"  :class="{'active': groupIndex === index }">
+              <div @click="groupIndex = index"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+              <i @click="groupId = item.id;pageType = '2'" :class="['vl_icon', groupId === item.id ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
+            </div>
           </div>
         </div>
-      </div>
+      </vue-scroll>
       <el-form :model="libForm" class="lib_form" v-if="tabType === '1'">
         <el-form-item>
           <el-date-picker
@@ -120,11 +122,12 @@
       <div class="snap_list" v-if="pageType === '1'">
         <div class="snap_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">(123)</span></div>
-          <el-button type="primary" @click="addPortraitDialog = true;">新建{{tabType === '1' ? '人像' : '车像'}}</el-button>
+          <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm')">新建人像</el-button>
+          <el-button v-else type="primary" @click.native="clearForm('carForm')">新建车像</el-button>
         </div>
         <div class="list_box">
           <template v-if="tabType === '1'">
-            <div class="list_info" v-for="item in '1234567'" :key="item.id">
+            <div class="list_info" v-for="item in '123456'" :key="item.id">
               <div class="list_img"><img src="//via.placeholder.com/200x200" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
@@ -142,6 +145,14 @@
                 <div class="data_list">
                   <span>失踪儿童</span>
                   <span>分组2</span>
+                  <!-- <div class="more">
+                    <span>更多组</span>
+                    <div>
+                      <span>失踪儿童</span>
+                      <span>拐卖儿童</span>
+                    </div>
+                    <i></i>
+                  </div> -->
                 </div>
                 <div class="data_list">
                   <span>环保路十字路口一小孩从电动车上掉下，被宝马车方救起送往天心区公安局。</span>
@@ -150,7 +161,7 @@
             </div>
           </template>
           <template v-else>
-            <div class="list_info" v-for="item in '1234567'" :key="item.id">
+            <div class="list_info" v-for="item in '123456'" :key="item.id">
               <div class="list_img"><img src="//via.placeholder.com/200x200" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
@@ -166,6 +177,14 @@
                 <div class="data_list">
                   <span>蓝底黑字</span>
                   <span>组1；组2</span>
+                  <!-- <div class="more">
+                    <span>更多组</span>
+                    <div>
+                      <span>失踪儿童</span>
+                      <span>拐卖儿童</span>
+                    </div>
+                    <i></i>
+                  </div> -->
                 </div>
                 <div class="data_list">
                   <span>环保路十字路口一小孩从电动车上掉下，被宝马车方救起送往天心区公安局。</span>
@@ -226,6 +245,17 @@
                 <div class="data_list">
                   <span>失踪儿童</span>
                   <span>分组2</span>
+                  <div class="more">
+                    <span @mouseenter="showMoreId = item.id" @mouseleave="showMoreId = null">更多组</span>
+                    <template v-if="showMoreId === item.id">
+                      <div>
+                        <span>失踪儿童</span>
+                        <span>拐卖儿童</span>
+                        <span>拐卖儿童</span>
+                      </div>
+                      <i></i>
+                    </template>
+                  </div>
                 </div>
                 <div class="data_list">
                   <span>环保路十字路口一小孩从电动车上掉下，被宝马车方救起送往天心区公安局。</span>
@@ -249,7 +279,17 @@
                 </div>
                 <div class="data_list">
                   <span>蓝底黑字</span>
-                  <span>组1；组2</span>
+                  <span>组2</span>
+                  <div class="more">
+                    <span @mouseenter="showMoreId = item.id" @mouseleave="showMoreId = null">更多组</span>
+                    <template v-if="showMoreId === item.id">
+                      <div>
+                        <span>失踪儿童</span>
+                        <span>拐卖儿童</span>
+                      </div>
+                      <i></i>
+                    </template>
+                  </div>
                 </div>
                 <div class="data_list">
                   <span>环保路十字路口一小孩从电动车上掉下，被宝马车方救起送往天心区公安局。</span>
@@ -306,8 +346,9 @@
             <p>请上传清晰照片</p>
           </div>
           <div class="portrait_form">
-            <el-form :model="portraitForm" class="portrait_form" v-if="tabType === '1'">
-              <el-form-item style="width: 415px;">
+            <!-- 人像 -->
+            <el-form class="portrait_form" v-show="tabType === '1'" :model="portraitForm" :rules="portraitRules" ref="portraitForm" label-width="20px" label-position="left">
+              <el-form-item label=" " style="width: 415px;" prop="name">
                 <el-input v-model="portraitForm.name" placeholder="姓名"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
@@ -315,45 +356,110 @@
                 <el-button plain>女</el-button>
               </el-form-item>
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.national" placeholder="民族"></el-input>
+                <el-select v-model="portraitForm.national" placeholder="民族" style="width: 100%;">
+                  <el-option
+                    v-for="item in nationalList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.cardType" placeholder="证件类型"></el-input>
+              <el-form-item label=" " style="width: 415px;" prop="cardType">
+                <el-select v-model="portraitForm.cardType" placeholder="证件类型" style="width: 100%;">
+                  <el-option
+                    v-for="item in cardTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item style="width: 415px;">
+              <el-form-item label=" " style="width: 415px;" prop="cardNum">
                 <el-input v-model="portraitForm.cardNum" placeholder="证件号码"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
                 <el-input v-model="portraitForm.date" placeholder="出生日期"></el-input>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.perOwnerGroup" placeholder="归属组"></el-input>
+              <!-- 选择归属组 -->
+              <el-form-item style="width: 415px;position: relative;">
+                <div class="group_sel">
+                  <span v-show="!isShowDpList && portraitForm.perOwnerGroup.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
+                  <div class="group" v-for="item in portraitForm.perOwnerGroup" :key="item.value" @click="delSelGroup(item, 1)">
+                    <span class="vl_f_999">{{item.label}}</span>
+                    <i class="el-icon-close"></i>
+                  </div>
+                  <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
+                  <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
+                </div>
+                <el-collapse-transition>
+                  <div class="group_li" v-show="isShowDpList">
+                    <el-checkbox-group v-model="portraitForm.perOwnerGroup">
+                      <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
+                    </el-checkbox-group>
+                  </div>
+                </el-collapse-transition>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.perDesc" placeholder="描述"></el-input>
+              <el-form-item style="width: 415px;" class="desc">
+                <div>
+                  <el-input
+                    type="textarea"
+                    :rows="4"
+                    resize="none"
+                    placeholder="描述"
+                    v-model="portraitForm.perDesc">
+                  </el-input>
+                  <p><span class="vl_f_999">1</span>/<span class="vl_f_999">50</span></p>
+                </div>
               </el-form-item>
             </el-form>
-            <el-form :model="portraitForm" class="portrait_form" v-else>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.carNum" placeholder="车牌号码"></el-input>
+            <!-- 车像 -->
+            <el-form :model="carForm" class="portrait_form" v-show="tabType === '2'" :rules="carRules" ref="carForm" label-width="20px" label-position="left">
+              <el-form-item label=" " style="width: 415px;" prop="carNum">
+                <el-input v-model="carForm.carNum" placeholder="车牌号码"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.carColor" placeholder="车身颜色"></el-input>
+                <el-input v-model="carForm.carColor" placeholder="车身颜色"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.cardType" placeholder="车辆类型"></el-input>
+                <el-input v-model="carForm.cardType" placeholder="车辆类型"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.numType" placeholder="号牌类型"></el-input>
+                <el-input v-model="carForm.numType" placeholder="号牌类型"></el-input>
               </el-form-item>
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.numColor" placeholder="号牌颜色"></el-input>
+                <el-input v-model="carForm.numColor" placeholder="号牌颜色"></el-input>
               </el-form-item>
+              <!-- 归属组 -->
               <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.carOwnerGroup" placeholder="归属组"></el-input>
+                <div class="group_sel">
+                  <span v-show="!isShowDpList && carForm.carOwnerGroup.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
+                  <div class="group" v-for="item in carForm.carOwnerGroup" :key="item.value" @click="delSelGroup(item, 2)">
+                    <span class="vl_f_999">{{item.label}}</span>
+                    <i class="el-icon-close"></i>
+                  </div>
+                  <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
+                  <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
+                </div>
+                <el-collapse-transition>
+                  <div class="group_li" v-show="isShowDpList">
+                    <el-checkbox-group v-model="carForm.carOwnerGroup">
+                      <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
+                    </el-checkbox-group>
+                  </div>
+                </el-collapse-transition>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.carDesc" placeholder="描述"></el-input>
+              <el-form-item style="width: 415px;" class="desc">
+                <div>
+                  <el-input
+                    type="textarea"
+                    :rows="4"
+                    resize="none"
+                    placeholder="描述"
+                    v-model="carForm.carDesc">
+                  </el-input>
+                  <p><span class="vl_f_999">1</span>/<span class="vl_f_999">50</span></p>
+                </div>
               </el-form-item>
             </el-form>
           </div>
@@ -435,7 +541,10 @@ export default {
         {groupName: '重点青少年', memberNum: 202, id: '003'},
         {groupName: '拐卖妇女', memberNum: 203, id: '004'},
         {groupName: '系统默认', memberNum: 204, id: '005'},
-        {groupName: '系统默认', memberNum: 205, id: '006'}
+        {groupName: '系统默认', memberNum: 204, id: '006'},
+        {groupName: '系统默认', memberNum: 204, id: '007'},
+        {groupName: '系统默认', memberNum: 204, id: '008'},
+        {groupName: '系统默认', memberNum: 205, id: '009'}
       ],//分组列表数据
       pageType: '1',//页面类型，默认为今日抓拍列表页
       groupId: null,//分组id
@@ -450,30 +559,59 @@ export default {
       pageNum: 1,
       // dialog
       addPortraitDialog: false,
+      // 新增人像参数
       portraitForm: {
-        // 人像库参数
-        name: null,
+        name: '',
         national: null,
-        cardType: null,
-        cardNum: null,
+        cardType: '',
+        cardNum: '',
         date: null,
-        ownerGroup: null,
-        desc: null,
-        // 车像库参数
+        perOwnerGroup: [],
+        perDesc: null
+      },
+      // 新增车像参数
+      carForm: {
         carNum: null,
         carColor: null,
         cadType: null,
         numType: null,
         numColor: null,
-        carOwnerGroup: null,
-        carDesc: null,
-      },//新增人像/车像参数
+        carOwnerGroup: [],
+        carDesc: null
+      },
+      cardTypeList: [
+        {
+          label: '身份证',
+          value: '1'
+        },
+        {
+          label: '护照',
+          value: '2'
+        }
+      ],//证件类型列表数据
       addGroupDialog: false,
       delGroupDialog: false,
       removeGroupDialog: false,
       groupName: null,//新增组名
       loadingBtn: false,
       addOrUpdate: null,//新增或者修改弹窗
+      isShowDpList: false,//是否显示下拉列表数据
+      groupDropdownList: [
+        {label: '失踪儿童', value: '1'},
+        {label: '拐卖妇女', value: '2'},
+        {label: '失踪儿童', value: '3'},
+        {label: '失踪儿童', value: '4'},
+        {label: '失踪儿童', value: '5'},
+        {label: '失踪儿童', value: '6'}
+      ],//归属组下拉列表数据
+      portraitRules: {
+        name: [{required: true, message: '不能为空', trigger: 'blur'}],
+        cardType: [{required: true, message: '不能为空', trigger: 'change'}],
+        cardNum: [{required: true, message: '不能为空', trigger: 'blur'}]
+      },
+      carRules: {
+        carNum: [{required: true, message: '不能为空', trigger: 'blur'}]
+      },
 
       // 上传人像参数
       dialogImageUrl: null,
@@ -492,7 +630,8 @@ export default {
         {isChecked: false, id: '00007'}
       ],//成员列表数据
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
-      track: null
+      track: null,
+      showMoreId: null,//显示更多组的组id
     }
   },
   computed: {
@@ -576,6 +715,24 @@ export default {
         this.$message.error('上传图片大小不能超过 2MB!');
       }
       return isJPG && isLt2M;
+    },
+    //删除选中的组
+    delSelGroup (item, type) {
+      if (type === 1) {
+        this.portraitForm.perOwnerGroup = this.portraitForm.perOwnerGroup.filter(f => f !== item);
+      } else {
+        this.carForm.carOwnerGroup = this.carForm.carOwnerGroup.filter(f => f !== item);
+      }
+    },
+    // 清除新建人像和车像表单验证和内容
+    clearForm (formName) {
+      if (this.$refs[formName]) {
+        this.$refs[formName].resetFields();
+      }
+      this.portraitForm.perOwnerGroup = [];
+      this.carForm.carOwnerGroup = [];
+      this.isShowDpList = false;
+      this.addPortraitDialog = true;
     }
   }
 }
@@ -630,8 +787,8 @@ export default {
       }
     }
     .add_group{
-      padding: 10px;
-      border-bottom: 1px solid rgba(211,211,211,1);
+      padding: 0 10px 10px;
+      max-height: 540px;
       .group_title{
         height: 36px;
         line-height: 36px;
@@ -685,7 +842,9 @@ export default {
       }
     }
     .lib_form{
+      margin-top: 30px;
       padding: 40px 20px 0;
+      border-top: 1px solid rgba(211,211,211,1);
     }
   }
   .library_content{
@@ -742,6 +901,38 @@ export default {
                 border:1px solid rgba(242,242,242,1);
                 border-radius:3px;
                 margin-right: 8px;
+              }
+              .more{
+                position: relative;
+                padding-top: 6px;
+                > span{
+                  margin-bottom: 10px;
+                  cursor: pointer;
+                  color: #0C70F8;
+                }
+                > div{
+                  width: 220px;
+                  padding: 20px 20px 10px;
+                  position: absolute;
+                  right: 72px;
+                  bottom: 0;
+                  background:rgba(255,255,255,1);
+                  box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
+                  border-radius: 5px;
+                  display: flex;
+                  flex-wrap: wrap;
+                  > span{
+                    margin-bottom: 10px;
+                  }
+                }
+                > i{
+                  position: absolute;
+                  left: -6px;
+                  top: 6px;
+                  display: inline-block;
+                  border: 6px solid transparent;
+                  border-left-color: #fff;
+                }
               }
             }
           }
@@ -854,6 +1045,46 @@ export default {
       .portrait_form{
         width: 480px;
         padding-left: 30px;
+        .group_sel{
+          min-height: 40px;
+          border-radius: 4px;
+          border: 1px solid #dcdfe6;
+          padding-right: 30px;
+          padding-bottom: 4px;
+          position: relative;
+          display: flex;
+          flex-wrap: wrap;
+          > span{
+            margin-left: 16px;
+            line-height: 34px;
+            color: #dcdfe6;
+            cursor: pointer;
+          }
+          .group{
+            height:30px;
+            line-height: 30px;
+            padding: 0 8px;
+            margin: 4px 0px 0 2px;
+            background:rgba(242,242,242,1);
+            border:1px solid rgba(211,211,211,1);
+            border-radius:3px;
+            cursor: pointer;
+            &:hover{
+              background:rgba(16,115,248,1);
+              border-radius:3px;
+              color: #fff;
+              > span{
+                color: #fff;
+              }
+            }
+          }
+          > i{
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+          }
+        }
       }
     }
   }
@@ -911,6 +1142,42 @@ export default {
     .el-dialog__footer{
       text-align: right;
       padding: 10px 90px 20px!important;
+    }
+    .add_portrait .portrait_form{
+      .desc{
+        > div{
+          border-radius: 4px;
+          border: 1px solid #dcdfe6;
+        }
+        .el-textarea__inner{
+          border: none;
+        }
+        p{
+          padding-right: 10px;
+          text-align: right;
+        }
+      }
+      .group_li{
+        width: 100%;
+        position: absolute;
+        left: 0;
+        z-index: 999;
+        margin-top: 4px;
+        background:rgba(255,255,255,1);
+        border:1px solid rgba(211,211,211,1);
+        border-radius:4px;
+        .el-checkbox{
+          display: block;
+          height: 30px;
+          line-height: 30px;
+          margin-left: 0px;
+          padding-left: 20px;
+          &:hover{
+            background:rgba(237,249,255,1);
+            border-radius: 4px;
+          }
+        }
+      }
     }
   }
 }

@@ -72,6 +72,7 @@ export default {
           height: 667px;
           margin-top: 20px;
           background: #fff;
+          overflow: hidden;
           >.top{
             padding: 15px;
             border-bottom: 1px solid #E2E2E2;

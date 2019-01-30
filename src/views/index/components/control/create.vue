@@ -29,7 +29,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="布控日期:" prop="controlDate" style="width: 25%;">
+            <el-form-item v-show="createForm.controlType === '1'" label="布控日期:" prop="controlDate" style="width: 25%;">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -39,15 +39,15 @@
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;" :class="['period_time', {'top': index === 4}]">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '起始时间不能为空', trigger: 'blur'}" >
                 <el-time-select
                   placeholder="起始时间"
                   v-model="item.startTime"
                   :picker-options="{
-                    start: '08:30',
+                    start: '00:00',
                     step: '00:15',
-                    end: '18:30'
+                    end: '23:00'
                   }">
                 </el-time-select>
               </el-form-item>
@@ -57,9 +57,9 @@
                   placeholder="结束时间"
                   v-model="item.endTime"
                   :picker-options="{
-                    start: '08:30',
+                    start: '00:00',
                     step: '00:15',
-                    end: '18:30',
+                    end: '23:00',
                     minTime: item.startTime
                   }">
                 </el-time-select>
@@ -70,7 +70,6 @@
               <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-       
           <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
               <el-option
@@ -131,12 +130,15 @@ export default {
     return {
       // 表单参数
       labelPosition: 'top',
-      controlTypeList: [],//布控类型
+      controlTypeList: [
+        {label: '短期布控', value: '1'},
+        {label: '长期布控', value: '2'}
+      ],//布控类型
       controlRankList: [],//告警类型
       createForm: {
         controlName: null,
         event: null,
-        controlType: null,
+        controlType: '1',
         controlDate: null,
         controlRank: null,
         periodTime: [
@@ -238,7 +240,7 @@ export default {
               width: 330px;
               position: absolute;
               left: 0;
-              top: 80px;
+              top: -40px;
             }
           }
           .el-form-item__content{
