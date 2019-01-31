@@ -94,7 +94,7 @@
         <div class="video_box" :style="{'height': videoHeight + 'px'}">
           <div class="video">
             <div>
-              <video src="../../../../assets/video/video.mp4" autoplay loop></video>
+              <video src="../../../../assets/video/video.mp4" autoplay loop controls></video>
               <div class="toolbar">
                 <div>环岛路摄像头001</div>
                 <div>
@@ -263,7 +263,7 @@ export default {
                     <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_img">
-                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop width="100%"></video>
+                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
                         <div class="vl_map_state">进行中</div>
                         <div class="vl_map_operate">
                           <div>摄像头12458 </div>
@@ -303,7 +303,7 @@ export default {
                     + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_img">' +
-                        '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop width="100%"></video>' +
+                        '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop controls width="100%"></video>' +
                         '<div class="vl_map_state">进行中</div>' +
                       ' <div class="vl_map_operate">' +
                           '<div>摄像头12458 </div>' +

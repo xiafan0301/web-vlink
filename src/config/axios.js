@@ -17,7 +17,7 @@ const service = axios.create({
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
   // console.log('axios request config', config);
-  if (config.mode && ajaxCtx[config.mode]) {
+  if (config.mode && ajaxCtx[config.mode]) {  
     config.baseURL = ajaxCtx[config.mode];
   }
   let r = '_r=' + new Date().getTime();

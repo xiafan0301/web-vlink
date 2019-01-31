@@ -35,6 +35,7 @@ export default {
   height: 100%;
   > .mes_content {
     height: 100%;
+    overflow: auto;
     padding-left: 200px;
     // 消息模块底部按钮公告样式
     .add_footer{

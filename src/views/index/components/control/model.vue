@@ -63,13 +63,13 @@
                     <div @click="changeEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
                   </div>
                   <vue-scroll>
-                    <ul v-if="type === '0'" style="max-height: 312px;">
+                    <ul v-if="type === '0'" style="max-height: 346px;">
                       <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}">
                         <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
                         <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
                       </li>
                     </ul>
-                    <ul v-else style="max-height: 312px;">
+                    <ul v-else style="max-height: 346px;">
                       <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}">
                         <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
                         <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
@@ -201,7 +201,7 @@ export default {
       dpType: null,//展开类型
       features: null,//设备特性
       featuresTypeList: [],//设备特性列表
-      isBind: false, // 是否给map绑定点击事件
+      // isBind: false, // 是否给map绑定点击事件
       scopeRadius: null, // 范围半径
       lnglat: null, // 坐标
       mapClickEvent: null,
@@ -344,22 +344,22 @@ export default {
     // 为map绑定点击事件
     mapBindClick () {
       let _this = this;
-      _this.isBind = !_this.isBind;
-      if (_this.isBind) {
+      // _this.isBind = !_this.isBind;
+      // if (_this.isBind) {
         console.log('绑定了')
         _this.mapClickEvent = window.AMap.event.addListener(_this.map, 'click', function(e) {
           console.log(e.lnglat.getLng() + ',' + e.lnglat.getLat(), 'target');
           _this.lnglat = [e.lnglat.getLng(), e.lnglat.getLat()];
           _this.mapCircle();
         });
-      } else {
-        if (_this.mapClickEvent) {
-          window.AMap.event.removeListener(_this.mapClickEvent);
-          _this.map.remove(this.selAreaCircle);
-          _this.trackPointList = [];
-          console.log('解绑了')
-        }
-      }
+      // } else {
+      //   if (_this.mapClickEvent) {
+      //     window.AMap.event.removeListener(_this.mapClickEvent);
+      //     _this.map.remove(this.selAreaCircle);
+      //     _this.trackPointList = [];
+      //     console.log('解绑了')
+      //   }
+      // }
     },
     // 标记地图范围，圆形覆盖物
     mapCircle () {
@@ -501,6 +501,7 @@ export default {
         this.mapBindClick();
       }
       _this.mapMark();
+      _this.trackPointList = [];
     }
   }
 }

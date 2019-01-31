@@ -899,8 +899,13 @@ export default {
                 padding: 5px 10px;
                 background:rgba(250,250,250,1);
                 border:1px solid rgba(242,242,242,1);
-                border-radius:3px;
-                margin-right: 8px;
+                border-radius: 3px;
+                white-space:nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+              }
+              & > span:not(:last-child){
+                margin-right: 2px;
               }
               .more{
                 position: relative;
@@ -923,11 +928,12 @@ export default {
                   flex-wrap: wrap;
                   > span{
                     margin-bottom: 10px;
+                    margin-right: 2px;
                   }
                 }
                 > i{
                   position: absolute;
-                  left: -6px;
+                  left: -8px;
                   top: 6px;
                   display: inline-block;
                   border: 6px solid transparent;
@@ -1122,12 +1128,12 @@ export default {
         background: rgba(67,140,238,1);
         border-radius: 20px;
         i{
-          width: 158px;
-          height: 158px;
+          width: 120px;
+          height: 110px;
         }
         &:hover{
           i.vl_icon_control_14{
-            background-position: -207px -570px;
+            background-position: -228px -570px;
           }
         }
       }

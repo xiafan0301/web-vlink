@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ name: 'control_manage' }">布控管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skipIsList()">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>布控详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -32,7 +32,7 @@
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字多行显示。<span>详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字多行显示。<span>详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_666">布控对象：</span><span class="vl_f_333">2</span></div>
@@ -145,7 +145,6 @@
                     @dragleave="dragleave"
                     @dragover="dragover"
                     @drop="drop($event, index)"
-                    :draggable="true"
                     >
                     <div class="situ_r_img">
                       <div></div>
@@ -225,9 +224,16 @@
 import {conData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
 export default {
+  props: {
+    state: {
+      type: String,
+      required: true,
+      default: () => {}
+    }
+  },
   data () {
     return {
-      controlState: null,//布控状态
+      controlState: null,//布控详情
       // 布控对象列表数据
       controlObjList: [
         {id: '1', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
@@ -304,10 +310,16 @@ export default {
         {name: '设备3', id: '03', src: require('../../../../assets/video/video.mp4'), index: 2},
         {name: '设备4', id: '04', src: require('../../../../assets/video/video.mp4'), index: 3}
       ],
-      dragged: null,//拖拽目标
-      rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频
+      rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
     }
+  },
+  created () {
+    this.$nextTick(() => {
+      this.controlState = this.state;
+    })
+    
+    console.log(this.controlState, 'controlState')
   },
   mounted () {
     this.resetMap();
@@ -317,9 +329,10 @@ export default {
     // this.reset();
   },
   methods: {
+    skipIsList () {
+      this.$emit('changePageType', 1);
+    },
     dragstart (e, index) {
-      // 保存拖动元素的引用(ref.)
-      this.dragged = e.target;
       // 使其半透明
       e.target.style.opacity = .5;
       this.dragstartIndex = index;
@@ -359,7 +372,7 @@ export default {
           let videoSrc = this.situList[this.dragstartIndex].src;
           let sid = this.situList[this.dragstartIndex].id + '_' + random14();
           let div = document.createElement('div');
-          let video = `<video src="${videoSrc}" autoplay loop></video>
+          let video = `<video src="${videoSrc}" autoplay loop controls></video>
             <div>
               <i class="vl_icon vl_icon_control_06"></i>
               <i class="vl_icon vl_icon_control_11"></i>
@@ -382,7 +395,7 @@ export default {
           console.log(this.rightVideoList) 
           // 防止重复绑定点击事件，先解绑
           // $('.situ_right').unbind('click');
-          // 利用事件冒泡,绑定关闭按钮的点击事件
+          // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
           let _this = this;
           $('.situ_right').on('click', '#' + sid, function (e) {
             let _div = document.createElement('div');
@@ -493,7 +506,7 @@ export default {
   position: relative;
   .manage_d_box{
     width: calc(100% - 40px);
-    min-height: 783px;
+    // min-height: 783px;
     margin-left: 20px;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     background: #fff;
@@ -730,7 +743,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 54px;
+                bottom: 58px;
                 left: 0;
                 > div{
                   color: #fff;
@@ -797,7 +810,7 @@ export default {
           padding-right: 10px;
           position: absolute;
           left: 0;
-          bottom: 2px;
+          bottom: 4px;
           background: rgba(0,0,0,.4);
           opacity: .4;
           text-align: right;
