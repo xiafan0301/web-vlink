@@ -56,7 +56,19 @@ export default new Router({
                     /* 地图板块 */
                     path: 'map',
                     name: 'map',
-                    component: () => import('@/views/index/components/map/map.vue')
+                    component: () => import('@/views/index/components/map/default.vue'),
+                    redirect: {name: 'map_map'},
+                    children: [
+                        {
+                            path: 'map',
+                            name: 'map_map',
+                            component: () => import('@/views/index/components/map/map.vue')
+                        }, {
+                            path: 'communication/:userId/:type',
+                            name: 'map_communication',
+                            component: () => import('@/views/index/components/map/communication.vue')
+                        }
+                    ]
                 }, {
                     /* 事件板块 */
                     path: 'event',
@@ -150,15 +162,13 @@ export default new Router({
                     /* 研判模块 */
                     path: 'judge',
                     name: 'judge',
-                    // component: () => import('@/views/index/components/judge/judge.vue')
-                    component: () => import('@/views/index/components/construction.vue')
+                    component: () => import('@/views/index/components/judge/judge.vue')
                 }, {
                     /* 检索模块 */
                     path: 'search',
                     name: 'search',
                     redirect: {name: 'search_capture'},
-                    // component: () => import('@/views/index/components/search/search.vue'),
-                    component: () => import('@/views/index/components/construction.vue'),
+                    component: () => import('@/views/index/components/search/search.vue'),
                     children: [
                         {
                             path: 'capture',
