@@ -5,13 +5,13 @@
       <div>
         <div class="map_lt">
           <ul>
-            <li :class="{'map_lt_ul_sed': tabType === 1}" @click="tabType = 1">地图信息</li>
-            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">标注历史</li>
+            <li :class="{'map_lt_ul_sed': tabType === 1}" @click="tabType = 1">人员列表</li>
+            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">通话记录</li>
           </ul>
           <div :style="{'left': tabType === 1 ? 0 : '50%'}"></div>
         </div>
         <div class="map_lc">
-          <!-- 地图信息 -->
+          <!-- 人员列表 -->
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
                 <el-input
@@ -28,8 +28,8 @@
               </div>
             </div>
           </div>
-          <!-- 标注历史 -->
-          <div class="map_lc_b" v-show="tabType === 2">标注历史</div>
+          <!-- 通话记录 -->
+          <div class="map_lc_b" v-show="tabType === 2">通话记录</div>
         </div>
       </div>
     </div>
@@ -37,19 +37,8 @@
     <div class="map_r">
       <!-- 地图容器 -->
       <div class="map_rm" id="mapMap"></div>
-      <!-- 头部统计 -->
-      <div class="map_rt">
-        <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
-          <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(sxtList.length + kkList.length + clList.length + ryList.length) | fmTenThousand}}</span></el-checkbox>
-        <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
-          <el-checkbox label="sxt">摄像头<span class="map_rt_ck_num">&nbsp;{{sxtList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="kk">卡口<span class="map_rt_ck_num">&nbsp;{{kkList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="cl">车辆<span class="map_rt_ck_num">&nbsp;{{clList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="ry">人员<span class="map_rt_ck_num">&nbsp;{{ryList.length | fmTenThousand}}</span></el-checkbox>
-        </el-checkbox-group>
-      </div>
       <!-- 右侧工具栏 -->
-      <div class="map_rrt" :class="{'map_rrt2': rightSxtList && rightSxtList.length > 0}">
+      <div class="map_rrt">
         <ul class="map_rrt_u1">
           <li :class="{'vl_icon_sed': selAreaAcitve}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
@@ -77,39 +66,60 @@
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
         </ul>
       </div>
-      <!-- 右侧摄像头列表 -->
-      <ul :style="{'margin-top': (-rightSxtList.length * 154 / 2 ) + 'px'}" class="map_rrc" v-if="rightSxtList && rightSxtList.length > 0">
-        <li v-for="(item, index) in rightSxtList" :key="'sxt_' + index">
-          <div>
-            <video class="com_trans50_t" src="../../../../assets/video/video.mp4" autoplay loop></video>
-            <i class="el-icon-error" @click="videoRemove(index)"></i>
+    </div>
+    <!-- 视频通话窗口LIST -->
+    <ul class="com_list">
+      <li v-for="(value, key) in comList" :key="'com_list_' + key">
+        <div :id="'comDialog_' + key">
+          <video src="" width="254px" height="400px" autoplay="zautoplay"></video>
+          <div class="com_li_user" @click="testChangeState(key, value.state)">
+            <i></i>
             <div>
-              <div>摄像头001 2018-09-23</div>
+              <h3>{{value.userName}}</h3>
+              <p v-html="comStateHtmlComDialog(key, value.type, value.state)"></p>
             </div>
           </div>
-        </li>
-      </ul>
-    </div>
+          <i class="com_li_full vl_icon vl_icon_vc_011"></i>
+          <div class="com_li_time">
+            <div v-if="value.state === 2 || value.state === 3">{{value.changer | fmDisTime(value.time, 'HH:mm:ss')}}</div>
+          </div>
+          <div class="com_li_opt">
+            <span v-if="value.state === 3 || value.state === 4">
+              <i class="vl_icon vl_icon_vc_023"></i>
+              <p>切到语音</p>
+            </span>
+            <span>
+              <i class="vl_icon vl_icon_vc_021"></i>
+              <p>取消</p>
+            </span>
+            <span v-if="value.state === 3 || value.state === 4">
+              <i class="vl_icon vl_icon_vc_022"></i>
+              <p>静音</p>
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
 </template>
 <script>
-import {testData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
 export default {
   data () {
     return {
       map: null, // 地图对象
-      sxtList: [], // 摄像头
-      sxtMapMarkers: [],
-      kkList: [], // 卡口
-      kkMapMarkers: [],
-      clList: [], // 车辆
-      clMapMarkers: [],
       ryList: [],  // 人员
       ryMapMarkers: [],
 
-      rightSxtList: [], // 右侧摄像头列表
-      rightSxtLimit: 4, // 右侧摄像头数量限制
+      // 通讯列表 {sid: {state, type, ...}}
+      /* 
+       * time: 连接开始时间或通话开始时间
+       * timer: 定时器对象
+       * changer: 触发更新数据的业务字段
+       */
+      comList: {
+        // '001': { userName: '张三', type: 1, state: 1, time: new Date().getTime(), timer: null, changer: 0 },
+      },
 
       // 选择区域
       mouseTool: null,
@@ -129,10 +139,10 @@ export default {
       rangingAcitve: false,
       rangingObj: null,
 
-      isIndeterminate: false,
-      mapTypeCheckAll: true,
-      mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
-      mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
+      isIndeterminate: true,
+      mapTypeCheckAll: false,
+      mapTypeList: ['ry'],
+      // mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
 
       tabType: 1, // 1地图信息 2标注历史
       mapInfoVal: '', // 地图信息查询值
@@ -141,6 +151,10 @@ export default {
           label: '溆浦县',
           children: [{
             label: '桥江镇',
+            userList: [
+              { id: '001', userName: '张三' },
+              { id: '002', userName: '李四' }
+            ]
           }, {
             label: '小江口乡',
           }, {
@@ -161,19 +175,6 @@ export default {
               label: '三级 2-2-1'
             }]
           }]
-        }, {
-          label: '一级 3',
-          children: [{
-            label: '二级 3-1',
-            children: [{
-              label: '三级 3-1-1'
-            }]
-          }, {
-            label: '二级 3-2',
-            children: [{
-              label: '三级 3-2-1'
-            }]
-          }]
         }
       ],
       mapTreeProps: {
@@ -182,18 +183,31 @@ export default {
       }
     }
   },
-  watch: {
-    mapTypeList () {
-      if (this.mapTypeList.length === 0) {
-        this.mapTypeCheckAll = false;
-        this.isIndeterminate = false;
-      } else if (this.mapTypeList.length > 0 && this.mapTypeList.length < this.mapTypeListAll.length) {
-        this.isIndeterminate = true;
-      } else {
-        this.mapTypeCheckAll = true;
-        this.isIndeterminate = false;
+  filters: {
+    /*
+     * 根据起始时间得出时分秒
+     * @param {string} format 格式，默认 HH:mm:ss
+     * */
+    fmDisTime: function(val, lTime, sFormat) {
+      let _h = 0, _m = 0, _s = 0;
+      if (lTime > 0) {
+        let time = new Date().getTime() - lTime;
+        let _ts = parseInt(time / 1000);
+        _s = parseInt(_ts % 60); // 秒取余，得到秒数
+        _m = parseInt(_ts / 60); // 秒取整，得到分钟数
+        if (_m >= 60) {
+          _h = parseInt(_m / 60); // 分取整，得到小时数
+          _m = parseInt(_m % 60); // 分取余，得到分钟数
+        }
+        //  $('#cntList_' + sid).find('.cnt-an-ctime').html(_m + ' : ' + _s);
       }
-      this.mapMarkHandler();
+      if (_h < 10) { _h = '0' + _h; }
+      if (_m < 10) { _m = '0' + _m; }
+      if (_s < 10) { _s = '0' + _s; }
+      if (sFormat.indexOf('HH') >= 0) { sFormat = sFormat.replace('HH', _h + ''); }
+      if (sFormat.indexOf('mm') >= 0) { sFormat = sFormat.replace('mm', _m + ''); }
+      if (sFormat.indexOf('ss') >= 0) { sFormat = sFormat.replace('ss', _s + ''); }
+      return sFormat;
     }
   },
   mounted () {
@@ -231,56 +245,60 @@ export default {
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
-        /* for (let j = 0; j < _this.sxtList.length; j++) {
-          let _o = _this.sxtList[j];
-          if (_o.longitude > 0 && _o.latitude > 0) {
-            if (polygon.contains(new window.AMap.LngLat(_o.longitude, _o.latitude))) {
-              console.log('============' + _o.sid);
-            }
-
-          }
-        } */
       }, 100);
     });
 
     _this.getMapData();
-
     // 地图标记事件
     _this.mapMarkerEvents();
+
+    // 参数处理
+    let _userId = _this.$route.params.userId;
+    let _type = _this.$route.params.type;
+    console.log('userId:', _userId);
+    console.log('type:', _type);
+    if (_userId) {
+      if (!_type || isNaN(_type)) { _type = 2; }
+      _this.comInit({userId: _userId, userName: '张三'}, Number(_type)); // 通讯
+    }
   },
   methods: {
+    testChangeState (sid, state) {
+      if (state < 6) {
+        state += 1;
+      } else {
+        state = 0;
+      }
+      let obj = this.comList[sid];
+      obj.state = state;
+      if (obj.timer) { clearInterval(obj.timer); }
+      console.log('state', state);
+      if (state === 2 || state === 3) {
+        obj.time = new Date().getTime();
+        obj.timer = setInterval(() => {
+          // console.log('setInterval: ' + sid + ', state:' + state);
+          obj.changer = obj.changer + 1;
+        }, 1000);
+      }
+    },
     // 获取地图数据
     getMapData () {
       setTimeout(() => {
-        this.sxtList = testData.sxt;
-        this.kkList = testData.kakou;
-        this.clList = testData.cheliang;
-        this.ryList = testData.renyuan;
+        this.ryList = [
+          { userId: '001', userName: '张三', addr: '长沙市天心区', latitude: 28.09466, longitude: 112.974315 },
+          { userId: '002', userName: '张三1', addr: '长沙市天心区', latitude: 28.09366, longitude: 112.974315 },
+          { userId: '003', userName: '张三2', addr: '长沙市天心区', latitude: 28.09566, longitude: 112.974315 },
+          { userId: '004', userName: '张三3', addr: '长沙市天心区', latitude: 28.09466, longitude: 112.973315 },
+          { userId: '005', userName: '张三4', addr: '长沙市天心区', latitude: 28.09466, longitude: 112.975315 }
+        ];
         this.mapMarkHandler();
       }, 200);
     },
     // 地图标记处理
     mapMarkHandler () {
-      // 摄像头
-      this.mapClearMarkers(this.sxtMapMarkers);
-      if (this.mapTypeList.indexOf('sxt') >= 0) {
-        this.mapMark(this.sxtList, this.sxtMapMarkers, 'sxt');
-      }
-      // 卡口
-      this.mapClearMarkers(this.kkMapMarkers);
-      if (this.mapTypeList.indexOf('kk') >= 0) {
-        this.mapMark(this.kkList, this.kkMapMarkers, 'kk');
-      }
-      // 车辆
-      this.mapClearMarkers(this.clMapMarkers);
-      if (this.mapTypeList.indexOf('cl') >= 0) {
-        this.mapMark(this.clList, this.clMapMarkers, 'cl');
-      }
       // 人员
       this.mapClearMarkers(this.ryMapMarkers);
-      if (this.mapTypeList.indexOf('ry') >= 0) {
-        this.mapMark(this.ryList, this.ryMapMarkers, 'ry');
-      }
+      this.mapMark(this.ryList, this.ryMapMarkers, 'ry');
     },
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
@@ -311,19 +329,13 @@ export default {
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
 
-            // 点击地图上的摄像头/卡口播放视频
-            if (keyWord === 'sxt' || keyWord === 'kk') {
-              marker.on('click', function () {
-                _this.testAddSxt();
-              });
-            }
-
             // hover
             marker.on('mouseover', function () {
               // let iW = Math.round($(window).width() * 0.15);
-              // let extD = mEvent.target.F.extData;
+              // console.log('mEvent', mEvent);
+              // let extD = mEvent.target.C.extData;
               let sContent = '<div class="vl_map_hover">' +
-                '<div class="vl_map_hover_main">' + _this.mapHoverInfo(obj, keyWord) + '</div>';
+                '<div class="vl_map_hover_main" _userId="' + obj.userId + '" _userName="' + obj.userName + '">' + _this.mapHoverInfo(obj, keyWord) + '</div>';
               hoverWindow = new window.AMap.InfoWindow({
                 isCustom: true,
                 closeWhenClickMap: true,
@@ -345,22 +357,22 @@ export default {
     },
     mapHoverInfo (data, type) {
       let str = '<ul>';
-      if (type === 'sxt') {
-        str += '<li><span>设备名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'kk') {
-        str += '<li><span>卡口名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'cl') {
-        str += '<li><span>车辆名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'ry') {
-        str += '<li><span>人员名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-        str += '<li style="text-align: center;">' +
-            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
-            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
-          '</li>';
+      if (type === 'ry') {
+        str += '<li><span>姓名：</span>' + data.userName + '</li>';
+        str += '<li><span>电话：</span>' + '15899999999' + '</li>';
+        str += '<li><span>单位：</span>' + '县交通局' + '</li>';
+        str += '<li><span>职称：</span>' + '科员' + '</li>';
+        str += '<li><span>未完成：</span>' + '3件' + '</li>';
+        str += '<li style="text-align: center;" id="comState_markerHover_' + data.userId + '">';
+        // 视频通话状态
+        let _type = 2, _state = 0;
+        if (this.comList[data.userId]) {
+          let _o = this.comList[data.userId];
+          _type = _o.type;
+          _state = _o.state;
+        }
+        str += this.comStateHtmlMarkerHover(_type, _state);
+        str += '</li>';
       } else {
         str += '<li>未知数据</li>';
       }
@@ -372,15 +384,15 @@ export default {
       let _this = this;
       // 1语音/2视频通话
       $('body').on('click', '.hover_btn_voice', function () {
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 1
-        }});
+        _this.comInit({
+          userId: $(this).closest('.vl_map_hover_main').attr('_userId'),
+          userName: $(this).closest('.vl_map_hover_main').attr('_userName')
+        }, 1);
       }).on('click', '.hover_btn_video', function () {
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 2
-        }});
+        _this.comInit({
+          userId: $(this).closest('.vl_map_hover_main').attr('_userId'),
+          userName: $(this).closest('.vl_map_hover_main').attr('_userName')
+        }, 2);
       });
     },
     // 清除地图标记
@@ -389,6 +401,102 @@ export default {
         this.map.remove(aMarkers);
         aMarkers = [];
       }
+    },
+
+    /********** 1语音/2视频通讯 **********/
+    /**
+     * 通讯
+     * @param {object} obj 标识
+     *  userId / 
+     * @param {int} type 1语音/2视频
+     */
+    comInit (obj, type) {
+      // 创建通话窗口
+      let nObj = {};
+      nObj[obj.userId] = { 
+        userName: obj.userName,
+        type: type,
+        state: 1,
+        time: new Date().getTime(),
+        timer: null,
+        changer: 0
+      }
+      this.comList = Object.assign({}, this.comList, nObj);
+      this.$nextTick(() => {
+        this.comStateHandler(obj.userId, type, 1); // 创建连接的信息提示
+      });
+    },
+    /**
+     * 通讯状态信息提示
+     * @param {string} sid 标识
+     * @param {int} type 1语音/2视频
+     * @param {int} state 连接状态
+        0: 无连接（未发起通讯）
+        1: new 创建连接
+        2: connecting 连接中
+        3: connected 已连接
+        4: disconnected 断开连接
+        5: failed 连接失败
+        6: closed 已关闭
+     */
+    comStateHandler (sid, type, state) {
+      let $mh = $('#comState_markerHover_' + sid);
+      $mh.html(this.comStateHtmlMarkerHover(type, state));
+    },
+    /**
+     * 地图标记浮层状态信息
+     * @param {string} sid 标识
+     * @param {int} type 1语音/2视频
+     * @param {int} state 连接状态
+     */
+    comStateHtmlMarkerHover (type, state) {
+      let sType = '视频';
+      if (type === 1) { sType = '语音'; }
+      let smh = ''; 
+      if (state === 0) {
+        smh = '<i class="vl_map_hover_btn hover_btn_voice">发送语音</i>' +
+          '<i class="vl_map hover_btn hover_btn_video">发送视频</i>';
+      } else if (state === 1) {
+        smh = '<p class="map_hover_comState">正在进行' + sType + '连接...</p>';
+      } else if (state === 2) {
+        smh = '<p class="map_hover_comState">' + sType + '连接中...</p>';
+      } else if (state === 3) {
+        smh = '<p class="map_hover_comState">' + sType + '通话中</p>';
+      } else if (state === 4) {
+        smh = '<p class="map_hover_comState">' + sType + '断开连接</p>';
+      } else if (state === 5) {
+        smh = '<p class="map_hover_comState">' + sType + '连接失败</p>';
+      } else if (state === 6) {
+        smh = '<p class="map_hover_comState">' + sType + '已关闭</p>';
+      }
+      return smh;
+    },
+    /**
+     * 通话窗口状态信息
+     * @param {string} sid 标识
+     * @param {int} type 1语音/2视频
+     * @param {int} state 连接状态
+     */
+    comStateHtmlComDialog (sid, type, state) {
+      let sType = '视频';
+      if (type === 1) { sType = '语音'; }
+      let smh = '';
+      if (state === 0) {
+        smh = '<span style="">未连接</span>';
+      } else if (state === 1) {
+        smh = '<span style="">正在连接...</span>';
+      } else if (state === 2) {
+        smh = '<span style="">等待对方接听...</span>';
+      } else if (state === 3) {
+        smh = '<span style="">' + sType + '通话中</span>';
+      } else if (state === 4) {
+        smh = '<span style="">' + sType + '断开连接</span>';
+      } else if (state === 5) {
+        smh = '<span style="">' + sType + '连接失败</span>';
+      } else if (state === 6) {
+        smh = '<span style="">' + sType + '已关闭</span>';
+      }
+      return smh;
     },
 
     // 清除所有
@@ -583,23 +691,6 @@ export default {
       }
     },
 
-    // 视频操作
-    videoRemove (_index) {
-      // rightSxtList
-      this.rightSxtList.splice(_index, 1);
-    },
-
-    testAddSxt () {
-      if ( this.rightSxtList.length < this.rightSxtLimit) {
-        this.rightSxtList.push(new Date().getTime());
-      } else {
-        this.$message({
-          message: '您最多只能打开' + this.rightSxtLimit + '个摄像头',
-          type: 'warning'
-        });
-      }
-    },
-
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
@@ -617,4 +708,65 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.com_list {
+  position: absolute; left: 300px; bottom: 20px; z-index: 2;
+  > li {
+    width: 274px; height: 400px;
+    padding: 0 10px;
+    float: left;
+    > div { 
+      position: relative;
+      width: 100%; height: 100%;
+      background-color: #333;
+      color: #fff;
+      > .com_li_user {
+        opacity: 0.8;
+        position: absolute; top: 20px; left: 20px;
+        transition: opacity .4s ease-out;
+        > div {
+          > h3 { font-size: 20px; }
+          > p { font-size: 12px; }
+        }
+      }
+      > .com_li_full {
+        opacity: 0;
+        position: absolute; top: 20px; right: 10px;
+        cursor: pointer;
+        transition: opacity .4s ease-out;
+      }
+      > .com_li_time {
+        opacity: 0.8;
+        position: absolute; bottom: 100px; left: 0;
+        width: 100%; height: 30px;
+        text-align: center;
+        transition: opacity .4s ease-out;
+      }
+      > .com_li_opt {
+        opacity: 0.8;
+        position: absolute; bottom: 10px; left: 0;
+        width: 100%; height: 80px;
+        padding: 0 10px;
+        text-align: center;
+        transition: opacity .4s ease-out;
+        > span {
+          display: inline-block;
+          width: 33.33%; height: 100%;
+          text-align: center;
+          > span {
+            cursor: pointer;
+          }
+          > p {
+            height: 30px; line-height: 30px;
+          }
+        }
+      }
+      &:hover {
+        > .com_li_user { opacity: 1; }
+        > .com_li_time { opacity: 1; }
+        > .com_li_full { opacity: 0.8; }
+        > .com_li_opt { opacity: 1; }
+      }
+    }
+  }
+}
 </style>

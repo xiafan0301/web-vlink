@@ -58,7 +58,11 @@
 .vl_icon_sed .vl_icon_045 { background-position: -277px -345px; }
 /* 地图板块 标注 */
 .vl_icon_051 { width: 31px; height: 34px; background-position: -477px -196px; }
-
+/* 地图板块 视频通话 */
+.vl_icon_vc_011 { width: 37px; height: 27px; background-position: -97px -1036px; }
+.vl_icon_vc_021 { width: 48px; height: 48px; background-position: -253px -1083px; }
+.vl_icon_vc_022 { width: 48px; height: 48px; background-position: -174px -1083px; }
+.vl_icon_vc_023 { width: 48px; height: 48px; background-position: -98px -1083px; }
 /* 布控板块图标 */
 .vl_icon_control_01 { width: 41px; height: 48px; background-position: -570px -188px; }
 .vl_icon_control_02 { width: 41px; height: 48px; background-position: -634px -188px; }
@@ -180,7 +184,7 @@
  .vl_map_hover {
    position: relative;
    width: 2px; height: 2px;
-   cursor: pointer;
+   cursor: default;
  }
  .vl_map_hover_main {
    position: absolute; bottom: 59px; left: -103px;
@@ -205,11 +209,33 @@
  .vl_map_hover_main > ul {
    padding: 10px;
  }
+ .vl_map_hover_main > ul > li {
+   padding: 2px 0;
+   color: #333;
+ }
  .vl_map_hover_main > ul > li > span {
    display: inline-block;
    width: 70px;
    text-align: right;
+   color: #666;
  }
+ .vl_map_hover_main .vl_map_hover_btn {
+   display: inline-block;
+   padding: 0 10px;
+   height: 26px; line-height: 26px;
+   background-color: #0D9DF4;
+   border-radius:4px;
+   font-size: 13px; color: #fff; font-style: normal;
+   margin: 5px 5px 0 5px;
+   cursor: pointer;
+   transition: background-color .4s ease-out;
+ }
+ .vl_map_hover_main .map_hover_comState {
+   padding: 10px 0;
+   font-size: 12px;
+ }
+ .vl_map_hover_main 
+
 /* 标注窗口 */
 .vl_map_mk {
    position: relative;
