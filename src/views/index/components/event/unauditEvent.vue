@@ -1,24 +1,38 @@
 <template>
-  <div class="add_event">
+  <div class="unaudit">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>新增事件</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item>事件审核</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="content_box">
+    <div class="content-box">
       <div class="content-left">
         <div class="content_left_scroll">
           <vue-scroll>
             <div class="content_left">
+              <ul>
+                <li>
+                  <span class="audit-label">状态:</span>
+                  <span class="audit-status">待审核</span>
+                </li>
+                <li>
+                  <span>事件编号:</span>
+                  <span>XPZ180724001</span>
+                </li>
+                <li>
+                  <span>上报人:</span>
+                  <span>13890908080</span>
+                  <span></span>
+                  <span></span>
+                </li>
+                <li>
+                  <span>上报时间:</span>
+                  <span>2018-05-16 13:57:34</span>
+                </li>
+              </ul>
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-                <el-form-item label="手机号码:" prop="phone" label-width="85px">
-                  <el-input type="text" style='width: 95%' placeholder="请输入上报人手机号码" v-model="addEventForm.phone" />
-                </el-form-item>
-                <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
-                  <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
-                </el-form-item>
-                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
+                <el-form-item label="事发地点:" label-width="85px">
                   <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
@@ -43,6 +57,12 @@
                 </el-form-item>
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
+                </el-form-item>
+                <el-form-item  label="处理单位:" prop="eventType" label-width="85px">
+                  <el-select v-model="addEventForm.eventType" style='width: 95%'>
+                    <el-option label="区域一" value="shanghai"></el-option>
+                    <el-option label="区域二" value="beijing"></el-option>
+                  </el-select>
                 </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
@@ -69,7 +89,8 @@
         </div>
       </div>
       <div class="content_right">
-        <div id="mapMap"></div>
+        <!--地图-->
+        <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
             <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
@@ -82,8 +103,8 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">保存并处理</el-button>
-      <el-button class="operation_btn function_btn">保存</el-button>
+      <el-button class="operation_btn function_btn">审核通过</el-button>
+      <el-button class="operation_btn back_btn">审核不通过</el-button>
       <el-button class="operation_btn back_btn">返回</el-button>
     </div>
   </div>
@@ -92,39 +113,26 @@
 export default {
   data () {
     return {
-      isImgNumber: true, // 是否显示图片超过最大数提示
+      isImgNumber: false,
       addEventForm: {
         phone: null, // 手机号码
         reportTime: null, // 上报时间
-        eventAddress: '阿斯达卡是了的', // 事发地点
+        eventAddress: '是交多少开发艰苦拉萨精神的理解发生的纠纷拉斯达克警方', // 事发地点
         eventSummary: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
         casualties: null // 伤亡人员
       },
       rules: {
-        phone:[
-          { required: true, message: '请输入上报人手机号码', trigger: 'blur' }
-        ],
-        reportTime:[
-          { required: true, message: '请选择上报时间', trigger: 'blur' }
-        ],
-        eventAddress:[
-          { required: true, message: '请输入事发地点', trigger: 'blur' }
-        ],
-        eventSummary:[
-          { required: true, message: '请输入事情情况', trigger: 'blur' }
-        ],
-        eventType:[
-          { required: true, message: '请选择事件类型', trigger: 'blur' }
-        ]
-      }
+
+      },
+      map: null
     }
   },
   mounted () {
-    let map = new window.AMap.Map('mapMap', {
+    let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
-      center: [112.974691, 28.093846], // 中心点坐标
+      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
       // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
@@ -185,90 +193,106 @@ export default {
         // }
       // }
     },
-    handleBeforeUpload (file) { // 图片上传之前
-      this.isImgDisabled = true;
-      const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
-      const isLtTenM = file.size / 1024 / 1024 < 2;
-      if (!isImg) {
-        this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
-        this.isImgDisabled = false;
-      }
-      if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过2M');
-        this.isImgDisabled = false;
-      }
-      return isImg && isLtTenM;
-    },
-    handleImgNumber (files) { // 图片超出最大个数限制
-      console.log(files)
-      this.isImgNumber = true;
-    },
+    handleBeforeUpload () {},
     handlePictureCardPreview () {},
     handleRemove () {},
-    handleSuccess () {}
+    handleSuccess () {},
+    handleImgNumber () {},
   }
 }
 </script>
-
 <style lang="scss" scoped>
-.add_event {
+.unaudit {
   width: 100%;
   height: 100%;
-  .content_box {
+  .content-box {
     width: 98%;
     margin: 10px 20px;
     height: calc(100% - 50px - 100px);
     display: flex;
-    .content_left_scroll {
-      width: 500px;
-      height: 100%;
-      background: #ffffff;
-      /deep/ .__view {
-        width: 100% !important;
-      }
-      .content_left {
-        width: 96%;
-        margin: 20px 0 0 2%;
-        .add_event_form {
+    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      .content_left_scroll {
+        width: 500px;
+        height: 100%;
+        background: #ffffff;
+        /deep/ .__view {
+          width: 100% !important;
+        }
+        .content_left {
           width: 100%;
-          .imgTips {
-            width: 160px;
-            border-radius: 2px;
-            position: absolute;
-            color: #F94539;
-            padding-top: 0;
-            -ms-flex-item-align: center;
-            align-self: center;
-            left: 90px;
-            top: 35px;
-          }
-          .img-form-item /deep/ .el-form-item__content{
-            display: flex;
-            .img-list {
-              width: 104px;
-              height: 104px;
-              margin-left: 10px;
-              margin-bottom: 10px;
-              display: flex;
-              .error-item {
-                position: absolute;
-                top: -10px;
-                right: -8px;
-                font-size: 18px;
-                color: #666;
-                z-index: 1;
+          // margin: 20px 0 0 2%;
+          padding: 20px 10px 0 10px;
+          > ul {
+            width: 100%;
+            font-size: 14px;
+            > li {
+              height: 35px;
+              > span:nth-child(1) {
+                padding-right: 10px;
+                color: #666666;
+                width: 85px;
+                display: inline-block;
+                text-align: right;
+                &.audit-label {
+                  color: #333333;
+                }
               }
+              > span:nth-child(2) {
+                color: #333333;
+                display: inline-block;
+                &.audit-status {
+                  color: #0C70F8;
+                  font-size: 18px;
+                }
+              }
+            }
+          }
+          .add_event_form {
+            width: 100%;
+            /deep/ .el-form-item {
+              margin-bottom: 15px;
+            }
+            .imgTips {
+              width: 160px;
+              border-radius: 2px;
+              position: absolute;
+              color: #F94539;
+              padding-top: 0;
+              -ms-flex-item-align: center;
+              align-self: center;
+              left: 90px;
+              top: 35px;
+            }
+            .img-form-item /deep/ .el-form-item__content{
+              display: flex;
+              .img-list {
+                width: 104px;
+                height: 104px;
+                margin-left: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                .error-item {
+                  position: absolute;
+                  top: -10px;
+                  right: -8px;
+                  font-size: 18px;
+                  color: #666;
+                  z-index: 1;
+                }
+              }
+            }
+            /deep/ .el-form-item__label {
+              color: #666666;
             }
           }
         }
       }
-    }
     .content_right {
       width: 100%;
       height: 100%;
-      #mapMap {
-        width: 100%;
+      #mapBox{
         height: 100%;
+        width: 100%;
       }
       .right-flag {
         position: absolute; right: 40px; bottom: 100px;
@@ -324,3 +348,5 @@ export default {
   }
 }
 </style>
+
+
