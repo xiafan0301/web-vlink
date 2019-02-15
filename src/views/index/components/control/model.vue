@@ -4,7 +4,7 @@
     <el-form-item label="人员图片:" prop="personnelPic" style="width: 25%;margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
       <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" :maxSize="9"></div>
       <div class="pic_format">
-        <div>从库中选择</div>
+        <div @click="createSelDialog = true;">从库中选择</div>
         <div class="vl_f_999">（支持JPEG、JPG、PNG、每张大小不超过2M）</div>
       </div>
     </el-form-item>
@@ -62,18 +62,32 @@
                     <div @click="changeEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
                     <div @click="changeEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
                   </div>
-                  <ul v-if="type === '0'">
-                    <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}">
-                      <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
-                    </li>
-                  </ul>
-                  <ul v-else>
-                    <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}">
-                      <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                      <div><i class="vl_icon vl_icon_control_05"></i><i class="vl_icon vl_icon_control_19"></i></div>
-                    </li>
-                  </ul>
+                  <vue-scroll>
+                    <ul v-if="type === '0'" style="max-height: 346px;">
+                      <template v-for="equ in trackPoint.sxt">
+                        <li :key="equ.sid" @click="eid = equ.sid" :class="['normal', {'active': eid === equ.sid}]" v-if="equ.isNormal">
+                          <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
+                        </li>
+                        <li :key="equ.sid" v-else>
+                          <span style="color: #b2b2b2;">{{equ.sxtName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                        </li>
+                      </template>
+                    </ul>
+                    <ul v-else style="max-height: 346px;">
+                      <template v-for="equ in equList">
+                        <li :key="equ.kid" @click="eid = equ.kid" :class="['normal', {'active': eid === equ.kid}]" v-if="equ.isNormal">
+                          <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
+                        </li>
+                        <li :key="equ.kid" v-else>
+                          <span style="color: #b2b2b2;">{{equ.kName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                        </li>
+                      </template>
+                    </ul>
+                  </vue-scroll>
                 </div>  
               </el-collapse-transition>
             </div>
@@ -81,7 +95,7 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="top" @click="selAreaType()"><i class="vl_icon vl_icon_control_23"></i></div>
+        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
         <div v-if="modelMType === '4'" style="line-height: 14px;padding-top: 16px;" :class="['top', {'vl_icon_sed': rangingAcitve}]" @click="ranging()">
           <i class="vl_icon vl_icon_042"></i><p :class="{'active': rangingAcitve}">测距</p>
         </div>
@@ -90,6 +104,28 @@
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
         </ul>
       </div>
+    </div>
+    <!-- 从库中选择模态框 -->
+    <div class="create_sel_dialog">
+      <el-dialog
+        :visible.sync="createSelDialog"
+        :close-on-click-modal="false"
+        width="482px"
+        top="40vh"
+        title="选择目标">
+        <el-select value-key="uid" v-model="targetId" filterable placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;">
+          <el-option
+            v-for="item in targetIdList"
+            :key="item.uid"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <div slot="footer">
+          <el-button @click="createSelDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" type="primary">确认</el-button>
+        </div>
+      </el-dialog>
     </div>
   </el-form>
 </template>
@@ -177,10 +213,15 @@ export default {
       dpType: null,//展开类型
       features: null,//设备特性
       featuresTypeList: [],//设备特性列表
-      isBind: false, // 是否给map绑定点击事件
+      // isBind: false, // 是否给map绑定点击事件
       scopeRadius: null, // 范围半径
       lnglat: null, // 坐标
-      mapClickEvent: null
+      mapClickEvent: null,
+      // 从库中选择模态框参数
+      targetId: null,
+      targetIdList: [],
+      createSelDialog: false,
+      loadingBtn: false,
     }
   },
   created () {
@@ -193,51 +234,11 @@ export default {
     },
     modelType (val) {
       this.modelMType = val
+      this.resetMap();
     }
   },
   mounted () {
-    console.log(1111111111)
-    // 共有部分
-    let _this = this;
-    let map = new window.AMap.Map(_this.mapMId, {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-      // viewMode: '3D' // 使用3D视图
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
-
-    // 范围分析
-    if (this.modelMType === '4') {
-      // 在地图中添加MouseTool插件
-      let mouseTool = new window.AMap.MouseTool(map);
-      _this.mouseTool = mouseTool;
-      // 添加事件
-      window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        console.log('drawPaths e', e); // 获取路径/范围
-        console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
-        setTimeout(() => {
-          _this.selAreaRest(true);
-          let polygon = new window.AMap.Polygon({
-            map: map,
-            strokeColor: '#FA453A',
-            strokeOpacity: 1,
-            strokeWeight: 1,
-            fillColor: '#FA453A',
-            fillOpacity: 0.2, 
-            path: e.obj.getPath(),
-            zIndex: 12
-          });
-          _this.selAreaPolygon = polygon;
-          _this.selAreaAble = true;
-          _this.getEquList(polygon);
-        }, 100);
-      });
-    // 人员追踪/车辆追踪
-    } else if (this.modelMType === '1' || this.modelMType === '2') {
-      console.log(11111)
-    }
-    _this.mapMark();
+    this.resetMap();
   },
   methods: {
     // 接收 到上传组件传过来的图片数据
@@ -345,32 +346,32 @@ export default {
       }
     },
     // 选择区域（圆形或者多边形）
-    selAreaType () {
-      if (this.modelMType === '1' || this.modelMType === '2') {
-        this.mapBindClick();
-      } else if (this.modelMType === '4') {
-        this.selArea();
-      }
-    },
+    // selAreaType () {
+    //   if (this.modelMType === '1' || this.modelMType === '2') {
+    //     this.mapBindClick();
+    //   } else if (this.modelMType === '4') {
+    //     this.selArea();
+    //   }
+    // },
     // 为map绑定点击事件
     mapBindClick () {
       let _this = this;
-      _this.isBind = !_this.isBind;
-      if (_this.isBind) {
+      // _this.isBind = !_this.isBind;
+      // if (_this.isBind) {
         console.log('绑定了')
         _this.mapClickEvent = window.AMap.event.addListener(_this.map, 'click', function(e) {
           console.log(e.lnglat.getLng() + ',' + e.lnglat.getLat(), 'target');
           _this.lnglat = [e.lnglat.getLng(), e.lnglat.getLat()];
           _this.mapCircle();
         });
-      } else {
-        if (_this.mapClickEvent) {
-          window.AMap.event.removeListener(_this.mapClickEvent);
-          _this.map.remove(this.selAreaCircle);
-          _this.trackPointList = [];
-          console.log('解绑了')
-        }
-      }
+      // } else {
+      //   if (_this.mapClickEvent) {
+      //     window.AMap.event.removeListener(_this.mapClickEvent);
+      //     _this.map.remove(this.selAreaCircle);
+      //     _this.trackPointList = [];
+      //     console.log('解绑了')
+      //   }
+      // }
     },
     // 标记地图范围，圆形覆盖物
     mapCircle () {
@@ -467,6 +468,53 @@ export default {
         this.rangingObj.turnOff();
       }
     },
+    // 初始化地图
+    resetMap () {
+      // 共有部分
+      let _this = this;
+      let map = new window.AMap.Map(_this.mapMId, {
+        zoom: 16, // 级别
+        center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+
+      // 范围分析
+      if (this.modelMType === '4') {
+        // 在地图中添加MouseTool插件
+        let mouseTool = new window.AMap.MouseTool(map);
+        _this.mouseTool = mouseTool;
+        // 添加事件
+        window.AMap.event.addListener(mouseTool, 'draw', function (e) {
+          console.log('drawPaths e', e); // 获取路径/范围
+          console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
+          setTimeout(() => {
+            _this.selAreaRest(true);
+            let polygon = new window.AMap.Polygon({
+              map: map,
+              strokeColor: '#FA453A',
+              strokeOpacity: 1,
+              strokeWeight: 1,
+              fillColor: '#FA453A',
+              fillOpacity: 0.2, 
+              path: e.obj.getPath(),
+              zIndex: 12
+            });
+            _this.selAreaPolygon = polygon;
+            _this.selAreaAble = true;
+            _this.getEquList(polygon);
+          }, 100);
+        });
+        this.selArea();
+      // 人员追踪/车辆追踪
+      } else if (this.modelMType === '1' || this.modelMType === '2') {
+        console.log(11111)
+        this.mapBindClick();
+      }
+      _this.mapMark();
+      _this.trackPointList = [];
+    }
   }
 }
 </script>

@@ -206,11 +206,6 @@ export default new Router({
                         component: () => import('@/views/index/components/control/manage.vue')
                       },
                       {
-                        path: 'manageDetail',
-                        name: 'control_manage_detail',
-                        component: () => import('@/views/index/components/control/manageDetail.vue')
-                      },
-                      {
                         path: 'create',
                         name: 'control_create',
                         component: () => import('@/views/index/components/control/create.vue')

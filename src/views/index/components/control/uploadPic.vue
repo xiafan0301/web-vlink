@@ -59,7 +59,7 @@ export default {
       this.$emit('uploadPicError', true);
       this.$message.error('上传失败！');
     },
-    uploadPicExceed (files, fileList) {
+    uploadPicExceed () {
       this.$message.warning('最多一次可上传' + this.maxSize + '张图片,不能上传非图片文件');
     },
     beforeAvatarUpload (file) {

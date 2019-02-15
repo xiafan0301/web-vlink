@@ -127,7 +127,7 @@ export default {
       this.$emit('changePage', pageType)
     },
     // 接收 到上传组件传过来的图片数据
-    uploadPicSubmit (aUploadImg) {
+    uploadPicSubmit () {
       
     },
     mapMark () {
@@ -139,7 +139,7 @@ export default {
         let obj = data[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48], selClass = '';
+          let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -248,21 +248,6 @@ export default {
         .bottom > li:nth-child(1){
           border-bottom: 1px solid #F1F1F1;
         }
-      }
-    }
-    .add_footer{
-      width: 100%;
-      height: 64px;
-      line-height: 64px;
-      position: absolute;
-      left: 0;
-      bottom: -104px;
-      padding-left: 20px;
-      background:rgba(255,255,255,1);
-      box-shadow:0px -1px 2px 0px rgba(0,0,0,0.03);
-      filter:blur(0px);
-      > .el-button{
-        width: 100px;
       }
     }
   }

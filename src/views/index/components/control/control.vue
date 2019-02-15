@@ -36,6 +36,7 @@ export default {
   > .con_content {
     height: 100%;
     padding-left: 200px;
+    overflow: auto;
     // 布控模块地图公用样式
     .manage_d_s_m{
       width: 100%;
@@ -72,6 +73,7 @@ export default {
           height: 667px;
           margin-top: 20px;
           background: #fff;
+          overflow: hidden;
           >.top{
             padding: 15px;
             border-bottom: 1px solid #E2E2E2;
@@ -128,13 +130,16 @@ export default {
                 flex-wrap: nowrap;
                 justify-content: space-between;
                 background: #fff;
+                color: #666;
+              }
+              li.normal{
                 cursor: pointer;
-                &.active{
+                &.active, &:hover{
                   background: rgba(235,239,242,1);
                 }
                 &:hover{
-                  span, i{
-                    color: #B2B2B2;
+                  .vl_icon_control_19{
+                    display: inline-block !important;
                   }
                 }
               }

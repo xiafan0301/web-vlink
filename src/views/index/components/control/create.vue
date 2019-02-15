@@ -29,7 +29,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="布控日期:" prop="controlDate" style="width: 25%;">
+            <el-form-item v-show="createForm.controlType === '1'" label="布控日期:" prop="controlDate" style="width: 25%;">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -39,15 +39,15 @@
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;" class="period_time">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '起始时间不能为空', trigger: 'blur'}" >
                 <el-time-select
                   placeholder="起始时间"
                   v-model="item.startTime"
                   :picker-options="{
-                    start: '08:30',
+                    start: '00:00',
                     step: '00:15',
-                    end: '18:30'
+                    end: '23:00'
                   }">
                 </el-time-select>
               </el-form-item>
@@ -57,18 +57,18 @@
                   placeholder="结束时间"
                   v-model="item.endTime"
                   :picker-options="{
-                    start: '08:30',
+                    start: '00:00',
                     step: '00:15',
-                    end: '18:30',
+                    end: '23:00',
                     minTime: item.startTime
                   }">
                 </el-time-select>
               </el-form-item>
             </div>
-          </el-form-item>
-          <el-form-item class="period_time_btn_box">
-            <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-            <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+            <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
+              <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
+              <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+            </el-form-item>
           </el-form-item>
           <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
@@ -130,12 +130,15 @@ export default {
     return {
       // 表单参数
       labelPosition: 'top',
-      controlTypeList: [],//布控类型
+      controlTypeList: [
+        {label: '短期布控', value: '1'},
+        {label: '长期布控', value: '2'}
+      ],//布控类型
       controlRankList: [],//告警类型
       createForm: {
         controlName: null,
         event: null,
-        controlType: null,
+        controlType: '1',
         controlDate: null,
         controlRank: null,
         periodTime: [
@@ -155,6 +158,10 @@ export default {
   methods: {
     // 新增时间段
     addPeriodTime() {
+      if (this.createForm.periodTime.length === 5) {
+        this.$message.error('布控时间段不能超过5个');
+        return false;
+      }
       this.createForm.periodTime.push({
         startTime: null,
         endTime: null
@@ -162,7 +169,11 @@ export default {
     },
     // 删除时间段
     removePeriodTime() {
-      this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1)
+      if (this.createForm.periodTime.length === 1) {
+        this.$message.error('至少要有一个布控时间段');
+        return false;
+      }
+      this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1);
     }
   }
 }
@@ -229,7 +240,7 @@ export default {
               width: 330px;
               position: absolute;
               left: 0;
-              top: 80px;
+              top: -40px;
             }
           }
           .el-form-item__content{
@@ -237,40 +248,45 @@ export default {
               width: 100%!important;
             }
           }
-          &:last-child{
-            margin-top: 20px;
-          }
-        } 
+        }
+        .period_time.top{
+          margin-top: 20px!important;
+        }
       }
-    }
-    .period_time_btn_box{ 
-      margin-bottom: 0!important;
-      .el-form-item__content{
-        display: flex;
-        .period_time_btn{
-          width: 164px;
-          height:40px;
-          line-height:40px;
-          text-align: center;
-          border-radius:4px;
-          border:1px dashed rgba(217,217,217,1);
-          cursor: pointer;
-          &:nth-child(1){
-            color: #0C70F8;
-            margin-right: 25px;
-          }
-          &:nth-child(2){
-            color: #F94539;
-          }
-          .vl_icon_control_22{
-            vertical-align: middle;
-            margin-bottom: 5px;
-            margin-right: 5px;
-          }
-          .vl_icon_control_28{
-            vertical-align: middle;
-            margin-bottom: 7px;
-            margin-right: 5px;
+      .period_time_btn_box{ 
+        margin-bottom: 0!important;
+        padding-right: 38px!important;
+        padding-top: 40px;
+        &.top{
+          padding-top: 20px;
+        }
+        .el-form-item__content{
+          display: flex;
+          .period_time_btn{
+            width: 164px;
+            height:40px;
+            line-height:40px;
+            text-align: center;
+            border-radius:4px;
+            border:1px dashed rgba(217,217,217,1);
+            cursor: pointer;
+            &:nth-child(1){
+              color: #0C70F8;
+              margin-right: 25px;
+            }
+            &:nth-child(2){
+              color: #F94539;
+            }
+            .vl_icon_control_22{
+              vertical-align: middle;
+              margin-bottom: 5px;
+              margin-right: 5px;
+            }
+            .vl_icon_control_28{
+              vertical-align: middle;
+              margin-bottom: 7px;
+              margin-right: 5px;
+            }
           }
         }
       }
