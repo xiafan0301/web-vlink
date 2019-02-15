@@ -114,6 +114,19 @@
 .vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;}
 .vl_icon_event_7{width: 23px; height: 22px; background-position: -903px -375px;}
 .vl_icon_event_8{width: 21px; height: 21px; background-position: -872px -375px;}
+/****事件-统计分析****/
+.vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
+.vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/
+.vl_icon_statistics_3{width: 73px; height: 37px; background-position: -380px -1032px;} /*处理完成右*/
+.vl_icon_statistics_4{width: 73px; height: 42px; background-position: -485px -1032px;} /*事件数量右*/
+.vl_icon_statistics_5{width: 49px; height: 49px; background-position: -544px -1082px;} /*待处理左*/
+.vl_icon_statistics_6{width: 40px; height: 49px; background-position: -478px -1082px;} /*处理中左*/
+.vl_icon_statistics_7{width: 49px; height: 49px; background-position: -398px -1082px;} /*处理完成左*/
+.vl_icon_statistics_8{width: 40px; height: 49px; background-position: -332px -1082px;} /*事件数量左*/
+.vl_icon_statistics_control_0{width: 65px; height: 34px; background-position: -630px -1097px;} /*事件布控-已布控*/
+.vl_icon_statistics_control_1{width: 65px; height: 39px; background-position: -730px -1092px;} /*事件布控-未布控*/
+/******管理*******/
+.vl_icon_manage_1{width: 25px; height: 20px; background-position: -456px -376px;} /*搜索*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -483,4 +496,138 @@
 .el-form-item.is-success .el-textarea__inner, 
 .el-form-item.is-success .el-textarea__inner:focus {
   border-color: #D3D3D3;
+}
+
+/*******弹出框公共样式********/
+.dialog_comp .el-dialog__title {
+  color: #333333;
+  font-size: 16px;
+}
+.dialog_comp .el-dialog__footer .el-button:first-child {
+  background-color: #ffffff;
+  color: #666666;
+  border: 1px solid #D3D3D3;
+}
+.dialog_comp .el-dialog__footer .el-button:last-child {
+  background-color: #0C70F8;
+  color: #ffffff;
+}
+
+/******提示信息样式**********/
+.el-message {
+  width: auto;
+  top: 50%;
+  left: 70%;
+  min-width: 0;
+}
+.el-message--success {
+  background:#000000;
+  box-shadow:0px 4px 12px 0px rgba(0,0,0,0.15);
+  border-radius:4px;
+  border-color: none;
+}
+.el-message--success .el-message__content {
+  color: #FFFFFF;
+}
+
+/****数据统计分析图表样式***/
+.e_stat_tb_ld1 {
+  width: 200px;
+  left: auto !important;
+  right: 40px !important;
+  top: 25% !important;
+  overflow: hidden !important;
+}
+.e_stat_tb_ld1 .g2-legend-list {
+  overflow: hidden;
+  width: 200px;
+}
+.e_stat_tb_ld1 .g2-legend-list-item {
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  width: 50%; float: left;
+  padding: 5px;
+}
+.e_stat_tb_ld1 .g2-legend-list-item > div {
+  border-radius: 4px;
+  border: 1px solid #F2F2F2;
+  background-color: #fff;
+  padding: 5px 10px;
+}
+.e_stat_tb_ld1 .g2-legend-list-item > div > div {
+  font-weight: bold;
+  font-size:22px;
+  color: #333333;
+  height: 24px;
+  line-height: 24px;
+  overflow: hidden;
+  position: relative;
+  padding-left: 20px;
+}
+.e_stat_tb_ld1 .g2-legend-list-item > div > div > i {
+  display: inline-block;
+  position: absolute; top: 6px; left: 0px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  /* background-color: rgba(0, 162, 255, 0.4); */
+}
+.e_stat_tb_ld1 .g2-legend-list-item > div > div > i > i {
+  display: inline-block;
+  position: absolute; top: 4px; left: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  /* background-color: rgba(0, 162, 255, 1); */
+}
+.e_stat_tb_ld1 .g2-legend-list-item > div > p {
+  color: #999;
+  height: 20px;
+  line-height: 20px;
+  overflow: hidden;
+}
+
+.e_stat_tb_ld4 {
+  left: auto !important;
+  right: 30px !important;
+  width: 200px !important;
+  top: 50% !important;
+}
+.e_stat_tb_ld4 .g2-legend-list-item {
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 5px;
+  border-bottom: 1px solid #F2F2F2;
+}
+.e_stat_tb_ld4 .g2-legend-list-item:last-child {
+  border-bottom: 0;
+}
+.e_stat_tb_ld4 .g2-legend-list-item > div {
+  position: relative;
+  height: 60px;
+  padding-left: 10px;
+}
+.e_stat_tb_ld4 .g2-legend-list-item > div > span {
+  position: absolute; top: 10px; left: 0;
+  width: 4px; height: 30px;
+  border-radius: 2px;
+}
+.e_stat_tb_ld4 .g2-legend-list-item > div > i {
+  position: absolute; top: 17px; right: 5px;
+  /* width: 34px; height: 19px; */
+  /* background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 100% 100%;
+  background-image: url(../img/stat/stat-052.png); */
+}
+.e_stat_tb_ld4 .g2-legend-list-item > div > div > div {
+  color: #999;
+  height: 16px; line-height: 16px;
+}
+.e_stat_tb_ld4 .g2-legend-list-item > div > div > p {
+  color: #333333;
+  font-size: 20px;
+  font-weight: 600;
+  padding-top: 7px;
+  height: 27px; line-height: 20px;
 }

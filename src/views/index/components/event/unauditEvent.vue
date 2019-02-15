@@ -103,21 +103,37 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">审核通过</el-button>
-      <el-button class="operation_btn back_btn">审核不通过</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData">通过</el-button>
+      <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
       <el-button class="operation_btn back_btn">返回</el-button>
     </div>
+    <el-dialog
+      title="驳回"
+      :visible.sync="rejectDialogVisible"
+      width="482px"
+      class="dialog_comp"
+      >
+      <div class="content-body">
+        <p>请输入驳回的原因。</p>
+        <el-input type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="rejectDialogVisible = false">取 消</el-button>
+        <el-button class="operation_btn function_btn" @click="rejectDialogVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>  
   </div>
 </template>
 <script>
 export default {
   data () {
     return {
+      rejectDialogVisible: false, // 驳回弹出框
       isImgNumber: false,
       addEventForm: {
         phone: null, // 手机号码
         reportTime: null, // 上报时间
-        eventAddress: '是交多少开发艰苦拉萨精神的理解发生的纠纷拉斯达克警方', // 事发地点
+        eventAddress: '湖南省怀化市溆浦县', // 事发地点
         eventSummary: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
@@ -198,6 +214,15 @@ export default {
     handleRemove () {},
     handleSuccess () {},
     handleImgNumber () {},
+    showRejectDialog () {
+      this.rejectDialogVisible = true;
+    },
+    submitData () { // 审核通过
+      this.$message({
+        type: 'success',
+        message: '保存成功'
+      })
+    }
   }
 }
 </script>
@@ -207,10 +232,10 @@ export default {
   height: 100%;
   .content-box {
     width: 98%;
-    margin: 10px 20px;
+    margin: 0 20px;
     height: calc(100% - 50px - 100px);
     display: flex;
-    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+    box-shadow: 5px 0px 16px 0px rgba(169,169,169,0.2);
       .content_left_scroll {
         width: 500px;
         height: 100%;
@@ -220,7 +245,6 @@ export default {
         }
         .content_left {
           width: 100%;
-          // margin: 20px 0 0 2%;
           padding: 20px 10px 0 10px;
           > ul {
             width: 100%;
@@ -300,11 +324,11 @@ export default {
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
         .map-rrt {
-          padding: 0 10px;
+          padding: 0 5px;
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 20px 15px;
+            padding: 15px 15px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;
@@ -344,6 +368,18 @@ export default {
       background: #ffffff;
       border: 1px solid #DDDDDD;
       color: #666666;
+    }
+  }
+  .dialog_comp {
+    .content-body {
+      p {
+        color: #999999;
+        margin-bottom: 20px;
+        &::before {
+          content: '*';
+          color: #F94539;
+        }
+      }
     }
   }
 }

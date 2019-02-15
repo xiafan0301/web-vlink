@@ -14,7 +14,7 @@
               <ul>
                 <li>
                   <span class="audit-label">状态:</span>
-                  <span class="audit-status">待审核</span>
+                  <span class="pass-status">通过</span>
                 </li>
                 <li>
                   <span>事件编号:</span>
@@ -51,63 +51,14 @@
                   <span>I级</span>
                 </li>
                 <li>
-                  <span>是否有人员上亡:</span>
+                  <span>伤亡人员:</span>
                   <span>不确定</span>
                 </li>
+                <li>
+                  <span>驳回原因:</span>
+                  <span>不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定</span>
+                </li>
               </ul>
-              <!-- <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-                <el-form-item label="事发地点:" label-width="85px">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
-                </el-form-item>
-                <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
-                </el-form-item>
-                <el-form-item  label-width="85px" class="img-form-item">
-                  <el-upload
-                    action="https://jsonplaceholder.typicode.com/posts/"
-                    list-type="picture-card"
-                    accept=".png,.jpg,.jpeg"
-                    :limit='9'
-                    :before-upload='handleBeforeUpload'
-                    :on-preview="handlePictureCardPreview"
-                    :on-remove="handleRemove"
-                    :on-success='handleSuccess'
-                    :on-exceed="handleImgNumber"
-                  >
-                    <i class="el-icon-plus"></i>
-                    <span class='add-img-text'>添加</span>
-                    <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span>
-                  </el-upload>
-                </el-form-item>
-                <el-form-item label-width="85px">
-                  <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
-                </el-form-item>
-                <el-form-item  label="处理单位:" prop="eventType" label-width="85px">
-                  <el-select v-model="addEventForm.eventType" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
-                  <el-select v-model="addEventForm.eventType" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="事件等级:" prop="eventLevel" label-width="85px">
-                  <el-select v-model="addEventForm.eventLevel" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 95%'>
-                    <el-radio label="无"></el-radio>
-                    <el-radio label="不确定"></el-radio>
-                    <el-radio label="有"></el-radio>
-                  </el-radio-group>
-                </el-form-item>
-              </el-form> -->
             </div>
           </vue-scroll>
         </div>
@@ -117,7 +68,7 @@
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -127,9 +78,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <!-- <el-button class="operation_btn function_btn">审核通过</el-button> -->
-      <!-- <el-button class="operation_btn back_btn">审核不通过</el-button> -->
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
   </div>
 </template>
@@ -177,8 +126,10 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div class="vl_icon vl_icon_051"></div>'
       });
-      console.log(marker);
     },
+    back () { // 返回
+      this.$router.back(-1);
+    }
   }
 }
 </script>
@@ -187,31 +138,33 @@ export default {
   width: 100%;
   height: 100%;
   .content-box {
-    width: 100%;
-    padding: 20px;  
+    width: 98%;
+    margin: 0 20px; 
     height: calc(100% - 50px - 100px);
     display: flex;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     .content-left {
       .content_left_scroll {
-        width: 450px;
+        width: 500px;
         height: 100%;
         background: #ffffff;
         /deep/ .__view {
           width: 100% !important;
         }
         .content_left {
-          width: 96%;
-          margin: 20px 0 0 2%;
+          width: 100%;
+          padding: 20px 10px 0 10px;
           > ul {
             width: 100%;
             font-size: 14px;
             > li {
-              height: 30px;
+              line-height: 30px;
+              display: flex;
+              width: 100%;
               > span:nth-child(1) {
                 padding-right: 10px;
                 color: #666666;
-                width: 85px;
+                width: 20%;
                 display: inline-block;
                 text-align: right;
                 &.audit-label {
@@ -219,10 +172,15 @@ export default {
                 }
               }
               > span:nth-child(2) {
+                width: 70%;
                 color: #333333;
                 display: inline-block;
-                &.audit-status {
-                  color: #0C70F8;
+                &.pass-status {
+                  font-size: 20px;
+                  color: #4FCB61;
+                }
+                &.reject-status {
+                  color: #F94539;
                   font-size: 20px;
                 }
               }
@@ -277,18 +235,19 @@ export default {
         width: 100%;
       }
       .right-flag {
-        position: absolute; right: 20px; bottom: 15%;
+        position: absolute; right: 40px; bottom: 100px;
         height: 220px;
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
         .map-rrt {
-          padding: 0 10px;
+          padding: 0 5px;
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 20px 15px;
+            padding: 15px 15px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
+            text-align: center;
             >i {
               font-size: 20px;
               color: #0B6FF7;

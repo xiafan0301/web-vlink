@@ -252,7 +252,32 @@ export default new Router({
                 }, {
                     path: 'manage',
                     name: 'manage',
-                    component: () => import('@/views/index/components/manage/manage.vue')
+                    component: () => import('@/views/index/components/manage/manage.vue'),
+                    children: [
+                      {
+                        path: 'department',
+                        name: 'manage_department',
+                        component: () => import('@/views/index/components/manage/departmentList.vue')
+                      },
+                      {
+                        path: 'user',
+                        name: 'user',
+                        component: () => import('@/views/index/components/manage/user.vue'),
+                        redirect: {name: 'user_manage'},
+                        children: [
+                          {
+                            path: 'userManage',
+                            name: 'user_manage',
+                            component: () => import('@/views/index/components/manage/userManage.vue')
+                          },
+                          {
+                            path: 'groupManage',
+                            name: 'group_manage',
+                            component: () => import('@/views/index/components/manage/groupManage.vue')
+                          },
+                        ]
+                      },
+                    ]
                 }
             ]
         },
