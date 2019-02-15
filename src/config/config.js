@@ -28,8 +28,8 @@ for (let _key in oDomains) {
 export {ajaxCtx};
 
 // cookie名
-export const cookieUserId = 'as.vlink.user_id';
-export const cookieUserName = 'as.vlink.user_name';
+export const cookieUserId = 'AS.VLINK.USERID';
+export const cookieUserName = 'AS.VLINK.USERNAME';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
 
