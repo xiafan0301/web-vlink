@@ -11,7 +11,7 @@
       <div class="content-box">
         <EventBasic></EventBasic>
         <div class="report-operation">
-          <el-form :model="reportForm" class="report-form" size="small">
+          <el-form :model="reportForm" class="report-form" size="middle">
             <el-form-item label="接收者:" label-width="100px">
               <el-input v-model="reportForm.reportUser"></el-input>
             </el-form-item>
@@ -53,9 +53,25 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">确定提交</el-button>
+        <el-button class="operation_btn function_btn" @click="submitData">确定提交</el-button>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
+      <!--提交弹出框-->
+      <el-dialog
+        :visible.sync="dialogVisible"
+        :show-close="false"
+        class="dialog_comp"
+        width="482px"
+        >
+        <div class="content-body">
+          <i class="el-icon-success"></i>
+          <p class="submit-status">提交成功</p>
+          <p class="submit-tip">上级有新的指示后，将会在页面顶部 “任务”栏中提示。</p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">我知道了</el-button>
+        </span>
+      </el-dialog>
     </div>
   </vue-scroll>
 </template>
@@ -65,10 +81,17 @@ export default {
   components: { EventBasic },
   data () {
     return {
+      dialogVisible: false, // 提示弹出框
       reportForm: {
         reportUser: null, // 接收者
         explain: null // 情况说明
       }
+    }
+  },
+  methods: {
+    // 提交数据
+    submitData () {
+      this.dialogVisible = true;
     }
   }
 }
@@ -91,12 +114,13 @@ export default {
         padding: 20px 0;
         position: relative;
         .search-result {
-          border: 1px solid #000000;
-          width: 250px;
+          width: calc(100% - 100px);
           height: 200px;
           position: absolute;
-          top: 52px;
+          top: 65px;
           left: 100px;
+          box-shadow:0px 2px 8px 0px rgba(0,0,0,0.15);
+          border-radius:4px;
           background-color: #ffffff;
           .__view {
             > ul {
@@ -104,13 +128,14 @@ export default {
               height: 100%;
               > li {
                 width: 100%;
-                height: 20px;
+                height: 40px;
+                color: #333333;
                 padding-left: 20px;
-                line-height: 20px;
+                line-height: 40px;
                 &:hover {
                   cursor: pointer;
-                  background-color: #0C70F8;
-                  color: #ffffff;
+                  background-color: #EDF9FF;
+                  color: #333333;
                 }
               }
             }
@@ -142,6 +167,25 @@ export default {
       background: #ffffff;
       border: 1px solid #DDDDDD;
       color: #666666;
+    }
+  }
+  .dialog_comp {
+    .content-body {
+      width: 50%;
+      text-align: center;
+      margin-left: 25%;
+      i {
+        font-size: 100px;
+        color: #4FCB61;
+      }
+      .submit-status {
+        color: #333333;
+        font-size: 16px;
+        margin: 20px 0;
+      }
+      .submit-tip {
+        color: #999999;
+      }
     }
   }
 }
