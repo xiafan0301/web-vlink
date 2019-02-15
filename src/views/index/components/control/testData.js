@@ -122,24 +122,24 @@ export const conData = [
   latitude: 28.093253,
   longitude: 112.975163,
     sxt: [
-      {sid: '0', sxtName: '摄像头001'},
-      {sid: '1', sxtName: '摄像头002'},
-      {sid: '2', sxtName: '摄像头003'},
-      {sid: '3', sxtName: '摄像头004'},
-      {sid: '4', sxtName: '摄像头005'},
-      {sid: '5', sxtName: '摄像头006'},
-      {sid: '6', sxtName: '摄像头007'},
-      {sid: '7', sxtName: '摄像头008'}
+      {sid: '0', sxtName: '摄像头001', isNormal: true},
+      {sid: '1', sxtName: '摄像头002', isNormal: true},
+      {sid: '2', sxtName: '摄像头003', isNormal: false},
+      {sid: '3', sxtName: '摄像头004', isNormal: true},
+      {sid: '4', sxtName: '摄像头005', isNormal: true},
+      {sid: '5', sxtName: '摄像头006', isNormal: true},
+      {sid: '6', sxtName: '摄像头007', isNormal: false},
+      {sid: '7', sxtName: '摄像头008', isNormal: true}
     ],
     kk: [
-      {kid: '01', kName: '卡口0011'},
-      {kid: '11', kName: '卡口0021'},
-      {kid: '21', kName: '卡口0031'},
-      {kid: '31', kName: '卡口0041'},
-      {kid: '41', kName: '卡口0051'},
-      {kid: '51', kName: '卡口0061'},
-      {kid: '61', kName: '卡口0071'},
-      {kid: '71', kName: '卡口0081'}
+      {kid: '01', kName: '卡口0011', isNormal: true},
+      {kid: '11', kName: '卡口0021', isNormal: true},
+      {kid: '21', kName: '卡口0031', isNormal: true},
+      {kid: '31', kName: '卡口0041', isNormal: false},
+      {kid: '41', kName: '卡口0051', isNormal: true},
+      {kid: '51', kName: '卡口0061', isNormal: true},
+      {kid: '61', kName: '卡口0071', isNormal: true},
+      {kid: '71', kName: '卡口0081', isNormal: true}
     ]
   },
   {tid: '1', trackPointName: '追踪点002:长沙市天心区创谷广告产业园B4栋',
@@ -148,24 +148,24 @@ export const conData = [
   latitude: 28.093281,
   longitude: 112.975927,
     sxt: [
-      {sid: '8', sxtName: '摄像头0011'},
-      {sid: '9', sxtName: '摄像头0021'},
-      {sid: '10', sxtName: '摄像头0031'},
-      {sid: '11', sxtName: '摄像头0041'},
-      {sid: '12', sxtName: '摄像头0051'},
-      {sid: '13', sxtName: '摄像头0061'},
-      {sid: '14', sxtName: '摄像头0071'},
-      {sid: '15', sxtName: '摄像头0081'}
+      {sid: '8', sxtName: '摄像头0011', isNormal: true},
+      {sid: '9', sxtName: '摄像头0021', isNormal: false},
+      {sid: '10', sxtName: '摄像头0031', isNormal: true},
+      {sid: '11', sxtName: '摄像头0041', isNormal: true},
+      {sid: '12', sxtName: '摄像头0051', isNormal: false},
+      {sid: '13', sxtName: '摄像头0061', isNormal: true},
+      {sid: '14', sxtName: '摄像头0071', isNormal: true},
+      {sid: '15', sxtName: '摄像头0081', isNormal: true}
     ],
     kk: [
-      {kid: '81', kName: '卡口001'},
-      {kid: '91', kName: '卡口002'},
-      {kid: '101', kName: '卡口003'},
-      {kid: '111', kName: '卡口004'},
-      {kid: '121', kName: '卡口005'},
-      {kid: '131', kName: '卡口006'},
-      {kid: '141', kName: '卡口007'},
-      {kid: '151', kName: '卡口008'}
+      {kid: '81', kName: '卡口001', isNormal: true},
+      {kid: '91', kName: '卡口002', isNormal: true},
+      {kid: '101', kName: '卡口003', isNormal: false},
+      {kid: '111', kName: '卡口004', isNormal: true},
+      {kid: '121', kName: '卡口005', isNormal: true},
+      {kid: '131', kName: '卡口006', isNormal: true},
+      {kid: '141', kName: '卡口007', isNormal: true},
+      {kid: '151', kName: '卡口008', isNormal: true}
     ]
   }
 ]

@@ -64,16 +64,28 @@
                   </div>
                   <vue-scroll>
                     <ul v-if="type === '0'" style="max-height: 346px;">
-                      <li v-for="equ in trackPoint.sxt" :key="equ.sid" @click="eid = equ.sid" :class="{'active': eid === equ.sid}">
-                        <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                        <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
-                      </li>
+                      <template v-for="equ in trackPoint.sxt">
+                        <li :key="equ.sid" @click="eid = equ.sid" :class="['normal', {'active': eid === equ.sid}]" v-if="equ.isNormal">
+                          <span>{{equ.sxtName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
+                        </li>
+                        <li :key="equ.sid" v-else>
+                          <span style="color: #b2b2b2;">{{equ.sxtName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                        </li>
+                      </template>
                     </ul>
                     <ul v-else style="max-height: 346px;">
-                      <li v-for="equ in equList" :key="equ.kid" @click="eid = equ.kid" :class="{'active': eid === equ.kid}">
-                        <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                        <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="margin-bottom: 3px;"></i></div>
-                      </li>
+                      <template v-for="equ in equList">
+                        <li :key="equ.kid" @click="eid = equ.kid" :class="['normal', {'active': eid === equ.kid}]" v-if="equ.isNormal">
+                          <span>{{equ.kName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
+                        </li>
+                        <li :key="equ.kid" v-else>
+                          <span style="color: #b2b2b2;">{{equ.kName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
+                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                        </li>
+                      </template>
                     </ul>
                   </vue-scroll>
                 </div>  

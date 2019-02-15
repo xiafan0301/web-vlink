@@ -130,13 +130,16 @@ export default {
                 flex-wrap: nowrap;
                 justify-content: space-between;
                 background: #fff;
+                color: #666;
+              }
+              li.normal{
                 cursor: pointer;
-                &.active{
+                &.active, &:hover{
                   background: rgba(235,239,242,1);
                 }
                 &:hover{
-                  span, i{
-                    color: #B2B2B2;
+                  .vl_icon_control_19{
+                    display: inline-block !important;
                   }
                 }
               }

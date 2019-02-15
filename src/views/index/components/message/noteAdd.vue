@@ -291,7 +291,7 @@ export default {
         padding: 10px 0;
         border-top: 1px solid #dcdfe6;
         li{
-          height: 30px;
+          height: 30px; 
           color: #B2B2B2;
         }
       }
