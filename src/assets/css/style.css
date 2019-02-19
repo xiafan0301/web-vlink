@@ -128,6 +128,11 @@
 .vl_icon_statistics_control_1{width: 65px; height: 39px; background-position: -730px -1092px;} /*事件布控-未布控*/
 /******管理*******/
 .vl_icon_manage_1{width: 25px; height: 20px; background-position: -456px -376px;} /*搜索*/
+.vl_icon_manage_2{width: 20px; height: 20px; background-position: -368px -350px;} /*成员管理--部门架构*/
+.vl_icon_manage_3{width: 20px; height: 20px; background-position: -368px -376px;} /*管理组信息--基础信息库*/
+.vl_icon_manage_4{width: 23px; height: 23px; background-position: -499px -373px;} /*添加--视频设置*/
+.vl_icon_manage_5{width: 28px; height: 28px; background-position: -714px -428px;} /*可用设备--视频设置--临时授权*/
+.vl_icon_manage_6{width: 18px; height: 22px; background-position: -325px -376px;} /*摄像头--视频设置--临时授权*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -631,4 +636,18 @@
   font-weight: 600;
   padding-top: 7px;
   height: 27px; line-height: 20px;
+}
+
+/***********单选框样式**************/
+.el-radio__input.is-checked .el-radio__inner {
+  border-color: #0C70F8;
+  background: #ffffff;
+}
+.el-radio__inner::after {
+  background-color: #0C70F8;
+  width: 8px;
+  height: 8px;
+}
+.el-radio__input.is-checked+.el-radio__label {
+  color: #333333;
 }

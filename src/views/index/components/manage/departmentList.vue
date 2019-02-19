@@ -47,7 +47,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
+            <span class="operation_btn" @click="skipSelectDetail(scope)">查看</span>
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showeditDialog(scope)">编辑</span>
             <span style="color: #f2f2f2">|</span>
@@ -70,6 +70,8 @@
       title="新增部门"
       :visible.sync="newDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <div style="margin-top: 10px;">
@@ -101,6 +103,8 @@
       title="编辑部门"
       :visible.sync="editDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <div style="margin-top: 10px;">
@@ -132,6 +136,8 @@
       title="是否确认删除部门？"
       :visible.sync="delDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <span style="color: #999999;">删除后数据不可恢复。</span>
@@ -145,6 +151,8 @@
       title="删除时将删除部门及其下级部门，是否确认删除？"
       :visible.sync="delChildDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <span style="color: #999999;">删除后数据不可恢复。</span>
@@ -223,9 +231,13 @@ export default {
   methods: {
     handleIconClick () {},
     handleSizeChange () {
-
     },
     handleCurrentChange () {},
+    // 跳至部门详情页
+    skipSelectDetail (obj) {
+      console.log(obj);
+      this.$router.push({name: 'department_detail'});
+    },
     // 显示新增部门弹出框
     showNewDepartment () {
       this.newDepartmentDialog = true;

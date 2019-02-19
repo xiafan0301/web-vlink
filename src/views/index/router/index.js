@@ -255,6 +255,11 @@ export default new Router({
                         component: () => import('@/views/index/components/manage/departmentList.vue')
                       },
                       {
+                        path: 'departmentDetail',
+                        name: 'department_detail',
+                        component: () => import('@/views/index/components/manage/departmentDetail.vue')
+                      },
+                      {
                         path: 'user',
                         name: 'user',
                         component: () => import('@/views/index/components/manage/user.vue'),
@@ -271,6 +276,44 @@ export default new Router({
                             component: () => import('@/views/index/components/manage/groupManage.vue')
                           },
                         ]
+                      },
+                      {
+                        path: 'addUser',
+                        name: 'add_user',
+                        component: () => import('@/views/index/components/manage/addUser.vue')
+                      },
+                      {
+                        path: 'roleManage',
+                        name: 'role_manage',
+                        component: () => import('@/views/index/components/manage/roleManage.vue')
+                      },
+                      {
+                        path: 'videoSetting',
+                        name: 'set_video',
+                        component: () => import('@/views/index/components/manage/videoSetting.vue'),
+                        redirect: {name: 'custom_group'},
+                        children: [
+                          {
+                            path: 'customGroup',
+                            name: 'custom_group',
+                            component: () => import('@/views/index/components/manage/customGroup.vue')
+                          },
+                          {
+                            path: 'tirotationSetting',
+                            name: 'tirotation_setting',
+                            component: () => import('@/views/index/components/manage/tirotationSetting.vue')
+                          },
+                          {
+                            path: 'deviceAuthorize',
+                            name: 'device_authorize',
+                            component: () => import('@/views/index/components/manage/deviceAuthorize.vue')
+                          }
+                        ]
+                      },
+                      {
+                        path: 'tempGrant',
+                        name: 'temp_grant',
+                        component: () => import('@/views/index/components/manage/tempGrant.vue')
                       },
                     ]
                 }

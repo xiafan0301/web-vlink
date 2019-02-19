@@ -201,7 +201,6 @@ export default {
   },
   methods: {
     handleSizeChange () {
-
     },
     handleCurrentChange () {},
     skipAddEventPage () { // 跳到新增事件页面

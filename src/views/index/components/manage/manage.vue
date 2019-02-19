@@ -2,7 +2,7 @@
   <div class="vl_manage clearfix">
     <ul class="vl_smenu">
       <li>
-        <router-link :to="{name: 'event_audit'}">视频设置</router-link>
+        <router-link :to="{name: 'set_video'}">视频设置</router-link>
       </li>
       <li>
         <router-link :to="{name: 'event_manage'}">基础信息库</router-link>
@@ -14,7 +14,7 @@
         <router-link :to="{name: 'user'}">用户管理</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'event_statistics'}">角色管理</router-link>
+        <router-link :to="{name: 'role_manage'}">角色管理</router-link>
       </li>
       <li>
         <router-link :to="{name: 'event_statistics'}">权限管理</router-link>
