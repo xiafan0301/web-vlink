@@ -21,6 +21,14 @@
           </el-badge>
         </li>
         <li>
+          <!-- <template v-if="sums.events > 0">
+            <el-badge :value="sums.events" class="item" :max="99">
+              <img class="aa" src="../assets/img/vl-jq1.gif" alt="">l
+            </el-badge>
+          </template>
+          <template v-else>
+            <img src="../assets/img/vl-jq2.png" alt="">
+          </template> -->
           <el-badge :value="sums.events" class="item" :max="99">
             <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
           </el-badge>
@@ -216,6 +224,6 @@ export default {
   }
 }
 .hd_user_is {
-  animation: twinkle 1s linear infinite both;
+  animation: twinkle 0.6s linear infinite both;
 }
 </style>

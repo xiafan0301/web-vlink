@@ -297,7 +297,7 @@ export default {
         position: 'right-center',
         title: null,
         useHtml: true,
-        reactive: true,
+        hoverable: false,
         containerTpl: '<div class="g2-legend vi_stat11_leg"><div class="g2-legend-list"></div></div>',
         itemTpl: function itemTpl(value, color) {
           var markerDom = '<div class="stat11_leg_marker" style="background-color:' + color + '"></div>';
