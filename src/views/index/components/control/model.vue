@@ -578,7 +578,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .pic_format{
-  line-height: 20px;
+  line-height: 40px;
+  display: inline-block;
   & > div{
     white-space: nowrap;
   }
@@ -617,4 +618,9 @@ export default {
     }
   }
 } 
+.create_model_box{
+  .el-form-item__content{
+    line-height: 0;
+  }
+}
 </style>

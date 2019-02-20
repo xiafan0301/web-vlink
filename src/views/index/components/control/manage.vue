@@ -5,7 +5,7 @@
       <div class="control_manage_box">
         <div class="search_box">
           <el-form :inline="true" :model="manageForm" class="manage_form">
-            <el-form-item style="width: 240px;">
+            <el-form-item>
               <el-select v-model="manageForm.type" placeholder="布控类型">
                 <el-option label="全部" :value="null"></el-option>
                 <el-option
@@ -16,7 +16,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 240px;">
+            <el-form-item>
               <el-select v-model="manageForm.state" placeholder="布控状态">
                 <el-option label="全部" :value="null"></el-option>
                 <el-option
@@ -27,7 +27,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 240px;">
+            <el-form-item>
               <el-select v-model="manageForm.rank" placeholder="告警级别">
                 <el-option label="全部" :value="null"></el-option>
                 <el-option
@@ -41,7 +41,6 @@
             <el-form-item>
               <el-date-picker
                 placeholder="创建时间"
-                style="width: 192px;"
                 v-model="manageForm.time"
                 type="datetimerange"
                 range-separator="-"
@@ -49,10 +48,13 @@
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item style="width: 240px;">
-              <el-input v-model="manageForm.controlObjOrFacilityName" placeholder="请输入布控对象或设备名称搜索"></el-input>
+            <el-form-item>
+              <el-input v-model="manageForm.controlObj" placeholder="请输入布控对象搜索"></el-input>
             </el-form-item>
-            <el-form-item style="width: 192px;">
+            <el-form-item>
+              <el-input v-model="manageForm.facilityName" placeholder="请输入设备名称搜索"></el-input>
+            </el-form-item>
+            <el-form-item>
               <el-button class="select_btn" type="primary">查询</el-button>
               <el-button class="reset_btn" type="primary" plain>重置</el-button>
             </el-form-item>
@@ -209,7 +211,8 @@ export default {
         state: null,
         rank: null,
         time: null,
-        controlObjOrFacilityName: null
+        controlObj: null,
+        facilityName: null
       },
       stateList: [
         {label: '待开始', value: '0'},
@@ -301,6 +304,9 @@ export default {
 </style>
 <style lang="scss">
 .control_manage{
+  .manage_form .el-input__inner{
+    width: 380px;
+  }
   .del_manage_dialog{
     h3{
       font-size: 16px;

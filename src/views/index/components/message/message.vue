@@ -37,7 +37,7 @@ export default {
     height: 100%;
     overflow: auto;
     padding-left: 200px;
-    // 消息模块底部按钮公告样式
+    // 消息模块底部按钮公共样式
     .add_footer{
       width: 100%;
       height: 64px;
@@ -51,6 +51,14 @@ export default {
       filter:blur(0px);
       > .el-button{
         width: 100px;
+      }
+    }
+    // 消息模块面包屑样式
+    .mes_back > .el-breadcrumb__inner{
+      color: #999;
+      &:hover{
+        color: #409EFF;
+        cursor: pointer;
       }
     }
   }

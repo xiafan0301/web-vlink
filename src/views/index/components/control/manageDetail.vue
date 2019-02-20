@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
-        <el-breadcrumb-item @click.native="skipIsList()">布控管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skipIsList()" class="con_back">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>布控详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>

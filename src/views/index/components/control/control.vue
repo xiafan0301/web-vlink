@@ -63,6 +63,9 @@ export default {
           background: #fff;
           p{
             margin-top: 12px;
+            &:nth-child(1){
+              padding-left: 14px;
+            }
           }
         }
         .equ_h{
@@ -182,6 +185,14 @@ export default {
         .bottom > li:nth-child(1){
           border-bottom: 1px solid #F1F1F1;
         }
+      }
+    }
+    // 布控模块面包屑样式
+    .con_back > .el-breadcrumb__inner{
+      color: #999;
+      &:hover{
+        color: #409EFF;
+        cursor: pointer;
       }
     }
   }

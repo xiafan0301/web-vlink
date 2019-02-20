@@ -3,7 +3,7 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)">短信通知</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">短信通知</el-breadcrumb-item>
         <el-breadcrumb-item>新增短信</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -17,7 +17,7 @@
                 <span>王益&lt;13324922333&gt;</span>
                 <i class="el-icon-close"></i>
               </div>
-              <i class="el-icon-circle-plus" @click="recDialog = true"></i>
+              <i class="vl_icon vl_icon_message_3 " @click="recDialog = true"></i>
             </div>
           </el-form-item>
           <el-form-item label="短信模板:" prop="template" class="template">
@@ -46,10 +46,11 @@
           <el-form-item label="短信内容:" style="width: 754px;" class="content">
             <div class="con_box">
               <el-input
+                :disabled="true"
                 resize="none"
                 type="textarea"
                 :rows="4"
-                placeholder="请输入短信内容"
+                placeholder="此处是已经编辑好的短信内容"
                 v-model="addForm.content">
               </el-input>
               <ul class="con_list">
@@ -283,17 +284,20 @@ export default {
       border: none;
     }
     .con_box{
-      border: 1px solid #dcdfe6;
+      background:rgba(242,242,242,1);
       border-radius:4px;
+      border:1px solid rgba(211,211,211,1);
       .con_list{
         width: 226px;
         margin-left: 20px;
         padding: 10px 0;
-        border-top: 1px solid #dcdfe6;
         li{
           height: 30px; 
           color: #B2B2B2;
         }
+      }
+      .el-textarea__inner{
+        background:rgba(242,242,242,1);
       }
     }
   }

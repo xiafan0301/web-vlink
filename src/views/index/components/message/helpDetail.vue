@@ -3,26 +3,25 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)">民众互助</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">民众互助</el-breadcrumb-item>
         <el-breadcrumb-item>查看互助</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="help_det_box">
       <div class="det_info">
-        <ul>
-          <li>
-            <div><span>上报人：</span><span style="color: #0C70F8;">13890809908</span></div>
-            <div><span>发布平台：</span><span>13890809908</span></div>
-          </li>
-          <li>
-            <div><span>报案时间：</span><span>13890809908</span></div>
-            <div><span>人员伤亡：</span><span>13890809908</span></div>
-          </li>
-          <li>
-            <div><span>事件类型：</span><span>13890809908</span></div>
-            <div><span>事件状态：</span><span>13890809908</span></div>
-          </li>
-        </ul>
+        <div style="padding-left: 14px;margin-bottom: 12px;">
+          <span>上报人：</span>
+          <el-popover
+            placement="top-start"
+            width="150"
+            trigger="click"
+            >
+            <div class="det_info_com"><i class="vl_icon vl_icon_message_1"></i><span>语音通话</span></div>
+            <div class="det_info_com"><i class="vl_icon vl_icon_message_2"></i><span>视频通话</span></div>
+            <span class="det_info_click" slot="reference">13890809908</span>
+          </el-popover>
+        </div>
+        <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">2018.08.07  12:13:14</span></div>
         <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span></div>
         <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">长沙市天心区创谷广告产业园</span></div>
       </div>
@@ -43,18 +42,28 @@
               <img src="//via.placeholder.com/117x117" alt="">
             </li>
             <li class="con_six">
-              <div><i class="el-icon-close"></i><span class="vl_f_666" @click="messageId = item.id">回复该评论</span></div>
-              <div><i class="el-icon-close"></i><span class="vl_f_666" @click="shieldDialog = true">屏蔽该评论</span></div>
+              <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="messageId = item.id;isConfirmation = false;">回复该评论</span></div>
+              <div><i class="vl_icon vl_icon_message_4"></i><span class="vl_f_666" @click="shieldDialog = true">屏蔽该评论</span></div>
             </li>
             <el-collapse-transition>
-              <li class="con_seven" v-if="messageId === item.id">
-                <el-input v-model="comment" placeholder="请对事发情况进行描述，文字限制140字"></el-input>
+              <li class="con_seven" v-if="messageId === item.id && !isConfirmation">
+                <el-input v-model="content" placeholder="请对事发情况进行描述，文字限制140字"></el-input>
                 <div class="con_btn">
-                  <el-button type="primary">回复评论</el-button>
-                  <el-button @click="messageId = null">取消评论</el-button>
+                  <i class="vl_icon vl_icon_message_6" @click="isShowEmoji = !isShowEmoji"></i>
+                  <el-button type="primary" @click="confirmation">回复评论</el-button>
+                  <el-button @click="messageId = null;isShowEmoji = false;">取消评论</el-button>
+                </div>
+                <!-- emoji表情选择框 -->
+                <div class="emoji_box" v-if="messageId === item.id && isShowEmoji">
+                  <emotion @emotion="handleEmotion" :height="200"></emotion>
                 </div>
               </li>
             </el-collapse-transition>
+            <li class="reply_content" v-if="messageId === item.id && isConfirmation">
+              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
+              <p>回复内容：</p>
+              <p v-html="content.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion)" class="vl_f_333"></p>
+            </li>
           </ul>
         </div>
       </div>
@@ -76,10 +85,14 @@
   </div>
 </template>
 <script>
+import emotion from './emotion/index.vue';
 export default {
+  components: {emotion},
   data () {
     return {
-      comment: null,//评论内容
+      content: '',//评论内容,
+      isShowEmoji: false,//是否显示表情选择框
+      isConfirmation: false,//是否确认回复评论
       messageList: [
         {id: '001'},
         {id: '002'},
@@ -101,6 +114,21 @@ export default {
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
+    },
+    handleEmotion (i) {
+      this.content += i
+    },
+    // 将匹配结果替换表情图片
+    emotion (res) {
+      let word = res.replace(/#|;/gi,'')
+      const list = ['微笑', '撇嘴', '色', '发呆', '得意', '流泪', '害羞', '闭嘴', '睡', '大哭', '尴尬', '发怒', '调皮', '呲牙', '惊讶', '难过', '酷', '冷汗', '抓狂', '吐', '偷笑', '可爱', '白眼', '傲慢', '饥饿', '困', '惊恐', '流汗', '憨笑', '大兵', '奋斗', '咒骂', '疑问', '嘘', '晕', '折磨', '衰', '骷髅', '敲打', '再见', '擦汗', '抠鼻', '鼓掌', '糗大了', '坏笑', '左哼哼', '右哼哼', '哈欠', '鄙视', '委屈', '快哭了', '阴险', '亲亲', '吓', '可怜', '菜刀', '西瓜', '啤酒', '篮球', '乒乓', '咖啡', '饭', '猪头', '玫瑰', '凋谢', '示爱', '爱心', '心碎', '蛋糕', '闪电', '炸弹', '刀', '足球', '瓢虫', '便便', '月亮', '太阳', '礼物', '拥抱', '强', '弱', '握手', '胜利', '抱拳', '勾引', '拳头', '差劲', '爱你', 'NO', 'OK', '爱情', '飞吻', '跳跳', '发抖', '怄火', '转圈', '磕头', '回头', '跳绳', '挥手', '激动', '街舞', '献吻', '左太极', '右太极']
+      let index = list.indexOf(word)
+      return `<img src="https://res.wx.qq.com/mpres/htmledition/images/icon/emotion/${index}.gif" align="top">`   
+    },
+    // 确认回复
+    confirmation () {
+      this.isConfirmation = !this.isConfirmation;
+      this.isShowEmoji = !this.isShowEmoji;
     }
   }
 }
@@ -119,19 +147,10 @@ export default {
     .det_info{
       margin-bottom: 20px;
       padding: 16px 45px;
-      > ul{
-        display: flex;
-        > li{
-          width: 25%;
-          > div{
-            padding-bottom: 12px;
-            > span:nth-child(1){
-              color: #666;
-            }
-            > span:nth-child(2){
-              color: #333;
-            }
-          }
+      .det_info_click{
+        &:hover{
+          color: #0C70F8;
+          cursor: pointer;
         }
       }
       > div{
@@ -204,11 +223,14 @@ export default {
             > div{
               margin-right: 30px;
               > span:nth-child(2){
-                margin-left: 10px;
+                margin-left: 6px;
               }
               > span:nth-child(2):hover{
                 cursor: pointer;
                 color: #0C70F8;
+              }
+              .vl_icon{
+                vertical-align: top;
               }
             }
           }
@@ -222,6 +244,28 @@ export default {
               width: 100%;
               padding-top: 10px;
               text-align: right;
+              .vl_icon_message_6{
+                float: left;
+                margin-top: 10px;
+                cursor: pointer;
+                transition: none;
+                &:hover{
+                  background-position: -766px -425px;
+                }
+              }
+            }
+            .emoji_box{
+              width: 400px;
+              margin-top: 20px;
+            }
+          }
+          .reply_content{
+            width: 710px;
+            padding: 20px 10px;
+            background:rgba(250,250,250,1);
+            border-radius:2px;
+            img{
+              vertical-align: text-bottom;
             }
           }
         }
@@ -238,6 +282,17 @@ export default {
     }
     .el-checkbox__input.is-checked+.el-checkbox__label{
       color: #409EFF;
+    }
+  }
+  .el-popover{
+    .det_info_com{
+      > span{
+        margin-left: 6px;
+        cursor: pointer;
+        &:hover{
+          color: #0C70F8;
+        }
+      }
     }
   }
 </style>

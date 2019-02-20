@@ -1061,6 +1061,8 @@ export default {
           display: flex;
           flex-wrap: wrap;
           > span{
+            width: 100%;
+            display: inline-block;
             margin-left: 16px;
             line-height: 34px;
             color: #dcdfe6;

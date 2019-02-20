@@ -1,15 +1,15 @@
 <template>
   <div class="control_create">
     <!-- 面包屑 -->
-    <div class="breadcrumb_heaer">
+    <!-- <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ name: 'control_manage' }">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>编辑布控</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
     <div class="create_box">
-      <div class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">b19344985</span></div>
+      <!-- <div class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">b19344985</span></div> -->
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one">
@@ -188,14 +188,14 @@ export default {
   position: relative;
   .create_box{
     min-height: 875px;
-    margin: 0 20px;
+    margin: 20px 20px;
     padding: 0 20px 20px;
     background: #fff;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     border-radius:4px;
-    .create_num{
-      line-height: 40px;
-    }
+    // .create_num{
+    //   line-height: 40px;
+    // }
     .create_model{
       .create_model_box{
         margin-top: 10px;
