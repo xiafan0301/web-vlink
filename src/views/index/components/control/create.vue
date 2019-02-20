@@ -13,13 +13,13 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one">
-            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;">
+            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '不能为空', trigger: 'blur'}">
               <el-input v-model="createForm.controlName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-input v-model="createForm.event"></el-input>
             </el-form-item>
-            <el-form-item label="布控类型:" prop="controlType" style="width: 25%;">
+            <el-form-item label="布控类型:" prop="controlType" style="width: 25%;" :rules="{required: true, message: '不能为空', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controlTypeList"
@@ -29,7 +29,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-show="createForm.controlType === '1'" label="布控日期:" prop="controlDate" style="width: 25%;">
+            <el-form-item v-show="createForm.controlType === '1'" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '不能为空', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -70,7 +70,7 @@
               <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;">
+          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;" :rules="{required: true, message: '不能为空', trigger: 'change'}">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
               <el-option
                 v-for="item in controlRankList"
@@ -119,6 +119,10 @@
           </div>
         </el-form>
       </div>
+    </div>
+    <div class="create_f_box">
+      <el-button type="primary">保存</el-button>
+      <el-button>取消</el-button>
     </div>
   </div>
 </template>
@@ -181,10 +185,10 @@ export default {
 <style lang="scss" scoped>
 .control_create{
   width: 100%;
-  height: 100%;
+  position: relative;
   .create_box{
     min-height: 875px;
-    margin: 0 20px 20px 20px;
+    margin: 0 20px;
     padding: 0 20px 20px;
     background: #fff;
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
@@ -192,21 +196,36 @@ export default {
     .create_num{
       line-height: 40px;
     }
-  }
-  .create_model{
-    .create_model_box{
-      margin-top: 10px;
-      border-radius:4px 4px 0px 0px;
-      border:1px solid rgba(211,211,211,1);
-      .model_checkbox{
-        width: 100%;
-        height: 44px;
-        line-height: 44px;
-        padding-left: 15px;
-        background:rgba(250,250,250,1);
-        border-radius:5px 5px 0px 0px;
-        border:1px solid rgba(242,242,242,1);
+    .create_model{
+      .create_model_box{
+        margin-top: 10px;
+        border-radius:4px 4px 0px 0px;
+        border:1px solid rgba(211,211,211,1);
+        .model_checkbox{
+          width: 100%;
+          height: 44px;
+          line-height: 44px;
+          padding-left: 15px;
+          background:rgba(250,250,250,1);
+          border-radius:5px 5px 0px 0px;
+          border:1px solid rgba(242,242,242,1);
+        }
       }
+    }
+  }
+  .create_f_box{
+    position: absolute;
+    left: 0;
+    bottom: -80px;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    padding: 0 20px;
+    background: #fff;
+    box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.03);
+    .el-button{
+      width: 100px;
+      height: 40px;
     }
   }
 }
@@ -218,6 +237,7 @@ export default {
       .el-form-item__content{
         display: flex;
         flex-wrap: wrap;
+        margin-bottom: 10px;
         .el-form-item{
           padding-right: 40px;
           .el-input__inner, .el-select{
@@ -292,7 +312,7 @@ export default {
       }
     }
     .el-form-item{
-      padding-right: 53px;
+      padding-right: 20px;
       .el-input__inner, .el-select{
         width: 100%!important;
       }

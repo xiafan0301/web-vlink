@@ -160,6 +160,7 @@ export default {
           text-align: center;
           cursor: pointer;
           i{
+            margin-top: 16px;
             font-size: 20px;
             color: #999999;
           }

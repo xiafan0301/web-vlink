@@ -32,10 +32,10 @@
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字多行显示。<span>详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字多行显示。<span @click="eventDetailDialog = true;">详情</span></div>
         </div>
         <div class="manage_d_c_o">
-          <div><span class="vl_f_666">布控对象：</span><span class="vl_f_333">2</span></div>
+          <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（50个）</span></div>
           <div>
             <div class="manage_d_c_o_i" v-for="item in controlObjList" :key="item.id">
               <img :src="item.url" alt="">
@@ -43,6 +43,16 @@
               <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
             </div>
           </div>
+          <el-pagination
+            style="align-self: flex-start;"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="100"
+            layout="total, prev, pager, next, jumper"
+            :total="400">
+          </el-pagination>
         </div>
         <div :class="['vl_control_state', controlState === '0' ? 'vl_control_s' : controlState === '1' ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
@@ -75,15 +85,15 @@
                           </div>
                           <vue-scroll>
                             <ul v-if="type === '0'" style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.sxt">
-                                <li :key="equ.sid" v-if="equ.isNormal"><span>{{equ.sxtName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <li :key="equ.sid" v-else><span style="color: #b2b2b2;">{{equ.sxtName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
+                              <template v-for="equ in trackPoint.equList">
+                                <li :key="equ.sid" v-if="equ.type === 'sxt' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li :key="equ.sid" v-if="equ.type === 'sxt' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
                               </template>
                             </ul>
                             <ul v-else style="max-height: 280px;">
-                              <template v-for="equ in equList">
-                                <li :key="equ.kid" v-if="equ.isNormal"><span>{{equ.kName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <li :key="equ.kid" v-else><span style="color: #b2b2b2;">{{equ.kName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
+                              <template v-for="equ in trackPoint.equList">
+                                <li :key="equ.sid" v-if="equ.type === 'kk' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li :key="equ.sid" v-if="equ.type === 'kk' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
                               </template>
                             </ul>
                           </vue-scroll>
@@ -224,6 +234,43 @@
       <el-button type="primary">复用</el-button>
       <el-button>删除</el-button>
     </div>
+    <div class="event_detail_dialog">
+      <el-dialog
+        :visible.sync="eventDetailDialog"
+        :close-on-click-modal="false"
+        width="800px"
+        title="事件详情"
+        top="20vh">
+        <div class="detail_list">
+          <div>
+            <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">XPZ180724001</span></div>
+          </div>
+          <div>
+            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">XPZ180724001</span></div>
+          </div>
+          <div>
+            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">XPZ180724001</span></div>
+          </div>
+        </div>
+        <div class="detail_list">
+          <span class="vl_f_666">人员伤亡：</span><span class="vl_f_333">未知</span>
+        </div>
+        <div class="detail_list">
+          <span class="vl_f_666">事发地点：</span><span class="vl_f_333">长沙市创谷广告产业园</span>
+        </div>
+        <div class="detail_list">
+          <span class="vl_f_666">事件情况：</span><span class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span>
+        </div>
+        <vue-scroll>
+          <div class="detail_img_box">
+            <img src="//via.placeholder.com/117x117" alt="" v-for="item in '111111111'" :key="item.id">
+          </div>
+        </vue-scroll>
+      </el-dialog>
+    </div>
   </div>
 </template>
 <script>
@@ -249,7 +296,10 @@ export default {
         {id: '5', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
         {id: '6', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
         {id: '7', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '8', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'}
+        {id: '8', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
+        {id: '9', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
+        {id: '10', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
+        {id: '11', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'}
       ],
       // 地图参数
       map: null,
@@ -273,6 +323,7 @@ export default {
       ],
       rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
+      eventDetailDialog: false,//事件详情弹窗
     }
   },
   created () {
@@ -396,11 +447,29 @@ export default {
       let data = conData;
       console.log(data, 'data')
       _this.map.clearMap();
-      for (let i = 0; i < data.length; i++) {
-        let obj = data[i];
+      for (let i = 0; i < data.equList.length; i++) {
+        let obj = data.equList[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
+          let _content = null;
+          if (obj.type === 'sxt') {
+            if (obj.isNormal && obj.isSelected) {
+              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
+            } else if (obj.isNormal && !obj.isSelected) {
+              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
+            } else if (!obj.isNormal) {
+              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+            }
+          } else {
+            if (obj.isNormal && obj.isSelected) {
+              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_kk"></div>';
+            } else if (obj.isNormal && !obj.isSelected) {
+              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
+            } else if (!obj.isNormal) {
+              _content = '';
+            }
+          }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,
             position: [obj.longitude, obj.latitude],
@@ -408,14 +477,14 @@ export default {
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>'
+            content: _content
           });
           // hover
           marker.on('mouseover', function () {
             let sContent = '<div class="vl_map_hover">' +
               '<div class="vl_map_hover_main"><ul>' + 
-                '<li><span>设备名称：</span>' + obj.name + '</li>' + 
-                '<li><span>设备地址：</span>' + obj.addr + '</li>' +  
+                '<li><span>设备名称：</span>' + obj.equName + '</li>' + 
+                '<li><span>设备地址：</span>' + obj.addr + '</li>' + 
               '</ul></div>';
             hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
@@ -500,7 +569,7 @@ export default {
         margin-top: 15px;
         line-height: 20px;
         div:nth-child(2){
-          flex: 1;
+          flex: 0 0 58%;
           span{
             color: #0C70F8;
             cursor: pointer;
@@ -508,19 +577,28 @@ export default {
         }
       }
       .manage_d_c_o{
+        margin-right: 20px;
+        margin-top: 20px;
+        border:1px solid rgba(242,242,242,1);
+        border-radius:4px 4px 0px 0px;
         >div:nth-child(1){
-          padding-top: 15px;
+          height:44px;
+          line-height: 44px;
+          padding-left: 20px;
+          background:rgba(250,250,250,1);
+          border-radius:4px 4px 0px 0px;
         }
         >div:nth-child(2){
           display: flex;
-          flex-wrap: wrap;
-          padding: 0 20px 0 60px;
+          flex-flow: row wrap;
+          align-content: flex-start;
+          padding: 0 0.5% 20px 0.5%;
           .manage_d_c_o_i{
-            width: 160px;
             height: 222px;
             border-radius:4px;
             border:1px solid rgba(211,211,211,1);
-            margin-right: 20px;
+            flex: 0 0 162px;
+            margin: 0 0.5%;
             margin-top: 15px;
             p{
               padding-left: 10px;
@@ -529,6 +607,10 @@ export default {
                 vertical-align: middle;
                 margin-bottom: 2px;
               }
+            }
+            img{
+              width: 100%;
+              height: 160px;
             }
           }
         }
@@ -542,7 +624,7 @@ export default {
         width:calc(100% - 20px);
         // height:848px;
         border-radius:4px 4px 0px 0px;
-        border:1px solid rgba(211,211,211,1);
+        border:1px solid #f2f2f2;
         margin-top: 20px;
         .manage_d_s_t{
           display: flex;
@@ -561,6 +643,7 @@ export default {
       .manage_d_c_situ{
         width: calc(100% - 20px);
         margin-top: 20px;
+        padding-bottom: 1px;
         background:rgba(255,255,255,1);
         box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
         border-radius:4px;
@@ -744,6 +827,42 @@ export default {
     .el-button{
       width: 100px;
       height: 40px;
+    }
+  }
+  .event_detail_dialog{
+    .detail_list{
+      line-height: 30px;
+    }
+    .detail_list:nth-child(1){
+      display: flex;
+      justify-content: flex-start;
+      > div{
+        width: 33%;
+        > div{
+          line-height: 30px;
+        }
+      }
+    }
+    .detail_list:nth-child(4){
+      display: flex;
+      > span:nth-child(2){
+        flex: 1;
+        line-height: 20px;
+        margin-top: 5px;
+      }
+    }
+    .detail_img_box{
+      width: 64%;
+      height: 274px;
+      padding: 20px 0 0 70px;
+      display: flex;
+      flex-flow: row wrap;
+      align-content: flex-start;
+      img{
+        flex: 0 0 117px;
+        margin-right: 20px;
+        margin-bottom: 20px;
+      }
     }
   }
 }
