@@ -4,20 +4,20 @@
       <div class="help_box">
         <div class="help_form">
           <el-form ref="helpForm" :model="helpForm" class="help_form">
-            <el-form-item>
+            <el-form-item prop="helpDate">
               <el-date-picker
-                style="width: 240px;"
+                style="width: 260px;"
                 v-model="helpForm.helpDate"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item>
+            <el-form-item style="width: 260px;" prop="content">
               <el-input v-model="helpForm.content" placeholder="请输入预案名称筛选查找"></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="helpState">
               <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择">
                 <el-option
                   v-for="item in helpStateList"
@@ -29,7 +29,7 @@
             </el-form-item>
             <el-form-item style="width: 25%;">
               <el-button type="primary">查询</el-button>
-              <el-button>重置</el-button>
+              <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -79,7 +79,7 @@
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3)">查看</span>
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn">修改</span>
+                  <span class="operation_btn" @click="skip(4)">修改</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -96,7 +96,7 @@
         </div>
       </div>
     </div>
-    <div is="helpAdd" v-if="pageType === 2" @changePage="skip"></div>
+    <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :pageType="pageType" @changePage="skip"></div>
     <div is="helpDetail" v-if="pageType === 3" @changePage="skip"></div>
   </div>
 </template>
@@ -107,7 +107,7 @@ export default {
   components: {helpAdd, helpDetail},
   data () {
     return {
-      pageType: 1,//页面类型 1-列表，2-新增，3-详情
+      pageType: 1,//页面类型 1-列表，2-新增，3-详情,4-修改
       // 顶部筛选参数
       helpForm: {
         helpDate: null,
@@ -139,6 +139,9 @@ export default {
     },
     skip (pageType) {
       this.pageType = pageType;
+    },
+    resetForm () {
+      this.$refs['helpForm'].resetFields();
     }
   }
 }

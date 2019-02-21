@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item @click.native="skip(1)" class="mes_back">民众互助</el-breadcrumb-item>
-        <el-breadcrumb-item>新增互助</el-breadcrumb-item>
+        <el-breadcrumb-item>{{pageType === 2 ? '新增' : '修改'}}互助</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="help_add_box">
@@ -13,21 +13,23 @@
           <el-form-item label="联系电话:" prop="phone">
             <el-input value-key="uid" v-model="addForm.phone" filterable placeholder="请选择"></el-input>
           </el-form-item>
-          <el-form-item label="上报时间:" prop="time" class="time">
+          <el-form-item label="事发时间:" prop="time" class="time">
             <el-date-picker
-              placeholder="创建时间"
+              placeholder="选择日期时间"
               v-model="addForm.time"
-              type="datetimerange"
-              range-separator="-"
-              start-placeholder="开始时间"
-              end-placeholder="结束时间">
+              type="datetime"
+             >
             </el-date-picker>
           </el-form-item>
           <el-form-item label="事发地点:" prop="place">
-            <el-input v-model="addForm.place" placeholder="请输入事发地点" @keyup.enter.native="markLocation('mapBox', addForm.place)"></el-input>
+            <el-input id="searchInput" v-model="addForm.place" placeholder="请输入事发地点" @keyup.enter.native="markLocation('mapBox', addForm.place)"></el-input>
+          </el-form-item>
+          <el-form-item style="margin-bottom: 0;">
+            <div id="searchResults"></div>
           </el-form-item>
           <el-form-item label="事件情况:" prop="situation">
             <el-input
+              maxlength="140"
               type="textarea"
               :rows="4"
               placeholder="请对事发情况进行描述，文字限制140字"
@@ -35,7 +37,7 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" :maxSize="9"></div>
+            <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
             <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
@@ -68,18 +70,21 @@
         </div>
       </div>
       <div class="add_footer">
-        <el-button type="primary">确定发布</el-button>
-        <el-button>返回</el-button>
+        <el-button type="primary" @click="release('addForm')">确定发布</el-button>
+        <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
 import uploadPic from '../control/uploadPic';
+import {validatePhone} from '@/utils/validator.js';
 export default {
   components: {uploadPic},
+  props: ['pageType'],
   data () {
     return {
+      type: null,//页面类型
       // 左侧表单参数
       addForm: {
         phone: null,
@@ -91,33 +96,40 @@ export default {
       },
       addRules: {
         phone: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入手机号', trigger: 'blur'},
+          { validator: validatePhone, trigger: 'blur' }
         ],
         time: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请选择上报时间', trigger: 'blur'}
         ],
         place: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入事发地点', trigger: 'blur'}
         ],
         situation: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入事件情况', trigger: 'blur'}
         ]
       },
       scopeList: [],
       // 地图参数
       map: null,
+      // 上传参数
+      fileList: []
     }
   },
   mounted () {
     this.resetMap();
+    this.search();
   },
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
     // 接收 到上传组件传过来的图片数据
-    uploadPicSubmit () {
-      
+    uploadPicSubmit (file) {
+      console.log(file);
+    },
+    uploadPicFileList (fileList) {
+      this.fileList = fileList;
     },
     resetMap () {
       let _this = this;
@@ -184,6 +196,63 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
+    // 确定发布
+    release (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.addForm.time.getTime() < new Date().getTime()) {
+            this.$message.error('事发时间不能晚于当前系统时间！');
+            return false;
+          }
+          if (this.fileList.length === 0) {
+            this.$message.error('请上传图片！');
+            return false;
+          }
+          console.log('通过验证')
+        } else {
+          console.log(this.addForm.time.getTime())
+          return false;
+        }
+      });
+    },
+    // 搜索事发地点
+    search () {
+      let _this = this;
+        new Window.AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
+
+          var poiPicker = new PoiPicker({
+              input: 'searchInput',
+              placeSearchOptions: {
+                  map: _this.map,
+                  pageSize: 10
+              },
+              searchResultsContainer: 'searchResults'
+          });
+
+          poiPicker.on('poiPicked', function(poiResult) {
+                console.log(poiResult)
+                _this.addForm.place = poiResult.item.name;
+              poiPicker.hideSearchResults();
+
+              var source = poiResult.source,
+                  poi = poiResult.item;
+
+              if (source !== 'search') {
+
+                  //suggest来源的，同样调用搜索
+                  poiPicker.searchByKeyword(poi.name);
+
+              } else {
+
+                  //console.log(poi);
+              }
+          });
+
+          poiPicker.onCityReady(function() {
+              poiPicker.searchByKeyword('');
+          });
+      });
+    }
   }
 }
 </script>
@@ -204,6 +273,12 @@ export default {
       padding: 20px;
       .el-form{
         width: 100%;
+      }
+      #searchResults{
+        position: absolute;
+        z-index: 999;
+        overflow: auto;
+        height: 400px;
       }
     }
     .add_map{
@@ -256,7 +331,7 @@ export default {
 </style>
 <style lang="scss">
 .mes_help_add{
-  .time .el-date-editor--datetimerange{
+  .time .el-date-editor--datetime{
     width: 450px;
   }
   #mapBox{

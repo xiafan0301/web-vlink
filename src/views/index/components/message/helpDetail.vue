@@ -128,7 +128,7 @@ export default {
     // 确认回复
     confirmation () {
       this.isConfirmation = !this.isConfirmation;
-      this.isShowEmoji = !this.isShowEmoji;
+      this.isShowEmoji = false;
     }
   }
 }

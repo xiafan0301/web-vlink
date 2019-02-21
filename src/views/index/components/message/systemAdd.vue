@@ -11,10 +11,11 @@
       <div class="add_form">
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
           <el-form-item label="消息标题:" prop="title" style="width: 754px;">
-            <el-input v-model="addForm.title" filterable placeholder="请输入标题，文字限制20字"></el-input>
+            <el-input v-model="addForm.title" filterable placeholder="请输入标题，文字限制20字" maxlength="20"></el-input>
           </el-form-item>
           <el-form-item label="消息内容:" prop="content" style="width: 754px;">
             <el-input
+              maxlength="140"
               type="textarea"
               :rows="4"
               placeholder="请对事发情况进行描述，文字限制140字"
@@ -24,8 +25,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary">发布</el-button>
-        <el-button>返回</el-button>
+        <el-button type="primary" @click="release('addForm')">发布</el-button>
+        <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
   </div>
@@ -40,10 +41,10 @@ export default {
       },
       addRules: {
         title: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入消息标题', trigger: 'blur'}
         ],
         content: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入消息内容', trigger: 'blur'}
         ]
       },
     }
@@ -54,7 +55,17 @@ export default {
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
-    }
+    },
+    // 确定发布
+    release (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('通过验证')
+        } else {
+          return false;
+        }
+      });
+    },
   }
 }
 </script>
