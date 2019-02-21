@@ -75,10 +75,25 @@
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选2人/共1000人）</h1>
         <div class="rec_box">
           <div class="rec_l">
-            
+            <p class="vl_f_999 vl_f_12">组织机构</p>
+            <el-tree
+              :data="instList"
+              @node-click="getRightData"
+              @check-change="operationChecked"
+              show-checkbox
+              node-key="id"
+              :default-expanded-keys="[]"
+              :default-checked-keys="[]"
+              :props="defaultProps">
+            </el-tree>
           </div>
-          <div class="rec-r">
-
+          <div class="rec_r">
+            <ul>
+              <li v-for="item in '1234567123456'" :key="item.id">
+                <span>冯晓龙</span>
+                <el-checkbox v-model="isChecked"></el-checkbox>
+              </li>
+            </ul>
           </div>
         </div>
         <div slot="footer">
@@ -122,6 +137,48 @@ export default {
       // 弹窗参数
       recDialog: false,
       loadingBtn: false,
+      // 左边机构 数结构数据
+      instList: [{
+          id: 1,
+          label: '一级 1',
+          children: [{
+            id: 4,
+            label: '二级 1-1',
+            children: [{
+              id: 9,
+              label: '三级 1-1-1'
+            }, {
+              id: 10,
+              label: '三级 1-1-2'
+            }]
+          }]
+        }, {
+          id: 2,
+          label: '一级 2',
+          children: [{
+            id: 5,
+            label: '二级 2-1'
+          }, {
+            id: 6,
+            label: '二级 2-2'
+          }]
+        }, {
+          id: 3,
+          label: '一级 3',
+          children: [{
+            id: 7,
+            label: '二级 3-1'
+          }, {
+            id: 8,
+            label: '二级 3-2'
+          }]
+        }],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
+      isChecked: false,
+      rgihtData: null,//右边接收人列表数据
     }
   },
   mounted () {
@@ -131,7 +188,14 @@ export default {
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
-  
+    getRightData (data) {
+      console.log(data, 'data')
+      this.rgihtData = data;
+    },
+    operationChecked (nede, isChecked) {
+      console.log(nede, 'nede')
+      console.log(isChecked, 'isChecked')
+    }
   }
 }
 </script>
@@ -142,31 +206,39 @@ export default {
   .note_add_box{
     margin: 0 20px 20px 20px;
     padding: 20px 40px;
-    position: relative;
-    min-height:820px;
+    min-height:680px;
     background:rgba(255,255,255,1);
     box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
     border-radius:4px;
-    .add_footer{
-      width: 100%;
-      height: 64px;
-      line-height: 64px;
-      position: absolute;
-      left: -20px;
-      bottom: -104px;
-      padding-left: 20px;
-      background:rgba(255,255,255,1);
-      box-shadow:0px -1px 2px 0px rgba(0,0,0,0.03);
-      filter:blur(0px);
-      > .el-button{
-        width: 100px;
-      }
-    }
   }
   .rec_dialog{
     .rec_box{
       width: 100%;
       border-top: 1px solid #F2F2F2;
+      display: flex;
+      .rec_l{
+        width: 50%;
+        padding-top: 10px;
+        p{
+          padding-left: 45px;
+        }
+      }
+      .rec_r{
+        width: 50%;
+        padding-top: 26px;
+        border-left: 1px solid #F2F2F2;
+        li{
+          width: 100%;
+          height: 26px;
+          line-height: 26px;
+          padding: 0 20px;
+          display: flex;
+          justify-content: space-between;
+          &:hover{
+            background: #E0F2FF;
+          }
+        }
+      }
     }
   }
 }
@@ -219,7 +291,7 @@ export default {
         padding: 10px 0;
         border-top: 1px solid #dcdfe6;
         li{
-          height: 30px;
+          height: 30px; 
           color: #B2B2B2;
         }
       }

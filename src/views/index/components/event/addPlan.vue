@@ -78,12 +78,13 @@ export default {
 .add-plan {
   width: 100%;
   .content-box {
-    width: 98%;
-    margin: 10px 20px 0 20px;
+    width: 97%;
+    margin: 0 20px;
     background: #ffffff;
+    margin-bottom: 100px;
     .add-plan-form {
       width: 100%;
-      padding: 20px 0;
+      padding: 10px 0;
       /deep/ .el-form-item__label {
         color: #666666;
       }

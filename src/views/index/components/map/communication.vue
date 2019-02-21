@@ -455,7 +455,7 @@ export default {
       let smh = ''; 
       if (state === 0) {
         smh = '<i class="vl_map_hover_btn hover_btn_voice">发送语音</i>' +
-          '<i class="vl_map hover_btn hover_btn_video">发送视频</i>';
+          '<i class="vl_map_hover_btn hover_btn_video">发送视频</i>';
       } else if (state === 1) {
         smh = '<p class="map_hover_comState">正在进行' + sType + '连接...</p>';
       } else if (state === 2) {

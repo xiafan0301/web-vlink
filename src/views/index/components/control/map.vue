@@ -94,7 +94,7 @@
         <div class="video_box" :style="{'height': videoHeight + 'px'}">
           <div class="video">
             <div>
-              <video src="../../../../assets/video/video.mp4" autoplay loop></video>
+              <video src="../../../../assets/video/video.mp4" autoplay loop controls></video>
               <div class="toolbar">
                 <div>环岛路摄像头001</div>
                 <div>
@@ -113,15 +113,17 @@
           </div>
         </div>
         <div class="control_box">
-          <el-card class="more" shadow="hover">
-            <p>布控对象</p>
-            <div>10</div>
-            <el-button size="small">查看更多</el-button>
-          </el-card>
-          <el-card class="pic" shadow="hover" v-for="item in controlObjList" :key="item.name">
-            <img :src="item.url" alt="">
-            <p>{{item.name}}</p>
-          </el-card>
+          <div>
+            <el-card class="more" shadow="hover">
+              <p>布控对象</p>
+              <div>10</div>
+              <el-button size="small">查看更多</el-button>
+            </el-card>
+            <el-card class="pic" shadow="hover" v-for="item in controlObjList" :key="item.name">
+              <img :src="item.url" alt="">
+              <p>{{item.name}}</p>
+            </el-card>
+          </div>
           <div class="control_info">
             <div class="control_info_list">
               <div><span>布控名称：</span><span>三岁小孩走失</span></div>
@@ -186,6 +188,9 @@ export default {
       controlObjList: [
         {url: '//via.placeholder.com/130x130', name: '冯晓宁1', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
         {url: '//via.placeholder.com/130x130', name: '冯晓宁2', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
+        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},     
+        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},      
+        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},      
         {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'}      
       ],
       isShowPlayback: false, // 是否显示视频回放页面
@@ -258,14 +263,14 @@ export default {
                     <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_img">
-                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop width="100%"></video>
+                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></  >
                         <div class="vl_map_state">进行中</div>
                         <div class="vl_map_operate">
                           <div>摄像头12458 </div>
                           <div>
                             <i class="vl_icon vl_icon_control_06"></i>
                             <i class="vl_icon vl_icon_control_07"></i>
-                            <i class="vl_icon vl_icon_control_08"></i>
+                            <i class="vl_icon vl_icon_control_08" id="screen"></i>
                           </div>
                         </div>
                       </div>
@@ -298,14 +303,14 @@ export default {
                     + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_img">' +
-                        '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop width="100%"></video>' +
+                        '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop controls width="100%"></video>' +
                         '<div class="vl_map_state">进行中</div>' +
                       ' <div class="vl_map_operate">' +
                           '<div>摄像头12458 </div>' +
                           '<div>' +
                             '<i class="vl_icon vl_icon_control_06"></i>' +
                             '<i class="vl_icon vl_icon_control_07"></i>' +
-                            '<i class="vl_icon vl_icon_control_08"></i>' +
+                            '<i class="vl_icon vl_icon_control_08" id="screen"></i>' +
                           '</div>' +
                         '</div>' +
                       '</div>';
@@ -332,7 +337,7 @@ export default {
                     <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_start">
-                        <div class="vl_map_state">等待开始</div>
+                        <div class="vl_map_state">待开始</div>
                         <span>摄像头524</span>
                       </div>
                       <div class="vl_map_info">
@@ -363,7 +368,7 @@ export default {
                     + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
                     '<div class="vl_map_click_main">' + 
                       '<div class="vl_map_start">' +
-                        '<div class="vl_map_state">等待开始</div>' +
+                        '<div class="vl_map_state">待开始</div>' +
                         '<span>摄像头0015</span>' +
                       '</div>';
                       for (let item of obj.controlList) {
@@ -451,7 +456,7 @@ export default {
               if (clickWindow) { clickWindow.close(); }
             })
             // 利用事件冒泡,绑定视频回放按钮的点击事件
-            $('#mapBox').on('click', '.vl_map_btn', function () {
+            $('#mapBox').on('click', '#screen', function () {
               // 关闭弹窗
               if (clickWindow) { clickWindow.close(); }
               // 显示视频回放页面
@@ -528,17 +533,19 @@ export default {
       }
       .snap_box{
         width: 100%;
+        height: 245px;
         overflow: hidden;
         position: absolute;
-        bottom: 0;
+        bottom: 20px;
         left: 0;
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: space-between;
-        padding: 20px;
+        padding: 0 20px;
         .more.el-card{
           width: 152px;
           height: 245px;
+          margin-bottom: 20px;
           text-align: center;
           padding: 78px 0 87px 0;
           box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
@@ -560,6 +567,7 @@ export default {
           width: 162px;
           height: 245px;
           padding: 15px 0;
+          margin-bottom: 20px;
           box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
           ul{
             padding: 16px 0 0 16px;
@@ -662,45 +670,56 @@ export default {
         }
         .control_box{
           width: 100%;
+          height: 200px;
+          overflow: hidden;
           display: flex;
           flex-wrap: nowrap;
           justify-content: space-between;
-          .el-card{
-            height: 182px;
-            margin-top: 18px;
-            text-align: center;
-            box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
-          }
-          .more.el-card{
-            width: 152px;
-            padding: 40px 0;
-            p{
-              line-height: 24px;
+          > div:nth-child(1){
+            width: calc(100% - 344px);
+            height: 200px;
+            padding-right: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            .el-card{
+              height: 182px;
+              margin-top: 18px;
+              text-align: center;
+              box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
             }
-            div{
-              font-size: 24px;
-              line-height: 24px;
-              margin-bottom: 5px;
-              color: #0769E7;
+            .more.el-card{
+              width: 152px;
+              padding: 40px 0;
+              p{
+                line-height: 24px;
+              }
+              div{
+                font-size: 24px;
+                line-height: 24px;
+                margin-bottom: 5px;
+                color: #0769E7;
+              }
+              .el-button{
+                width: 90px;
+                height: 30px;
+              }
             }
-            .el-button{
-              width: 90px;
-              height: 30px;
-            }
-          }
-          .pic.el-card{
-            width: 162px;
-            padding-top: 10px;
-            p{
-              line-height: 30px;
-              color: #333;
+            .pic.el-card{
+              width: 162px;
+              padding-top: 10px;
+              p{
+                line-height: 30px;
+                color: #333;
+              }
             }
           }
           .control_info{
             width: 344px;
-            height: 182px;
+            height: 180px;
             padding: 10px;
-            margin-top: 18px;
+            margin-top: 19px;
             background: #fff;
             .control_info_list{
               padding: 10px 0;
@@ -719,15 +738,8 @@ export default {
               & > div:nth-child(3){
                 display: flex;
                 flex-wrap: nowrap;
-                > span:nth-child(1){
-                  width: 19%;
-                  height: 44px;
-                  overflow: hidden;
-                }
                 > span:nth-child(2){
-                  width: 81%;
-                  height: 44px;
-                  overflow: hidden;
+                  flex: 1;
                 }
               }
             }
@@ -819,8 +831,8 @@ export default {
           & > div:nth-child(3){
             display: flex;
             flex-wrap: nowrap;
-            > span:nth-child(1){
-              width: 150px;
+            > span:nth-child(2){
+              flex: 1;
             }
           }
         }

@@ -25,7 +25,6 @@
                   :data="planList"
                   >
                   <el-table-column
-                    fixed
                     label="序号"
                     type="index"
                     >
@@ -310,6 +309,7 @@ export default {
     border-left: 1px solid #F2F2F2;
     width: 100%;
     height: 65px;
+    z-index: 1;
     line-height: 65px;
     position: fixed;
     bottom: 0;

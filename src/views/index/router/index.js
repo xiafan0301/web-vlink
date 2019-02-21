@@ -229,11 +229,6 @@ export default new Router({
                         component: () => import('@/views/index/components/control/manage.vue')
                       },
                       {
-                        path: 'manageDetail',
-                        name: 'control_manage_detail',
-                        component: () => import('@/views/index/components/control/manageDetail.vue')
-                      },
-                      {
                         path: 'create',
                         name: 'control_create',
                         component: () => import('@/views/index/components/control/create.vue')
@@ -275,7 +270,75 @@ export default new Router({
                 }, {
                     path: 'manage',
                     name: 'manage',
-                    component: () => import('@/views/index/components/manage/manage.vue')
+                    component: () => import('@/views/index/components/manage/manage.vue'),
+                    children: [
+                      {
+                        path: 'department',
+                        name: 'manage_department',
+                        component: () => import('@/views/index/components/manage/departmentList.vue')
+                      },
+                      {
+                        path: 'departmentDetail',
+                        name: 'department_detail',
+                        component: () => import('@/views/index/components/manage/departmentDetail.vue')
+                      },
+                      {
+                        path: 'user',
+                        name: 'user',
+                        component: () => import('@/views/index/components/manage/user.vue'),
+                        redirect: {name: 'user_manage'},
+                        children: [
+                          {
+                            path: 'userManage',
+                            name: 'user_manage',
+                            component: () => import('@/views/index/components/manage/userManage.vue')
+                          },
+                          {
+                            path: 'groupManage',
+                            name: 'group_manage',
+                            component: () => import('@/views/index/components/manage/groupManage.vue')
+                          },
+                        ]
+                      },
+                      {
+                        path: 'addUser',
+                        name: 'add_user',
+                        component: () => import('@/views/index/components/manage/addUser.vue')
+                      },
+                      {
+                        path: 'roleManage',
+                        name: 'role_manage',
+                        component: () => import('@/views/index/components/manage/roleManage.vue')
+                      },
+                      {
+                        path: 'videoSetting',
+                        name: 'set_video',
+                        component: () => import('@/views/index/components/manage/videoSetting.vue'),
+                        redirect: {name: 'custom_group'},
+                        children: [
+                          {
+                            path: 'customGroup',
+                            name: 'custom_group',
+                            component: () => import('@/views/index/components/manage/customGroup.vue')
+                          },
+                          {
+                            path: 'tirotationSetting',
+                            name: 'tirotation_setting',
+                            component: () => import('@/views/index/components/manage/tirotationSetting.vue')
+                          },
+                          {
+                            path: 'deviceAuthorize',
+                            name: 'device_authorize',
+                            component: () => import('@/views/index/components/manage/deviceAuthorize.vue')
+                          }
+                        ]
+                      },
+                      {
+                        path: 'tempGrant',
+                        name: 'temp_grant',
+                        component: () => import('@/views/index/components/manage/tempGrant.vue')
+                      },
+                    ]
                 }
             ]
         },
