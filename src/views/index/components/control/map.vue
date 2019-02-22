@@ -3,17 +3,17 @@
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
       <p>选择一个或多个条件进行搜索</p>
-      <el-form :model="mapForm" class="map_form">
-        <el-form-item style="width: 192px;">
+      <el-form :model="mapForm" class="map_form" ref="mapForm">
+        <el-form-item style="width: 192px;" prop="name">
           <el-input v-model="mapForm.name" placeholder="请输入布控名称"></el-input>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="num">
           <el-input v-model="mapForm.num" placeholder="请输入事件编号"></el-input>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="obj">
           <el-input v-model="mapForm.obj" placeholder="请输入布控对象"></el-input>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="state">
           <el-select v-model="mapForm.state" placeholder="布控状态" @change="changeState()">
             <el-option
               v-for="item in stateList"
@@ -23,7 +23,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="type">
           <el-select v-model="mapForm.type" placeholder="设备类型">
             <el-option
               v-for="item in typeList"
@@ -33,7 +33,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="rank">
           <el-select v-model="mapForm.rank" placeholder="告警级别">
             <el-option
               v-for="item in rankList"
@@ -43,14 +43,14 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="time">
           <el-date-picker
             style="width: 192px;"
             v-model="mapForm.time"
-            type="datetimerange"
+            type="daterange"
             range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
+            start-placeholder="开始时间"
+            end-placeholder="结束时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
@@ -63,7 +63,7 @@
       <!-- 地图 -->
       <div id="mapBox"></div>
       <!-- 抓拍列表 -->
-      <div class="snap_box" v-if="!isShowPlayback">
+      <div class="snap_box" v-if="!isShowFullScreen">
         <el-card shadow="hover" class="more">
           <p>今日抓拍</p>
           <div>2354</div>
@@ -90,7 +90,7 @@
         </el-card>
       </div>
       <!-- 布控进行中页面 -->
-      <div class="underway_box" v-if="isShowPlayback">
+      <div class="underway_box" v-if="isShowFullScreen">
         <div class="video_box" :style="{'height': videoHeight + 'px'}">
           <div class="video">
             <div>
@@ -108,7 +108,7 @@
                 </div>
               </div>
               <div class="vl_map_state">进行中</div>
-              <div class="vl_icon vl_icon_control_13" @click="isShowPlayback = !isShowPlayback"></div>
+              <div class="vl_icon vl_icon_control_13" @click="isShowFullScreen = !isShowFullScreen"></div>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@
               <div><span>布控日期：</span><span>2018-11-01</span></div>
               <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
             </div>
-            <el-button type="primary" size="small">视频回放</el-button>
+            <el-button type="primary" size="small" @click="skipIsVideo">视频回放</el-button>
           </div>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default {
         {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},      
         {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'}      
       ],
-      isShowPlayback: false, // 是否显示视频回放页面
+      isShowFullScreen: false, // 是否显示全屏播放页面
       videoHeight: null
     }
   },
@@ -206,19 +206,10 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
-    // _this.getMapData();
     _this.changeState();
     _this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
-    // 获取地图数据
-    // getMapData () {
-    //   setTimeout(() => {
-    //     this.controlList = testData;
-    //     console.log(this.controlList, 111111)
-    //     this.mapMark();
-    //   }, 200);
-    // },
     // 地图标记
     mapMark () {
       let _this = this, clickWindow = null;
@@ -229,8 +220,9 @@ export default {
         let obj = data[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         let content = '';
+        // 暂时默认告警级别为五级时出现告警闪烁
         if (obj.controlList[0].alarmRank === '五级') {
-          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_02"><div class="vl_icon_warning">发现可疑目标</div></div>';
+          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_02 vl_icon_alarm"><div class="vl_icon_warning">发现可疑目标</div></div>';
         } else {
           content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>';
         }
@@ -246,13 +238,36 @@ export default {
             content: content
           });
           marker.setMap(_this.map);
+          // 让告警闪烁图标10s后自动消失
+          if (obj.controlList.some(s => s.alarmRank === '五级')) {
+            setTimeout(() => {
+              $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+              $('#mapBox .vl_icon_warning').remove();
+              $('#' + obj.sid).removeClass("vl_icon_control_02");
+              $('#' + obj.sid).addClass("vl_icon_control_01");
+            }, 10000);
+          }
           marker.on('click', function(e) {
-            console.log(e.target.C.extData.sid, 'e')
-            // 点击切换图标
-            $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
-            $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
-            $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
-            $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_01");
+            console.log(e.target.C.extData, 'e')
+            // 点击切换告警闪烁图标
+            if (e.target.C.extData.controlList.some(s => s.alarmRank === '五级')) {
+              if (!$('#' + e.target.C.extData.sid).hasClass('vl_icon_control_02')) {
+                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
+                $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+              } else {
+                $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+                $('#mapBox .vl_icon_warning').remove();
+                $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_02");
+                $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+              }
+            } else {
+              // 点击切换普通点标记图标
+              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+              $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
+              $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+              $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_01");
+            }
             let sContent = '';
             // 布控进行中
             if (_this.mapForm.state === '1') {
@@ -270,25 +285,32 @@ export default {
                           <div>
                             <i class="vl_icon vl_icon_control_06"></i>
                             <i class="vl_icon vl_icon_control_07"></i>
-                            <i class="vl_icon vl_icon_control_08" id="screen"></i>
+                            <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
                           </div>
                         </div>
                       </div>
                       <div class="vl_map_info">
-                        <div><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
+                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
                         <div><span>布控日期：</span><span>2018-11-01</span></div>
                         <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
                       </div>
                       <div class="vl_map_obj">
                         <div class="vl_map_obj_num">
                           <div><span>布控对象：</span><span>10</span></div>
-                          <div>查看更多</div>
+                          <div class="vl_map_slide">
+                            <i class="el-icon-arrow-left"></i>
+                            <i class="el-icon-arrow-right"></i>
+                          </div>
                         </div>
                         <div class="vl_map_obj_img">
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                          <div class="vl_map_obj_box">
+                            <div><img src="//via.placeholder.com/60x60"><p>张111</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张222</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张333</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张444</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张555</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张666</p></div>
+                          </div>
                         </div>
                       </div>
                       <div class="vl_map_btn">视频回放</div>
@@ -310,14 +332,14 @@ export default {
                           '<div>' +
                             '<i class="vl_icon vl_icon_control_06"></i>' +
                             '<i class="vl_icon vl_icon_control_07"></i>' +
-                            '<i class="vl_icon vl_icon_control_08" id="screen"></i>' +
+                            '<i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>' +
                           '</div>' +
                         '</div>' +
                       '</div>';
                       for (let item of obj.controlList) {
                         sContent += 
                         '<div class="vl_map_info">' +
-                          '<div><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
+                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
                           '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
                           '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
                         '</div>'
@@ -341,20 +363,25 @@ export default {
                         <span>摄像头524</span>
                       </div>
                       <div class="vl_map_info">
-                        <div><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
+                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
                         <div><span>布控日期：</span><span>2018-11-01</span></div>
                         <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
                       </div>
                       <div class="vl_map_obj">
                         <div class="vl_map_obj_num">
                           <div><span>布控对象：</span><span>10</span></div>
-                          <div>查看更多</div>
+                          <div class="vl_map_slide">
+                            <i class="el-icon-arrow-left"></i>
+                            <i class="el-icon-arrow-right"></i>
+                          </div>
                         </div>
                         <div class="vl_map_obj_img">
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                          <div class="vl_map_obj_box">
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -374,7 +401,7 @@ export default {
                       for (let item of obj.controlList) {
                         sContent += 
                         '<div class="vl_map_info">' +
-                          '<div><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
+                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
                           '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
                           '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
                         '</div>'
@@ -397,20 +424,25 @@ export default {
                         <span>摄像头524</span>
                       </div>
                       <div class="vl_map_info">
-                        <div><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
+                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
                         <div><span>布控日期：</span><span>2018-11-01</span></div>
                         <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
                       </div>
                       <div class="vl_map_obj">
                         <div class="vl_map_obj_num">
                           <div><span>布控对象：</span><span>10</span></div>
-                          <div>查看更多</div>
+                          <div class="vl_map_slide">
+                            <i class="el-icon-arrow-left"></i>
+                            <i class="el-icon-arrow-right"></i>
+                          </div>
                         </div>
                         <div class="vl_map_obj_img">
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                          <div class="vl_map_obj_box">
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -430,7 +462,7 @@ export default {
                       for (let item of obj.controlList) {
                         sContent += 
                         '<div class="vl_map_info">' +
-                          '<div><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
+                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
                           '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
                           '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
                         '</div>'
@@ -455,16 +487,81 @@ export default {
               // 关闭弹窗
               if (clickWindow) { clickWindow.close(); }
             })
-            // 利用事件冒泡,绑定视频回放按钮的点击事件
-            $('#mapBox').on('click', '#screen', function () {
+            // 利用事件冒泡,绑定视频全屏按钮的点击事件
+            $('#mapBox').on('click', '.vl_map_full_screen', function () {
               // 关闭弹窗
               if (clickWindow) { clickWindow.close(); }
               // 显示视频回放页面
-              _this.isShowPlayback = true;
+              _this.isShowFullScreen = true;
+            })
+            $('#mapBox').on('click', '.vl_map_name > span', function () {
+              // 跳转至布控详情页
+              const { href } = _this.$router.resolve({
+                name: 'control_manage',
+                query: {pageType: 2, state: _this.mapForm.state}
+              })
+              window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+            })
+            $('#mapBox').on('click', '.vl_map_btn', function () {
+              // 跳转至视频回放页面
+              _this.skipIsVideo();
+            })
+            // 向右滑动
+            let offbtnStatusLfet = false;
+            $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-right', function () {
+              if(offbtnStatusLfet){
+                return;
+              }
+              offbtnStatusLfet = true;
+              const slide = $('#mapBox .vl_map_obj_box');
+              const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
+              if ((slide.width() + slideMarginLeft) >= 380) {
+                slide.animate({marginLeft: '-=80px'}, 1000, function () {
+                  offbtnStatusLfet = false;
+                });
+              } else {
+                setTimeout(() => {
+                  offbtnStatusLfet = false;
+                }, 1000)
+              }
+            })
+            // 向左滑动
+            let offbtnStatusRight = false;
+            $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-left', function () {
+              if(offbtnStatusRight){
+                return;
+              }
+              offbtnStatusRight = true;
+              const slide = $('#mapBox .vl_map_obj_box');
+              const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
+              if (slideMarginLeft < 0) {
+                slide.animate({marginLeft: '+=80px'}, 1000,function () {
+                  offbtnStatusRight = false;
+                });
+              } else {
+                setTimeout(() => {
+                  offbtnStatusRight = false;
+                }, 1000)
+              }
             })
           });
         }
       }
+    },
+    // 跳转至视频回放页面
+    skipIsVideo () {
+      const { href } = this.$router.resolve({
+        name: 'video_playback'
+      })
+      window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+    },
+    // 深度拷贝公共方法
+    objDeepCopy (source) {
+      var sourceCopy = source instanceof Array ? [] : {};
+      for (var item in source) {
+        sourceCopy[item] = typeof source[item] === 'object' ? this.objDeepCopy(source[item]) : source[item];
+      }
+      return sourceCopy;
     },
     // 按布控状态来筛选地图标记
     changeState () {
@@ -475,19 +572,10 @@ export default {
       this.controlList = this.controlList.filter(f => f.controlList.length > 0);
       this.mapMark();
     },
-    // 深度拷贝公共方法
-    objDeepCopy (source) {
-      var sourceCopy = source instanceof Array ? [] : {};
-      for (var item in source) {
-        sourceCopy[item] = typeof source[item] === 'object' ? this.objDeepCopy(source[item]) : source[item];
-      }
-      return sourceCopy;
-    },
+  
     // 重置表单
     resetForm () {
-      for (let key in this.mapForm) {
-        this.mapForm[key] = null;
-      }
+      this.$refs['mapForm'].resetFields();
     }
   }
 }
@@ -822,6 +910,9 @@ export default {
             font-size: 16px;
             color: #0567E1;
             line-height:24px;
+            > span{
+              cursor: pointer;
+            }
           }
           & > div:not(:nth-child(1)){
             font-size: 12px;
@@ -851,23 +942,45 @@ export default {
                 color: #666666;
               }
             }
-            > div:nth-child(2){
-              color: #0567E1;
-              cursor: pointer;
+            .vl_map_slide{
+              > i{
+                padding: 4px;
+                border: 1px solid #E2E2E2;
+                border-radius: 4px;
+                background: #fff;
+                color: #0567E1;
+                cursor: pointer;
+                &:hover, &.active{
+                  color: #fff;
+                  border-radius: 4px;
+                  background: #0769E7;
+                }
+              }
             }
           }
           .vl_map_obj_img{
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            & > div{
-              text-align: center;
-              > p{
-                line-height: 30px;
-              }
-              > p:hover{
-                cursor: pointer;
-                color: #0567E1;
+            width: 300px;
+            height: 90px;
+            overflow: hidden;
+            position: relative;
+            .vl_map_obj_box{
+              display: flex;
+              flex-wrap: nowrap;
+              position: absolute;
+              left: 0;
+              top: 0;
+              & > div{
+                text-align: center;
+                &:not(:last-child){
+                  margin-right: 20px;
+                }
+                > p{
+                  line-height: 30px;
+                }
+                > p:hover{
+                  cursor: pointer;
+                  color: #0567E1;
+                }
               }
             }
           }
@@ -928,6 +1041,9 @@ export default {
         background: #FA453A;
         color: #fff;
       }
+    }
+    .vl_icon_alarm{
+      animation: twinkle 1s linear infinite both;
     }
   }
 }

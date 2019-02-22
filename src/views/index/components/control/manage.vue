@@ -204,7 +204,7 @@ export default {
   data () {
     return {
       pageType: 1,//页面类型：1-列表页，2-详情页
-      state: null,//布控详情状态，0-待开始 1-进行中 2-                                                            
+      state: null,//布控详情状态，0-待开始 1-进行中 2-已结束                                                           
       // 顶部搜索参数
       manageForm: {
         type: null,
@@ -258,13 +258,19 @@ export default {
     },
     // 跳转至布控详情
     skipIsDetail (state) {
-      // this.$router.push({name: 'control_manage_detail', query: {state: state}});
       this.pageType = 2;
       this.state = state;
     },
     // 跳转至列表
     changePageType (pageType) {
       this.pageType = pageType;
+    }
+  },
+  mounted () {
+    const data = this.$route.query;
+    if (data.pageType && data.state) {
+      this.pageType = parseInt(data.pageType);
+      this.state = data.state;
     }
   }
 }
