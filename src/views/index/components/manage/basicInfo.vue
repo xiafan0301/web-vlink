@@ -1,9 +1,8 @@
 <template>
   <div class="main">
     <div class="ar-tab-nav">
-      <div><router-link :to="{ name: 'custom_group'}" @click.native = "state = 1">自定义组</router-link></div>
-      <div><router-link :to="{ name: 'tirotation_setting'}" @click.native = "state = 2">轮巡设置</router-link></div>
-      <div><router-link :to="{ name: 'device_authorize'}" @click.native = "state = 3">设备授权</router-link></div>
+      <div><router-link :to="{ name: 'person_info'}" @click.native = "state = 1">人员信息库</router-link></div>
+      <div><router-link :to="{ name: 'vehicle_info'}" @click.native = "state = 2">车辆信息库</router-link></div>
     </div>
     <div>
       <!-- <transition enter-active-class="fade-in" leave-active-class="leave-immediately"
@@ -26,6 +25,7 @@ export default {
 .main {
   padding: 20px;
   height: 100%;
+  box-shadow: 4px 0px 10px 0px rgba(131,131,131,0.28);
   > .ar-tab-nav {
     background-color: #ffffff;
     padding-top: 8px;

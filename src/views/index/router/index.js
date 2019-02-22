@@ -247,6 +247,7 @@ export default new Router({
                 }, {
                     path: 'manage',
                     name: 'manage',
+                    redirect: {name: 'set_video'},
                     component: () => import('@/views/index/components/manage/manage.vue'),
                     children: [
                       {
@@ -311,9 +312,57 @@ export default new Router({
                         ]
                       },
                       {
-                        path: 'tempGrant',
-                        name: 'temp_grant',
-                        component: () => import('@/views/index/components/manage/tempGrant.vue')
+                        path: 'basicInfo',
+                        name: 'basic_info',
+                        redirect: {name: 'person_info'},
+                        component: () => import('@/views/index/components/manage/basicInfo.vue'),
+                        children: [
+                          {
+                            path: 'personInfo',
+                            name: 'person_info',
+                            component: () => import('@/views/index/components/manage/personInfo.vue')
+                          },
+                          {
+                            path: 'vehicleInfo',
+                            name: 'vehicle_info',
+                            component: () => import('@/views/index/components/manage/vehicleInfo.vue')
+                          },
+                        ]
+                      },
+                      {
+                        path: 'adminPersonInfo',
+                        name: 'admin_person_info',
+                        component: () => import('@/views/index/components/manage/adminPersonInfo.vue')
+                      },
+                      {
+                        path: 'adminVehicleInfo',
+                        name: 'admin_vehicle_info',
+                        component: () => import('@/views/index/components/manage/adminVehicleInfo.vue')
+                      },
+                      {
+                        path: 'authorityInfo',
+                        name: 'authority_info',
+                        component: () => import('@/views/index/components/manage/authorityInfo.vue')
+                      },
+                      {
+                        path: 'addGroup',
+                        name: 'add_group',
+                        component: () => import('@/views/index/components/manage/addGroup.vue')
+                      },
+                      {
+                        path: 'addPatrol',
+                        name: 'add_patrol',
+                        component: () => import('@/views/index/components/manage/addPatrol.vue')
+                      },
+                      {
+                        path: 'addTempGrant',
+                        name: 'add_temp_grant',
+                        component: () => import('@/views/index/components/manage/addTempGrant.vue')
+                      },
+                      {
+                        path: 'authorizeGrant',
+                        name: 'authorize_grant',
+                        component: () => import('@/views/index/components/manage/authorizeGrant.vue')
                       },
                     ]
                 }

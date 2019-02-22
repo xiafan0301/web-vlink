@@ -96,7 +96,7 @@
 .vl_icon_control_20{width: 20px; height: 20px; background-position: -584px -374px;}
 .vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -374px;}
 .vl_icon_control_22{width: 20px; height: 20px; background-position: -500px -347px;}
-.vl_icon_control_23{width: 30px; height: 32px; background-position: -636px -128px;}
+.vl_icon_control_23{width: 39px; height: 39px; background-position: -639px -128px;}
 .vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -345px;}
 .vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -345px;}
 .vl_icon_control_26{width: 20px; height: 20px; background-position: -755px -374px;}
@@ -133,6 +133,14 @@
 .vl_icon_manage_4{width: 23px; height: 23px; background-position: -499px -373px;} /*添加--视频设置*/
 .vl_icon_manage_5{width: 28px; height: 28px; background-position: -714px -428px;} /*可用设备--视频设置--临时授权*/
 .vl_icon_manage_6{width: 18px; height: 22px; background-position: -325px -376px;} /*摄像头--视频设置--临时授权*/
+.vl_icon_manage_7{width: 20px; height: 19px; background-position: -584px -377px;} /*编辑--视频设置--自定义组*/
+.vl_icon_manage_8{width: 20px; height: 19px; background-position: -694px -377px;} /*删除--视频设置--自定义组*/
+.vl_icon_manage_9{width: 186px; height: 196px; background-position: -98px -1255px;} /*无数据图标--视频设置--自定义组*/
+.vl_icon_manage_10{width: 18px; height: 20px; background-position: -412px -374px;}
+.vl_icon_manage_11{width: 22px; height: 22px; background-position: -802px -529px;} /*权限管理---拖拽--未选中*/
+.vl_icon_manage_12{width: 22px; height: 22px; background-position: -802px -554px;} /*权限管理---拖拽--选中*/
+.vl_icon_manage_13{width: 22px; height: 22px; background-position: -831px -529px;} /*权限管理---添加--未选中*/
+.vl_icon_manage_14{width: 22px; height: 22px; background-position: -831px -554px;} /*权限管理---添加--选中*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
