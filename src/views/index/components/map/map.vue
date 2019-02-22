@@ -317,7 +317,6 @@ export default {
                 _this.testAddSxt();
               });
             }
-
             // hover
             marker.on('mouseover', function () {
               // let iW = Math.round($(window).width() * 0.15);
