@@ -200,7 +200,10 @@ export default {
     handleSizeChange () {
     },
     handleCurrentChange () {},
-    skipAddRatotionPage () {},
+    // 跳至新增轮巡页面
+    skipAddRatotionPage () {
+      this.$router.push({name: 'add_patrol'});
+    },
     // 显示关闭轮巡弹出框
     showCloseDialog (obj) {
       console.log(obj);

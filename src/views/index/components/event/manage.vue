@@ -34,8 +34,8 @@
           <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" type="primary">查询</el-button>
-          <el-button class="reset_btn" type="primary">重置</el-button>
+          <el-button class="select_btn">查询</el-button>
+          <el-button class="reset_btn">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
