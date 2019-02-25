@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
-        <el-breadcrumb-item @click.native="skipIsList()" class="con_back">布控管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="con_back">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>布控详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -221,18 +221,17 @@
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
     <div class="manage_f_box" v-if="controlState === '0'">
-      <el-button type="primary">编辑</el-button>
-      <el-button>删除</el-button>
+      <el-button type="primary" @click="skip(3)">编辑</el-button>
+      <el-button @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
     <div class="manage_f_box" v-if="controlState === '1'">
-      <el-button type="primary">终止</el-button>
-      <el-button>返回</el-button>
+      <el-button type="primary" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
     <div class="manage_f_box" v-if="controlState === '2'">
-      <el-button type="primary">复用</el-button>
-      <el-button>删除</el-button>
+      <el-button type="primary" @click="skipIsCreate">复用</el-button>
+      <el-button @click="showDialog('delDialog')">删除</el-button>
     </div>
     <div class="event_detail_dialog">
       <el-dialog
@@ -271,12 +270,17 @@
         </vue-scroll>
       </el-dialog>
     </div>
+    <div is="delDialog" ref="delDialog"></div>
+    <div is="stopDialog" ref="stopDialog"></div>
   </div>
 </template>
 <script>
-import {conData} from './testData.js';
-import {random14} from '../../../../utils/util.js';
+import delDialog from './delDialog.vue';
+import stopDialog from './stopDialog.vue';
+import {conData} from '../testData.js';
+import {random14} from '../../../../../utils/util.js';
 export default {
+  components: {delDialog, stopDialog},
   props: {
     state: {
       type: String,
@@ -316,10 +320,10 @@ export default {
       pageNum: 1,
       // 实时监控设备列表
       situList: [
-        {name: '设备1', id: '01', src: require('../../../../assets/video/video.mp4'), index: 0},
-        {name: '设备2', id: '02', src: require('../../../../assets/video/video.mp4'), index: 1},
-        {name: '设备3', id: '03', src: require('../../../../assets/video/video.mp4'), index: 2},
-        {name: '设备4', id: '04', src: require('../../../../assets/video/video.mp4'), index: 3}
+        {name: '设备1', id: '01', src: require('../../../../../assets/video/video.mp4'), index: 0},
+        {name: '设备2', id: '02', src: require('../../../../../assets/video/video.mp4'), index: 1},
+        {name: '设备3', id: '03', src: require('../../../../../assets/video/video.mp4'), index: 2},
+        {name: '设备4', id: '04', src: require('../../../../../assets/video/video.mp4'), index: 3}
       ],
       rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
@@ -342,8 +346,18 @@ export default {
     // this.reset();
   },
   methods: {
-    skipIsList () {
-      this.$emit('changePageType', 1);
+    skip (type) {
+      this.$emit('changePageType', type);
+    },
+    // 跳转至新建布控页-复用
+    skipIsCreate () {
+      this.$router.push({ name: 'control_create', query: {createType: 3} });
+    },
+    // 显示弹出框
+    showDialog (formName) {
+      if (this.$refs[formName]) {
+        this.$refs[formName].reset();
+      }
     },
     dragstart (e, index) {
       // 使其半透明

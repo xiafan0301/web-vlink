@@ -37,7 +37,7 @@
   </div>
 </template>
 <script>
-import uploadPic from '../control/uploadPic';
+import uploadPic from '../control/components/uploadPic';
 export default {
   components: {uploadPic},
   props: ['pageType'],

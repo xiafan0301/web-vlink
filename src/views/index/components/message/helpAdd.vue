@@ -77,7 +77,7 @@
   </div>
 </template>
 <script>
-import uploadPic from '../control/uploadPic';
+import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
 export default {
   components: {uploadPic},
