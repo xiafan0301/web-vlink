@@ -8,7 +8,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :status="$route.query.status"></EventBasic>
         <div class="event-handle">
           <div class="event-handle-header">
             <span>处理事件</span>
@@ -60,9 +60,17 @@ export default {
   components: { EventBasic },
   data () {
     return {
+      status: null, // 
       isMutual: null, // 是否发布民众互助
       handleType: null, // 选择处理的方式
     }
+  },
+  mounted () {
+    const status = this.$route.query.status;
+    console.log(status)
+  },
+  methods: {
+
   }
 }
 </script>

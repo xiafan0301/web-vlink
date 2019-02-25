@@ -101,11 +101,7 @@
 .vl_icon_control_20{width: 20px; height: 20px; background-position: -584px -374px;}
 .vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -374px;}
 .vl_icon_control_22{width: 20px; height: 20px; background-position: -500px -347px;}
-<<<<<<< HEAD
 .vl_icon_control_23{width: 40px; height: 40px; background-position: -636px -128px;}
-=======
-.vl_icon_control_23{width: 39px; height: 39px; background-position: -639px -128px;}
->>>>>>> sy
 .vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -345px;}
 .vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -345px;}
 .vl_icon_control_26{width: 20px; height: 20px; background-position: -755px -374px;}
@@ -124,6 +120,13 @@
 .vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;}
 .vl_icon_event_7{width: 23px; height: 22px; background-position: -903px -375px;}
 .vl_icon_event_8{width: 21px; height: 21px; background-position: -872px -375px;}
+.vl_icon_event_9{width: 124px; height: 124px; background-position: -91px -718px;} /*事件---未处理*/
+.vl_icon_event_10{width: 124px; height: 124px; background-position: -227px -718px;} /*事件---处理中*/
+.vl_icon_event_11{width: 124px; height: 124px; background-position: -364px -718px;} /*事件---已结束*/
+.vl_icon_event_12{width: 124px; height: 124px; background-position: -525px -718px;} /*事件---待开始*/
+.vl_icon_event_13{width: 124px; height: 124px; background-position: -667px -718px;} /*事件---进行中*/
+.vl_icon_event_14{width: 24px; height: 18px; background-position: -280px -995px;} /*事件---语音通话*/
+.vl_icon_event_15{width: 20px; height: 23px; background-position: -105px -135px;} /*事件---视频暂停*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/

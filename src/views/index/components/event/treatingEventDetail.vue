@@ -8,7 +8,7 @@
       </el-breadcrumb>
     </div>
     <div class="content-box">
-      <EventBasic></EventBasic>
+      <EventBasic :status="$route.query.status"></EventBasic>
       <div class="summary">
         <div class="summary-header">
           <span>事件总结</span>
@@ -17,6 +17,16 @@
         <div class="summary-content">
           <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
           <p>事件总结报告</p>
+        </div>
+      </div>
+      <div class="summary">
+        <div class="summary-header">
+          <span>调度总结</span>
+        </div>
+        <div class="divide"></div>
+        <div class="summary-content">
+          <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
+          <p>调度总结报告</p>
         </div>
       </div>
       <div class="control-result">
@@ -50,12 +60,9 @@
                 <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                 <div class="control-btn">
                   <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
+                  <!-- <div> -->
+                   <i class="vl_icon_event_15 vl_icon"></i>
+                  <!-- </div> -->
                 </div>
               </div>
               <div class="control-text">
@@ -74,12 +81,26 @@
                 <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                 <div class="control-btn">
                   <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
+                  <i class="vl_icon_event_15 vl_icon"></i>
+                </div>
+              </div>
+              <div class="control-text">
+                <p>
+                  <i></i>
+                  <span class="name">匹配名称</span>
+                </p>
+                <p>
+                  <i></i>
+                  <span class="time">2018-12-2414:12:17</span>
+                </p>
+              </div>
+            </li>
+            <li>
+              <div class="control-main">
+                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+                <div class="control-btn">
+                  <div>抓拍设备</div>
+                  <i class="vl_icon_event_15 vl_icon"></i>
                 </div>
               </div>
               <div class="control-text">
@@ -99,34 +120,7 @@
                 <div class="control-btn">
                   <div>抓拍设备</div>
                   <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
+                    <i class="vl_icon_event_15 vl_icon"></i>
                   </div>
                 </div>
               </div>
@@ -289,14 +283,16 @@
                   <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
                   <div class='time'>2019-01-17 11:57</div>
                   <div style="width:100%;margin-top:10px;">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
+                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
                     <!-- <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div> -->
                   </div>
                 </div>
@@ -350,28 +346,28 @@
             <li>
               <div>
                 <span class="title">民众互助：</span>
-                <span class="content">5条评论</span>
+                <span class="content" @click="skipCommentPage">5条评论</span>
                 <span class="status">（已发布）</span>
               </div>
             </li>
             <li>
               <div>
                 <span class="title">智能布控：</span>
-                <span class="content">查看布控方案</span>
+                <span class="content" @click="skipControlPage">查看布控方案</span>
                 <span class="status">（已设置）</span>
               </div>
             </li>
             <li>
               <div>
                 <span class="title">调度指挥：</span>
-                <span class="content">查看调度方案</span>
+                <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
                 <span class="status">（已发布）</span>
               </div>
             </li>
             <li>
               <div>
                 <span class="title">向上呈报：</span>
-                <span class="content">查看呈报的内容和上级指示</span>
+                <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
                 <span class="status">（已呈报）</span>
               </div>
             </li>
@@ -380,7 +376,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">结束事件</el-button>
+      <el-button class="operation_btn function_btn" v-show="$route.query.status === 'handling'" @click="skipEventEndPage">结束事件</el-button>
       <el-button class="operation_btn back_btn">返回</el-button>
     </div>
   </div>
@@ -418,6 +414,26 @@ export default {
 
     },
     handleCurrentChange () {},
+    // 跳至结束事件页面
+    skipEventEndPage () {
+      this.$router.push({name: 'event_end', query: {status: this.$route.query.status}});
+    },
+    // 跳至查看互助页面
+    skipCommentPage () {
+      this.$router.push({path: '/message/help'});
+    },
+    // 跳至查看布控详情页面
+    skipControlPage () {
+      this.$router.push({path: '/control/manage'});
+    },
+    // 跳至查看调度指挥页面
+    skipEventCtcDetailPage () {
+      this.$router.push({name: 'event_ctc_detail', query: {status: this.$route.query.status}});
+    },
+    // 跳至查看呈报内容
+    skipReportDetailPage () {
+      this.$router.push({name: 'report_detail', query: {status: this.$route.query.status}});
+    }
   }
 }
 </script>
@@ -507,12 +523,16 @@ export default {
                 z-index: 1;
                 position: absolute;
                 display: flex;
+                align-items: center;
                 justify-content: space-between;
                 bottom: 0;
                 left: 0;
                 > div {
                   color: #ffffff;
                   font-weight: 500;
+                }
+                i {
+                  cursor: pointer;
                 }
               }
             }

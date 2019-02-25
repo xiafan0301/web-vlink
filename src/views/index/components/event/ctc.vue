@@ -1,29 +1,35 @@
 <template>
   <div class="ctc-list">
     <div class="search_box">
-      <el-form :inline="true" :model="ctcForm" class="ctc_form">
+      <el-form :inline="true" :model="ctcForm" class="ctc_form" ref="ctcForm">
         <el-form-item>
           <el-date-picker
-            style="width: 240px;"
-            v-model="ctcForm.dateTime"
-            type="datetimerange"
+            style="width: 260px;"
+            v-model="ctcForm.reportTime"
+            type="daterange"
+            value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="ctcForm.eventStatus" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="ctcForm.eventStatus" style="width: 240px;" placeholder="事件状态">
+            <el-option value='全部状态'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item >
           <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" type="primary">查询</el-button>
-          <el-button class="reset_btn" type="primary">重置</el-button>
+          <el-button class="select_btn" @click="selectDataList('ctcForm')">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('ctcForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
@@ -89,7 +95,7 @@
         </el-table-column>
         <el-table-column label="操作" width="140">
           <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
+            <span class="operation_btn" @click="skipCtcDetailPage(scope.row)">查看</span>
           </template>
         </el-table-column>
       </el-table>
@@ -97,19 +103,20 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
   </div>
 </template>
 <script>
+import { formatDate } from '@/utils/util.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       blueStyle: {
         'color': '#6262FF'
       },
@@ -117,7 +124,7 @@ export default {
         'color': '#666666'
       },
       ctcForm: {
-        dateTime: null, // 日期
+        reportTime: [], // 日期
         eventStatus: null, // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
@@ -129,7 +136,7 @@ export default {
           idCard: '市民',
           reportTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
+          eventStatus: '待开始',
           reportContent: 0,
         },
         {
@@ -139,7 +146,7 @@ export default {
           idCard: '城管',
           reportTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '处理中',
+          eventStatus: '进行中',
           reportContent: 1
         },
         {
@@ -159,7 +166,7 @@ export default {
           idCard: '市民',
           reportTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
+          eventStatus: '进行中',
           reportContent: 1
         },
         {
@@ -169,17 +176,49 @@ export default {
           idCard: '市民',
           reportTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
+          eventStatus: '进行中',
           reportContent: 1
         }
       ] // 表格数据
     }
+  },
+  mounted () {
+    this.getOneMonth();
   },
   methods: {
     handleSizeChange () {
 
     },
     handleCurrentChange () {},
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.ctcForm.reportTime.push(startDate);
+      this.ctcForm.reportTime.push(endDate);
+    },
+    // 根据搜索条件查询
+    selectDataList (form) {
+      this.$refs[form].validator(valid => {
+        if (valid) {
+          console.log(valid)
+        }
+      })
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.eventForm.reportTime = [];
+      this.$refs[form].resetFields();
+      this.getOneMonth();
+    },
+    // 跳至调度指挥详情页
+    skipCtcDetailPage (obj) {
+      if (obj.eventStatus === '进行中') {
+        this.$router.push({name: ''});
+      }
+    }
   }
 }
 </script>
