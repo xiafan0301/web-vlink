@@ -9,7 +9,7 @@ const oDomains = {
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
-    // 应急指挥 mode: ecc
+    // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',

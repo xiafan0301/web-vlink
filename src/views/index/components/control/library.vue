@@ -29,18 +29,19 @@
           </div>
         </div>
       </vue-scroll>
-      <el-form :model="libForm" class="lib_form" v-if="tabType === '1'">
-        <el-form-item>
+      <el-form :model="libForm" class="lib_form" ref="libForm" v-if="tabType === '1'">
+        <el-form-item prop="perTime">
           <el-date-picker
             style="width: 192px;"
             v-model="libForm.perTime"
-            type="datetimerange"
-            range-separator="-"
+            type="daterange"
+            format="yy-MM-dd"
+            range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="sex">
           <el-select v-model="libForm.sex" placeholder="选择性别">
             <el-option
               v-for="item in sexList"
@@ -50,7 +51,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="national">
           <el-select v-model="libForm.national" placeholder="选择民族">
             <el-option
               v-for="item in nationalList"
@@ -60,26 +61,27 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="card">
           <el-input v-model="libForm.card" placeholder="证件号码"></el-input>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button style="width: 90px;" type="primary" plain>重置</el-button>
+          <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
           <el-button style="width: 90px;" type="primary">搜索</el-button>
         </el-form-item>
       </el-form>
-      <el-form :model="libForm" class="lib_form" v-else>
-        <el-form-item>
+      <el-form :model="libForm" class="lib_form" v-else ref="libForm">
+        <el-form-item prop="carTime">
           <el-date-picker
             style="width: 192px;"
             v-model="libForm.carTime"
-            type="datetimerange"
-            range-separator="-"
+            type="daterange"
+            format="yy-MM-dd"
+            range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="carColor">
           <el-select v-model="libForm.carColor" placeholder="选择车身颜色">
             <el-option
               v-for="item in carColorList"
@@ -89,7 +91,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="carType">
           <el-select v-model="libForm.carType" placeholder="选择车辆类型">
             <el-option
               v-for="item in carTypeList"
@@ -99,7 +101,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="numType">
           <el-select v-model="libForm.numType" placeholder="选择号牌类型">
             <el-option
               v-for="item in numTypeList"
@@ -109,21 +111,21 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;">
+        <el-form-item style="width: 192px;" prop="carNum">
           <el-input v-model="libForm.carNum" placeholder="车辆号码"></el-input>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button style="width: 90px;" type="primary" plain>重置</el-button>
+          <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
           <el-button style="width: 90px;" type="primary">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="library_content">
-      <div class="snap_list" v-if="pageType === '1'">
+      <div class="member_list" v-if="pageType === '1'">
         <div class="snap_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">(123)</span></div>
-          <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm')">新建人像</el-button>
-          <el-button v-else type="primary" @click.native="clearForm('carForm')">新建车像</el-button>
+          <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+          <el-button v-else type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box">
           <template v-if="tabType === '1'">
@@ -132,7 +134,7 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20"></i>
+                  <i class="vl_icon vl_icon_control_20" @click="clearForm('portraitForm', '2')"></i>
                 </div>
                 <div class="data_list">
                   <span>里默默</span>
@@ -166,7 +168,7 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20"></i>
+                  <i class="vl_icon vl_icon_control_20" @click="clearForm('carForm', '2')"></i>
                 </div>
                 <div class="data_list">
                   <span>湘A12345</span><span>小型汽车号牌</span>
@@ -206,18 +208,18 @@
           </div>
         </div>
       </div>
-      <div class="member_list" v-if="pageType === '2'">
+      <div class="set_list" v-if="pageType === '2'">
         <div class="member_title">
           <div>
             <div><span class="vl_f_333">{{tabType === '1' ? '失踪儿童' : '全部车辆'}}</span><i class="vl_icon vl_icon_control_25" @click="popAddGroupDialog(2)"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
             <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
           </div>
           <div>
-            <el-button @click="isShowGroupCopy = !isShowGroupCopy;">复制</el-button>
-            <el-button @click="removeGroupDialog = true;">移出</el-button>
+            <el-button @click="judgeIsSelectedCopy">复制</el-button>
+            <el-button @click="judgeIsSelectedRemove">移出</el-button>
             <el-collapse-transition>
               <ul class="group_copy" v-show="isShowGroupCopy">
-                <li>系统默认</li>
+                <li @click="copyIsGroup">系统默认</li>
                 <li>重点青少年</li>
                 <li>拐卖妇女</li>
                 <li>失踪儿童</li>
@@ -318,7 +320,7 @@
         :close-on-click-modal="false"
         width="722px"
         top="20vh"
-        :title="tabType === '1' ? '新增人像' : '新增车像'">
+        :title="tabType === '1' ? `${operationType === '1' ? '新增' : '修改'}人像` : `${operationType === '1' ? '新增' : '修改'}车像`">
         <div class="add_portrait">
           <div class="portrait_update">
             <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
@@ -349,13 +351,13 @@
             <!-- 人像 -->
             <el-form class="portrait_form" v-show="tabType === '1'" :model="portraitForm" :rules="portraitRules" ref="portraitForm" label-width="20px" label-position="left">
               <el-form-item label=" " style="width: 415px;" prop="name">
-                <el-input v-model="portraitForm.name" placeholder="姓名"></el-input>
+                <el-input v-model="portraitForm.name" placeholder="姓名" maxlength="50"></el-input>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-button plain>男</el-button>
-                <el-button plain>女</el-button>
+              <el-form-item style="width: 415px;" class="portrait_form_sex">
+                <el-button plain @click.native="portraitForm.sex = 1" :class="{'active': portraitForm.sex === 1}">男</el-button>
+                <el-button plain @click.native="portraitForm.sex = 2" :class="{'active': portraitForm.sex === 2}">女</el-button>
               </el-form-item>
-              <el-form-item style="width: 415px;">
+              <el-form-item style="width: 415px;" prop="national">
                 <el-select v-model="portraitForm.national" placeholder="民族" style="width: 100%;">
                   <el-option
                     v-for="item in nationalList"
@@ -376,10 +378,10 @@
                 </el-select>
               </el-form-item>
               <el-form-item label=" " style="width: 415px;" prop="cardNum">
-                <el-input v-model="portraitForm.cardNum" placeholder="证件号码"></el-input>
+                <el-input v-model="portraitForm.cardNum" placeholder="证件号码" @blur="getBirthDate"></el-input>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="portraitForm.date" placeholder="出生日期"></el-input>
+              <el-form-item style="width: 415px;" prop="date">
+                <el-input v-model="portraitForm.date" placeholder="出生日期" :disabled="true"></el-input>
               </el-form-item>
               <!-- 选择归属组 -->
               <el-form-item style="width: 415px;position: relative;">
@@ -393,14 +395,14 @@
                   <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
                 </div>
                 <el-collapse-transition>
-                  <div class="group_li" v-show="isShowDpList">
+                  <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
                     <el-checkbox-group v-model="portraitForm.perOwnerGroup">
                       <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
                     </el-checkbox-group>
                   </div>
                 </el-collapse-transition>
               </el-form-item>
-              <el-form-item style="width: 415px;" class="desc">
+              <el-form-item style="width: 415px;" class="desc" prop="perDesc">
                 <div>
                   <el-input
                     type="textarea"
@@ -409,7 +411,7 @@
                     placeholder="描述"
                     v-model="portraitForm.perDesc">
                   </el-input>
-                  <p><span class="vl_f_999">1</span>/<span class="vl_f_999">50</span></p>
+                  <p><span class="vl_f_999">{{portraitForm.perDesc.length}}</span>/<span class="vl_f_999">100</span></p>
                 </div>
               </el-form-item>
             </el-form>
@@ -418,17 +420,45 @@
               <el-form-item label=" " style="width: 415px;" prop="carNum">
                 <el-input v-model="carForm.carNum" placeholder="车牌号码"></el-input>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="carForm.carColor" placeholder="车身颜色"></el-input>
+              <el-form-item style="width: 415px;" prop="carColor">
+                <el-select v-model="carForm.carColor" placeholder="选择车身颜色" style="width: 100%;">
+                  <el-option
+                    v-for="item in carColorList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="carForm.cardType" placeholder="车辆类型"></el-input>
+              <el-form-item style="width: 415px;" prop="carType">
+                <el-select v-model="carForm.carType" placeholder="选择车辆类型" style="width: 100%;">
+                  <el-option
+                    v-for="item in carTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="carForm.numType" placeholder="号牌类型"></el-input>
+              <el-form-item style="width: 415px;" prop="numType">
+                <el-select v-model="carForm.numType" placeholder="选择号牌类型" style="width: 100%;">
+                  <el-option
+                    v-for="item in numTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
-              <el-form-item style="width: 415px;">
-                <el-input v-model="carForm.numColor" placeholder="号牌颜色"></el-input>
+              <el-form-item style="width: 415px;" prop="numColor">
+                <el-select v-model="carForm.numColor" placeholder="选择号牌颜色" style="width: 100%;">
+                  <el-option
+                    v-for="item in numColorList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
               </el-form-item>
               <!-- 归属组 -->
               <el-form-item style="width: 415px;">
@@ -449,7 +479,7 @@
                   </div>
                 </el-collapse-transition>
               </el-form-item>
-              <el-form-item style="width: 415px;" class="desc">
+              <el-form-item style="width: 415px;" class="desc" prop="carDesc">
                 <div>
                   <el-input
                     type="textarea"
@@ -458,15 +488,16 @@
                     placeholder="描述"
                     v-model="carForm.carDesc">
                   </el-input>
-                  <p><span class="vl_f_999">1</span>/<span class="vl_f_999">50</span></p>
+                  <p><span class="vl_f_999">{{carForm.carDesc.length}}</span>/<span class="vl_f_999">100</span></p>
                 </div>
               </el-form-item>
             </el-form>
           </div>
         </div>
         <div slot="footer">
-          <el-button @click="addPortraitDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary">保存</el-button>
+          <el-button @click="toGiveUpDialog = true">取消</el-button>
+          <el-button v-if="tabType === '1'" :loading="loadingBtn" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
+          <el-button v-else :loading="loadingBtn" type="primary" @click="saveCar('carForm')">保存</el-button>
         </div>
       </el-dialog>
     </div>
@@ -477,10 +508,14 @@
         width="482px"
         top="40vh">
         <h4>{{addOrUpdate  === 1 ? '新增组' : '修改组'}}</h4>
-        <el-input v-model="groupName" placeholder="请输入组名称，最多6字，不可重复" style="padding: 20px 20px 0;"></el-input>
+        <el-form :model="addGroup" class="add_group" ref="addGroup">
+          <el-form-item prop="groupName" :rules="{ required: true, message: '请输入组名', trigger: 'blur'}">
+            <el-input v-model="addGroup.groupName" placeholder="请输入组名称，最多6字，不可重复" maxlength="6" style="padding-top: 20px;"></el-input>
+          </el-form-item>
+        </el-form>
         <div slot="footer">
           <el-button @click="addGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary">{{addOrUpdate  === 1 ? '新增' : '确认'}}</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="addGrouping('addGroup')">{{addOrUpdate  === 1 ? '新增' : '确认'}}</el-button>
         </div>
       </el-dialog>
     </div>
@@ -504,7 +539,7 @@
         :close-on-click-modal="false"
         width="482px"
         top="40vh">
-        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要将这 <span>1</span>条人像数据移出该组？</h1>
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要将这 <span>{{allIsChecked}}</span>条{{tabType === '1' ? '人像' : '车像'}}数据移出该组？</h1>
         <p class="vl_f_12 vl_f_999">移出该组后将在系统默认中。</p>
         <div slot="footer">
           <el-button @click="removeGroupDialog = false">取消</el-button>
@@ -512,9 +547,21 @@
         </div>
       </el-dialog>
     </div>
+    <el-dialog
+      :visible.sync="toGiveUpDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否放弃本次操作？</h4>
+      <div slot="footer">
+        <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;">放弃</el-button>
+        <el-button  type="primary" @click="toGiveUpDialog = false">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import {checkIdCard, checkName, checkPlateNumber} from '@/utils/validator.js';
 export default {
   data () {
     return {
@@ -546,28 +593,68 @@ export default {
         {groupName: '系统默认', memberNum: 204, id: '008'},
         {groupName: '系统默认', memberNum: 205, id: '009'}
       ],//分组列表数据
-      pageType: '1',//页面类型，默认为今日抓拍列表页
+      pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
-      sexList: [],//性别列表数据
-      nationalList: [],//民族列表数据
-      carColorList: [],//车身颜色列表数据
-      carTypeList: [],//车辆类型列表数据
-      numTypeList: [],//号码类型列表数据
+      sexList: [
+        {label: '未知', value: '0'},
+        {label: '男', value: '1'},
+        {label: '女', value: '2'}
+      ],//性别列表数据
+      nationalList: [
+        {label: '其他', value: '0'},
+        {label: '汉族', value: '1'},
+        {label: '苗族', value: '2'},
+        {label: '土家族', value: '3'},
+        {label: '傣族', value: '4'},
+        {label: '壮族', value: '5'}
+      ],//民族列表数据
+      carTypeList: [
+        {label: '其他', value: '0'},
+        {label: '小轿车', value: '1'},
+        {label: 'SUV', value: '2'},
+        {label: '面包车', value: '3'},
+        {label: '中巴车', value: '4'},
+        {label: '卡车', value: '5'},
+        {label: '自行车', value: '6'},
+        {label: '电动车', value: '7'},
+        {label: '摩托车', value: '8'}
+      ],//车辆类型列表数据
+      numTypeList: [
+        {label: '大型汽车号牌', value: '0'},
+        {label: '小型汽车号牌', value: '1'}
+      ],//号码类型列表数据
+      carColorList: [
+        {label: '其他', value: '0'},
+        {label: '黑', value: '1'},
+        {label: '红', value: '2'},
+        {label: '白', value: '3'},
+        {label: '蓝', value: '4'},
+        {label: '紫', value: '5'},
+        {label: '灰', value: '6'},
+        {label: '绿', value: '7'}
+      ],//车身颜色列表
+      numColorList: [
+        {label: '其他', value: '0'},
+        {label: '红底白字', value: '1'},
+        {label: '蓝底白字', value: '2'}
+      ],//号牌颜色列表
       // 翻页数据
       currentPage: 1,
       pageSzie: 10,
       pageNum: 1,
       // dialog
       addPortraitDialog: false,
+      toGiveUpDialog: false,
       // 新增人像参数
       portraitForm: {
         name: '',
+        sex: '',
         national: null,
         cardType: '',
         cardNum: '',
         date: null,
         perOwnerGroup: [],
-        perDesc: null
+        perDesc: ''
       },
       // 新增车像参数
       carForm: {
@@ -577,25 +664,21 @@ export default {
         numType: null,
         numColor: null,
         carOwnerGroup: [],
-        carDesc: null
+        carDesc: ''
       },
+      //证件类型列表数据
       cardTypeList: [
-        {
-          label: '身份证',
-          value: '1'
-        },
-        {
-          label: '护照',
-          value: '2'
-        }
-      ],//证件类型列表数据
+        {label: '身份证', value: '1'},
+        {label: '护照', value: '2'}
+      ],
       addGroupDialog: false,
       delGroupDialog: false,
       removeGroupDialog: false,
-      groupName: null,//新增组名
+      addGroup: {groupName: null},//新增组名
       loadingBtn: false,
       addOrUpdate: null,//新增或者修改弹窗
       isShowDpList: false,//是否显示下拉列表数据
+      operationType: null,//新增还是修改人像/车像，1-新增，2-修改
       groupDropdownList: [
         {label: '失踪儿童', value: '1'},
         {label: '拐卖妇女', value: '2'},
@@ -605,19 +688,26 @@ export default {
         {label: '失踪儿童', value: '6'}
       ],//归属组下拉列表数据
       portraitRules: {
-        name: [{required: true, message: '不能为空', trigger: 'blur'}],
-        cardType: [{required: true, message: '不能为空', trigger: 'change'}],
-        cardNum: [{required: true, message: '不能为空', trigger: 'blur'}]
+        name: [
+          {required: true, message: '请填写姓名', trigger: 'blur'},
+          {validator: checkName, trigger: 'blur'}
+        ],
+        cardType: [{required: true, message: '请选择证件类型', trigger: 'change'}],
+        cardNum: [
+          {required: true, message: '请填写证件号码', trigger: 'blur'},
+          {validator: checkIdCard, trigger: 'blur'}
+        ]
       },
       carRules: {
-        carNum: [{required: true, message: '不能为空', trigger: 'blur'}]
+        carNum: [
+          {required: true, message: '请填写车牌号码', trigger: 'blur'},
+          {validator: checkPlateNumber, trigger: 'blur'}
+        ]
       },
-
       // 上传人像参数
       dialogImageUrl: null,
       dialogVisible: false,
       picHeight: null,
-
       // 右边列表参数
       allChecked: false,
       memberList: [
@@ -657,6 +747,11 @@ export default {
       this.addOrUpdate = type;
       this.groupIndex = -1;
       this.addGroupDialog = true;
+      this.$refs['addGroup'].resetFields();
+    },
+    // 重置左侧组合搜索
+    reset () {
+      this.$refs['libForm'].resetFields();
     },
     // 单选
     operateRadio () {
@@ -716,6 +811,36 @@ export default {
       }
       return isJPG && isLt2M;
     },
+    // 新增/修改分组
+    addGrouping (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('验证通过');
+        } else {
+          return false;
+        }
+      })
+    },
+    // 判断是否选择了复制对象
+    judgeIsSelectedCopy () {
+      if (this.memberList.every(e => e.isChecked === false)) {
+        this.$message.error('请选择复制对象!');
+      } else {
+        this.isShowGroupCopy = !this.isShowGroupCopy;
+      }
+    },
+    // 判断是否选择了移出对象
+    judgeIsSelectedRemove () {
+      if (this.memberList.every(e => e.isChecked === false)) {
+        this.$message.error('请选择移出对象!');
+      } else {
+        this.removeGroupDialog = true;
+      }
+    },
+    // 复制到自定义组
+    copyIsGroup () {
+      this.isShowGroupCopy = !this.isShowGroupCopy;
+    },
     //删除选中的组
     delSelGroup (item, type) {
       if (type === 1) {
@@ -724,15 +849,43 @@ export default {
         this.carForm.carOwnerGroup = this.carForm.carOwnerGroup.filter(f => f !== item);
       }
     },
-    // 清除新建人像和车像表单验证和内容
-    clearForm (formName) {
+    // 清除新建/修改人像和车像表单验证和内容
+    clearForm (formName, type) {
       if (this.$refs[formName]) {
         this.$refs[formName].resetFields();
       }
+      this.operationType = type;
       this.portraitForm.perOwnerGroup = [];
       this.carForm.carOwnerGroup = [];
+      this.portraitForm.sex = '';
       this.isShowDpList = false;
       this.addPortraitDialog = true;
+    },
+    // 获取出生日期
+    getBirthDate () {
+      if (this.portraitForm.cardNum.length === 18) {
+        this.portraitForm.date = `${this.portraitForm.cardNum.slice(6, 10)}年${this.portraitForm.cardNum.slice(10, 12)}月${this.portraitForm.cardNum.slice(12, 14)}日`;
+      }
+    },
+    // 保存人像
+    savePortrait (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('验证通过')
+        } else {
+          return false;
+        }
+      })
+    },
+    // 保存车像
+    saveCar (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('验证通过')
+        } else {
+          return false;
+        }
+      })
     }
   }
 }
@@ -851,7 +1004,7 @@ export default {
     height: 100%;
     width: calc(100% - 252px);
     margin-left: 252px;
-    .snap_list, .member_list{
+    .member_list, .set_list{
       width: 100%;
       height: 100%;
       position: relative;
@@ -945,7 +1098,7 @@ export default {
         }
       }
     }
-    .member_list{
+    .set_list{
       width: 100%;
       height: 100%;
       .member_title{
@@ -1117,6 +1270,9 @@ export default {
     }
     .lib_form .el-form-item{
       margin-bottom: 10px!important;
+      .el-range-input{
+        width: 62px;
+      }
     }
   }
   .add_portrait_dialog{
@@ -1185,6 +1341,11 @@ export default {
             border-radius: 4px;
           }
         }
+      }
+      .el-button.active{
+        background: #fff;
+        border-color: #409EFF;
+        color: #409EFF;
       }
     }
   }

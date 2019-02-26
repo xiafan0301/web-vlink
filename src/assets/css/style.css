@@ -476,6 +476,14 @@
   text-align: center;
 }
 /* 重置全局弹窗样式 */
+.el-dialog{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0 !important;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+}
 .el-dialog__wrapper .el-dialog__body{
   padding: 0px 20px 30px;
 }
