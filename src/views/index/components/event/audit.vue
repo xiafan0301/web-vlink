@@ -240,7 +240,8 @@ export default {
     selectDataList (form) {
       this.$refs[form].validator(valid => {
         if (valid) {
-
+          console.log(valid);
+          
         }
       })
     },

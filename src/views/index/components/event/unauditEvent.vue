@@ -220,13 +220,14 @@ export default {
     submitData () { // 审核通过
       this.$message({
         type: 'success',
-        message: '保存成功'
+        message: '保存成功',
+        customClass: 'request_tip'
       })
     }
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .unaudit {
   width: 100%;
   height: 100%;
@@ -236,81 +237,81 @@ export default {
     height: calc(100% - 50px - 100px);
     display: flex;
     box-shadow: 5px 0px 16px 0px rgba(169,169,169,0.2);
-      .content_left_scroll {
-        width: 500px;
-        height: 100%;
-        background: #ffffff;
-        /deep/ .__view {
-          width: 100% !important;
-        }
-        .content_left {
+    .content_left_scroll {
+      width: 500px;
+      height: 100%;
+      background: #ffffff;
+      /deep/ .__view {
+        width: 100% !important;
+      }
+      .content_left {
+        width: 100%;
+        padding: 20px 10px 0 10px;
+        > ul {
           width: 100%;
-          padding: 20px 10px 0 10px;
-          > ul {
-            width: 100%;
-            font-size: 14px;
-            > li {
-              height: 35px;
-              > span:nth-child(1) {
-                padding-right: 10px;
-                color: #666666;
-                width: 85px;
-                display: inline-block;
-                text-align: right;
-                &.audit-label {
-                  color: #333333;
-                }
-              }
-              > span:nth-child(2) {
+          font-size: 14px;
+          > li {
+            height: 35px;
+            > span:nth-child(1) {
+              padding-right: 10px;
+              color: #666666;
+              width: 85px;
+              display: inline-block;
+              text-align: right;
+              &.audit-label {
                 color: #333333;
-                display: inline-block;
-                &.audit-status {
-                  color: #0C70F8;
-                  font-size: 18px;
-                }
+              }
+            }
+            > span:nth-child(2) {
+              color: #333333;
+              display: inline-block;
+              &.audit-status {
+                color: #0C70F8;
+                font-size: 18px;
               }
             }
           }
-          .add_event_form {
-            width: 100%;
-            /deep/ .el-form-item {
-              margin-bottom: 15px;
-            }
-            .imgTips {
-              width: 160px;
-              border-radius: 2px;
-              position: absolute;
-              color: #F94539;
-              padding-top: 0;
-              -ms-flex-item-align: center;
-              align-self: center;
-              left: 90px;
-              top: 35px;
-            }
-            .img-form-item /deep/ .el-form-item__content{
+        }
+        .add_event_form {
+          width: 100%;
+          /deep/ .el-form-item {
+            margin-bottom: 15px;
+          }
+          .imgTips {
+            width: 160px;
+            border-radius: 2px;
+            position: absolute;
+            color: #F94539;
+            padding-top: 0;
+            -ms-flex-item-align: center;
+            align-self: center;
+            left: 90px;
+            top: 35px;
+          }
+          .img-form-item /deep/ .el-form-item__content{
+            display: flex;
+            .img-list {
+              width: 104px;
+              height: 104px;
+              margin-left: 10px;
+              margin-bottom: 10px;
               display: flex;
-              .img-list {
-                width: 104px;
-                height: 104px;
-                margin-left: 10px;
-                margin-bottom: 10px;
-                display: flex;
-                .error-item {
-                  position: absolute;
-                  top: -10px;
-                  right: -8px;
-                  font-size: 18px;
-                  color: #666;
-                  z-index: 1;
-                }
+              .error-item {
+                position: absolute;
+                top: -10px;
+                right: -8px;
+                font-size: 18px;
+                color: #666;
+                z-index: 1;
               }
             }
-            /deep/ .el-form-item__label {
-              color: #666666;
-            }
+          }
+          /deep/ .el-form-item__label {
+            color: #666666;
           }
         }
       }
+    }
     .content_right {
       width: 100%;
       height: 100%;

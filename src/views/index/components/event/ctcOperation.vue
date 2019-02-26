@@ -49,9 +49,9 @@
                   </el-table-column>
                   <el-table-column label="操作" width="150">
                     <template slot-scope="scope">
-                      <span class="operation_btn">查看</span>
+                      <span class="operation_btn" @click="skipSelectPlanPage(scope.row)">查看</span>
                       <span style="color: #f2f2f2">|</span>
-                      <span class="operation_btn">启用</span>
+                      <span class="operation_btn" @click="skipReplanPage(scope.row)">启用</span>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -178,6 +178,16 @@ export default {
     },
     skipMorePlan () { // 跳转至更多预案页面
       this.$router.push({name: 'more_plan'});
+    },
+    // 跳至查看预案页面
+    skipSelectPlanPage (obj) {
+      console.log(obj);
+      this.$router.push({name: 'plan_detail'});
+    },
+    // 跳至启用预案页面
+    skipReplanPage (obj) {
+      console.log(obj);
+      this.$router.push({name: 'enable_plan'});
     }
   }
 }

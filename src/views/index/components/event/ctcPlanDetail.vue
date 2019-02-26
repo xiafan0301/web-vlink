@@ -1,10 +1,9 @@
 <template>
   <vue-scroll>
-    <div class="plan-detail">
+    <div class="ctc-plan-detail">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctcplan' }">调度预案</el-breadcrumb-item>
           <el-breadcrumb-item>预案详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -107,9 +106,25 @@
         </ul>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="skipReplanPage">启用</el-button>
+        <el-button class="operation_btn function_btn" @click="skipEditPage">修改</el-button>
+        <el-button class="operation_btn delete_btn" @click="showDeleteDialog">删除</el-button>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
+      <!--删除预案弹出框-->
+      <el-dialog
+        title="是否确定删除该预案?"
+        :visible.sync="delPlanDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="delPlanDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="delPlanDialog = false">确认</el-button>
+        </div>
+      </el-dialog>
     </div>
   </vue-scroll>
 </template>
@@ -117,19 +132,23 @@
 export default {
   data () {
     return {
-
+      delPlanDialog: false, // 删除预案弹出框
     }
   },
   methods: {
-    // 跳至启用预案页面
-    skipReplanPage () {
-      this.$router.push({name: 'enable_plan'});
+    // 显示删除预案弹出框
+    showDeleteDialog () {
+      this.delPlanDialog = true;
+    },
+    // 跳至修改预案页面
+    skipEditPage () {
+      this.$router.push({name: 'edit_plan'});
     }
   }
 }
 </script>
 <style lang="scss" scoped>
-.plan-detail {
+.ctc-plan-detail {
   width: 100%;
   .content-box {
     width: 98%;
@@ -189,6 +208,10 @@ export default {
     }
     .function_btn {
       background: #0C70F8;
+      color: #ffffff;
+    }
+    .delete_btn {
+      background-color: #F94539;
       color: #ffffff;
     }
     .back_btn {

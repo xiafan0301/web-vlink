@@ -75,6 +75,10 @@
           label="状态"
           prop="force"
           >
+          <template slot-scope="scope">
+            <span v-show="scope.row.isForce">禁用</span>
+            <span v-show="!scope.row.isForce">启用</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="300">
           <template slot-scope="scope">
@@ -86,7 +90,8 @@
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showResetPassword(scope)">重置密码</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showeditDialog(scope)">禁用账户</span>
+            <span class="operation_btn" v-show="!scope.row.isForce" @click="forbiddenUser(scope)">禁用账户</span>
+            <span class="operation_btn" v-show="scope.row.isForce" @click="enableUser(scope)">启用账户</span>
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showDeleteDialog(scope)">删除用户</span>
           </template>
@@ -96,11 +101,11 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
     <!--重置密码弹出框-->
     <el-dialog
@@ -272,7 +277,19 @@ export default {
           lastLoginTime: '2018-12-34 10:00:00',
           sysUserGroupInfos: [],
           sysUserRoleInfos: [],
-          force: '禁用'
+          force: true,
+          isForce: true
+        },
+        {
+          userMobile: '13599999999',
+          userName: '张三',
+          userSex: '男',
+          userEmail: '1136787777@qq.com',
+          lastLoginTime: '2018-12-34 10:00:00',
+          sysUserGroupInfos: [],
+          sysUserRoleInfos: [],
+          force: false,
+          isForce: false
         }
       ],
       editUser: {
@@ -301,7 +318,7 @@ export default {
         label: '北京烤鸭'
       }],
       value4: '',
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       resetPasswordDialog: false, // 重置密码弹出框
       delUserDialog: false, // 删除用户弹出框
       editUserInfoDialog: false, // 编辑信息弹出框
@@ -348,6 +365,26 @@ export default {
     // change用户性别
     changeSex () {
 
+    },
+    // 禁用用户
+    forbiddenUser (obj) {
+      console.log(obj);
+      const phone = 18099999999;
+      this.$notify({
+        title: '提示通知',
+        message: phone + '已禁用',
+        iconClass: 'vl_icon vl_icon_event_16'
+      });
+    },
+    // 启用用户
+    enableUser (obj) {
+      console.log(obj);
+      const phone = 18099999999;
+      this.$notify({
+        title: '提示通知',
+        message: phone + '已启用',
+        iconClass: 'vl_icon vl_icon_event_18'
+      });
     }
   }
 }

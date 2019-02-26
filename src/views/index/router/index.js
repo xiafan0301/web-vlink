@@ -156,6 +156,22 @@ export default new Router({
                         path: 'ctcOperation',
                         name: 'ctc_operation',
                         component: () => import('@/views/index/components/event/ctcOperation.vue')
+                      }, {
+                        path: 'editPlan',
+                        name: 'edit_plan',
+                        component: () => import('@/views/index/components/event/editPlan.vue')
+                      }, {
+                        path: 'ctcPlanDetail',
+                        name: 'ctc_plan_detail',
+                        component: () => import('@/views/index/components/event/ctcPlanDetail.vue')
+                      }, {
+                        path: 'ctcDetailInfo',
+                        name: 'ctc_detail_info',
+                        component: () => import('@/views/index/components/event/ctcDetailInfo.vue')
+                      }, {
+                        path: 'ctcEnd',
+                        name: 'ctc_end',
+                        component: () => import('@/views/index/components/event/ctcEnd.vue')
                       }
                     ]
                 }, {
