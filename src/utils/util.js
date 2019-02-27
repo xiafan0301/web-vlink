@@ -212,3 +212,11 @@ export const getLunarDateString = (lunarDate) => {
   }
   return data;
 }
+// 深度拷贝
+export const objDeepCopy = (source) => {
+  let sourceCopy = source instanceof Array ? [] : {};
+  for (var item in source) {
+      sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item];
+  }
+  return sourceCopy;
+}
