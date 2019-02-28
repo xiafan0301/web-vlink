@@ -22,16 +22,18 @@
             <div @click="popGroupDialog()" :class="['group_title', {'active': groupIndex === -1 }]">
               <i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span>
             </div>
+            <!-- 人像库组列表 -->
             <div class="group_list" v-if="tabType === '1'">
-              <div v-for="(item, index) in groupListPortrait" :key="item.id"  :class="{'active': groupIndex === index }">
-                <div @click="groupIndex = index"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="groupId = item.id;pageType = '2'" :class="['vl_icon', groupId === item.id ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
+              <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
+                <div @click="getPortraitListByGroup(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <i @click="groupId = item.uid;pageType = '2'" :class="['vl_icon', groupId === item.uid ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
               </div>
             </div>
+            <!-- 车像库组列表 -->
             <div class="group_list" v-else>
-              <div v-for="(item, index) in groupListCar" :key="item.id"  :class="{'active': groupIndex === index }">
-                <div @click="groupIndex = index"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="groupId = item.id;pageType = '2'" :class="['vl_icon', groupId === item.id ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
+              <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
+                <div @click="getVehicleListByGroup(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <i @click="groupId = item.uid;pageType = '2'" :class="['vl_icon', groupId === item.uid ? 'vl_icon_control_16' : 'vl_icon_control_21']"></i>
               </div>
             </div>
           </div>
@@ -136,18 +138,18 @@
       <!-- 组成员列表 -->
       <div class="member_list">
         <div class="member_title">
-          <div><span class="vl_f_333">布控库</span><span class="vl_f_666">(123)</span></div>
+          <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
           <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
           <el-button v-else type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box">
           <template v-if="tabType === '1'">
-            <div class="list_info" v-for="item in protraitMemberList" :key="item.uid">
+            <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
               <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20" @click="clearForm('portraitForm', '2')"></i>
+                  <i class="vl_icon vl_icon_control_20" @click="clearForm('portraitForm', '2', item.uid)"></i>
                 </div>
                 <div class="data_list">
                   <span>{{item.name}}</span>
@@ -168,12 +170,12 @@
             </div>
           </template>
           <template v-else>
-            <div class="list_info" v-for="item in carMemberList" :key="item.id">
+            <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
               <div class="list_img"><img :src="item.vehicleImagePath" alt="" style="width: 100%;"></div>
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20" @click="clearForm('carForm', '2')"></i>
+                  <i class="vl_icon vl_icon_control_20" @click="clearForm('carForm', '2', item.uid)"></i>
                 </div>
                 <div class="data_list">
                   <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
@@ -198,9 +200,9 @@
               @current-change="handleCurrentChange"
               :current-page="currentPage"
               :page-sizes="[100, 200, 300, 400]"
-              :page-size="pageSize"
+              :page-size="tabType === '1' ? protraitMemberList.pageSize : carMemberList.pageSize"
               layout="total, prev, pager, next, jumper"
-              :total="total">
+              :total="tabType === '1' ? protraitMemberList.total : carMemberList.total">
             </el-pagination>
           </div>
         </div>
@@ -364,7 +366,7 @@
                     <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
                   </div>
                   <el-collapse-transition>
-                    <div class="group_li" v-show="isShowDpList">
+                    <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
                       <el-checkbox-group v-model="carForm.groupIds">
                         <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
                       </el-checkbox-group>
@@ -388,8 +390,14 @@
           </div>
           <div slot="footer">
             <el-button @click="toGiveUpDialog = true">取消</el-button>
-            <el-button v-if="tabType === '1'" :loading="loadingBtn" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
-            <el-button v-else :loading="loadingBtn" type="primary" @click="saveCar('carForm')">保存</el-button>
+            <template v-if="tabType === '1'">
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" type="primary" @click="putPortrait('portraitForm')">确定</el-button>
+            </template>
+            <template v-else>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" type="primary">确定</el-button>
+            </template>
           </div>
         </el-dialog>
       </div>
@@ -412,13 +420,13 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === '001'"></div>
+        <div is="allPortrait" v-if="groupId === '0'" :protraitMemberList="protraitMemberList" @getPortraitList="getPortraitList"></div>
         <!-- 自定义人像列表 -->
         <div is="customPortrait" v-else></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === '001'"></div>
+        <div is="allCar" v-if="groupId === '0'" :carMemberList="carMemberList" @getVehicleList="getVehicleList"></div>
         <!-- 自定义车像列表 -->
         <div is="customCar" v-else></div>
       </template>
@@ -432,8 +440,8 @@ import allPortrait from './components/allPortrait.vue';
 import customCar from './components/customCar.vue';
 import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
-import {addPortrait, addVehicle, getPortraitList, getVehicleList, getPortraitByIdNo} from '@/views/index/api/api.js';
-import {objDeepCopy} from '@/utils/util.js';
+import {addPortrait, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getPortraitListByGroup, getVehicleListByGroup, getVehicleById} from '@/views/index/api/api.js';
+import {objDeepCopy, formatDate} from '@/utils/util.js';
 export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
@@ -456,17 +464,20 @@ export default {
         numberType: null,
         vehicleNumber: null
       },
-      groupIndex: null,//分组下标
+      groupIndex: 0,//分组下标
       // 人像组列表数据
       groupListPortrait: [
-        {groupName: '全部人像', memberNum: 200, id: '001'},
-        {groupName: '失踪儿童', memberNum: 201, id: '002'},
-        {groupName: '重点青少年', memberNum: 202, id: '003'}
+        {groupName: '全部人像', memberNum: 200, uid: '0'},
+        {groupName: '人像test1', memberNum: 200, uid: '1'},
+        {groupName: '人像test2', memberNum: 201, uid: '2'},
+        {groupName: '人像test3', memberNum: 202, uid: '3'}
       ],
       // 车像组列表数据
       groupListCar: [
-        {groupName: '全部车辆', memberNum: 200, id: '001'},
-        {groupName: '失踪车辆', memberNum: 201, id: '002'}
+        {groupName: '全部车像', memberNum: 200, uid: '0'},
+        {groupName: '车像test1', memberNum: 200, uid: '4'},
+        {groupName: '车像test2', memberNum: 201, uid: '5'},
+        {groupName: '车像test3', memberNum: 201, uid: '6'}
       ],
       pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
@@ -484,40 +495,39 @@ export default {
         {label: '壮族', value: 5}
       ],//民族列表数据
       carTypeList: [
-        {label: '其他', value: '0'},
-        {label: '小轿车', value: '1'},
-        {label: 'SUV', value: '2'},
-        {label: '面包车', value: '3'},
-        {label: '中巴车', value: '4'},
-        {label: '卡车', value: '5'},
-        {label: '自行车', value: '6'},
-        {label: '电动车', value: '7'},
-        {label: '摩托车', value: '8'}
+        {label: '其他', value: 0},
+        {label: '小轿车', value: 1},
+        {label: 'SUV', value: 2},
+        {label: '面包车', value: 3},
+        {label: '中巴车', value: 4},
+        {label: '卡车', value: 5},
+        {label: '自行车', value: 6},
+        {label: '电动车', value: 7},
+        {label: '摩托车', value: 8}
       ],//车辆类型列表数据
       numTypeList: [
-        {label: '大型汽车号牌', value: '0'},
-        {label: '小型汽车号牌', value: '1'}
+        {label: '大型汽车号牌', value: 0},
+        {label: '小型汽车号牌', value: 1}
       ],//号码类型列表数据
       carColorList: [
-        {label: '其他', value: '0'},
-        {label: '黑', value: '1'},
-        {label: '红', value: '2'},
-        {label: '白', value: '3'},
-        {label: '蓝', value: '4'},
-        {label: '紫', value: '5'},
-        {label: '灰', value: '6'},
-        {label: '绿', value: '7'}
+        {label: '其他', value: 0},
+        {label: '黑', value: 1},
+        {label: '红', value: 2},
+        {label: '白', value: 3},
+        {label: '蓝', value: 4},
+        {label: '紫', value: 5},
+        {label: '灰', value: 6},
+        {label: '绿', value: 7}
       ],//车身颜色列表
       numColorList: [
-        {label: '其他', value: '0'},
-        {label: '红底白字', value: '1'},
-        {label: '蓝底白字', value: '2'}
+        {label: '其他', value: 0},
+        {label: '红底白字', value: 1},
+        {label: '蓝底白字', value: 2}
       ],//号牌颜色列表
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
       pageNum: 1,
-      total: null,
       // dialog
       addPortraitDialog: false,
       toGiveUpDialog: false,
@@ -542,7 +552,6 @@ export default {
         groupIds: [],
         desci: ''
       },
-      protraitInfo: {},//人像信息
       //证件类型列表数据
       cardTypeList: [
         {label: '身份证', value: '1'},
@@ -584,6 +593,15 @@ export default {
       carMemberList: []//车像成员列表数据
     }
   },
+  computed: {
+    memberNum () {
+      if (this.tabType === '1') {
+        return this.protraitMemberList.list && this.protraitMemberList.list.length;
+      } else {
+        return this.carMemberList.list && this.carMemberList.list.length;
+      }
+    }
+  },
   mounted () {
     // 默认获取人像库列表
     this.getPortraitList();
@@ -598,6 +616,7 @@ export default {
     },
     changeTab (tabType) {
       this.tabType = tabType;
+      this.groupIndex = 0;
       if (this.tabType === '1') {
         this.getPortraitList();
       } else {
@@ -608,7 +627,7 @@ export default {
     },
     popGroupDialog () {
       this.groupIndex = -1;
-     this.$refs['groupDialog'].reset();
+      this.$refs['groupDialog'].reset();
     },
     // 重置左侧组合搜索
     reset () {
@@ -654,7 +673,7 @@ export default {
       })
     },
     // 清除新建/修改人像和车像表单验证和内容
-    clearForm (formName, type) {
+    clearForm (formName, type, uid) {
       // 清除已上传的图片
       if (this.$refs['uploadPic']) {
         this.$refs['uploadPic'].clearFiles();
@@ -665,8 +684,14 @@ export default {
         this.$refs[formName].resetFields();
       }
       this.operationType = type;
-      if (type === '2') {
-        this.getPortraitByIdNo();
+      // 获取人像信息回填，用来修改人像
+      if (formName === 'portraitForm' && type === '2') {
+        this.getPortraitById(uid);
+      }
+      // 获取车像信息回填，用来修改车像
+      if (formName === 'carForm' && type === '2') {
+        this.getVehicleById(uid);
+        console.log('车像')
       }
       this.portraitForm.groupIds = [];
       this.carForm.groupIds = [];
@@ -703,9 +728,12 @@ export default {
           data.origin = 1;
           data.photoUrl = this.dialogImageUrl;
           addPortrait(data).then(res => {
-            console.log(res);
-            this.clearForm('portraitForm', '1');
-            this.$message.success('新增成功！');
+            if (res && res.data) {
+              console.log(res);
+              this.addPortraitDialog = false;
+              this.$message.success('新增成功！');
+              this.getPortraitList();
+            }
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -724,9 +752,12 @@ export default {
           data.origin = 1;
           data.vehicleImagePath = this.dialogImageUrl;
           addVehicle(data).then(res => {
-            console.log(res);
-            this.clearForm('carForm', '1');
-            this.$message.success('新增成功！');
+            if (res && res.data) {
+              console.log(res);
+              this.addPortraitDialog = false;
+              this.$message.success('新增成功！');
+              this.getVehicleList();
+            }
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -735,7 +766,7 @@ export default {
         }
       })
     },
-    // 获取人像库列表
+    // 获取全部人像库列表
     getPortraitList () {
       this.currentPage = 1;
       let params = {
@@ -752,14 +783,11 @@ export default {
       getPortraitList(params).then(res => {
         console.log(res)
         if (res && res.data) {
-          this.protraitMemberList = res.data.list;
-          this.pageSize = res.data.pageSize;
-          this.pageNum = res.data.pageNum;
-          this.total = res.data.total;
+          this.protraitMemberList = res.data;
         }
       })
     },
-    // 获取车像库列表
+    // 获取全部车像库列表
     getVehicleList () {
       this.currentPage = 1;
       let params = {
@@ -778,18 +806,120 @@ export default {
       getVehicleList(params).then(res => {
         console.log(res)
         if (res && res.data) {
-          this.carMemberList = res.data.list;
-          this.pageSize = res.data.pageSize;
-          this.pageNum = res.data.pageNum;
-          this.total = res.data.total;
+          this.carMemberList = res.data;
         }
       })
     },
-    // 通过证件号获取人像
-    getPortraitByIdNo (idNo) {
-      // getPortraitByIdNo(idNo).then(res => {
-      //   // this.protraitInfo = 
-      // })
+    // 通过id获取人像，用于修改人像
+    getPortraitById (uid) {
+      getPortraitById(uid).then(res => {
+        if (res && res.data) {
+          let protraitInfo = res.data;
+          this.dialogImageUrl = protraitInfo.photoUrl
+          protraitInfo.birthDate = protraitInfo.birthDate.split('');
+          protraitInfo.birthDate.splice(4, 1, '年');
+          protraitInfo.birthDate.splice(7, 1, '月');
+          protraitInfo.birthDate.splice(10, 0, '日');
+          protraitInfo.birthDate = protraitInfo.birthDate.join('');
+          protraitInfo.idType = protraitInfo.groupDict[0].enumValue;
+          protraitInfo.groupIds = protraitInfo.groupDict.map(m => {
+            return {
+              label: m.enumField,
+              value: m.enumValue
+            }
+          });
+          this.portraitForm = protraitInfo;
+          console.log(this.portraitForm)
+        }
+      })
+    },
+    // 修改人像
+    putPortrait (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.loadingBtn = true;
+          let data = objDeepCopy(this.portraitForm);
+          data.birthDate = data.birthDate.split('');
+          data.birthDate.splice(4, 1, '-');
+          data.birthDate.splice(7, 1, '-');
+          data.birthDate.splice(10, 1);
+          data.birthDate = data.birthDate.join('');
+          data.groupIds = data.groupIds.map(m => m.value).join(',');
+          data.origin = 1;
+          data.photoUrl = this.dialogImageUrl;
+          putPortrait(data).then(res => {
+            console.log(res);
+            this.addPortraitDialog = false;
+            this.$message.success('修改成功！');
+            this.getPortraitList();
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
+        } else {
+          return false;
+        }
+      })
+    },
+    // 通过id获取车像，用于修改车像
+    getVehicleById (uid) {
+      getVehicleById(uid).then(res => {
+        if (res && res.data) {
+          let carInfo = res.data;
+          this.dialogImageUrl = carInfo.vehicleImagePath;
+          carInfo.groupIds = carInfo.groupDict.map(m => {
+            return {
+              label: m.enumField,
+              value: m.enumValue
+            }
+          });
+          this.carForm = carInfo;
+          console.log(this.carForm)
+        }
+      })
+    },
+    // 根据人像组id获取人像列表
+    getPortraitListByGroup (groupId, index) {
+      this.groupIndex = index;
+      // 获取全部人像组的人像
+      if (index === 0) {
+        this.getPortraitList();
+        return;
+      }
+      const params = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: null,
+        order: null,
+        'where.groupId': groupId
+      }
+      // 获取自定义组的人像
+      getPortraitListByGroup(params).then(res => {
+        if (res && res.data) {
+          this.protraitMemberList = res.data;
+        }
+      })
+    },
+    // 根据车像组id获取车像列表
+    getVehicleListByGroup (groupId, index) {
+      this.groupIndex = index;
+      // 获取全部车像组的车像
+      if (index === 0) {
+        this.getVehicleList();
+        return;
+      }
+      const params = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: null,
+        order: null,
+        'where.groupId': groupId
+      }
+      // 获取自定义组的车像
+      getVehicleListByGroup(params).then(res => {
+        if (res && res.data) {
+          this.carMemberList = res.data;
+        }
+      })
     }
   }
 }
@@ -916,12 +1046,12 @@ export default {
       line-height: 40px;
     }
     .list_box{
-      margin: 20px;
+      margin: 20px 0.5%;
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-between;
       align-items: flex-start;
       .list_info{
+        margin: 0 0.5%;
         width: 32%;
         padding: 20px;
         margin-bottom: 20px;

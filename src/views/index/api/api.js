@@ -57,7 +57,19 @@ export function addPortrait(data) {
   })
 }
 /**
- * addPortrait 人像库列表分页查询接口
+ * delPortrait 删除人像
+ * @param {object} data
+ */
+export function delPortrait(data) {
+  return request({
+    url: '/surveillanceRepertory/portrait/batch',
+    method: 'delete',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getPortraitList 人像库列表分页查询接口
  * @param {object} params
  */
 export function getPortraitList(params) {
@@ -69,7 +81,42 @@ export function getPortraitList(params) {
   })
 }
 /**
- * addPortrait 通过证件号搜索人像（根据返回对象为空可判断证件号是否存在）
+ * getPortraitById 通过标识获取人像包含组信息
+ * @param {object} uid
+ */
+export function getPortraitById(uid) {
+  return request({
+    url: '/surveillanceRepertory/portrait/withGroup/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}
+/**
+ * putPortrait 修改人像
+ * @param {object} data
+ */
+export function putPortrait(data) {
+  return request({
+    url: '/surveillanceRepertory/portrait',
+    method: 'put',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getPortraitListByGroup 根据不同分组人像库列表分页查询接口
+ * @param {object} params
+ */
+export function getPortraitListByGroup(params) {
+  return request({
+    url: '/surveillanceRepertory/portrait/pageByGroup',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getPortraitByIdNo 通过证件号搜索人像（根据返回对象为空可判断证件号是否存在）
  * @param {object} params
  */
 export function getPortraitByIdNo(params) {
@@ -80,8 +127,33 @@ export function getPortraitByIdNo(params) {
     mode: ''
   })
 }
+
 /**
- * addPortrait 车像库列表分页查询接口
+ * addVehicle 新建车像
+ * @param {object} data
+ */
+export function addVehicle(data) {
+  return request({
+    url: '/surveillanceRepertory/vehicle',
+    method: 'post',
+    data,
+    mode: ''
+  })
+}
+/**
+ * delVehicle 删除车像
+ * @param {object} data
+ */
+export function delVehicle(data) {
+  return request({
+    url: '/surveillanceRepertory/vehicle/batch',
+    method: 'delete',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getVehicleList 车像库列表分页查询接口
  * @param {object} params
  */
 export function getVehicleList(params) {
@@ -93,14 +165,37 @@ export function getVehicleList(params) {
   })
 }
 /**
- * addPortrait 新建车像
- * @param {object} data
+ * getVehicleById 通过标识获取车辆包含组信息
+ * @param {object} uid
  */
-export function addVehicle(data) {
+export function getVehicleById(uid) {
   return request({
-    url: '/surveillanceRepertory/vehicle',
-    method: 'post',
-    data,
+    url: '/surveillanceRepertory/vehicle/withGroup/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}
+/**
+ * getVehicleByIdNo 通过车牌号搜索车辆
+ * @param {object} params
+ */
+export function getVehicleByIdNo(params) {
+  return request({
+    url: '/surveillanceRepertory/vehicle/byIdNo',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getVehicleListByGroup 根据不同分组车像库列表分页查询接口
+ * @param {object} params
+ */
+export function getVehicleListByGroup(params) {
+  return request({
+    url: '/surveillanceRepertory/vehicle/pageByGroup',
+    method: 'get',
+    params,
     mode: ''
   })
 }

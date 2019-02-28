@@ -260,12 +260,12 @@ export default {
         }
       }
       .list_box{
-        margin: 20px;
+        margin: 20px 0.5%;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
         align-items: flex-start;
         .list_info{
+          margin: 0 0.5%;
           width: 32%;
           padding: 20px;
           margin-bottom: 20px;
