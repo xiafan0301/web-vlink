@@ -19,7 +19,7 @@
                   <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
+                  <el-input type="text" id="tipinput" style='width: 95%' placeholder="请输入事发地点"  @input="onPositionChange" v-model="addEventForm.eventAddress" />
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
@@ -57,11 +57,16 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 95%'>
+                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
                     <el-radio label="无"></el-radio>
                     <el-radio label="不确定"></el-radio>
                     <el-radio label="有"></el-radio>
                   </el-radio-group>
+                  <template v-if="addEventForm.casualties === '有'">
+                    <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
+                    <span style='margin-left:1%'>人</span>
+                    <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
+                  </template>
                 </el-form-item>
               </el-form>
             </div>
@@ -89,6 +94,7 @@
   </div>
 </template>
 <script>
+import { validatePhone } from '@/utils/validator.js';
 export default {
   data () {
     return {
@@ -100,11 +106,14 @@ export default {
         eventSummary: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
+        longitude: null, // 经度
+        latitude: null, // 纬度
         casualties: null // 伤亡人员
       },
       rules: {
         phone:[
-          { required: true, message: '请输入上报人手机号码', trigger: 'blur' }
+          { required: true, message: '请输入上报人手机号码', trigger: 'blur' },
+          { validator: validatePhone, trigger: 'blur'}
         ],
         reportTime:[
           { required: true, message: '请选择上报时间', trigger: 'blur' }
@@ -113,12 +122,16 @@ export default {
           { required: true, message: '请输入事发地点', trigger: 'blur' }
         ],
         eventSummary:[
-          { required: true, message: '请输入事情情况', trigger: 'blur' }
+          { required: true, message: '请输入事情情况', trigger: 'blur' },
+          { max: 140, message: '最多可以输入140个字' }
         ],
         eventType:[
           { required: true, message: '请选择事件类型', trigger: 'blur' }
         ]
-      }
+      },
+       dieNumber: null, // 死亡人数
+       isDieError: false,
+       dieTip: '死亡人数只能为正整数'
     }
   },
   mounted () {
@@ -132,6 +145,45 @@ export default {
     this.mapMark();
   },
   methods: {
+    onPositionChange (val) { // 事件地点输入框值改变
+      console.log(val);
+      
+      // let value = val;
+      // let _this = this;
+      // const map = new window.AMap.Map('mapMap', {
+      //   resizeEnable: true
+      // });
+      // // 输入提示
+      // const autoOptions = {
+      //   input: 'tipinput'
+      // };
+      // const auto = new window.AMap.Autocomplete(autoOptions);
+      // const placeSearch = new AMap.PlaceSearch({
+      //   map: map
+      // }); // 构造地点查询类
+      // AMap.service('AMap.Geocoder', () => {
+      //   var geocoder = new AMap.Geocoder({});
+      //   geocoder.getLocation(value, (status, result) => {
+      //     if (status === 'complete' && result.info === 'OK') {
+      //       this.addEventForm.longitude = result.geocodes[0].location.lng;
+      //       this.addEventForm.latitude = result.geocodes[0].location.lat;
+      //     }
+      //   });
+      // })
+      // AMap.event.addListener(auto, 'select', function (e) {
+      //   value = e.poi.name;
+      //   _this.addEventForm.eventAddress = e.poi.name;
+      //   AMap.service('AMap.Geocoder', () => {
+      //     var geocoder = new AMap.Geocoder({});
+      //     geocoder.getLocation(e.poi.name, (status, result) => {
+      //       if (status === 'complete' && result.info === 'OK') {
+      //         _this.addEventForm.longitude = result.geocodes[0].location.lng;
+      //         _this.addEventForm.latitude = result.geocodes[0].location.lat;
+      //       }
+      //     });
+      //   })
+      // }); // 注册监听，当选中某条记录时会触发
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);

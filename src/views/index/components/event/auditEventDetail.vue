@@ -14,7 +14,7 @@
               <ul>
                 <li>
                   <span class="audit-label">状态:</span>
-                  <span class="pass-status">通过</span>
+                  <span :class="[$route.query.status === 'pass' ? 'pass-status' : 'reject-status']">{{$route.query.status === 'pass' ? '通过' : '驳回'}}</span>
                 </li>
                 <li>
                   <span>事件编号:</span>
@@ -126,6 +126,8 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div class="vl_icon vl_icon_051"></div>'
       });
+      console.log(marker);
+      
     },
     back () { // 返回
       this.$router.back(-1);

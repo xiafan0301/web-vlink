@@ -5,10 +5,10 @@
       <div><router-link :to="{ name: 'group_manage'}" @click.native = "state = 2">组</router-link></div>
     </div>
     <div>
-      <transition enter-active-class="fade-in" leave-active-class="leave-immediately"
-                  :duration="{ enter: 300, leave: 100 }">
+      <!-- <transition enter-active-class="fade-in" leave-active-class="leave-immediately"
+                  :duration="{ enter: 100, leave: 100 }"> -->
         <router-view></router-view>
-      </transition>
+      <!-- </transition> -->
     </div>
   </div>
 </template>

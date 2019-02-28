@@ -259,13 +259,12 @@ export default {
 
 <style lang="scss" scoped>
 .department-manage {
-  background-color: #ffffff;
-  width: 98%;
-  margin: 20px;
+  padding: 20px;
   .header {
     padding: 10px;
     display: flex;
     justify-content: space-between;
+    background-color: #ffffff;
     .add-btn {
       background-color: #0C70F8;
       color: #fff;
@@ -277,6 +276,7 @@ export default {
   }
   .table_box {
     padding: 0 10px;
+    background-color: #ffffff;
     .department_table {
       margin-top: 8px;
       .operation_btn {

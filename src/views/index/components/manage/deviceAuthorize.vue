@@ -62,7 +62,7 @@
             <i class="vl_icon vl_icon_manage_5"></i>
             <span>可用设备 (100个)</span>
           </p>
-          <el-button class="stop_btn" @click="showGrantDialog">管理</el-button>
+          <el-button class="stop_btn" @click="skipAuthorizeGrantPage">管理</el-button>
           <div class="divide"></div>
         </div>
         <div class="search_box">
@@ -376,7 +376,6 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <!-- <span style="color: #999999;">删除后数据不可恢复。</span> -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="stopGrantDialog = false">取消</el-button>
         <el-button class="operation_btn function_btn" @click="stopGrantDialog = false">确认</el-button>
@@ -419,7 +418,11 @@ export default {
     },
     // 跳至临时授权页面
     skipTempGrantPage () {
-      this.$router.push({name: 'temp_grant'});
+      this.$router.push({name: 'add_temp_grant'});
+    },
+    // 跳至机构授权页面
+    skipAuthorizeGrantPage () {
+      this.$router.push({name: 'authorize_grant'});
     },
   }
 }

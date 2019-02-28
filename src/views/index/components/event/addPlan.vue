@@ -8,24 +8,33 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <el-form :model="addPlanForm" ref="addPlanForm" class="add-plan-form" size="small">
-          <el-form-item label="预案名称:" prop="planName" label-width="120px">
-            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 40%;"></el-input>
+        <el-form :model="addPlanForm" ref="addPlanForm" :rules="rules" class="add-plan-form" size="small">
+          <el-form-item label="预案名称:" prop="scheduleName" label-width="120px">
+            <el-input v-model="addPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 40%;"></el-input>
           </el-form-item>
-          <el-form-item label="预案类型:" label-width="120px">
-          <el-select v-model="addPlanForm.planType" placeholder="请选择预案类型" style="width: 40%;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-form-item label="预案类型:" label-width="120px" prop="scheduleType">
+          <el-select v-model="addPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 40%;">
+            <el-option value='全部状态'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
           </el-form-item>
-          <el-form-item label="适用事件等级:" label-width="120px">
-            <el-select v-model="addPlanForm.eventLevel" placeholder="请选择适用事件等级" style="width: 40%;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+          <el-form-item label="适用事件等级:" label-width="120px" prop="applyEventLevel">
+            <el-select v-model="addPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 40%;">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="预案正文:" label-width="120px">
-            <el-input type="textarea" rows="7" style="width: 40%;" v-model="addPlanForm.planContent" placeholder="请输入预案正文"></el-input>
+          <el-form-item label="预案正文:" label-width="120px" prop="scheduleContent">
+            <el-input type="textarea" rows="7" style="width: 40%;" v-model="addPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
@@ -42,6 +51,7 @@
             </el-upload>
           </el-form-item>
           <el-form-item label="响应处置:" label-width="120px">
+            
             <el-input type="textarea" rows="7" style="width: 40%;" v-model="addPlanForm.planContent" placeholder="请输入预案正文"></el-input>
           </el-form-item>
         </el-form>
@@ -57,11 +67,40 @@
 export default {
   data () {
     return {
+      options: [{
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }, {
+        value: '选项4',
+        label: '龙须面'
+      }, {
+        value: '选项5',
+        label: '北京烤鸭'
+      }],
       addPlanForm: {
-        planName: null, // 预案名称
-        planType: null, // 预案类型
-        eventLevel: null, // 事件等级
-        planContent: null, // 预案正文
+        scheduleName: null, // 预案名称
+        scheduleType: null, // 预案类型
+        applyEventLevel: [], // 事件等级
+        scheduleContent: null, // 预案正文
+      },
+      rules: {
+        scheduleName: [
+          { required: true, message: '请输入预案名称', trigger: 'blur' },
+          { max: 50, message: '最多输入50字'}
+        ],
+        scheduleType: [
+          { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
+          { max: 50, message: '最多输入50字'}
+        ],
+        applyEventLevel: [
+          { required: true, message: '请选择事件等级', trigger: 'blur' }
+        ],
       },
       fileList: []
     }

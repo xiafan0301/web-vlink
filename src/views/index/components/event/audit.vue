@@ -1,41 +1,57 @@
 <template>
   <div class="audit">
     <div class="search_box">
-      <el-form :inline="true" :model="auditForm" class="event_form">
-        <el-form-item style="width: 240px;">
+      <el-form :inline="true" :model="auditForm" class="event_form" ref="auditForm">
+        <el-form-item>
           <el-date-picker
-            style="width: 240px;"
-            v-model="auditForm.dateTime"
-            type="datetimerange"
+            style="width: 260px;"
+            v-model="auditForm.reportTime"
+            type="daterange"
+            value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="auditForm.eventType" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="auditForm.eventType" style="width: 240px;" placeholder="审核状态">
+            <el-option value='全部状态'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="auditForm.eventStatus" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="事件类型">
+            <el-option value='全部类型'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="auditForm.userName" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="auditForm.userName" style="width: 240px;" placeholder="上报者身份">
+            <el-option value='全部上报者'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="auditForm.phoneOrNumber" />
+          <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号" v-model="auditForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn">查询</el-button>
-          <el-button class="reset_btn">重置</el-button>
+          <el-button class="select_btn" @click="selectDataList('auditForm')">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('auditForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
@@ -43,7 +59,7 @@
     <div class="content-box">
       <div class="select-checkbox">
         <span>自动审核政务人员的</span>
-        <el-switch v-model="isOpen"></el-switch>
+        <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
       </div>
       <el-table
         class="audit_table"
@@ -108,7 +124,7 @@
         </el-table-column>
         <el-table-column label="操作" width="140">
           <template slot-scope="scope">
-            <span class="operation_btn" @click="skipDetailPage">查看</span>
+            <span class="operation_btn" @click="skipDetailPage(scope.row)">查看</span>
           </template>
         </el-table-column>
       </el-table>
@@ -116,21 +132,22 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
   </div>
 </template>
 <script>
+import { formatDate } from '@/utils/util.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       auditForm: {
-        dateTime: null, // 日期
+        reportTime: [], // 日期
         eventType: null, // 事件类型
         eventStatus: null, // 事件状态
         userName: null, // 上报者
@@ -191,13 +208,52 @@ export default {
       ]
     }
   },
+  mounted () {
+    this.getOneMonth();
+  },
   methods: {
     handleSizeChange () {
 
     },
     handleCurrentChange () {},
-    skipDetailPage () { // 跳转至事件审核详情页
-      this.$router.push({name: 'unaudit_event'});
+    skipDetailPage (obj) { // 跳转至事件审核详情页
+      if (obj.status === '待审核') {
+        this.$router.push({name: 'unaudit_event'});
+      }
+      if (obj.status === '审核通过') {
+        this.$router.push({name: 'audit_event_detail', query: {status: 'pass'}});
+      }
+      if (obj.status === '审核不通过') {
+        this.$router.push({name: 'audit_event_detail', query: {status: 'reject'}});
+      }
+    },
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.auditForm.reportTime.push(startDate);
+      this.auditForm.reportTime.push(endDate);
+    },
+    // 根据搜索条件查询
+    selectDataList (form) {
+      this.$refs[form].validator(valid => {
+        if (valid) {
+
+        }
+      })
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.eventForm.reportTime = [];
+      this.$refs[form].resetFields();
+      this.getOneMonth();
+    },
+    // 自动审核政务人员
+    isAutoCheck (val) {
+      console.log(val);
+      
     }
   }
 }
