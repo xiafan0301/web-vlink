@@ -10,10 +10,10 @@
       <div class="content-box">
         <el-form :model="editPlanForm" ref="editPlanForm" :rules="rules" class="edit-plan-form" size="small">
           <el-form-item label="预案名称:" prop="scheduleName" label-width="120px">
-            <el-input v-model="editPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 40%;"></el-input>
+            <el-input v-model="editPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
           </el-form-item>
           <el-form-item label="预案类型:" label-width="120px" prop="scheduleType">
-          <el-select v-model="editPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 40%;">
+          <el-select v-model="editPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
             <el-option value='全部状态'></el-option>
             <!-- <el-option
               v-for="item in eventStatusList"
@@ -24,7 +24,7 @@
           </el-select>
           </el-form-item>
           <el-form-item label="适用事件等级:" label-width="120px" prop="applyEventLevel">
-            <el-select v-model="editPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 40%;">
+            <el-select v-model="editPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -34,11 +34,11 @@
             </el-select>
           </el-form-item>
           <el-form-item label="预案正文:" label-width="120px" prop="scheduleContent">
-            <el-input type="textarea" rows="7" style="width: 40%;" v-model="editPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
-              style="width: 40%;"
+              style="width: 500px;"
               action="https://jsonplaceholder.typicode.com/posts/"
               :on-preview="handlePreview"
               :on-remove="handleRemove"
@@ -179,12 +179,11 @@ export default {
         width: 40%;
       }
       .response_box {
-        width: 40%;
+        width: 500px;
         .plan_form_box {
           background-color: #FAFAFA;
           border-radius:2px;
           margin-bottom: 10px;
-          clear: both;
           .title {
             padding: 10px 20px 0;
             height: 30px;

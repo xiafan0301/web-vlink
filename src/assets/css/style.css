@@ -19,6 +19,9 @@
 .vl_icon_lg_02 { width: 14px; height: 16px; background-position: -740px -529px; }
 .vl_icon_lg_03 { width: 16px; height: 16px; background-position: -767px -529px; }
 .vl_icon_sed.vl_icon_lg_03 { background-position: -767px -551px; }
+.vl_icon_sed span {
+  color: #0B6FF7;
+}
 
 /* 一级导航菜单 */
 .vl_icon_001 { width: 36px; height: 36px; background-position: -103px -66px; }
@@ -151,11 +154,12 @@
 .vl_icon_manage_7{width: 20px; height: 19px; background-position: -584px -377px;} /*编辑--视频设置--自定义组*/
 .vl_icon_manage_8{width: 20px; height: 19px; background-position: -694px -377px;} /*删除--视频设置--自定义组*/
 .vl_icon_manage_9{width: 186px; height: 196px; background-position: -98px -1255px;} /*无数据图标--视频设置--自定义组*/
-.vl_icon_manage_10{width: 18px; height: 20px; background-position: -412px -374px;}
+.vl_icon_manage_10{width: 18px; height: 18px; background-position: -412px -374px;}
 .vl_icon_manage_11{width: 22px; height: 22px; background-position: -802px -529px;} /*权限管理---拖拽--未选中*/
 .vl_icon_manage_12{width: 22px; height: 22px; background-position: -802px -554px;} /*权限管理---拖拽--选中*/
 .vl_icon_manage_13{width: 22px; height: 22px; background-position: -831px -529px;} /*权限管理---添加--未选中*/
 .vl_icon_manage_14{width: 22px; height: 22px; background-position: -831px -554px;} /*权限管理---添加--选中*/
+.vl_icon_manage_15{width: 18px; height: 22px; background-position: -370px -376px;} /*禁用摄像头--视频设置--临时授权*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -233,7 +237,8 @@
 /* 地图标记 hover */
  .vl_map_hover {
    position: relative;
-   width: 2px; height: 2px;
+   width: 2px;
+   height: 2px;
    cursor: default;
  }
  .vl_map_hover_main {
@@ -244,7 +249,15 @@
    border-radius: 4px;
    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
  }
- .vl_map_hover_main:after {
+.vl_main_hover_address {
+    position: absolute; bottom: 59px; left: -150px;
+    width: 200px;
+    background-color: #fff;
+    color: #666;
+    border-radius: 4px;
+    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+ }
+ .vl_map_hover_main:after, .vl_main_hover_address:after {
    border-bottom-color: rgba(0, 0, 0, 1);
    content: "";
    display: inline-block;

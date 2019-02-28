@@ -276,9 +276,9 @@ export default {
   mounted () {
     this.intitReportSize();
     this.setStats1(this.chart1Data);
-    // this.setStats2(this.chart2Data);
-    // this.setStats3(this.chart3Data);
-    // this.setStats4(this.chart4Data);
+    this.setStats2(this.chart2Data);
+    this.setStats3(this.chart3Data);
+    this.setStats4(this.chart4Data);
   },
   methods: {
     intitReportSize () {
@@ -331,7 +331,7 @@ export default {
         '<ul class="g2-legend-list" style="list-style-type:none;margin:0;padding:0;"></ul>' +
         '</div>',
         itemTpl: (value, color, checked, index) => {
-          if (index < 4) {
+          if (index > 4) {
             return value;
           }
           return '<li class="g2-legend-list-item item-' + index + ' ' + checked +
