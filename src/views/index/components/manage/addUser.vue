@@ -53,7 +53,7 @@
   </vue-scroll>
 </template>
 <script>
-import { validatePhone } from '@/utils/validator.js';
+import { validatePhone, checkIdCard } from '@/utils/validator.js';
 export default {
   data () {
     return {
@@ -72,6 +72,9 @@ export default {
         ],
         userRealName: [
           { required: true, message: '该项内容不可为空' },
+        ],
+        userIdcard: [
+          { validator: checkIdCard, trigger: 'blur' }
         ]
       }
     }

@@ -11,8 +11,8 @@
       <div class="btn_box">
         <div class="bnt_box_left">
           <span>自定义组</span>
-          <i class="vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
-          <i class="vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
+          <i class="edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
+          <i class="del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
         <div class="bnt_box_right">
           <el-button class="oper_btn copy_btn" @click="showGroup = !showGroup">复制</el-button>
@@ -358,6 +358,16 @@ export default {
         i {
           cursor: pointer;
           margin: 0 10px 0 20px;
+        }
+        .del_btn {
+          &:hover {
+            background-position: -694px -350px !important;
+          }
+        }
+        .edit_btn {
+          &:hover {
+            background-position: -584px -350px !important;
+          }
         }
       }
       .bnt_box_right {

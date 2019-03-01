@@ -11,12 +11,12 @@
       <template v-if="status === 'handling'">
         <i class="vl_icon vl_icon_event_10"></i>
       </template>
-      <template v-if="status === 'ending'">
+      <template v-if="status === 'ending' || status === 'ctc_end'">
         <i class="vl_icon vl_icon_event_11"></i>
       </template>
-      <template v-if="status === 'unhandle'"></template>
-      <template v-if="status === 'unhandle'"></template>
-      
+      <template v-if="status === 'ctc_ing'">
+        <i class="vl_icon vl_icon_event_13"></i>
+      </template>     
     </div>
     <div class='basic-detail'>
       <div class='basic-list'>
@@ -47,7 +47,7 @@
                 <span>语音通话</span>
               </div>
               <div>
-                <i class="vl_icon vl_icon_event_14"></i>
+                <i class="vl_icon vl_icon_event_17"></i>
                 <span>视频通话</span>
               </div>
             </div>

@@ -4,22 +4,22 @@
       <div class="system_box">
         <div class="system_form">
           <el-form ref="systemForm" :model="systemForm" class="system_form">
-            <el-form-item>
+            <el-form-item prop="systemDate">
               <el-date-picker
-                style="width: 240px;"
+                style="width: 260px;"
                 v-model="systemForm.systemDate"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="content">
               <el-input v-model="systemForm.content" placeholder="输入标题或发布者"></el-input>
             </el-form-item>
             <el-form-item style="width: 25%;">
               <el-button type="primary">查询</el-button>
-              <el-button>重置</el-button>
+              <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -116,6 +116,9 @@ export default {
     },
     skip (pageType) {
       this.pageType = pageType;
+    },
+    resetForm () {
+      this.$refs['systemForm'].resetFields();
     }
   }
 }

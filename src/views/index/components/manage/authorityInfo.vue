@@ -24,8 +24,8 @@
           <li>
             <span>分组民方面奥昇(123)</span>
             <div>
-              <i class="vl_icon vl_icon_manage_7"></i>
-              <i class="vl_icon vl_icon_manage_8"></i>
+              <i class="edit_btn vl_icon vl_icon_manage_7"></i>
+              <i class="del_btn vl_icon vl_icon_manage_8"></i>
             </div>
           </li>
         </ul>
@@ -46,10 +46,10 @@
               <!-- <span>菜单已阿萨大</span> -->
               <span>{{ data.label }}</span>
               <span class="operation">
-                <i class="vl_icon_manage_11 vl_icon" title="拖动变换顺序"></i>
-                <i class="vl_icon_manage_13 vl_icon" @click="showAddDialog" title="添加"></i>
-                <i class="vl_icon_manage_7 vl_icon" @click="showEditDialog" title="编辑"></i>
-                <i class="vl_icon_manage_8 vl_icon" @click="showDeleteDialog" title="删除"></i>
+                <i class="drag_btn vl_icon_manage_11 vl_icon" title="拖动变换顺序"></i>
+                <i class="add_btn vl_icon_manage_13 vl_icon" @click="showAddDialog" title="添加"></i>
+                <i class="edit_btn vl_icon_manage_7 vl_icon" @click="showEditDialog" title="编辑"></i>
+                <i class="del_btn vl_icon_manage_8 vl_icon" @click="showDeleteDialog" title="删除"></i>
               </span>
             </span>
           </el-tree>
@@ -320,6 +320,16 @@ export default {
               cursor: pointer;
               margin-right: 5px;
             }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px;
+              }
+            }
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px;
+              }
+            }
           }
           &:hover {
             background-color: #E0F2FF;
@@ -365,11 +375,31 @@ export default {
       }
       .operation {
         padding: 0 15px;
+        display: none;
         i {
           vertical-align: middle;
           margin: 0 2px;
         }
-        display: none;
+        .drag_btn {
+          &:hover {
+            background-position: -802px -553px;
+          }
+        }
+        .add_btn {
+          &:hover {
+            background-position: -831px -553px;
+          }
+        }
+        .edit_btn {
+          &:hover {
+            background-position: -584px -350px;
+          }
+        }
+        .del_btn {
+          &:hover {
+            background-position: -694px -350px;
+          }
+        }
       }
     }
   }

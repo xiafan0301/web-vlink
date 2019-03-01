@@ -4,20 +4,20 @@
       <div class="notice_box">
         <div class="notice_form">
           <el-form ref="noticeForm" :model="noticeForm" class="notice_form">
-            <el-form-item>
+            <el-form-item prop="noticeDate">
               <el-date-picker
-                style="width: 240px;"
+                style="width: 260px;"
                 v-model="noticeForm.noticeDate"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="content">
               <el-input v-model="noticeForm.content" placeholder="请输入标题或者发布者"></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="noticeState">
               <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择">
                 <el-option
                   v-for="item in noticeStateList"
@@ -29,7 +29,7 @@
             </el-form-item>
             <el-form-item style="width: 25%;">
               <el-button type="primary">查询</el-button>
-              <el-button>重置</el-button>
+              <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -79,7 +79,7 @@
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3)">查看</span>
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn">修改</span>
+                  <span class="operation_btn" @click="skip(4)">修改</span>
                   <span class="operation_wire">|</span>
                   <span class="operation_btn">置顶</span>
                 </template>
@@ -98,7 +98,7 @@
         </div>
       </div>
     </div>
-    <div is="noticeAdd" v-if="pageType === 2" @changePage="skip"></div>
+    <div is="noticeAdd" v-if="pageType === 2 || pageType === 4" :pageType="pageType" @changePage="skip"></div>
     <div is="noticeDetail" v-if="pageType === 3" @changePage="skip"></div>
   </div>
 </template>
@@ -140,6 +140,9 @@ export default {
     },
     skip (pageType) {
       this.pageType = pageType;
+    },
+    resetForm () {
+      this.$refs['noticeForm'].resetFields();
     }
   }
 }

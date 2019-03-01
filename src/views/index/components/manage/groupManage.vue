@@ -74,11 +74,11 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
     <!--删除用户组弹出框-->
     <el-dialog
@@ -106,6 +106,7 @@
       >
       <div>
         <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" v-model="userGroupName"></el-input>
+        <p class="error_tip">请输入用户组名称</p>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addUserGroupDialog = false">取消</el-button>
@@ -123,6 +124,7 @@
       >
       <div>
         <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" v-model="userGroupName"></el-input>
+        <p class="error_tip">请输入用户组名称</p>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editUserGroupDialog = false">取消</el-button>
@@ -250,7 +252,7 @@
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       checkedCities: ['上海', '北京'],
       cities: ['上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳'],
       userGroupName: null, // 新增用户组名称
@@ -446,6 +448,10 @@ export default {
           }
         }
       }
+    }
+    .error_tip {
+      color: #f56c6c;
+      margin: 3px 5px;
     }
   }
 }

@@ -69,7 +69,7 @@
           prop="eventStatus"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatus === '待处理' ? 'untreated_event' : scope.row.eventStatus === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
+            <span class="event_status" :class="[scope.row.eventStatus === '待开始' ? 'untreated_event' : scope.row.eventStatus === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -216,7 +216,10 @@ export default {
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
       if (obj.eventStatus === '进行中') {
-        this.$router.push({name: ''});
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing'}});
+      }
+      if (obj.eventStatus === '已结束') {
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end'}});
       }
     }
   }

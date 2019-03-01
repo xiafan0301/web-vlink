@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/manage/department' }">部门架构</el-breadcrumb-item>
-        <el-breadcrumb-item>溆浦县政法委</el-breadcrumb-item>
+        <el-breadcrumb-item>{{departDetailInfo.organName}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="all_content">
@@ -16,36 +16,36 @@
         <div class="basic_info">
           <p>
             <i class="vl_icon vl_icon_event_4"></i>
-            <span>溆浦县政法委</span>
+            <span>{{departDetailInfo.superiorName}}</span>
           </p>
           <ul class="basic_list">
             <li>
               <span>上级部门:</span>
-              <span>溆浦县政法委</span>
+              <span>{{departDetailInfo.organName}}</span>
             </li>
             <li>
               <span>负责人:</span>
-              <span>禁止康</span>
+              <span>{{departDetailInfo.chargeUserName}}</span>
             </li>
             <li>
               <span>联系方式:</span>
-              <span>13908398989</span>
+              <span>{{departDetailInfo.chargeUserTelephone}}</span>
             </li>
             <li>
               <span>创建时间:</span>
-              <span>2018-6-25 10:00:00</span>
+              <span>{{departDetailInfo.createTime}}</span>
             </li>
             <li>
               <span>更新时间:</span>
-              <span>2018-6-25 10:00:00</span>
+              <span>{{departDetailInfo.updateTime}}</span>
             </li>
           </ul>
         </div>
         <div class="junior_depart">
           <p>下级部门</p>
           <div class="depart_btn_box">
-            <el-button class="add_btn" icon="el-icon-plus">新增部门</el-button>
-            <el-button class="del_btn">删除部门</el-button>
+            <el-button class="add_btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
+            <el-button class="del_btn" @click="showDeleteDialog">删除部门</el-button>
           </div>
           <div class="depart_tree">
             <el-checkbox>全选</el-checkbox>
@@ -60,7 +60,10 @@
       <template v-else>
         <div class="member_box">
           <div class="header">
-            <el-button class="admin-btn" icon="vl_icon vl_icon_manage_2" @click="showAdminMember">成员管理</el-button>
+            <el-button class="admin-btn" @click="showAdminMember">
+              <i class="vl_icon vl_icon_manage_2"></i>
+              <span>成员管理</span>
+            </el-button>
             <el-input  placeholder="请输入账户名/姓名查找" style="width: 240px;">
               <i
               class="search_icon vl_icon vl_icon_manage_1"
@@ -114,11 +117,11 @@
           <el-pagination
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
-            :current-page="currentPage4"
+            :current-page="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-size="pagination.pageSize"
             layout="total, prev, pager, next, jumper"
-            :total="400">
+            :total="pagination.total">
           </el-pagination>
         </div>
       </template>
@@ -164,6 +167,55 @@
         </div>
       </div>
     </el-dialog>
+    <!--新增部门弹框-->
+    <el-dialog
+      title="新增部门"
+      :visible.sync="newDepartmentDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div style="margin-top: 10px;">
+        <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
+          <el-form-item label=" " prop="organName">
+            <el-input v-model="addDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+          </el-form-item>
+          <el-form-item label=" " prop="organPid">
+            <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
+              <el-option label="无" value="shanghai"></el-option>
+              <el-option label="区域一" value="shanghai"></el-option>
+              <el-option label="区域二" value="beijing"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label=" " prop="chargeUserName">
+            <el-select style="width: 95%" filterable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
+              <el-option label="区域一" value="shanghai"></el-option>
+              <el-option label="区域二" value="beijing"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="newDepartmentDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="newDepartmentDialog = false">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--删除下级部门弹出框-->
+    <el-dialog
+      title="删除时将删除部门及其下级部门，是否确认删除？"
+      :visible.sync="delChildDepartmentDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">您已选中4个部门</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delChildDepartmentDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="delChildDepartmentDialog = false">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </vue-scroll>
 </template>
@@ -171,8 +223,8 @@
 export default {
   data () {
     return {
-      currentPage4: 1,
-      tabState: 2,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      tabState: 1,
       data: [{
         label: '一级 1',
         children: [{
@@ -256,7 +308,29 @@ export default {
           lastLoginTime: '2018-12-12 12:12:12'
         }
       ],
+      departDetailInfo: { // 部门详情数据
+        organName: 'assdasdasd',
+        superiorName: '监察部',
+        chargeUserName: '张三',
+        chargeUserTelephone: '18212344321'
+      },
+      addDepartment: {
+        organName: null,
+        organPid: null,
+        chargeUserName: null
+      },
+      addRules: {
+        organName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        organPid: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ]
+      },
+      deleteArr: [], // 删除部门id集合
       adminMemberDialog: false, // 成员管理弹出框
+      newDepartmentDialog: false, // 新建部门弹出框
+      delChildDepartmentDialog: false, // 删除部门弹出框
     }
   },
   methods: {
@@ -268,6 +342,22 @@ export default {
     // 显示成员管理弹出框
     showAdminMember () {
       this.adminMemberDialog = true;
+    },
+    // 显示新增部门弹出框
+    showNewDepartment () {
+      this.newDepartmentDialog = true;
+    },
+    // 显示删除部门弹出框
+    showDeleteDialog () {
+      if (this.deleteArr.length === 0) {
+        this.$message({
+          message: '请先选择需删除的部门',
+          type: 'warning',
+          customClass: 'delete_depart'
+        });
+      } else {
+        this.delChildDepartmentDialog = true;
+      }
     },
     searchData () {}
   }
@@ -391,9 +481,14 @@ export default {
         padding: 20px 10px 10px;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         .admin-btn {
           background-color: #0C70F8;
           color: #fff;
+          i {
+            display: inline-block;
+            vertical-align: middle;
+          }
         }
         .search_icon{
           margin-top: 10px;
@@ -506,7 +601,6 @@ export default {
       }
     }
   }
-
 }
 </style>
 
