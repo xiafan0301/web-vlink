@@ -127,6 +127,30 @@ export function getPortraitByIdNo(params) {
     mode: ''
   })
 }
+/**
+ * copyPortrait 批量复制人像到别的分组
+ * @param {object} data
+ */
+export function copyPortrait(data) {
+  return request({
+    url: '/surveillanceRepertory/portrait/group/copy/batch',
+    method: 'post',
+    data,
+    mode: ''
+  })
+}
+/**
+ * removePortrait 批量移出人像到别的分组
+ * @param {object} data
+ */
+export function removePortrait(data) {
+  return request({
+    url: '/surveillanceRepertory/portrait/group/delete/batch',
+    method: 'delete',
+    data,
+    mode: ''
+  })
+}
 
 /**
  * addVehicle 新建车像
@@ -196,6 +220,42 @@ export function getVehicleListByGroup(params) {
     url: '/surveillanceRepertory/vehicle/pageByGroup',
     method: 'get',
     params,
+    mode: ''
+  })
+}
+/**
+ * putVehicle 修改车像
+ * @param {object} data
+ */
+export function putVehicle(data) {
+  return request({
+    url: '/surveillanceRepertory/vehicle',
+    method: 'put',
+    data,
+    mode: ''
+  })
+}
+/**
+ * copyVehicle 批量复制车像到别的分组
+ * @param {object} data
+ */
+export function copyVehicle(data) {
+  return request({
+    url: '/surveillanceRepertory/vehicle/group/copy/batch',
+    method: 'post',
+    data,
+    mode: ''
+  })
+}
+/**
+ * removeVehicle 批量移出车像到别的分组
+ * @param {object} data
+ */
+export function removeVehicle(data) {
+  return request({
+    url: '/surveillanceRepertory/vehicle/group/delete/batch',
+    method: 'delete',
+    data,
     mode: ''
   })
 }

@@ -11,10 +11,7 @@
         <el-button @click="judgeIsSelectedRemove">删除人像</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
-            <li @click="copyIsGroup">系统默认</li>
-            <li>重点青少年</li>
-            <li>拐卖妇女</li>
-            <li>失踪儿童</li>
+            <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
             <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
           </ul>
         </el-collapse-transition>
@@ -90,7 +87,7 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delPortrait} from '@/views/index/api/api.js';
+import {delPortrait, copyPortrait} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
   props: ['protraitMemberList'],
@@ -103,6 +100,13 @@ export default {
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
       track: null,
       showMoreId: null,//显示更多组的组id
+      // 人像组列表数据
+      groupListPortrait: [
+        {groupName: '全部人像', memberNum: 200, uid: '0'},
+        {groupName: '人像test1', memberNum: 200, uid: '1'},
+        {groupName: '人像test2', memberNum: 201, uid: '2'},
+        {groupName: '人像test3', memberNum: 202, uid: '3'}
+      ],
       // 弹出框参数
       delPortraitDialog: false,
       loadingBtn: false,
@@ -114,6 +118,7 @@ export default {
       this.memberList.forEach(f => {
         this.$set(f, 'isChecked', false);
       })
+      this.allChecked = false;
     }
   },
   computed: {
@@ -176,21 +181,30 @@ export default {
         this.delPortraitDialog = true;
       }
     },
-    // 复制到自定义组
-    copyIsGroup () {
-      this.isShowGroupCopy = !this.isShowGroupCopy;
-    },
     // 批量删除人像
     delPortrait () {
       this.loadingBtn = true;
-      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',')
+      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
       const params = {ids: member};
-      delPortrait(params).then(res => {
+      delPortrait(params).then(() => {
         this.delPortraitDialog = false;
         this.$message.success('删除成功！');
         this.$emit('getPortraitList');//重新通知父组件获取人像列表
       }).finally(() => {
         this.loadingBtn = false;
+      })
+    },
+    // 批量复制人像到别的组
+    copyPortrait (groupId) {
+      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
+      const data = {
+        groupId: groupId,
+        ids: member
+      }
+      copyPortrait(data).then(() => {
+        this.isShowGroupCopy = false;
+        this.$message.success('复制成功');
+        this.$emit('getPortraitList');//重新通知父组件获取人像列表
       })
     }
   }
