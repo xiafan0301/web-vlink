@@ -25,15 +25,15 @@
             <!-- 人像库组列表 -->
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
-                <div @click="getPortraitListByGroup(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="getPortraitListByGroup(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
+                <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <i @click="getPortraitList(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
-                <div @click="getVehicleListByGroup(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="getVehicleListByGroup(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
+                <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <i @click="getVehicleList(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@
           </el-form-item>
           <el-form-item style="width: 192px;">
             <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getPortraitList">搜索</el-button>
+            <el-button style="width: 90px;" type="primary" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
@@ -131,7 +131,7 @@
           </el-form-item>
           <el-form-item style="width: 192px;">
             <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getVehicleList">搜索</el-button>
+            <el-button style="width: 90px;" type="primary" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -421,15 +421,15 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === '0'" :protraitMemberList="protraitMemberList" @getPortraitList="getPortraitList"></div>
+        <div is="allPortrait" v-if="groupId === null" :protraitMemberList="protraitMemberList" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
         <!-- 自定义人像列表 -->
-        <div is="customPortrait" v-else :protraitMemberList="protraitMemberList" :groupId="groupId" @getPortraitListByGroup="getPortraitListByGroup(groupId, groupIndex)"></div>
+        <div is="customPortrait" v-else :protraitMemberList="protraitMemberList" :groupId="groupId" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === '0'" :carMemberList="carMemberList" @getVehicleList="getVehicleList"></div>
+        <div is="allCar" v-if="groupId === null" :carMemberList="carMemberList" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
         <!-- 自定义车像列表 -->
-        <div is="customCar" v-else :carMemberList="carMemberList" :groupId="groupId" @getVehicleListByGroup="getVehicleListByGroup(groupId, groupIndex)"></div>
+        <div is="customCar" v-else :carMemberList="carMemberList" :groupId="groupId" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
       </template>
     </template>
   </div>
@@ -441,7 +441,7 @@ import allPortrait from './components/allPortrait.vue';
 import customCar from './components/customCar.vue';
 import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
-import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getPortraitListByGroup, getVehicleListByGroup, getVehicleById, putVehicle} from '@/views/index/api/api.js';
+import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle} from '@/views/index/api/api.js';
 import {objDeepCopy} from '@/utils/util.js';
 export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
@@ -468,14 +468,14 @@ export default {
       groupIndex: 0,//分组下标
       // 人像组列表数据
       groupListPortrait: [
-        {groupName: '全部人像', memberNum: 200, uid: '0'},
+        {groupName: '全部人像', memberNum: 200, uid: null},
         {groupName: '人像test1', memberNum: 200, uid: '1'},
         {groupName: '人像test2', memberNum: 201, uid: '2'},
         {groupName: '人像test3', memberNum: 202, uid: '3'}
       ],
       // 车像组列表数据
       groupListCar: [
-        {groupName: '全部车像', memberNum: 200, uid: '0'},
+        {groupName: '全部车像', memberNum: 200, uid: null},
         {groupName: '车像test1', memberNum: 200, uid: '4'},
         {groupName: '车像test2', memberNum: 201, uid: '5'},
         {groupName: '车像test3', memberNum: 201, uid: '6'}
@@ -606,7 +606,7 @@ export default {
   },
   mounted () {
     // 默认获取人像库列表
-    this.getPortraitList();
+    this.getPortraitList(this.groupId, 0);
     this.picHeight = window.screenHeight + 180;
   },
   methods: {
@@ -620,9 +620,9 @@ export default {
       this.tabType = tabType;
       this.groupIndex = 0;
       if (this.tabType === '1') {
-        this.getPortraitList();
+        this.getPortraitList(null, 0);
       } else {
-        this.getVehicleList();
+        this.getVehicleList(null, 0);
       }
       this.pageType = '1';
       this.groupId = null;
@@ -717,14 +717,17 @@ export default {
     },
     // 通过证件号搜索人像
     getPortraitByIdNo () {
-      const params = {idNo: this.portraitForm.idNo}
-      getPortraitByIdNo(params).then(res => {
-        if (res && res.data) {
-          this.$message.error('证件号已存在');
-        } else {
-          this.getBirthDate();
-        }
-      })
+      const idNo = this.Trim(this.portraitForm.idNo, 'g');
+      const params = {idNo: idNo}
+      if (idNo) {
+        getPortraitByIdNo(params).then(res => {
+          if (res && res.data) {
+            this.$message.error('证件号已存在');
+          } else {
+            this.getBirthDate();
+          }
+        })
+      }
     },
     // 保存人像
     savePortrait (formName) {
@@ -744,13 +747,8 @@ export default {
             if (res && res.data) {
               console.log(res);
               this.addPortraitDialog = false;
-              this.$message.success('新增成功！');
-              // 根据当前在哪个组新增，来获取不同的列表
-              if (this.groupIndex === 0) {
-                this.getPortraitList();
-              } else {
-                this.getPortraitListByGroup(this.groupId, this.groupIndex);
-              }
+              this.$message.success('新增成功！');             
+              this.getPortraitList(this.groupId, this.groupIndex);
             }
           }).finally(() => {
             this.loadingBtn = false;
@@ -762,10 +760,11 @@ export default {
     },
     // 通过车牌号搜索车像
     getVehicleByIdNo () {
+      const idNo = this.Trim(this.carForm.vehicleNumber, 'g');
       const params = {
-        vehicleNumber: this.carForm.vehicleNumber
+        vehicleNumber: idNo
       }
-      if (this.carForm.vehicleNumber) {
+      if (idNo) {
         getVehicleByIdNo(params).then(res => {
           if (res && res.data) {
             this.$message.error('车牌号已存在');
@@ -787,62 +786,13 @@ export default {
               console.log(res);
               this.addPortraitDialog = false;
               this.$message.success('新增成功！');
-              // 根据当前在哪个组新增，来获取不同的列表
-              if (this.groupIndex === 0) {
-                this.getVehicleList();
-              } else {
-                this.getVehicleListByGroup(this.groupId, this.groupIndex);
-              }
+              this.getVehicleList(this.groupId, this.groupIndex);
             }
           }).finally(() => {
             this.loadingBtn = false;
           })
         } else {
           return false;
-        }
-      })
-    },
-    // 获取全部人像库列表
-    getPortraitList () {
-      this.currentPage = 1;
-      let params = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize,
-        orderBy: null,
-        order: null,
-        'where.dateStart': this.libPortraitForm.perTime && this.libPortraitForm.perTime[0],
-        'where.dateEnd': this.libPortraitForm.perTime && this.libPortraitForm.perTime[1],
-        'where.sex': this.libPortraitForm.sex,
-        'where.nation': this.libPortraitForm.nation,
-        'where.card': this.libPortraitForm.card
-      }
-      getPortraitList(params).then(res => {
-        console.log(res)
-        if (res && res.data) {
-          this.protraitMemberList = res.data;
-        }
-      })
-    },
-    // 获取全部车像库列表
-    getVehicleList () {
-      this.currentPage = 1;
-      let params = {
-        pageNum: this.pageNum,
-        pageSize: this.pageSize,
-        orderBy: null,
-        order: null,
-        'where.dateStart': this.libVehicleForm.carTime && this.libVehicleForm.carTime[0],
-        'where.dateEnd': this.libVehicleForm.carTime && this.libVehicleForm.carTime[1],
-        'where.vehicleColor': this.libVehicleForm.vehicleColor,
-        'where.vehicleType': this.libVehicleForm.vehicleType,
-        'where.numberType': this.libVehicleForm.numberType,
-        'where.vehicleNumber': this.libVehicleForm.vehicleNumber,
-        'where.groupId': null
-      }
-      getVehicleList(params).then(res => {
-        console.log(res)
-        if (res && res.data) {
-          this.carMemberList = res.data;
         }
       })
     },
@@ -887,12 +837,7 @@ export default {
             console.log(res);
             this.addPortraitDialog = false;
             this.$message.success('修改成功！');
-            // 根据当前在哪个组修改，来获取不同的列表
-            if (this.groupIndex === 0) {
-              this.getPortraitList();
-            } else {
-              this.getPortraitListByGroup(this.groupId, this.groupIndex);
-            }
+            this.getPortraitList(this.groupId, this.groupIndex);
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -931,12 +876,7 @@ export default {
             console.log(res);
             this.addPortraitDialog = false;
             this.$message.success('修改成功！');
-            // 根据当前在哪个组修改，来获取不同的列表
-            if (this.groupIndex === 0) {
-              this.getVehicleList();
-            } else {
-              this.getVehicleListByGroup(this.groupId, this.groupIndex);
-            }
+            this.getVehicleList(this.groupId, this.groupIndex);
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -945,28 +885,24 @@ export default {
         }
       })
     },
-    // 根据人像组id获取人像列表
-    getPortraitListByGroup (groupId, index, pageType) {
+    // 获取全部人像列表，或者根据组id获取人像列表
+    getPortraitList (groupId, index, pageType) {
+      this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
-      // 获取全部人像组的人像
-      if (index === 0) {
-        this.getPortraitList();
-        // 跳转到设置页
-        if (pageType === '2') {
-          this.pageType = pageType;
-        }
-        return;
-      }
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
+        'where.dateStart': this.libPortraitForm.perTime && this.libPortraitForm.perTime[0],
+        'where.dateEnd': this.libPortraitForm.perTime && this.libPortraitForm.perTime[1],
+        'where.sex': this.libPortraitForm.sex,
+        'where.nation': this.libPortraitForm.nation,
+        'where.card': this.libPortraitForm.card,
         'where.groupId': groupId
       }
-      // 获取自定义组的人像
-      getPortraitListByGroup(params).then(res => {
+      getPortraitList(params).then(res => {
         if (res && res.data) {
           this.protraitMemberList = res.data;
           // 跳转到设置页
@@ -976,28 +912,25 @@ export default {
         }
       })
     },
-    // 根据车像组id获取车像列表
-    getVehicleListByGroup (groupId, index, pageType) {
+    //  获取全部车像列表，或者根据组id获取车像列表
+    getVehicleList (groupId, index, pageType) {
+      this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
-      // 获取全部车像组的车像
-      if (index === 0) {
-        this.getVehicleList();
-        // 跳转到设置页
-        if (pageType === '2') {
-          this.pageType = pageType;
-        }
-        return;
-      }
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         orderBy: null,
         order: null,
+        'where.dateStart': this.libVehicleForm.carTime && this.libVehicleForm.carTime[0],
+        'where.dateEnd': this.libVehicleForm.carTime && this.libVehicleForm.carTime[1],
+        'where.vehicleColor': this.libVehicleForm.vehicleColor,
+        'where.vehicleType': this.libVehicleForm.vehicleType,
+        'where.numberType': this.libVehicleForm.numberType,
+        'where.vehicleNumber': this.libVehicleForm.vehicleNumber,
         'where.groupId': groupId
       }
-      // 获取自定义组的车像
-      getVehicleListByGroup(params).then(res => {
+      getVehicleList(params).then(res => {
         if (res && res.data) {
           this.carMemberList = res.data;
           // 跳转到设置页

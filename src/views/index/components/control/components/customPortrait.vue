@@ -211,7 +211,7 @@ export default {
       copyPortrait(data).then(() => {
         this.isShowGroupCopy = false;
         this.$message.success('复制成功');
-        this.$emit('getPortraitListByGroup');//重新通知父组件获取人像列表
+        this.$emit('getPortraitList');//重新通知父组件获取人像列表
       })
     },
     // 批量移出人像到别的组
@@ -225,7 +225,7 @@ export default {
       removePortrait(data).then(() => {
         this.removeGroupDialog = false;
         this.$message.success('移出成功');
-        this.$emit('getPortraitListByGroup');//重新通知父组件获取人像列表
+        this.$emit('getPortraitList');//重新通知父组件获取人像列表
       }).finally(() => {
         this.loadingBtn = false;
       })

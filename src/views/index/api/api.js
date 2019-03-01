@@ -104,18 +104,6 @@ export function putPortrait(data) {
   })
 }
 /**
- * getPortraitListByGroup 根据不同分组人像库列表分页查询接口
- * @param {object} params
- */
-export function getPortraitListByGroup(params) {
-  return request({
-    url: '/surveillanceRepertory/portrait/pageByGroup',
-    method: 'get',
-    params,
-    mode: ''
-  })
-}
-/**
  * getPortraitByIdNo 通过证件号搜索人像（根据返回对象为空可判断证件号是否存在）
  * @param {object} params
  */
@@ -206,18 +194,6 @@ export function getVehicleById(uid) {
 export function getVehicleByIdNo(params) {
   return request({
     url: '/surveillanceRepertory/vehicle/byIdNo',
-    method: 'get',
-    params,
-    mode: ''
-  })
-}
-/**
- * getVehicleListByGroup 根据不同分组车像库列表分页查询接口
- * @param {object} params
- */
-export function getVehicleListByGroup(params) {
-  return request({
-    url: '/surveillanceRepertory/vehicle/pageByGroup',
     method: 'get',
     params,
     mode: ''

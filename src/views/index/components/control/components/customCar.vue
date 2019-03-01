@@ -208,7 +208,7 @@ export default {
       copyVehicle(data).then(() => {
         this.isShowGroupCopy = false;
         this.$message.success('复制成功');
-        this.$emit('getVehicleListByGroup');//重新通知父组件获取车像列表
+        this.$emit('getVehicleList');//重新通知父组件获取车像列表
       })
     },
     // 批量移出人像到别的组
@@ -222,7 +222,7 @@ export default {
       removeVehicle(data).then(() => {
         this.removeGroupDialog = false;
         this.$message.success('移出成功');
-        this.$emit('getVehicleListByGroup');//重新通知父组件获取人像列表
+        this.$emit('getVehicleList');//重新通知父组件获取人像列表
       }).finally(() => {
         this.loadingBtn = false;
       })
