@@ -1,19 +1,19 @@
 <template>
   <vue-scroll>
-    <div class="add-plan">
+    <div class="edit-plan">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/ctcplan' }">调度预案</el-breadcrumb-item>
-          <el-breadcrumb-item>新增预案</el-breadcrumb-item>
+          <el-breadcrumb-item>修改预案</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <el-form :model="addPlanForm" ref="addPlanForm" :rules="rules" class="add-plan-form" size="small">
+        <el-form :model="editPlanForm" ref="editPlanForm" :rules="rules" class="edit-plan-form" size="small">
           <el-form-item label="预案名称:" prop="scheduleName" label-width="120px">
-            <el-input v-model="addPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+            <el-input v-model="editPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
           </el-form-item>
           <el-form-item label="预案类型:" label-width="120px" prop="scheduleType">
-          <el-select v-model="addPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+          <el-select v-model="editPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
             <el-option value='全部状态'></el-option>
             <!-- <el-option
               v-for="item in eventStatusList"
@@ -24,7 +24,7 @@
           </el-select>
           </el-form-item>
           <el-form-item label="适用事件等级:" label-width="120px" prop="applyEventLevel">
-            <el-select v-model="addPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
+            <el-select v-model="editPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -34,7 +34,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="预案正文:" label-width="120px" prop="scheduleContent">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
@@ -54,7 +54,7 @@
             <div class="response_box" v-for="(item, index) in taskList" :key="index">
               <div class="plan_form_box">
                 <div class="title">
-                  <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="taskList.length > 1"></i>
+                  <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
                   <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
@@ -108,7 +108,7 @@ export default {
         value: '选项5',
         label: '北京烤鸭'
       }],
-      addPlanForm: {
+      editPlanForm: {
         scheduleName: null, // 预案名称
         scheduleType: null, // 预案类型
         applyEventLevel: [], // 事件等级
@@ -159,14 +159,14 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.add-plan {
+.edit-plan {
   width: 100%;
   .content-box {
     width: 97%;
     margin: 0 20px;
     background: #ffffff;
     margin-bottom: 100px;
-    .add-plan-form {
+    .edit-plan-form {
       width: 100%;
       padding: 10px 0;
       /deep/ .el-form-item__label {
@@ -194,7 +194,7 @@ export default {
             }
           }
           .plan_form {
-            padding: 3px 20px 5px;
+            padding: 10px 20px;
             /deep/ .el-form-item {
               margin-bottom: 15px;
             }
@@ -250,5 +250,3 @@ export default {
   }
 }
 </style>
-
-

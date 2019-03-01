@@ -1,25 +1,35 @@
 <template>
   <div class="plan-list">
     <div class="search_box">
-      <el-form :inline="true" :model="planForm" class="ctc_form">
+      <el-form :inline="true" :model="planForm" class="ctc_form" ref="planForm">
         <el-form-item>
-          <el-select v-model="planForm.eventType" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="planForm.scheduleType" style="width: 240px;" placeholder="预案类型">
+            <el-option value='全部类型'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="planForm.eventLevel" style="width: 240px;">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="planForm.level" style="width: 240px;" placeholder="适用等级">
+            <el-option value='全部等级'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item >
-          <el-input style="width: 240px;" type="text" placeholder="请输入预案名称筛选查找" v-model="planForm.phoneOrNumber" />
+          <el-input style="width: 240px;" type="text" placeholder="请输入预案名称筛选查找" v-model="planForm.content" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" type="primary">查询</el-button>
-          <el-button class="reset_btn" type="primary">重置</el-button>
+          <el-button class="select_btn" @click="selectDataList('planForm')">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('planForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
@@ -41,25 +51,25 @@
         </el-table-column>
         <el-table-column
           label="预案名称"
-          prop="planName"
+          prop="scheduleName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="预案类型"
-          prop="planType"
+          prop="scheduleType"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="适用事件等级"
-          prop="eventLevel"
+          prop="applyEventLevel"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="创建用户"
-          prop="createUser"
+          prop="opUserName"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -71,11 +81,11 @@
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
+            <span class="operation_btn" @click="skipDetailPage(scope.row)">查看</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn">修改</span>
+            <span class="operation_btn" @click="skipEditPage(scope.row)">修改</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn">删除</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
           </template>
         </el-table-column>
       </el-table>
@@ -83,62 +93,63 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
+    <!--删除预案弹出框-->
+    <el-dialog
+      title="是否确定删除该条预案数据?"
+      :visible.sync="delPlanDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delPlanDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="delPlanDialog = false">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       planForm: {
-        dateTime: null, // 日期
-        eventLevel: null,
-        planType: null,
-        phoneOrNumber: null // 手机号或事件编号
+        level: null, // 适用等级
+        scheduleType: null, // 预案类型
+        content: null // 预案名称
       },
        planList: [
         {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）',
-          createUser: 'admin',
+          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+          scheduleType: '事故灾难',
+          applyEventLevel: 'IV级（一般）、V级（较大）',
+          opUserName: 'admin',
           createTime: '2019-01-21 13:57:33'
         },
         {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）',
-          createUser: 'admin',
+          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+          scheduleType: '事故灾难',
+          applyEventLevel: 'IV级（一般）、V级（较大）',
+          opUserName: 'admin',
           createTime: '2019-01-21 13:57:33'
         },
         {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）',
-          createUser: 'admin',
+          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+          scheduleType: '事故灾难',
+          applyEventLevel: 'IV级（一般）、V级（较大）',
+          opUserName: 'admin',
           createTime: '2019-01-21 13:57:33'
         },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）',
-          createUser: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）',
-          createUser: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        }
-      ] // 表格数据
+      ], // 表格数据
+      delPlanDialog: false, // 删除预案弹出框
     }
   },
   methods: {
@@ -148,6 +159,29 @@ export default {
     handleCurrentChange () {},
     skipAddPlanPage () { // 跳到新增预案页面
       this.$router.push({name: 'add_plan'});
+    },
+    // 根据搜索条件查询
+    selectDataList (form) {
+      console.log(form);
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+    },
+    // 显示删除预案弹出框
+    showDeleteDialog (obj) {
+      console.log(obj);
+      this.delPlanDialog = true;
+    },
+    // 跳至修改预案页面
+    skipEditPage (obj) {
+      console.log(obj);
+      this.$router.push({name: 'edit_plan'});
+    },
+    // 跳至预案详情页面
+    skipDetailPage (obj) {
+      console.log(obj);
+      this.$router.push({name: 'ctc_plan_detail'});
     }
   }
 }

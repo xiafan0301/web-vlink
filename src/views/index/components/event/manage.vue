@@ -253,11 +253,8 @@ export default {
     },
     // 根据搜索条件查询
     selectDataList (form) {
-      this.$refs[form].validator(valid => {
-        if (valid) {
-
-        }
-      })
+      console.log(form);
+      
     },
     // 重置查询条件
     resetForm (form) {

@@ -172,11 +172,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="pagination.pageNum"
         :page-sizes="[100, 200, 300, 400]"
-        :page-size="100"
+        :page-size="pagination.pageSize"
         layout="total, prev, pager, next, jumper"
-        :total="400">
+        :total="pagination.total">
       </el-pagination>
     </div>
     <!--查看人员详细信息弹出框-->
@@ -279,7 +279,7 @@
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       userGroupName: null,
       options: [{
         value: '选项1',
@@ -385,7 +385,6 @@ export default {
     }
     .left_content_box {
       .group_ul {
-        // height: calc();
         >li {
           padding-left: 40px;
           height: 36px;
@@ -395,8 +394,11 @@ export default {
           color: #333333;
           cursor: pointer;
           i {
-            display: none;
+            display: block;
             margin-left: 5px;
+            &:hover {
+              background-position: -412px -350px;
+            }
           }
           &:hover {
             background-color: #E0F2FF;

@@ -58,11 +58,11 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
     <!--删除角色弹出框-->
     <el-dialog
@@ -251,7 +251,7 @@ export default {
         children: 'children',
         label: 'label'
       },
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       addRole: {
         roleName: null,
         roleDesc: null
@@ -262,7 +262,9 @@ export default {
       },
       rules: {
         roleName: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { min: 2, message: '最少输入2个字符' },
+          { max: 20, message: '最多输入20个字符' }
         ]
       },
       roleListData: [

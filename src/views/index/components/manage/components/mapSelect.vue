@@ -1,5 +1,5 @@
 <template>
-  <div class="select_map_area">
+  <div class="select_map_area" :class="{'vl_map_selarea_ctl': selAreaAble}">
     <div class="select_map_left">
       <div class="select_top">
         <span>已有设备 (12)</span>
@@ -129,63 +129,68 @@
   </div>
 </template>
 <script>
+import { testData } from './testData.js';
+import { random14 } from '@/utils/util.js';
 export default {
   data () {
     return {
       arrowActiveTemp: false,
-      selAreaAcitve: false,
       map: null, // 地图对象
       // 选择区域
+      selAreaAcitve: false,
       mouseTool: null,
+      selAreaAble: false,
+      mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
+      mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
+
+      sxtList: [], // 摄像头
+      sxtMapMarkers: [],
+      kkList: [], // 卡口
+      kkMapMarkers: [],
+      clList: [], // 车辆
+      clMapMarkers: [],
+      ryList: [],  // 人员
+      ryMapMarkers: [],
     }
   },
   mounted () {
     let _this = this;
     let map = new window.AMap.Map('mapMap', {
-      zoom: 16, // 级别
+      zoom: 18, // 级别
       center: [112.974691, 28.093846], // 中心点坐标
       // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
+    this.map = map;
     // 在地图中添加MouseTool插件
     let mouseTool = new window.AMap.MouseTool(map);
     _this.mouseTool = mouseTool;
     // 添加事件
-    window.AMap.event.addListener(mouseTool, 'draw', function (e) {
+    window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
+      console.log('e', e)
       // _this.drawPaths = e.obj.getPath();
       console.log('drawPaths e', e); // 获取路径/范围
       console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
       setTimeout(() => {
-        // _this.editForm.areaData = null;
-        // _this.dialogVisible = true;
-        // _this.amap.setDefaultCursor(_this.defaultCursor);
         _this.selAreaRest(true);
-        let polygon = new window.AMap.Polygon({
-          map: map,
-          strokeColor: '#FA453A',
-          strokeOpacity: 1,
-          strokeWeight: 1,
-          fillColor: '#FA453A',
-          fillOpacity: 0.2,
-          path: e.obj.getPath(),
-          zIndex: 12
+        let polygon = new window.AMap.Polygon({ // 构造多边形对象
+          map: map, // 地图对象
+          strokeColor: '#FA453A', // 线条颜色
+          strokeOpacity: 1, // 轮廓线透明度 [0,1]
+          strokeWeight: 1, // 轮廓线宽度
+          fillColor: '#FA453A', //多边形填充颜色
+          fillOpacity: 0.2, // 多边形填充透明度
+          path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
+          zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
         });
+        console.log(polygon);
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
-        /* for (let j = 0; j < _this.sxtList.length; j++) {
-          let _o = _this.sxtList[j];
-          if (_o.longitude > 0 && _o.latitude > 0) {
-            if (polygon.contains(new window.AMap.LngLat(_o.longitude, _o.latitude))) {
-              console.log('============' + _o.sid);
-            }
-
-          }
-        } */
       }, 100);
     });
-    this.mapMark();
+
+    _this.getMapData();
   },
   methods: {
     mapZoomSet (val) {
@@ -193,61 +198,142 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
+    // 获取地图数据
+    getMapData () {
+      setTimeout(() => {
+        this.sxtList = testData.sxt;
+        this.kkList = testData.kakou;
+        this.clList = testData.cheliang;
+        this.ryList = testData.renyuan;
+        this.mapMarkHandler();
+      }, 200);
+    },
+    // 地图标记处理
+    mapMarkHandler () {
+      // 摄像头
+      this.mapClearMarkers(this.sxtMapMarkers);
+      if (this.mapTypeList.indexOf('sxt') >= 0) {
+        this.mapMark(this.sxtList, this.sxtMapMarkers, 'sxt');
+      }
+      // 卡口
+      this.mapClearMarkers(this.kkMapMarkers);
+      if (this.mapTypeList.indexOf('kk') >= 0) {
+        this.mapMark(this.kkList, this.kkMapMarkers, 'kk');
+      }
+      // 车辆
+      this.mapClearMarkers(this.clMapMarkers);
+      if (this.mapTypeList.indexOf('cl') >= 0) {
+        this.mapMark(this.clList, this.clMapMarkers, 'cl');
+      }
+      // 人员
+      this.mapClearMarkers(this.ryMapMarkers);
+      if (this.mapTypeList.indexOf('ry') >= 0) {
+        this.mapMark(this.ryList, this.ryMapMarkers, 'ry');
+      }
+    },
     // 地图标记
-    mapMark () {
-      let _this = this;
-      _this.map.clearMap();
-      let content = '';
-      let hoverWindow = null;
-      // for (let i = 0; i < data.length; i++) {
-        // let obj = data[i];
-        // obj.sid = obj.name + '_' + i + '_' + random14();
-        // let content = '';
-        // if (obj.controlList[0].alarmRank === '五级') {
-        //   content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_target"><div class="vl_icon_warning">发现可疑目标</div></div>';
-        // } else {
-          content = '<div class="vl_icon vl_icon_click"></div>';
-        // }
-        // if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
-            position: [112.980377, 28.100175],
-            offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            // 自定义点标记覆盖物内容
-            content: content
-          });
-          marker.setMap(_this.map);
-          // hover
-          marker.on('mouseover', function () {
-            let sContent = '<div class="vl_map_hover">' +
-              '<div class="vl_map_hover_main"><p class="vl_map_hover_main_p">事发地点：阿萨大</p></div>';
-            hoverWindow = new window.AMap.InfoWindow({
-              isCustom: true,
-              closeWhenClickMap: true,
-              offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-              content: sContent
+    mapMark (data, aMarkers, keyWord) {
+      if (data && data.length > 0) {
+        let hoverWindow = null;
+        let _this = this;
+        for (let i = 0; i < data.length; i++) {
+          let obj = data[i];
+          obj.sid = keyWord + '_' + i + '_' + random14();
+          if (obj.longitude > 0 && obj.latitude > 0) {
+            let offSet = [-20.5, -48], selClass = '';
+            if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
+              // 多边形存在且不在多边形之中
+              selClass = "vl_map_selarea_hide";
+            }
+            let marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              // 110.601394, 27.909162
+              position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+              // position: [110.601394, 27.909162], // 基点位置 [116.397428, 39.90923]
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: obj, // 用户自定义属性
+              // 自定义点标记覆盖物内容
+              content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
-            // aCenter = mEvent.target.F.position
-            hoverWindow.open(_this.map, new window.AMap.LngLat(112.980377, 28.100175));
-            hoverWindow.on('close', function () {
-              // console.log('infoWindow close')
+            console.log('marker', marker);
+            // myAMap.hoverMarkerHandler(map, marker, obj);
+            if (!aMarkers) { aMarkers = []; }
+            aMarkers.push(marker);
+
+            // 点击地图上的摄像头/卡口播放视频
+            if (keyWord === 'sxt' || keyWord === 'kk') {
+              marker.on('click', function () {
+                _this.testAddSxt();
+              });
+            }
+            // hover
+            marker.on('mouseover', function () {
+              let sContent = '<div class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' + _this.mapHoverInfo(obj, keyWord) + '</div>';
+              hoverWindow = new window.AMap.InfoWindow({ // 创建一个信息窗体对象
+                isCustom: true, // 是否可以自定义内容
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+                content: sContent
+              });
+              // aCenter = mEvent.target.F.position
+              hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+              hoverWindow.on('close', function () {
+                // console.log('infoWindow close')
+              });
             });
-          });
-          marker.on('mouseout', function () {
-            if (hoverWindow) { hoverWindow.close(); }
-          });
-        // }
-      // }
+            marker.on('mouseout', function () {
+              // if (hoverWindow) { hoverWindow.close(); }
+            });
+          }
+        }
+      }
+    },
+    mapHoverInfo (data, type) {
+      let str = '<ul>';
+      if (type === 'sxt') {
+        str += '<li><span>设备名称：</span>' + data.name + '</li>';
+        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
+      } else if (type === 'kk') {
+        str += '<li><span>卡口名称：</span>' + data.name + '</li>';
+        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
+      } else if (type === 'cl') {
+        str += '<li><span>车辆名称：</span>' + data.name + '</li>';
+        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
+      } else if (type === 'ry') {
+        str += '<li><span>人员名称：</span>' + data.name + '</li>';
+        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
+        str += '<li style="text-align: center;">' +
+            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
+            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
+          '</li>';
+      } else {
+        str += '<li>未知数据</li>';
+      }
+      str += '</ul>';
+      return str;
+    },
+    // 清除所有
+    resetTools () {
+      this.selAreaRest();
+      // this.markRest();
+      // this.rangingRest();
+    },
+    // 清除地图标记
+    mapClearMarkers (aMarkers) {
+      if (this.map && aMarkers && aMarkers.length > 0) {
+        this.map.remove(aMarkers);
+        aMarkers = [];
+      }
     },
     // 选择区域
     selArea () {
       if (this.selAreaAcitve) {
-        // this.resetTools();
+        this.resetTools();
         return false;
       }
-      // this.resetTools();
+      this.resetTools();
       if (this.map && this.mouseTool) {
         this.selAreaAcitve = true;
         this.mouseTool.close(true);
@@ -262,7 +348,17 @@ export default {
         });
       }
     },
-    
+    // 重置选择区域
+    selAreaRest (notClearPolygon) {
+      this.selAreaAcitve = false;
+      this.mouseTool.close(true);
+      this.map.setDefaultCursor('');
+      if (!notClearPolygon && this.selAreaPolygon) {
+        this.map.remove(this.selAreaPolygon);
+        this.selAreaPolygon = null;
+        this.selAreaAble = false;
+      }
+    },
   }
 }
 </script>
@@ -379,14 +475,15 @@ export default {
     .right-flag {
       position: absolute;
       right: 60px;
-      bottom: 130px;
+      bottom: 100px;
       transition: right .3s ease-out;
       animation: fadeInRight .4s ease-out .4s both;
       .map-rrt {
-        background-color: #fff;
+        margin-bottom: 20px;
         box-shadow: 0 0 10px rgba(148,148,148,0.24);
         >li {
-          padding: 15px 5px;
+          padding: 12px 5px;
+          background-color: #ffffff;
           cursor: pointer;
           border-bottom: 1px solid #eee;
           text-align: center;
@@ -394,16 +491,18 @@ export default {
             font-size: 20px;
             color: #0B6FF7;
           }
-          &:last-child { border-bottom: 0; }
+          >span {
+            font-size: 12px;
+          }
+           &:last-child { border-bottom: 0; }
         }
       }
       .map_rrt_u1 {
-        margin-bottom: 20px;
         >li {
-          cursor: pointer;
-          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           i {
-            margin: 6px auto 0 auto;
             text-align: center;
             display: block;
           }
@@ -412,9 +511,6 @@ export default {
             display: block;
           }
         }
-      }
-      .map_rrt_u2 {
-        margin-top: 20px;
       }
     }
   }

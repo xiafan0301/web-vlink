@@ -406,6 +406,9 @@ export default {
           i {
             display: none;
             margin-left: 5px;
+            &:hover {
+              background-position: -412px -350px;
+            }
           }
           &:hover {
             background-color: #E0F2FF;

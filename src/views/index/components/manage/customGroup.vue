@@ -21,8 +21,8 @@
               <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
                 <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="operation_btn del_btn vl_icon vl_icon_manage_8"></i>
+                <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveTemp">
                 <div class="temp_tab">
@@ -62,9 +62,9 @@
                     <span>广场监控点1-300</span>
                     <i class="vl_icon vl_icon_manage_6"></i>
                   </li>
-                  <li>
+                  <li class="isProhibit">
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <i class="vl_icon vl_icon_manage_15"></i>
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
@@ -141,6 +141,35 @@ export default {
   data () {
     return {
       arrowActiveTemp: false,
+      groupData: [
+        {
+          groupName: '常用点位',
+          deviceList: [
+            {
+              name: '广场监控点1-300',
+              isProhibit: false
+            }
+          ]
+        },
+        {
+          groupName: '常用点位',
+          deviceList: [
+            {
+              name: '广场监控点1-300',
+              isProhibit: false
+            }
+          ]
+        },
+        {
+          groupName: '常用点位',
+          deviceList: [
+            {
+              name: '广场监控点1-300',
+              isProhibit: false
+            }
+          ]
+        }
+      ], // 所有的组名数据
     }
   },
   methods: {
@@ -206,7 +235,16 @@ export default {
               float: right;
               margin: 5px 5px 0;
             }
-            
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
+            }
             &.temp_active {
               &:hover {
                 background-color: #E0F2FF;
@@ -254,12 +292,9 @@ export default {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                // position: relative;
-                // i {
-                //   position: absolute;
-                //   right: 0;
-                //   top: 0;
-                // }
+              }
+              .isProhibit {
+                color: #DFDFDF;
               }
             }
           }
@@ -274,13 +309,6 @@ export default {
       height: 196px;
       margin-left: 40%;
       margin-top: 15%;
-      // i {
-      //   position: absolute;
-      //   margin-left: 100px;
-      //   margin-top: -98px;
-      //   left: 50%;
-      //   top: 50%;
-      // }
     }
   }
 }
