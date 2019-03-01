@@ -2,11 +2,11 @@
   <div class="department-manage">
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
-      <el-input  placeholder="请输入部门名称" style="width: 240px;">
+      <el-input  placeholder="请输入部门名称" style="width: 240px;" v-model="name">
         <i
         class="search_icon vl_icon vl_icon_manage_1"
         slot="suffix"
-        @click="handleIconClick">
+        @click="searchData">
       </i>
       </el-input>
     </div>
@@ -24,30 +24,30 @@
         </el-table-column>
         <el-table-column
           label="部门名称"
-          prop="departmentName"
+          prop="organName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="上级部门"
-          prop="parentDepartment"
+          prop="superiorName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="部门负责人"
-          prop="departmentCharge"
+          prop="chargeUserName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="负责人联系方式"
-          prop="userMobile"
+          prop="chargeUserTelephone"
           >
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
+            <span class="operation_btn" @click="skipSelectDetail(scope)">查看</span>
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showeditDialog(scope)">编辑</span>
             <span style="color: #f2f2f2">|</span>
@@ -59,32 +59,35 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
     <!--新增部门弹框-->
     <el-dialog
       title="新增部门"
       :visible.sync="newDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <div style="margin-top: 10px;">
-        <el-form :model="addDepartment">
-          <el-form-item label="">
-            <el-input v-model="addDepartment.departmentName" placeholder="请输入部门名称"></el-input>
+        <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
+          <el-form-item label=" " prop="organName">
+            <el-input v-model="addDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
           </el-form-item>
-          <el-form-item label="">
-            <el-select style="width: 100%" v-model="addDepartment.parentDepartment" placeholder="请选择上级部门">
+          <el-form-item label=" " prop="organPid">
+            <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
+              <el-option label="无" value="shanghai"></el-option>
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="">
-            <el-select style="width: 100%" filterable v-model="addDepartment.departmentCharge" placeholder="请搜索部门负责人姓名">
+          <el-form-item label=" " prop="chargeUserName">
+            <el-select style="width: 95%" filterable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
@@ -101,21 +104,24 @@
       title="编辑部门"
       :visible.sync="editDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <div style="margin-top: 10px;">
-        <el-form :model="editDepartment">
-          <el-form-item label="">
-            <el-input v-model="editDepartment.departmentName" placeholder="请输入部门名称"></el-input>
+        <el-form :model="editDepartment" ref="editDepartment" :rules="editRules" label-width="10px">
+          <el-form-item label=" " prop="organName">
+            <el-input v-model="editDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
           </el-form-item>
-          <el-form-item label="">
-            <el-select style="width: 100%" v-model="editDepartment.parentDepartment" placeholder="请选择上级部门">
+          <el-form-item label=" " prop="organPid">
+            <el-select style="width: 95%;" v-model="editDepartment.organPid" placeholder="请选择上级部门">
+              <el-option label="无" value="shanghai"></el-option>
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="">
-            <el-select style="width: 100%" filterable v-model="editDepartment.departmentCharge" placeholder="请搜索部门负责人姓名">
+          <el-form-item label=" " prop="chargeUserName">
+            <el-select style="width: 95%;" filterable v-model="editDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
@@ -132,6 +138,8 @@
       title="是否确认删除部门？"
       :visible.sync="delDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <span style="color: #999999;">删除后数据不可恢复。</span>
@@ -145,6 +153,8 @@
       title="删除时将删除部门及其下级部门，是否确认删除？"
       :visible.sync="delChildDepartmentDialog"
       width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
       class="dialog_comp"
       >
       <span style="color: #999999;">删除后数据不可恢复。</span>
@@ -159,73 +169,71 @@
 export default {
   data () {
     return {
+      name: null, // 搜索的部门名称
       departmentData: [
         {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
+          organName: '县政法委',
+          superiorName: '溆浦县政法委',
+          chargeUserName: '金子康',
+          chargeUserTelephone: '13970041234'
         },
         {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
+          organName: '县政法委',
+          superiorName: '溆浦县政法委',
+          chargeUserName: '金子康',
+          chargeUserTelephone: '13970041234'
         },
         {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
+          organName: '县政法委',
+          superiorName: '溆浦县政法委',
+          chargeUserName: '金子康',
+          chargeUserTelephone: '13970041234'
         },
-        {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
-        },
-        {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
-        },
-        {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
-        },
-        {
-          departmentName: '县政法委',
-          parentDepartment: '溆浦县政法委',
-          departmentCharge: '金子康',
-          userMobile: '13970041234'
-        }
       ],
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       newDepartmentDialog: false, // 新建部门弹出框
       delDepartmentDialog: false, // 删除部门弹出框
       delChildDepartmentDialog: false, // 删除下级部门弹出框
       editDepartmentDialog: false, // 编辑部门弹出框
       addDepartment: {
-        departmentName: null,
-        parentDepartment: null,
-        departmentCharge: null
+        organName: null,
+        organPid: null,
+        chargeUserName: null
       },
       editDepartment: {
-        departmentName: null,
-        parentDepartment: null,
-        departmentCharge: null
+        organName: null,
+        organPid: null,
+        chargeUserName: null
+      },
+      addRules: {
+        organName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        organPid: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ]
+      },
+      editRules: {
+        organName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        organPid: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ]
       }
     }
   },
   methods: {
-    handleIconClick () {},
+    // 根据部门名称搜索
+    searchData () {},
     handleSizeChange () {
-
     },
     handleCurrentChange () {},
+    // 跳至部门详情页
+    skipSelectDetail (obj) {
+      console.log(obj);
+      this.$router.push({name: 'department_detail'});
+    },
     // 显示新增部门弹出框
     showNewDepartment () {
       this.newDepartmentDialog = true;
@@ -247,13 +255,12 @@ export default {
 
 <style lang="scss" scoped>
 .department-manage {
-  background-color: #ffffff;
-  width: 98%;
-  margin: 20px;
+  padding: 20px;
   .header {
     padding: 10px;
     display: flex;
     justify-content: space-between;
+    background-color: #ffffff;
     .add-btn {
       background-color: #0C70F8;
       color: #fff;
@@ -265,6 +272,7 @@ export default {
   }
   .table_box {
     padding: 0 10px;
+    background-color: #ffffff;
     .department_table {
       margin-top: 8px;
       .operation_btn {
@@ -273,9 +281,6 @@ export default {
         padding: 0 10px;
         display: inline-block;
       }
-      // /deep/ .el-table__row:hover {
-      //   cursor: pointer;
-      // }
     }
   }
 }

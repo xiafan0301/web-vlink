@@ -14,7 +14,7 @@
               <ul>
                 <li>
                   <span class="audit-label">状态:</span>
-                  <span class="pass-status">通过</span>
+                  <span :class="[$route.query.status === 'pass' ? 'pass-status' : 'reject-status']">{{$route.query.status === 'pass' ? '通过' : '驳回'}}</span>
                 </li>
                 <li>
                   <span>事件编号:</span>
@@ -22,9 +22,7 @@
                 </li>
                 <li>
                   <span>上报人:</span>
-                  <span>13890908080</span>
-                  <span></span>
-                  <span></span>
+                  <span class="phone">13890908080</span>
                 </li>
                 <li>
                   <span>上报时间:</span>
@@ -87,28 +85,31 @@ export default {
   data () {
     return {
       addEventForm: {
-        phone: null, // 手机号码
-        reportTime: null, // 上报时间
-        eventAddress: null, // 事发地点
-        eventSummary: null, // 事件情况
+        eventNumber: 'X23912831283129038210938', // 事件编号
+        userName: '18077777777', // 报案人  手机号码
+        createTime: '2019-1-12 12:12:12', // 上报时间
+        eventAddress: '湖南省怀化市溆浦县', // 事发地点
+        describe: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
-        casualties: null // 伤亡人员
-      },
-      rules: {
-
+        casualtiesFlag: null, // 伤亡人员
+        longitude: 112.975828, // 经度
+        latitude: 28.093804, // 纬度
+        handleCompany: null, // 处理单位
+        fileList: [], // 图片文件
       },
       map: null
     }
   },
   mounted () {
+    let _this = this;
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-      // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
-    this.map = map;
+    _this.map = map;
+    _this.mapMark(_this.addEventForm);
   },
   methods: {
     mapZoomSet (val) {
@@ -116,16 +117,43 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
-    markMark (data) {
+    // 地图标记
+    mapMark (obj) {
       let _this = this;
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: _this.map,
-        position: new window.AMap.LngLat(data.longitude, data.latitude),
-        offset: new window.AMap.Pixel(-15, -16), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // 自定义点标记覆盖物内容
-        content: '<div class="vl_icon vl_icon_051"></div>'
-      });
+      _this.map.clearMap();
+      let hoverWindow = null;
+      if (obj.longitude > 0 && obj.latitude > 0) {
+        let offSet = [-20.5, -48];
+        let marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [obj.longitude, obj.latitude],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_control_30"></div>'
+        });
+        marker.setMap(_this.map);
+        _this.newMarker = marker;
+        // hover
+        marker.on('mouseover', function () {
+          let sContent = '<div class="vl_map_hover" >' +
+            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + obj.eventAddress + '</p></div></div>';
+          hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: sContent
+          });
+          // aCenter = mEvent.target.F.position
+          hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+          hoverWindow.on('close', function () {
+            // console.log('infoWindow close')
+          });
+        });
+        marker.on('mouseout', function () {
+          if (hoverWindow) { hoverWindow.close(); }
+        });
+      }
     },
     back () { // 返回
       this.$router.back(-1);
@@ -182,6 +210,9 @@ export default {
                 &.reject-status {
                   color: #F94539;
                   font-size: 20px;
+                }
+                &.phone {
+                  color: #0C70F8;
                 }
               }
             }

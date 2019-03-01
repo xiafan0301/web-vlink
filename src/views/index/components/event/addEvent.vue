@@ -19,7 +19,7 @@
                   <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" v-model="addEventForm.eventAddress" />
+                  <el-input type="text" id="tipinput" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
@@ -57,11 +57,16 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 95%'>
+                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
                     <el-radio label="无"></el-radio>
                     <el-radio label="不确定"></el-radio>
                     <el-radio label="有"></el-radio>
                   </el-radio-group>
+                  <template v-if="addEventForm.casualties === '有'">
+                    <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
+                    <span style='margin-left:1%'>人</span>
+                    <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
+                  </template>
                 </el-form-item>
               </el-form>
             </div>
@@ -69,7 +74,7 @@
         </div>
       </div>
       <div class="content_right">
-        <div id="mapMap"></div>
+        <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
             <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
@@ -89,22 +94,29 @@
   </div>
 </template>
 <script>
+import { validatePhone } from '@/utils/validator.js';
 export default {
   data () {
     return {
       isImgNumber: true, // 是否显示图片超过最大数提示
       addEventForm: {
-        phone: null, // 手机号码
-        reportTime: null, // 上报时间
-        eventAddress: '阿斯达卡是了的', // 事发地点
+        eventNumber: 'X23912831283129038210938', // 事件编号
+        phone: '18077777777', // 报案人  手机号码
+        reportTime: '2019-1-12 12:12:12', // 上报时间
+        eventAddress: '湖南省怀化市溆浦县', // 事发地点
         eventSummary: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
-        casualties: null // 伤亡人员
+        casualtiesFlag: null, // 伤亡人员
+        longitude: 112.975828, // 经度
+        latitude: 28.093804, // 纬度
+        handleCompany: null, // 处理单位
+        fileList: [], // 图片文件
       },
       rules: {
         phone:[
-          { required: true, message: '请输入上报人手机号码', trigger: 'blur' }
+          { required: true, message: '请输入上报人手机号码', trigger: 'blur' },
+          { validator: validatePhone, trigger: 'blur'}
         ],
         reportTime:[
           { required: true, message: '请选择上报时间', trigger: 'blur' }
@@ -113,77 +125,114 @@ export default {
           { required: true, message: '请输入事发地点', trigger: 'blur' }
         ],
         eventSummary:[
-          { required: true, message: '请输入事情情况', trigger: 'blur' }
+          { required: true, message: '请输入事情情况', trigger: 'blur' },
+          { max: 140, message: '最多可以输入140个字' }
         ],
         eventType:[
           { required: true, message: '请选择事件类型', trigger: 'blur' }
         ]
-      }
+      },
+      map: null,
+      dieNumber: null, // 死亡人数
+      isDieError: false,
+      dieTip: '死亡人数只能为正整数'
     }
   },
   mounted () {
-    let map = new window.AMap.Map('mapMap', {
+    let _this = this;
+    let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
-      center: [112.974691, 28.093846], // 中心点坐标
-      // viewMode: '3D' // 使用3D视图
+      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
     });
     map.setMapStyle('amap://styles/whitesmoke');
-    this.map = map;
-    this.mapMark();
+    _this.map = map;
+    map.on('click', function(e) {
+      console.log(e);  
+      if (_this.newMarker) {
+        _this.map.remove(_this.newMarker);
+        _this.newMarker = null;
+      }
+      _this.addEventForm.longitude = e.lnglat.getLng();
+      _this.addEventForm.latitude = e.lnglat.getLat();
+      window.AMap.service('AMap.Geocoder', function () { // 回调函数
+        let geocoder = new window.AMap.Geocoder({});
+        geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
+          let sAddr = '';
+          if (status === 'complete' && result.info === 'OK') {
+            // 获得了有效的地址信息: result.regeocode.formattedAddress
+            // console.log(result.regeocode.formattedAddress);
+            sAddr = result.regeocode.formattedAddress;
+          }
+          _this.addEventForm.eventAddress = sAddr;
+          _this.mapMark(_this.addEventForm);
+        });
+      });
+    });
+    _this.mapMark(_this.addEventForm);
   },
   methods: {
+   // 地图标记
+    mapMark (obj) {
+      let _this = this;
+      _this.map.clearMap();
+      let hoverWindow = null;
+      if (obj.longitude > 0 && obj.latitude > 0) {
+        let offSet = [-20.5, -48];
+        let marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [obj.longitude, obj.latitude],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_control_30"></div>'
+        });
+        marker.setMap(_this.map);
+        _this.newMarker = marker;
+        // hover
+        marker.on('mouseover', function () {
+          let sContent = '<div class="vl_map_hover" >' +
+            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + obj.eventAddress + '</p></div></div>';
+          hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: sContent
+          });
+          // aCenter = mEvent.target.F.position
+          hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+          hoverWindow.on('close', function () {
+            // console.log('infoWindow close')
+          });
+        });
+        marker.on('mouseout', function () {
+          if (hoverWindow) { hoverWindow.close(); }
+        });
+      }
+    },
+    // 事件地址change
+    changeAddress () {
+      let _this = this;
+      let autoInput = new window.AMap.Autocomplete({
+        input: 'address'
+      })
+      window.AMap.event.addListener(autoInput, 'select', function (e) {
+        _this.addEventForm.eventAddress = e.poi.name;
+        window.AMap.service('AMap.Geocoder', () => {
+          var geocoder = new window.AMap.Geocoder({});
+          geocoder.getLocation(e.poi.name, (status, result) => {
+            if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.longitude = result.geocodes[0].location.lng;
+              _this.addEventForm.latitude = result.geocodes[0].location.lat;
+              _this.mapMark(_this.addEventForm);
+            }
+          });
+        })
+      }); // 注册监听，当选中某条记录时会触发
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
-    },
-    // 地图标记
-    mapMark () {
-      let _this = this;
-      _this.map.clearMap();
-      let content = '';
-      let hoverWindow = null;
-      // for (let i = 0; i < data.length; i++) {
-        // let obj = data[i];
-        // obj.sid = obj.name + '_' + i + '_' + random14();
-        // let content = '';
-        // if (obj.controlList[0].alarmRank === '五级') {
-        //   content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_target"><div class="vl_icon_warning">发现可疑目标</div></div>';
-        // } else {
-          content = '<div class="vl_icon vl_icon_click"></div>';
-        // }
-        // if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
-            position: [112.980377, 28.100175],
-            offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            // 自定义点标记覆盖物内容
-            content: content
-          });
-          marker.setMap(_this.map);
-          // hover
-          marker.on('mouseover', function () {
-            let sContent = '<div class="vl_map_hover">' +
-              '<div class="vl_map_hover_main"><p class="vl_map_hover_main_p">事发地点： ' + _this.addEventForm.eventAddress + '</p></div>';
-            hoverWindow = new window.AMap.InfoWindow({
-              isCustom: true,
-              closeWhenClickMap: true,
-              offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-              content: sContent
-            });
-            // aCenter = mEvent.target.F.position
-            hoverWindow.open(_this.map, new window.AMap.LngLat(112.980377, 28.100175));
-            hoverWindow.on('close', function () {
-              // console.log('infoWindow close')
-            });
-          });
-          marker.on('mouseout', function () {
-            if (hoverWindow) { hoverWindow.close(); }
-          });
-        // }
-      // }
     },
     handleBeforeUpload (file) { // 图片上传之前
       this.isImgDisabled = true;
@@ -266,7 +315,7 @@ export default {
     .content_right {
       width: 100%;
       height: 100%;
-      #mapMap {
+      #mapBox {
         width: 100%;
         height: 100%;
       }

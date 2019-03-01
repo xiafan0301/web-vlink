@@ -4,7 +4,20 @@
       <i class="vl_icon vl_icon_event_4"></i>
       <span>事件编号：XPZ180724001</span>
     </div>
-    <div class="event-status-img"></div>
+    <div class="event-status-img">
+      <template v-if="status === 'unhandle'">
+        <i class="vl_icon vl_icon_event_9"></i>
+      </template>
+      <template v-if="status === 'handling'">
+        <i class="vl_icon vl_icon_event_10"></i>
+      </template>
+      <template v-if="status === 'ending' || status === 'ctc_end'">
+        <i class="vl_icon vl_icon_event_11"></i>
+      </template>
+      <template v-if="status === 'ctc_ing'">
+        <i class="vl_icon vl_icon_event_13"></i>
+      </template>     
+    </div>
     <div class='basic-detail'>
       <div class='basic-list'>
         <div>
@@ -26,7 +39,19 @@
       <div class='basic-list'>
         <div style='display:flex;align-items: center;'>
           <span class='title'>上报人：</span>
-          <span class='content reportUser' style='margin-right:20px;'>13890809908</span>
+          <div class="content phone_box" style='margin-right:20px;'>
+            <span class='reportUser'>13890809908</span>
+            <div class="phone_dialog">
+              <div>
+                <i class="vl_icon vl_icon_event_14"></i>
+                <span>语音通话</span>
+              </div>
+              <div>
+                <i class="vl_icon vl_icon_event_17"></i>
+                <span>视频通话</span>
+              </div>
+            </div>
+          </div>
           <!-- <span class='content' style='margin-right:20px;'>{{eventDetailObj.reporterPhone}}</span> -->
           <!-- <a :href="urlDetail + '?eventId=' + this.$route.query.eventId + '&' + userInfoParam()" target="_blank"><div class="relation-person"><i class="el-icon-phone"></i>联系上报人</div></a> -->
         </div>
@@ -75,6 +100,20 @@
     </div>
   </div>
 </template>
+<script>
+export default {
+  props: [ 'status' ],
+  data () {
+    return {
+
+    }
+  },
+  mounted () {
+    console.log(this.status)
+  }
+}
+</script>
+
 <style lang="scss">
 .basic-info{
   width: 100%;
@@ -82,9 +121,15 @@
   background-color: #ffffff;
   box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
   border-radius:4px;
+  position: relative;
+  .event-status-img {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
   .header {
     display: flex;
-    padding: 10px 20px 0 20px;
+    padding: 10px 20px 15px 20px;
     align-items: center;
     > span {
       margin-left: 5px;
@@ -104,7 +149,7 @@
       > div {
         width:33.3%;
         display: flex;
-        line-height:27px;
+        line-height: 30px;
         .title {
           color: #666666;
           font-size: 14px;
@@ -121,6 +166,37 @@
         .reportUser {
           color: #0C70F8;
           cursor: pointer;
+        }
+        .phone_box {
+          position: relative;
+          padding-right: 10px;
+          &:hover {
+            .phone_dialog {
+              display: block;
+            }
+          }
+          .phone_dialog {
+            display: none;
+            position: absolute;
+            right: -30px;
+            bottom: 30px;
+            box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.15);
+            >div {
+              padding: 0 10px;
+              display: flex;
+              align-items: center;
+              cursor: pointer;
+              >span {
+                color: #333333;
+                font-size: 12px;
+              }
+              &:hover {
+                >span {
+                  color: #0C70F8;
+                }
+              }
+            }
+          }
         }
       }
     }

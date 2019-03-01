@@ -8,7 +8,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :status="$route.query.status"></EventBasic>
         <div class="event-handle">
           <div class="event-handle-header">
             <span>处理事件</span>
@@ -18,26 +18,26 @@
             <div class="mutual">
               <p class="title">是否发布民众互助:</p>
               <el-radio-group v-model="isMutual">
-                <el-radio :label="3">不发布</el-radio>
-                <el-radio :label="6">发布</el-radio>
+                <el-radio :label="false">不发布</el-radio>
+                <el-radio :label="true">发布</el-radio>
               </el-radio-group>
             </div>
             <div class="handle-type">
               <p class="title">请选择处理方式:</p>
-              <el-radio-group v-model="handleType">
-                <el-radio :label="3">
+              <el-radio-group v-model="handleType" @change="handleHandleMode">
+                <el-radio :label="1">
                   <span class="content">智能布控</span>
                   <span class="tip">（在监控设备上做布控，发现情况会自动告警提醒）</span>
                 </el-radio>
-                <el-radio :label="6">
+                <el-radio :label="2">
                   <span class="content">调度指挥</span>
                   <span class="tip">（调度协调其他部门协调解决）</span>
                 </el-radio>
-                <el-radio :label="9">
+                <el-radio :label="3">
                   <span class="content">呈报上级</span>
                   <span class="tip">（处理不了的事件可以向上级呈报）</span>
                 </el-radio>
-                <el-radio :label="9">
+                <el-radio :label="4">
                   <span class="content">转到其他单位</span>
                   <span class="tip">（不属于本单位处理的事件可以转到其它单位处理）</span>
                 </el-radio>
@@ -47,8 +47,8 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">确定</el-button>
-        <el-button class="operation_btn function_btn">结束事件</el-button>
+        <el-button class="operation_btn function_btn" @click="skipEachPage">确定</el-button>
+        <el-button class="operation_btn function_btn" @click="skipEventEndPage">结束事件</el-button>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
     </div>
@@ -60,8 +60,42 @@ export default {
   components: { EventBasic },
   data () {
     return {
-      isMutual: null, // 是否发布民众互助
-      handleType: null, // 选择处理的方式
+      status: null, // 
+      isMutual: false, // 是否发布民众互助
+      handleType: 1, // 选择处理的方式
+    }
+  },
+  mounted () {
+  },
+  methods: {
+    // 跳至结束事件页面
+    skipEventEndPage () {
+      this.$router.push({name: 'event_end'});
+    },
+    // 确定---跳页面
+    skipEachPage () {
+      const type = this.handleType;
+      if (type) {
+        if (type === 1) {
+          // 跳至新增布控页面
+          this.$router.push({path: '/control/create'});
+        }
+        if (type === 2) {
+          // 跳至事件管理调度指挥页面
+          this.$router.push({name: 'ctc_operation'});
+        }
+        if (type === 3) {
+          // 跳至呈报上级页面
+          this.$router.push({name: 'event_report'});
+        }
+        if (type === 4) {
+          // 跳至转到其他单位页面
+          this.$router.push({name: 'send_other_units'});
+        }
+      }
+    },
+    // 处理方式change
+    handleHandleMode () {
     }
   }
 }
@@ -120,13 +154,6 @@ export default {
           /deep/ .el-radio {
             color: #333333;
             line-height: 30px;
-          }
-          /deep/ .el-radio__input.is-checked .el-radio__inner {
-            border-color: #0C70F8;
-            background: #0C70F8;
-          }
-          /deep/ .el-radio__input.is-checked+.el-radio__label {
-            color: #333333;
           }
           .content {
             color: #333333;

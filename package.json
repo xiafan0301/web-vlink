@@ -18,6 +18,8 @@
     "@antv/g2": "^3.4.9",
     "axios": "^0.18.0",
     "element-ui": "^2.4.11",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
     "node-sass": "^4.10.0",
     "qrcodejs2": "0.0.2",
     "sass-loader": "^7.1.0",

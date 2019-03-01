@@ -156,13 +156,52 @@ export default new Router({
                         path: 'ctcOperation',
                         name: 'ctc_operation',
                         component: () => import('@/views/index/components/event/ctcOperation.vue')
+                      }, {
+                        path: 'editPlan',
+                        name: 'edit_plan',
+                        component: () => import('@/views/index/components/event/editPlan.vue')
+                      }, {
+                        path: 'ctcPlanDetail',
+                        name: 'ctc_plan_detail',
+                        component: () => import('@/views/index/components/event/ctcPlanDetail.vue')
+                      }, {
+                        path: 'ctcDetailInfo',
+                        name: 'ctc_detail_info',
+                        component: () => import('@/views/index/components/event/ctcDetailInfo.vue')
+                      }, {
+                        path: 'ctcEnd',
+                        name: 'ctc_end',
+                        component: () => import('@/views/index/components/event/ctcEnd.vue')
                       }
                     ]
                 }, {
                     /* 研判模块 */
                     path: 'judge',
                     name: 'judge',
-                    component: () => import('@/views/index/components/judge/judge.vue')
+                    component: () => import('@/views/index/components/judge/judge.vue'),
+                    redirect: {name: 'trajectory_collide'},
+                    children: [
+                        {
+                            path: 'trajectoryCollide',
+                            name: 'trajectory_collide',
+                            component: () => import('@/views/index/components/judge/trajectoryCollide.vue')
+                        },
+                        {
+                            path: 'focusOn',
+                            name: 'focus_on',
+                            component: () => import('@/views/index/components/judge/focusOn.vue')
+                        },
+                        {
+                            path: 'investigation',
+                            name: 'investigation',
+                            component: () => import('@/views/index/components/judge/investigation.vue')
+                        },
+                        {
+                            path: 'highArea',
+                            name: 'high_area',
+                            component: () => import('@/views/index/components/judge/highArea.vue')
+                        }
+                    ]
                 }, {
                     /* 检索模块 */
                     path: 'search',
@@ -247,12 +286,18 @@ export default new Router({
                 }, {
                     path: 'manage',
                     name: 'manage',
+                    redirect: {name: 'set_video'},
                     component: () => import('@/views/index/components/manage/manage.vue'),
                     children: [
                       {
                         path: 'department',
                         name: 'manage_department',
                         component: () => import('@/views/index/components/manage/departmentList.vue')
+                      },
+                      {
+                        path: 'departmentDetail',
+                        name: 'department_detail',
+                        component: () => import('@/views/index/components/manage/departmentDetail.vue')
                       },
                       {
                         path: 'user',
@@ -271,6 +316,92 @@ export default new Router({
                             component: () => import('@/views/index/components/manage/groupManage.vue')
                           },
                         ]
+                      },
+                      {
+                        path: 'addUser',
+                        name: 'add_user',
+                        component: () => import('@/views/index/components/manage/addUser.vue')
+                      },
+                      {
+                        path: 'roleManage',
+                        name: 'role_manage',
+                        component: () => import('@/views/index/components/manage/roleManage.vue')
+                      },
+                      {
+                        path: 'videoSetting',
+                        name: 'set_video',
+                        component: () => import('@/views/index/components/manage/videoSetting.vue'),
+                        redirect: {name: 'custom_group'},
+                        children: [
+                          {
+                            path: 'customGroup',
+                            name: 'custom_group',
+                            component: () => import('@/views/index/components/manage/customGroup.vue')
+                          },
+                          {
+                            path: 'tirotationSetting',
+                            name: 'tirotation_setting',
+                            component: () => import('@/views/index/components/manage/tirotationSetting.vue')
+                          },
+                          {
+                            path: 'deviceAuthorize',
+                            name: 'device_authorize',
+                            component: () => import('@/views/index/components/manage/deviceAuthorize.vue')
+                          }
+                        ]
+                      },
+                      {
+                        path: 'basicInfo',
+                        name: 'basic_info',
+                        redirect: {name: 'person_info'},
+                        component: () => import('@/views/index/components/manage/basicInfo.vue'),
+                        children: [
+                          {
+                            path: 'personInfo',
+                            name: 'person_info',
+                            component: () => import('@/views/index/components/manage/personInfo.vue')
+                          },
+                          {
+                            path: 'vehicleInfo',
+                            name: 'vehicle_info',
+                            component: () => import('@/views/index/components/manage/vehicleInfo.vue')
+                          },
+                        ]
+                      },
+                      {
+                        path: 'adminPersonInfo',
+                        name: 'admin_person_info',
+                        component: () => import('@/views/index/components/manage/adminPersonInfo.vue')
+                      },
+                      {
+                        path: 'adminVehicleInfo',
+                        name: 'admin_vehicle_info',
+                        component: () => import('@/views/index/components/manage/adminVehicleInfo.vue')
+                      },
+                      {
+                        path: 'authorityInfo',
+                        name: 'authority_info',
+                        component: () => import('@/views/index/components/manage/authorityInfo.vue')
+                      },
+                      {
+                        path: 'addGroup',
+                        name: 'add_group',
+                        component: () => import('@/views/index/components/manage/addGroup.vue')
+                      },
+                      {
+                        path: 'addPatrol',
+                        name: 'add_patrol',
+                        component: () => import('@/views/index/components/manage/addPatrol.vue')
+                      },
+                      {
+                        path: 'addTempGrant',
+                        name: 'add_temp_grant',
+                        component: () => import('@/views/index/components/manage/addTempGrant.vue')
+                      },
+                      {
+                        path: 'authorizeGrant',
+                        name: 'authorize_grant',
+                        component: () => import('@/views/index/components/manage/authorizeGrant.vue')
                       },
                     ]
                 }

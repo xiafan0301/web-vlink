@@ -1,41 +1,57 @@
 <template>
   <div class="event-manage">
     <div class="search_box">
-      <el-form :inline="true" :model="eventForm" class="event_form">
-        <el-form-item style="width: 240px;">
+      <el-form :inline="true" :model="eventForm" class="event_form" ref="eventForm">
+        <el-form-item>
           <el-date-picker
-            style="width: 240px;"
-            v-model="eventForm.dateTime"
-            type="datetimerange"
+            style="width: 260px;"
+            v-model="eventForm.reportTime"
+            type="daterange"
+            value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventType">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="eventForm.eventType" placeholder="事件类型">
+            <el-option value='全部类型'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventStatus">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="eventForm.eventStatus" placeholder="事件状态">
+            <el-option value='全部状态'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.userName">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="eventForm.phoneOrNumber" placeholder="上报者身份">
+            <el-option value='全部上报者'></el-option>
+            <!-- <el-option
+              v-for="item in eventStatusList"
+              :key="item.dictId"
+              :label="item.dictContent"
+              :value="item.dictId"
+            ></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item style="width: 240px;">
-          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
+          <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" type="primary">查询</el-button>
-          <el-button class="reset_btn" type="primary">重置</el-button>
+          <el-button class="select_btn" @click="selectDataList('eventForm')">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('eventForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
@@ -110,9 +126,9 @@
         </el-table-column>
         <el-table-column label="操作" width="140">
           <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
+            <span class="operation_btn" @click="skipEventDetailPage(scope.row)">查看</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn">布控</span>
+            <span class="operation_btn" @click="skipAddControlPage(scope.row)">布控</span>
           </template>
         </el-table-column>
       </el-table>
@@ -120,33 +136,33 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
   </div>
 </template>
 <script>
+import { formatDate } from '@/utils/util.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
       eventForm: {
-        dateTime: null, // 日期
-        eventType: null, // 事件类型
-        eventStatus: null, // 事件状态
-        userName: null, // 上报者
+        reportTime: [], // 日期
+        eventType: '全部类型', // 事件类型
+        eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       eventList: [
         {
-          eventCode: 'XP1000000000000',
+          eventNumber: 'XP1000000000000',
           eventType: '治安事件',
-          reportUser: '17899999999',
+          userName: '17899999999',
           idCard: '市民',
-          reportTime: '2018-05-15 18：40',
+          createTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
           eventStatus: '待处理',
           reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
@@ -199,13 +215,52 @@ export default {
       ] // 表格数据
     }
   },
+  mounted () {
+    this.getOneMonth();
+  },
   methods: {
     handleSizeChange () {
-
     },
     handleCurrentChange () {},
     skipAddEventPage () { // 跳到新增事件页面
       this.$router.push({name: 'add_event'});
+    },
+    // 跳至事件详情页
+    skipEventDetailPage (obj) {
+      if (obj.eventStatus === '待处理') {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
+      }
+      if (obj.eventStatus === '处理中') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling'}});
+      }
+      if (obj.eventStatus === '已结束') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending'}});
+      }
+    },
+    // 跳至新增布控页面
+    skipAddControlPage (obj) {
+      console.log(obj);
+      this.$router.push({path: '/control/create'});
+    },
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.eventForm.reportTime.push(startDate);
+      this.eventForm.reportTime.push(endDate);
+    },
+    // 根据搜索条件查询
+    selectDataList (form) {
+      console.log(form);
+      
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.eventForm.reportTime = [];
+      this.$refs[form].resetFields();
+      this.getOneMonth();
     }
   }
 }

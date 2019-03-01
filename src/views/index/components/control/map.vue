@@ -278,7 +278,7 @@ export default {
                     <div class="vl_map_close vl_icon vl_icon_control_04"></div>
                     <div class="vl_map_click_main">
                       <div class="vl_map_img">
-                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></  >
+                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></>
                         <div class="vl_map_state">进行中</div>
                         <div class="vl_map_operate">
                           <div>摄像头12458 </div>

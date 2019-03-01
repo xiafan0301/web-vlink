@@ -9,7 +9,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :status="$route.query.status"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
             <p class="ctc-title">调度指挥方案</p>

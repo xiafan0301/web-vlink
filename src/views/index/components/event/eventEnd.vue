@@ -9,7 +9,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :status="$route.query.status"></EventBasic>
         <div class="end-body">
           <div class="end-content">
             <span>处理结果:</span>
@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">确定提交</el-button>
+        <el-button class="operation_btn function_btn">确定</el-button>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
     </div>

@@ -9,7 +9,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :status="$route.query.status"></EventBasic>
         <div class="report-content">
           <div class="header">
             <p class="ctc-title">上级指示</p>
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">再次呈报</el-button>
+        <el-button class="operation_btn function_btn" @click="skipReportPage">再次呈报</el-button>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
     </div>
@@ -80,6 +80,12 @@ export default {
   data () {
     return {
 
+    }
+  },
+  methods: {
+    // 跳至向上级呈报页面
+    skipReportPage () {
+      this.$router.push({name: 'event_report'});
     }
   }
 }
