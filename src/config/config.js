@@ -5,11 +5,12 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://emi.aorise.org/api/vis/',
+        // dev: 'http://emi.aorise.org/api/vis/',
+        dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
-    // 应急指挥 mode: ecc
+    // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',

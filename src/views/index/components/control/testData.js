@@ -11,7 +11,7 @@ export const testData = [
           controlObj: '张三',
           controlState: '1',
           facilityType: '球机',
-          alarmRank: '一级',
+          alarmRank: '五级',
           createTime: '2018-01-01'
         },
         {
@@ -36,7 +36,7 @@ export const testData = [
           controlObj: '李四',
           controlState: '0',
           facilityType: '球机',
-          alarmRank: '二级',
+          alarmRank: '',
           createTime: '2018-01-01'
         },
         {
@@ -45,7 +45,7 @@ export const testData = [
           controlObj: '李四',
           controlState: '0',
           facilityType: '球机',
-          alarmRank: '二级',
+          alarmRank: '',
           createTime: '2018-01-01'
         }
       ]
@@ -61,7 +61,7 @@ export const testData = [
         controlObj: '王五',
         controlState: '2',
         facilityType: '枪机',
-        alarmRank: '一级',
+        alarmRank: '',
         createTime: '2018-01-01'
        },
        {
@@ -70,7 +70,7 @@ export const testData = [
         controlObj: '王五',
         controlState: '1',
         facilityType: '枪机',
-        alarmRank: '一级',
+        alarmRank: '',
         createTime: '2018-01-01'
        }
      ]
@@ -86,7 +86,7 @@ export const testData = [
           controlObj: '王五',
           controlState: '2',
           facilityType: '枪机',
-          alarmRank: '五级',
+          alarmRank: '',
           createTime: '2018-01-01'
          }
       ]
