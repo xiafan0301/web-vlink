@@ -1,17 +1,17 @@
 <template>
-  <el-form ref="createForm" :model="createForm">
+  <el-form :ref="mapMId" :model="modelForm">
     <!-- 图片上传 -->
-    <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" prop="personnelPic" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit"></div>
+    <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
+      <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
       <div class="pic_format">
         <div @click="createSelDialog = true;">从库中选择</div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelMType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelMType !== '4'}">
-      <el-input v-model="createForm.licenseNum"></el-input>
+      <el-input v-model="modelForm.licenseNum"></el-input>
     </el-form-item>
     <el-form-item v-if="modelMType === '3'"  label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
-      <el-select value-key="uid" v-model="createForm.limitation" filterable placeholder="请选择">
+      <el-select value-key="uid" v-model="modelForm.limitation" filterable placeholder="请选择">
         <el-option
           v-for="item in limitationList"
           :key="item.uid"
@@ -21,7 +21,7 @@
       </el-select>
     </el-form-item>
     <template v-if="modelMType === '1' || modelMType === '2'">
-      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in createForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
+      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
         <el-input v-model="item.point" @keyup.enter.native="markLocation(mapMId, item.point, index)"></el-input><i class="vl_icon vl_icon_control_28" @click="removePoint(item)"></i>
       </el-form-item>
       <el-form-item style="width: calc(50% - 30px);padding-left: 20px;">
@@ -129,16 +129,16 @@
   </el-form>
 </template>
 <script>
-import {conData} from './testData.js';
-import {random14} from '../../../../utils/util.js';
+import {conData} from '../testData.js';
+import {random14} from '../../../../../utils/util.js';
 import uploadPic from './uploadPic.vue';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId', 'modelType'],
+  props: ['mapId', 'modelType', 'checkList'],
   data () {
     return {
-      createForm: {
+      modelForm: {
         licenseNum: null,
         limitation: null,
         points: [
@@ -175,6 +175,8 @@ export default {
       targetIdList: [],
       createSelDialog: false,
       loadingBtn: false,
+      // 上传参数
+      fileList: []
     }
   },
   created () {
@@ -198,26 +200,102 @@ export default {
     uploadPicSubmit () {
       
     },
+    uploadPicFileList (fileList) {
+      this.fileList = fileList;
+    },
+    // 验证人员追踪的必填项
+    validateModelOne () {
+      if (this.checkList.some(s => s === '人员追踪')) {
+        console.log('人员追踪')
+        this.$refs[this.mapMId].validate((valid) => {
+          if (valid) {
+            if (this.fileList.length === 0) {
+              this.$message.error('请上传图片！');
+              return false;
+            }
+            const data = {
+              fileList: this.fileList,
+              trackPointList: this.trackPointList
+            }
+            this.$emit('sendModelDataOne', data);
+          }
+        })
+      }
+    },
+    // 验证车辆追踪的必填项
+    validateModelTwo () {
+      if (this.checkList.some(s => s === '车辆追踪')) {
+        console.log('车辆追踪')
+        this.$refs[this.mapMId].validate((valid) => {
+          if (valid) {
+            if (this.fileList.length === 0) {
+              this.$message.error('请上传图片！');
+              return false;
+            }
+            const data = {
+              fileList: this.fileList,
+              trackPointList: this.trackPointList,
+              licenseNum: this.modelForm.licenseNum
+            }
+            this.$emit('sendModelDataTwo', data);
+          }
+        })
+      }
+    },
+    // 验证越界分析的必填项
+    validateModelThree () {
+      if (this.checkList.some(s => s === '越界分析')) {
+        console.log('越界分析')
+        if (this.fileList.length === 0) {
+          this.$message.error('请上传图片！');
+          return false;
+        }
+        const data = {
+          fileList: this.fileList,
+          licenseNum: this.modelForm.licenseNum,
+          limitation: this.modelForm.limitation
+        }
+        this.$emit('sendModelDataThree', data);
+      }
+    },
+    // 验证范围分析的必填项
+    validateModelFour () {
+      if (this.checkList.some(s => s === '范围分析')) {
+        console.log('范围分析')
+        if (this.fileList.length === 0) {
+          this.$message.error('请上传图片！');
+          return false;
+        }
+        const data = {
+          fileList: this.fileList,
+          licenseNum: this.modelForm.licenseNum
+        }
+        this.$emit('sendModelDataFour', data);
+      }
+    },
+    reset () {
+      this.$refs[this.mapMId].clearValidate();
+    },
     // 添加追踪点
     addPoint () {
-      if (this.createForm.points.length === 10) {
+      if (this.modelForm.points.length === 10) {
         this.$message.error('最多10个追踪点！');
         return false;
       }
-      this.createForm.points.push({
+      this.modelForm.points.push({
         point: null
       })
     },
     // 删除追踪点
     removePoint(item) {
       let _this = this;
-      if (_this.createForm.points.length === 1) {
+      if (_this.modelForm.points.length === 1) {
         _this.$message.error('至少要有一个追踪点！');
         return false;
       }
-      let index = _this.createForm.points.indexOf(item)
+      let index = _this.modelForm.points.indexOf(item)
       if (index !== -1) {
-        _this.createForm.points.splice(index, 1)
+        _this.modelForm.points.splice(index, 1)
       }
       // 移除重复添加的追踪点
       let circleObj = _this.selAreaCircle.find(f => f.index === index);
@@ -259,9 +337,9 @@ export default {
       console.log(data, 'data')
       let obj = {
         tid: _this.circleIndex, 
-        trackPointName: '追踪点00' + (_this.circleIndex + 1) + ':' + _this.createForm.points[_this.circleIndex].point,
+        trackPointName: '追踪点00' + (_this.circleIndex + 1) + ':' + _this.modelForm.points[_this.circleIndex].point,
         name: '追踪点00' + (_this.circleIndex + 1),
-        addr: _this.createForm.points[_this.circleIndex].point,
+        addr: _this.modelForm.points[_this.circleIndex].point,
         equList: []
       }
       // 把在圆形覆盖物范围之内的追踪点添加进来
@@ -578,7 +656,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .pic_format{
-  line-height: 20px;
+  line-height: 40px;
+  display: inline-block;
   & > div{
     white-space: nowrap;
   }
@@ -589,6 +668,7 @@ export default {
 }
 .add_point{
   margin-top: 20px;
+  line-height: 40px;
   background:rgba(255,255,255,1);
   border-radius:4px;
   text-align: center;
@@ -617,4 +697,9 @@ export default {
     }
   }
 } 
+.create_model_box{
+  .el-form-item__content{
+    line-height: 0;
+  }
+}
 </style>

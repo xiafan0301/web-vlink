@@ -3,25 +3,24 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)">短信通知</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">短信通知</el-breadcrumb-item>
         <el-breadcrumb-item>新增短信</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="note_add_box">
       <div class="add_form">
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
-          <el-form-item label="收件人:" prop="recipient">
-            <!-- <el-input v-model="addForm.recipient" filterable placeholder="请选择接收人"></el-input> -->
+          <el-form-item label="联系人:" prop="recipient">
             <div class="recipient clearfix">
               <div class="rec_list" v-for="item in '123456'" :key="item.id">
                 <span>王益&lt;13324922333&gt;</span>
                 <i class="el-icon-close"></i>
               </div>
-              <i class="el-icon-circle-plus" @click="recDialog = true"></i>
+              <i class="vl_icon vl_icon_message_3 " @click="recDialog = true"></i>
             </div>
           </el-form-item>
           <el-form-item label="短信模板:" prop="template" class="template">
-            <el-select value-key="uid" v-model="addForm.template" filterable placeholder="请选择短信模板">
+            <el-select value-key="uid" v-model="addForm.template" filterable placeholder="请选择短信模板" @change="changeTemplate()">
               <el-option
                 v-for="item in templateList"
                 :key="item.uid"
@@ -30,26 +29,28 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="主题:" prop="theme" style="width: 754px;">
-            <el-input v-model="addForm.theme" filterable placeholder="请输入主题"></el-input>
+          <el-form-item label="名字:" prop="name" style="width: 754px;">
+            <el-input v-model="addForm.name" filterable placeholder="请输入名字" @blur="changeTemplate"></el-input>
           </el-form-item>
           <el-form-item label="时间:" prop="time" class="template">
             <el-date-picker
+              @blur="changeTemplate"
               v-model="addForm.time"
               type="datetime"
               placeholder="请选择时间">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="地点:" prop="site" style="width: 754px;">
-            <el-input v-model="addForm.site" filterable placeholder="请输入地点"></el-input>
+          <el-form-item label="地点:" prop="adress" style="width: 754px;">
+            <el-input v-model="addForm.adress" filterable placeholder="请输入地点" @blur="changeTemplate"></el-input>
           </el-form-item>
           <el-form-item label="短信内容:" style="width: 754px;" class="content">
             <div class="con_box">
               <el-input
+                :disabled="true"
                 resize="none"
                 type="textarea"
-                :rows="4"
-                placeholder="请输入短信内容"
+                :rows="1"
+                placeholder="此处是已经编辑好的短信内容"
                 v-model="addForm.content">
               </el-input>
               <ul class="con_list">
@@ -62,8 +63,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary">发送</el-button>
-        <el-button>返回</el-button>
+        <el-button type="primary" @click="release('addForm')">发送</el-button>
+        <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
     <div class="rec_dialog">
@@ -73,10 +74,12 @@
         width="482px"
         top="20vh">
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选2人/共1000人）</h1>
+        <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small"></el-input>
         <div class="rec_box">
           <div class="rec_l">
             <p class="vl_f_999 vl_f_12">组织机构</p>
             <el-tree
+              icon-class="el-icon-arrow-right"
               :data="instList"
               @node-click="getRightData"
               @check-change="operationChecked"
@@ -88,6 +91,7 @@
             </el-tree>
           </div>
           <div class="rec_r">
+            <p class="vl_f_999 vl_f_12">联系人</p>
             <ul>
               <li v-for="item in '1234567123456'" :key="item.id">
                 <span>冯晓龙</span>
@@ -105,38 +109,40 @@
   </div>
 </template>
 <script>
+import {formatDate} from '@/utils/util.js';
 export default {
   data () {
     return {
       addForm: {
         recipient: null,
         template: null,
-        theme: null,
+        name: null,
         time: null,
-        site: null,
+        adress: null,
         content: null
       },
-      templateList: [],
+      templateList: [{label: '事件调度', value: '0'},{label: '普通通知', value: '1'}],
       addRules: {
         recipient: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请选择联系人', trigger: 'blur'}
         ],
         template: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请选择短信模板', trigger: 'change'}
         ],
-        theme: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+        name: [
+          {required: true, message: '请输入名字', trigger: 'blur'}
         ],
         time: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+          {required: true, message: '请输入时间', trigger: 'blur'}
         ],
-        site: [
-          {required: true, message: '不能为空', trigger: 'blur'}
+        adress: [
+          {required: true, message: '请输入地点', trigger: 'blur'}
         ]
       },
       // 弹窗参数
       recDialog: false,
       loadingBtn: false,
+      keywords: null,
       // 左边机构 数结构数据
       instList: [{
           id: 1,
@@ -195,7 +201,25 @@ export default {
     operationChecked (nede, isChecked) {
       console.log(nede, 'nede')
       console.log(isChecked, 'isChecked')
-    }
+    },
+    // 切换短信模板
+    changeTemplate () {
+      if (this.addForm.template === '0') {
+        this.addForm.content = `${this.addForm.name ? this.addForm.name : '#name#'}，请于${this.addForm.time ? formatDate(this.addForm.time, 'yyyy-MM-dd HH:mm:ss') : '#time#'}，到达${this.addForm.adress ? this.addForm.adress : 'adress'}`;
+      } else if (this.addForm.template === '1') {
+        this.addForm.content = `${this.addForm.name ? this.addForm.name : '#name#'}，xxxx${this.addForm.time ? formatDate(this.addForm.time, 'yyyy-MM-dd HH:mm:ss') : '#time#'}，xxxx${this.addForm.adress ? this.addForm.adress : 'adress'}`;
+      }
+    },
+    // 确定发送
+    release (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('通过验证')
+        } else {
+          return false;
+        }
+      });
+    },
   }
 }
 </script>
@@ -216,17 +240,21 @@ export default {
       width: 100%;
       border-top: 1px solid #F2F2F2;
       display: flex;
+      margin-top: 10px;
       .rec_l{
         width: 50%;
-        padding-top: 10px;
         p{
-          padding-left: 45px;
+          padding-left: 22px;
+          line-height: 30px;
         }
       }
       .rec_r{
         width: 50%;
-        padding-top: 26px;
         border-left: 1px solid #F2F2F2;
+        p{
+          padding-left: 20px;
+          line-height: 30px;
+        }
         li{
           width: 100%;
           height: 26px;
@@ -283,18 +311,30 @@ export default {
       border: none;
     }
     .con_box{
-      border: 1px solid #dcdfe6;
+      background:rgba(242,242,242,1);
       border-radius:4px;
+      border:1px solid rgba(211,211,211,1);
       .con_list{
         width: 226px;
         margin-left: 20px;
         padding: 10px 0;
-        border-top: 1px solid #dcdfe6;
         li{
           height: 30px; 
           color: #B2B2B2;
         }
       }
+      .el-textarea__inner{
+        background:rgba(242,242,242,1);
+      }
+    }
+  }
+  // 重置UI树组件样式
+  .rec_dialog .el-tree-node__content{
+    position: relative;
+    .el-checkbox{
+      position: absolute;
+      right: 0;
+      top: 0;
     }
   }
 } 

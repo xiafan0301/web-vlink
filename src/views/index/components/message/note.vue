@@ -4,20 +4,20 @@
       <div class="note_box">
         <div class="note_form">
           <el-form ref="noteForm" :model="noteForm" class="note_form">
-            <el-form-item>
+            <el-form-item prop="noteDate">
               <el-date-picker
-                style="width: 240px;"
+                style="width: 260px;"
                 v-model="noteForm.noteDate"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="content">
               <el-input v-model="noteForm.content" placeholder="请输入预案名称筛选查找"></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item prop="noteState">
               <el-select value-key="uid" v-model="noteForm.noteState" filterable placeholder="请选择">
                 <el-option
                   v-for="item in noteStateList"
@@ -29,7 +29,7 @@
             </el-form-item>
             <el-form-item style="width: 25%;">
               <el-button type="primary">查询</el-button>
-              <el-button>重置</el-button>
+              <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -114,6 +114,9 @@ export default {
     },
     skip (pageType) {
       this.pageType = pageType;
+    },
+    resetForm () {
+      this.$refs['noteForm'].resetFields();
     }
   }
 }
