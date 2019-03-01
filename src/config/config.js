@@ -14,6 +14,12 @@ const oDomains = {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',
         prod: 'http://apiemi.aorise.org/api/emi/'
+    },
+    // 上传图片
+    upload: {
+        dev: 'http://apidev.aorise.org/education-user-related',
+        test: 'http://apirel.aorise.org/education-user-related',
+        prod: 'http://apirel.aorise.org/education-user-related'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
