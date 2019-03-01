@@ -10,7 +10,7 @@
             multiple
             :show-file-list="false"
             accept="image/*"
-            action="https://apidev.aorise.org/medical-his/api/network/upload/new"
+            :action="uploadAcion"
             list-type="picture-card"
             :on-exceed="uploadPicExceed"
             :before-upload="beforeAvatarUpload"
@@ -83,9 +83,11 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
+import {ajaxCtx} from '@/config/config';
 export default {
   data() {
     return {
+      uploadAcion: ajaxCtx.upload + '/new',
       testData: testData,
       curImageUrl: '', // 当前上传的图片
       curImgNum: 0, // 当前图片数量
