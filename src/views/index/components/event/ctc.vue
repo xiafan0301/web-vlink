@@ -47,7 +47,7 @@
           >
         </el-table-column>
         <el-table-column
-          label="上报者"
+          label="手机号"
           prop="reportUser"
           show-overflow-tooltip
           >
@@ -73,7 +73,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="上报时间"
+          label="调度时间"
           prop="reportTime"
           show-overflow-tooltip
           >
@@ -128,7 +128,7 @@ export default {
         eventStatus: null, // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
-       ctcList: [
+      ctcList: [
         {
           eventCode: 'XP1000000000000',
           eventType: '治安事件',
@@ -186,10 +186,29 @@ export default {
     this.getOneMonth();
   },
   methods: {
-    handleSizeChange () {
-
+    // 获取调度指挥列表数据
+    getCtcList () {
+      let eventStatus;
+      if (this.ctcForm.eventStatus === '全部状态') {
+        eventStatus = '';
+      }
+      const params = {
+        'where.eventFlag': this.ctcForm.eventFlag,
+        'where.reportTimeStart': this.ctcForm.reportTime[0],
+        'where.reportTimeEnd': this.ctcForm.reportTime[1],
+        'where.eventStatus': this.ctcForm.eventStatus,
+        pageNum: this.pagination.pageNum
+      }
     },
-    handleCurrentChange () {},
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      // this.getCtcList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      // this.getCtcList();
+    },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
       const start = new Date();
@@ -200,18 +219,15 @@ export default {
       this.ctcForm.reportTime.push(endDate);
     },
     // 根据搜索条件查询
-    selectDataList (form) {
-      this.$refs[form].validator(valid => {
-        if (valid) {
-          console.log(valid)
-        }
-      })
+    selectDataList () {
+      // this.getCtcList();
     },
     // 重置查询条件
     resetForm (form) {
-      this.eventForm.reportTime = [];
+      this.ctcForm.reportTime = [];
       this.$refs[form].resetFields();
       this.getOneMonth();
+      // this.getCtcList();
     },
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {

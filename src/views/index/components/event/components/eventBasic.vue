@@ -22,7 +22,7 @@
       <div class='basic-list'>
         <div>
           <span class='title'>事件类型：</span>
-          <span class='content'>火灾</span>
+          <span class='content'>火灾阿萨达萨达萨达萨达</span>
           <!-- <span class='content'>{{eventDetailObj.eventTypeName}}</span> -->
         </div>
         <div>
@@ -178,6 +178,7 @@ export default {
           .phone_dialog {
             display: none;
             position: absolute;
+            background-color: #ffffff;
             right: -30px;
             bottom: 30px;
             box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.15);

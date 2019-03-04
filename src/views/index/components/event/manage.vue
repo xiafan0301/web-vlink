@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="event-manage">
     <div class="search_box">
       <el-form :inline="true" :model="eventForm" class="event_form" ref="eventForm">
@@ -13,8 +14,8 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventType" placeholder="事件类型">
+        <el-form-item>
+          <el-select  style="width: 240px;" v-model="eventForm.eventType" placeholder="事件类型">
             <el-option value='全部类型'></el-option>
             <!-- <el-option
               v-for="item in eventStatusList"
@@ -24,8 +25,8 @@
             ></el-option> -->
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventStatus" placeholder="事件状态">
+        <el-form-item>
+          <el-select style="width: 240px;" v-model="eventForm.eventStatus" placeholder="事件状态">
             <el-option value='全部状态'></el-option>
             <!-- <el-option
               v-for="item in eventStatusList"
@@ -35,8 +36,8 @@
             ></el-option> -->
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.phoneOrNumber" placeholder="上报者身份">
+        <el-form-item>
+          <el-select style="width: 240px;" v-model="eventForm.phoneOrNumber" placeholder="上报者身份">
             <el-option value='全部上报者'></el-option>
             <!-- <el-option
               v-for="item in eventStatusList"
@@ -46,7 +47,7 @@
             ></el-option> -->
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 240px;">
+        <el-form-item>
           <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
@@ -80,9 +81,13 @@
         </el-table-column>
         <el-table-column
           label="上报者"
-          prop="reportUser"
+          prop="reporterPhone"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterPhone'>{{scope.row.reporterPhone}}</span>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="身份"
@@ -135,7 +140,7 @@
     </div>
     <el-pagination
       @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
+      @current-change="onPageChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
@@ -143,9 +148,11 @@
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
+import { getEventList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -219,9 +226,47 @@ export default {
     this.getOneMonth();
   },
   methods: {
-    handleSizeChange () {
+    // 获取事件列表数据
+    getEventData () {
+      let eventType, eventStatus;
+      if (this.eventForm.eventSource === '全部类型') {
+        eventType = '';
+      } else {
+        eventType = this.eventForm.eventType;
+      }
+      if (this.eventForm.eventStatus === '全部状态') {
+        eventStatus = '';
+      } else {
+        eventStatus = this.eventForm.eventStatus;
+      }
+      const params = {
+        'where.eventFlag': true,
+        'where.reportTimeStart': this.eventForm.reportTime[0],
+        'where.reportTimeEnd': this.eventForm.reportTime[1],
+        'where.eventStatus': eventStatus,
+        'where.eventType': eventType,
+        'where.otherQuery': this.eventForm.phoneOrNumber,
+        pageNum: this.pagination.pageNum
+      }
+      getEventList(params)
+        .then(res => {
+          console.log(res);
+          if (res && res.data.list) {
+            this.eventList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    onPageChange (page) {
+      this.pagination.pageNum = page;
+      // this.getCtcDataList();
+    },
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      // this.getEventData();
+    },
     skipAddEventPage () { // 跳到新增事件页面
       this.$router.push({name: 'add_event'});
     },
@@ -239,7 +284,6 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      console.log(obj);
       this.$router.push({path: '/control/create'});
     },
     getOneMonth () { // 设置默认一个月
@@ -254,13 +298,14 @@ export default {
     // 根据搜索条件查询
     selectDataList (form) {
       console.log(form);
-      
+      // this.getEventData();
     },
     // 重置查询条件
     resetForm (form) {
       this.eventForm.reportTime = [];
       this.$refs[form].resetFields();
       this.getOneMonth();
+      // this.getEventData();
     }
   }
 }

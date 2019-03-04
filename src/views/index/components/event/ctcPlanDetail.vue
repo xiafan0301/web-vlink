@@ -108,7 +108,7 @@
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipEditPage">修改</el-button>
         <el-button class="operation_btn delete_btn" @click="showDeleteDialog">删除</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <!--删除预案弹出框-->
       <el-dialog
@@ -143,6 +143,10 @@ export default {
     // 跳至修改预案页面
     skipEditPage () {
       this.$router.push({name: 'edit_plan'});
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

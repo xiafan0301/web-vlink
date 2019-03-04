@@ -42,3 +42,46 @@ export function getEventsStatistics(data) {
     mode: 'ecc'
   })
 }
+/*=================事件管理模块================== */
+/**
+ * 获取事件列表数据
+ * @param {*} data 
+ */
+export function getEventList(data) {
+  return request({
+    url: 'eventServices/events/page',
+    method: 'get',
+    params: data
+  })
+}
+/**
+ * 添加事件
+ */
+export function addEvent(data) {
+  return request({
+    url: 'eventServices/event',
+    method: 'post',
+    data
+  })
+}
+/**
+ * 获取事件详情
+ * @param {*} data 
+ */
+export function getEventDetail(uid) {
+  return request({
+    url: 'eventServices/event/' + uid,
+    method: 'get'
+  })
+}
+// /**
+//  * 获取调度指挥列表数据
+//  * @param {*} data 
+//  */
+// export function getCtcList(data) {
+//   return request({
+//     url: 'eventServices/events/page',
+//     method: 'get',
+//     params: data
+//   })
+// }

@@ -12,17 +12,17 @@
           <vue-scroll>
             <div class="content_left">
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-                <el-form-item label="手机号码:" prop="phone" label-width="85px">
-                  <el-input type="text" style='width: 95%' placeholder="请输入上报人手机号码" v-model="addEventForm.phone" />
+                <el-form-item label="手机号码:" prop="reporterPhone" label-width="85px">
+                  <el-input type="text" style='width: 95%' placeholder="请输入上报人手机号码" v-model="addEventForm.reporterPhone" />
                 </el-form-item>
                 <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
-                  <el-date-picker type="date" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
+                  <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
                   <el-input type="text" id="tipinput" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
-                <el-form-item label="事件情况:" prop="eventSummary" label-width="85px">
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventSummary" />
+                <el-form-item label="事件情况:" prop="eventDetail" label-width="85px">
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <el-form-item  label-width="85px" class="img-form-item">
                   <el-upload
@@ -87,34 +87,42 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">保存并处理</el-button>
-      <el-button class="operation_btn function_btn">保存</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn function_btn" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <BigImg></BigImg>
   </div>
 </template>
 <script>
 import { validatePhone } from '@/utils/validator.js';
+import BigImg from './components/bigImg.vue';
+import { addEvent } from '@/views/index/api/api.js';
 export default {
+  components: { BigImg },
   data () {
     return {
       isImgNumber: true, // 是否显示图片超过最大数提示
+      pickerOptions0: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
       addEventForm: {
-        eventNumber: 'X23912831283129038210938', // 事件编号
-        phone: '18077777777', // 报案人  手机号码
-        reportTime: '2019-1-12 12:12:12', // 上报时间
-        eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        eventSummary: null, // 事件情况
+        reporterPhone: null, // 报案人  手机号码
+        reportTime: '', // 上报时间
+        eventAddress: null, // 事发地点
+        eventDetail: null, // 事件情况
         eventType: null, // 事件类型
         eventLevel: null, // 事件等级
-        casualtiesFlag: null, // 伤亡人员
-        longitude: 112.975828, // 经度
-        latitude: 28.093804, // 纬度
+        casualties: null, // 伤亡人员
+        longitude: null, // 经度
+        latitude: null, // 纬度
         handleCompany: null, // 处理单位
         fileList: [], // 图片文件
       },
       rules: {
-        phone:[
+        reporterPhone:[
           { required: true, message: '请输入上报人手机号码', trigger: 'blur' },
           { validator: validatePhone, trigger: 'blur'}
         ],
@@ -124,7 +132,7 @@ export default {
         eventAddress:[
           { required: true, message: '请输入事发地点', trigger: 'blur' }
         ],
-        eventSummary:[
+        eventDetail:[
           { required: true, message: '请输入事情情况', trigger: 'blur' },
           { max: 140, message: '最多可以输入140个字' }
         ],
@@ -135,7 +143,7 @@ export default {
       map: null,
       dieNumber: null, // 死亡人数
       isDieError: false,
-      dieTip: '死亡人数只能为正整数'
+      dieTip: '死亡人数只能为正整数',
     }
   },
   mounted () {
@@ -249,12 +257,65 @@ export default {
       return isImg && isLtTenM;
     },
     handleImgNumber (files) { // 图片超出最大个数限制
-      console.log(files)
       this.isImgNumber = true;
     },
     handlePictureCardPreview () {},
     handleRemove () {},
-    handleSuccess () {}
+    handleSuccess () {},
+    // 保存提交数据
+    submitData (form) {
+      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          console.log(this.addEventForm)
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
+          addEvent(this.addEventForm)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '添加成功',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+        }
+      })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 保存并处理
+    skipHandlePage (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
+        }
+      })
+    }
   }
 }
 </script>
@@ -372,4 +433,5 @@ export default {
     }
   }
 }
+
 </style>

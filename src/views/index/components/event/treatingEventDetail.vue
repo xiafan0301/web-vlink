@@ -233,13 +233,13 @@
             </li>
           </ul>
           <el-pagination
-            class="control-page"
             @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage4"
-            :page-size="100"
+            @current-change="onPageChange"
+            :current-page="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
             layout="total, prev, pager, next, jumper"
-            :total="400">
+            :total="pagination.total">
           </el-pagination>
         </div>
       </div>
@@ -283,17 +283,13 @@
                   <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
                   <div class='time'>2019-01-17 11:57</div>
                   <div style="width:100%;margin-top:10px;">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <!-- <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div> -->
+                    <img
+                      style="width: 50px;height: 50px;margin-right: 5px;cursor:pointer;border-radius:4px;"
+                      v-for="(item, index) in imgList"
+                      :key="index"
+                      :src="item.src"
+                      @click="openBigImg(index)"
+                    >
                   </div>
                 </div>
               </li>
@@ -308,12 +304,18 @@
                   <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
                   <div class='time'>2019-01-17 11:57</div>
                   <div style="width:100%;margin-top:10px;">
+                    <img
+                      style="width: 50px;height: 50px;margin-right: 5px;cursor:pointer;border-radius:4px;"
+                      v-for="(item, index) in imgList"
+                      :key="index"
+                      :src="item.src"
+                      @click="openBigImg(index)"
+                    >
+                    <!-- <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                     <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                     <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                     <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                    <!-- <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div> -->
+                    <img src="../../../../assets/img/temp/vis-eg.png" alt=""> -->
                   </div>
                 </div>
               </li>
@@ -327,9 +329,6 @@
                 <div class="content-right">
                   <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
                   <div class='time'>2019-01-17 11:57</div>
-                  <!-- <div style="width:100%;margin-top:10px;">
-                    <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div>
-                  </div> -->
                 </div>
               </li>
             </ul>
@@ -377,43 +376,87 @@
     </div>
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" v-show="$route.query.status === 'handling'" @click="skipEventEndPage">结束事件</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
-  components: { EventBasic },
+  components: { EventBasic, BigImg },
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       dateTime: null, // 搜索布控结果的起止时间
       options: [{
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
-        }],
-        devicesSearch: ''
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }, {
+        value: '选项4',
+        label: '龙须面'
+      }, {
+        value: '选项5',
+        label: '北京烤鸭'
+      }],
+      devicesSearch: '',
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [],
+      imgList: [
+        {
+          uid: '001',
+          src: require('./img/1.jpg')
+        },
+        {
+          uid: '002',
+          src: require('./img/2.jpg')
+        },
+        {
+          uid: '003',
+          src: require('./img/3.jpg')
+        },
+        {
+          uid: '004',
+          src: require('./img/4.jpg')
+        }
+      ]
     }
   },
   methods: {
-    handleSizeChange () {
-
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
     },
-    handleCurrentChange () {},
+    // 获取事件详情
+    getDetail () {
+      const eventId = '';
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+
+          }
+        })
+        .catch(() => {})
+    },
+    onPageChange (page) {
+      this.pagination.pageNum = page;
+      // this.getCtcDataList();
+    },
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      // this.getEventData();
+    },
     // 跳至结束事件页面
     skipEventEndPage () {
       this.$router.push({name: 'event_end', query: {status: this.$route.query.status}});
@@ -433,6 +476,17 @@ export default {
     // 跳至查看呈报内容
     skipReportDetailPage () {
       this.$router.push({name: 'report_detail', query: {status: this.$route.query.status}});
+    },
+    // 放大图片
+    openBigImg (index) {
+      console.log(index)
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(this.imgList));
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

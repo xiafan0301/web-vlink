@@ -206,8 +206,10 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">再次调度</el-button>
-        <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
+        <template v-if="$route.query.status === 'ctc_ing'">
+          <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
+          <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
+        </template>
         <el-button class="operation_btn back_btn">返回</el-button>
       </div>
     </div>
@@ -227,6 +229,10 @@ export default {
     skipCtcEndPage () {
       this.$router.push({name: 'ctc_end'});
     },
+    // 跳至再次调度页面
+    skipAgainCtcPage () {
+      this.$router.push({name: 'ctc_operation'});
+    }
   }
 }
 </script>

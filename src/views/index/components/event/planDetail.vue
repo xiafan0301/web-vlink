@@ -108,7 +108,7 @@
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipReplanPage">启用</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
@@ -124,6 +124,10 @@ export default {
     // 跳至启用预案页面
     skipReplanPage () {
       this.$router.push({name: 'enable_plan'});
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

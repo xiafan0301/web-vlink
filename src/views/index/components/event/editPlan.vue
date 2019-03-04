@@ -83,7 +83,7 @@
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn">保存</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
@@ -155,6 +155,10 @@ export default {
     deletePlanBox (index) { // 删除调度方法输入框
       this.taskList.splice(index, 1);
     },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>

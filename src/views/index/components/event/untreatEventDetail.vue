@@ -49,13 +49,14 @@
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipEachPage">确定</el-button>
         <el-button class="operation_btn function_btn" @click="skipEventEndPage">结束事件</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
   components: { EventBasic },
   data () {
@@ -63,11 +64,24 @@ export default {
       status: null, // 
       isMutual: false, // 是否发布民众互助
       handleType: 1, // 选择处理的方式
+      detailInfo: {}, // 事件详情
     }
   },
   mounted () {
+
   },
   methods: {
+    // 获取事件详情
+    getDetail () {
+      const eventId = '';
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+
+          }
+        })
+        .catch(() => {})
+    },
     // 跳至结束事件页面
     skipEventEndPage () {
       this.$router.push({name: 'event_end'});
@@ -96,6 +110,10 @@ export default {
     },
     // 处理方式change
     handleHandleMode () {
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

@@ -5,7 +5,8 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://emi.aorise.org/api/vis/',
+        // dev: 'http://emi.aorise.org/api/vis/',
+        dev: 'http://apidev.aorise.org/visual-emi/',
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },

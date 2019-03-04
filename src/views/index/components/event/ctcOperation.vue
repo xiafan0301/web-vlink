@@ -10,6 +10,89 @@
     </div>
     <div class="content-box">
       <EventBasic></EventBasic>
+      <div class="event-ctc-content">
+        <div class="header">
+          <p class="ctc-title">调度指挥方案</p>
+        </div>
+        <div class="divide"></div>
+        <ul class="content-list">
+          <li>
+            <div>
+              <span>调度部门：</span>
+              <span>消防部</span>
+            </div>
+            <div>
+              <span>任务名称：</span>
+              <span>灭火</span>
+            </div>
+            <div class="ctc-content">
+              <span>任务内容：</span>
+              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
+                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
+                区门口有电动车起火园区门口有电动
+                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
+              </span>
+            </div>
+          </li>
+          <div class="divide-list"></div>
+          <li>
+            <div>
+              <span>调度部门：</span>
+              <span>消防部</span>
+            </div>
+            <div>
+              <span>任务名称：</span>
+              <span>灭火</span>
+            </div>
+            <div class="ctc-content">
+              <span>任务内容：</span>
+              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
+                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
+                区门口有电动车起火园区门口有电动
+                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
+              </span>
+            </div>
+          </li>
+          <div class="divide-list"></div>
+          <li>
+            <div>
+              <span>调度部门：</span>
+              <span>消防部</span>
+            </div>
+            <div>
+              <span>任务名称：</span>
+              <span>灭火</span>
+            </div>
+            <div class="ctc-content">
+              <span>任务内容：</span>
+              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
+                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
+                区门口有电动车起火园区门口有电动
+                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
+              </span>
+            </div>
+          </li>
+          <div class="divide-list"></div>
+          <li>
+            <div>
+              <span>调度部门：</span>
+              <span>消防部</span>
+            </div>
+            <div>
+              <span>任务名称：</span>
+              <span>灭火</span>
+            </div>
+            <div class="ctc-content">
+              <span>任务内容：</span>
+              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
+                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
+                区门口有电动车起火园区门口有电动
+                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
       <div class="ctc-plan-box">
         <div class="plan-box">
           <div class="plan-operation-box">
@@ -94,7 +177,7 @@
     </div>
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
   </div>
 </vue-scroll>
@@ -188,6 +271,10 @@ export default {
     skipReplanPage (obj) {
       console.log(obj);
       this.$router.push({name: 'enable_plan'});
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }
@@ -199,7 +286,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box {
+    .ctc-plan-box, {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -311,6 +398,65 @@ export default {
               vertical-align: middle;
             }
           }
+        }
+      }
+    }
+    .event-ctc-content {
+      width: 100%;
+      margin-bottom: 20px;
+      background-color: #ffffff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+      .header {
+        padding: 10px 20px 0 20px;
+        > p {
+          color: #333333;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .ctc-title {
+          margin-bottom: 10px;
+        }
+      }
+      .divide {
+        width: 100%;
+        height: 1px;
+        background-color: #F2F2F2;
+      }
+      .content-list {
+        padding: 10px 20px 10px 20px;
+        > li {
+          display: flex;
+          flex-wrap: wrap;
+          > div {
+            // height: 30px;
+            line-height: 30px;
+            span:nth-child(1) {
+              color: #666666;
+            }
+            span:nth-child(2) {
+              color: #333333;
+            }
+            &:nth-child(1) {
+              width: 25%;
+            }
+            &:nth-child(2) {
+              width: 60%;
+            }
+            &:nth-child(3) {
+              display: flex;
+              span:nth-child(2) {
+                width: 750px;
+                display: inline-block;
+              }
+            }
+          }
+        }
+        .divide-list {
+          width: 100%;
+          height: 1px;
+          margin: 10px 0;
+          border-bottom: 1px dashed #F2F2F2;
         }
       }
     }
