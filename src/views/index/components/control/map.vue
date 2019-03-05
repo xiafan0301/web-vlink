@@ -260,6 +260,8 @@ export default {
                 $('#mapBox .vl_icon_warning').remove();
                 $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_02");
                 $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.sid})`).addClass("vl_icon_control_01");
+                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.sid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标

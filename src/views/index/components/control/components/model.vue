@@ -2,16 +2,23 @@
   <el-form :ref="mapMId" :model="modelForm">
     <!-- 图片上传 -->
     <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
+      <div is="uploadPic" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
       <div class="pic_format">
         <div @click="createSelDialog = true;">从库中选择</div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelMType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelMType !== '4'}">
-      <el-input v-model="modelForm.licenseNum"></el-input>
+      <el-select v-model="modelForm.licenseNum" multiple filterable allow-create default-first-option placeholder="请选择" @change="getLicenseNum">
+        <el-option
+          v-for="item in licenseNumList"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
-    <el-form-item v-if="modelMType === '3'"  label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
-      <el-select value-key="uid" v-model="modelForm.limitation" filterable placeholder="请选择">
+    <el-form-item v-if="modelMType === '3'" label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
+      <el-select value-key="uid" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请选择">
         <el-option
           v-for="item in limitationList"
           :key="item.uid"
@@ -63,26 +70,26 @@
                   </div>
                   <vue-scroll>
                     <ul v-if="type === '0'" style="max-height: 346px;">
-                      <template v-for="equ in trackPoint.equList">
-                        <li :key="equ.sid" @click="eid = equ.sid" :class="['normal', {'active': eid === equ.sid}]" v-if="equ.type === 'sxt' && equ.isNormal">
+                      <template v-for="equ in trackPoint.devList">
+                        <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 'sxt'">
                           <span>{{equ.equName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
-                        </li>
-                        <li :key="equ.sid" v-if="equ.type === 'sxt' && !equ.isNormal">
-                          <span style="color: #b2b2b2;">{{equ.equName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                          <div>
+                            <i v-if="equ.isNormal" class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
+                            <i v-else class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i>
+                            <el-checkbox v-model="equ.isSelected" style="display:none;" @click.native="changeSelectedStatus(equ)"></el-checkbox>
+                          </div>
                         </li>
                       </template>
                     </ul>
                     <ul v-else style="max-height: 346px;">
-                      <template v-for="equ in trackPoint.equList">
-                        <li :key="equ.sid" @click="eid = equ.sid" :class="['normal', {'active': eid === equ.sid}]" v-if="equ.type === 'kk' && equ.isNormal">
+                      <template v-for="equ in trackPoint.devList">
+                        <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 'kk' && equ.isNormal">
                           <span>{{equ.equName}}<br/><span class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                          <div><i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i><i class="vl_icon vl_icon_control_19" style="display: none;margin-bottom: 3px;"></i></div>
-                        </li>
-                        <li :key="equ.sid" v-if="equ.type === 'kk' && !equ.isNormal">
-                          <span style="color: #b2b2b2;">{{equ.equName}}<br/><span style="color: #b2b2b2;">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
-                          <div><i class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i></div>
+                          <div>
+                            <i v-if="equ.isNormal" class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
+                            <i v-else class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i>
+                            <el-checkbox v-model="equ.isSelected" style="display:none;" @click.native="changeSelectedStatus(equ)"></el-checkbox>
+                          </div>
                         </li>
                       </template>
                     </ul>
@@ -94,10 +101,11 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
-        <div v-if="modelMType === '4'" style="line-height: 14px;padding-top: 16px;" :class="['top', {'vl_icon_sed': rangingAcitve}]" @click="ranging()">
-          <i class="vl_icon vl_icon_042"></i><p :class="{'active': rangingAcitve}">测距</p>
+        <div class="area top" v-if="modelMType === '4'" @click="bindDraw" :class="{'active': selAreaAcitve}">
+          <i class="vl_icon vl_icon_041"></i>
+          <p>选中区域</p>
         </div>
+        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
         <ul class="bottom">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -130,7 +138,7 @@
 </template>
 <script>
 import {conData} from '../testData.js';
-import {random14} from '../../../../../utils/util.js';
+// import {random14} from '../../../../../utils/util.js';
 import uploadPic from './uploadPic.vue';
 export default {
   components: {uploadPic},
@@ -139,14 +147,30 @@ export default {
   data () {
     return {
       modelForm: {
-        licenseNum: null,
-        limitation: null,
+        licenseNum: [],
+        limitation: [],
         points: [
-          {point: null}
+          {point: '九峰安置小区'}
         ],
       },
       circleIndex: null, //圆形覆盖物的下标
-      limitationList: [],
+      limitationList: [{
+          value: '九峰安置小区',
+          label: '九峰安置小区'
+        }, {
+          value: '长沙市天心区君逸路',
+          label: '长沙市天心区君逸路'
+        }],
+      licenseNumList: [{
+          value: '沪CR8706',
+          label: '沪CR8706'
+        }, {
+          value: '沪CR8725',
+          label: '沪CR8725'
+        }, {
+          value: '沪CR1235',
+          label: '沪CR1235'
+        }],
       // 地图数据
       mapMId: null,
       modelMType: null,
@@ -156,6 +180,7 @@ export default {
       selAreaAble: false,
       selAreaCircle: [],
       selAreaPolygon: null,
+      _marker: null,
       // 测距
       rangingAcitve: false,
       rangingObj: null,
@@ -163,12 +188,15 @@ export default {
       trackPointList: [],
       type: '0',// 设备类型
       tid: null,//追踪点列表id
-      eid: null,//设备列表id
+      sid: null,//设备列表id
       dpType: null,//展开类型
-      features: null,//设备特性
-      featuresTypeList: [],//设备特性列表
-      scopeRadius: null, // 范围半径
-      lnglat: null, // 坐标
+      features: 1,//设备特性
+      featuresTypeList: [
+        {label: '人脸识别', value: 1},
+        {label: '车辆识别', value: 2}
+      ],//设备特性列表
+      scopeRadius: 5, // 范围半径
+      lnglat: null, // 圆形覆盖物坐标
       mapClickEvent: null,
       // 从库中选择模态框参数
       targetId: null,
@@ -189,13 +217,65 @@ export default {
     },
     modelType (val) {
       this.modelMType = val
-      this.resetMap();
     }
   },
   mounted () {
     this.resetMap();
   },
   methods: {
+    checkPlateNumber (value) {
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      if (value && !reg.test(value)) {
+        this.$message.error('请正确输入车牌号码');
+        return false;
+      } else {
+        return true;
+      }
+    },
+    // 验证车牌号
+    getLicenseNum () {
+      console.log(this.modelForm.licenseNum)
+      this.modelForm.licenseNum.forEach((f, index) => {
+        if (!this.checkPlateNumber(f)) {
+          this.modelForm.licenseNum.splice(index, 1);
+        }
+      })
+    },
+    // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态
+    changeSelectedStatus (_obj) {
+      const sid = $(`#${this.mapMId} #${_obj.sid}`);
+      // 摄像头
+      if (_obj.type === 'sxt') {
+        if (_obj.isNormal && _obj.isSelected) {
+          sid.removeClass('vl_icon_sxt');
+          sid.addClass('vl_icon_sxt_uncheck');
+        } else if (_obj.isNormal && !_obj.isSelected) {
+          sid.removeClass('vl_icon_sxt_uncheck');
+          sid.addClass('vl_icon_sxt');
+        } else if (!_obj.isNormal && _obj.isSelected) {
+          sid.removeClass('vl_icon_sxt_not_choose');
+          sid.addClass('vl_icon_sxt_uncheck');
+        } else if (!_obj.isNormal && !_obj.isSelected) {
+          sid.removeClass('vl_icon_sxt_uncheck');
+          sid.addClass('vl_icon_sxt_not_choose');
+        }
+      // 卡口
+      } else {
+        if (_obj.isNormal && _obj.isSelected) {
+          sid.removeClass('vl_icon_kk');
+          sid.addClass('vl_icon_kk_uncheck');
+        } else if (_obj.isNormal && !_obj.isSelected) {
+          sid.removeClass('vl_icon_kk_uncheck');
+          sid.addClass('vl_icon_kk');
+        } else if (!_obj.isNormal) {
+
+        }
+      }
+    },
+    uploadPicDel (fileList) {
+      this.fileList = fileList;
+      console.log(fileList)
+    },
     // 接收 到上传组件传过来的图片数据
     uploadPicSubmit () {
       
@@ -210,14 +290,40 @@ export default {
         this.$refs[this.mapMId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
+              this.$emit('sendModelDataOne', null);
               this.$message.error('请上传图片！');
               return false;
             }
+            const pointDtoList = this.trackPointList.map(t => {
+              return {
+                address: t.address,
+                deviceChara: t.deviceChara,
+                groupId: t .groupId,
+                latitude: t .latitude,
+                longitude: t .longitude,
+                radius: t.radius,
+                devList: t.devList.filter(f => f.isSelected === true).map(m => {
+                  return {
+                    deviceId: m.uid
+                  }
+                })
+              }
+            });
+            this.fileList = this.fileList.map((m, i) => {
+              return {
+                objId: i,
+                objType: 3
+              }
+            })
             const data = {
-              fileList: this.fileList,
-              trackPointList: this.trackPointList
+              modelType: 1,
+              pointDtoList: pointDtoList,
+              surveillanceObjectDtoList: this.fileList
             }
             this.$emit('sendModelDataOne', data);
+          } else {
+            this.$emit('sendModelDataOne', null);
+            return false;
           }
         })
       }
@@ -229,15 +335,41 @@ export default {
         this.$refs[this.mapMId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
+              this.$emit('sendModelDataTwo', null);
               this.$message.error('请上传图片！');
               return false;
             }
+            const pointDtoList = this.trackPointList.map(t => {
+              return {
+                address: t.address,
+                deviceChara: t.deviceChara,
+                groupId: t .groupId,
+                latitude: t .latitude,
+                longitude: t .longitude,
+                radius: t.radius,
+                devList: t.devList.filter(f => f.isSelected === true).map(m => {
+                  return {
+                    deviceId: m.uid
+                  }
+                })
+              }
+            });
+            this.fileList = this.fileList.map((m, i) => {
+              return {
+                objId: i,
+                objType: 3
+              }
+            })
             const data = {
-              fileList: this.fileList,
-              trackPointList: this.trackPointList,
-              licenseNum: this.modelForm.licenseNum
+              carNumberInfo: this.modelForm.licenseNum,
+              modelType: 2,
+              pointDtoList: pointDtoList,
+              surveillanceObjectDtoList: this.fileList
             }
             this.$emit('sendModelDataTwo', data);
+          } else {
+            this.$emit('sendModelDataTwo', null);
+            return false;
           }
         })
       }
@@ -263,14 +395,38 @@ export default {
       if (this.checkList.some(s => s === '范围分析')) {
         console.log('范围分析')
         if (this.fileList.length === 0) {
+          this.$emit('sendModelDataFour', null);
           this.$message.error('请上传图片！');
           return false;
         }
+        const pointDtoList = this.trackPointList.map(t => {
+          return {
+            address: t.address,
+            deviceChara: t.deviceChara,
+            groupId: t .groupId,
+            devList: t.devList.filter(f => f.isSelected === true).map(m => {
+              return {
+                deviceId: m.uid
+              }
+            })
+          }
+        });
+        this.fileList = this.fileList.map((m, i) => {
+          return {
+            objId: i,
+            objType: 3
+          }
+        })
         const data = {
-          fileList: this.fileList,
-          licenseNum: this.modelForm.licenseNum
+          carNumberInfo: this.modelForm.licenseNum.join(','),
+          modelType: 4,
+          pointDtoList: pointDtoList,
+          surveillanceObjectDtoList: this.fileList
         }
         this.$emit('sendModelDataFour', data);
+      } else {
+        this.$emit('sendModelDataFour', null);
+        return false;
       }
     },
     reset () {
@@ -278,6 +434,7 @@ export default {
     },
     // 添加追踪点
     addPoint () {
+      console.log(this.fileList)
       if (this.modelForm.points.length === 10) {
         this.$message.error('最多10个追踪点！');
         return false;
@@ -330,17 +487,21 @@ export default {
       }
       return sourceCopy;
     },
-    // 获得选取范围内的设备列表数据
-    getEquList (graphics) {
+    // 获得人员追踪、车辆追踪 选取范围内的设备列表数据
+    getTraceEquList (graphics) {
       let _this = this;
       let data = _this.objDeepCopy(conData);
       console.log(data, 'data')
       let obj = {
         tid: _this.circleIndex, 
-        trackPointName: '追踪点00' + (_this.circleIndex + 1) + ':' + _this.modelForm.points[_this.circleIndex].point,
-        name: '追踪点00' + (_this.circleIndex + 1),
-        addr: _this.modelForm.points[_this.circleIndex].point,
-        equList: []
+        trackPointName: '追踪点00' + (_this.circleIndex + 1),
+        address: _this.modelForm.points[_this.circleIndex].point,
+        deviceChara: _this.features,//设备特性
+        longitude: _this.lnglat[0],//追踪点经度
+        latitude: _this.lnglat[1],//追踪点纬度
+        radius: _this.scopeRadius,//范围半径
+        groupId: 1,//设备组id,先写死
+        devList: []//设备列表
       }
       // 把在圆形覆盖物范围之内的追踪点添加进来
       if (_this.lnglat[0] > 0 && _this.lnglat[1] > 0) {
@@ -354,16 +515,37 @@ export default {
           console.log(_this.trackPointList);
         }
       }
-      let index = _this.trackPointList.indexOf(obj);
-      _this.trackPointList[index].equList = [];
+        
+      _this.trackPointList[index].devList = [];
       // 把在圆形覆盖物范围之内的设备添加进来
-      for (let s = 0; s < data.equList.length; s++) {
-        let _obj = data.equList[s];
+      for (let s = 0; s < data.devList.length; s++) {
+        let _obj = data.devList[s];
         if (_obj.longitude > 0 && _obj.latitude > 0) {
           if (graphics && graphics.contains(new window.AMap.LngLat(_obj.longitude, _obj.latitude))) {
             // 在圆形之中
             _this.$nextTick(() => {
-              _this.trackPointList[index].equList.push(_obj);
+              //在覆盖物内的置为选中-图标
+              const sid = $(`#${this.mapMId} #${_obj.sid}`);
+              // 摄像头
+              if (_obj.type === 'sxt') {
+                if (_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_sxt_uncheck');
+                  sid.addClass('vl_icon_sxt');
+                } else if (!_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_sxt_uncheck');
+                  sid.addClass('vl_icon_sxt_not_choose');
+                }
+              // 卡口
+              } else {
+                if (_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_kk_uncheck');
+                  sid.addClass('vl_icon_kk');
+                } else if (!_obj.isNormal) {
+
+                }
+              }
+              _obj.isSelected = true;//在覆盖物内的置为选中-多选框
+              _this.trackPointList[index].devList.push(_obj);
             })
           }
         }
@@ -374,11 +556,11 @@ export default {
       let _this = this, _hoverWindow = null;
       let data = conData;
       // 遍历追踪点范围内的设备列表，包括摄像头、卡口
-      for (let i = 0; i < data.equList.length; i++) {
+      for (let i = 0; i < data.devList.length; i++) {
         let offSet = [-20.5, -48];
-        let _obj = data.equList[i];
+        let _obj = data.devList[i];
         console.log(_obj)
-        _obj.sid = _obj.equName + '_' + i + '_' + random14();
+        _obj.sid = _obj.equName + '_' + i;
         if (_obj.longitude > 0 && _obj.latitude > 0) {
           let _content = null;
           if (_obj.type === 'sxt') {
@@ -386,8 +568,10 @@ export default {
               _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
             } else if (_obj.isNormal && !_obj.isSelected) {
               _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            } else if (!_obj.isNormal) {
+            } else if (!_obj.isNormal && _obj.isSelected) {
               _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+            } else if (!_obj.isNormal && !_obj.isSelected) {
+              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             }
           } else {
             if (_obj.isNormal && _obj.isSelected) {
@@ -408,11 +592,11 @@ export default {
             content: _content
           });
           // hover
-          _marker.on('mouseover', function () {
+          _marker.on('click', function () {
             let _sContent = '<div class="vl_map_hover">' +
               '<div class="vl_map_hover_main"><ul>' + 
                 '<li><span>设备名称：</span>' + _obj.equName + '</li>' + 
-                '<li><span>设备地址：</span>' + _obj.addr + '</li>' + 
+                '<li><span>设备地址：</span>' + _obj.address + '</li>' + 
               '</ul></div>';
             _hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
@@ -421,9 +605,18 @@ export default {
               content: _sContent
             });
             _hoverWindow.open(_this.map, new window.AMap.LngLat(_obj.longitude, _obj.latitude));
-          });
-          _marker.on('mouseout', function () {
-            if (_hoverWindow) { _hoverWindow.close(); }
+
+            _this.sid = _obj.sid;//点击设备marker,使其在设备列表背景颜色高亮
+            // 切换设备列表中设备的选择状态
+            _this.trackPointList.forEach(f => {
+              f.devList.forEach(d => {
+                if (d.sid === _obj.sid) {
+                  d.isSelected = !d.isSelected;
+                }
+              })
+            })
+            _this.changeSelectedStatus(_obj);
+            _obj.isSelected = !_obj.isSelected;//切换marker选中状态图标
           });
           _marker.setMap(_this.map);
         }
@@ -448,38 +641,26 @@ export default {
       }
       let _circle = new window.AMap.Circle({
         center: new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]), // 圆心位置
-        radius: _this.scopeRadius || 100,  //半径
+        radius: _this.scopeRadius * 100,  //半径
         strokeColor: "#F33",  //线颜色
         strokeOpacity: 1,  //线透明度
         strokeWeight: 3,  //线粗细度
         fillColor: "#ee2200",  //填充颜色
         fillOpacity: 0.35 //填充透明度
       })
-      // hover
-      _circle.on('mouseover', function () {
-        let sContent = '<div class="vl_map_hover">' +
-          '<div class="vl_map_hover_main"><ul>' + 
-            '<li>输入半径或地图选择</li>' +
-          '</ul></div>';
-        hoverWindow = new window.AMap.InfoWindow({
-          isCustom: true,
-          closeWhenClickMap: true,
-          offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-          content: sContent
-        });
-        hoverWindow.open(_this.map, new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]));
-      });
-      _circle.on('mouseout', function () {
-        if (hoverWindow) { hoverWindow.close(); }
-      });
-
-      _this.getEquList(_circle);
+      _this.getTraceEquList(_circle);
       _this.selAreaCircle.push({_circle, index});
       _circle.setMap(_this.map)
     },
     // 输入追踪点定位圆形覆盖物的中心点
     markLocation(mapId, address, index) {
       let _this = this;
+      // 清空上一次输入的追踪点产生的marker
+      if (_this.circleIndex === index) {
+        if (_this._marker) {
+          _this.map.remove(_this._marker);
+        }
+      }
       new window.AMap.plugin('AMap.Geocoder', function() {
           let geocoder = new window.AMap.Geocoder(); 
           console.log(address)           
@@ -491,7 +672,7 @@ export default {
               // 追踪点标记
               let offSet = [-20.5, -48], _hoverWindow = null;
               if (lng > 0 && lat > 0) {
-                let _marker = new window.AMap.Marker({ // 添加自定义点标记
+                _this._marker = new window.AMap.Marker({ // 添加自定义点标记
                   map: _this.map,
                   position: [lng, lat],
                   offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
@@ -501,7 +682,7 @@ export default {
                   content: '<div class="vl_icon vl_icon_zzd"></div>'
                 });
                 // hover
-                _marker.on('mouseover', function () {
+                _this._marker.on('click', function () {
                   let _sContent = '<div class="vl_map_hover">' +
                     '<div class="vl_map_hover_main"><ul>' + 
                       '<li><span>追踪点地址：</span>' + address + '</li>' + 
@@ -513,11 +694,16 @@ export default {
                     content: _sContent
                   });
                   _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+                  console.log(_this.trackPointList)
+                  // 展开追踪点的设备列表
+                  _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
+                  const obj = _this.trackPointList.find(f => f.address === address);
+                  if (obj) {
+                    _this.tid = obj.tid;
+                    obj.isDropdown = true;
+                  }
                 });
-                _marker.on('mouseout', function () {
-                  if (_hoverWindow) { _hoverWindow.close(); }
-                });
-                _marker.setMap(_this.map);
+                _this._marker.setMap(_this.map);
                 // 画圆形覆盖物
                 _this.lnglat = [lng, lat];
                 _this.mapCircle(index)
@@ -529,7 +715,88 @@ export default {
           });
       });
     },
-     // 选择区域
+    // 获取范围分析选取范围内的设备列表数据
+    getScopeEquList (graphics) {
+      let _this = this;
+      let data = _this.objDeepCopy(conData);
+      console.log(data, 'data')
+      const i = _this.trackPointList.length + 1;
+      let obj = {
+        tid: i, 
+        trackPointName: '范围00'  + i,
+        address: '范围00' + i,
+        deviceChara: _this.features,//设备特性
+        groupId: 1,//设备组id,先写死
+        devList: []//设备列表
+      }
+      _this.$set(obj, 'isDropdown', false);
+      _this.trackPointList.push(obj);
+      let index = _this.trackPointList.indexOf(obj);
+
+      // 把多边形覆盖物范围之内的设备添加进来
+      for (let s = 0; s < data.devList.length; s++) {
+        let _obj = data.devList[s];
+        if (_obj.longitude > 0 && _obj.latitude > 0) {
+          if (graphics && graphics.contains(new window.AMap.LngLat(_obj.longitude, _obj.latitude))) {
+            // 在圆形之中
+            _this.$nextTick(() => {
+              //在覆盖物内的置为选中-图标
+              const sid = $(`#${this.mapMId} #${_obj.sid}`);
+              // 摄像头
+              if (_obj.type === 'sxt') {
+                if (_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_sxt_uncheck');
+                  sid.addClass('vl_icon_sxt');
+                } else if (!_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_sxt_uncheck');
+                  sid.addClass('vl_icon_sxt_not_choose');
+                }
+              // 卡口
+              } else {
+                if (_obj.isNormal && !_obj.isSelected) {
+                  sid.removeClass('vl_icon_kk_uncheck');
+                  sid.addClass('vl_icon_kk');
+                } else if (!_obj.isNormal) {
+
+                }
+              }
+              _obj.isSelected = true;//在覆盖物内的置为选中-多选框
+              _this.trackPointList[index].devList.push(_obj);
+            })
+          }
+        }
+      }
+    },
+    // 绑定draw
+    bindDraw () {
+      let _this = this;
+      // 在地图中添加MouseTool插件
+      let mouseTool = new window.AMap.MouseTool(_this.map);
+      _this.mouseTool = mouseTool;
+      // 添加事件
+      window.AMap.event.addListener(mouseTool, 'draw', function (e) {
+        console.log('drawPaths e', e); // 获取路径/范围
+        console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
+        setTimeout(() => {
+          // _this.selAreaRest(true);
+          let polygon = new window.AMap.Polygon({
+            map: _this.map,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2, 
+            path: e.obj.getPath(),
+            zIndex: 12
+          });
+          _this.selAreaPolygon = polygon;
+          _this.selAreaAble = true;
+          _this.getScopeEquList(polygon);
+        }, 100);
+      });
+      _this.selArea();
+    },
+    // 选择区域
     selArea () {
       if (this.selAreaAcitve) {
         this.selAreaRest();
@@ -561,50 +828,6 @@ export default {
         this.selAreaAble = false;
       }
     },
-    // 测距
-    ranging () {
-      if (this.rangingAcitve) {
-        this.rangingRest();
-        return false;
-      }
-      this.rangingRest();
-      this.rangingAcitve = true;
-      // 自定义样式
-      let startMarkerOptions= {
-        content: '<div class="vl_map_ranging vl_map_ranging_s"><div></div></div>',
-        offset: new window.AMap.Pixel(-12, -12)
-      };
-      let endMarkerOptions = {
-        content: '<div class="vl_map_ranging vl_map_ranging_e"><div>终</div></div>',
-        offset: new window.AMap.Pixel(-17, -17)
-      };
-      let midMarkerOptions = {
-        content: '<div class="vl_map_ranging vl_map_ranging_m"><div></div></div>',
-        offset: new window.AMap.Pixel(-12, -12)
-      };
-      let lineOptions = {
-          strokeStyle: "solid",
-          strokeColor: "#61C772",
-          strokeOpacity: 1,
-          strokeWeight: 8
-      };
-      let rulerOptions = {
-        startMarkerOptions: startMarkerOptions,
-        midMarkerOptions:midMarkerOptions,
-        endMarkerOptions: endMarkerOptions,
-        lineOptions: lineOptions
-      };
-      let ruler2 = new window.AMap.RangingTool(this.map, rulerOptions);
-      ruler2.turnOn();
-      this.rangingObj = ruler2;
-    },
-    // 重置测距
-    rangingRest () {
-      this.rangingAcitve = false;
-      if (this.rangingObj) {
-        this.rangingObj.turnOff();
-      }
-    },
     // 初始化地图
     resetMap () {
       // 共有部分
@@ -616,38 +839,6 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
-
-      // 范围分析
-      if (this.modelMType === '4') {
-        // 在地图中添加MouseTool插件
-        let mouseTool = new window.AMap.MouseTool(map);
-        _this.mouseTool = mouseTool;
-        // 添加事件
-        window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-          console.log('drawPaths e', e); // 获取路径/范围
-          console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
-          setTimeout(() => {
-            _this.selAreaRest(true);
-            let polygon = new window.AMap.Polygon({
-              map: map,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2, 
-              path: e.obj.getPath(),
-              zIndex: 12
-            });
-            _this.selAreaPolygon = polygon;
-            _this.selAreaAble = true;
-            _this.getEquList(polygon);
-          }, 100);
-        });
-        this.selArea();
-      // 人员追踪/车辆追踪
-      } else if (this.modelMType === '1' || this.modelMType === '2') {
-        console.log(11111)
-      }
       _this.mapMark();
       _this.trackPointList = [];
     }

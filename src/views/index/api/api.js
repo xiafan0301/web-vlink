@@ -235,3 +235,28 @@ export function removeVehicle(data) {
     mode: ''
   })
 }
+/* ========== 布控管理 ========== */
+/**
+ * addControl 新增布控
+ * @param {object} data
+ */
+export function addControl(data) {
+  return request({
+    url: '/surveillance',
+    method: 'post',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getControlInfoByName 通过布控名称获取布控信息
+ * @param {object} params
+ */
+export function getControlInfoByName(params) {
+  return request({
+    url: '/surveillance/byName',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}

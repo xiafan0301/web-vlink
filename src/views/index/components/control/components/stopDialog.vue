@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="stop_manage_dialog">
     <el-dialog
       :visible.sync="stopManageDialog"

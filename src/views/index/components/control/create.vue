@@ -17,7 +17,7 @@
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one">
             <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
-              <el-input v-model="createForm.controlName" maxlength="20"></el-input>
+              <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-input v-model="createForm.event"></el-input>
@@ -32,40 +32,42 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.controlType === '1'" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
+            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
-                end-placeholder="结束日期">
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
             <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
-                <el-time-select
+                <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
                   :picker-options="{
-                    start: '00:00',
-                    step: '00:01',
-                    end: '23:00'
+                    start: '00:00:00',
+                    step: '00:01:00',
+                    end: '23:00:00'
                   }">
-                </el-time-select>
+                </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
               <el-form-item :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
-                <el-time-select
+                <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
                   :picker-options="{
-                    start: '00:00',
-                    step: '00:01',
-                    end: '23:00',
+                    start: '00:00:00',
+                    step: '00:01:00',
+                    end: '23:00:00',
                     minTime: item.startTime
                   }">
-                </el-time-select>
+                </el-time-picker>
               </el-form-item>
             </div>
             <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
@@ -126,6 +128,8 @@
 </template>
 <script>
 import model from './components/model.vue';
+import {getControlInfoByName, addControl} from '@/views/index/api/api.js';
+import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
   props: ['createType'],
@@ -135,15 +139,15 @@ export default {
       // 表单参数
       labelPosition: 'top',
       controlTypeList: [
-        {label: '短期布控', value: '1'},
-        {label: '长期布控', value: '2'}
+        {label: '短期布控', value: 1},
+        {label: '长期布控', value: 2}
       ],//布控类型
       controlRankList: [
-        {label: '一级', value: '0'},
-        {label: '二级', value: '1'},
-        {label: '三级', value: '2'},
-        {label: '四级', value: '3'},
-        {label: '五级', value: '4'}
+        {label: '一级', value: 0},
+        {label: '二级', value: 1},
+        {label: '三级', value: 2},
+        {label: '四级', value: 3},
+        {label: '五级', value: 4}
       ],//告警类型
       createForm: {
         controlName: null,
@@ -161,6 +165,10 @@ export default {
       // 分析模型数据
       checkList: ['人员追踪'],
       modelType: '1',//模型类型序号
+      modelDataOne: null,// 人员追踪数据
+      modelDataTwo: null,// 车辆追踪数据
+      modelDataThree: null,// 越界分析数据
+      modelDataFour: null,// 范围分析数据
       // 弹出框参数
       toGiveUpDialog: false,
       loadingBtn: false
@@ -206,6 +214,17 @@ export default {
       }
       this.toGiveUpDialog = false;
     },
+    // 通过布控名称获取布控信息，异步查询布控是否存在
+    getControlInfoByName () {
+      const name = this.Trim(this.createForm.controlName, 'g');
+      if (name) {
+        getControlInfoByName({name}).then(res => {
+          if (res && res.data) {
+            this.$message.error('布控名称已存在');
+          }
+        })
+      }
+    },
     // 保存布控任务
     saveControl (formName) {
       // 点击保存按钮时清除没勾选的模型类别的验证结果
@@ -222,10 +241,54 @@ export default {
             return false;
           } else {
             console.log('验证通过');
-            this.$refs.mapOne.validateModelOne();
-            this.$refs.mapTwo.validateModelTwo();
-            this.$refs.mapThree.validateModelThree();
-            this.$refs.mapFour.validateModelFour();
+            const modelList = [];
+            this.checkList.forEach(f => {
+              if (f === '人员追踪') {
+                this.$refs.mapOne.validateModelOne();
+                modelList.push(this.modelDataOne);
+              } else if (f === '车辆追踪') {
+                this.$refs.mapTwo.validateModelTwo();
+                modelList.push(this.modelDataTwo);
+              } else if (f === '越界分析') {
+                this.$refs.mapThree.validateModelThree();
+                modelList.push(this.modelDataThree);
+              } else if (f === '范围分析') {
+                this.$refs.mapFour.validateModelFour();
+                modelList.push(this.modelDataFour);
+              }
+            })
+            if (this.checkList.some(s => s === '人员追踪') && !this.modelDataOne) {
+              return false;
+            } else if (this.checkList.some(s => s === '车辆追踪') && !this.modelDataTwo) {
+              return false;
+            } else if (this.checkList.some(s => s === '越界分析') && !this.modelDataThree) {
+              return false;
+            } else if (this.checkList.some(s => s === '范围分析') && !this.modelDataFour) {
+              return false;
+            }
+            const time = this.createForm.periodTime.map(m => {
+              return {
+                startTime: formatDate(m.startTime, 'HH:mm:ss'),
+                endTime: formatDate(m.endTime, 'HH:mm:ss')
+              }
+            })
+            let data = {
+              alarmLevel: this.createForm.controlRank,// 告警级别
+              eventId: parseInt(this.createForm.event),// 事件id
+              surveillanceDateStart: this.createForm.controlDate && this.createForm.controlDate[0],// 布控开始时间
+              surveillanceDateEnd: this.createForm.controlDate && this.createForm.controlDate[1],// 布控结束时间
+              surveillanceName: this.createForm.controlName,// 布控名称
+              surveillanceType: this.createForm.controlType,// 布控类型
+              modelList: modelList,// 布控分析模型
+              surveillancTimeList: time// 布控时间段
+            }
+            console.log(JSON.stringify(data) )
+            addControl(data).then(res => {
+              if (res && res.data) {
+                this.$message.success('新增成功');
+                this.$router.push({ name: 'control_manage' });
+              }
+            })
           }
         } else {
           return false;
@@ -255,18 +318,22 @@ export default {
     // 获得子组件传过来的人员追踪的数据
     getModelDataOne (data) {
       console.table(data);
+      this.modelDataOne  = data;
     },
     // 获得子组件传过来的车辆追踪的数据
     getModelDataTwo (data) {
       console.table(data);
+      this.modelDataTwo  = data;
     },
     // 获得子组件传过来的越界分析的数据
     getModelDataThree (data) {
       console.table(data);
+      this.modelDataThree  = data;
     },
     // 获得子组件传过来的范围分析的数据
     getModelDataFour (data) {
       console.table(data);
+      this.modelDataFour  = data;
     },
   }
 }

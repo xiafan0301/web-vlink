@@ -141,8 +141,15 @@ export default {
                   background: rgba(235,239,242,1);
                 }
                 &:hover{
-                  .vl_icon_control_19{
+                  .el-checkbox{
                     display: inline-block !important;
+                    
+                  }
+                }
+                &{
+                  .el-checkbox{
+                    position: relative;
+                    bottom: 6px;
                   }
                 }
               }
@@ -185,6 +192,24 @@ export default {
         .bottom > li:nth-child(1){
           border-bottom: 1px solid #F1F1F1;
         }
+        .area{
+          line-height: 14px;
+          p{
+            font-size: 12px;
+            color: #666;
+          }
+          &.active{
+            i{
+              background-position: -97px -347px;
+            }
+            p{
+              color: #0C70F8;
+            }
+          }
+        }
+      }
+      .vl_icon{
+        transition: none;
       }
     }
     // 布控模块面包屑样式
