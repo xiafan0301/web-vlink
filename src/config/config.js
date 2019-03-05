@@ -6,15 +6,22 @@ const oDomains = {
     // 默认ajax地址
     base: {
         // dev: 'http://emi.aorise.org/api/vis/',
-        dev: 'http://apidev.aorise.org/visual-emi/',
+        // dev: 'http://apidev.aorise.org/visual-emi/',
+        dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
-    // 应急指挥 mode: ecc
+    // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',
         prod: 'http://apiemi.aorise.org/api/emi/'
+    },
+    // 上传图片
+    upload: {
+        dev: 'http://apidev.aorise.org/education-user-related',
+        test: 'http://apirel.aorise.org/education-user-related',
+        prod: 'http://apirel.aorise.org/education-user-related'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

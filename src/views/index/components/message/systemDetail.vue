@@ -3,7 +3,7 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)">公告管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">公告管理</el-breadcrumb-item>
         <el-breadcrumb-item>查看详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>

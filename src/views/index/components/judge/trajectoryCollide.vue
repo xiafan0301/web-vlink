@@ -10,7 +10,7 @@
             multiple
             :show-file-list="false"
             accept="image/*"
-            action="https://apidev.aorise.org/medical-his/api/network/upload/new"
+            :action="uploadAcion"
             list-type="picture-card"
             :on-exceed="uploadPicExceed"
             :before-upload="beforeAvatarUpload"
@@ -60,13 +60,34 @@
     <div class="vl_j_right">
       <div id="tcMap"></div>
     </div>
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" src="../../../../assets/video/demo.mp4"></video>
+      <div @click="closeVideo" class="close_btn el-icon-error"></div>
+      <div class="control_bottom">
+        <div>某某摄像头</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="curVideo.playing"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span><a download="视频" :href="curVideoUrl" class="el-icon-download"></a></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+        </div>
+      </div>
+    </div>
+    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+      <img :src="demoImg" alt="">
+      <i @click="showCut = false" class="close_btn el-icon-error"></i>
+      <a download="截图" :href="demoImg" id="vlJtcDownloadImg" ></a>
+    </div>
   </div>
 </template>
 <script>
+let AMap = window.AMap;
 import {testData} from './testData';
+import {ajaxCtx} from '@/config/config';
 export default {
   data() {
     return {
+      uploadAcion: ajaxCtx.upload + '/new',
       testData: testData,
       curImageUrl: '', // 当前上传的图片
       curImgNum: 0, // 当前图片数量
@@ -101,17 +122,37 @@ export default {
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
-      amap: null // 地图实例
+      amap: null, // 地图实例
+      markerCheck: [], // 地图checkbox集合
+      markerLine: [], // 地图线集合
+      markerPoint: [], // 地图点集合
+      markerIconPlay: [], // 地图播放按钮集合
+      markerIconBig: [], // 地图放大按钮集合
+      curVideo: {
+        id: '',
+        indexNum: 0,
+        playing: false
+      }, // 当前被放大播放的video
+      showLarge: false,
+      showCut: false,
+      curVideoUrl: '',
+      demoImg: ''
     }
   },
   mounted () {
     this.setDTime();
-    let map = new window.AMap.Map('tcMap', {
-      center: [112.980377, 28.100175],
+    let map = new AMap.Map('tcMap', {
+      center: [112.974691, 28.093846],
       zoom: 16
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
+    this.drawMapMarker(this.testData.sxt);
+    $(window).bind('resize', () => {
+      this.drawCheckbox(this.testData.sxt);
+      this.drawPlayBtn(this.testData.sxt);
+      this.drawBigBtn(this.testData.sxt);
+    })
   },
   methods: {
     // 上传图片
@@ -131,7 +172,6 @@ export default {
       return isJPG && isLt;
     },
     uploadSucess (response, file, fileList) {
-      console.log(this.curImgNum);
       this.uploading = false;
       if (response && response.data) {
         if (this.curImgNum >= 3) {
@@ -156,8 +196,13 @@ export default {
             thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
             // uid: '' //  附件标识
           };
-          this.imgList[this.curImgNum - 1] = x;
-          this.curImageUrl = x.fileFullPath;
+          for (let i = 0; i < this.imgList.length; i++) {
+            if (!this.imgList[i]) {
+              this.imgList.splice(i, 1, x);
+              break;
+            }
+          }
+          this.showCurImg();
         }
       }
       this.uploadFileList = fileList;
@@ -169,25 +214,32 @@ export default {
     },
     delPic (index) {
       this.curImgNum--;
-      this.uploadFileList.splice(index, 1);
+      if (this.uploadFileList.length > index) {
+        this.uploadFileList.splice(index, 1);
+      } else {
+        this.uploadFileList.splice(this.uploadFileList.length - 1, 1);
+      }
       this.imgList.splice(index, 1, '');
       console.log(this.uploadFileList, index);
       if (this.curImgNum) {
-        if (this.imgList[this.curImgNum - 1].fileFullPath && this.imgList[0].fileFullPath) {
-          this.curImageUrl = this.imgList[this.curImgNum - 1].fileFullPath;
-        } else {
-          if (this.curImgNum === 2) {
-            this.curImageUrl = this.imgList[2].fileFullPath;
-          } else {
-            if (this.imgList[this.curImgNum - 1].fileFullPath) {
-              this.curImageUrl = this.imgList[this.curImgNum - 1].fileFullPath;
-            } else {
-              this.curImageUrl = this.imgList[2].fileFullPath ? this.imgList[2].fileFullPath : this.imgList[1].fileFullPath;
-            }
-          }
-        }
+        this.showCurImg();
       } else {
         this.curImageUrl = '';
+      }
+    },
+    showCurImg () {
+      if (this.imgList[this.curImgNum - 1].fileFullPath && this.imgList[0].fileFullPath) {
+        this.curImageUrl = this.imgList[this.curImgNum - 1].fileFullPath;
+      } else {
+        if (this.curImgNum === 2) {
+          this.curImageUrl = this.imgList[2].fileFullPath;
+        } else {
+          if (this.imgList[this.curImgNum - 1].fileFullPath) {
+            this.curImageUrl = this.imgList[this.curImgNum - 1].fileFullPath;
+          } else {
+            this.curImageUrl = this.imgList[2].fileFullPath ? this.imgList[2].fileFullPath : this.imgList[1].fileFullPath;
+          }
+        }
       }
     },
     chooseType () {
@@ -215,144 +267,233 @@ export default {
     },
     tcDiscuss () {
       console.log(this.searchData.time)
+    },
+    drawMapMarker (data) {
+      let path = [];
+      this.drawPoint(data);
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _path = [obj.longitude, obj.latitude];
+        if (obj.longitude > 0 && obj.latitude > 0) {
+          let _id = 'vlJtcVideo' + obj.id;
+          let _sContent = `<div class="vl_jtc_mk"><video id="${_id}" src="${require('../../../../assets/video/demo.mp4')}"></video><p>${obj.time}</p></div>`;
+          // 窗体
+          let markerWindow = new AMap.Marker({ // 添加自定义点标记
+            map: this.amap,
+            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            offset: new AMap.Pixel(20, -50), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            extData: obj,
+            // 自定义点标记覆盖物内容
+            content: _sContent
+          });
+          console.log(markerWindow)
+          // markerWindow.on('click', this.largeVideo);
+          path.push(_path);
+        }
+      }
+      this.drawCheckbox(data);
+      this.drawPlayBtn(data);
+      this.drawBigBtn(data);
+      this.drawLine(path);
+    }, // 覆盖物（窗体和checkbox
+    drawPoint (data) {
+      this.markerPoint.forEach(z => {
+        this.amap.remove(z);
+      })
+      this.markerPoint = [];
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _class = 'vl_icon_sxt';
+        if (!obj.checked) {
+          _class = 'vl_icon_sxt_not_choose';
+        }
+        let _content = '<div class="vl_icon ' + _class + '"></div>'
+        if (obj.longitude > 0 && obj.latitude > 0) {
+          let point = new AMap.Marker({ // 添加自定义点标记
+            map: this.amap,
+            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            // 自定义点标记覆盖物内容
+            content: _content
+          });
+          this.markerPoint.push(point);
+        }
+      }
+    }, // 画摄像头点
+    drawLine (path) {
+      var polyline = new AMap.Polyline({
+        path: path,
+        showDir: true,
+        strokeColor: '#61C772',
+        strokeWeight: 6
+      });
+      this.markerLine.push(polyline);
+      this.amap.add([polyline]);
+    }, // 画线
+    drawCheckbox (data) {
+      if (this.markerCheck.length) {
+        this.markerCheck.forEach(x => {
+          this.amap.remove(x);
+        })
+        this.markerCheck = [];
+      }
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _bContent = '<div class="vl_jtc_mk_check">';
+        _bContent += '<input checked type="checkbox">';
+        _bContent += '</div>';
+        let cWin = document.documentElement.clientWidth;
+        let markerCheckbox = new AMap.Marker({ // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(170 * cWin / 1366, -50), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _bContent
+        });
+        this.markerCheck.push(markerCheckbox);
+        markerCheckbox.on('click', this.updateLine);
+      }
+    }, // 复选框单独,适应屏幕大小变化
+    drawPlayBtn (data) {
+      if (this.markerIconPlay.length) {
+        this.markerIconPlay.forEach(x => {
+          this.amap.remove(x);
+        })
+        this.markerIconPlay = [];
+      }
+      let cWin = document.documentElement.clientWidth;
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _bContent = '<div><i class="vl_icon ';
+        _bContent += obj.playing ? 'vl_icon_judge_01' : 'vl_icon_control_09'
+        _bContent += '"></i></div>'    ;
+        let markerPlayBtn = new AMap.Marker({ // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(130 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _bContent
+        });
+        this.markerIconPlay.push(markerPlayBtn);
+        markerPlayBtn.on('click', this.playVideo);
+      }
+    }, // 播放按钮，适应屏幕大小变化
+    drawBigBtn (data) {
+      if (this.markerIconBig.length) {
+        this.markerIconBig.forEach(x => {
+          this.amap.remove(x);
+        })
+        this.markerIconBig = [];
+      }
+      for (let  i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let _bContent = '<div><i class="vl_icon vl_icon_control_08"></i></div>';
+        let cWin = document.documentElement.clientWidth;
+        let markerBigBtn = new AMap.Marker({ // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new AMap.Pixel(146 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: obj,
+          // 自定义点标记覆盖物内容
+          content: _bContent
+        });
+        this.markerIconBig.push(markerBigBtn);
+        markerBigBtn.on('click', this.largeVideo);
+      }
+    }, // 放大按钮，适应屏幕大小变化
+    updateLine (e) {
+      this.amap.remove(this.markerLine);
+      e.target.C.extData.checked = !e.target.C.extData.checked;
+      let _i = this.testData.sxt.indexOf(e.target.C.extData);
+      this.testData.sxt.splice(_i, 1);
+      this.testData.sxt.push(e.target.C.extData);
+      let path = [];
+      for (let i = 0; i < this.testData.sxt.length; i++) {
+        if (this.testData.sxt[i].checked) {
+          let _path = [this.testData.sxt[i].longitude, this.testData.sxt[i].latitude];
+          path.push(_path);
+        }
+      }
+      console.log(path)
+      this.drawLine(path);
+      this.drawPoint(this.testData.sxt)
+    }, // 更新画线
+    playVideo (e) {
+      let _i = this.testData.sxt.indexOf(e.target.C.extData);
+      let vDom = document.getElementById('vlJtcVideo' + this.testData.sxt[_i].id);
+      if (e.target.C.extData.playing) {
+        vDom.pause();
+      } else {
+        vDom.play();
+        vDom.addEventListener('ended', (e) => {
+          e.target.currentTime = 0;
+          this.testData.sxt[_i].playing = false;
+          this.drawPlayBtn(this.testData.sxt);
+        })
+      }
+      e.target.C.extData.playing = !e.target.C.extData.playing;
+      this.drawPlayBtn(this.testData.sxt);
+    },
+    largeVideo (e) {
+      let _i = this.testData.sxt.indexOf(e.target.C.extData);
+      let vDom = document.getElementById('vlJtcVideo' + this.testData.sxt[_i].id);
+      vDom.pause();
+      this.curVideo.id = 'vlJtcVideo' + this.testData.sxt[_i].id;
+      this.curVideo.playing = this.testData.sxt[_i].playing;
+      this.curVideo.indexNum = _i;
+      this.showLarge = true;
+      if (this.testData.sxt[_i].playing) {
+        document.getElementById('vlJtcLargeV').play();
+        document.getElementById('vlJtcLargeV').addEventListener('ended', (e) => {
+          e.target.currentTime = 0;
+          this.testData.sxt[_i].playing = false;
+          this.showLarge = false;
+        })
+        this.testData.sxt[_i].playing = false;
+        this.drawPlayBtn(this.testData.sxt);
+      }
+      document.getElementById('vlJtcLargeV').currentTime = vDom.currentTime;
+      this.curVideoUrl = vDom.src;
+    },
+    closeVideo () {
+      let vDom = document.getElementById(this.curVideo.id);
+      document.getElementById('vlJtcLargeV').pause();
+      vDom.currentTime = document.getElementById('vlJtcLargeV').currentTime;
+      this.showLarge = false;
+      if (this.curVideo.playing) {
+        this.testData.sxt[this.curVideo.indexNum].playing = true;
+        this.drawPlayBtn(this.testData.sxt);
+        vDom.play();
+      }
+    },
+    pauseLargeVideo () {
+      this.curVideo.playing = false;
+      document.getElementById('vlJtcLargeV').pause();
+    } ,
+    playLargeVideo () {
+      this.curVideo.playing = true;
+      document.getElementById('vlJtcLargeV').play();
+    },
+    cutScreen () {
+      this.showCut = true;
+      let _canvas = document.createElement('canvas');
+      _canvas.setAttribute('width', document.documentElement.clientWidth);
+      _canvas.setAttribute('height', document.documentElement.clientHeight);
+      let cxt = _canvas.getContext('2d');
+      cxt.drawImage(document.getElementById('vlJtcLargeV'), 0, 0, _canvas.width, _canvas.height);
+      this.demoImg = _canvas.toDataURL();
+      setTimeout(() => {
+        document.getElementById('vlJtcDownloadImg').click();
+      }, 200)
     }
   },
   watch: {}
 }
 </script>
-<style scoped="scoped" lang="scss">
-  .vl_jtc_img_box {
-    width: 100%;
-    height: auto;
-    padding: 0 .2rem;
-    border-bottom: 1px dashed #D3D3D3;
-    padding-bottom: .44rem;
-    .vl_jtc_upload_img {
-      position: relative;
-      .vl_jtc_upload {
-        /deep/.el-upload--picture-card {
-          width: 100%;
-          padding-top: 100%;
-          position: relative;
-          > i {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-          }
-          > img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            -webkit-border-radius: 6px;
-            -moz-border-radius: 6px;
-            border-radius: 6px;
-          }
-        }
-      }
-      > p {
-        position: absolute;
-        bottom: 7px;
-        text-align: center;
-        font-size: 0.14rem;
-        width: 100%;
-      }
-    }
-    .vl_jtc_img_list {
-      width: 100%;
-      margin-top: 10px;
-      text-align: center;
-      .middle_img {
-        display: inline-block;
-      }
-      > div {
-        width: 30%;
-        padding-top: 30%;
-        border: 1px dashed #D3D3D3;
-        position: relative;
-        &:hover {
-          .del_mask {
-            display: block;
-          }
-        }
-        &:last-child {
-          float: right;
-        }
-        &:first-child {
-          float: left;
-        }
-        .del_mask {
-          display: none;
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, .2);
-          top: 0;
-          > i {
-            cursor: pointer;
-            display: block;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            color: #ffffff;
-            width: 16px;
-            height: 16px;
-            text-align: center;
-          }
-        }
-        > img {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-      }
-    }
-  }
-  .vl_jtc_search {
-    width: 100%;
-    height: auto;
-    padding: 0 .2rem;
-    padding-top: .4rem;
-    /deep/.el-input__inner {
-      height: .4rem;
-      line-height: .4rem;
-    }
-    /deep/.el-input__icon {
-      height: .4rem;
-      line-height: .4rem;
-    }
-    /deep/.el-range-editor {
-      width: 100%;
-      padding: 0;
-      > i {
-        display: none;
-      }
-      > input {
-        width: 50%;
-      }
-      .el-range-separator {
-        height: .4rem;
-        line-height: .4rem;
-        width: 10px;
-        padding: 0;
-      }
-    }
-    /deep/button {
-      height: .4rem;
-      line-height: .4rem;
-      padding: 0 .12rem;
-    }
-    > div {
-      margin-bottom: .1rem;
-    }
-  }
-</style>

@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="audit">
     <div class="search_box">
       <el-form :inline="true" :model="auditForm" class="event_form" ref="auditForm">
@@ -139,6 +140,7 @@
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
@@ -241,7 +243,6 @@ export default {
       this.$refs[form].validator(valid => {
         if (valid) {
           console.log(valid);
-          
         }
       })
     },
