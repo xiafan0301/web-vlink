@@ -91,7 +91,7 @@
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -163,6 +163,7 @@ export default {
   },
   mounted () {
     let _this = this;
+     _this.resetMap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -194,6 +195,16 @@ export default {
     _this.mapMark(_this.addEventForm);
   },
   methods: {
+    resetMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);

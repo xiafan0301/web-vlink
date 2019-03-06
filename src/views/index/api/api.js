@@ -1,45 +1,13 @@
 import request from '@/config/axios';
 
 /**
- * testApiService
- * @param {Object} data 接口入参
+ * 字典接口
+ * @param {*} data 
  */
-export function testApiService(data) {
+export function getDiciData(uid) {
   return request({
-    url: '/testApiService',
-    method: 'post/get/put...',
-    data,
-    params: null,
-    mode: ''
-  })
-}
-
-/* ========== 可视化 ========== */
-/**
- * getBorders 区域边框描点
- * @param {string} data 区域adcode
- */
-export function getBorders(data) {
-  return request({
-    url: 'mapServices/borders/' + data,
-    method: 'get',
-    // params: data,
-    // data,
-    mode: ''
-  })
-}
-/* ========== 应急指挥 ========== */
-/**
- * getEventsStatistics 事件统计信息
- * @param {object} data 事件ID eventId: ''
- */
-export function getEventsStatistics(data) {
-  return request({
-    url: 'eventServices/events/statistics',
-    method: 'get',
-    params: data,
-    // data,
-    mode: 'ecc'
+    url: 'dictServices/dicts/byDictTypeId/' + uid,
+    method: 'get'
   })
 }
 /*=================事件管理模块================== */
@@ -74,17 +42,38 @@ export function getEventDetail(uid) {
     method: 'get'
   })
 }
-// /**
-//  * 获取调度指挥列表数据
-//  * @param {*} data 
-//  */
-// export function getCtcList(data) {
-//   return request({
-//     url: 'eventServices/events/page',
-//     method: 'get',
-//     params: data
-//   })
-// }
+/**
+ * 获取调度指挥列表数据
+ * @param {*} data 
+ */
+export function getCtcList(data) {
+  return request({
+    url: 'eventServices/events/page',
+    method: 'get',
+    params: data
+  })
+}
+/**
+ * 获取更多预案列表数据
+ * @param {*} data 
+ */
+export function getPlanData(data) {
+  return request({
+    url: 'planServices/plans',
+    method: 'get',
+    params: data
+  })
+}
+/**
+ * 获取预案详情
+ * @param {*} data 
+ */
+export function getPlanDetail(uid) {
+  return request({
+    url: 'planServices/plans/' + uid,
+    method: 'get'
+  })
+}
 /* ================== 布控模块 =================== */
 /* ========== 布控库 ========== */
 /**

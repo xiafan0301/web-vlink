@@ -12,24 +12,23 @@
         <EventBasic :status="$route.query.status"></EventBasic>
         <div class="end-body">
           <div class="end-content">
-            <span>处理结果:</span>
-            <el-input type="textarea" rows="7" size="small" placeholder="请填写或者上传处理结果和总结"></el-input>
+            <span>事件总结:</span>
+            <el-input type="textarea" rows="7" v-model="eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
           </div>
           <div class="end-upload">
             <el-upload
-              class="upload-demo"
               action="https://jsonplaceholder.typicode.com/posts/"
               :on-change="handleChange"
               :file-list="fileList">
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.rar .zip .doc .docx .pdf .jpg…）</div>
+              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .jpg…）</div>
             </el-upload>
           </div>
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">确定</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn function_btn" @click="submitData">确定</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
@@ -40,11 +39,20 @@ export default {
   components: { EventBasic },
   data () {
     return {
+      eventSummary: null, // 事件总结
       fileList: [], // 文件上传列表
     }
   },
   methods: {
-    handleChange () {}
+    handleChange () {},
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 结束事件
+    submitData () {
+
+    }
   }
 }
 </script>
@@ -68,18 +76,18 @@ export default {
         padding: 20px;
         > span {
           color: #666666;
-          width: 60px;
+          width: 90px;
           margin-right: 10px;
           text-align: right;
         }
         > div {
-          width: 60%;
+          width: 100%;
           margin-top: -10px;
         }
       }
       .end-upload {
         margin-left: 90px;
-        width: 50%;
+        width: 60%;
         padding-bottom: 20px;
         .upload-btn {
           border: 1px solid #D3D3D3;

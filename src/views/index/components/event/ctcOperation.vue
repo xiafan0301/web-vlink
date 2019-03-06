@@ -9,7 +9,7 @@
       </el-breadcrumb>
     </div>
     <div class="content-box">
-      <EventBasic></EventBasic>
+      <EventBasic :basicInfo="basicInfo"></EventBasic>
       <div class="event-ctc-content">
         <div class="header">
           <p class="ctc-title">调度指挥方案</p>
@@ -149,24 +149,24 @@
               </div>
               <div class="divide"></div>
               <div class="plan-form-box">
-                <el-form class="plan-form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <el-form class="plan-form" label-width="90px" :model="item"  size="middle">
+                  <el-form-item label="执行部门:"  :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" placeholder="请选择执行部门">
                       <el-option label="区域一" value="shanghai"></el-option>
                       <el-option label="区域二" value="beijing"></el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                  <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
                     <el-input v-model="item.taskName"></el-input>
                   </el-form-item>
-                  <el-form-item label="任务内容:" :prop="item.taskContent" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                  <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
                     <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
             </div>
             <template v-if="taskList.length === (index + 1)">
-              <div class="add-ctc" @click="addTask">
+              <div class="add-ctc" @click="addTask('form' + index)">
                 <i class="vl_icon vl_icon_event_8"></i>
                 <span>调度指挥任务添加</span>
               </div>
@@ -184,10 +184,21 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
   components: { EventBasic },
   data () {
     return {
+      basicInfo: {
+        eventCode: 'XD111111111111111',
+        eventTypeName: '自然灾害',
+        eventLevelName: 'V级',
+        reportTime: '2019-03-12',
+        reporterPhone: '18076543210',
+        eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        casualties: -1,
+        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      }, // 事件详情
       taskList: [
         {
           departmentName: null,
@@ -246,8 +257,52 @@ export default {
     }
   },
   methods: {
-    onSubmit () {},
-    addTask () {
+    // 获取事件详情
+    getDetail () {
+      const eventId = '';
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.basicInfo = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve, reject) => {
+        let arr = [];
+        _this.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    },
+    // 提交数据
+    onSubmit () {
+      let _this = this;
+      _this.judgeData().then(result => {
+        console.log(result);
+        if (result === false) {
+          console.log('未填完')
+        } else {
+          console.log('已填完');
+        }
+      })
+    },
+    addTask (form) {
       const value = {
         departmentName: null,
         taskName: null,
@@ -298,7 +353,7 @@ export default {
           background: #ffffff;
           height: 480px;
           .plan-title {
-            padding: 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             span:nth-child(1) {

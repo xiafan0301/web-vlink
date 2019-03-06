@@ -40,11 +40,10 @@
             <el-upload
               style="width: 500px;"
               action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
+              accept='.txt.pdf,.doc,.docx,.ppt,.pptx'
+              :on-success="handSuccess"
+              :before-upload="beforeUpload"
               :limit="1"
-              :on-exceed="handleExceed"
               :file-list="fileList">
               <el-button size="small" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
@@ -82,7 +81,7 @@
         </el-form>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">保存</el-button>
+        <el-button class="operation_btn function_btn" @click="submitData('addPlanForm')">保存</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
@@ -126,6 +125,9 @@ export default {
         applyEventLevel: [
           { required: true, message: '请选择事件等级', trigger: 'blur' }
         ],
+        scheduleContent: [
+          { max: 10000, message: '最多输入10000字' }
+        ]
       },
       fileList: [],
       taskList: [
@@ -139,10 +141,20 @@ export default {
     }
   },
   methods: {
-    handlePreview () {},
-    handleRemove () {},
-    beforeRemove () {},
-    handleExceed () {},
+    // 上传成功
+    handSuccess () {},
+    // 在上传之前
+    beforeUpload (file) {
+      const isLt = file.size / 1024 / 1024 < 10;
+      if (!isLt) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件大小不能超过 10MB!',
+          customClass: 'upload_file_tip'
+        });
+      }
+      return isLt;
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -154,6 +166,14 @@ export default {
     },
     deletePlanBox (index) { // 删除调度方法输入框
       this.taskList.splice(index, 1);
+    },
+    // 提交数据
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+
+        }
+      })
     },
     // 返回
     back () {

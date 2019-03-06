@@ -10,24 +10,24 @@
     </div>
     <div class="content_box">
       <div class="content_new_group">
-        <el-form :inline="true" :model="addForm" class="search_form">
-          <el-form-item label="预案名称:">
-            <el-select  style="width: 240px;" v-model="addForm.eventType" placeholder="行政区划">
+        <el-form :inline="true" :model="addForm" class="add_form" label-width="80px">
+          <el-form-item label="预案名称:" style="width: 49%;">
+            <el-select style="width: 100%;" v-model="addForm.eventType" placeholder="行政区划">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
           </el-form-item>
-           <el-form-item label="轮巡时间:">
-            <el-date-picker type="date" style='width: 240px;' placeholder="选择日期" v-model="addForm.reportTime" ></el-date-picker>
+           <el-form-item label="轮巡时间:" style="width: 49%;">
+            <el-date-picker type="date" style='width: 100%;' placeholder="选择日期" v-model="addForm.reportTime" ></el-date-picker>
           </el-form-item>
-          <el-form-item label="轮巡画面:">
-            <el-select style="width: 240px;" v-model="addForm.eventStatus" placeholder="智能特性">
+          <el-form-item label="轮巡画面:" style="width: 49%;">
+            <el-select style="width: 100%;" v-model="addForm.eventStatus" placeholder="智能特性">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="间隔时间:">
-            <el-input style="width: 240px;" v-model="addForm.eventStatus" placeholder="5-120秒"></el-input>
+          <el-form-item label="间隔时间:" style="width: 49%;">
+            <el-input style="width: 100%;" v-model="addForm.eventStatus" placeholder="5-120秒"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -78,7 +78,6 @@
       <el-button class="operation_btn back_btn">取消</el-button>
     </div>
   </div>
-
 </vue-scroll>
 </template>
 <script>
@@ -118,21 +117,24 @@ export default {
       padding: 10px 20px 0;
       display: flex;
       align-items: center;
-       .search_form {
-          width: 100%;
-          .select_btn, .reset_btn {
-            width: 80px;
-          }
-          .select_btn {
-            background-color: #0C70F8;
-            color: #ffffff;
-          }
-          .reset_btn {
-            background-color: #ffffff;
-            color: #666666;
-            border-color: #DDDDDD;
-          }
+      .add_form {
+        width: 100%;
+        .el-form-item__content {
+          width: 80%;
         }
+        .select_btn, .reset_btn {
+          width: 80px;
+        }
+        .select_btn {
+          background-color: #0C70F8;
+          color: #ffffff;
+        }
+        .reset_btn {
+          background-color: #ffffff;
+          color: #666666;
+          border-color: #DDDDDD;
+        }
+      }
     }
     .content_main_box {
       padding: 0 20px;

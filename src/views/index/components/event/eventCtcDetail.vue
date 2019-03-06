@@ -9,7 +9,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic :status="$route.query.status"></EventBasic>
+        <EventBasic :status="$route.query.status" :basicInfo="basicInfo"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
             <p class="ctc-title">调度指挥方案</p>
@@ -95,21 +95,50 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">再次调度</el-button>
-        <el-button class="operation_btn back_btn">结束调度</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <template v-if="$route.query.status !== 'ending'">
+          <el-button class="operation_btn function_btn">再次调度</el-button>
+          <el-button class="operation_btn back_btn">结束调度</el-button>
+        </template>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
   components: { EventBasic },
   data () {
     return {
-
+      basicInfo: {
+        eventCode: 'XD111111111111111',
+        eventTypeName: '自然灾害',
+        eventLevelName: 'V级',
+        reportTime: '2019-03-12',
+        reporterPhone: '18076543210',
+        eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        casualties: -1,
+        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      }, // 事件详情
     }
+  },
+  methods: {
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = '';
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.basicInfo = res.data;
+          }
+        })
+        .catch(() => {})
+    },
   }
 }
 </script>

@@ -13,8 +13,8 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveLeft === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
+                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveLeft">
                 <div class="temp_tab">
@@ -69,8 +69,8 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
+                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveRight">
                 <div class="temp_tab">
@@ -101,8 +101,8 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
+                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveRight">
                 <div class="temp_tab">
@@ -133,8 +133,8 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
+                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveRight">
                 <div class="temp_tab">
@@ -227,7 +227,16 @@ export default {
               float: right;
               margin: 5px 5px 0;
             }
-            
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
+            }
             &.temp_active {
               &:hover {
                 background-color: #E0F2FF;
@@ -276,6 +285,9 @@ export default {
                 align-items: center;
                 >span {
                   margin: 0 80px 0 15px;
+                }
+                i:hover {
+
                 }
               }
             }
@@ -341,6 +353,16 @@ export default {
               display: none;
               float: right;
               margin: 5px 5px 0;
+            }
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
             }
             &.temp_active {
               &:hover {

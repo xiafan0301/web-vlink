@@ -66,7 +66,7 @@
           <div class="divide"></div>
         </div>
         <div class="search_box">
-          <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
+          <el-select v-model="value" placeholder="请选择" style="margin-right: 10px;width: 200px;">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -74,7 +74,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
+          <el-select v-model="value" placeholder="请选择" style="margin-right: 10px;width: 200px;">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -82,7 +82,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
+          <el-select v-model="value" placeholder="请选择" style="margin-right: 10px;width: 200px;">
             <el-option
               v-for="item in options"
               :key="item.value"
@@ -222,29 +222,29 @@
             <i class="vl_icon vl_icon_manage_5"></i>
             <span>可用设备 (100个)</span>
           </p>
-          <el-button class="stop_btn" @click="showGrantDialog">全部终止</el-button>
+          <div class="search_box" style="margin-top: 15px;">
+            <el-date-picker
+              style="width: 300px;margin-right: 30px;"
+              v-model="value6"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+            <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <el-button class="select_btn">查询</el-button>
+            <el-button class="reset_btn">重置</el-button>
+          </div>
           <div class="divide"></div>
         </div>
-        <div class="search_box">
-          <el-date-picker
-            style="width: 300px;margin-right: 30px;"
-            v-model="value6"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
-          </el-date-picker>
-          <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
-            <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-          <el-button class="select_btn">查询</el-button>
-          <el-button class="reset_btn">重置</el-button>
-        </div>
+        <el-button class="all_stop_btn" @click="showGrantDialog">全部终止</el-button>
         <div class="templ_detail_box">
           <vue-scroll>
             <ul class="temp_detail_info">
@@ -522,11 +522,16 @@ export default {
         margin-top: 20px;
       }
       .divide {
-        margin: 30px 0;
+        margin: 15px 0;
         width: 100%;
         height: 1px;
         background-color: #f2f2f2;
       }
+    }
+    .all_stop_btn{
+      background-color: #0C70F8;
+      color: #ffffff;
+      // margin-top: 20px;
     }
     .search_box {
       .select_btn {

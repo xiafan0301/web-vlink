@@ -21,34 +21,42 @@
                 <div class="divide"></div>
                 <div class="plan-form-box">
                   <el-form class="plan-form" label-width="90px" :model="item"  size="middle" >
-                    <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                    <el-form-item label="执行部门:" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                       <el-select v-model="item.departmentId" placeholder="请选择执行部门">
                         <el-option label="区域一" value="shanghai"></el-option>
                         <el-option label="区域二" value="beijing"></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                    <el-form-item label="任务名称:"  :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
                       <el-input v-model="item.taskName"></el-input>
                     </el-form-item>
-                    <el-form-item label="任务内容:" :prop="item.taskContent" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                      <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
+                    <el-form-item label="任务内容:"  :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                      <el-input type="textarea" rows="9" v-model="item.taskContent"></el-input>
                     </el-form-item>
                   </el-form>
                 </div>
               </div>
-              <template v-if="taskList.length === (index + 1)">
-                <div class="add-ctc" @click="addTask">
+              <template v-if="!isInitial">
+                <div class="add-ctc" @click="addTask" v-if="taskList.length === (index + 1)">
                   <i class="vl_icon vl_icon_event_8"></i>
                   <span>调度指挥任务添加</span>
                 </div>
               </template>
             </div>
+            <template v-if="isInitial">
+              <div class="plan_add_box">
+                <div class="add-ctc" @click="initAddTask">
+                  <i class="vl_icon vl_icon_event_8"></i>
+                  <span>调度指挥任务添加</span>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
@@ -59,6 +67,7 @@ export default {
   components: { EventBasic },
   data () {
     return {
+      isInitial: true, //  页面初始化进来
       planForm: {
         department: null,
         taskName: null,
@@ -75,6 +84,17 @@ export default {
     }
   },
   methods: {
+    // 第一次添加
+    initAddTask () {
+      this.isInitial = false;
+      const value = {
+        departmentName: null,
+        taskName: null,
+        taskContent: null,
+        departmentId: null
+      }
+      this.taskList.push(value);
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -87,8 +107,42 @@ export default {
     deletePlanBox (index) { // 删除调度方法输入框
       this.taskList.splice(index, 1);
     },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve, reject) => {
+        let arr = [];
+        _this.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    },
     onSubmit () { // 提交-启用预案
-      console.log(this.taskList)
+      let _this = this;
+      _this.judgeData().then(result => {
+        console.log(result);
+        if (result === false) {
+          console.log('未填完')
+        } else {
+          console.log('已填完');
+        }
+      })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }
@@ -174,8 +228,25 @@ export default {
             }
           }
         }
-      }
-      
+        .plan_add_box {
+          width: 49%;
+          height: 480px;
+          background-color: #ffffff;
+          .add-ctc {
+            text-align: center;
+            margin-top: 30%;
+            i {
+              vertical-align: middle;
+              margin-right: 5px;
+              cursor: pointer;
+            }
+            > span {
+              color: #0C70F8;
+              vertical-align: middle;
+            }
+          }
+        }
+      }  
     }
   }
   .operation-footer {

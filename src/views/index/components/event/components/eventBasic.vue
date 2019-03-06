@@ -2,7 +2,7 @@
   <div class="basic-info">
     <div class="header">
       <i class="vl_icon vl_icon_event_4"></i>
-      <span>事件编号：XPZ180724001</span>
+      <span>事件编号：{{basicInfo.eventCode}}</span>
     </div>
     <div class="event-status-img">
       <template v-if="status === 'unhandle'">
@@ -22,64 +22,69 @@
       <div class='basic-list'>
         <div>
           <span class='title'>事件类型：</span>
-          <span class='content'>火灾阿萨达萨达萨达萨达</span>
-          <!-- <span class='content'>{{eventDetailObj.eventTypeName}}</span> -->
+          <!-- <span class='content'>火灾阿萨达萨达萨达萨达</span> -->
+          <span class='content'>{{basicInfo.eventTypeName}}</span>
         </div>
         <div>
           <span class='title'>事件等级：</span>
-          <span class='content'>I级（特大）</span>
-          <!-- <span class='content'>{{eventDetailObj.eventLevelName}}</span> -->
+          <!-- <span class='content'>I级（特大）</span> -->
+          <span class='content'>{{basicInfo.eventLevelName}}</span>
         </div>
         <div>
           <span class='title'>报案时间：</span>
-          <span class='content'>2018-06-07 15:00</span>
-          <!-- <span class='content'>{{eventDetailObj.reportTime}}</span> -->
+          <!-- <span class='content'>2018-06-07 15:00</span> -->
+          <span class='content'>{{basicInfo.reportTime}}</span>
         </div>
       </div>
       <div class='basic-list'>
         <div style='display:flex;align-items: center;'>
           <span class='title'>上报人：</span>
           <div class="content phone_box" style='margin-right:20px;'>
-            <span class='reportUser'>13890809908</span>
-            <div class="phone_dialog">
-              <div>
-                <i class="vl_icon vl_icon_event_14"></i>
-                <span>语音通话</span>
+            <template v-if="status === 'ending' || status === 'ctc_end' || !status">
+              <span class='content'>{{basicInfo.reporterPhone}}</span>
+            </template>
+            <template v-else>
+              <span class='reportUser'>{{basicInfo.reporterPhone}}</span>
+              <div class="phone_dialog">
+                <div>
+                  <i class="vl_icon vl_icon_event_14"></i>
+                  <span>语音通话</span>
+                </div>
+                <div>
+                  <i class="vl_icon vl_icon_event_17"></i>
+                  <span>视频通话</span>
+                </div>
               </div>
-              <div>
-                <i class="vl_icon vl_icon_event_17"></i>
-                <span>视频通话</span>
-              </div>
-            </div>
+            </template>
           </div>
           <!-- <span class='content' style='margin-right:20px;'>{{eventDetailObj.reporterPhone}}</span> -->
           <!-- <a :href="urlDetail + '?eventId=' + this.$route.query.eventId + '&' + userInfoParam()" target="_blank"><div class="relation-person"><i class="el-icon-phone"></i>联系上报人</div></a> -->
         </div>
         <div style='width: 65%'>
           <span class='title'>事发地点：</span>
-          <span class='content'>长沙市创谷工业园，地址如果文字过多，可以多行显示</span>
-          <!-- <span class='content'>{{eventDetailObj.eventAddress}}</span> -->
+          <!-- <span class='content'>长沙市创谷工业园，地址如果文字过多，可以多行显示</span> -->
+          <span class='content'>{{basicInfo.eventAddress}}</span>
         </div>
       </div>
       <div class='basic-list'>
         <div>
           <span class='title'>人员伤亡：</span>
-          <span class='content'>不确定</span>
-          <!-- <template v-if='eventDetailObj.casualties == -1'>
+          <!-- <span class='content'>不确定</span> -->
+          <template v-if='basicInfo.casualties == -1'>
             <span class='content'>不确定</span>
           </template>
-          <template v-else-if='eventDetailObj.casualties == 0'>
+          <template v-else-if='basicInfo.casualties == 0'>
             <span class='content'>无</span>
           </template>
-          <template v-if='eventDetailObj.casualties > 0'>
-            <span class='content'>{{eventDetailObj.casualties}}</span>
-          </template> -->
+          <template v-if='basicInfo.casualties > 0'>
+            <span class='content'>{{basicInfo.casualties}}</span>
+          </template>
         </div>
       </div>
       <div class='basic-list'>
         <div style='width: 100%'>
           <span class='title'>事件情况：</span>
-          <span class='content' style="width: 50%;display:inline-block;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span>
+          <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
           <!-- <span class='content'>{{eventDetailObj.eventDetail}}</span> -->
         </div>
       </div>
@@ -101,15 +106,27 @@
   </div>
 </template>
 <script>
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
-  props: [ 'status' ],
+  props: [ 'status', 'basicInfo' ],
   data () {
     return {
-
+      // basicInfo: {
+      //   eventCode: 'XD111111111111111',
+      //   eventTypeName: '自然灾害',
+      //   eventLevelName: 'V级',
+      //   reportTime: '2019-03-12',
+      //   reporterPhone: '18076543210',
+      //   eventAddress: '湖南省长沙市天心区创谷产业工业园',
+      //   casualties: -1,
+      //   eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      // }
     }
   },
   mounted () {
     console.log(this.status)
+  },
+  methods: {
   }
 }
 </script>
