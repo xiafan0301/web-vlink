@@ -18,21 +18,21 @@
         <!-- 布控信息 -->
         <ul>
           <li>
-            <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">b19344985</span></div>
-            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">短期布控</span></div>
+            <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
+            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType === 1 ? '短期布控' : controlDetail.surveillanceType === 2 ? '长期布控' : '' }}</span></div>
           </li>
           <li>
-            <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">名称默认为布控1</span></div>
-            <div><span class="vl_f_666">布控日期：</span><span class="vl_f_333">2018-11-21 至2018-11-30</span></div>
+            <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
+            <div><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}}-{{controlDetail.surveillanceDateEnd}}</span></div>
           </li>
           <li>
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">一级</span></div>
-            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">10:00:00-12:00:00</span></div>
+            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevelDict[0].enumField}}</span></div>
+            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlTime(controlDetail.surveillancTimeList)}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字多行显示。<span @click="eventDetailDialog = true;">详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">{{'事件内容'}}<span @click="eventDetailDialog = true;">详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（50个）</span></div>
@@ -85,13 +85,13 @@
                           </div>
                           <vue-scroll>
                             <ul v-if="type === '0'" style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.equList">
+                              <template v-for="equ in trackPoint.devList">
                                 <li :key="equ.sid" v-if="equ.type === 'sxt' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                                 <li :key="equ.sid" v-if="equ.type === 'sxt' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
                               </template>
                             </ul>
                             <ul v-else style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.equList">
+                              <template v-for="equ in trackPoint.devList">
                                 <li :key="equ.sid" v-if="equ.type === 'kk' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                                 <li :key="equ.sid" v-if="equ.type === 'kk' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
                               </template>
@@ -277,20 +277,16 @@
 <script>
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
-import {conData} from '../testData.js';
+import {conData, conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
+import {getControlDetail} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
-  props: {
-    state: {
-      type: String,
-      required: true,
-      default: () => {}
-    }
-  },
+  props: ['state', 'controlId'],
   data () {
     return {
-      controlState: null,//布控详情
+      controlState: null,//布控详情状态
+      controlDetail: conDetail,//布控详情
       // 布控对象列表数据
       controlObjList: [
         {id: '1', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
@@ -309,7 +305,7 @@ export default {
       map: null,
       // 追踪点列表数据
       trackPointList: [],
-      equList: [], //设备列表
+      devList: [], //设备列表
       type: '0',// 设备类型
       tid: null,//追踪点列表id
       eid: null,//设备列表id
@@ -335,8 +331,6 @@ export default {
       this.controlState = this.state;
       this.trackPointList = conData;
     })
-    
-    console.log(this.controlState, 'controlState')
   },
   mounted () {
     this.resetMap();
@@ -344,8 +338,35 @@ export default {
       this.$set(f, 'isDropdown', false);
     })
     // this.reset();
+    this.getControlDetail();
   },
   methods: {
+    // 获取布控详情
+    getControlDetail () {
+      getControlDetail(this.controlId).then(res => {
+        if (res && res.data) {
+          this.controlDetail = res.data;
+        }
+      })
+    },
+    // 布控时间转换
+    controlTime (data) {
+      let timeList = data.map(m => {
+        return {
+          startTime: m.startTime,
+          endTime: m.endTime
+        }
+      })
+      let timeStr = '';
+      for (let i = 0; i < timeList.length; i++) {
+        if (i < timeList.length - 2) {
+          timeStr += Object.values(timeList[i]).join('-') + ',';
+        } else {
+          timeStr += Object.values(timeList[i]).join('-');
+        }
+      }
+      return timeStr;
+    },
     skip (type) {
       this.$emit('changePageType', type);
     },
@@ -441,7 +462,7 @@ export default {
       this.type = type;
       this.tid = data.tid;
       if (type === '1') {
-        this.equList = data.kk;
+        this.devList = data.kk;
       }
     },
     // 展开或者闭合设备列表
@@ -453,7 +474,6 @@ export default {
           f.isDropdown = false;
         }
         this.getEquList('0', data);
-        7
       })
     },
     mapMark () {
@@ -461,8 +481,8 @@ export default {
       let data = conData;
       console.log(data, 'data')
       _this.map.clearMap();
-      for (let i = 0; i < data.equList.length; i++) {
-        let obj = data.equList[i];
+      for (let i = 0; i < data.devList.length; i++) {
+        let obj = data.devList[i];
         obj.sid = obj.name + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];

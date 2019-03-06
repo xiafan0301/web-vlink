@@ -17,7 +17,7 @@ export function testApiService(data) {
 /* ========== 可视化 ========== */
 /**
  * getBorders 区域边框描点
- * @param {string} data 区域adcode
+ * @param {string} data 区域adcode0
  */
 export function getBorders(data) {
   return request({
@@ -257,6 +257,53 @@ export function getControlInfoByName(params) {
     url: '/surveillance/byName',
     method: 'get',
     params,
+    mode: ''
+  })
+}
+/**
+ * getControlList 布控列表分页查询接口
+ * @param {object} params
+ */
+export function getControlList(params) {
+  return request({
+    url: '/surveillance/page',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getControlObject 获取所有布控对象
+ * @param {object} params
+ */
+export function getControlObject(params) {
+  return request({
+    url: '/surveillance/object',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getControlDevice 获取所有布控设备
+ * @param {object} params
+ */
+export function getControlDevice(params) {
+  return request({
+    url: '/surveillance/device',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getControlDetail 编辑时根据标识获取所有布控信息
+ * @param {object} params
+ */
+export function getControlDetail(uid) {
+  return request({
+    url: '/surveillance/beforeUpdate/' + uid,
+    method: 'get',
     mode: ''
   })
 }

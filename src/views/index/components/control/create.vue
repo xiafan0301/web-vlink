@@ -111,7 +111,7 @@
     </div>
     <div class="create_f_box">
       <el-button type="primary" @click="toGiveUpDialog = true">返回</el-button>
-      <el-button @click="saveControl('createForm')">保存</el-button>
+      <el-button :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -283,11 +283,14 @@ export default {
               surveillancTimeList: time// 布控时间段
             }
             console.log(JSON.stringify(data) )
+            this.loadingBtn = true;
             addControl(data).then(res => {
               if (res && res.data) {
                 this.$message.success('新增成功');
                 this.$router.push({ name: 'control_manage' });
               }
+            }).finally(() => {
+              this.loadingBtn = false;
             })
           }
         } else {

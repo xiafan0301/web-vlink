@@ -42,104 +42,135 @@
               <el-date-picker
                 placeholder="创建时间"
                 v-model="manageForm.time"
-                type="datetimerange"
+                type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
-                end-placeholder="结束日期">
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item prop="controlObj">
-              <el-input v-model="manageForm.controlObj" placeholder="请输入布控对象搜索"></el-input>
+            <el-form-item prop="controlObjId">
+              <el-select
+                v-model="manageForm.controlObjId"
+                filterable
+                remote
+                reserve-keyword
+                placeholder="请输入对象搜索"
+                :remote-method="getControlObject"
+                :loading="loading">
+                <el-option
+                  v-for="item in controlObjList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item prop="facilityName">
-              <el-input v-model="manageForm.facilityName" placeholder="请输入设备名称搜索"></el-input>
+            <el-form-item prop="facilityId">
+              <el-select
+                v-model="manageForm.facilityId"
+                filterable
+                remote
+                reserve-keyword
+                placeholder="请输入设备名搜索"
+                :remote-method="getControlDevice"
+                :loading="loading">
+                <el-option
+                  v-for="item in facilityNameList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" type="primary">查询</el-button>
+              <el-button class="select_btn" type="primary" @click="getControlList">查询</el-button>
               <el-button class="reset_btn" type="primary" plain @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="table_box">
           <el-table
-            :data="manageList"
+            :data="manageList.list"
             >
             <el-table-column
               fixed
               label="布控编号"
-              prop="eventCode"
+              prop="surveillanceNo"
               :show-overflow-tooltip='true'
               >
             </el-table-column>
             <el-table-column
               label="布控名称"
-              prop="eventType"
+              prop="surveillanceName"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="目标数量"
-              prop="reportUser"
+              prop="num"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="布控日期"
-              prop="idCard"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                {{scope.row.surveillanceDateStart}}-{{scope.row.surveillanceDateEnd}}
+              </template>
             </el-table-column>
             <el-table-column
               label="布控时间"
-              prop="reportTime"
+              prop="time"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="布控状态"
-              prop="state"
               show-overflow-tooltip
               >
               <template slot-scope="scope">
-                <span :class="['manage_state', {'blue': scope.row.state === '0', 'green': scope.row.state === '1', 'gray': scope.row.state === '2' }]"></span>
-                {{scope.row.state === '0' ? '待开始' : scope.row.state === '1' ? '进行中' : scope.row.state === '2' ? '已结束' : ''}}
+                <span :class="['manage_state', {'blue': scope.row.surveillanceStatus === '待开始', 'green': scope.row.surveillanceStatus === '进行中', 'gray': scope.row.surveillanceStatus === '已结束' }]"></span>
+                {{scope.row.surveillanceStatus}}
               </template>
             </el-table-column>
             <el-table-column
               label="关联事件编号"
-              prop="eventAddress"
+              prop="eventNo"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="告警级别"
-              prop="eventAddress"
+              prop="alarmLevel"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="最近更新"
-              prop="eventAddress"
+              prop="updateTime"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
-                <span class="operation_btn" @click="skipIsDetail(scope.row.state)">查看</span>
+                <span class="operation_btn" @click="skipIsDetail(scope.row.surveillanceStatus, scope.row.uid)">查看</span>
                 <!-- 待开始 -->
-                <template v-if="scope.row.state === '0'">
+                <template v-if="scope.row.surveillanceStatus === '待开始'">
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="pageType = 3;">编辑</span>
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="showDialog('delDialog')">删除</span>
                 </template>
                 <!-- 进行中 -->
-                <template v-if="scope.row.state === '1'">
+                <template v-if="scope.row.surveillanceStatus === '进行中'">
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="showDialog('stopDialog')">终止</span>
                 </template>
                 <!-- 已结束 -->
-                <template v-if="scope.row.state === '2'">
+                <template v-if="scope.row.surveillanceStatus === '已结束'">
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="skipIsCreate">复用</span>
                   <span class="operation_wire">|</span>
@@ -154,15 +185,15 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :page-size="manageList.pageSzie"
           layout="total, prev, pager, next, jumper"
-          :total="400">
+          :total="manageList.total">
         </el-pagination>
       </div>
       <div is="delDialog" ref="delDialog"></div>
       <div is="stopDialog" ref="stopDialog"></div>
     </div>
-    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType"></div>
+    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId"></div>
     <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2"></div>
   </div>
 </template>
@@ -171,6 +202,7 @@ import manageDetail from './components/manageDetail.vue';
 import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
+import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -183,21 +215,22 @@ export default {
         state: null,
         rank: null,
         time: null,
-        controlObj: null,
-        facilityName: null
+        controlObjId: null,
+        facilityId: null
       },
+      loading: false,
+      controlObjList: [],//布控对象列表
+      facilityNameList: [],//设备列表
       stateList: [
-        {label: '待开始', value: '0'},
-        {label: '进行中', value: '1'},
-        {label: '已结束', value: '2'}
+        {label: '待开始', value: 0},
+        {label: '进行中', value: 1},
+        {label: '已结束', value: 2}
       ],
       typeList: [
-        {label: '全部', value: 0},
-        {label: '球机', value: 1},
-        {label: '枪机', value: 2}
+        {label: '短期布控', value: 1},
+        {label: '长期布控', value: 2}
       ],
       rankList: [
-        {label: '全部', value: 0},
         {label: '一级', value: 1},
         {label: '二级', value: 2},
         {label: '三级', value: 3},
@@ -205,16 +238,21 @@ export default {
         {label: '五级', value: 5}
       ],
       // 布控管理列表数据
-      manageList: [
-        {state: '0'},
-        {state: '1'},
-        {state: '2'}
-      ],
+      manageList: [],
       // 翻页数据
       currentPage: 1,
       pageSzie: 10,
       pageNum: 1,
+      controlId: null,//布控id
     }
+  },
+  mounted () {
+    const data = this.$route.query;
+    if (data.pageType && data.state) {
+      this.pageType = parseInt(data.pageType);
+      this.state = data.state;
+    }
+    this.getControlList();
   },
   methods: {
     handleSizeChange () {
@@ -230,9 +268,10 @@ export default {
       }
     },
     // 跳转至布控详情
-    skipIsDetail (state) {
+    skipIsDetail (state, uid) {
+      this.state = state === '待开始' ? '0' : state === '进行中' ? '1' : '2';
+      this.controlId = uid;
       this.pageType = 2;
-      this.state = state;
     },
     // 跳转至列表
     changePageType (pageType) {
@@ -244,14 +283,61 @@ export default {
     },
     resetForm () {
       this.$refs['manageForm'].resetFields();
-    }
-  },
-  mounted () {
-    const data = this.$route.query;
-    if (data.pageType && data.state) {
-      this.pageType = parseInt(data.pageType);
-      this.state = data.state;
-    }
+    },
+    // 获取所有布控对象
+    getControlObject () {
+      const params = {
+        name: this.manageForm.controlObjId
+      }
+      getControlObject(params).then(res => {
+        if (res && res.data) {
+          this.controlObjList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.name
+            }
+          });
+        }
+      })
+    },
+    // 获取所有布控设备
+    getControlDevice () {
+      const params = {
+        name: this.manageForm.facilityId
+      }
+      getControlDevice(params).then(res => {
+        if (res && res.data) {
+          this.facilityNameList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.name
+            }
+          });
+        }
+      })
+    },
+    // 获取布控列表
+    getControlList () {
+      const params = {
+        pageSzie: this.pageSzie,
+        pageNum: this.pageNum,
+        orderBy: null,
+        order: null,
+        'where.surveillanceType': this.manageForm.type,//布控类型
+        'where.status': this.manageForm.state,//布控状态
+        'where.level': this.manageForm.rank,//告警级别
+        'where.dateStart': this.manageForm.time && this.manageForm.time[0],//布控开始时间
+        'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
+        'where.surveillanceObjectId': this.manageForm.controlObjId,//布控对象id
+        'where.objType': null,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
+        'where.deviceId': this.manageForm.facilityId//布控设备id
+      }
+      getControlList(params).then(res => {
+        if (res && res.data) {
+          this.manageList = res.data;
+        }
+      })
+    },
   }
 }
 </script>

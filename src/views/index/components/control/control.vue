@@ -134,6 +134,9 @@ export default {
                 justify-content: space-between;
                 background: #fff;
                 color: #666;
+                > span.four{
+                  margin-top: 8px;
+                }
               }
               li.normal{
                 cursor: pointer;
