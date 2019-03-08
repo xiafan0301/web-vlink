@@ -254,7 +254,7 @@ export default {
             }
             > p {
                 position: absolute; top: 25px; z-index: 1;
-                height: 1px;
+                height: 2px;
                 overflow: hidden;
                 background-color: #999;
                 &.pwd_tl_1 {
