@@ -297,13 +297,82 @@ export function getControlDevice(params) {
   })
 }
 /**
- * getControlDetail 编辑时根据标识获取所有布控信息
+ * getControlDetail 布控详情查询接口
  * @param {object} params
  */
 export function getControlDetail(uid) {
   return request({
+    url: '/surveillance/detail/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}
+/**
+ * getControlDetailIsEditor 编辑时根据标识获取所有布控信息
+ * @param {object} params
+ */
+export function getControlDetailIsEditor(uid) {
+  return request({
     url: '/surveillance/beforeUpdate/' + uid,
     method: 'get',
+    mode: ''
+  })
+}
+/**
+ * putControl 编辑布控
+ * @param {object} data
+ */
+export function putControl(data) {
+  return request({
+    url: '/surveillance',
+    method: 'put',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getControlObjList 布控对象列表分页查询
+ * @param {object} params
+ */
+export function getControlObjList(params) {
+  return request({
+    url: '/surveillance/object/page',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * delControl 删除布控
+ * @param {object} params
+ */
+export function delControl(uid) {
+  return request({
+    url: '/surveillance/' + uid,
+    method: 'delete',
+    mode: ''
+  })
+}
+/**
+ * controlArea 布控范围
+ * @param {object} params
+ */
+export function controlArea(uid) {
+  return request({
+    url: '/surveillance/area/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}
+/**
+ * controlStop 终止布控
+
+ * @param {object} params
+ */
+export function controlStop(uid) {
+  return request({
+    url: '/surveillance/stop/' + uid,
+    method: 'put',
     mode: ''
   })
 }

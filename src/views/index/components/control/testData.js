@@ -115,62 +115,24 @@ export const conData = {
 }
 // 布控详情数据模型
 export const conDetail = {
-  "uid": null,
-  "surveillanceNo": null,
-  "surveillanceName": null,
-  "eventId": null,
-  "eventCode": null,
-  "surveillanceType": null,
-  "surveillanceDateStart": null,
-  "surveillanceDateEnd": null,
-  "surveillancTimeList": [
-    {
-      "startTime": null,
-      "endTime": null,
-      "uid": null
-    }
-  ],
-  "alarmLevelDict": [
-    {
-      "enumField": null,
-      "enumValue": null,
-      "sort": null,
-      "selected": true
-    }
-  ],
-  "modelList": [
-    {
-      "modelType": null,
-      "surveillanceObjectDtoList": [
-        {
-          "objId": null,
-          "objType": null,
-          "photoUrl": null,
-          "uid": null
-        }
-      ],
-      "pointDtoList": [
-        {
-          "address": null,
-          "longitude": null,
-          "latitude": null,
-          "devList": [
-            {
-              "deviceId": null,
-              "trackId": null,
-              "uid": null,
-              "deviceName": null
-            }
-          ],
-          "radius": null,
-          "deviceChara": null,
-          "groupId": null,
-          "groupName": null,
-          "uid": null
-        }
-      ],
-      "carNumberInfo": null,
-      "uid": null
-    }
-  ]
+  alarmLevel: null,
+  alarmList: null,
+  alarmNum: null,
+  createTime: null,
+  duration: null,
+  eventDetail: null,
+  eventId: null,
+  objectList: [],
+  objectNum: null,
+  runningEndTime: null,
+  runningStartTime: null,
+  surveillanceDateEnd: null,
+  surveillanceDateStart: null,
+  surveillanceName: null,
+  surveillanceNo: null,
+  surveillanceStatus: null,
+  terminationReason: null,
+  time: null,
+  type: null,
+  updateTime: null
 }

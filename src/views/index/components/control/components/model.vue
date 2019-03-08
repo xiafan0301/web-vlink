@@ -2,7 +2,7 @@
   <el-form :ref="mapMId" :model="modelForm">
     <!-- 图片上传 -->
     <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
+      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
       <div class="pic_format">
         <div @click="createSelDialog = true;">从库中选择</div>
       </div>
@@ -165,14 +165,14 @@ import uploadPic from './uploadPic.vue';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId', 'modelType', 'checkList'],
+  props: ['pType', 'mapId', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
   data () {
     return {
       modelForm: {
         licenseNum: [],
         limitation: [],
         points: [
-          {point: '九峰安置小区'}
+          {point: null}
         ],
       },
       circleIndex: null, //圆形覆盖物的下标
@@ -237,10 +237,31 @@ export default {
     },
     modelType (val) {
       this.modelMType = val
+    },
+    modelDataOne () {
+      if (this.modelDataOne) {
+        this.getModelDataOne();
+      }
+    },
+    modelDataTwo () {
+      if (this.modelDataTwo) {
+        this.getModelDataTwo();
+      }
+    },
+    modelDataThree () {
+      if (this.modelDataThree) {
+        this.getModelDataThree();
+      }
+    },
+    modelDataFour () {
+      if (this.modelDataFour) {
+        this.getModelDataFour();
+      }
     }
   },
   mounted () {
     this.resetMap();
+  
   },
   methods: {
     checkPlateNumber (value) {
@@ -302,6 +323,7 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
+      console.log(this.fileList)
     },
     // 验证人员追踪的必填项
     validateModelOne () {
@@ -319,20 +341,24 @@ export default {
                 address: t.address,
                 deviceChara: t.deviceChara,
                 groupId: t .groupId,
+                groupName: null,//编辑参数
                 latitude: t .latitude,
                 longitude: t .longitude,
                 radius: t.radius,
                 devList: t.devList.filter(f => f.isSelected === true).map(m => {
                   return {
-                    deviceId: m.uid
+                    deviceId: m.uid,
+                    deviceName: m.equName//编辑参数
                   }
                 })
               }
             });
+            console.log(this.fileList, 'this.fileList')
             this.fileList = this.fileList.map((m, i) => {
               return {
                 objId: i,
-                objType: 3
+                objType: 3,
+                photoUrl: m.url//编辑参数
               }
             })
             const data = {
@@ -593,7 +619,6 @@ export default {
       for (let i = 0; i < data.devList.length; i++) {
         let offSet = [-20.5, -48];
         let _obj = data.devList[i];
-        console.log(_obj)
         _obj.sid = _obj.equName + '_' + i;
         if (_obj.longitude > 0 && _obj.latitude > 0) {
           let _content = null;
@@ -666,6 +691,13 @@ export default {
     // 标记地图范围，圆形覆盖物
     mapCircle (index) {
       let _this = this;
+      if (_this.scopeRadius < 0) {
+        _this.$message.error('半径为正数');
+        return false;
+      } else if (_this.scopeRadius > 20) {
+        _this.$message.error('半径不可超过20千米');
+        return false;
+      }
       _this.circleIndex = index;
       // 移除重复添加的追踪点
       let circleObj = _this.selAreaCircle.find(f => f.index === index);
@@ -759,7 +791,7 @@ export default {
       let obj = {
         tid: i, 
         trackPointName: type === 1 ? ('范围00'  + i) : (_this.modelForm.limitation.length > 0 && _this.modelForm.limitation[0]),
-        address: '范围00' + i,
+        address: type === 1 ? ('范围00'  + i) : (_this.modelForm.limitation.length > 0 && _this.modelForm.limitation[0]),
         deviceChara: _this.features,//设备特性
         groupId: 1,//设备组id,先写死
         devList: []//设备列表
@@ -902,6 +934,90 @@ export default {
       _this.map = map;
       _this.mapMark();
       _this.trackPointList = [];
+    },
+    // 回填人员追踪数据
+    getModelDataOne() {
+      console.log(1111)
+      // 回填图片
+      this.fileList = this.modelDataOne.surveillanceObjectDtoList.map(() => {
+        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      });
+      // 回填追踪点表单
+      this.modelForm.points = this.modelDataOne.pointDtoList.map((m) => {
+        return {point: m.address};
+      })
+      // 回填半径
+      this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
+      // 回填设备特性
+      this.features = this.modelDataOne.pointDtoList[0].deviceChara;
+      this.modelDataOne.pointDtoList.forEach((m, index) => {
+        // 回填追踪点列表
+        this.markLocation(this.mapMId, m.address, index)
+      })
+    },
+    // 回填车辆追踪数据
+    getModelDataTwo() {
+      console.log(2222)
+      // 回填图片
+      // this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(m => m.photoUrl);
+      // 回填车牌信息
+      if (this.modelDataTwo.carNumberInfo.includes(',')) {
+        this.modelForm.licenseNum = this.modelDataTwo.carNumberInfo.split(',');
+      } else {
+        this.modelForm.licenseNum = [this.modelDataTwo.carNumberInfo];
+      }
+      // 回填追踪点表单
+      this.modelForm.points = this.modelDataTwo.pointDtoList.map((m) => {
+        return {point: m.address};
+      })
+      // 回填半径
+      this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
+      // 回填设备特性
+      this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
+      this.modelDataTwo.pointDtoList.forEach((m, index) => {
+        // 回填追踪点列表
+        this.markLocation(this.mapMId, m.address, index)
+      })
+    },
+    // 回填越界分析数据
+    getModelDataThree () {
+      console.log(3333)
+      // 回填图片
+      // this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(m => m.photoUrl);
+      // 回填车牌信息
+      if (this.modelDataThree.carNumberInfo.includes(',')) {
+        this.modelForm.licenseNum = this.modelDataThree.carNumberInfo.split(',');
+      } else {
+        this.modelForm.licenseNum = [this.modelDataThree.carNumberInfo];
+      }
+      // 回填越界分析的受限范围
+      this.modelForm.limitation = this.modelDataThree.pointDtoList.map(m => m.address);
+      // 回填设备特性
+      this.features = this.modelDataThree.pointDtoList[0].deviceChara;
+
+      this.modelDataThree.pointDtoList.forEach(() => {
+        // 回填受限范围
+        this.getLimitedScope();
+      })
+    },
+    // 回填范围分析数据
+    getModelDataFour () {
+      console.log(4444)
+      // 回填图片
+      // this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(m => m.photoUrl);
+      // 回填车牌信息
+      if (this.modelDataFour.carNumberInfo.includes(',')) {
+        this.modelForm.licenseNum = this.modelDataFour.carNumberInfo.split(',');
+      } else {
+        this.modelForm.licenseNum = [this.modelDataFour.carNumberInfo];
+      }
+      // 回填设备特性
+      this.features = this.modelDataFour.pointDtoList[0].deviceChara;
+
+      this.modelDataFour.pointDtoList.forEach(() => {
+        // 回填范围分析
+
+      })
     }
   }
 }

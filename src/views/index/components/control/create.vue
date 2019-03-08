@@ -12,7 +12,7 @@
     </div>
     <div :class="['create_box', {'editor': type !== 2}]">
       <!-- 编辑布控时出现 -->
-      <div v-if="type === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">b19344985</span></div>
+      <div v-if="type === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one">
@@ -97,21 +97,24 @@
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" mapId="mapOne" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" mapId="mapOne" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDataOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" mapId="mapTwo" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" mapId="mapTwo" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDataTwo"></div>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree"></div>
+              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDataThree"></div>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" mapId="mapFour" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" mapId="mapFour" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDataFour"></div>
             </div>
           </div>
         </el-form>
       </div>
     </div>
     <div class="create_f_box">
-      <el-button type="primary" @click="toGiveUpDialog = true">返回</el-button>
-      <el-button :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <!-- 新增布控 -->
+      <el-button v-if=" type !== 2" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <!-- 编辑布控 -->
+      <el-button v-if="type === 2" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
+      <el-button  @click="toGiveUpDialog = true">取消</el-button>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -128,11 +131,11 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getControlInfoByName, addControl} from '@/views/index/api/api.js';
+import {getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
-  props: ['createType'],
+  props: ['createType', 'controlId'],
   data () {
     return {
       type: null,//页面类型
@@ -163,26 +166,40 @@ export default {
         ],
       },
       // 分析模型数据
-      checkList: ['人员追踪'],
-      modelType: '1',//模型类型序号
+      checkList: [],//多选
+      modelType: null,//模型类型序号
       modelDataOne: null,// 人员追踪数据
       modelDataTwo: null,// 车辆追踪数据
       modelDataThree: null,// 越界分析数据
       modelDataFour: null,// 范围分析数据
       // 弹出框参数
       toGiveUpDialog: false,
-      loadingBtn: false
+      loadingBtn: false,
+      // 布控编辑参数
+      controlDetail: {},
+      // modelDataOne: null,//传给子组件的回填数据-人员追踪
+      // modelDataTwo: null,//传给子组件的回填数据-车辆追踪
+      // modelDataThree: null,//传给子组件的回填数据-越界分析
+      // modelDataFour: null,//传给子组件的回填数据-范围分析
     }
   },
   created () {
     // 编辑页-2
     if (this.createType) {
       this.type = this.createType;
+      if (this.type === 2) {
+        this.getControlDetailIsEditor();
+      }
+    // 新增页-1
+    } else {
+      this.checkList = ['人员追踪'];
+      this.modelType = '1';
     }
     // 复用页-3
     if (this.$route.query.createType) {
       this.type = parseInt(this.$route.query.createType);
     }
+    console.log(this.createType)
   },
   methods: {
     // 新增时间段
@@ -216,6 +233,12 @@ export default {
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
+      // 编辑布控时，只有布控名称做出改动以后才会异步判断是否存在
+      if (this.controlDetail.surveillanceName) {
+        if (this.createForm.controlName === this.controlDetail.surveillanceName) {
+          return false;
+        }
+      }
       const name = this.Trim(this.createForm.controlName, 'g');
       if (name) {
         getControlInfoByName({name}).then(res => {
@@ -338,6 +361,124 @@ export default {
       console.table(data);
       this.modelDataFour  = data;
     },
+    // 根据布控id获取布控详情，用于回填数据
+    getControlDetailIsEditor () {
+      getControlDetailIsEditor(this.controlId).then(res => {
+        if (res && res.data) {
+          this.controlDetail = res.data;
+          this.createForm.controlName = this.controlDetail.surveillanceName;
+          this.createForm.event = this.controlDetail.eventCode;
+          this.createForm.controlType = this.controlDetail.surveillanceType;
+          this.createForm.controlDate = [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlRank = parseInt(this.controlDetail.alarmLevelDict[0].enumValue);
+          this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
+            return {
+              startTime: new Date(2019, 9, 10, m.startTime.split(':')[0], m.startTime.split(':')[1]),
+              endTime: new Date(2019, 9, 10, m.endTime.split(':')[0], m.endTime.split(':')[1])
+            }
+          });
+          this.checkList = [];
+          // 勾选分析模型
+          this.controlDetail.modelList.forEach(f => {
+            if (f.modelType === 1) {
+              this.checkList.push('人员追踪');
+            } else if (f.modelType === 2) {
+              this.checkList.push('车辆追踪');
+            } else if (f.modelType === 3) {
+              this.checkList.push('越界分析');
+            } else if (f.modelType === 4) {
+              this.checkList.push('范围分析');
+            }
+          })
+          // 高亮第一个有数据的模型
+          if (this.checkList.length > 0) {
+            if (this.checkList[0] === '人员追踪') {
+              this.modelType = '1';
+            } else if (this.checkList[0] === '车辆追踪') {
+              this.modelType = '2';
+            } else if (this.checkList[0] === '越界分析') {
+              this.modelType = '3';
+            } else if (this.checkList[0] === '范围分析') {
+              this.modelType = '4';
+            }
+          }
+          this.modelList = this.controlDetail.modelList;
+          this.modelDataOne = this.modelList.find(f => f.modelType === 1);
+          this.modelDataTwo = this.modelList.find(f => f.modelType === 2);
+          this.modelDataThree = this.modelList.find(f => f.modelType === 3);
+          this.modelDataFour = this.modelList.find(f => f.modelType === 4);
+        }
+      })
+    },
+    // 编辑布控
+    putControl (formName) {
+      // 点击保存按钮时清除没勾选的模型类别的验证结果
+      if (!this.checkList.some(s => s === '人员追踪')) {
+        this.$refs.mapOne.reset();
+      } else if (!this.checkList.some(s => s === '车辆追踪')) {
+        this.$refs.mapTwo.reset();
+      }
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          //验证所选时间段是否出现重叠
+          const isThrough = this.isOverlap();
+          if (!isThrough) {
+            return false;
+          } else {
+            console.log('验证通过');
+            const modelList = [];
+            this.checkList.forEach(f => {
+              if (f === '人员追踪') {
+                this.$refs.mapOne.validateModelOne();
+                modelList.push(this.modelDataOne);
+              } else if (f === '车辆追踪') {
+                this.$refs.mapTwo.validateModelTwo();
+                modelList.push(this.modelDataTwo);
+              } else if (f === '越界分析') {
+                this.$refs.mapThree.validateModelThree();
+                modelList.push(this.modelDataThree);
+              } else if (f === '范围分析') {
+                this.$refs.mapFour.validateModelFour();
+                modelList.push(this.modelDataFour);
+              }
+            })
+            if (this.checkList.some(s => s === '人员追踪') && !this.modelDataOne) {
+              return false;
+            } else if (this.checkList.some(s => s === '车辆追踪') && !this.modelDataTwo) {
+              return false;
+            } else if (this.checkList.some(s => s === '越界分析') && !this.modelDataThree) {
+              return false;
+            } else if (this.checkList.some(s => s === '范围分析') && !this.modelDataFour) {
+              return false;
+            }
+            const time = this.createForm.periodTime.map(m => {
+              return {
+                startTime: formatDate(m.startTime, 'HH:mm:ss'),
+                endTime: formatDate(m.endTime, 'HH:mm:ss')
+              }
+            })
+            this.controlDetail.alarmLevelDict[0].enumValue = this.createForm.controlRank;
+            this.controlDetail.eventId = parseInt(this.createForm.event);
+            this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];
+            this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];
+            this.controlDetail.surveillanceName = this.createForm.controlName;
+            this.controlDetail.surveillanceType = this.createForm.controlType;
+            this.controlDetail.modelList = modelList;
+            this.controlDetail.surveillancTimeList = time;
+            console.log(JSON.stringify(this.controlDetail) )
+            this.loadingBtn = true;
+            putControl(this.controlDetail).then(res => {
+              this.$message.success('编辑成功');
+              this.$router.push({ name: 'control_manage' });
+            }).finally(() => {
+              this.loadingBtn = false;
+            })
+          }
+        } else {
+          return false;
+        }
+      })
+    }
   }
 }
 </script>

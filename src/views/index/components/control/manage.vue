@@ -115,7 +115,7 @@
             </el-table-column>
             <el-table-column
               label="布控日期"
-              show-overflow-tooltip
+              :show-overflow-tooltip="true"
               >
               <template slot-scope="scope">
                 {{scope.row.surveillanceDateStart}}-{{scope.row.surveillanceDateEnd}}
@@ -160,21 +160,21 @@
                 <!-- 待开始 -->
                 <template v-if="scope.row.surveillanceStatus === '待开始'">
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="pageType = 3;">编辑</span>
+                  <span class="operation_btn" @click="skipIsEditor(scope.row.uid)">编辑</span>
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="showDialog('delDialog')">删除</span>
+                  <span class="operation_btn" @click="showDialog('delDialog', scope.row.uid)">删除</span>
                 </template>
                 <!-- 进行中 -->
                 <template v-if="scope.row.surveillanceStatus === '进行中'">
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="showDialog('stopDialog')">终止</span>
+                  <span class="operation_btn" @click="showDialog('stopDialog', scope.row.uid)">终止</span>
                 </template>
                 <!-- 已结束 -->
                 <template v-if="scope.row.surveillanceStatus === '已结束'">
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="skipIsCreate">复用</span>
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="showDialog('delDialog')">删除</span>
+                  <span class="operation_btn" @click="showDialog('delDialog', scope.row.uid)">删除</span>
                 </template>
               </template>
             </el-table-column>
@@ -190,11 +190,11 @@
           :total="manageList.total">
         </el-pagination>
       </div>
-      <div is="delDialog" ref="delDialog"></div>
-      <div is="stopDialog" ref="stopDialog"></div>
+      <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
+      <div is="stopDialog" ref="stopDialog" :controlId="controlId"></div>
     </div>
-    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId"></div>
-    <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2"></div>
+    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
+    <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId"></div>
   </div>
 </template>
 <script>
@@ -262,16 +262,22 @@ export default {
 
     },
     // 显示弹出框
-    showDialog (formName) {
+    showDialog (formName, uid) {
       if (this.$refs[formName]) {
         this.$refs[formName].reset();
       }
+      this.controlId = uid;
     },
     // 跳转至布控详情
     skipIsDetail (state, uid) {
       this.state = state === '待开始' ? '0' : state === '进行中' ? '1' : '2';
       this.controlId = uid;
       this.pageType = 2;
+    },
+    // 跳转至布控编辑
+    skipIsEditor (uid) {
+      this.pageType = 3;
+      this.controlId = uid;
     },
     // 跳转至列表
     changePageType (pageType) {
@@ -318,6 +324,8 @@ export default {
     },
     // 获取布控列表
     getControlList () {
+      console.log(11111)
+      this.pageType = 1;//在布控详情页里删除布控，需要跳转到布控列表页
       const params = {
         pageSzie: this.pageSzie,
         pageNum: this.pageNum,

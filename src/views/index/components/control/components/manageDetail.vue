@@ -19,45 +19,45 @@
         <ul>
           <li>
             <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
-            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType === 1 ? '短期布控' : controlDetail.surveillanceType === 2 ? '长期布控' : '' }}</span></div>
+            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.type === 1 ? '短期布控' : controlDetail.type === 2 ? '长期布控' : '' }}</span></div>
           </li>
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
-            <div><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}}-{{controlDetail.surveillanceDateEnd}}</span></div>
+            <div><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} - {{controlDetail.surveillanceDateEnd}}</span></div>
           </li>
           <li>
-            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevelDict[0].enumField}}</span></div>
-            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlTime(controlDetail.surveillancTimeList)}}</span></div>
+            <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
+            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">{{'事件内容'}}<span @click="eventDetailDialog = true;">详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="eventDetailDialog = true;">详情</span></div>
         </div>
         <div class="manage_d_c_o">
-          <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（50个）</span></div>
+          <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
           <div>
-            <div class="manage_d_c_o_i" v-for="item in controlObjList" :key="item.id">
-              <img :src="item.url" alt="">
-              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.controlObjName}}</span></p>
+            <div class="manage_d_c_o_i" v-for="item in controlDetail.objectList" :key="item.id">
+              <img :src="item.photoUrl" alt="">
+              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.name}}</span></p>
               <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
             </div>
           </div>
           <el-pagination
             style="align-self: flex-start;"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
+            @size-change="handleSizeChangeObj"
+            @current-change="handleCurrentChangeObj"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-size="18"
             layout="total, prev, pager, next, jumper"
-            :total="400">
+            :total="controlDetail.objectNum">
           </el-pagination>
         </div>
         <div :class="['vl_control_state', controlState === '0' ? 'vl_control_s' : controlState === '1' ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
-          <div class="manage_d_s_t" @click="dpType = '布控范围'">
+          <div class="manage_d_s_t" @click="controlArea">
             <div>布控范围</div>
             <i class="el-icon-arrow-up" v-show="dpType !== '布控范围'"></i>
             <i class="el-icon-arrow-down" v-show="dpType === '布控范围'"></i>
@@ -206,8 +206,8 @@
             </div>
             <el-pagination
               style="align-self: flex-start;"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
+              @size-change="handleSizeChangeRes"
+              @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
               :page-sizes="[100, 200, 300, 400]"
               :page-size="100"
@@ -270,7 +270,7 @@
         </vue-scroll>
       </el-dialog>
     </div>
-    <div is="delDialog" ref="delDialog"></div>
+    <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <div is="stopDialog" ref="stopDialog"></div>
   </div>
 </template>
@@ -279,7 +279,7 @@ import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conData, conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
-import {getControlDetail} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
   props: ['state', 'controlId'],
@@ -287,20 +287,6 @@ export default {
     return {
       controlState: null,//布控详情状态
       controlDetail: conDetail,//布控详情
-      // 布控对象列表数据
-      controlObjList: [
-        {id: '1', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '2', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '3', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '4', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '5', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '6', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '7', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '8', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '9', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '10', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'},
-        {id: '11', url: '//via.placeholder.com/160x160', controlObjName: '马司小易', controlReason: '失踪儿童'}
-      ],
       // 地图参数
       map: null,
       // 追踪点列表数据
@@ -312,8 +298,10 @@ export default {
       dpType: null,//展开类型
        // 翻页数据
       currentPage: 1,
-      pageSzie: 10,
-      pageNum: 1,
+      pageSzieObj: 18,
+      pageNumObj: 1,
+      pageSzieRes: 8,
+      pageNumObjRes: 1,
       // 实时监控设备列表
       situList: [
         {name: '设备1', id: '01', src: require('../../../../../assets/video/video.mp4'), index: 0},
@@ -349,24 +337,6 @@ export default {
         }
       })
     },
-    // 布控时间转换
-    controlTime (data) {
-      let timeList = data.map(m => {
-        return {
-          startTime: m.startTime,
-          endTime: m.endTime
-        }
-      })
-      let timeStr = '';
-      for (let i = 0; i < timeList.length; i++) {
-        if (i < timeList.length - 2) {
-          timeStr += Object.values(timeList[i]).join('-') + ',';
-        } else {
-          timeStr += Object.values(timeList[i]).join('-');
-        }
-      }
-      return timeStr;
-    },
     skip (type) {
       this.$emit('changePageType', type);
     },
@@ -379,6 +349,9 @@ export default {
       if (this.$refs[formName]) {
         this.$refs[formName].reset();
       }
+    },
+    getControlList () {
+      this.$emit('getControlList');
     },
     dragstart (e, index) {
       // 使其半透明
@@ -556,12 +529,46 @@ export default {
       _this.map = map;
       _this.mapMark();
     },
-    handleSizeChange () {
+    // 获取布控范围
+    controlArea () {
+      this.dpType = '布控范围';
+      controlArea(this.controlId).then(() => {
+
+      })
+    },
+    // 布控对象列表分页查询
+    getControlObjList () {
+      const params = {
+        pageNum: this.pageNumObj,
+        pageSzie: this.pageSzieObj,
+        orderBy: null,
+        order: null,
+        'where.surveillanceId': this.controlId
+      }
+      getControlObjList(params).then(res => {
+        if (res && res.data) {
+          this.controlDetail.objectList = res.data.list;
+        }
+      })
+    },
+    // 布控对象列表分页
+    handleSizeChangeObj (size) {
+      this.pageSzieObj = size;
+      this.getControlObjList();
+    },
+    // 布控对象列表分页
+    handleCurrentChangeObj (page) {
+      this.pageNumObj = page;
+      this.getControlObjList();
+    },
+    // 布控结果列表分页
+    handleSizeChangeRes () {
 
     },
-    handleCurrentChange () {
+    // 布控结果列表分页
+    handleCurrentChangeRes () {
 
-    }
+    },
   }
 }
 </script>
