@@ -57,8 +57,6 @@
               </div>
             </template>
           </div>
-          <!-- <span class='content' style='margin-right:20px;'>{{eventDetailObj.reporterPhone}}</span> -->
-          <!-- <a :href="urlDetail + '?eventId=' + this.$route.query.eventId + '&' + userInfoParam()" target="_blank"><div class="relation-person"><i class="el-icon-phone"></i>联系上报人</div></a> -->
         </div>
         <div style='width: 65%'>
           <span class='title'>事发地点：</span>
@@ -89,44 +87,34 @@
         </div>
       </div>
       <div class='basic-list img-content'>
-        <!-- <div style="width:100%;">
-          <div class='img-list' style="width:auto" id="imgs" v-show="imgList && imgList.length > 0"></div>
-          <div class='video-list' style="width:auto" v-show="videoList && videoList.length > 0">
-            <video id="my-video" class="video-js" controls preload="auto" width="100" height="100"
-            data-setup="{}" v-for="(item, index) in videoList" :key="'item'+index">
-              <source :src="item.url" type="video/mp4">
-              <source :src="item.url" type="video/webm">
-              <source :src="item.url" type="video/ogg">
-              <p class="vjs-no-js"> 您的浏览器不支持 video 标签。</p>
-            </video>
-          </div>
-        </div> -->
+        <img
+          v-for="(item, index) in basicInfo.imgList"
+          :key="index"
+          :src="item.src"
+          @click="handleBigImg(index)"
+        />
       </div>
     </div>
   </div>
 </template>
 <script>
-import { getEventDetail } from '@/views/index/api/api.js';
 export default {
   props: [ 'status', 'basicInfo' ],
   data () {
     return {
-      // basicInfo: {
-      //   eventCode: 'XD111111111111111',
-      //   eventTypeName: '自然灾害',
-      //   eventLevelName: 'V级',
-      //   reportTime: '2019-03-12',
-      //   reporterPhone: '18076543210',
-      //   eventAddress: '湖南省长沙市天心区创谷产业工业园',
-      //   casualties: -1,
-      //   eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      // }
     }
   },
   mounted () {
     console.log(this.status)
   },
   methods: {
+    // 图片放大
+    handleBigImg (index) {
+      console.log('oooooo')
+      const isShowImg = true;
+      const imgIndex = index;
+      this.$emit('emitHandleImg', isShowImg, imgIndex);
+    }
   }
 }
 </script>
@@ -221,6 +209,13 @@ export default {
     .img-content {
       width: 100%;
       padding-left: 80px;
+      img {
+        width: 80px;
+        height: 80px;
+        border-radius: 4px;
+        margin: 0 5px 5px 0;
+        cursor: pointer;
+      }
     }
   }
 }

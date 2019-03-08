@@ -58,9 +58,15 @@
       <div class="divide"></div>
     </div>
     <div class="content-box">
-      <div class="select-checkbox">
-        <span>自动审核政务人员的</span>
-        <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
+      <div class="button_box">
+        <div class="add_event_btn" @click="skipAddEventPage">
+          <span>+</span>
+          <span>新增事件</span>
+        </div>
+        <div class="select-checkbox">
+          <span>自动审核政务人员的</span>
+          <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
+        </div>
       </div>
       <el-table
         class="audit_table"
@@ -218,6 +224,9 @@ export default {
 
     },
     handleCurrentChange () {},
+    skipAddEventPage () { // 跳到新增事件页面
+      this.$router.push({name: 'add_event'});
+    },
     skipDetailPage (obj) { // 跳转至事件审核详情页
       if (obj.status === '待审核') {
         this.$router.push({name: 'unaudit_event'});
@@ -292,12 +301,32 @@ export default {
   }
   .content-box {
     padding: 0 20px;
-    .select-checkbox {
-      text-align: right;
-      padding: 5px 0;
-      span {
-        color: #333333;
-        margin-right: 5px;
+    .button_box {
+      display: flex;
+      justify-content: space-between;
+      .add_event_btn {
+        width: 108px;
+        height: 40px;
+        background-color: #0C70F8;
+        color: #ffffff;
+        font-size: 14px;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        span:nth-child(1) {
+          font-size: 16px;
+        }
+        span:nth-child(2) {
+          margin-left: 5px;
+        }
+      }
+      .select-checkbox {
+        padding: 5px 0;
+        span {
+          color: #333333;
+          margin-right: 5px;
+        }
       }
     }
     .audit_table {

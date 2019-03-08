@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>事件审核</el-breadcrumb-item>
+        <el-breadcrumb-item>受理核实</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box">
@@ -22,7 +22,19 @@
                 </li>
                 <li>
                   <span>上报人:</span>
-                  <span class="phone">{{addEventForm.userName}}</span>
+                  <div class="phone_box" style='margin-right:20px;'>
+                    <span class="reportUser">{{addEventForm.userName}}</span>
+                    <div class="phone_dialog">
+                      <div>
+                        <i class="vl_icon vl_icon_event_14"></i>
+                        <span>语音通话</span>
+                      </div>
+                      <div>
+                        <i class="vl_icon vl_icon_event_17"></i>
+                        <span>视频通话</span>
+                      </div>
+                    </div>
+                  </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
@@ -324,6 +336,7 @@ export default {
           font-size: 14px;
           > li {
             height: 35px;
+            display: flex;
             > span:nth-child(1) {
               padding-right: 10px;
               color: #666666;
@@ -343,6 +356,42 @@ export default {
               }
               &.phone {
                 color: #0C70F8;
+              }
+            }
+            .phone_box {
+              position: relative;
+              padding-right: 10px;
+              &:hover {
+                .phone_dialog {
+                  display: block;
+                }
+              }
+              .reportUser {
+                color: #0C70F8;
+                cursor: pointer;
+              }
+              .phone_dialog {
+                display: none;
+                position: absolute;
+                background-color: #ffffff;
+                right: -30px;
+                bottom: 30px;
+                box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.15);
+                >div {
+                  padding: 5px 10px;
+                  display: flex;
+                  align-items: center;
+                  cursor: pointer;
+                  >span {
+                    color: #333333;
+                    font-size: 12px;
+                  }
+                  &:hover {
+                    >span {
+                      color: #0C70F8;
+                    }
+                  }
+                }
               }
             }
           }

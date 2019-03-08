@@ -2,7 +2,7 @@
   <div class="add_event">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">受理核实</el-breadcrumb-item>
         <el-breadcrumb-item>新增事件</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -267,7 +267,7 @@ export default {
       }
       return isImg && isLtTenM;
     },
-    handleImgNumber (files) { // 图片超出最大个数限制
+    handleImgNumber () { // 图片超出最大个数限制
       this.isImgNumber = true;
     },
     handlePictureCardPreview () {},

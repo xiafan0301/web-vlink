@@ -110,7 +110,7 @@ export default {
     // 判断taskList是否都填写完
     judgeData () {
       let _this = this;
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         let arr = [];
         _this.taskList.map((item, index) => {
           if (!item.departmentId || !item.taskName || !item.taskContent) {

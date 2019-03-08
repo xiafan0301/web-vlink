@@ -171,7 +171,7 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
+          console.log(valid);
         }
       })
     },
