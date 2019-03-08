@@ -58,10 +58,10 @@
       <div class="divide"></div>
     </div>
     <div class="table_box">
-      <div class="add_event_btn" @click="skipAddEventPage">
+      <!-- <div class="add_event_btn" @click="skipAddEventPage">
         <span>+</span>
         <span>新增事件</span>
-      </div>
+      </div> -->
       <el-table
         class="event_table"
         :data="eventList"
@@ -267,9 +267,9 @@ export default {
       this.pagination.pageSize = val;
       // this.getEventData();
     },
-    skipAddEventPage () { // 跳到新增事件页面
-      this.$router.push({name: 'add_event'});
-    },
+    // skipAddEventPage () { // 跳到新增事件页面
+    //   this.$router.push({name: 'add_event'});
+    // },
     // 跳至事件详情页
     skipEventDetailPage (obj) {
       if (obj.eventStatus === '待处理') {
@@ -284,6 +284,7 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
+      console.log(obj);
       this.$router.push({path: '/control/create'});
     },
     getOneMonth () { // 设置默认一个月
@@ -342,23 +343,23 @@ export default {
   }
   .table_box {
     padding: 0 20px;
-    .add_event_btn {
-      width: 108px;
-      height: 40px;
-      background-color: #0C70F8;
-      color: #ffffff;
-      font-size: 14px;
-      line-height: 40px;
-      text-align: center;
-      border-radius: 3px;
-      cursor: pointer;
-      span:nth-child(1) {
-        font-size: 16px;
-      }
-      span:nth-child(2) {
-        margin-left: 5px;
-      }
-    }
+    // .add_event_btn {
+    //   width: 108px;
+    //   height: 40px;
+    //   background-color: #0C70F8;
+    //   color: #ffffff;
+    //   font-size: 14px;
+    //   line-height: 40px;
+    //   text-align: center;
+    //   border-radius: 3px;
+    //   cursor: pointer;
+    //   span:nth-child(1) {
+    //     font-size: 16px;
+    //   }
+    //   span:nth-child(2) {
+    //     margin-left: 5px;
+    //   }
+    // }
     .event_table {
       margin-top: 8px;
       // padding-bottom: 20px;

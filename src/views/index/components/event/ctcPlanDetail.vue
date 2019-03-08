@@ -122,7 +122,7 @@
         <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="delPlanDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="delPlanDialog = false">确认</el-button>
+          <el-button class="operation_btn function_btn" @click="sureDeletePlan">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -147,6 +147,10 @@ export default {
     // 返回
     back () {
       this.$router.back(-1);
+    },
+    // 确认删除预案
+    sureDeletePlan () {
+      this.$router.push({name: 'event_ctcplan'});
     }
   }
 }

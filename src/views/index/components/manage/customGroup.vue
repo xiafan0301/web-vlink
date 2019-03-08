@@ -32,15 +32,15 @@
                 <ul class="child_temp_detail">
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                 </ul>
               </div>
@@ -60,39 +60,39 @@
                 <ul class="child_temp_detail">
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li class="isProhibit">
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_15"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_15"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                 </ul>
               </div>
@@ -112,15 +112,15 @@
                 <ul class="child_temp_detail">
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                   <li>
                     <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
+                    <!-- <i class="vl_icon vl_icon_manage_6"></i> -->
                   </li>
                 </ul>
               </div>

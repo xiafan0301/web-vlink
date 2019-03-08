@@ -2,7 +2,7 @@
   <div class="add_event">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">受理核实</el-breadcrumb-item>
         <el-breadcrumb-item>新增事件</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -77,7 +77,7 @@
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -148,6 +148,7 @@ export default {
   },
   mounted () {
     let _this = this;
+    _this.resetMap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -179,6 +180,16 @@ export default {
     _this.mapMark(_this.addEventForm);
   },
   methods: {
+    resetMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
    // 地图标记
     mapMark (obj) {
       let _this = this;
@@ -256,7 +267,7 @@ export default {
       }
       return isImg && isLtTenM;
     },
-    handleImgNumber (files) { // 图片超出最大个数限制
+    handleImgNumber () { // 图片超出最大个数限制
       this.isImgNumber = true;
     },
     handlePictureCardPreview () {},

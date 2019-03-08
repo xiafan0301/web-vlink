@@ -595,6 +595,11 @@
   top: 350px;
   left: 450px;
 }
+/*添加预案--上传文件的提示样式*/
+.upload_file_tip {
+  top: 320px;
+  left: 460px;
+}
 .el-message--success, .el-message--warning {
   background:#000000;
   box-shadow:0px 4px 12px 0px rgba(0,0,0,0.15);

@@ -2,7 +2,7 @@
   <div class="vl_event clearfix">
     <ul class="vl_smenu">
       <li>
-        <router-link :to="{name: 'event_audit'}">事件审核</router-link>
+        <router-link :to="{name: 'event_audit'}">受理核实</router-link>
       </li>
       <li>
         <router-link :to="{name: 'event_manage'}">事件管理</router-link>
