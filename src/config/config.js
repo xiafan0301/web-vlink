@@ -11,6 +11,12 @@ const oDomains = {
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
+    // 用户登录权限
+    user: {
+        dev: 'http://apidev.aorise.org/vlink-user/userService',
+        test: 'http://apidev.aorise.org/vlink-user/userService',
+        prod: 'http://apidev.aorise.org/vlink-user/userService',
+    },
     // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',

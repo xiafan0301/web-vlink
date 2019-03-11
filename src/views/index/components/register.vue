@@ -29,6 +29,7 @@
 <script>
 import headerNormal from '@/components/headerNormal.vue';
 import {validatePhone} from '@/utils/validator.js';
+import {smsCode, userInfo} from '../api/api.user.js';
 export default {
     components: {headerNormal},
     data () {
@@ -90,14 +91,27 @@ export default {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     this.regLoading = true;
-                    setTimeout(() => {
+                    userInfo({
+                        organId: 0,
+                        userEmail: this.regForm.pass,
+                        userIdcard: '',
+                        userMobile: this.regForm.mobile,
+                        userName: '',
+                        userSex: 0 
+                    }).then((res) => {
+                        console.log('userInfo res：', res);
+                    })
+                    .catch((error) => {
+                        console.log('userInfo error：', error);
+                    });
+                    /* setTimeout(() => {
                         this.regLoading = false;
                         this.$message({
                             message: '注册成功，请登录',
                             type: 'success'
                         });
                         this.$router.push({name: 'index'});
-                    }, 1000);
+                    }, 1000); */
                 } else {
                     return false;
                 }
@@ -113,6 +127,15 @@ export default {
                 } else {
                     this.regCodeDis = true;
                     this.regCodeTip = this.regCodeTime;
+                    smsCode({
+                        msgType: 1, // 注册短信
+                        userMobile: this.regForm.mobile
+                    }).then((res) => {
+                        console.log('smsCode res：', res);
+                    })
+                    .catch((error) => {
+                        console.log('smsCode error：', error);
+                    });
                     this.regCodeVal = setInterval(() => {
                         if (this.regCodeTime > 0) {
                             this.regCodeTime -= 1;
