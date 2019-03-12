@@ -14,14 +14,16 @@
         v-model="stopReason">
       </el-input>
       <div slot="footer">
-        <el-button @click="stopManageDialog = false">确定终止</el-button>
+        <el-button @click="controlStop">确定终止</el-button>
         <el-button :loading="loadingBtn" type="primary" @click="stopManageDialog = false">暂不终止</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import {controlStop} from '@/views/index/api/api.js';
 export default {
+  props: ['controlId'],
   data () {
     return {
       stopManageDialog: false,
@@ -33,6 +35,18 @@ export default {
     reset () {
       this.stopReason = null;
       this.stopManageDialog = true;
+    },
+    // 终止布控
+    controlStop () {
+      const data = {
+        terminationReason: this.stopReason,
+        uid: this.controlId
+      }
+      controlStop(data).then(res => {
+        this.stopManageDialog = false;
+        this.$message.success('终止成功');
+        this.$emit('getControlList');
+      })
     }
   }
 }

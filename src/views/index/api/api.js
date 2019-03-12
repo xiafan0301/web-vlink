@@ -366,13 +366,25 @@ export function controlArea(uid) {
 }
 /**
  * controlStop 终止布控
-
  * @param {object} params
  */
-export function controlStop(uid) {
+export function controlStop(data) {
   return request({
-    url: '/surveillance/stop/' + uid,
+    url: '/surveillance/stop/' + data.uid,
     method: 'put',
+    data,
+    mode: ''
+  })
+}
+/**
+ * repertorySel 从库中选择
+ * @param {object} params
+ */
+export function repertorySel(params) {
+  return request({
+    url: '/surveillance/repertory',
+    method: 'get',
+    params,
     mode: ''
   })
 }

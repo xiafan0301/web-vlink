@@ -65,12 +65,12 @@
               <!-- 人员追踪、车辆追踪、范围分析 -->
               <el-collapse-transition v-if="modelMType !== '3'">
                 <div v-show="trackPoint.isDropdown">
-                  <div class="equ_m">
+                  <!-- <div class="equ_m">
                     <div @click="changeEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
                     <div @click="changeEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
-                  </div>
+                  </div> -->
                   <vue-scroll>
-                    <ul v-if="type === '0'" style="max-height: 346px;">
+                    <ul style="max-height: 346px;">
                       <template v-for="equ in trackPoint.devList">
                         <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 'sxt'">
                           <span :class="{'four': modelMType === '4'}">{{equ.equName}}<br/><span v-if="modelMType === '1' || modelMType === '2'" class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
@@ -82,7 +82,7 @@
                         </li>
                       </template>
                     </ul>
-                    <ul v-else style="max-height: 346px;">
+                    <!-- <ul v-else style="max-height: 346px;">
                       <template v-for="equ in trackPoint.devList">
                         <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 'kk' && equ.isNormal">
                           <span :class="{'four': modelMType === '4'}">{{equ.equName}}<br/><span v-if="modelMType === '1' || modelMType === '2'" class="vl_f_666">距追踪点001 <span style="color: orange;">1.4km</span></span></span>
@@ -93,7 +93,7 @@
                           </div>
                         </li>
                       </template>
-                    </ul>
+                    </ul> -->
                   </vue-scroll>
                 </div>  
               </el-collapse-transition>
@@ -140,13 +140,54 @@
         width="482px"
         top="40vh"
         title="选择目标">
-        <el-select value-key="uid" v-model="targetId" filterable placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;">
-          <el-option
-            v-for="item in targetIdList"
-            :key="item.uid"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
+        <el-select v-model="targetId" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;">
+          <!-- 只有成员对象类型 -->
+          <template v-if="surveillanceObjectDtoList && surveillanceObjectDtoList.length > 0 && !groups">
+            <el-option
+              v-for="item in surveillanceObjectDtoList"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+              <div style="display: flex;line-height: 16px;">
+                <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <div>
+                  <p style="font-size: 12px;">姓名：<span>{{item.label}}</span></p>
+                  <p style="font-size: 12px;">证件号码：<span>{{item.idNo}}</span></p>
+                </div>
+              </div>
+            </el-option>
+          </template>
+          <!-- 只有组类型 -->
+          <template v-if="groups && groups.length > 0 && !surveillanceObjectDtoList">
+            <el-option
+              v-for="item in groups"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </template>
+          <!-- 成员对象类型都有 -->
+          <template v-if="surveillanceObjectDtoList && surveillanceObjectDtoList.length > 0 && !groups">
+            <el-option
+              v-for="item in groups"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+            <el-option
+              v-for="item in surveillanceObjectDtoList"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+              <div style="display: flex;line-height: 16px;">
+                <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <div>
+                  <p style="font-size: 12px;">姓名：<span>{{item.label}}</span></p>
+                  <p style="font-size: 12px;">证件号码：<span>{{item.idNo}}</span></p>
+                </div>
+              </div>
+            </el-option>
+          </template>
         </el-select>
         <div slot="footer">
           <el-button @click="createSelDialog = false">取消</el-button>
@@ -161,6 +202,7 @@ import {conData} from '../testData.js';
 // import {random14} from '../../../../../utils/util.js';
 import {_mapData} from '../../../../../utils/data.js';
 import {objDeepCopy} from '@/utils/util.js';
+import {repertorySel} from '@/views/index/api/api.js';
 import uploadPic from './uploadPic.vue';
 export default {
   components: {uploadPic},
@@ -216,12 +258,15 @@ export default {
         {label: '车辆识别', value: 2}
       ],//设备特性列表
       scopeRadius: 5, // 范围半径
-      lnglat: null, // 圆形覆盖物坐标
+      lnglat: null, // 圆形覆盖物圆心坐标
+      polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
       // 从库中选择模态框参数
       targetId: null,
-      targetIdList: [],
+      groups: [],//组列表
+      surveillanceObjectDtoList: [],//成员对象列表
       createSelDialog: false,
+      loading: false,
       loadingBtn: false,
       // 上传参数
       fileList: []
@@ -264,6 +309,39 @@ export default {
   
   },
   methods: {
+    // 从库中选择
+    repertorySel () {
+      const params = {
+        key: 'a',
+        modelType: parseInt(this.modelMType)
+      }
+      repertorySel(params).then(res => {
+        if (res && res.data) {
+          if (res.data.groups && res.data.groups.length > 0) {
+            this.groups = res.data.surveillanceObjectDtoList.map(m => {
+              return {
+                label: m.name,
+                value: m.objId,
+                idNo: m.idNo,
+                objType: m.objType,
+                photoUrl: m.photoUrl
+              }
+            });
+          }
+          if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
+            this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
+              return {
+                label: m.name,
+                value: m.objId,
+                idNo: m.idNo,
+                objType: m.objType,
+                photoUrl: m.photoUrl
+              }
+            });
+          }
+        }
+      })
+    },
     checkPlateNumber (value) {
       let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
       if (value && !reg.test(value)) {
@@ -345,7 +423,7 @@ export default {
                 latitude: t .latitude,
                 longitude: t .longitude,
                 radius: t.radius,
-                devList: t.devList.filter(f => f.isSelected === true).map(m => {
+                devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
                   return {
                     deviceId: m.uid,
                     deviceName: m.equName//编辑参数
@@ -390,12 +468,14 @@ export default {
                 address: t.address,
                 deviceChara: t.deviceChara,
                 groupId: t .groupId,
+                groupName: null,//编辑参数
                 latitude: t .latitude,
                 longitude: t .longitude,
                 radius: t.radius,
-                devList: t.devList.filter(f => f.isSelected === true).map(m => {
+                devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
                   return {
-                    deviceId: m.uid
+                    deviceId: m.uid,
+                    deviceName: m.equName//编辑参数
                   }
                 })
               }
@@ -403,11 +483,12 @@ export default {
             this.fileList = this.fileList.map((m, i) => {
               return {
                 objId: i,
-                objType: 3
+                objType: 3,
+                photoUrl: m.url//编辑参数
               }
             })
             const data = {
-              carNumberInfo: this.modelForm.licenseNum,
+              carNumberInfo: this.modelForm.licenseNum.join(','),
               modelType: 2,
               pointDtoList: pointDtoList,
               surveillanceObjectDtoList: this.fileList
@@ -433,10 +514,11 @@ export default {
           return {
             address: t.address,
             deviceChara: t.deviceChara,
+            groupName: null,//编辑参数
             groupId: t .groupId,
-            devList: t.devList.filter(f => f.isSelected === true).map(m => {
+            bayonetList: t.devList.filter(f => (f.isSelected === true && f.type === 'kk')).map(m => {
               return {
-                deviceId: m.uid
+                bayonetId: m.uid
               }
             })
           }
@@ -444,7 +526,8 @@ export default {
         this.fileList = this.fileList.map((m, i) => {
           return {
             objId: i,
-            objType: 3
+            objType: 3,
+            photoUrl: m.url//编辑参数
           }
         })
         const data = {
@@ -472,10 +555,14 @@ export default {
           return {
             address: t.address,
             deviceChara: t.deviceChara,
+            latitude: t .latitude,
+            longitude: t .longitude,
+            groupName: null,//编辑参数
             groupId: t .groupId,
-            devList: t.devList.filter(f => f.isSelected === true).map(m => {
+            devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
               return {
-                deviceId: m.uid
+                deviceId: m.uid,
+                deviceName: m.equName//编辑参数
               }
             })
           }
@@ -483,7 +570,8 @@ export default {
         this.fileList = this.fileList.map((m, i) => {
           return {
             objId: i,
-            objType: 3
+            objType: 3,
+            photoUrl: m.url//编辑参数
           }
         })
         const data = {
@@ -533,10 +621,10 @@ export default {
       _this.trackPointList.splice(index, 1);
     },
     // 切换设备类型获得设备列表数据
-    changeEquList (type, data) {
-      this.type = type;
-      this.tid = data.tid;
-    },
+    // changeEquList (type, data) {
+    //   this.type = type;
+    //   this.tid = data.tid;
+    // },
     // 展开或者闭合设备列表
     dropdown (data) {
       this.trackPointList.length > 0 && this.trackPointList.map(f => {
@@ -545,7 +633,7 @@ export default {
         } else {
           f.isDropdown = false;
         }
-        this.changeEquList('0', data);
+        // this.changeEquList('0', data);
       })
     },
     // 获得人员追踪、车辆追踪 选取范围内的设备列表数据
@@ -793,6 +881,8 @@ export default {
         trackPointName: type === 1 ? ('范围00'  + i) : (_this.modelForm.limitation.length > 0 && _this.modelForm.limitation[0]),
         address: type === 1 ? ('范围00'  + i) : (_this.modelForm.limitation.length > 0 && _this.modelForm.limitation[0]),
         deviceChara: _this.features,//设备特性
+        latitude: type === 1 ? _this.polygonLnglat.map(m => m.lat).join(',') : '',
+        longitude: type === 1 ? _this.polygonLnglat.map(m => m.lng).join(',') : '',
         groupId: 1,//设备组id,先写死
         devList: []//设备列表
       }
@@ -844,6 +934,7 @@ export default {
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
         console.log('drawPaths e', e); // 获取路径/范围
         console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
+        _this.polygonLnglat = null;
         setTimeout(() => {
           _this.selAreaRest(true);
           let polygon = new window.AMap.Polygon({
@@ -856,10 +947,34 @@ export default {
             path: e.obj.getPath(),
             zIndex: 12
           });
+          // 移入覆盖物生成删除小图标
+          let offSet = [-10, -10];
+          polygon.on('mouseover', function() {
+            let _marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [e.obj.getPath()[0].lng, e.obj.getPath()[0].lat],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '',
+              // 自定义点标记覆盖物内容
+              content: `<div class="el-icon-error" style="color: red;"></div>`
+            });
+            // 点击小图标移除覆盖物和删除小图标
+            _marker.on('click', function() {
+              _this.map.remove(polygon);
+              _this.map.remove(_marker);
+              // 移除覆盖物内对应的设备
+              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude === e.obj.getPath()[0].lat);
+              console.log(_this.trackPointList)
+              _this.trackPointList.splice(delObjIndex, 1);
+            })
+            _marker.setMap(_this.map);
+          })
           _this.selAreaPolygon = polygon;
           _this.selAreaAble = true;
           _this.getScopeEquList(polygon, 1);
         }, 100);
+        _this.polygonLnglat = e.obj.getPath();
       });
       _this.selArea();
     },
@@ -927,7 +1042,7 @@ export default {
       let _this = this;
       let map = new window.AMap.Map(_this.mapMId, {
         zoom: 12, // 级别27.898681, longitude: 110.690875
-        center: [110.690875, 27.898681], // 中心点坐标[112.97503, 28.09358]
+        center: [112.97503, 28.09358], // 中心点坐标[112.97503, 28.09358]
         // viewMode: '3D' // 使用3D视图
       });
       map.setMapStyle('amap://styles/whitesmoke');
@@ -942,82 +1057,140 @@ export default {
       this.fileList = this.modelDataOne.surveillanceObjectDtoList.map(() => {
         return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
       });
-      // 回填追踪点表单
-      this.modelForm.points = this.modelDataOne.pointDtoList.map((m) => {
-        return {point: m.address};
-      })
-      // 回填半径
-      this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
-      // 回填设备特性
-      this.features = this.modelDataOne.pointDtoList[0].deviceChara;
-      this.modelDataOne.pointDtoList.forEach((m, index) => {
-        // 回填追踪点列表
-        this.markLocation(this.mapMId, m.address, index)
-      })
+      if (this.modelDataOne.pointDtoList.length > 0) {
+        // 回填追踪点表单
+        this.modelForm.points = this.modelDataOne.pointDtoList.map((m) => {
+          return {point: m.address};
+        })
+        // 回填半径
+        this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
+        // 回填设备特性
+        this.features = this.modelDataOne.pointDtoList[0].deviceChara;
+        this.modelDataOne.pointDtoList.forEach((m, index) => {
+          // 回填追踪点列表
+          this.markLocation(this.mapMId, m.address, index)
+        })
+      }
     },
     // 回填车辆追踪数据
     getModelDataTwo() {
       console.log(2222)
-      // 回填图片
-      // this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(m => m.photoUrl);
+      this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(() => {
+        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      });
       // 回填车牌信息
       if (this.modelDataTwo.carNumberInfo.includes(',')) {
         this.modelForm.licenseNum = this.modelDataTwo.carNumberInfo.split(',');
       } else {
         this.modelForm.licenseNum = [this.modelDataTwo.carNumberInfo];
       }
-      // 回填追踪点表单
-      this.modelForm.points = this.modelDataTwo.pointDtoList.map((m) => {
-        return {point: m.address};
-      })
-      // 回填半径
-      this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
-      // 回填设备特性
-      this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
-      this.modelDataTwo.pointDtoList.forEach((m, index) => {
-        // 回填追踪点列表
-        this.markLocation(this.mapMId, m.address, index)
-      })
+      if (this.modelDataTwo.pointDtoList.length > 0) {
+        // 回填追踪点表单
+        this.modelForm.points = this.modelDataTwo.pointDtoList.map((m) => {
+          return {point: m.address};
+        })
+        // 回填半径
+        this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
+        // 回填设备特性
+        this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
+        this.modelDataTwo.pointDtoList.forEach((m, index) => {
+          // 回填追踪点列表
+          this.markLocation(this.mapMId, m.address, index)
+        })
+      }
     },
     // 回填越界分析数据
     getModelDataThree () {
       console.log(3333)
-      // 回填图片
-      // this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(m => m.photoUrl);
+      this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(() => {
+        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      });
       // 回填车牌信息
       if (this.modelDataThree.carNumberInfo.includes(',')) {
         this.modelForm.licenseNum = this.modelDataThree.carNumberInfo.split(',');
       } else {
         this.modelForm.licenseNum = [this.modelDataThree.carNumberInfo];
       }
-      // 回填越界分析的受限范围
-      this.modelForm.limitation = this.modelDataThree.pointDtoList.map(m => m.address);
-      // 回填设备特性
-      this.features = this.modelDataThree.pointDtoList[0].deviceChara;
+      if (this.modelDataThree.pointDtoList.length > 0) {
+        // 回填越界分析的受限范围
+        this.modelForm.limitation = this.modelDataThree.pointDtoList.map(m => m.address);
+        // 回填设备特性
+        this.features = this.modelDataThree.pointDtoList[0].deviceChara;
 
-      this.modelDataThree.pointDtoList.forEach(() => {
-        // 回填受限范围
-        this.getLimitedScope();
-      })
+        this.modelDataThree.pointDtoList.forEach(() => {
+          // 回填受限范围
+          this.getLimitedScope();
+        })
+      }
     },
     // 回填范围分析数据
     getModelDataFour () {
       console.log(4444)
-      // 回填图片
-      // this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(m => m.photoUrl);
+      this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(() => {
+        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      });
       // 回填车牌信息
       if (this.modelDataFour.carNumberInfo.includes(',')) {
         this.modelForm.licenseNum = this.modelDataFour.carNumberInfo.split(',');
       } else {
         this.modelForm.licenseNum = [this.modelDataFour.carNumberInfo];
       }
-      // 回填设备特性
-      this.features = this.modelDataFour.pointDtoList[0].deviceChara;
-
-      this.modelDataFour.pointDtoList.forEach(() => {
-        // 回填范围分析
-
-      })
+      if (this.modelDataFour.pointDtoList.length > 0) {
+        // 回填设备特性
+        this.features = this.modelDataFour.pointDtoList[0].deviceChara;
+        let _this = this;
+        _this.modelDataFour.pointDtoList.forEach((f) => {
+          // 回填范围分析
+          let polygon = new window.AMap.Polygon({
+            map: _this.map,
+            strokeColor: '#FA453A',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FA453A',
+            fillOpacity: 0.2, 
+            path: _this.changeData(f),
+            zIndex: 12
+          });
+          // 移入覆盖物生成删除小图标
+          let offSet = [-10, -10];
+          polygon.on('mouseover', function() {
+            let _marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [f.longitude.split(',')[0], f.latitude.split(',')[0]],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '',
+              // 自定义点标记覆盖物内容
+              content: `<div class="el-icon-error" style="color: red;"></div>`
+            });
+            // 点击小图标移除覆盖物和删除小图标
+            _marker.on('click', function() {
+              _this.map.remove(polygon);
+              _this.map.remove(_marker);
+              // 移除覆盖物内对应的设备
+              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude === f.latitude);
+              console.log(_this.trackPointList)
+              _this.trackPointList.splice(delObjIndex, 1);
+            })
+            _marker.setMap(_this.map);
+          })
+          _this.polygonLnglat = _this.changeData(f);
+          if (_this.polygonLnglat) {
+            _this.getScopeEquList(polygon, 1);
+          }
+        })
+      }
+     
+    },
+    // 转换坐标
+    changeData (data) {
+      let one = data.latitude.split(',');
+      let two = data.longitude.split(',');
+      let arr = [];
+      for (let i = 0; i < one.length; i++) {
+        arr.push(new window.AMap.LngLat(two[i], one[i]));
+      }
+      return arr;
     }
   }
 }

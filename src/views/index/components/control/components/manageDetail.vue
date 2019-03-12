@@ -12,7 +12,7 @@
     <div class="manage_d_box">
       <div class="manage_d_title">
         <div class="vl_f_16 vl_f_333">基本信息</div>
-        <div class="vl_f_12 vl_f_666">创建于2018-11-1 11:00:00 ；更新于2018-11-1 11:00:00</div>
+        <div class="vl_f_12 vl_f_666">创建于{{controlDetail.createTime}} ；更新于{{controlDetail.updateTime}}</div>
       </div>
       <div class="manage_d_content">
         <!-- 布控信息 -->
@@ -73,27 +73,27 @@
                 <div>
                   <div class="vl_f_333 top">布控设备（12）</div>
                   <div class="dp_box">
-                    <div v-for="trackPoint in trackPointList" :key="trackPoint.tid">
+                    <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
                       <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
-                        <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.trackPointName}}</span>
+                        <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.address}}</span>
                       </div>
                       <el-collapse-transition>
                         <div v-show="trackPoint.isDropdown">
                           <div class="equ_m">
-                            <div @click="getEquList('0', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '0'}">摄像头</div>
-                            <div @click="getEquList('1', trackPoint)" :class="{'active': tid === trackPoint.tid && type === '1'}">卡口</div>
+                            <div @click="getEquList('0', trackPoint)" :class="{'active': devId === trackPoint.uid && type === '0'}">摄像头（{{devNum}}）</div>
+                            <div @click="getEquList('1', trackPoint)" :class="{'active': devId === trackPoint.uid && type === '1'}">卡口（{{bayonetNum}}）</div>
                           </div>
                           <vue-scroll>
-                            <ul v-if="type === '0'" style="max-height: 280px;">
+                            <ul v-if="type === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li :key="equ.sid" v-if="equ.type === 'sxt' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <li :key="equ.sid" v-if="equ.type === 'sxt' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
+                                <li :key="equ.uid"><span>{{equ.uid}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <!-- <li :key="equ.uid"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li> -->
                               </template>
                             </ul>
-                            <ul v-else style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.devList">
-                                <li :key="equ.sid" v-if="equ.type === 'kk' && equ.isNormal"><span>{{equ.equName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <li :key="equ.sid" v-if="equ.type === 'kk' && !equ.isNormal"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li>
+                            <ul v-if="type === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;">
+                              <template v-for="equ in trackPoint.bayonetList">
+                                <li :key="equ.uid"><span>{{equ.uid}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <!-- <li :key="equ.uid"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li> -->
                               </template>
                             </ul>
                           </vue-scroll>
@@ -117,9 +117,9 @@
         <div class="manage_d_c_situ" v-if="controlState !== '0'">
           <div class="situ_title">运行情况</div>
           <div class="situ_time">
-            <div><span>开始时间：</span><span>2018-11-21 10:00:00</span></div>
-            <div v-if="controlState === '2'"><span>结束时间：</span><span>2018-11-21 10:00:00</span></div>
-            <div><span>持续时间：</span><span>110:00:00</span></div>
+            <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
+            <div v-if="controlState === '2'"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
+            <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === '1'">
             <div class="situ_top" @click="dpType = '运行情况'">
@@ -271,7 +271,7 @@
       </el-dialog>
     </div>
     <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
-    <div is="stopDialog" ref="stopDialog"></div>
+    <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
 <script>
@@ -291,10 +291,11 @@ export default {
       map: null,
       // 追踪点列表数据
       trackPointList: [],
+      devNum: null,//摄像头数量
+      bayonetNum: null,//卡口数量
       devList: [], //设备列表
       type: '0',// 设备类型
-      tid: null,//追踪点列表id
-      eid: null,//设备列表id
+      devId: null,//设备id
       dpType: null,//展开类型
        // 翻页数据
       currentPage: 1,
@@ -317,14 +318,11 @@ export default {
   created () {
     this.$nextTick(() => {
       this.controlState = this.state;
-      this.trackPointList = conData;
+      // this.trackPointList = conData;
     })
   },
   mounted () {
     this.resetMap();
-    this.trackPointList.map(f => {
-      this.$set(f, 'isDropdown', false);
-    })
     // this.reset();
     this.getControlDetail();
   },
@@ -433,15 +431,15 @@ export default {
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
       this.type = type;
-      this.tid = data.tid;
-      if (type === '1') {
-        this.devList = data.kk;
-      }
+      this.devId = data.uid;
+      // if (type === '1') {
+      //   this.devList = data.kk;
+      // }
     },
     // 展开或者闭合设备列表
     dropdown (data) {
       this.trackPointList.map(f => {
-        if (data.tid === f.tid) {
+        if (data.uid === f.uid) {
           f.isDropdown = !f.isDropdown;
         } else {
           f.isDropdown = false;
@@ -450,9 +448,24 @@ export default {
       })
     },
     mapMark () {
-      let _this = this, hoverWindow = null;
+      let _this = this, hoverWindow = null//, data;
+      // // 组装右边点标记数据
+      // let devList = [];
+      // _this.trackPointList.forEach(f => {
+      //   if (f.devList && f.devList.length > 0) {
+      //     devList = [...devList, ...f.devList];
+      //   }
+      // })
+      // devList.forEach(f => f.type = 1);//设置属性type:1为摄像头，2为卡口
+      // let bayonetList = [];
+      // _this.trackPointList.forEach(f => {
+      //   if (f.bayonetList && f.bayonetList.length > 0) {
+      //     bayonetList = [...bayonetList, ...f.bayonetList];
+      //   }
+      // })
+      // bayonetList.forEach(f => f.type = 2);//设置属性type:1为摄像头，2为卡口
+      // data = [...devList, ...bayonetList];
       let data = conData;
-      console.log(data, 'data')
       _this.map.clearMap();
       for (let i = 0; i < data.devList.length; i++) {
         let obj = data.devList[i];
@@ -532,8 +545,17 @@ export default {
     // 获取布控范围
     controlArea () {
       this.dpType = '布控范围';
-      controlArea(this.controlId).then(() => {
-
+      controlArea(this.controlId).then(res => {
+        if (res && res.data) {
+          this.devNum = res.data.devNum;
+          this.bayonetNum = res.data.bayonetNum;
+          this.trackPointList = res.data.trackingPointList;
+          this.trackPointList.map(f => {
+            this.$set(f, 'isDropdown', false);
+          });
+          this.mapMark();
+        }
+        
       })
     },
     // 布控对象列表分页查询

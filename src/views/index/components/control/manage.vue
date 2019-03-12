@@ -172,7 +172,7 @@
                 <!-- 已结束 -->
                 <template v-if="scope.row.surveillanceStatus === '已结束'">
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skipIsCreate">复用</span>
+                  <span class="operation_btn" @click="skipIsCreate(scope.row.uid)">复用</span>
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="showDialog('delDialog', scope.row.uid)">删除</span>
                 </template>
@@ -191,10 +191,10 @@
         </el-pagination>
       </div>
       <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
-      <div is="stopDialog" ref="stopDialog" :controlId="controlId"></div>
+      <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
     </div>
     <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
-    <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId"></div>
+    <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
 <script>
@@ -284,8 +284,8 @@ export default {
       this.pageType = pageType;
     },
     // 跳转至新建布控页-复用
-    skipIsCreate () {
-      this.$router.push({ name: 'control_create', query: {createType: 3} });
+    skipIsCreate (uid) {
+      this.$router.push({ name: 'control_create', query: {controlId: uid, createType: 3} });
     },
     resetForm () {
       this.$refs['manageForm'].resetFields();

@@ -97,13 +97,13 @@
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" mapId="mapOne" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDataOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" mapId="mapOne" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" mapId="mapTwo" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDataTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" mapId="mapTwo" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDataThree"></div>
+              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" mapId="mapFour" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDataFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" mapId="mapFour" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
             </div>
           </div>
         </el-form>
@@ -177,10 +177,10 @@ export default {
       loadingBtn: false,
       // 布控编辑参数
       controlDetail: {},
-      // modelDataOne: null,//传给子组件的回填数据-人员追踪
-      // modelDataTwo: null,//传给子组件的回填数据-车辆追踪
-      // modelDataThree: null,//传给子组件的回填数据-越界分析
-      // modelDataFour: null,//传给子组件的回填数据-范围分析
+      modelDOne: null,//传给子组件的回填数据-人员追踪
+      modelDTwo: null,//传给子组件的回填数据-车辆追踪
+      modelDThree: null,//传给子组件的回填数据-越界分析
+      modelDFour: null,//传给子组件的回填数据-范围分析
     }
   },
   created () {
@@ -188,7 +188,7 @@ export default {
     if (this.createType) {
       this.type = this.createType;
       if (this.type === 2) {
-        this.getControlDetailIsEditor();
+        this.getControlDetailIsEditor(this.controlId);
       }
     // 新增页-1
     } else {
@@ -198,8 +198,8 @@ export default {
     // 复用页-3
     if (this.$route.query.createType) {
       this.type = parseInt(this.$route.query.createType);
+      this.getControlDetailIsEditor(this.$route.query.controlId);
     }
-    console.log(this.createType)
   },
   methods: {
     // 新增时间段
@@ -309,7 +309,7 @@ export default {
             this.loadingBtn = true;
             addControl(data).then(res => {
               if (res && res.data) {
-                this.$message.success('新增成功');
+                this.$message.success(this.type === 3 ? '复用成功' : '新增成功');
                 this.$router.push({ name: 'control_manage' });
               }
             }).finally(() => {
@@ -362,14 +362,14 @@ export default {
       this.modelDataFour  = data;
     },
     // 根据布控id获取布控详情，用于回填数据
-    getControlDetailIsEditor () {
-      getControlDetailIsEditor(this.controlId).then(res => {
+    getControlDetailIsEditor (controlId) {
+      getControlDetailIsEditor(controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
-          this.createForm.controlName = this.controlDetail.surveillanceName;
+          this.createForm.controlName = this.type === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
           this.createForm.event = this.controlDetail.eventCode;
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = (this.type === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = parseInt(this.controlDetail.alarmLevelDict[0].enumValue);
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
@@ -403,10 +403,10 @@ export default {
             }
           }
           this.modelList = this.controlDetail.modelList;
-          this.modelDataOne = this.modelList.find(f => f.modelType === 1);
-          this.modelDataTwo = this.modelList.find(f => f.modelType === 2);
-          this.modelDataThree = this.modelList.find(f => f.modelType === 3);
-          this.modelDataFour = this.modelList.find(f => f.modelType === 4);
+          this.modelDOne = this.modelList.find(f => f.modelType === 1);
+          this.modelDTwo = this.modelList.find(f => f.modelType === 2);
+          this.modelDThree = this.modelList.find(f => f.modelType === 3);
+          this.modelDFour = this.modelList.find(f => f.modelType === 4);
         }
       })
     },
@@ -469,7 +469,7 @@ export default {
             this.loadingBtn = true;
             putControl(this.controlDetail).then(res => {
               this.$message.success('编辑成功');
-              this.$router.push({ name: 'control_manage' });
+              this.$emit('getControlList');
             }).finally(() => {
               this.loadingBtn = false;
             })
