@@ -4,7 +4,7 @@
     <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
       <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
       <div class="pic_format">
-        <div @click="createSelDialog = true;">从库中选择</div>
+        <div @click="popSel">从库中选择</div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelMType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelMType !== '4'}">
@@ -140,19 +140,27 @@
         width="482px"
         top="40vh"
         title="选择目标">
-        <el-select v-model="targetId" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;">
+        <el-select v-model="targetObj" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;" @change="gettargetId">
           <!-- 只有成员对象类型 -->
           <template v-if="surveillanceObjectDtoList && surveillanceObjectDtoList.length > 0 && !groups">
             <el-option
               v-for="item in surveillanceObjectDtoList"
               :key="item.uid"
               :label="item.label"
-              :value="item.value">
-              <div style="display: flex;line-height: 16px;">
+              :value="item">
+              <!-- 人像 -->
+              <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 1">
                 <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
                 <div>
                   <p style="font-size: 12px;">姓名：<span>{{item.label}}</span></p>
                   <p style="font-size: 12px;">证件号码：<span>{{item.idNo}}</span></p>
+                </div>
+              </div>
+              <!-- 车像 -->
+              <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 2">
+                <img :src="item.vehicleImagePath" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <div>
+                  <p style="font-size: 12px;">车牌号码：<span>{{item.vehicleNumber}}</span></p>
                 </div>
               </div>
             </el-option>
@@ -163,27 +171,35 @@
               v-for="item in groups"
               :key="item.uid"
               :label="item.label"
-              :value="item.value">
+              :value="item">
             </el-option>
           </template>
-          <!-- 成员对象类型都有 -->
-          <template v-if="surveillanceObjectDtoList && surveillanceObjectDtoList.length > 0 && !groups">
+          <!-- 成员对象、组都有 -->
+          <template v-if="surveillanceObjectDtoList && surveillanceObjectDtoList.length > 0 && groups && groups.length > 0">
             <el-option
               v-for="item in groups"
               :key="item.uid"
               :label="item.label"
-              :value="item.value">
+              :value="item">
             </el-option>
             <el-option
               v-for="item in surveillanceObjectDtoList"
               :key="item.uid"
               :label="item.label"
-              :value="item.value">
-              <div style="display: flex;line-height: 16px;">
+              :value="item">
+              <!-- 人像 -->
+              <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 1">
                 <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
                 <div>
                   <p style="font-size: 12px;">姓名：<span>{{item.label}}</span></p>
                   <p style="font-size: 12px;">证件号码：<span>{{item.idNo}}</span></p>
+                </div>
+              </div>
+              <!-- 车像 -->
+              <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 2">
+                <img :src="item.vehicleImagePath" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <div>
+                  <p style="font-size: 12px;">车牌号码：<span>{{item.vehicleNumber}}</span></p>
                 </div>
               </div>
             </el-option>
@@ -191,7 +207,7 @@
         </el-select>
         <div slot="footer">
           <el-button @click="createSelDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary">确认</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="seltarget">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -262,9 +278,9 @@ export default {
       polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
       // 从库中选择模态框参数
-      targetId: null,
-      groups: [],//组列表
-      surveillanceObjectDtoList: [],//成员对象列表
+      targetObj: [],
+      groups: null,//组列表
+      surveillanceObjectDtoList: null,//成员对象列表
       createSelDialog: false,
       loading: false,
       loadingBtn: false,
@@ -309,6 +325,47 @@ export default {
   
   },
   methods: {
+    gettargetId () {
+      console.log(this.targetObj)
+    },
+    // 弹出从库中选择框
+    popSel () {
+      this.createSelDialog = true;
+      this.targetObj = [];
+    },
+    // 从库中选择确定
+    seltarget () {
+      let groupList = [],objList = [];
+      // 过滤组
+      groupList = this.targetObj.filter(f => f.groupName !== undefined);
+      if (groupList.length > 0) {
+        const arr = [];
+        groupList.forEach(f => {
+          arr = f.map(m => {
+            return {
+              objType: m.objType,
+              url: m.photoUrl,
+              objId: m.value
+            }
+          })
+          this.fileList = this.fileList.concat(arr);
+        })
+      }
+      // 过滤成员对象
+      objList = this.targetObj.filter(f => f.groupName === undefined);
+      if (objList.length > 0) {
+        const fileList = objList.map(m => {
+          return {
+            objType: m.objType,
+            url: m.photoUrl,
+            objId: m.value
+          }
+        })
+        this.fileList = this.fileList.concat(fileList);
+      }
+      console.log(this.fileList)
+      this.createSelDialog = false;
+    },
     // 从库中选择
     repertorySel () {
       const params = {
@@ -318,20 +375,17 @@ export default {
       repertorySel(params).then(res => {
         if (res && res.data) {
           if (res.data.groups && res.data.groups.length > 0) {
-            this.groups = res.data.surveillanceObjectDtoList.map(m => {
+            this.groups = res.data.groups.map(m => {
               return {
-                label: m.name,
-                value: m.objId,
-                idNo: m.idNo,
-                objType: m.objType,
-                photoUrl: m.photoUrl
+                label: m.groupName,
+                surveillanceObjectDtoList: m.surveillanceObjectDtoList
               }
             });
           }
           if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
             this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
               return {
-                label: m.name,
+                label: m.objType === 1 ? m.name : m.objType === 2 ? m.vehicleNumber : '',
                 value: m.objId,
                 idNo: m.idNo,
                 objType: m.objType,
@@ -406,7 +460,6 @@ export default {
     // 验证人员追踪的必填项
     validateModelOne () {
       if (this.checkList.some(s => s === '人员追踪')) {
-        console.log('人员追踪')
         this.$refs[this.mapMId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
@@ -432,17 +485,32 @@ export default {
               }
             });
             console.log(this.fileList, 'this.fileList')
-            this.fileList = this.fileList.map((m, i) => {
-              return {
-                objId: i,
-                objType: 3,
-                photoUrl: m.url//编辑参数
-              }
-            })
+            let fileListOne,fileListTwo,fileList;
+            // 从库中选择的
+            if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
+              fileListOne = this.fileList.filter(f => f.objType).map(m => {
+                return {
+                  objId: m.objId,
+                  objType: m.objType,
+                  photoUrl: m.url//编辑参数
+                }
+              })
+            }
+            //本地上传的
+            if (this.fileList.filter(f => f.objType === undefined).length > 0) {
+              fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+                return {
+                  objId: i,
+                  objType: 3,
+                  photoUrl: m.response.data.fileFullPath//编辑参数
+                }
+              })
+            }
+            fileList = [...fileListOne, ...fileListTwo];
             const data = {
               modelType: 1,
               pointDtoList: pointDtoList,
-              surveillanceObjectDtoList: this.fileList
+              surveillanceObjectDtoList: fileList
             }
             this.$emit('sendModelDataOne', data);
           } else {
@@ -480,18 +548,33 @@ export default {
                 })
               }
             });
-            this.fileList = this.fileList.map((m, i) => {
-              return {
-                objId: i,
-                objType: 3,
-                photoUrl: m.url//编辑参数
-              }
-            })
+            let fileListOne,fileListTwo,fileList;
+            // 从库中选择的
+            if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
+              fileListOne = this.fileList.filter(f => f.objType).map(m => {
+                return {
+                  objId: m.objId,
+                  objType: m.objType,
+                  photoUrl: m.url//编辑参数
+                }
+              })
+            }
+            //本地上传的
+            if (this.fileList.filter(f => f.objType === undefined).length > 0) {
+              fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+                return {
+                  objId: i,
+                  objType: 3,
+                  photoUrl: m.response.data.fileFullPath//编辑参数
+                }
+              })
+            }
+            fileList = [...fileListOne, ...fileListTwo];
             const data = {
               carNumberInfo: this.modelForm.licenseNum.join(','),
               modelType: 2,
               pointDtoList: pointDtoList,
-              surveillanceObjectDtoList: this.fileList
+              surveillanceObjectDtoList: fileList
             }
             this.$emit('sendModelDataTwo', data);
           } else {
@@ -523,18 +606,33 @@ export default {
             })
           }
         });
-        this.fileList = this.fileList.map((m, i) => {
-          return {
-            objId: i,
-            objType: 3,
-            photoUrl: m.url//编辑参数
-          }
-        })
+        let fileListOne,fileListTwo,fileList;
+        // 从库中选择的
+        if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
+          fileListOne = this.fileList.filter(f => f.objType).map(m => {
+            return {
+              objId: m.objId,
+              objType: m.objType,
+              photoUrl: m.url//编辑参数
+            }
+          })
+        }
+        //本地上传的
+        if (this.fileList.filter(f => f.objType === undefined).length > 0) {
+          fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+            return {
+              objId: i,
+              objType: 3,
+              photoUrl: m.response.data.fileFullPath//编辑参数
+            }
+          })
+        }
+        fileList = [...fileListOne, ...fileListTwo];
         const data = {
           carNumberInfo: this.modelForm.licenseNum.join(','),
           modelType: 3,
           pointDtoList: pointDtoList,
-          surveillanceObjectDtoList: this.fileList
+          surveillanceObjectDtoList: fileList
         }
         this.$emit('sendModelDataThree', data);
       } else {
@@ -567,18 +665,33 @@ export default {
             })
           }
         });
-        this.fileList = this.fileList.map((m, i) => {
-          return {
-            objId: i,
-            objType: 3,
-            photoUrl: m.url//编辑参数
-          }
-        })
+        let fileListOne,fileListTwo,fileList;
+        // 从库中选择的
+        if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
+          fileListOne = this.fileList.filter(f => f.objType).map(m => {
+            return {
+              objId: m.objId,
+              objType: m.objType,
+              photoUrl: m.url//编辑参数
+            }
+          })
+        }
+        //本地上传的
+        if (this.fileList.filter(f => f.objType === undefined).length > 0) {
+          fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+            return {
+              objId: i,
+              objType: 3,
+              photoUrl: m.response.data.fileFullPath//编辑参数
+            }
+          })
+        }
+        fileList = [...fileListOne, ...fileListTwo];
         const data = {
           carNumberInfo: this.modelForm.licenseNum.join(','),
           modelType: 4,
           pointDtoList: pointDtoList,
-          surveillanceObjectDtoList: this.fileList
+          surveillanceObjectDtoList: fileList
         }
         this.$emit('sendModelDataFour', data);
       } else {
@@ -1054,8 +1167,12 @@ export default {
     getModelDataOne() {
       console.log(1111)
       // 回填图片
-      this.fileList = this.modelDataOne.surveillanceObjectDtoList.map(() => {
-        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      this.fileList = this.modelDataOne.surveillanceObjectDtoList.map(m => {
+        return {
+          objId: m.objId,
+          objType: m.objType,
+          url: m.photoUrl || 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'
+        }
       });
       if (this.modelDataOne.pointDtoList.length > 0) {
         // 回填追踪点表单
@@ -1075,8 +1192,12 @@ export default {
     // 回填车辆追踪数据
     getModelDataTwo() {
       console.log(2222)
-      this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(() => {
-        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(m => {
+        return {
+          objId: m.objId,
+          objType: m.objType,
+          url: m.photoUrl || 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'
+        }
       });
       // 回填车牌信息
       if (this.modelDataTwo.carNumberInfo.includes(',')) {
@@ -1102,8 +1223,12 @@ export default {
     // 回填越界分析数据
     getModelDataThree () {
       console.log(3333)
-      this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(() => {
-        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(m => {
+        return {
+          objId: m.objId,
+          objType: m.objType,
+          url: m.photoUrl || 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'
+        }
       });
       // 回填车牌信息
       if (this.modelDataThree.carNumberInfo.includes(',')) {
@@ -1126,8 +1251,12 @@ export default {
     // 回填范围分析数据
     getModelDataFour () {
       console.log(4444)
-      this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(() => {
-        return {url: 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'}
+      this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(m => {
+        return {
+          objId: m.objId,
+          objType: m.objType,
+          url: m.photoUrl || 'https://apirel.aorise.org/medical-his/image/a24f4ecb-9252-4067-8c97-fa33e66ae056.jpg'
+        }
       });
       // 回填车牌信息
       if (this.modelDataFour.carNumberInfo.includes(',')) {
@@ -1241,6 +1370,16 @@ export default {
 .create_model_box{
   .el-form-item__content{
     line-height: 0;
+  }
+}
+.el-select-dropdown.is-multiple{
+  .el-select-dropdown__item{
+    height: 50px;
+    padding-top: 5px;
+    p{
+      margin-top: 3px;
+      font-size: 12px;
+    }
   }
 }
 </style>

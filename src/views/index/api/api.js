@@ -388,3 +388,40 @@ export function repertorySel(params) {
     mode: ''
   })
 }
+/* ========== 布控地图 ========== */
+/**
+ * getControlMap 根据条件查询布控的所有设备点位【默认查询正在进行的布控的所有设备】
+ * @param {object} params
+ */
+export function getControlMap(params) {
+  return request({
+    url: '/controlMap',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getControlMapByDevice 设备下布控列表查询接口
+ * @param {object} params
+ */
+export function getControlMapByDevice(params) {
+  return request({
+    url: '/controlMap/byDevice',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
+/**
+ * getAlarmSnap 布控抓拍结果分页查询列表
+ * @param {object} params
+ */
+export function getAlarmSnap(params) {
+  return request({
+    url: '/surveillance/alarmSnap/page',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}

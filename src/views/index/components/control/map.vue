@@ -14,7 +14,7 @@
           <el-input v-model="mapForm.obj" placeholder="请输入布控对象"></el-input>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="state">
-          <el-select v-model="mapForm.state" placeholder="布控状态" @change="changeState()">
+          <el-select v-model="mapForm.state" placeholder="布控状态">
             <el-option
               v-for="item in stateList"
               :key="item.value"
@@ -55,7 +55,7 @@
         </el-form-item>
         <el-form-item style="width: 192px;">
           <el-button class="reset_btn" type="primary" plain @click="resetForm()">重置</el-button>
-          <el-button class="select_btn" type="primary">搜索</el-button>
+          <el-button class="select_btn" type="primary" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -96,7 +96,7 @@
             <div>
               <video src="../../../../assets/video/video.mp4" autoplay loop controls></video>
               <div class="toolbar">
-                <div>环岛路摄像头001</div>
+                <div>{{controlObjList.deviceName}}</div>
                 <div>
                   <i class="vl_icon vl_icon_control_09"></i>
                   <i class="vl_icon vl_icon_control_10"></i>
@@ -116,19 +116,19 @@
           <div>
             <el-card class="more" shadow="hover">
               <p>布控对象</p>
-              <div>10</div>
+              <div>{{controlObjList.objectList.length}}</div>
               <el-button size="small">查看更多</el-button>
             </el-card>
-            <el-card class="pic" shadow="hover" v-for="item in controlObjList" :key="item.name">
-              <img :src="item.url" alt="">
+            <el-card class="pic" shadow="hover" v-for="item in controlObjList.objectList" :key="item.name">
+              <img :src="item.photoUrl" alt="" width="130" height="130">
               <p>{{item.name}}</p>
             </el-card>
           </div>
           <div class="control_info">
             <div class="control_info_list">
-              <div><span>布控名称：</span><span>三岁小孩走失</span></div>
-              <div><span>布控日期：</span><span>2018-11-01</span></div>
-              <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
+              <div><span>布控名称：</span><span>{{controlObjList.list[0].surveillanceName}}</span></div>
+              <div><span>布控日期：</span><span>{{controlObjList.list[0].surveillanceDateStart}}-{{controlObjList.list[0].surveillanceDateEnd}}</span></div>
+              <div><span>事件预览：</span><span>{{controlObjList.list[0].eventDetail}}</span></div>
             </div>
             <el-button type="primary" size="small" @click="skipIsVideo">视频回放</el-button>
           </div>
@@ -140,6 +140,8 @@
 <script>
 import {testData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
+import {objDeepCopy} from '@/utils/util.js';
+import {getControlMap, getControlMapByDevice} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -148,15 +150,15 @@ export default {
         name: null,
         num: null,
         obj: null,
-        state: '1',
+        state: 1,
         type: null,
         rank: null,
         time: null
       },
       stateList: [
-        {label: '待开始', value: '0'},
-        {label: '进行中', value: '1'},
-        {label: '已结束', value: '2'}
+        {label: '待开始', value: 2},
+        {label: '进行中', value: 1},
+        {label: '已结束', value: 3}
       ],
       typeList: [
         {label: '全部', value: 0},
@@ -199,6 +201,7 @@ export default {
   },
   mounted () {
     let _this = this;
+    _this.getControlMap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -206,10 +209,315 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
-    _this.changeState();
+    
     _this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 获取实时监控的布控设备
+    getControlMap () {
+      const params = {
+        deviceType: this.mapForm.type,//设备类型
+        surveillanceStatus: this.mapForm.state,//布控状态
+        alarmLevel: this.mapForm.rank,//告警级别
+        surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
+        surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
+        surveillanceName: this.mapForm.name,//布控名称
+        eventId: this.mapForm.num,//事件Id
+        surveillanceObjectId: this.mapForm.obj//布控对象id
+      }
+      getControlMap(params).then(res => {
+        if (res && res.data) {
+          this.controlList = res.data;
+          this.changeState();
+        }
+      })
+    },
+    // 获取设备下布控列表查询接口
+    getControlMapByDevice (obj) {
+      const params = {
+        deviceName: 1,//obj.deviceName
+        uid: 1,//obj.uid
+        surveillanceIds: 11,//obj.surveillanceIds
+        surveillanceStatus: 1//obj.surveillanceStatus
+      }
+      getControlMapByDevice(params).then(res => {
+        if (res && res.data) {
+          let _this = this;
+          _this.controlObjList = res.data;
+          let sContent = '', clickWindow;
+          // 布控进行中
+          if (_this.mapForm.state === 1) {
+            // 一个摄像头只有一个布控时
+            if (_this.controlObjList.num === 1) {
+              sContent = `
+                <div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_img">
+                      <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
+                      <div class="vl_map_state">进行中</div>
+                      <div class="vl_map_operate">
+                        <div>${_this.controlObjList.deviceName}</div>
+                        <div>
+                          <i class="vl_icon vl_icon_control_06"></i>
+                          <i class="vl_icon vl_icon_control_07"></i>
+                          <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="vl_map_info">
+                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
+                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
+                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
+                    </div>
+                    <div class="vl_map_obj">
+                      <div class="vl_map_obj_num">
+                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
+                        <div class="vl_map_slide">
+                          <i class="el-icon-arrow-left"></i>
+                          <i class="el-icon-arrow-right"></i>
+                        </div>
+                      </div>
+                      <div class="vl_map_obj_img">
+                        <div class="vl_map_obj_box">`;
+                        for (let item of _this.controlObjList.objectList) {
+                          sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
+                        }
+                        sContent += `</div>
+                      </div>
+                    </div>
+                    <div class="vl_map_btn">视频回放</div>
+                  </div>
+                  <div class="vl_map_triangle"></div>
+                </div>
+                `;
+            // 一个摄像头有多个布控时
+            } else if (_this.controlObjList.num > 1) {
+              sContent = 
+                `<div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_img">
+                      <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
+                      <div class="vl_map_state">进行中</div>
+                      <div class="vl_map_operate">
+                        <div>${_this.controlObjList.deviceName} </div>
+                        <div>
+                          <i class="vl_icon vl_icon_control_06"></i>
+                          <i class="vl_icon vl_icon_control_07"></i>
+                          <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
+                        </div>
+                      </div>
+                    </div>`
+                    for (let item of _this.controlObjList.list) {
+                      sContent += 
+                      `<div class="vl_map_info">
+                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
+                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
+                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
+                      </div>`
+                    }
+                    
+                sContent +=  `</div>
+                  <div class="vl_map_triangle"></div>
+                </div>`;
+            }
+          }
+          // 布控待开始
+          if (_this.mapForm.state === 2) {
+            // 一个摄像头只有一个布控时
+            if (_this.controlObjList.num === 1) {
+              sContent = `
+                <div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_start">
+                      <div class="vl_map_state">待开始</div>
+                      <span>${_this.controlObjList.deviceName}</span>
+                    </div>
+                    <div class="vl_map_info">
+                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
+                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
+                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
+                    </div>
+                    <div class="vl_map_obj">
+                      <div class="vl_map_obj_num">
+                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
+                        <div class="vl_map_slide">
+                          <i class="el-icon-arrow-left"></i>
+                          <i class="el-icon-arrow-right"></i>
+                        </div>
+                      </div>
+                      <div class="vl_map_obj_img">
+                        <div class="vl_map_obj_box">`;
+                        for (let item of _this.controlObjList.objectList) {
+                          sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
+                        }
+                      sContent += `</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="vl_map_triangle"></div>
+                </div>
+                `;
+            // 一个摄像头有多个布控时
+            } else if (_this.controlObjList.num > 1) {
+              sContent = 
+                `<div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_start">
+                      <div class="vl_map_state">待开始</div>
+                      <span>${_this.controlObjList.deviceName}</span>
+                    </div>`;
+                    for (let item of _this.controlObjList.list) {
+                      sContent += 
+                      `<div class="vl_map_info">
+                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
+                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
+                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
+                      </div>`
+                    }
+                sContent += `</div>
+                  <div class="vl_map_triangle"></div>
+                </div>`;
+            }
+          }
+          // 布控已结束
+          if (_this.mapForm.state === 3) {
+            // 一个摄像头只有一个布控时
+            if (_this.controlObjList.num === 1) {
+              sContent = `
+                <div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_start">
+                      <div class="vl_map_state" style="background: #999999;">已结束</div>
+                      <span>${_this.controlObjList.deviceName}</span>
+                    </div>
+                    <div class="vl_map_info">
+                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
+                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
+                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
+                    </div>
+                    <div class="vl_map_obj">
+                      <div class="vl_map_obj_num">
+                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
+                        <div class="vl_map_slide">
+                          <i class="el-icon-arrow-left"></i>
+                          <i class="el-icon-arrow-right"></i>
+                        </div>
+                      </div>
+                      <div class="vl_map_obj_img">
+                        <div class="vl_map_obj_box">`;
+                          for (let item of _this.controlObjList.objectList) {
+                            sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
+                          }
+                        sContent += `</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="vl_map_triangle"></div>
+                </div>
+                `;
+            // 一个摄像头有多个布控时
+            } else if (_this.controlObjList.num > 1) {
+              sContent = 
+                `<div class="vl_map_click">
+                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+                  <div class="vl_map_click_main">
+                    <div class="vl_map_start">
+                      <div class="vl_map_state" style="background: #999999;">已结束</div>
+                      <span>${_this.controlObjList.deviceName}</span>
+                    </div>`;
+                    for (let item of _this.controlObjList.list) {
+                      sContent += 
+                      `<div class="vl_map_info">
+                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
+                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
+                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
+                      </div>`
+                    }
+                sContent += `</div>
+                  <div class="vl_map_triangle"></div>
+                </div>`;
+            }
+          }
+          clickWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
+            content: sContent
+          });
+          // 打开弹窗
+          clickWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+          // 防止重复绑定点击事件，先解绑
+          $("#mapBox").unbind('click');
+          // 利用事件冒泡,绑定关闭弹框的点击事件
+          $('#mapBox').on('click', '.vl_map_close', function () {
+            // 关闭弹窗
+            if (clickWindow) { clickWindow.close(); }
+          })
+          // 利用事件冒泡,绑定视频全屏按钮的点击事件
+          $('#mapBox').on('click', '.vl_map_full_screen', function () {
+            // 关闭弹窗
+            if (clickWindow) { clickWindow.close(); }
+            // 显示视频回放页面
+            _this.isShowFullScreen = true;
+          })
+          $('#mapBox').on('click', '.vl_map_name > span', function () {
+            // 跳转至布控详情页
+            const { href } = _this.$router.resolve({
+              name: 'control_manage',
+              query: {pageType: 2, state: _this.mapForm.state}
+            })
+            window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
+          })
+          $('#mapBox').on('click', '.vl_map_btn', function () {
+            // 跳转至视频回放页面
+            _this.skipIsVideo();
+          })
+          // 向右滑动
+          let offbtnStatusLfet = false;
+          $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-right', function () {
+            if(offbtnStatusLfet){
+              return;
+            }
+            offbtnStatusLfet = true;
+            const slide = $('#mapBox .vl_map_obj_box');
+            const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
+            if ((slide.width() + slideMarginLeft) >= 380) {
+              slide.animate({marginLeft: '-=80px'}, 1000, function () {
+                offbtnStatusLfet = false;
+              });
+            } else {
+              setTimeout(() => {
+                offbtnStatusLfet = false;
+              }, 1000)
+            }
+          })
+          // 向左滑动
+          let offbtnStatusRight = false;
+          $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-left', function () {
+            if(offbtnStatusRight){
+              return;
+            }
+            offbtnStatusRight = true;
+            const slide = $('#mapBox .vl_map_obj_box');
+            const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
+            if (slideMarginLeft < 0) {
+              slide.animate({marginLeft: '+=80px'}, 1000,function () {
+                offbtnStatusRight = false;
+              });
+            } else {
+              setTimeout(() => {
+                offbtnStatusRight = false;
+              }, 1000)
+            }
+          })
+        }
+      })
+    },
     // 地图标记
     mapMark () {
       let _this = this, clickWindow = null;
@@ -218,10 +526,10 @@ export default {
       _this.map.clearMap();
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
-        obj.sid = obj.name + '_' + i + '_' + random14();
+        obj.sid = obj.deviceName + '_' + i + '_' + random14();
         let content = '';
         // 暂时默认告警级别为五级时出现告警闪烁
-        if (obj.controlList[0].alarmRank === '五级') {
+        if (obj.uid === 1) {
           content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_02 vl_icon_alarm"><div class="vl_icon_warning">发现可疑目标</div></div>';
         } else {
           content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>';
@@ -239,7 +547,7 @@ export default {
           });
           marker.setMap(_this.map);
           // 让告警闪烁图标10s后自动消失
-          if (obj.controlList.some(s => s.alarmRank === '五级')) {
+          if (obj.uid === 1) {
             setTimeout(() => {
               $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
               $('#mapBox .vl_icon_warning').remove();
@@ -250,7 +558,7 @@ export default {
           marker.on('click', function(e) {
             console.log(e.target.C.extData, 'e')
             // 点击切换告警闪烁图标
-            if (e.target.C.extData.controlList.some(s => s.alarmRank === '五级')) {
+            if (e.target.C.extData.uid === 1) {
               if (!$('#' + e.target.C.extData.sid).hasClass('vl_icon_control_02')) {
                 $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
@@ -270,282 +578,11 @@ export default {
               $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
               $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_01");
             }
-            let sContent = '';
-            // 布控进行中
-            if (_this.mapForm.state === '1') {
-              // 一个摄像头只有一个布控时
-              if (obj && obj.controlList.length === 1) {
-                sContent = `
-                  <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
-                    <div class="vl_map_click_main">
-                      <div class="vl_map_img">
-                        <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></>
-                        <div class="vl_map_state">进行中</div>
-                        <div class="vl_map_operate">
-                          <div>摄像头12458 </div>
-                          <div>
-                            <i class="vl_icon vl_icon_control_06"></i>
-                            <i class="vl_icon vl_icon_control_07"></i>
-                            <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
-                        <div><span>布控日期：</span><span>2018-11-01</span></div>
-                        <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
-                      </div>
-                      <div class="vl_map_obj">
-                        <div class="vl_map_obj_num">
-                          <div><span>布控对象：</span><span>10</span></div>
-                          <div class="vl_map_slide">
-                            <i class="el-icon-arrow-left"></i>
-                            <i class="el-icon-arrow-right"></i>
-                          </div>
-                        </div>
-                        <div class="vl_map_obj_img">
-                          <div class="vl_map_obj_box">
-                            <div><img src="//via.placeholder.com/60x60"><p>张111</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张222</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张333</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张444</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张555</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张666</p></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="vl_map_btn">视频回放</div>
-                    </div>
-                    <div class="vl_map_triangle"></div>
-                  </div>
-                  `;
-              // 一个摄像头有多个布控时
-              } else if (obj && obj.controlList.length > 1) {
-                sContent = 
-                  '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
-                    '<div class="vl_map_click_main">' + 
-                      '<div class="vl_map_img">' +
-                        '<video src=' + require('../../../../assets/video/video.mp4') + ' + autoplay loop controls width="100%"></video>' +
-                        '<div class="vl_map_state">进行中</div>' +
-                      ' <div class="vl_map_operate">' +
-                          '<div>摄像头12458 </div>' +
-                          '<div>' +
-                            '<i class="vl_icon vl_icon_control_06"></i>' +
-                            '<i class="vl_icon vl_icon_control_07"></i>' +
-                            '<i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>' +
-                          '</div>' +
-                        '</div>' +
-                      '</div>';
-                      for (let item of obj.controlList) {
-                        sContent += 
-                        '<div class="vl_map_info">' +
-                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
-                          '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
-                          '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
-                        '</div>'
-                      }
-                      
-                  sContent +=  '</div>' +
-                    '<div class="vl_map_triangle"></div>' +
-                  '</div>';
-              }
-            }
-            // 布控待开始
-            if (_this.mapForm.state === '0') {
-              // 一个摄像头只有一个布控时
-              if (obj && obj.controlList.length === 1) {
-                sContent = `
-                  <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
-                    <div class="vl_map_click_main">
-                      <div class="vl_map_start">
-                        <div class="vl_map_state">待开始</div>
-                        <span>摄像头524</span>
-                      </div>
-                      <div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
-                        <div><span>布控日期：</span><span>2018-11-01</span></div>
-                        <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
-                      </div>
-                      <div class="vl_map_obj">
-                        <div class="vl_map_obj_num">
-                          <div><span>布控对象：</span><span>10</span></div>
-                          <div class="vl_map_slide">
-                            <i class="el-icon-arrow-left"></i>
-                            <i class="el-icon-arrow-right"></i>
-                          </div>
-                        </div>
-                        <div class="vl_map_obj_img">
-                          <div class="vl_map_obj_box">
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="vl_map_triangle"></div>
-                  </div>
-                  `;
-              // 一个摄像头有多个布控时
-              } else if (obj && obj.controlList.length > 1) {
-                sContent = 
-                  '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
-                    '<div class="vl_map_click_main">' + 
-                      '<div class="vl_map_start">' +
-                        '<div class="vl_map_state">待开始</div>' +
-                        '<span>摄像头0015</span>' +
-                      '</div>';
-                      for (let item of obj.controlList) {
-                        sContent += 
-                        '<div class="vl_map_info">' +
-                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
-                          '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
-                          '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
-                        '</div>'
-                      }
-                  sContent +=  '</div>' +
-                    '<div class="vl_map_triangle"></div>' +
-                  '</div>';
-              }
-            }
-            // 布控已结束
-            if (_this.mapForm.state === '2') {
-              // 一个摄像头只有一个布控时
-              if (obj && obj.controlList.length === 1) {
-                sContent = `
-                  <div class="vl_map_click">
-                    <div class="vl_map_close vl_icon vl_icon_control_04"></div>
-                    <div class="vl_map_click_main">
-                      <div class="vl_map_start">
-                        <div class="vl_map_state" style="background: #999999;">已结束</div>
-                        <span>摄像头524</span>
-                      </div>
-                      <div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${obj.controlList[0].controlName}</span></div>
-                        <div><span>布控日期：</span><span>2018-11-01</span></div>
-                        <div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>
-                      </div>
-                      <div class="vl_map_obj">
-                        <div class="vl_map_obj_num">
-                          <div><span>布控对象：</span><span>10</span></div>
-                          <div class="vl_map_slide">
-                            <i class="el-icon-arrow-left"></i>
-                            <i class="el-icon-arrow-right"></i>
-                          </div>
-                        </div>
-                        <div class="vl_map_obj_img">
-                          <div class="vl_map_obj_box">
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                            <div><img src="//via.placeholder.com/60x60"><p>张三</p></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="vl_map_triangle"></div>
-                  </div>
-                  `;
-              // 一个摄像头有多个布控时
-              } else if (obj && obj.controlList.length > 1) {
-                sContent = 
-                  '<div class="vl_map_click">'
-                    + '<div class="vl_map_close vl_icon vl_icon_control_04"></div>' + 
-                    '<div class="vl_map_click_main">' + 
-                      '<div class="vl_map_start">' +
-                        '<div class="vl_map_state" style="background: #999999;">已结束</div>' +
-                        '<span>摄像头0015</span>' +
-                      '</div>';
-                      for (let item of obj.controlList) {
-                        sContent += 
-                        '<div class="vl_map_info">' +
-                          '<div class="vl_map_name"><span>布控名称：</span><span>' + item.controlName + '</span></div>' +
-                          '<div><span>布控日期：</span><span>2018-11-01</span></div>' +
-                          '<div><span>事件预览：</span><span>在雀园路与君逸路交叉口一3岁小孩与父母走丢，被保安发现带往天心区公安局，好心…</span></div>' +
-                        '</div>'
-                      }
-                  sContent +=  '</div>' +
-                    '<div class="vl_map_triangle"></div>' +
-                  '</div>';
-              }
-            }
-            clickWindow = new window.AMap.InfoWindow({
-              isCustom: true,
-              closeWhenClickMap: true,
-              offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
-              content: sContent
-            });
-            // 打开弹窗
-            clickWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-            // 防止重复绑定点击事件，先解绑
-            $("#mapBox").unbind('click');
-            // 利用事件冒泡,绑定关闭弹框的点击事件
-            $('#mapBox').on('click', '.vl_map_close', function () {
-              // 关闭弹窗
-              if (clickWindow) { clickWindow.close(); }
-            })
-            // 利用事件冒泡,绑定视频全屏按钮的点击事件
-            $('#mapBox').on('click', '.vl_map_full_screen', function () {
-              // 关闭弹窗
-              if (clickWindow) { clickWindow.close(); }
-              // 显示视频回放页面
-              _this.isShowFullScreen = true;
-            })
-            $('#mapBox').on('click', '.vl_map_name > span', function () {
-              // 跳转至布控详情页
-              const { href } = _this.$router.resolve({
-                name: 'control_manage',
-                query: {pageType: 2, state: _this.mapForm.state}
-              })
-              window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
-            })
-            $('#mapBox').on('click', '.vl_map_btn', function () {
-              // 跳转至视频回放页面
-              _this.skipIsVideo();
-            })
-            // 向右滑动
-            let offbtnStatusLfet = false;
-            $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-right', function () {
-              if(offbtnStatusLfet){
-                return;
-              }
-              offbtnStatusLfet = true;
-              const slide = $('#mapBox .vl_map_obj_box');
-              const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
-              if ((slide.width() + slideMarginLeft) >= 380) {
-                slide.animate({marginLeft: '-=80px'}, 1000, function () {
-                  offbtnStatusLfet = false;
-                });
-              } else {
-                setTimeout(() => {
-                  offbtnStatusLfet = false;
-                }, 1000)
-              }
-            })
-            // 向左滑动
-            let offbtnStatusRight = false;
-            $('#mapBox').on('click', '.vl_map_slide > .el-icon-arrow-left', function () {
-              if(offbtnStatusRight){
-                return;
-              }
-              offbtnStatusRight = true;
-              const slide = $('#mapBox .vl_map_obj_box');
-              const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
-              if (slideMarginLeft < 0) {
-                slide.animate({marginLeft: '+=80px'}, 1000,function () {
-                  offbtnStatusRight = false;
-                });
-              } else {
-                setTimeout(() => {
-                  offbtnStatusRight = false;
-                }, 1000)
-              }
-            })
+            _this.getControlMapByDevice(obj);
+            // if (_this.controlObjList.num === undefined) {
+            //   return false;
+            // }
+            
           });
         }
       }
@@ -557,24 +594,19 @@ export default {
       })
       window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
     },
-    // 深度拷贝公共方法
-    objDeepCopy (source) {
-      var sourceCopy = source instanceof Array ? [] : {};
-      for (var item in source) {
-        sourceCopy[item] = typeof source[item] === 'object' ? this.objDeepCopy(source[item]) : source[item];
-      }
-      return sourceCopy;
-    },
     // 按布控状态来筛选地图标记
     changeState () {
-      this.controlList = this.objDeepCopy(testData);
-      for (let item of this.controlList) {
-        item.controlList = item.controlList.filter(f => f.controlState === this.mapForm.state);
-      }
-      this.controlList = this.controlList.filter(f => f.controlList.length > 0);
+      // this.controlList = objDeepCopy(testData);
+      this.controlList = this.controlList.filter(f => f.surveillanceStatus === this.mapForm.state);
+      // this.controlList = this.controlList.filter(f => f.controlList.length > 0);
+      console.log(this.controlList)
+      this.controlList.forEach((f, i) => {
+        f.latitude = '28.10' + i + '253';
+        f.longitude = '112.9' + i + '1563';
+        f.deviceName = i;
+      });
       this.mapMark();
     },
-  
     // 重置表单
     resetForm () {
       this.$refs['mapForm'].resetFields();
@@ -772,7 +804,6 @@ export default {
             overflow: hidden;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
             .el-card{
               height: 182px;
               margin-top: 18px;
@@ -782,6 +813,7 @@ export default {
             .more.el-card{
               width: 152px;
               padding: 40px 0;
+              margin-right: 1%;
               p{
                 line-height: 24px;
               }
@@ -799,6 +831,7 @@ export default {
             .pic.el-card{
               width: 162px;
               padding-top: 10px;
+              margin-right: 1%;
               p{
                 line-height: 30px;
                 color: #333;
@@ -975,6 +1008,10 @@ export default {
                 text-align: center;
                 &:not(:last-child){
                   margin-right: 20px;
+                }
+                >img{
+                  width: 60px;
+                  height: 60px;
                 }
                 > p{
                   line-height: 30px;

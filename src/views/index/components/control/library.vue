@@ -443,6 +443,7 @@ import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
 import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle} from '@/views/index/api/api.js';
 import {objDeepCopy} from '@/utils/util.js';
+import {nationData} from './testData.js';
 export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
@@ -487,14 +488,7 @@ export default {
         {label: '男', value: 1},
         {label: '女', value: 2}
       ],//性别列表数据
-      nationalList: [
-        {label: '其他', value: 0},
-        {label: '汉族', value: 1},
-        {label: '苗族', value: 2},
-        {label: '土家族', value: 3},
-        {label: '傣族', value: 4},
-        {label: '壮族', value: 5}
-      ],//民族列表数据
+      nationalList: nationData,//民族列表数据
       carTypeList: [
         {label: '其他', value: 0},
         {label: '小轿车', value: 1},

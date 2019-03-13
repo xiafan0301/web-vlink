@@ -135,8 +135,8 @@
                       <ul style="width: 100%;max-height: 736px;">
                         <template v-for="(item, index) in situList">
                           <li
-                            v-if="item.name"
-                            :key="'item' + index"
+                            v-if="item.surveillanceIds"
+                            :key="item.uid"
                             @dragstart="dragstart($event, index)"
                             @drag="drag"
                             @dragend="dragend"
@@ -146,14 +146,14 @@
                             @drop="drop($event, index)"
                             :draggable="true"
                           >
-                            <span>{{item.name}}</span><i class="vl_icon vl_icon_control_05"></i>
+                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
                           </li>
                         </template>
                       </ul>
                     </vue-scroll>
                   </div>
                 <div class="situ_right">
-                  <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="'item' + index"
+                  <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
                     @dragstart="dragstart($event, index)"
                     @drag="drag"
                     @dragend="dragend"
@@ -183,8 +183,31 @@
           <div class="result_title">
             <div>布控结果（200个）</div>
             <div>
-              <el-input size="small" placeholder="请选择起止时间"></el-input>
-              <el-input size="small">请搜索或选择设备</el-input>
+              <el-date-picker
+                placeholder="请选择起止时间"
+                v-model="controlTimeIsKey"
+                type="daterange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
+              </el-date-picker>
+              <el-select
+                v-model="devNameIsKey"
+                filterable
+                remote
+                reserve-keyword
+                placeholder="请输入设备名搜索"
+                :remote-method="getControlDevice"
+                :loading="loading">
+                <el-option
+                  v-for="item in devListIsKey"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.label">
+                </el-option>
+              </el-select>
             </div>
           </div>
           <div class="result_content">
@@ -279,7 +302,7 @@ import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conData, conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
-import {getControlDetail, getControlObjList, controlArea} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
   props: ['state', 'controlId'],
@@ -313,6 +336,10 @@ export default {
       rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
       eventDetailDialog: false,//事件详情弹窗
+      // 布控结果筛选参数
+      controlTimeIsKey: null,//布控时间
+      devListIsKey: null,//设备列表
+      devNameIsKey: null,//设备名称
     }
   },
   created () {
@@ -325,6 +352,7 @@ export default {
     this.resetMap();
     // this.reset();
     this.getControlDetail();
+    this.getControlMap();
   },
   methods: {
     // 获取布控详情
@@ -350,6 +378,56 @@ export default {
     },
     getControlList () {
       this.$emit('getControlList');
+    },
+    // 获取实时监控的布控设备
+    getControlMap () {
+      const params = {
+        deviceType: null,//设备类型
+        surveillanceStatus: null,//布控状态
+        alarmLevel: null,//告警级别
+        surveillanceDateStart: null,//布控开始时间
+        surveillanceDateEnd: null,//布控结束时间
+        surveillanceName: null,//布控名称
+        eventId: null,//事件Id
+        surveillanceObjectId: null//布控对象id
+      }
+      getControlMap().then(res => {
+        if (res && res.data) {
+          this.situList = res.data;
+        }
+      })
+    },
+    // 获取所有布控设备
+    getControlDevice () {
+      const params = {
+        name: this.devNameIsKey
+      }
+      getControlDevice(params).then(res => {
+        if (res && res.data) {
+          this.devListIsKey = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.name
+            }
+          });
+        }
+      })
+    },
+    // 获取布控抓拍结果列表
+    getAlarmSnap () {
+      const params = {
+        pageNum: this.pageNumObjRes,
+        pageSzie: this.pageSzieRes,
+        surveillanceId: this.controlId,
+        dateStart: this.controlTimeIsKey && this.controlTimeIsKey[0],
+        dateEnd: this.controlTimeIsKey && this.controlTimeIsKey[1],
+        deviceName: this.devNameIsKey
+      }
+      getAlarmSnap().then(res => {
+        if (res && res.data) {
+
+        }
+      })
     },
     dragstart (e, index) {
       // 使其半透明
@@ -427,7 +505,7 @@ export default {
           })
       }
     },
-
+    
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
       this.type = type;

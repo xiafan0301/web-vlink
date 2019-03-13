@@ -430,6 +430,7 @@ export default {
             this.checkList.forEach(f => {
               if (f === '人员追踪') {
                 this.$refs.mapOne.validateModelOne();
+                console.log(1111)
                 modelList.push(this.modelDataOne);
               } else if (f === '车辆追踪') {
                 this.$refs.mapTwo.validateModelTwo();
@@ -442,6 +443,7 @@ export default {
                 modelList.push(this.modelDataFour);
               }
             })
+            
             if (this.checkList.some(s => s === '人员追踪') && !this.modelDataOne) {
               return false;
             } else if (this.checkList.some(s => s === '车辆追踪') && !this.modelDataTwo) {
