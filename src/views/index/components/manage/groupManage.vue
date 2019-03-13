@@ -3,12 +3,14 @@
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddUserGroup">新增组</el-button>
       <div class="right-search">
-        <el-input  placeholder="请输入组名搜索查找" style="width: 240px;">
+        <el-input  placeholder="请输入组名搜索查找" style="width: 240px;" v-model="groupName">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 20px;"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="searchData">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
     </div>
@@ -72,7 +74,6 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -252,6 +253,8 @@
 export default {
   data () {
     return {
+      groupName: null, // 根据组名搜索
+      closeShow: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       checkedCities: ['上海', '北京'],
       cities: ['上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳'],

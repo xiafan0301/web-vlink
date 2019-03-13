@@ -15,14 +15,36 @@
             <span>事件总结:</span>
             <el-input type="textarea" rows="7" v-model="eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
           </div>
+          <div class="error_tip">请填写事件总结</div>
           <div class="end-upload">
             <el-upload
               action="https://jsonplaceholder.typicode.com/posts/"
-              :on-change="handleChange"
-              :file-list="fileList">
+              accept='.png,.jpg,.bmp,.pdf,.doc,.docx,.ppt,.pptx'
+              :before-upload='handleBeforeUpload'
+              :on-success="handleSuccess"
+              :disabled="isImgDisabled"
+              :title="[isImgDisabled === true ? '禁用' : '']"
+              :show-file-list='false'
+              >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .jpg…）</div>
             </el-upload>
+            <div class="img_list">
+              <div v-for="(item, index) in imgList2" :key="'item' + index">
+                <img
+                  :src="item.src"
+                  @click="openBigImg(index, imgList2)"
+                >
+                <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
+              </div>
+            </div>
+            <div class="file_list">
+              <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
+                <i class="vl_icon vl_icon_event_5"></i>
+                <span>{{item.fileName}}</span>
+                <i class='el-icon-close' @click="deleteFile(item, index)"></i>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -43,10 +65,10 @@ export default {
   data () {
     return {
       eventSummary: null, // 事件总结
-      fileList: [], // 文件上传列表
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
-      imgList1: [],
+      isImgDisabled: false,
+      imgList1: [], // 要放大的图片数据
       basicInfo: {
         eventCode: 'XD111111111111111',
         eventTypeName: '自然灾害',
@@ -75,6 +97,36 @@ export default {
         ],
         eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
       }, // 事件详情
+      fileList: [
+        {
+          fileName: '公共文档.docx'
+        },
+        {
+          fileName: '公共文档.docx'
+        },
+        {
+          fileName: '公共文档.docx'
+        }
+      ], // 要上传的文件列表
+      imgList2: [
+        {
+            uid: '001',
+            src: require('./img/1.jpg')
+          },
+          {
+            uid: '002',
+            src: require('./img/2.jpg')
+          },
+          {
+            uid: '003',
+            src: require('./img/3.jpg')
+          },
+          {
+            uid: '004',
+            src: require('./img/4.jpg')
+          }
+      ],
+      imgList: [] // 图片列表
     }
   },
   methods: {
@@ -89,15 +141,73 @@ export default {
         })
         .catch(() => {})
     },
-    handleChange () {},
+    handleSuccess (res, file) {
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let type;
+        if (fileName) {
+          type = fileName.substring(fileName.lastIndexOf('.'));
+          let data;
+          res.fileName = file.name;
+          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            data = {
+              attachmentType: dictType.imgId,
+              url: res.data.newFileName,
+              attachmentName: res.data.fileName,
+              attachmentSize: res.data.fileSize,
+              attachmentWidth: res.data.imageWidth,
+              attachmentHeight: res.data.imageHeight,
+              thumbnailUrl: res.data.thumbnailUrl,
+              thumbnailWidth: res.data.thumbImageWidth,
+              thumbnailHeight: res.data.thumbImageHeight
+            }
+            this.imgList2.push(res.data);
+          } else {
+            data = {
+              attachmentType: dictType.fileId,
+              url: res.data.newFileName,
+              attachmentName: res.data.fileName,
+              attachmentSize: res.data.fileSize
+            }
+            this.fileList.push(res.data);
+          }
+          this.endForm.attachmentList.push(data);
+          this.isImgDisabled = false;
+        }
+      }
+    },
+    handleBeforeUpload (file) { // 附件上传之前
+      this.isImgDisabled = true;
+      const isLtTenM = file.size / 1024 / 1024 < 10;
+      if (!isLtTenM) {
+        this.$message.error('上传的附件大小不能超过10M');
+        this.isImgDisabled = false;
+      }
+      return isLtTenM;
+    },
+    // 删除图片
+    closeImgList (index) {
+      this.imgList2.splice(index, 1);
+      // this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+      //   if (item.url === obj.newFileName) {
+      //     this.endForm.attachmentList.splice(idx, 1);
+      //   }
+      // });
+    },
+    deleteFile (obj, index) { // 删除文件
+      this.fileList.splice(index, 1);
+      // this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+      //   if (item.url === obj.newFileName) {
+      //     this.endForm.attachmentList.splice(idx, 1);
+      //   }
+      // });
+    },
     // 返回
     back () {
       this.$router.back(-1);
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
       this.openBigImg(index, this.basicInfo.imgList);
     },
     // 关闭图片放大
@@ -135,7 +245,7 @@ export default {
       .end-content {
         width: 60%;
         display:flex;
-        padding: 20px;
+        padding: 20px 20px 10px;
         > span {
           color: #666666;
           width: 90px;
@@ -147,8 +257,13 @@ export default {
           margin-top: -10px;
         }
       }
+      .error_tip {
+        margin-left: 110px;
+        margin-bottom: 10px;
+        color: #F94539;
+      }
       .end-upload {
-        margin-left: 90px;
+        margin-left: 110px;
         width: 60%;
         padding-bottom: 20px;
         .upload-btn {
@@ -163,6 +278,46 @@ export default {
         }
         /deep/ .el-upload-list__item {
           width: 40%;
+        }
+        .img_list {
+          display: flex;
+          >div {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 5px 5px 0;
+            cursor: pointer;
+            img {
+              border-radius: 4px;
+              margin-right: 5px;
+              width: 100%;
+              height:100%;
+            }
+            .close_btn {
+              position: absolute;
+              right: 0;
+              top: 0;
+              cursor: pointer;
+            }
+          }
+        }
+        .file_list {
+          .show-file-div-list {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            span {
+              // color: #0785FD;
+              font-size: 14px;
+              margin: 0 5px;
+            }
+            i {
+              font-size: 18px;
+              color: #5D5D5D;
+              cursor: pointer;
+            }
+          }
         }
       }
     }

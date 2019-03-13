@@ -3,6 +3,18 @@
 * {"trigger":"change","max":10,"min":20,"field":"telegrpNo","fullField":"telegrpNo","type":"string", ...}
 *  可自定义属性
 */
+import {judgeDepart} from '@/views/index/api/api.js';
+export const isJudgeDepart = (value, callback) => {
+  if (value) {
+    judgeDepart(value)
+      .then(res => {
+        if (res) {
+          return callback(new Error('部门已存在'))
+        }
+      })
+      .catch(() => {})
+  }
+}
 // 验证手机号
 export const validatePhone = (rule, value, callback) => {
   if (value) {
@@ -51,4 +63,18 @@ export const checkPlateNumber = (rule, value, callback) => {
   } else {
     callback();
   }
+}
+/**
+ * 判断邮箱格式
+ */
+export const checkEmail = (rule, value, callback) => {
+  if (value) {
+    let reg = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/;
+    if (!reg.test(value)) {
+      callback(new Error('邮箱格式填写错误'));
+    } else {
+      callback();
+    }
+  }
+  callback()
 }

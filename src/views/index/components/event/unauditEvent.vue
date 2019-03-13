@@ -453,7 +453,7 @@ export default {
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 15px 15px;
+            padding: 15px 10px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;

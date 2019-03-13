@@ -53,11 +53,13 @@
   </vue-scroll>
 </template>
 <script>
-import { validatePhone, checkIdCard } from '@/utils/validator.js';
+import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
+import { createUser } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       addUser: {
+        proKey: null,
         userMobile: null,
         userRealName: null,
         userSex: 1,
@@ -75,16 +77,41 @@ export default {
         ],
         userIdcard: [
           { validator: checkIdCard, trigger: 'blur' }
+        ],
+        userEmail: [
+          { validator: checkEmail, trigger: 'blur' }
         ]
       }
     }
   },
   methods: {
     submitForm (form) {
-      console.log(form)
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          createUser(this.addUser)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                })
+                this.$router.push({name: 'user'});
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '新建失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      })
     },
     resetForm (form) {
-      console.log(form);
+      this.$refs[form].resetFields();
+      this.$router.back(-1);
     }
   }
 }
