@@ -75,6 +75,7 @@
         <p class="pwd_tl_1"></p>
         <p class="pwd_tl_2"></p>
       </div>
+    
 </template>
 <script>
 import headerNormal from '@/components/headerNormal.vue';
@@ -149,8 +150,6 @@ export default {
         beginClientX: 0, // 距离屏幕最左端距离
         maxWidth: 320, // 拖动的最大宽度
       }
-    
-   
   },
    mounted () {
       let _this = this;
