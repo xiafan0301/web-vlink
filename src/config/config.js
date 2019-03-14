@@ -16,10 +16,17 @@ const oDomains = {
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
+    // 消息部分地址
+    message: {
+        // dev: 'http://apidev.aorise.org/vlink-message',
+        dev: 'http://10.116.64.169:8081',//花艳玲
+        test: 'http://emi.aorise.org/api/vis/',
+        prod: 'http://emi.aorise.org/api/vis/'
+    },
     // 事件部分地址
     event: {
       // dev: 'http://apidev.aorise.org/vlink-event/api/emi',
-      dev: 'http://10.116.64.134:8081/api/emi',
+      dev: 'http://10.116.64.134:8082/api/emi',
       test: 'http://apirel.aorise.org/vlink-event/api/emi',
       prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     },

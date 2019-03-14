@@ -485,7 +485,7 @@ export default {
               }
             });
             console.log(this.fileList, 'this.fileList')
-            let fileListOne,fileListTwo,fileList;
+            let fileListOne = [],fileListTwo = [],fileList = [];
             // 从库中选择的
             if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
               fileListOne = this.fileList.filter(f => f.objType).map(m => {
@@ -500,13 +500,15 @@ export default {
             if (this.fileList.filter(f => f.objType === undefined).length > 0) {
               fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
                 return {
-                  objId: i,
+                  objId: m.response.data.sysAppendixInfo.uid,
                   objType: 3,
-                  photoUrl: m.response.data.fileFullPath//编辑参数
+                  photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
                 }
               })
             }
+            
             fileList = [...fileListOne, ...fileListTwo];
+            console.log(1111)
             const data = {
               modelType: 1,
               pointDtoList: pointDtoList,
@@ -548,7 +550,7 @@ export default {
                 })
               }
             });
-            let fileListOne,fileListTwo,fileList;
+            let fileListOne = [],fileListTwo = [],fileList = [];
             // 从库中选择的
             if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
               fileListOne = this.fileList.filter(f => f.objType).map(m => {
@@ -563,9 +565,9 @@ export default {
             if (this.fileList.filter(f => f.objType === undefined).length > 0) {
               fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
                 return {
-                  objId: i,
+                  objId: m.response.data.sysAppendixInfo.uid,
                   objType: 3,
-                  photoUrl: m.response.data.fileFullPath//编辑参数
+                  photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
                 }
               })
             }
@@ -606,7 +608,7 @@ export default {
             })
           }
         });
-        let fileListOne,fileListTwo,fileList;
+        let fileListOne = [],fileListTwo = [],fileList = [];
         // 从库中选择的
         if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
           fileListOne = this.fileList.filter(f => f.objType).map(m => {
@@ -621,9 +623,9 @@ export default {
         if (this.fileList.filter(f => f.objType === undefined).length > 0) {
           fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
             return {
-              objId: i,
+              objId: m.response.data.sysAppendixInfo.uid,
               objType: 3,
-              photoUrl: m.response.data.fileFullPath//编辑参数
+              photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
             }
           })
         }
@@ -665,7 +667,7 @@ export default {
             })
           }
         });
-        let fileListOne,fileListTwo,fileList;
+        let fileListOne = [],fileListTwo = [],fileList = [];
         // 从库中选择的
         if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
           fileListOne = this.fileList.filter(f => f.objType).map(m => {
@@ -680,9 +682,9 @@ export default {
         if (this.fileList.filter(f => f.objType === undefined).length > 0) {
           fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
             return {
-              objId: i,
+              objId: m.response.data.sysAppendixInfo.uid,
               objType: 3,
-              photoUrl: m.response.data.fileFullPath//编辑参数
+              photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
             }
           })
         }

@@ -15,7 +15,7 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item style="width: 260px;" prop="content">
-              <el-input v-model="helpForm.content" placeholder="请输入预案名称筛选查找"></el-input>
+              <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
             <el-form-item prop="helpState">
               <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择">
@@ -28,7 +28,7 @@
               </el-select>
             </el-form-item>
             <el-form-item style="width: 25%;">
-              <el-button type="primary">查询</el-button>
+              <el-button type="primary" @click="getMutualHelpList">查询</el-button>
               <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
@@ -37,7 +37,7 @@
           <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
             <div class="table_box">
             <el-table
-              :data="helpList"
+              :data="helpList.list"
               >
               <el-table-column
                 type="index"
@@ -47,39 +47,42 @@
               </el-table-column>
               <el-table-column
                 label="事件情况"
-                prop="eventType"
+                prop="eventDetail"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="事件地点"
-                prop="reportUser"
+                prop="eventAddress"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="发布者"
-                prop="idCard"
+                prop="reporterUserName"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="APP是否推送"
-                prop="reportTime"
+                prop="radius"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  {{scope.row.radius === -1 ? '不推送' : scope.row.radius === 0 ? '全部推送' : scope.row.radius > 0 ? (scope.row.radius + '公里以内') : ''}}
+                </template>
               </el-table-column>
-              <el-table-column
+              <el-table-column  
                 label="发布时间"
-                prop="eventAddress"
+                prop="reportTime"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column label="操作" width="140">
                 <template slot-scope="scope">
-                  <span class="operation_btn" @click="skip(3)">查看</span>
+                  <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
                   <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4)">修改</span>
+                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -89,20 +92,21 @@
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-size="helpList.pageSize"
             layout="total, prev, pager, next, jumper"
-            :total="400">
+            :total="helpList.total">
           </el-pagination>
         </div>
       </div>
     </div>
-    <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :pageType="pageType" @changePage="skip"></div>
-    <div is="helpDetail" v-if="pageType === 3" @changePage="skip"></div>
+    <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :helpId="helpId" :pageType="pageType" @changePage="skip"></div>
+    <div is="helpDetail" v-if="pageType === 3" :helpId="helpId" @changePage="skip"></div>
   </div>
 </template>
 <script>
 import helpAdd from './helpAdd.vue';
-import helpDetail from './helpDetail.vue';
+import helpDetail from './helpDetail.vue';  
+import {getMutualHelpList} from '@/views/index/api/api.js';
 export default {
   components: {helpAdd, helpDetail},
   data () {
@@ -115,9 +119,12 @@ export default {
         helpState: null
       },
       helpStateList: [
-        {value: '0', label: '未发布'},
-        {value: '1', label: '处理中'},
-        {value: '2', label: '已结束'}
+        {value: -1, label: '不推送'},
+        {value: 0, label: '全部推送'},
+        {value: 10, label: '10公里以内的'},
+        {value: 20, label: '20公里以内的'},
+        {value: 30, label: '30公里以内的'},
+        {value: 40, label: '40公里以内的'}
       ],
       // 表格参数
       helpList: [{name: 'xxx'}],
@@ -127,18 +134,42 @@ export default {
       currentPage: 1
     }
   },
+  mounted () {
+    this.getMutualHelpList();
+  },
   methods: {
+    // 获取民众互助列表
+    getMutualHelpList () {
+      const params = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: null,
+        order: null,
+        'where.startDateStr': this.helpForm.helpDate && this.helpForm.helpDate[0],
+        'where.endDateStr': this.helpForm.helpDate && this.helpForm.helpDate[1],
+        'where.keyWord': this.helpForm.content,
+        'where.radius': this.helpForm.helpState
+      }
+      getMutualHelpList().then(res => {
+        if (res && res.data) {
+          this.helpList = res.data;
+        }
+      })
+    },
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange () {
-
+    handleSizeChange (size) {
+      this.pageSize = size;
+      this.getMutualHelpList();
     },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.pageNum = page;
+      this.getMutualHelpList();
     },
-    skip (pageType) {
+    skip (pageType, uid) {
       this.pageType = pageType;
+      this.helpId = uid;
     },
     resetForm () {
       this.$refs['helpForm'].resetFields();

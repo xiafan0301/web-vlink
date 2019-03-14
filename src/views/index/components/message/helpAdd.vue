@@ -37,17 +37,17 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
+            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
             <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
             <el-radio-group v-model="addForm.radio">
-              <el-radio :label="1">不推送</el-radio>
-              <el-radio :label="2">推送</el-radio>
+              <el-radio :label="-1">不推送</el-radio>
+              <el-radio :label="0">推送</el-radio>
             </el-radio-group>
             <p class="vl_f_999">(APP是否推送消息?）</p>
           </el-form-item>
-          <el-form-item label="接收范围:">
+          <el-form-item label="接收范围:" v-if="addForm.radio === 0">
             <el-select value-key="uid" v-model="addForm.scope" filterable placeholder="请选择">
               <el-option
                 v-for="item in scopeList"
@@ -70,7 +70,8 @@
         </div>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="release('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 2" type="primary" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 4" type="primary" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -79,9 +80,10 @@
 <script>
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
+import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.js';
 export default {
   components: {uploadPic},
-  props: ['pageType'],
+  props: ['pageType', 'helpId'],
   data () {
     return {
       type: null,//页面类型
@@ -91,7 +93,7 @@ export default {
         time: null,
         place: null,
         situation: null,
-        radio: 1,
+        radio: -1,
         scope: null
       },
       addRules: {
@@ -109,16 +111,28 @@ export default {
           {required: true, message: '请输入事件情况', trigger: 'blur'}
         ]
       },
-      scopeList: [],
+      scopeList: [
+        {value: 10, label: '10公里以内的'},
+        {value: 20, label: '20公里以内的'},
+        {value: 30, label: '30公里以内的'},
+        {value: 40, label: '40公里以内的'}
+      ],
+      loadingBtn: false,
+      hId: null,//民众互助id，用于修改
       // 地图参数
       map: null,
+      lngLat: null,//经纬度
       // 上传参数
       fileList: []
     }
   },
   mounted () {
     this.resetMap();
-    this.search();
+    // this.search();
+    // 修改，回填数据
+    if (this.pageType === 4) {
+      this.getMutualHelpDetail();
+    }
   },
   methods: {
     skip (pageType) {
@@ -130,6 +144,11 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
+      console.log(fileList)
+    },
+    uploadPicDel (fileList) {
+      this.fileList = fileList;
+      console.log(fileList)
     },
     resetMap () {
       let _this = this;
@@ -152,6 +171,7 @@ export default {
               // 经纬度                      
               let lng = result.geocodes[0].location.lng;
               let lat = result.geocodes[0].location.lat;
+              _this.lngLat = [lng, lat];
               // 追踪点标记
               let offSet = [-20.5, -48], _hoverWindow = null;
               if (lng > 0 && lat > 0) {
@@ -196,8 +216,8 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
-    // 确定发布
-    release (formName) {
+     // 新增民众互助
+    addMutualHelp (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.addForm.time.getTime() < new Date().getTime()) {
@@ -209,8 +229,126 @@ export default {
             return false;
           }
           console.log('通过验证')
+          const data = {
+            attachmentList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
+            eventAddress: this.addForm.place,//事发地点
+            eventDetail: this.addForm.situation,//事件详情
+            latitude: this.lngLat[0],//事发地点纬度
+            longitude: this.lngLat[1],//事发地点经度
+            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
+            reportTime: this.addForm.time,//上报时间
+            reporterPhone: this.addForm.phone,//上报手机号
+            reporterUserId: 123//上报人标识
+          }
+          console.log(JSON.stringify(data) )
+          this.loadingBtn = true;
+          addMutualHelp(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('发布成功');
+              this.skip(1); 
+            }
+          }).finally(() => {
+              this.loadingBtn = false;
+            })
         } else {
-          console.log(this.addForm.time.getTime())
+          return false;
+        }
+      });
+    },
+     addForm: {
+        phone: null,
+        time: null,
+        place: null,
+        situation: null,
+        radio: 1,
+        scope: null
+      },
+    // 根据id获取民众互助详情,用于回填数据
+    getMutualHelpDetail () {
+      getMutualHelpDetail(this.helpId).then(res => {
+        if (res && res.data) {
+          const detail = res.data;
+          this.addForm.phone = detail.reporterPhone;
+          this.addForm.time = detail.reportTime;
+          this.addForm.place = detail.eventAddress;
+          this.addForm.situation = detail.eventDetail;
+          this.lngLat = [detail.longitude, detail.latitude];
+          this.hId = detail.uid;
+          this.fileList = detail.attachmentList.map(m => {
+            return {
+              cname: m.cname,
+              contentUid: m.contentUid,
+              createTime: m.createTime,
+              delFlag: m.delFlag,
+              desci: m.desci,
+              filePathName: m.filePathName,
+              fileType: m.fileType,
+              imgHeight: m.imgHeight,
+              imgSize: m.imgSize,
+              imgWidth: m.imgWidth,
+              opUserId: m.opUserId,
+              url: m.path,
+              sort: m.sort,
+              thumbnailName: m.thumbnailName,
+              thumbnailPath: m.thumbnailPath,
+              uid: m.uid,
+              updateTime: m.updateTime,
+              updateUserId: m.updateUserId
+            }
+          })
+          if (detail.radius > 0) {
+            this.addForm.radio = 0;
+            this.addForm.scope = detail.radius;
+          } else if (detail.radius === 0) {
+            this.addForm.radio = 0;
+          } else {
+            this.addForm.radio = -1;
+          }
+        }
+      })
+    },
+    // 修改民众互助
+    putMutualHelp (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          // if (this.addForm.time.getTime() < new Date().getTime()) {
+          //   this.$message.error('事发时间不能晚于当前系统时间！');
+          //   return false;
+          // }
+          if (this.fileList.length === 0) {
+            this.$message.error('请上传图片！');
+            return false;
+          }
+          console.log('通过验证')
+          const data = {
+            attachmentList: this.fileList.map(m => {
+              if (m.response) {
+                return m.response.data.sysAppendixInfo;
+              } else {
+                return m;
+              }
+            }),//附件信息列表
+            eventAddress: this.addForm.place,//事发地点
+            eventDetail: this.addForm.situation,//事件详情
+            latitude: this.lngLat[0],//事发地点纬度
+            longitude: this.lngLat[1],//事发地点经度
+            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
+            reportTime: this.addForm.time,//上报时间
+            reporterPhone: this.addForm.phone,//上报手机号
+            reporterUserId: 123,//上报人标识
+            uid: this.hId
+          }
+          this.loadingBtn = true;
+          console.log(data)
+          putMutualHelp(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('修改发布成功');
+              this.skip(1); 
+            }
+          }).finally(() => {
+              this.loadingBtn = false;
+            })
+        } else {
           return false;
         }
       });
@@ -218,7 +356,7 @@ export default {
     // 搜索事发地点
     search () {
       let _this = this;
-        new Window.AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
+        new window.AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
 
           var poiPicker = new PoiPicker({
               input: 'searchInput',

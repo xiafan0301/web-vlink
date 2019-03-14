@@ -822,14 +822,64 @@ export function getAlarmSnap(params) {
     mode: 'control'
   })
 }
+/*=================消息管理模块================== */
 /**
- * getEventDetailById 通过事件id查询事件详情
+ * addMutualHelp 新增民众互助接口
  * @param {object} params
  */
-export function getEventDetailById(uid) {
+export function addMutualHelp(data) {
   return request({
-    url: '/api/emi/eventServices/events/' + uid,
+    url: '/eventService/mutualHelp',
+    method: 'post',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * getMutualHelpDetail 民众互助详情查询接口  
+
+ * @param {object} params
+ */
+export function getMutualHelpDetail(uid) {
+  return request({
+    url: '/eventService/mutualHelp/' + uid,
+    method: 'put',
+    mode: 'message'
+  })
+}
+/**
+ * putMutualHelp 修改民众互助接口
+ * @param {object} params
+ */
+export function putMutualHelp(data) {
+  return request({
+    url: '/eventService/mutualHelp',
+    method: 'put',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * getMutualHelpList 民众互助列表分页查询接口
+ * @param {object} params
+ */
+export function getMutualHelpList(params) {
+  return request({
+    url: '/eventService/mutualHelpList',
     method: 'get',
-    mode: 'event'
+    params,
+    mode: 'message'
+  })
+}
+/**
+ * getCommentInfoList 事件评论列表分页查询接口
+ * @param {object} params
+ */
+export function getCommentInfoList(params) {
+  return request({
+    url: '/eventService/commentInfoList',
+    method: 'get',
+    params,
+    mode: 'message'
   })
 }

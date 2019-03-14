@@ -32,7 +32,7 @@
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetailById">详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
@@ -261,7 +261,7 @@
       <el-button type="primary" @click="skipIsCreate">复用</el-button>
       <el-button @click="showDialog('delDialog')">删除</el-button>
     </div>
-    <div class="event_detail_dialog">
+    <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog
         :visible.sync="eventDetailDialog"
         :close-on-click-modal="false"
@@ -270,30 +270,30 @@
         top="20vh">
         <div class="detail_list">
           <div>
-            <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">XPZ180724001</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.dealOrgId}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">XPZ180724001</span></div>
-            <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatus}}</span></div>
+            <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">{{eventDetail.reportTime}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">XPZ180724001</span></div>
-            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">XPZ180724001</span></div>
+            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventType}}</span></div>
+            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevel}}</span></div>
           </div>
         </div>
         <div class="detail_list">
-          <span class="vl_f_666">人员伤亡：</span><span class="vl_f_333">未知</span>
+          <span class="vl_f_666">人员伤亡：</span><span class="vl_f_333">{{eventDetail.casualties === -1 ? '不确定' : eventDetail.casualties === 0 ? '无' : eventDetail.casualties > 0 ? eventDetail.casualties : ''}}</span>
         </div>
         <div class="detail_list">
-          <span class="vl_f_666">事发地点：</span><span class="vl_f_333">长沙市创谷广告产业园</span>
+          <span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{eventDetail.eventAddress}}</span>
         </div>
         <div class="detail_list">
-          <span class="vl_f_666">事件情况：</span><span class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span>
+          <span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{eventDetail.eventDetail}}</span>
         </div>
         <vue-scroll>
           <div class="detail_img_box">
-            <img src="//via.placeholder.com/117x117" alt="" v-for="item in '111111111'" :key="item.id">
+            <img :src="item.path !== 'string' ? item.path : '//via.placeholder.com/117x117'" alt="" v-for="item in eventDetail.closeAttachmentList" :key="item.id">
           </div>
         </vue-scroll>
       </el-dialog>
@@ -307,7 +307,7 @@ import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conData, conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
-import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetailById} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
   props: ['state', 'controlId'],
@@ -315,6 +315,7 @@ export default {
     return {
       controlState: null,//布控详情状态
       controlDetail: conDetail,//布控详情
+      eventDetail: null,//事件详情
       // 地图参数
       map: null,
       // 追踪点列表数据
@@ -388,11 +389,11 @@ export default {
       })
     },
     // 获取事件详情
-    getEventDetailById () {
+    getEventDetail () {
       this.eventDetailDialog = true;
-      getEventDetailById(this.controlDetail.eventId).then(res => {
+      getEventDetail(1).then(res => {
         if (res && res.data) {
-          console.log(res.data)
+          this.eventDetail = res.data;
         }
       })
     },
@@ -1015,7 +1016,6 @@ export default {
     }
     .detail_img_box{
       width: 64%;
-      height: 274px;
       padding: 20px 0 0 70px;
       display: flex;
       flex-flow: row wrap;

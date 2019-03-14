@@ -223,7 +223,7 @@
                   multiple
                   accept="image/*"
                   :limit="1"
-                  action="https://apidev.aorise.org/medical-his/api/network/upload/new"
+                  action="http://apidev.aorise.org/vlink-base/appendix"
                   :on-exceed="uploadPicExceed"
                   :data="{projectType: 2}"
                   list-type="picture-card"
@@ -637,7 +637,7 @@ export default {
       this.dialogVisible = true;
     },
     uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.fileFullPath;
+      this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
       this.$message.success('上传成功！');
     },
     uploadPicError () {

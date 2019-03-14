@@ -8,7 +8,7 @@
       </el-breadcrumb>
     </div>
     <div class="help_det_box">
-      <div class="det_info">
+      <div class="det_info" v-if="helpDetail">
         <div style="padding-left: 14px;margin-bottom: 12px;">
           <span>上报人：</span>
           <el-popover
@@ -18,28 +18,26 @@
             >
             <div class="det_info_com"><i class="vl_icon vl_icon_message_1"></i><span>语音通话</span></div>
             <div class="det_info_com"><i class="vl_icon vl_icon_message_2"></i><span>视频通话</span></div>
-            <span class="det_info_click" slot="reference">13890809908</span>
+            <span class="det_info_click" slot="reference">{{helpDetail.reporterPhone}}</span>
           </el-popover>
         </div>
-        <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">2018.08.07  12:13:14</span></div>
-        <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</span></div>
-        <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">长沙市天心区创谷广告产业园</span></div>
+        <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">{{helpDetail.reportTime}}</span></div>
+        <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{helpDetail.eventDetail}}</span></div>
+        <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
       </div>
       <div class="det_list">
         <div class="list_title">
-          <span>5</span><span>条信息</span>
+          <span>{{commentList && commentList.length}}</span><span>条信息</span>
         </div>
-        <div class="list_content" v-for="item in messageList" :key="item.id">
+        <div class="list_content" v-for="item in commentList" :key="item.id">
           <img src="//via.placeholder.com/32x32" alt="">
           <ul>
-            <li class="con_one"><span>13900001234</span><span class="vl_f_999 vl_f_12">（信息部门-信息科长）</span></li>
-            <li class="con_two"><span class="vl_f_999 vl_f_12">2017-10-01 18:00</span><span class="vl_f_999 vl_f_12">来源 全域智能视联系统APP</span></li>
-            <li class="con_three">未参与民众互助</li>
-            <li class="con_four vl_f_333">园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。</li>
+            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserIdentity}}）</span></li>
+            <li class="con_two"><span class="vl_f_999 vl_f_12">{{item.createTime}}</span><span class="vl_f_999 vl_f_12">来源 {{item.eventSource}}</span></li>
+            <li class="con_three">{{item.participateType}}</li>
+            <li class="con_four vl_f_333">{{item.content}}</li>
             <li class="con_five">
-              <img src="//via.placeholder.com/117x117" alt="">
-              <img src="//via.placeholder.com/117x117" alt="">
-              <img src="//via.placeholder.com/117x117" alt="">
+              <img :src="info.path" alt="" v-if="info in item.sysAppendixInfoList" :key="info.uid">
             </li>
             <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="messageId = item.id;isConfirmation = false;">回复该评论</span></div>
@@ -86,21 +84,17 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
+import {getMutualHelpDetail, getCommentInfoList} from '@/views/index/api/api.js';
 export default {
   components: {emotion},
+  props: ['helpId'],
   data () {
     return {
+      helpDetail: null,//民众互助详情
+      commentList: [],//评论列表内容
       content: '',//评论内容,
       isShowEmoji: false,//是否显示表情选择框
       isConfirmation: false,//是否确认回复评论
-      messageList: [
-        {id: '001'},
-        {id: '002'},
-        {id: '003'},
-        {id: '004'},
-        {id: '005'},
-        {id: '006'}
-      ],//信息列表
       messageId: null,//信息id
       // 屏蔽弹窗参数
       shieldDialog: null,
@@ -109,9 +103,29 @@ export default {
     }
   },
   mounted () {
-   
+    this.getMutualHelpDetail();
+    this.getCommentInfoList();
   },
   methods: {
+    // 根据id获取民众互助详情
+    getMutualHelpDetail () {
+      getMutualHelpDetail(this.helpId).then(res => {
+        if (res && res.data) {
+          this.helpDetail = res.data;
+        }
+      })
+    },
+    // 获取评论列表数据
+    getCommentInfoList () {
+      const params = {
+        eventId: 1//this.helpId
+      }
+      getCommentInfoList(params).then(res => {
+        if (res && res.data) {
+          this.commentList = res.data;
+        }
+      })
+    },
     skip (pageType) {
       this.$emit('changePage', pageType)
     },

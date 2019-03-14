@@ -255,11 +255,13 @@ export default {
     this.getControlList();
   },
   methods: {
-    handleSizeChange () {
-
+    handleSizeChange (size) {
+      this.pageType = size;
+      this.getControlList();
     },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.pageNum = page;
+      this.getControlList();
     },
     // 显示弹出框
     showDialog (formName, uid) {
