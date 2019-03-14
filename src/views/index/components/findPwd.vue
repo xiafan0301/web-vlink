@@ -21,9 +21,9 @@
                             <el-form-item>
                               <div id="drag">
                                 <div class="drag_bg"></div>
-                                <div class="drag_text" onselectstart="return false;" unselectable="on">向右滑动验证</div>
-                                <div class="handler handler_bg" @mousedown="mousedownFn($event)">
-                                  <i class="el-icon-d-arrow-right"></i>
+                                <div class="drag_text">{{dragText}}</div>
+                                <div class="handler" :class="[confirmSuccess ? 'handler_ok_bg' : 'handler_bg']" @mousedown="mousedownFn($event, 'pwdForm1')">
+                                  <i :class="[confirmSuccess ? 'el-icon-circle-check' : 'el-icon-d-arrow-right']"></i>
                                 </div>
                               </div>
                             </el-form-item>
@@ -42,7 +42,7 @@
                                 <el-button @click="getRegCode('pwdForm2')" :disabled="regCodeDis" class="pwd_code_btn">{{regCodeTip}}</el-button>
                             </el-form-item>
                             <el-form-item>
-                                <el-button type="primary" :disabled="!pwdForm2.code" :loading="pwdForm2Loading" @click="nextStep2('pwdForm2')">下一步</el-button>
+                                <el-button :class="[!pwdForm2.code ? 'disabled_btn' : 'nextTwobtn']" :disabled="!pwdForm2.code" :loading="pwdForm2Loading" @click="nextStep2('pwdForm2')">下一步</el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -140,6 +140,8 @@ export default {
         mouseMoveStata: false, // 触发滑块拖动状态判断
         beginClientX: 0, // 距离屏幕最左端距离
         maxWidth: 320, // 拖动的最大宽度
+        confirmSuccess: false, // 滑块验证结果
+        dragText: '向右滑动验证'
       }
     },
     mounted () {
@@ -150,7 +152,7 @@ export default {
           if (width > 0 && width <= _this.maxWidth) {
             $('.handler').css('left', width);
             $('.drag_bg').css('width', width);
-          } else if (width > _this.maxWidth) {
+          } else if ( width > _this.maxWidth ) {
             _this.successDrag();
           }
         }
@@ -166,26 +168,31 @@ export default {
     },
     methods: {
       // 拖动滑块按下时
-      mousedownFn (e) {
-        this.mouseMoveStata = true;
-        this.beginClientX = e.clientX;
+      mousedownFn (e, form) {
+        this.$refs[form].validate(valid => {
+          if (valid) {
+            this.mouseMoveStata = true;
+            this.beginClientX = e.clientX;
+          }
+        })
       },
       // 拖动滑块验证成功
       successDrag () {
-        if (!this.pwdForm1.mobile) {
-          this.$message.warning('请先输入手机号');
-          return false;
-        } else {
-          const params = {
-            userMobile: this.pwdForm1.mobile
-          };
-          isRegister(params)
-            .then(res => {
-              if (res) {
-                
-              }
-            })
-        }
+        const params = {
+          userMobile: this.pwdForm1.mobile
+        };
+        isRegister(params)
+          .then(res => {
+            if (res.data) {
+              this.confirmSuccess = false;
+              $('.handler').removeClass('handler_ok_bg').addClass('handler_bg');
+              this.dragText = '该手机账户不存在';
+            } else {
+              this.confirmSuccess = true;
+              this.dragText = '';
+              this.step = 2;
+            }
+          })
       },
       nextStep1 (formName) {
           this.$refs[formName].validate((valid) => {
@@ -361,6 +368,7 @@ export default {
                         background-color: #4FCB61;
                         height: 40px;
                         width: 0px;
+                        color: #ffffff;
                       }
                       .handler {
                         position: absolute;
@@ -373,13 +381,27 @@ export default {
                         cursor: move;
                       }
                     }
+                    .nextTwobtn {
+                      background-color: #0C70F8;
+                      color: #ffffff;
+                    }
+                    .disabled_btn {
+                      background-color: #F2F2F2;
+                      color: #B2B2B2;
+                    }
                 }
             }
         }
     }
 }
 .pwd_code_btn {
-    position: absolute; top: 0; right: 0;
-    width: 150px;
+  font-size: 16px;
+  height: 40px;
+  position: absolute; top: 0; right: 0;
+  width: 120px;
+  &:hover {
+    color: #0C70F8;
+    border-color: #0C70F8;
+  }
 }
 </style>
