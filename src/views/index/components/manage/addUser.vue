@@ -15,8 +15,8 @@
             <el-form-item label="手机号码:" prop="userMobile">
               <el-input style="width: 40%;" placeholder="请输入手机号码" v-model="addUser.userMobile"></el-input>
             </el-form-item>
-            <el-form-item label="姓名:" prop="userRealName">
-              <el-input style="width: 40%;" placeholder="请输入姓名" v-model="addUser.userRealName"></el-input>
+            <el-form-item label="姓名:" prop="userName">
+              <el-input style="width: 40%;" placeholder="请输入姓名" v-model="addUser.userName"></el-input>
             </el-form-item>
             <el-form-item label="性别:" prop="name">
               <el-radio-group style="width: 40%;" v-model="addUser.userSex">
@@ -30,10 +30,14 @@
             <el-form-item label="邮箱:" prop="userEmail">
               <el-input style="width: 40%;" placeholder="请输入邮箱" v-model="addUser.userEmail"></el-input>
             </el-form-item>
-            <el-form-item label="所属部门:" prop="department">
-              <el-select style="width: 40%;" v-model="addUser.department" placeholder="请选择部门">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="所属部门:" prop="organId">
+              <el-select style="width: 40%;" v-model="addUser.organId" placeholder="请选择部门">
+                <el-option
+                  v-for="(item, index) in departmentData"
+                  :key="index"
+                  :label="item.organName"
+                  :value="item.uid"
+                ></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -57,25 +61,25 @@
 </template>
 <script>
 import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
-import { createUser } from '@/views/index/api/api.js';
+import { createUser, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       addUser: {
         proKey: null,
         userMobile: null,
-        userRealName: null,
-        userSex: 1,
+        userName: null,
+        userSex: 0,
         userIdcard: null,
         userEmail: null,
-        department: null
+        organId: null
       },
       rules: {
         userMobile: [
           { required: true, message: '该项内容不可为空' },
           { validator: validatePhone, trigger: 'blur' }
         ],
-        userRealName: [
+        userName: [
           { required: true, message: '该项内容不可为空' },
         ],
         userIdcard: [
@@ -84,10 +88,31 @@ export default {
         userEmail: [
           { validator: checkEmail, trigger: 'blur' }
         ]
-      }
+      },
+      userInfo: {},
+      departmentData: []
     }
   },
+  mounted () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.addUser.proKey = this.userInfo.proKey;
+    this.getDepartList();
+  },
   methods: {
+    // 获取列表数据
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageNum: 1,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.departmentData = res.data.list;
+          }
+        })
+    },
     submitForm (form) {
       this.$refs[form].validate(valid => {
         if (valid) {

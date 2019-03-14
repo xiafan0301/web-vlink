@@ -260,6 +260,42 @@ export function judgeDepart (data) {
   });
 }
 /**
+ * 根据组织机构查人员
+ * @param {*} data 
+ */
+export function getUserMember (data) {
+  return request({
+    url: 'authServices/organ/user',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 组织机构批量添加人员
+ * @param {*} data 
+ */
+export function addUserMember (data) {
+  return request({
+    url: 'authServices/organ/user',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 组织机构批量删除人员
+ * @param {*} data 
+ */
+export function delUserMember (data) {
+  return request({
+    url: 'authServices/organ/user',
+    params: data,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
  * 添加部门
  * @param {*} data 
  */
@@ -277,7 +313,7 @@ export function addDepart (data) {
  */
 export function getUserList (data) {
   return request({
-    url: 'userServices/users',
+    url: 'authServices/users',
     params: data,
     mode: 'auth',
     method: 'get'
@@ -296,36 +332,36 @@ export function getDepartDetail (data) {
   });
 }
 /**
- * 获取用户组
- * @param {*} data 
- */
-export function getUserGroup (data) {
-  return request({
-    url: 'authServices/userGroups',
-    params: data,
-    mode: 'auth',
-    method: 'get'
-  });
-}
-/**
  * 删除用户
  * @param {*} data 
  */
-export function delUser (uid) {
+export function delUser (params) {
   return request({
-    url: 'authServices/user/' + uid,
+    url: 'authServices/user/' + params.uid + '?proKey=' + params.proKey,
     mode: 'auth',
     method: 'delete'
+  });
+}
+/**
+ * 重置密码
+ * @param {*} data 
+ */
+export function resetPwd (data) {
+  return request({
+    url: 'authServices/users/user',
+    mode: 'auth',
+    data,
+    method: 'put'
   });
 }
 /**
  * 启用/禁用用户
  * @param {*} data 
  */
-export function isForceUser (params) {
+export function isForceUser (data) {
   return request({
     url: 'authServices/user',
-    params,
+    data,
     mode: 'auth',
     method: 'put'
   });
@@ -334,11 +370,11 @@ export function isForceUser (params) {
  * 编辑用户
  * @param {*} data 
  */
-export function updateUser (params) {
+export function updateUser (data) {
   return request({
-    url: 'authServices/user',
-    params,
-    mode: 'auth',
+    url: 'userService/userInfo',
+    data,
+    mode: 'user',
     method: 'put'
   });
 }
@@ -346,11 +382,11 @@ export function updateUser (params) {
  * 创建用户
  * @param {*} data 
  */
-export function createUser (params) {
+export function createUser (data) {
   return request({
-    url: 'authServices/user',
-    params,
-    mode: 'auth',
+    url: 'userService/userInfo',
+    data,
+    mode: 'user',
     method: 'post'
   });
 }
@@ -370,22 +406,70 @@ export function getUserGroups (params) {
  * 创建用户组
  * @param {*} data 
  */
-export function createUserGroups (params) {
+export function createUserGroups (data) {
   return request({
     url: 'authServices/userGroup',
-    params,
+    data,
     mode: 'auth',
     method: 'post'
+  });
+}
+/**
+ * 批量新增所选组
+ * @param {*} data 
+ */
+export function addUserBatchGroups (data) {
+  return request({
+    url: 'authServices/userBatchGroup',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 批量新增所选角色
+ * @param {*} data 
+ */
+export function addUserBatchRoles (data) {
+  return request({
+    url: 'authServices/userBatchRole',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 批量删除所选组
+ * @param {*} data 
+ */
+export function delUserBatchGroups (data) {
+  return request({
+    url: 'authServices/userBatchGroup',
+    data,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 批量删除所选角色
+ * @param {*} data 
+ */
+export function delUserBatchRoles (data) {
+  return request({
+    url: 'authServices/userBatchRole',
+    data,
+    mode: 'auth',
+    method: 'delete'
   });
 }
 /**
  * 编辑用户组
  * @param {*} data 
  */
-export function updateUserGroups (params) {
+export function updateUserGroups (data) {
   return request({
     url: 'authServices/userGroup',
-    params,
+    data,
     mode: 'auth',
     method: 'put'
   });
@@ -408,31 +492,102 @@ export function judgeUserGroup (data) {
  */
 export function delUserGroup (params) {
   return request({
-    url: 'authServices/userGroup/' + params.uid,
+    url: 'authServices/userGroup/' + params.uid + '?proKey=' + params.proKey,
     mode: 'auth',
     method: 'delete'
   });
 }
 /**
- * 添加所选成员
+ * 用户组批量添加所选用户成员
  * @param {*} data 
  */
-export function addMemberInfo (params) {
+export function addMemberInfo (data) {
   return request({
     url: 'authServices/userGroupBatch',
-    params,
+    data,
     mode: 'auth',
     method: 'post'
   });
 }
 /**
- * 删除所选成员
+ * 用户组批量删除所选用户成员
  * @param {*} data 
  */
-export function delMemberInfo (params) {
+export function delMemberInfo (data) {
   return request({
     url: 'authServices/userGroupBatch',
+    data,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 用户组批量添加所选角色
+ * @param {*} data 
+ */
+export function addUserGroupRoles (data) {
+  return request({
+    url: 'authServices/groupBatchRole',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 用户组批量删除所选角色
+ * @param {*} data 
+ */
+export function delUserGroupRoles (data) {
+  return request({
+    url: 'authServices/groupBatchRole',
+    data,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 获取角色列表数据
+ * @param {*} data 
+ */
+export function getRoleList (params) {
+  return request({
+    url: 'authServices/userRoles',
     params,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 创建角色
+ * @param {*} data 
+ */
+export function createRole (data) {
+  return request({
+    url: 'authServices/userRole',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 编辑角色
+ * @param {*} data 
+ */
+export function updateRole (data) {
+  return request({
+    url: 'authServices/userRole',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 删除角色
+ * @param {*} data 
+ */
+export function delRole (data) {
+  return request({
+    url: 'authServices/userRole/' + data.uid + '?proKey=' + data.proKey,
     mode: 'auth',
     method: 'delete'
   });

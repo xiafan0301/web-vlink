@@ -82,7 +82,7 @@
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
-              <el-option label="无" value="shanghai"></el-option>
+              <el-option label="无" value=""></el-option>
               <el-option
                 v-for="(item, index) in departmentData"
                 :key="'item' + index"
@@ -101,8 +101,6 @@
                 :value="item.uid"
               >
               </el-option>
-              <!-- <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
         </el-form>
@@ -126,17 +124,27 @@
           <el-form-item label=" " prop="organName">
             <el-input v-model="editDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
           </el-form-item>
-          <el-form-item label=" " prop="organPid">
-            <el-select style="width: 95%;" v-model="editDepartment.organPid" placeholder="请选择上级部门">
-              <el-option label="无" value="shanghai"></el-option>
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+          <el-form-item label=" " prop="pid">
+            <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门">
+              <el-option label="无" value=""></el-option>
+              <el-option
+                v-for="(item, index) in departmentData"
+                :key="'item' + index"
+                :label="item.organName"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="chargeUserName">
             <el-select style="width: 95%;" filterable v-model="editDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="(item, index) in userList"
+                :key="'item' + index"
+                :label="item.userName"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -179,10 +187,26 @@
   </div>
 </template>
 <script>
-import {isJudgeDepart} from '@/utils/validator.js';
-import { getDepartmentList, updateDepart, delDepart, addDepart, getUserList } from '@/views/index/api/api.js';
+// import {isJudgeDepart} from '@/utils/validator.js';
+import { getDepartmentList, updateDepart, delDepart, addDepart, getUserList, judgeDepart } from '@/views/index/api/api.js';
 export default {
   data () {
+    var isJudgeDepart = (value, callback) => {
+      if (value) {
+        const params = {
+          proKey: this.userInfo.proKey,
+          organName: this.addDepartment.organName
+        }
+        judgeDepart(params)
+          .then(res => {
+            if (res.data) {
+              console.log(res.data)
+              return callback(new Error('部门已存在'))
+            }
+          })
+          .catch(() => {})
+      }
+    };
     return {
       closeShow: false, // 清空搜索框
       organName: null, // 搜索的部门名称
@@ -193,22 +217,22 @@ export default {
       delChildDepartmentDialog: false, // 删除下级部门弹出框
       editDepartmentDialog: false, // 编辑部门弹出框
       addDepartment: {
-        'where.proKey': null,
+        proKey: null,
         organName: null,
         organPid: null,
         chargeUserName: null
       },
       editDepartment: {
-        'where.proKey': null,
+        proKey: null,
         uid: null,
         organName: null,
-        organPid: null,
+        pid: null,
         chargeUserName: null
       },
       addRules: {
         organName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { validator: isJudgeDepart, trigger: 'blur' }
+          // { validator: isJudgeDepart, trigger: 'blur' }
         ],
         organPid: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
@@ -219,7 +243,7 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { validator: 'isJudgeDepart', trigger: 'blur' }
         ],
-        organPid: [
+        pid: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
@@ -230,11 +254,10 @@ export default {
   },
   created () {
     this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    console.log(this.userInfo)
   },
   mounted () {
-    this.addDepartment['where.proKey'] = this.userInfo.proKey;
-    this.editDepartment['where.proKey'] = this.userInfo.proKey;
+    this.addDepartment.proKey = this.userInfo.proKey;
+    this.editDepartment.proKey= this.userInfo.proKey;
     this.getList();
   },
   methods: {
@@ -286,37 +309,36 @@ export default {
     },
     // 跳至部门详情页
     skipSelectDetail (obj) {
-      console.log(obj);
       this.$router.push({name: 'department_detail', query: {id: obj.uid}});
     },
     // 显示新增部门弹出框
     showNewDepartment () {
       this.getUsersData();
+      this.addDepartment.organName = null;
+      this.addDepartment.organPid = null;
+      this.addDepartment.chargeUserName = null;
       this.newDepartmentDialog = true;
     },
     // 显示编辑部门弹出框
     showEditDialog (obj) {
-      // this.editDepartment.uid = obj.uid;
+      this.getUsersData();
+      this.editDepartment.uid = obj.uid;
       this.editDepartment.organName = obj.organName;
-      this.editDepartment.organPid = obj.organPid;
+      this.editDepartment.pid = obj.organPid;
       this.editDepartment.chargeUserName = obj.chargeUserName;
       this.editDepartmentDialog = true;
     },
     // 显示删除部门的弹出框
     showDeleteDialog (obj) {
       this.deleteId = obj.uid;
-      // this.delDepartmentDialog = true;
-      this.delChildDepartmentDialog = true;
+      if ((obj.organRight - obj.organLeft) > 1) {
+        this.delChildDepartmentDialog = true;
+      } else {
+        this.delDepartmentDialog = true;
+      }
     },
     // 删除部门
     deleteDepartment () {
-      this.handleDelete();
-    },
-    // 删除下级部门
-    delChildDepart () {
-      this.handleDelete();
-    },
-    handleDelete () {
       const params = {
         deleteId: this.deleteId,
         proKey: this.userInfo.proKey
@@ -330,6 +352,33 @@ export default {
               customClass: 'request_tip'
             })
             this.getList();
+            this.delDepartmentDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 删除下级部门
+    delChildDepart () {
+      const params = {
+        deleteId: this.deleteId,
+        proKey: this.userInfo.proKey
+      };
+      delDepart(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '删除成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.delChildDepartmentDialog = false;
           } else {
             this.$message({
               type: 'error',
@@ -344,6 +393,7 @@ export default {
     addDepartmentInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          console.log('111111')
           addDepart(this.addDepartment)
             .then(res => {
               if (res) {

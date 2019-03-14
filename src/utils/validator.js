@@ -4,29 +4,31 @@
 *  可自定义属性
 */
 import { judgeDepart, judgeUserGroup } from '@/views/index/api/api.js';
-// 判断部门名称是否重复
-export const isJudgeDepart = (value, callback) => {
-  if (value) {
-    const params = {
-      'where.proKey': '111',
-      organName: value
-    }
-    judgeDepart(params)
-      .then(res => {
-        if (res) {
-          return callback(new Error('部门已存在'))
-        }
-      })
-      .catch(() => {})
-  }
-}
+// const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+// // 判断部门名称是否重复
+// export const isJudgeDepart = (value, callback) => {
+//   if (value) {
+//     console.log(value)
+//     const params = {
+//       proKey: userInfo.proKey,
+//       organName: value
+//     }
+//     judgeDepart(params)
+//       .then(res => {
+//         if (res) {
+//           return callback(new Error('部门已存在'))
+//         }
+//       })
+//       .catch(() => {})
+//   }
+// }
 /**
  * 判断用户组名称是否重复
  */
 export const isJudgeUserGroup = (value, callback) => {
   if (value) {
     const params = {
-      'where.proKey': '111',
+      'where.proKey': userInfo.proKey,
       groupName: value
     }
     judgeUserGroup(params)
