@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    只能查看
+    智能查看
   </div>
 </template>
 <script>

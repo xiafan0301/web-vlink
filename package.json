@@ -14,12 +14,16 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@antv/data-set": "^0.10.1",
+    "@antv/g2": "^3.4.9",
     "axios": "^0.18.0",
-    "element-ui": "^2.4.11",
+    "element-ui": "^2.6.1",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
     "node-sass": "^4.10.0",
     "qrcodejs2": "0.0.2",
     "sass-loader": "^7.1.0",
-    "vue": "^2.5.17",
+    "vue": "^2.6.8",
     "vue-qart": "^2.2.0",
     "vue-router": "^3.0.1",
     "vuescroll": "^4.9.1"
@@ -28,7 +32,7 @@
     "@vue/cli-plugin-babel": "^3.0.4",
     "@vue/cli-plugin-eslint": "^3.0.4",
     "@vue/cli-service": "^3.0.4",
-    "vue-template-compiler": "^2.5.17"
+    "vue-template-compiler": "^2.6.8"
   },
   "eslintConfig": {
     "root": true,

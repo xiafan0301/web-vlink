@@ -2,6 +2,13 @@
 import Vue from 'vue/dist/vue.js';
 import {formatDate} from './util.js';
 /*
+ * 求百分比
+ * */
+Vue.filter('fnPercent', function (val, total) {
+  if (isNaN(val) || isNaN(total)) { return ''; }
+  return Math.round(val / total * 100) + '%';
+});
+/*
  * 时间戳处理
  * */
 Vue.filter('fmTimestamp', function (timestamp, fm) {

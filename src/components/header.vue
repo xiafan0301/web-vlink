@@ -12,7 +12,7 @@
           <li class="user_pl_dis">修改密码</li>
           <li @click="loginOut">退出登录</li>
         </ul>
-        <span slot="reference">管理员&nbsp;<i class="el-icon-arrow-down"></i></span>
+        <span slot="reference">{{ userInfo && userInfo.userRealName}}&nbsp;<i class="el-icon-arrow-down"></i></span>
       </el-popover>
       <ul>
         <li>
@@ -21,6 +21,14 @@
           </el-badge>
         </li>
         <li>
+          <!-- <template v-if="sums.events > 0">
+            <el-badge :value="sums.events" class="item" :max="99">
+              <img class="aa" src="../assets/img/vl-jq1.gif" alt="">l
+            </el-badge>
+          </template>
+          <template v-else>
+            <img src="../assets/img/vl-jq2.png" alt="">
+          </template> -->
           <el-badge :value="sums.events" class="item" :max="99">
             <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
           </el-badge>
@@ -80,14 +88,20 @@
   </header>
 </template>
 <script>
+import { logout } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       sums: {
         msg: 109,
         events: 212
-      }
+      },
+      userInfo: null,
     }
+  },
+  mounted () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    console.log(this.userInfo)
   },
   methods: {
     loginOut () {
@@ -103,11 +117,24 @@ export default {
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '正在退出...';
             // ajax
-            setTimeout(() => {
-              _this.$router.push({name: 'login'});
-              instance.confirmButtonLoading = false;
-              done();
-            }, 2000);
+            const params = {
+              userMobile: _this.userInfo.userMobile
+            }
+            logout(params)
+              .then(res => {
+                if (res) {
+                  _this.$router.push({name: 'login'});
+                  instance.confirmButtonLoading = false;
+                  done();
+                } else {
+                  this.$message({
+                    type: 'error',
+                    message: '退出失败',
+                    customClass: 'request_tip'
+                  })
+                  instance.confirmButtonLoading = false;
+                }
+              })
           } else {
             done();
           }
@@ -185,7 +212,7 @@ export default {
       height: 20px; line-height: 20px;
       cursor: pointer;
       font-size: 16px; color: #fff;
-      margin-top: 40px; padding: 0 10px 0 20px;
+      margin-top: 45px; padding: 0 10px 0 20px;
       border-left: 1px solid #ddd;
     }
     > ul {
@@ -193,7 +220,7 @@ export default {
       height: 100%;
       > li {
         float: left;
-        padding: 25px 20px 0 0;
+        padding: 30px 20px 0 0;
         cursor: pointer;
       }
     }
@@ -216,6 +243,6 @@ export default {
   }
 }
 .hd_user_is {
-  animation: twinkle 1s linear infinite both;
+  animation: twinkle 0.6s linear infinite both;
 }
 </style>

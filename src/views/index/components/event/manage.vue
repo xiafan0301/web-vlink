@@ -1,155 +1,175 @@
 <template>
+<vue-scroll>
   <div class="event-manage">
     <div class="search_box">
-      <el-form :inline="true" :model="eventForm" class="event_form">
-        <el-form-item style="width: 240px;">
+      <el-form :inline="true" :model="eventForm" class="event_form" ref="eventForm">
+        <el-form-item prop="reportTime">
           <el-date-picker
-            style="width: 240px;"
-            v-model="eventForm.dateTime"
-            type="datetimerange"
+            style="width: 260px;"
+            v-model="eventForm.reportTime"
+            type="daterange"
+            value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventType">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <el-form-item prop="eventType">
+          <el-select  style="width: 240px;" v-model="eventForm.eventType" placeholder="事件类型">
+            <el-option value='全部类型'></el-option>
+            <el-option
+              v-for="(item, index) in eventTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.eventStatus">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <el-form-item prop="eventStatus">
+          <el-select style="width: 240px;" v-model="eventForm.eventStatus" placeholder="事件状态">
+            <el-option value='全部状态'></el-option>
+            <el-option
+              v-for="(item, index) in eventStatusList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="eventForm.userName">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <el-form-item prop="phoneOrNumber">
+          <el-select style="width: 240px;" v-model="eventForm.phoneOrNumber" placeholder="上报者身份">
+            <el-option value='全部上报者'></el-option>
+            <el-option
+              v-for="(item, index) in identityList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item style="width: 240px;">
-          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" type="primary">查询</el-button>
-          <el-button class="reset_btn" type="primary">重置</el-button>
+          <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
+        </el-form-item>
+        <el-form-item>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('eventForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
     </div>
     <div class="table_box">
-      <div class="add_event_btn" @click="skipAddEventPage">
-        <span>+</span>
-        <span>新增事件</span>
-      </div>
-      <!-- <vue-scroll> -->
-        <el-table
-          class="event_table"
-          :data="eventList"
+      <el-table
+        class="event_table"
+        :data="eventList"
+        >
+        <el-table-column
+          fixed
+          label="事件编号"
+          prop="eventCode"
+          :show-overflow-tooltip='true'
           >
-          <el-table-column
-            fixed
-            label="事件编号"
-            prop="eventCode"
-            :show-overflow-tooltip='true'
-            >
-          </el-table-column>
-          <el-table-column
-            label="类型"
-            prop="eventType"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="上报者"
-            prop="reportUser"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="身份"
-            prop="idCard"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="上报时间"
-            prop="reportTime"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="事件地点"
-            prop="eventAddress"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="状态"
-            prop="eventStatus"
-           >
-            <template slot-scope="scope">
-              <span class="event_status" :class="[scope.row.eventStatus === '待处理' ? 'untreated_event' : scope.row.eventStatus === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="上报内容"
-            prop="reportContent"
-            :show-overflow-tooltip='true'
+        </el-table-column>
+        <el-table-column
+          label="类型"
+          prop="eventTypeName"
+          show-overflow-tooltip
           >
-          </el-table-column>
-          <el-table-column
-            label="是否有研判结果"
-            width="150"
-            prop="isResult"
-            show-overflow-tooltip
-            align="center"
-           >
-          </el-table-column>
-          <el-table-column label="操作" width="140">
-            <template slot-scope="scope">
-              <span class="operation_btn">查看</span>
-              <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn">布控</span>
-            </template>
-          </el-table-column>
-        </el-table>
-      <!-- </vue-scroll> -->
-      
+        </el-table-column>
+        <el-table-column
+          label="上报者"
+          prop="reporterPhone"
+          show-overflow-tooltip
+          >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterPhone'>{{scope.row.reporterPhone}}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="身份"
+          prop="idCard"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="上报时间"
+          prop="reportTime"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="事件地点"
+          prop="eventAddress"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="状态"
+          prop="eventStatusName"
+          >
+          <template slot-scope="scope">
+            <span class="event_status" :class="[scope.row.eventStatusName === '待处理' ? 'untreated_event' : scope.row.eventStatusName === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="上报内容"
+          prop="eventDetail"
+          :show-overflow-tooltip='true'
+        >
+        </el-table-column>
+        <el-table-column
+          label="是否有研判结果"
+          width="150"
+          prop="isResult"
+          show-overflow-tooltip
+          align="center"
+          >
+        </el-table-column>
+        <el-table-column label="操作" width="140">
+          <template slot-scope="scope">
+            <span class="operation_btn" @click="skipEventDetailPage(scope.row)">查看</span>
+            <span style="color: #f2f2f2">|</span>
+            <span class="operation_btn" @click="skipAddControlPage(scope.row)">布控</span>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
     <el-pagination
       @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      @current-change="onPageChange"
+      :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
+import { formatDate } from '@/utils/util.js';
+import { dataList } from '@/utils/data.js';
+import { getEventList, getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
       eventForm: {
-        dateTime: null, // 日期
-        eventType: null, // 事件类型
-        eventStatus: null, // 事件状态
-        userName: null, // 上报者
+        reportTime: [], // 日期
+        eventType: '全部类型', // 事件类型
+        eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       eventList: [
         {
-          eventCode: 'XP1000000000000',
+          eventNumber: 'XP1000000000000',
           eventType: '治安事件',
-          reportUser: '17899999999',
+          userName: '17899999999',
           idCard: '市民',
-          reportTime: '2018-05-15 18：40',
+          createTime: '2018-05-15 18：40',
           eventAddress: '湖南省长沙市天心区创谷工业园',
           eventStatus: '待处理',
           reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
@@ -199,16 +219,131 @@ export default {
           reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
           isResult: '是'
         }
-      ] // 表格数据
+      ], // 表格数据
+      eventStatusList: [], // 事件状态数据
+      eventTypeList: [], // 事件类型
+      identityList: [], // 上报者身份
     }
   },
+  mounted () {
+    this.getOneMonth();
+    this.getEventStatusList();
+    this.getEventTypeList();
+    this.getIdentityList();
+    this.getEventData();
+  },
   methods: {
-    handleSizeChange () {
-
+    // 获取事件状态数据
+    getEventStatusList () {
+      const status = dataList.eventStatus;
+      getDiciData(status)
+        .then(res => {
+          if (res) {
+            this.eventStatusList = res.data;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
-    skipAddEventPage () { // 跳到新增事件页面
-      this.$router.push({name: 'add_event'});
+    // 获取事件类型
+    getEventTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.eventTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取上报者身份
+    getIdentityList () {
+      const identity = dataList.identity;
+      getDiciData(identity)
+        .then(res => {
+          if (res) {
+            this.identityList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件列表数据
+    getEventData () {
+      let eventType, eventStatus;
+      if (this.eventForm.eventType === '全部类型') {
+        eventType = null;
+      } else {
+        eventType = this.eventForm.eventType;
+      }
+      if (this.eventForm.eventStatus === '全部状态') {
+        eventStatus = null;
+      } else {
+        eventStatus = this.eventForm.eventStatus;
+      }
+      const params = {
+        'where.reportTimeStart': this.eventForm.reportTime[0],
+        'where.reportTimeEnd': this.eventForm.reportTime[1],
+        'where.eventStatus': eventStatus,
+        'where.eventType': eventType,
+        'where.otherQuery': this.eventForm.phoneOrNumber,
+        pageNum: this.pagination.pageNum,
+        // orderBy: 'create_time',
+        // order: 'desc'
+      }
+      getEventList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.eventList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    onPageChange (page) {
+      this.pagination.pageNum = page;
+      this.getEventData();
+    },
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      this.getEventData();
+    },
+    // 跳至事件详情页
+    skipEventDetailPage (obj) {
+      if (obj.eventStatusName === '待处理') {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.eventId}});
+      }
+      if (obj.eventStatusName === '处理中') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.eventId}});
+      }
+      if (obj.eventStatusName === '已结束') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.eventId}});
+      }
+    },
+    // 跳至新增布控页面
+    skipAddControlPage (obj) {
+      console.log(obj);
+      this.$router.push({path: '/control/create'});
+    },
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.eventForm.reportTime.push(startDate);
+      this.eventForm.reportTime.push(endDate);
+    },
+    // 根据搜索条件查询
+    selectDataList () {
+      this.getEventData();
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.eventForm.reportTime = [];
+      this.$refs[form].resetFields();
+      console.log(this.eventForm)
+      this.getOneMonth();
+      this.getEventData();
     }
   }
 }
@@ -245,23 +380,23 @@ export default {
   }
   .table_box {
     padding: 0 20px;
-    .add_event_btn {
-      width: 108px;
-      height: 40px;
-      background-color: #0C70F8;
-      color: #ffffff;
-      font-size: 14px;
-      line-height: 40px;
-      text-align: center;
-      border-radius: 3px;
-      cursor: pointer;
-      span:nth-child(1) {
-        font-size: 16px;
-      }
-      span:nth-child(2) {
-        margin-left: 5px;
-      }
-    }
+    // .add_event_btn {
+    //   width: 108px;
+    //   height: 40px;
+    //   background-color: #0C70F8;
+    //   color: #ffffff;
+    //   font-size: 14px;
+    //   line-height: 40px;
+    //   text-align: center;
+    //   border-radius: 3px;
+    //   cursor: pointer;
+    //   span:nth-child(1) {
+    //     font-size: 16px;
+    //   }
+    //   span:nth-child(2) {
+    //     margin-left: 5px;
+    //   }
+    // }
     .event_table {
       margin-top: 8px;
       // padding-bottom: 20px;

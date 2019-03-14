@@ -10,5 +10,7 @@ import '@/assets/css/style.css';
 import '@/utils/filter.js';
 // import 全局方法
 import '@/utils/method.js';
+// import 自定义shape for AntV/g2
+import '@/utils/antv.shape.js';
 // use element-ui
 Vue.use(ElementUI);

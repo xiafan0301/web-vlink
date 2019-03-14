@@ -5,15 +5,50 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://emi.aorise.org/api/vis/',
+        dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
-    // 应急指挥 mode: ecc
+    // 事件部分地址
+    event: {
+      // dev: 'http://apidev.aorise.org/vlink-event/api/emi',
+      dev: 'http://10.116.64.134:8081/api/emi',
+      test: 'http://apirel.aorise.org/vlink-event/api/emi',
+      prod: 'http://apidev.aorise.org/vlink-event/api/emi'
+    },
+    // 调度和预案部分地址
+    ctc: {
+      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/emi',
+      dev: 'http://10.116.64.134:8082/api/emi',
+      test: 'http://apirel.aorise.org/vlink-dispatching',
+      prod: 'http://apidev.aorise.org/vlink-dispatching'
+    },
+    // 用户登录地址
+    user: {
+      dev: 'http://10.116.64.142:8082', // 江先琨
+      // dev: 'http://apidev.aorise.org/vlink-user',
+      test: 'http://apidev.aorise.org/vlink-user',
+      prod: 'http://apidev.aorise.org/vlink-user'
+    },
+    // 用户权限地址
+    auth: {
+      dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
+      // dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
+    },
+    // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',
         prod: 'http://apiemi.aorise.org/api/emi/'
+    },
+    // 文件上传
+    upload: {
+        dev: 'http://apidev.aorise.org/vlink-base',
+        test: 'http://apidev.aorise.org/vlink-base',
+        prod: 'http://apidev.aorise.org/vlink-base'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
@@ -28,8 +63,8 @@ for (let _key in oDomains) {
 export {ajaxCtx};
 
 // cookie名
-export const cookieUserId = 'as.vlink.user_id';
-export const cookieUserName = 'as.vlink.user_name';
+export const cookieUserId = 'AS.VLINK.USERID';
+export const cookieUserName = 'AS.VLINK.USERNAME';
 // cookie默认有效时间（小时）
 export const cookieTime = 24;
 
