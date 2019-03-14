@@ -450,7 +450,7 @@ export function addPortrait(data) {
     url: '/surveillanceRepertory/portrait',
     method: 'post',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -462,7 +462,7 @@ export function delPortrait(data) {
     url: '/surveillanceRepertory/portrait/batch',
     method: 'delete',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -474,7 +474,7 @@ export function getPortraitList(params) {
     url: '/surveillanceRepertory/portrait/page',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -485,7 +485,7 @@ export function getPortraitById(uid) {
   return request({
     url: '/surveillanceRepertory/portrait/withGroup/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -497,7 +497,7 @@ export function putPortrait(data) {
     url: '/surveillanceRepertory/portrait',
     method: 'put',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -509,7 +509,7 @@ export function getPortraitByIdNo(params) {
     url: '/surveillanceRepertory/portrait/byIdNo',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -521,7 +521,7 @@ export function copyPortrait(data) {
     url: '/surveillanceRepertory/portrait/group/copy/batch',
     method: 'post',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -533,7 +533,7 @@ export function removePortrait(data) {
     url: '/surveillanceRepertory/portrait/group/delete/batch',
     method: 'delete',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 
@@ -546,7 +546,7 @@ export function addVehicle(data) {
     url: '/surveillanceRepertory/vehicle',
     method: 'post',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -558,7 +558,7 @@ export function delVehicle(data) {
     url: '/surveillanceRepertory/vehicle/batch',
     method: 'delete',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -570,7 +570,7 @@ export function getVehicleList(params) {
     url: '/surveillanceRepertory/vehicle/page',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -581,7 +581,7 @@ export function getVehicleById(uid) {
   return request({
     url: '/surveillanceRepertory/vehicle/withGroup/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -593,7 +593,7 @@ export function getVehicleByIdNo(params) {
     url: '/surveillanceRepertory/vehicle/byIdNo',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -605,7 +605,7 @@ export function putVehicle(data) {
     url: '/surveillanceRepertory/vehicle',
     method: 'put',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -617,7 +617,7 @@ export function copyVehicle(data) {
     url: '/surveillanceRepertory/vehicle/group/copy/batch',
     method: 'post',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -629,7 +629,7 @@ export function removeVehicle(data) {
     url: '/surveillanceRepertory/vehicle/group/delete/batch',
     method: 'delete',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /* ========== 布控管理 ========== */
@@ -642,7 +642,7 @@ export function addControl(data) {
     url: '/surveillance',
     method: 'post',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -654,7 +654,7 @@ export function getControlInfoByName(params) {
     url: '/surveillance/byName',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -666,7 +666,7 @@ export function getControlList(params) {
     url: '/surveillance/page',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -678,7 +678,7 @@ export function getControlObject(params) {
     url: '/surveillance/object',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -690,7 +690,7 @@ export function getControlDevice(params) {
     url: '/surveillance/device',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -701,7 +701,7 @@ export function getControlDetail(uid) {
   return request({
     url: '/surveillance/detail/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -712,7 +712,7 @@ export function getControlDetailIsEditor(uid) {
   return request({
     url: '/surveillance/beforeUpdate/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -724,7 +724,7 @@ export function putControl(data) {
     url: '/surveillance',
     method: 'put',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -736,7 +736,7 @@ export function getControlObjList(params) {
     url: '/surveillance/object/page',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -747,7 +747,7 @@ export function delControl(uid) {
   return request({
     url: '/surveillance/' + uid,
     method: 'delete',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -758,7 +758,7 @@ export function controlArea(uid) {
   return request({
     url: '/surveillance/area/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -770,7 +770,7 @@ export function controlStop(data) {
     url: '/surveillance/stop/' + data.uid,
     method: 'put',
     data,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -782,7 +782,7 @@ export function repertorySel(params) {
     url: '/surveillance/repertory',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /* ========== 布控地图 ========== */
@@ -795,7 +795,7 @@ export function getControlMap(params) {
     url: '/controlMap',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -807,7 +807,7 @@ export function getControlMapByDevice(params) {
     url: '/controlMap/byDevice',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -819,7 +819,7 @@ export function getAlarmSnap(params) {
     url: '/surveillance/alarmSnap/page',
     method: 'get',
     params,
-    mode: ''
+    mode: 'control'
   })
 }
 /**
@@ -830,6 +830,6 @@ export function getEventDetailById(uid) {
   return request({
     url: '/api/emi/eventServices/events/' + uid,
     method: 'get',
-    mode: ''
+    mode: 'event'
   })
 }
