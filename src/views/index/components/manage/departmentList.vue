@@ -32,19 +32,19 @@
         </el-table-column>
         <el-table-column
           label="上级部门"
-          prop="superiorName"
+          prop="parentOrganName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="部门负责人"
-          prop="chargeUserName"
+          prop="chargeUserNameStr"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="负责人联系方式"
-          prop="chargeUserTelephone"
+          prop="chargeUserMobile"
           >
         </el-table-column>
         <el-table-column label="操作" width="200">
@@ -83,26 +83,26 @@
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
               <el-option label="无" value="shanghai"></el-option>
-              <!-- <el-option
+              <el-option
                 v-for="(item, index) in departmentData"
                 :key="'item' + index"
                 :label="item.organName"
                 :value="item.uid"
               >
-              </el-option> -->
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="chargeUserName">
             <el-select style="width: 95%" filterable clearable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
-              <!-- <el-option
+              <el-option
                 v-for="(item, index) in userList"
                 :key="'item' + index"
                 :label="item.userName"
                 :value="item.uid"
               >
-              </el-option> -->
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              </el-option>
+              <!-- <el-option label="区域一" value="shanghai"></el-option>
+              <el-option label="区域二" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
         </el-form>
@@ -186,39 +186,20 @@ export default {
     return {
       closeShow: false, // 清空搜索框
       organName: null, // 搜索的部门名称
-      departmentData: [
-        {
-          organName: '县政法委',
-          superiorName: '溆浦县政法委',
-          chargeUserName: '金子康',
-          chargeUserTelephone: '13970041234'
-        },
-        {
-          organName: '县政法委',
-          superiorName: '溆浦县政法委',
-          chargeUserName: '金子康',
-          chargeUserTelephone: '13970041234'
-        },
-        {
-          organName: '县政法委',
-          superiorName: '溆浦县政法委',
-          chargeUserName: '金子康',
-          chargeUserTelephone: '13970041234'
-        },
-      ],
+      departmentData: [], // 列表数据
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       newDepartmentDialog: false, // 新建部门弹出框
       delDepartmentDialog: false, // 删除部门弹出框
       delChildDepartmentDialog: false, // 删除下级部门弹出框
       editDepartmentDialog: false, // 编辑部门弹出框
       addDepartment: {
-        'where.proKey': 'aaa',
+        'where.proKey': null,
         organName: null,
         organPid: null,
         chargeUserName: null
       },
       editDepartment: {
-        'where.proKey': 'aaa',
+        'where.proKey': null,
         uid: null,
         organName: null,
         organPid: null,
@@ -244,13 +225,23 @@ export default {
       },
       deleteId: null, // 要删除的部门id
       userList: [], // 用户列表
+      userInfo: {}, // 存储的用户信息
     }
+  },
+  created () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    console.log(this.userInfo)
+  },
+  mounted () {
+    this.addDepartment['where.proKey'] = this.userInfo.proKey;
+    this.editDepartment['where.proKey'] = this.userInfo.proKey;
+    this.getList();
   },
   methods: {
     // 获取列表数据
     getList () {
       const params = {
-        'where.proKey': 'aaaaa',
+        'where.proKey': this.userInfo.proKey,
         'where.organName': this.organName,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -266,7 +257,7 @@ export default {
     // 获取用户数据
     getUsersData () {
       const params = {
-        'where.proKey': 'aaaaa',
+        'where.proKey': this.userInfo.proKey,
         pageNum: this.pagination.pageNum,
         pageSize: 0,
       };
@@ -300,6 +291,7 @@ export default {
     },
     // 显示新增部门弹出框
     showNewDepartment () {
+      this.getUsersData();
       this.newDepartmentDialog = true;
     },
     // 显示编辑部门弹出框
@@ -327,7 +319,7 @@ export default {
     handleDelete () {
       const params = {
         deleteId: this.deleteId,
-        proKey: 'aaaaa'
+        proKey: this.userInfo.proKey
       };
       delDepart(params)
         .then(res => {

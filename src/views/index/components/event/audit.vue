@@ -84,7 +84,7 @@
           <template slot-scope="scope">
             <span class="event_status"
               :class="[scope.row.status === '待审核' ? 'untreated_event'
-                : scope.row.status === '审核通过' ? 'treating_event' : 'end_event']">
+                : scope.row.status === '通过' ? 'treating_event' : 'end_event']">
                 {{scope.row.status}}
             </span>
           </template>
@@ -179,7 +179,7 @@ export default {
           isPicture: '是'
         },
         {
-          status: '审核通过',
+          status: '通过',
           eventType: '治安事件',
           reportUser: '18216061865',
           idCard: '市民',
@@ -189,7 +189,7 @@ export default {
           isPicture: '是'
         },
         {
-          status: '审核不通过',
+          status: '驳回',
           eventType: '治安事件',
           reportUser: '18216061865',
           idCard: '市民',

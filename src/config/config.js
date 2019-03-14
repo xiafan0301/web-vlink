@@ -24,17 +24,31 @@ const oDomains = {
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },
+    // 用户登录地址
+    user: {
+      dev: 'http://10.116.64.142:8082', // 江先琨
+      // dev: 'http://apidev.aorise.org/vlink-user',
+      test: 'http://apidev.aorise.org/vlink-user',
+      prod: 'http://apidev.aorise.org/vlink-user'
+    },
+    // 用户权限地址
+    auth: {
+      dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
+      // dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
+    },
     // 应急指挥   : ecc
     ecc: {
         dev: 'http://apiemi.aorise.org/api/emi/',
         test: 'http://apiemi.aorise.org/api/emi/',
         prod: 'http://apiemi.aorise.org/api/emi/'
     },
-    // 上传图片
+    // 文件上传
     upload: {
-        dev: 'http://apidev.aorise.org/education-user-related',
-        test: 'http://apirel.aorise.org/education-user-related',
-        prod: 'http://apirel.aorise.org/education-user-related'
+        dev: 'http://apidev.aorise.org/vlink-base',
+        test: 'http://apidev.aorise.org/vlink-base',
+        prod: 'http://apidev.aorise.org/vlink-base'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

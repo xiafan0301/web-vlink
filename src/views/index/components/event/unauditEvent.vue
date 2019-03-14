@@ -115,7 +115,7 @@
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" @click="submitData">通过</el-button>
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <el-dialog
       title="驳回"
@@ -307,6 +307,10 @@ export default {
         message: '保存成功',
         customClass: 'request_tip'
       })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

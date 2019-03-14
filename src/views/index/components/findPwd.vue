@@ -16,13 +16,16 @@
                         <h2>找回密码</h2>
                         <el-form :model="pwdForm1" status-icon :rules="pwdForm1Rules" ref="pwdForm1">
                             <el-form-item prop="mobile">
-                                <el-input type="text" v-model="pwdForm1.mobile" autocomplete="off" placeholder="输入手机号"></el-input>
+                              <el-input type="text" v-model="pwdForm1.mobile" autocomplete="off" placeholder="输入手机号"></el-input>
                             </el-form-item>
                             <el-form-item>
-                                向右滑动验证
-                            </el-form-item>
-                            <el-form-item>
-                                <el-button type="primary" :disabled="!pwdForm1.mobile" :loading="pwdForm1Loading" @click="nextStep1('pwdForm1')">下一步</el-button>
+                              <div id="drag">
+                                <div class="drag_bg"></div>
+                                <div class="drag_text" onselectstart="return false;" unselectable="on">向右滑动验证</div>
+                                <div class="handler handler_bg" @mousedown="mousedownFn($event)">
+                                  <i class="el-icon-d-arrow-right"></i>
+                                </div>
+                              </div>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -68,139 +71,185 @@
 <script>
 import headerNormal from '@/components/headerNormal.vue';
 import {validatePhone} from '@/utils/validator.js';
+import { isRegister } from '@/views/index/api/api.js';
 export default {
-    components: {headerNormal},
-    data () {
-        var validatePass = (rule, value, callback) => {
-            if (!value) {
-                callback(new Error('请输入新密码'));
-            } else {
-                let reg = /^[a-zA-Z0-9]{6,16}$/;
-                if (!reg.test(value)) {
-                    callback(new Error('密码为6-16个数字或英文字母组合'));
-                } else {
-                    if (this.pwdForm3.checkPass !== '') {
-                        this.$refs.pwdForm3.validateField('checkPass');
-                    }
-                    callback();
-                }
+  components: {headerNormal},
+  data () {
+      var validatePass = (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('请输入新密码'));
+        } else {
+          let reg = /^[a-zA-Z0-9]{6,16}$/;
+          if (!reg.test(value)) {
+            callback(new Error('密码为6-16个数字或英文字母组合'));
+          } else {
+            if (this.pwdForm3.checkPass !== '') {
+              this.$refs.pwdForm3.validateField('checkPass');
             }
-        };
-        var validatePass2 = (rule, value, callback) => {
-            if (!value) {
-                callback(new Error('请再次输入新密码'));
-            } else if (value !== this.pwdForm3.pass) {
-                callback(new Error('两次输入密码不一致!'));
-            } else {
-                callback();
-            }
-        };
-        return {
-            step: 1,
-            pwdForm1: {
-                mobile: ''
-            },
-            pwdForm1Rules: {
-                mobile: [
-                    { required: true, message: '输入手机号', trigger: 'blur' },
-                    { validator: validatePhone, trigger: 'blur' }
-                ]
-            },
-            pwdForm1Loading: false,
-
-            regCodeDis: false,
-            regCodeTip: '获取验证码',
-            regCodeTime: 60,
-            regCodeVal: null,
-            pwdForm2: {
-                code: ''
-            },
-            pwdForm2Rules: {
-                code: [
-                    { required: true, message: '请输入验证码', trigger: 'blur' }
-                ]
-            },
-            pwdForm2Loading: false,
-
-            pwdForm3: {
-                pass: '',
-                checkPass: ''
-            },
-            pwdForm3Rules: {
-                pass: [
-                    { validator: validatePass, trigger: 'blur' }
-                ],
-                checkPass: [
-                    { validator: validatePass2, trigger: 'blur' }
-                ]
-            },
-            pwdForm3Loading: false
+            callback();
+          }
         }
+      };
+      var validatePass2 = (rule, value, callback) => {
+        if (!value) {
+          callback(new Error('请再次输入新密码'));
+        } else if (value !== this.pwdForm3.pass) {
+          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
+      return {
+        step: 1,
+        pwdForm1: {
+          mobile: ''
+        },
+        pwdForm1Rules: {
+          mobile: [
+            { required: true, message: '请输入手机号', trigger: 'blur' },
+            { validator: validatePhone, trigger: 'blur' }
+          ]
+        },
+        pwdForm1Loading: false,
+        regCodeDis: false,
+        regCodeTip: '获取验证码',
+        regCodeTime: 60,
+        regCodeVal: null,
+        pwdForm2: {
+          code: ''
+        },
+        pwdForm2Rules: {
+          code: [
+            { required: true, message: '请输入验证码', trigger: 'blur' }
+          ]
+        },
+        pwdForm2Loading: false,
+        pwdForm3: {
+          pass: '',
+          checkPass: ''
+        },
+        pwdForm3Rules: {
+          pass: [
+            { validator: validatePass, trigger: 'blur' }
+          ],
+          checkPass: [
+            { validator: validatePass2, trigger: 'blur' }
+          ]
+        },
+        pwdForm3Loading: false,
+        mouseMoveStata: false, // 触发滑块拖动状态判断
+        beginClientX: 0, // 距离屏幕最左端距离
+        maxWidth: 320, // 拖动的最大宽度
+      }
+    },
+    mounted () {
+      let _this = this;
+      $('.handler').on('mousemove', (e) => {
+        if (_this.mouseMoveStata) {
+          let width = e.clientX - _this.beginClientX;
+          if (width > 0 && width <= _this.maxWidth) {
+            $('.handler').css('left', width);
+            $('.drag_bg').css('width', width);
+          } else if (width > _this.maxWidth) {
+            _this.successDrag();
+          }
+        }
+      });
+      $('.handler').on('mouseup', (e) => {
+        _this.mouseMoveStata = false;
+        let width = e.clientX - _this.beginClientX;
+        if (width < _this.maxWidth) {
+          $('.handler').css('left', 0);
+          $('.drag_bg').css('width', 0);
+        }
+      })
     },
     methods: {
-        nextStep1 (formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    this.pwdForm1Loading = true;
-                    setTimeout(() => {
-                        this.pwdForm1Loading = false;
-                        this.step = 2;
-                    }, 1000);
-                } else {
-                    return false;
-                }
-            });
-        },
-
-        nextStep2 (formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    this.pwdForm2Loading = true;
-                    setTimeout(() => {
-                        this.pwdForm2Loading = false;
-                        this.step = 3;
-                    }, 1000);
-                } else {
-                    return false;
-                }
-            });
-        },
-        getRegCode () {
-            this.regCodeDis = true;
-            this.regCodeTip = this.regCodeTime;
-            this.regCodeVal = setInterval(() => {
-                if (this.regCodeTime > 0) {
-                    this.regCodeTime -= 1;
-                    this.regCodeTip = this.regCodeTime;
-                } else {
-                    if (this.regCodeVal) {
-                        window.clearInterval(this.regCodeVal);
-                    }
-                    this.regCodeDis = false;
-                    this.regCodeTip = '重新获取验证码';
-                    this.regCodeTime = 60;
-                }
+      // 拖动滑块按下时
+      mousedownFn (e) {
+        this.mouseMoveStata = true;
+        this.beginClientX = e.clientX;
+      },
+      // 拖动滑块验证成功
+      successDrag () {
+        if (!this.pwdForm1.mobile) {
+          this.$message.warning('请先输入手机号');
+          return false;
+        } else {
+          const params = {
+            userMobile: this.pwdForm1.mobile
+          };
+          isRegister(params)
+            .then(res => {
+              if (res) {
                 
-            }, 1000);
-        },
-
-        nextStep3 (formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    this.pwdForm3Loading = true;
-                    setTimeout(() => {
-                        this.pwdForm3Loading = false;
-                        this.$message({
-                            message: '新密码设置成功，请登录',
-                            type: 'success'
-                        });
-                        this.$router.push({name: 'login'});
-                    }, 1000);
-                } else {
-                    return false;
-                }
-            });
+              }
+            })
         }
+      },
+      nextStep1 (formName) {
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  this.pwdForm1Loading = true;
+                  setTimeout(() => {
+                      this.pwdForm1Loading = false;
+                      this.step = 2;
+                  }, 1000);
+              } else {
+                  return false;
+              }
+          });
+      },
+
+      nextStep2 (formName) {
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  this.pwdForm2Loading = true;
+                  setTimeout(() => {
+                      this.pwdForm2Loading = false;
+                      this.step = 3;
+                  }, 1000);
+              } else {
+                  return false;
+              }
+          });
+      },
+      getRegCode () {
+          this.regCodeDis = true;
+          this.regCodeTip = this.regCodeTime;
+          this.regCodeVal = setInterval(() => {
+              if (this.regCodeTime > 0) {
+                  this.regCodeTime -= 1;
+                  this.regCodeTip = this.regCodeTime;
+              } else {
+                  if (this.regCodeVal) {
+                      window.clearInterval(this.regCodeVal);
+                  }
+                  this.regCodeDis = false;
+                  this.regCodeTip = '重新获取验证码';
+                  this.regCodeTime = 60;
+              }
+              
+          }, 1000);
+      },
+
+      nextStep3 (formName) {
+          this.$refs[formName].validate((valid) => {
+              if (valid) {
+                  this.pwdForm3Loading = true;
+                  setTimeout(() => {
+                      this.pwdForm3Loading = false;
+                      this.$message({
+                          message: '新密码设置成功，请登录',
+                          type: 'success'
+                      });
+                      this.$router.push({name: 'login'});
+                  }, 1000);
+              } else {
+                  return false;
+              }
+          });
+      }
     }
 }
 </script>
@@ -289,6 +338,40 @@ export default {
                        > span {
                            color: #333;
                        }
+                    }
+                    #drag {
+                      width: 100%;
+                      position: relative;
+                      height: 40px;
+                      line-height: 40px;
+                      text-align: center;
+                      background-color: #F2F2F2;
+                      color: #666666;
+                      .drag_text{
+                        position: absolute;
+                        top: 0px;
+                        width: 100%;
+                        -moz-user-select: none;
+                        -webkit-user-select: none;
+                        user-select: none;
+                        -o-user-select:none;
+                        -ms-user-select:none; 
+                      }
+                      .drag_bg {
+                        background-color: #4FCB61;
+                        height: 40px;
+                        width: 0px;
+                      }
+                      .handler {
+                        position: absolute;
+                        top: 0px;
+                        left: 0px;
+                        width: 40px;
+                        height: 39px;
+                        background-color: #ffffff;
+                        border: 1px solid #F2F2F2;
+                        cursor: move;
+                      }
                     }
                 }
             }

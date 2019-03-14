@@ -47,6 +47,9 @@
         <p class="title">批量创建</p>
         <div class="content-body">
           <p>您需要下载模板文件并按要求填写相关信息，上传成功后，点击【批量新增】，批量创建用户账号。</p>
+          <div class="download_box">
+            
+          </div>
         </div>
       </div>
     </div>

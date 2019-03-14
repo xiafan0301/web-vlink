@@ -3,13 +3,36 @@
 * {"trigger":"change","max":10,"min":20,"field":"telegrpNo","fullField":"telegrpNo","type":"string", ...}
 *  可自定义属性
 */
-import {judgeDepart} from '@/views/index/api/api.js';
+import { judgeDepart, judgeUserGroup } from '@/views/index/api/api.js';
+// 判断部门名称是否重复
 export const isJudgeDepart = (value, callback) => {
   if (value) {
-    judgeDepart(value)
+    const params = {
+      'where.proKey': '111',
+      organName: value
+    }
+    judgeDepart(params)
       .then(res => {
         if (res) {
           return callback(new Error('部门已存在'))
+        }
+      })
+      .catch(() => {})
+  }
+}
+/**
+ * 判断用户组名称是否重复
+ */
+export const isJudgeUserGroup = (value, callback) => {
+  if (value) {
+    const params = {
+      'where.proKey': '111',
+      groupName: value
+    }
+    judgeUserGroup(params)
+      .then(res => {
+        if (res) {
+          return callback(new Error('该用户组已存在'))
         }
       })
       .catch(() => {})
@@ -78,3 +101,18 @@ export const checkEmail = (rule, value, callback) => {
   }
   callback()
 }
+/**
+ * 判断输入的是否是中英文
+ */
+export const checkUserName = (rule, value, callback) => {
+  if (value) {
+    let reg = /^[\u0391-\uFFE5A-Za-z]+$/;
+    if (!reg.test(value)) {
+      callback(new Error('请输入中英文'));
+    } else {
+      callback();
+    }
+  }
+  callback()
+}
+

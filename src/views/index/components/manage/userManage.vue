@@ -3,7 +3,7 @@
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddUser">新增用户</el-button>
       <div class="right-search">
-        <el-select v-model="groupId" style="margin-right: 15px;" clearable placeholder="请选择用户组" @change="handleChangeGroup">
+        <el-select v-model="groupId" style="margin-right: 15px;" clearable placeholder="请选择用户组">
           <el-option
             v-for="item in userGroupList"
             :key="item.uid"
@@ -264,7 +264,7 @@
   </div>
 </template>
 <script>
-import { validatePhone, checkIdCard } from '@/utils/validator.js';
+import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
 import { getUserList, getUserGroup, delUser, isForceUser, updateUser } from '@/views/index/api/api.js';
 export default {
   data () {
@@ -361,10 +361,6 @@ export default {
             this.userGroupList = res.data.list;
           }
         })
-    },
-    // change用户组
-    handleChangeGroup (val) {
-      this.getList();
     },
     // 搜索用户名/姓名
     searchData () {

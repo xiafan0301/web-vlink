@@ -1,6 +1,42 @@
 import request from '@/config/axios';
 
 /**
+ * 用户登录
+ * @param {*} data 
+ */
+export function login(data) {
+  return request({
+    url: '/userService/login',
+    data,
+    mode: 'user',
+    method: 'post'
+  });
+}
+/**
+ * 用户退出登录
+ * @param {*} data 
+ */
+export function logout(data) {
+  return request({
+    url: '/userService/logout',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 判断用户是否注册
+ * @param {*} data 
+ */
+export function isRegister(data) {
+  return request({
+    url: '/userService/checkUserMobile',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
  * 字典接口
  * @param {*} data 
  */
@@ -8,7 +44,7 @@ export function getDiciData(uid) {
   return request({
     url: 'dictService/dictList/?pid=' + uid,
     method: 'get'
-  })
+  });
 }
 /*=================事件管理模块================== */
 /**
@@ -21,7 +57,7 @@ export function getEventList(data) {
     method: 'get',
     params: data,
     mode: 'event'
-  })
+  });
 }
 /**
  * 修改事件
@@ -32,7 +68,7 @@ export function updateEvent(data, uid) {
     method: 'put',
     data,
     mode: 'event'
-  })
+  });
 }
 /**
  * 添加事件
@@ -43,7 +79,7 @@ export function addEvent(data) {
     method: 'post',
     data,
     mode: 'event'
-  })
+  });
 }
 /**
  * 获取事件详情
@@ -54,7 +90,7 @@ export function getEventDetail(uid) {
     url: 'eventServices/events/' + uid,
     method: 'get',
     mode: 'event'
-  })
+  });
 }
 /**
  * 获取调度指挥列表数据
@@ -66,7 +102,7 @@ export function getCtcList(data) {
     method: 'get',
     params: data,
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 分页查询预案
@@ -78,7 +114,7 @@ export function getPlanData(data) {
     method: 'get',
     params: data,
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 获取预案详情
@@ -89,7 +125,7 @@ export function getPlanDetail(uid) {
     url: 'planServices/plans/' + uid,
     method: 'get',
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 添加预案
@@ -101,7 +137,7 @@ export function addPlan(data) {
     data,
     method: 'post',
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 修改预案
@@ -113,7 +149,7 @@ export function updatePlan(data) {
     method: 'put',
     data,
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 删除预案
@@ -124,7 +160,7 @@ export function delPlan(uid) {
     url: 'planServices/plans/' + uid,
     method: 'delete',
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 预览预案
@@ -135,7 +171,7 @@ export function previewPlan(uid) {
     url: 'planServices/plans/' + uid,
     method: 'get',
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 分页获取调度任务
@@ -147,7 +183,7 @@ export function getCtcData(data) {
     method: 'get',
     params: data,
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 调度指挥
@@ -159,7 +195,7 @@ export function ctcTasks(data, uid) {
     method: 'post',
     data,
     mode: 'ctc'
-  })
+  });
 }
 /**
  * 修改事件过程状态
@@ -171,7 +207,7 @@ export function updateProcess(uid, data) {
     method: 'put',
     params: data,
     mode: 'ctc'
-  })
+  });
 }
 /* ================== 管理模块 =================== */
 /*****  部门架构  ** */
@@ -182,10 +218,11 @@ export function updateProcess(uid, data) {
  */
 export function getDepartmentList (data) {
   return request({
-    url: 'auth/authServices/organInfos',
+    url: 'authServices/organInfos',
     params: data,
-    method: 'get'
-  })
+    method: 'get',
+    mode: 'auth'
+  });
 }
 /**
  * 编辑部门
@@ -193,10 +230,11 @@ export function getDepartmentList (data) {
  */
 export function updateDepart (data) {
   return request({
-    url: 'auth/authServices/organInfo',
+    url: 'authServices/organInfo',
     data,
+    mode: 'auth',
     method: 'put'
-  })
+  });
 }
 /**
  * 删除部门
@@ -204,9 +242,10 @@ export function updateDepart (data) {
  */
 export function delDepart (data) {
   return request({
-    url: 'auth/authServices/organInfo?uids=' + data.deleteId + '&proKey=' + data.proKey,
+    url: 'authServices/organInfo?uids=' + data.deleteId + '&proKey=' + data.proKey,
+    mode: 'auth',
     method: 'delete'
-  })
+  });
 }
 /**
  * 判断部门名称是否重复
@@ -214,10 +253,11 @@ export function delDepart (data) {
  */
 export function judgeDepart (data) {
   return request({
-    url: 'auth/authServices/organName',
+    url: 'authServices/organName',
     params: data,
+    mode: 'auth',
     method: 'get'
-  })
+  });
 }
 /**
  * 添加部门
@@ -225,10 +265,11 @@ export function judgeDepart (data) {
  */
 export function addDepart (data) {
   return request({
-    url: 'auth/authServices/organInfo',
+    url: 'authServices/organInfo',
     data,
+    mode: 'auth',
     method: 'post'
-  })
+  });
 }
 /**
  * 获取用户列表数据
@@ -238,8 +279,9 @@ export function getUserList (data) {
   return request({
     url: 'userServices/users',
     params: data,
+    mode: 'auth',
     method: 'get'
-  })
+  });
 }
 /**
  * 获取部门详情
@@ -247,10 +289,11 @@ export function getUserList (data) {
  */
 export function getDepartDetail (data) {
   return request({
-    url: 'auth/authServices/organInfo',
+    url: 'authServices/organInfo',
     params: data,
+    mode: 'auth',
     method: 'get'
-  })
+  });
 }
 /**
  * 获取用户组
@@ -258,10 +301,11 @@ export function getDepartDetail (data) {
  */
 export function getUserGroup (data) {
   return request({
-    url: 'auth/authServices/userGroups',
+    url: 'authServices/userGroups',
     params: data,
+    mode: 'auth',
     method: 'get'
-  })
+  });
 }
 /**
  * 删除用户
@@ -269,9 +313,10 @@ export function getUserGroup (data) {
  */
 export function delUser (uid) {
   return request({
-    url: 'auth/authServices/user/' + uid,
+    url: 'authServices/user/' + uid,
+    mode: 'auth',
     method: 'delete'
-  })
+  });
 }
 /**
  * 启用/禁用用户
@@ -279,10 +324,11 @@ export function delUser (uid) {
  */
 export function isForceUser (params) {
   return request({
-    url: 'auth/authServices/user',
+    url: 'authServices/user',
     params,
+    mode: 'auth',
     method: 'put'
-  })
+  });
 }
 /**
  * 编辑用户
@@ -290,10 +336,11 @@ export function isForceUser (params) {
  */
 export function updateUser (params) {
   return request({
-    url: 'auth/authServices/user',
+    url: 'authServices/user',
     params,
+    mode: 'auth',
     method: 'put'
-  })
+  });
 }
 /**
  * 创建用户
@@ -301,10 +348,94 @@ export function updateUser (params) {
  */
 export function createUser (params) {
   return request({
-    url: 'auth/authServices/user',
+    url: 'authServices/user',
     params,
+    mode: 'auth',
     method: 'post'
-  })
+  });
+}
+/**
+ * 获取用户组
+ * @param {*} data 
+ */
+export function getUserGroups (params) {
+  return request({
+    url: 'authServices/userGroups',
+    params,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 创建用户组
+ * @param {*} data 
+ */
+export function createUserGroups (params) {
+  return request({
+    url: 'authServices/userGroup',
+    params,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 编辑用户组
+ * @param {*} data 
+ */
+export function updateUserGroups (params) {
+  return request({
+    url: 'authServices/userGroup',
+    params,
+    mode: 'auth',
+    method: 'put'
+  });
+}
+/**
+ * 判断用户组名称是否重复
+ * @param {*} data 
+ */
+export function judgeUserGroup (data) {
+  return request({
+    url: 'authServices/userGroupRename',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 删除用户组
+ * @param {*} data 
+ */
+export function delUserGroup (params) {
+  return request({
+    url: 'authServices/userGroup/' + params.uid,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 添加所选成员
+ * @param {*} data 
+ */
+export function addMemberInfo (params) {
+  return request({
+    url: 'authServices/userGroupBatch',
+    params,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 删除所选成员
+ * @param {*} data 
+ */
+export function delMemberInfo (params) {
+  return request({
+    url: 'authServices/userGroupBatch',
+    params,
+    mode: 'auth',
+    method: 'delete'
+  });
 }
 /* ================== 布控模块 =================== */
 /* ========== 布控库 ========== */
