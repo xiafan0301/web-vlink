@@ -1,14 +1,50 @@
 import request from '@/config/axios';
 
 /**
+ * 用户登录
+ * @param {*} data 
+ */
+export function login(data) {
+  return request({
+    url: '/userService/login',
+    data,
+    mode: 'user',
+    method: 'post'
+  });
+}
+/**
+ * 用户退出登录
+ * @param {*} data 
+ */
+export function logout(data) {
+  return request({
+    url: '/userService/logout',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 判断用户是否注册
+ * @param {*} data 
+ */
+export function isRegister(data) {
+  return request({
+    url: '/userService/checkUserMobile',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
  * 字典接口
  * @param {*} data 
  */
 export function getDiciData(uid) {
   return request({
-    url: 'dictServices/dicts/byDictTypeId/' + uid,
+    url: 'dictService/dictList/?pid=' + uid,
     method: 'get'
-  })
+  });
 }
 /*=================事件管理模块================== */
 /**
@@ -19,8 +55,20 @@ export function getEventList(data) {
   return request({
     url: 'eventServices/events/page',
     method: 'get',
-    params: data
-  })
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 修改事件
+ */
+export function updateEvent(data, uid) {
+  return request({
+    url: 'eventServices/events/' + uid,
+    method: 'put',
+    data,
+    mode: 'event'
+  });
 }
 /**
  * 添加事件
@@ -29,8 +77,9 @@ export function addEvent(data) {
   return request({
     url: 'eventServices/event',
     method: 'post',
-    data
-  })
+    data,
+    mode: 'event'
+  });
 }
 /**
  * 获取事件详情
@@ -38,9 +87,10 @@ export function addEvent(data) {
  */
 export function getEventDetail(uid) {
   return request({
-    url: 'eventServices/event/' + uid,
-    method: 'get'
-  })
+    url: 'eventServices/events/' + uid,
+    method: 'get',
+    mode: 'event'
+  });
 }
 /**
  * 获取调度指挥列表数据
@@ -50,19 +100,21 @@ export function getCtcList(data) {
   return request({
     url: 'eventServices/events/page',
     method: 'get',
-    params: data
-  })
+    params: data,
+    mode: 'ctc'
+  });
 }
 /**
- * 获取更多预案列表数据
+ * 分页查询预案
  * @param {*} data 
  */
 export function getPlanData(data) {
   return request({
     url: 'planServices/plans',
     method: 'get',
-    params: data
-  })
+    params: data,
+    mode: 'ctc'
+  });
 }
 /**
  * 获取预案详情
@@ -71,8 +123,319 @@ export function getPlanData(data) {
 export function getPlanDetail(uid) {
   return request({
     url: 'planServices/plans/' + uid,
+    method: 'get',
+    mode: 'ctc'
+  });
+}
+/**
+ * 添加预案
+ * @param {*} data 
+ */
+export function addPlan(data) {
+  return request({
+    url: 'planServices/plan',
+    data,
+    method: 'post',
+    mode: 'ctc'
+  });
+}
+/**
+ * 修改预案
+ * @param {*} data 
+ */
+export function updatePlan(data) {
+  return request({
+    url: 'planServices/plans',
+    method: 'put',
+    data,
+    mode: 'ctc'
+  });
+}
+/**
+ * 删除预案
+ * @param {*} data 
+ */
+export function delPlan(uid) {
+  return request({
+    url: 'planServices/plans/' + uid,
+    method: 'delete',
+    mode: 'ctc'
+  });
+}
+/**
+ * 预览预案
+ * @param {*} data 
+ */
+export function previewPlan(uid) {
+  return request({
+    url: 'planServices/plans/' + uid,
+    method: 'get',
+    mode: 'ctc'
+  });
+}
+/**
+ * 分页获取调度任务
+ * @param {*} data 
+ */
+export function getCtcData(data) {
+  return request({
+    url: 'taskServices/tasks',
+    method: 'get',
+    params: data,
+    mode: 'ctc'
+  });
+}
+/**
+ * 调度指挥
+ * @param {*} data 
+ */
+export function ctcTasks(data, uid) {
+  return request({
+    url: 'taskServices/task/' + uid,
+    method: 'post',
+    data,
+    mode: 'ctc'
+  });
+}
+/**
+ * 修改事件过程状态
+ * @param {*} data 
+ */
+export function updateProcess(uid, data) {
+  return request({
+    url: 'taskServices/task/process/' + uid,
+    method: 'put',
+    params: data,
+    mode: 'ctc'
+  });
+}
+/* ================== 管理模块 =================== */
+/*****  部门架构  ** */
+
+/**
+ * 获取部门列表数据
+ * @param {*} data 
+ */
+export function getDepartmentList (data) {
+  return request({
+    url: 'authServices/organInfos',
+    params: data,
+    method: 'get',
+    mode: 'auth'
+  });
+}
+/**
+ * 编辑部门
+ * @param {*} data 
+ */
+export function updateDepart (data) {
+  return request({
+    url: 'authServices/organInfo',
+    data,
+    mode: 'auth',
+    method: 'put'
+  });
+}
+/**
+ * 删除部门
+ * @param {*} data 
+ */
+export function delDepart (data) {
+  return request({
+    url: 'authServices/organInfo?uids=' + data.deleteId + '&proKey=' + data.proKey,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 判断部门名称是否重复
+ * @param {*} data 
+ */
+export function judgeDepart (data) {
+  return request({
+    url: 'authServices/organName',
+    params: data,
+    mode: 'auth',
     method: 'get'
-  })
+  });
+}
+/**
+ * 添加部门
+ * @param {*} data 
+ */
+export function addDepart (data) {
+  return request({
+    url: 'authServices/organInfo',
+    data,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 获取用户列表数据
+ * @param {*} data 
+ */
+export function getUserList (data) {
+  return request({
+    url: 'userServices/users',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 获取部门详情
+ * @param {*} data 
+ */
+export function getDepartDetail (data) {
+  return request({
+    url: 'authServices/organInfo',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 获取用户组
+ * @param {*} data 
+ */
+export function getUserGroup (data) {
+  return request({
+    url: 'authServices/userGroups',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 删除用户
+ * @param {*} data 
+ */
+export function delUser (uid) {
+  return request({
+    url: 'authServices/user/' + uid,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 启用/禁用用户
+ * @param {*} data 
+ */
+export function isForceUser (params) {
+  return request({
+    url: 'authServices/user',
+    params,
+    mode: 'auth',
+    method: 'put'
+  });
+}
+/**
+ * 编辑用户
+ * @param {*} data 
+ */
+export function updateUser (params) {
+  return request({
+    url: 'authServices/user',
+    params,
+    mode: 'auth',
+    method: 'put'
+  });
+}
+/**
+ * 创建用户
+ * @param {*} data 
+ */
+export function createUser (params) {
+  return request({
+    url: 'authServices/user',
+    params,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 获取用户组
+ * @param {*} data 
+ */
+export function getUserGroups (params) {
+  return request({
+    url: 'authServices/userGroups',
+    params,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 创建用户组
+ * @param {*} data 
+ */
+export function createUserGroups (params) {
+  return request({
+    url: 'authServices/userGroup',
+    params,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 编辑用户组
+ * @param {*} data 
+ */
+export function updateUserGroups (params) {
+  return request({
+    url: 'authServices/userGroup',
+    params,
+    mode: 'auth',
+    method: 'put'
+  });
+}
+/**
+ * 判断用户组名称是否重复
+ * @param {*} data 
+ */
+export function judgeUserGroup (data) {
+  return request({
+    url: 'authServices/userGroupRename',
+    params: data,
+    mode: 'auth',
+    method: 'get'
+  });
+}
+/**
+ * 删除用户组
+ * @param {*} data 
+ */
+export function delUserGroup (params) {
+  return request({
+    url: 'authServices/userGroup/' + params.uid,
+    mode: 'auth',
+    method: 'delete'
+  });
+}
+/**
+ * 添加所选成员
+ * @param {*} data 
+ */
+export function addMemberInfo (params) {
+  return request({
+    url: 'authServices/userGroupBatch',
+    params,
+    mode: 'auth',
+    method: 'post'
+  });
+}
+/**
+ * 删除所选成员
+ * @param {*} data 
+ */
+export function delMemberInfo (params) {
+  return request({
+    url: 'authServices/userGroupBatch',
+    params,
+    mode: 'auth',
+    method: 'delete'
+  });
 }
 /* ================== 布控模块 =================== */
 /* ========== 布控库 ========== */

@@ -44,16 +44,37 @@
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
                 </el-form-item>
+                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                  <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
+                    <el-option
+                      v-for="(item, index) in handleUnitList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="index"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
+                    <el-option
+                      v-for="(item, index) in eventTypeList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="item.uid"
+                    >
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="事件等级:" prop="eventLevel" label-width="85px">
                   <el-select v-model="addEventForm.eventLevel" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
+                    <el-option
+                      v-for="(item, index) in eventLevelList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="item.uid"
+                    >
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
@@ -95,9 +116,10 @@
   </div>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
 import { validatePhone } from '@/utils/validator.js';
 import BigImg from './components/bigImg.vue';
-import { addEvent } from '@/views/index/api/api.js';
+import { addEvent, getDiciData } from '@/views/index/api/api.js';
 export default {
   components: { BigImg },
   data () {
@@ -109,6 +131,8 @@ export default {
         }
       },
       addEventForm: {
+        eventFlag: true,
+        mutualFlag: false,
         reporterPhone: null, // 报案人  手机号码
         reportTime: '', // 上报时间
         eventAddress: null, // 事发地点
@@ -118,8 +142,9 @@ export default {
         casualties: null, // 伤亡人员
         longitude: null, // 经度
         latitude: null, // 纬度
-        handleCompany: null, // 处理单位
-        fileList: [], // 图片文件
+        dealOrgId: null, // 处理单位
+        radius: -1, // 是否推送
+        attachmentList: [], // 图片文件
       },
       rules: {
         reporterPhone:[
@@ -138,57 +163,99 @@ export default {
         ],
         eventType:[
           { required: true, message: '请选择事件类型', trigger: 'blur' }
+        ],
+        dealOrgId:[
+          { required: true, message: '请选择处理单位', trigger: 'blur' }
         ]
       },
-      map: null,
+      map: null, // 地图对象
       dieNumber: null, // 死亡人数
       isDieError: false,
       dieTip: '死亡人数只能为正整数',
+      eventLevelList: [], // 事件等级列表数据
+      eventTypeList: [], // 事件类型列表数据
+      handleUnitList: [], // 处理单位列表数据
     }
   },
+  created () {
+    this.getEventLevelList();
+    this.getHandleUnit();
+    this.getEventTypeList();
+  },
   mounted () {
-    let _this = this;
-    _this.resetMap();
-    let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
-    map.on('click', function(e) {
-      console.log(e);  
-      if (_this.newMarker) {
-        _this.map.remove(_this.newMarker);
-        _this.newMarker = null;
-      }
-      _this.addEventForm.longitude = e.lnglat.getLng();
-      _this.addEventForm.latitude = e.lnglat.getLat();
-      window.AMap.service('AMap.Geocoder', function () { // 回调函数
-        let geocoder = new window.AMap.Geocoder({});
-        geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
-          let sAddr = '';
-          if (status === 'complete' && result.info === 'OK') {
-            // 获得了有效的地址信息: result.regeocode.formattedAddress
-            // console.log(result.regeocode.formattedAddress);
-            sAddr = result.regeocode.formattedAddress;
-          }
-          _this.addEventForm.eventAddress = sAddr;
-          _this.mapMark(_this.addEventForm);
-        });
-      });
-    });
-    _this.mapMark(_this.addEventForm);
+    this.initMap();
   },
   methods: {
-    resetMap () {
+    // 初始化地图
+    initMap () {
       let _this = this;
+      // _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-        // viewMode: '3D' // 使用3D视图
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
+      map.on('click', function(e) {
+        console.log(e);  
+        if (_this.newMarker) {
+          _this.map.remove(_this.newMarker);
+          _this.newMarker = null;
+        }
+        _this.addEventForm.longitude = e.lnglat.getLng();
+        _this.addEventForm.latitude = e.lnglat.getLat();
+        window.AMap.service('AMap.Geocoder', function () { // 回调函数
+          let geocoder = new window.AMap.Geocoder({});
+          geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
+            let sAddr = '';
+            if (status === 'complete' && result.info === 'OK') {
+              // 获得了有效的地址信息: result.regeocode.formattedAddress
+              // console.log(result.regeocode.formattedAddress);
+              sAddr = result.regeocode.formattedAddress;
+            }
+            _this.addEventForm.eventAddress = sAddr;
+            _this.mapMark(_this.addEventForm);
+          });
+        });
+      });
+      _this.mapMark(_this.addEventForm);
+    },
+    // 获取处理单位
+    getHandleUnit () {
+      const handleUnit = dataList.handleUnit;
+      getDiciData(handleUnit)
+        .then(res => {
+          if (res) {
+            this.handleUnitList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件类型
+    getEventTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.eventTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件等级
+    getEventLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 重置地图
+    resetMap () {
+      this.initMap();
     },
    // 地图标记
     mapMark (obj) {
@@ -248,6 +315,7 @@ export default {
         })
       }); // 注册监听，当选中某条记录时会触发
     },
+    // 地图放大缩小
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
@@ -275,33 +343,10 @@ export default {
     handleSuccess () {},
     // 保存提交数据
     submitData (form) {
-      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
       this.$refs[form].validate(valid => {
         if (valid) {
           console.log(this.addEventForm)
-          if (this.addEventForm.casualties === '无') {
-            this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
-            this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
-            if (!reg.test(this.dieNumber)) {
-              this.isDieError = true;
-              this.dieTip = '死亡人数只能为正整数';
-              return false;
-            } else {
-              this.isDieError = false;
-              this.dieTip = '';
-            }
-            if (parseInt(this.dieNumber) > 9999) {
-              this.isDieError = true;
-              this.dieTip = '可输入的最大死亡人数为9999';
-              return false;
-            } else {
-              this.isDieError = false;
-              this.dieTip = '';
-            }
-            this.addEventForm.casualties = this.dieNumber;
-          }
+          this.handleFormData();
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
@@ -310,8 +355,16 @@ export default {
                   message: '添加成功',
                   customClass: 'request_tip'
                 })
+                this.$router.push({name: 'event_manage'});
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '添加失败',
+                  customClass: 'request_tip'
+                })
               }
             })
+            .catch(() => {})
         }
       })
     },
@@ -326,6 +379,33 @@ export default {
           this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
+    },
+    // 处理要提交的数据
+    handleFormData () {
+      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+      if (this.addEventForm.casualties === '无') {
+        this.addEventForm.casualties = 0;
+      } else if (this.addEventForm.casualties === '不确定') {
+        this.addEventForm.casualties = -1;
+      } else if (this.addEventForm.casualties === '有') {
+        if (!reg.test(this.dieNumber)) {
+          this.isDieError = true;
+          this.dieTip = '死亡人数只能为正整数';
+          return false;
+        } else {
+          this.isDieError = false;
+          this.dieTip = '';
+        }
+        if (parseInt(this.dieNumber) > 9999) {
+          this.isDieError = true;
+          this.dieTip = '可输入的最大死亡人数为9999';
+          return false;
+        } else {
+          this.isDieError = false;
+          this.dieTip = '';
+        }
+        this.addEventForm.casualties = this.dieNumber;
+      }
     }
   }
 }
@@ -401,7 +481,7 @@ export default {
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 20px 15px;
+            padding: 15px 10px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;

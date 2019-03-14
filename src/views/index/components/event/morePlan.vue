@@ -13,15 +13,25 @@
           <el-form-item>
             <el-select v-model="planForm.planType" style="width: 240px;">
               <el-option value="全部类型"></el-option>
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="(item, index) in eventTypeList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
             <el-select v-model="planForm.planLevel" style="width: 240px;">
               <el-option value="全部等级"></el-option>
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="(item, index) in eventLevelList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item >
@@ -53,15 +63,18 @@
           </el-table-column>
           <el-table-column
             label="预案类型"
-            prop="planType"
+            prop="eventTypeName"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="适用事件等级"
-            prop="eventLevel"
+            prop="levelNameList"
             show-overflow-tooltip
             >
+            <template slot-scope='scope'>
+              <span>{{scope.row.levelNameList.join('、')}}</span>
+            </template>
           </el-table-column>
           <el-table-column label="操作" width="200">
             <template slot-scope="scope">
@@ -85,7 +98,8 @@
   </div>
 </template>
 <script>
-import { getPlanData } from '@/views/index/api/api.js';
+import { dataList } from '@/utils/data.js';
+import { getPlanData, getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -98,33 +112,61 @@ export default {
        planList: [
         {
           planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
+          eventTypeName: '事故灾难',
+          levelNameList: ['IV级（一般）', 'V级（较大）']
         },
         {
           planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
           planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
+          levelNameList: ['IV级（一般）', 'V级（较大）']
         },
         {
           planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
           planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
+          levelNameList: ['IV级（一般）', 'V级（较大）']
         },
         {
           planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
           planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
+          levelNameList: ['IV级（一般）', 'V级（较大）']
         },
         {
           planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
           planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
+          levelNameList: ['IV级（一般）', 'V级（较大）']
         }
-      ] // 表格数据
+      ], // 表格数据
+      eventTypeList: [], // 事件类型
+      eventLevelList: [], // 事件等级
     }
   },
+  created () {
+    this.getEventTypeList();
+    this.getEventLevelList()
+  },
   methods: {
+    // 获取事件类型
+    getEventTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.eventTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件等级
+    getEventLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     onPageChange (page) {
       this.pagination.pageNum = page;
       // this.getPlanList();

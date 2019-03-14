@@ -83,7 +83,6 @@
         <div style='width: 100%'>
           <span class='title'>事件情况：</span>
           <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
-          <!-- <span class='content'>{{eventDetailObj.eventDetail}}</span> -->
         </div>
       </div>
       <div class='basic-list img-content'>
@@ -105,12 +104,10 @@ export default {
     }
   },
   mounted () {
-    console.log(this.status)
   },
   methods: {
     // 图片放大
     handleBigImg (index) {
-      console.log('oooooo')
       const isShowImg = true;
       const imgIndex = index;
       this.$emit('emitHandleImg', isShowImg, imgIndex);

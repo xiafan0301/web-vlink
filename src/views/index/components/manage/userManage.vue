@@ -3,20 +3,22 @@
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddUser">新增用户</el-button>
       <div class="right-search">
-        <el-select v-model="value4" style="margin-right: 15px;" placeholder="请选择用户组">
+        <el-select v-model="groupId" style="margin-right: 15px;" clearable placeholder="请选择用户组">
           <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            v-for="item in userGroupList"
+            :key="item.uid"
+            :label="item.groupName"
+            :value="item.uid">
           </el-option>
         </el-select>
-        <el-input  placeholder="请输入用户名/姓名搜索查找" style="width: 240px;">
+        <el-input  placeholder="请输入用户名/姓名搜索" v-model="keyWord" style="width: 240px;">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 20px;"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="searchData">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
     </div>
@@ -82,24 +84,23 @@
         </el-table-column>
         <el-table-column label="操作" width="300">
           <template slot-scope="scope">
-            <span class="operation_btn" @click="showEditDialog(scope)">编辑信息</span>
+            <span class="operation_btn" @click="showEditDialog(scope.row)">编辑信息</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showEditGroupDialog(scope)">修改所属组</span>
+            <span class="operation_btn" @click="showEditGroupDialog(scope.row)">修改所属组</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showConfigRoleDialog(scope)">配置角色</span>
+            <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置角色</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showResetPassword(scope)">重置密码</span>
+            <span class="operation_btn" @click="showResetPassword(scope.row)">重置密码</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" v-show="!scope.row.isForce" @click="forbiddenUser(scope)">禁用账户</span>
-            <span class="operation_btn" v-show="scope.row.isForce" @click="enableUser(scope)">启用账户</span>
+            <span class="operation_btn" v-show="!scope.row.isForce" @click="forbiddenUser(scope.row)">禁用账户</span>
+            <span class="operation_btn" v-show="scope.row.isForce" @click="enableUser(scope.row)">启用账户</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope)">删除用户</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户</span>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -134,7 +135,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delUserDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteUser">确认</el-button>
       </div>
     </el-dialog>
     <!--编辑信息弹出框-->
@@ -147,25 +148,25 @@
       class="dialog_comp"
       >
       <div style="margin-top: 15px;">
-        <el-form :model="editUser">
+        <el-form :model="editUser" ref="editUser" :rules="editRules">
           <div style="margin-bottom: 15px;">
             <span>用户名:</span>
             <span>{{editUser.userMobile}}</span>
           </div>
-          <el-form-item label="">
+          <el-form-item label="" prop="userName">
             <el-input v-model="editUser.userName" placeholder="请输入姓名"></el-input>
           </el-form-item>
           <div class="sex_box">
-            <span class="active" @click="changeSex">男</span>
-            <span @click="changeSex">女</span>
+            <span :class="[editUser.userSex === 1 ? 'active' : '']" @click="editUser.userSex = 1">男</span>
+            <span :class="[editUser.userSex === 2 ? 'active' : '']" @click="editUser.userSex = 2">女</span>
           </div>
-          <el-form-item label="">
-            <el-input v-model="editUser.idCard" placeholder="请输入用户身份证号码"></el-input>
+          <el-form-item label=" " prop="userIdcard">
+            <el-input v-model="editUser.userIdcard" placeholder="请输入用户身份证号码"></el-input>
           </el-form-item>
-          <el-form-item label="">
+          <el-form-item label=" " prop="userEmail">
             <el-input v-model="editUser.userEmail" placeholder="请输入邮箱"></el-input>
           </el-form-item>
-          <el-form-item label="">
+          <el-form-item label=" ">
             <el-select style="width: 100%" v-model="editUser.province" placeholder="请选择上级部门">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
@@ -174,8 +175,8 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="editUserInfoDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserInfoDialog = false">保存</el-button>
+        <el-button @click="cancelEdit('editUser')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="editUserInfo('editUser')">保存</el-button>
       </div>
     </el-dialog>
     <!--修改所属组弹出框-->
@@ -205,7 +206,7 @@
             <i
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
-              @click="searchData">
+              @click="searchGroup">
             </i>
           </el-input>
            <div class="checkbox_box_right">
@@ -246,7 +247,7 @@
             <i
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
-              @click="searchData">
+              @click="searchRole">
             </i>
           </el-input>
            <div class="checkbox_box_right">
@@ -263,9 +264,14 @@
   </div>
 </template>
 <script>
+import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
+import { getUserList, getUserGroup, delUser, isForceUser, updateUser } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      groupId: null, // 搜索的用户组
+      keyWord: null, // 用户名/姓名搜索
+      closeShow: false, // 清空搜索框
       checkedCities: ['上海', '北京'],
       cities: ['上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳'],
       userListData: [
@@ -293,50 +299,98 @@ export default {
         }
       ],
       editUser: {
+        uid: null,
+        proKey: null,
         userMobile: '13599999999',
         userName: null,
-        userSex: null,
-        idCard: null,
+        userSex: 1,
+        userIdcard: null,
         userEmail: null,
         province: null,
         city: null
       },
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value4: '',
+      editRules: {
+        userName: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' },
+          { validator: validatePhone, trigger: 'blur'}
+        ],
+        userIdcard: [
+          { validator: checkIdCard, trigger: 'blur' }
+        ],
+        userEmail: [
+          { validator: checkEmail, trigger: 'blur' }
+        ]
+      },
+      userGroupList: [], // 所有的用户组
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       resetPasswordDialog: false, // 重置密码弹出框
       delUserDialog: false, // 删除用户弹出框
       editUserInfoDialog: false, // 编辑信息弹出框
       editUserGroupDialog: false, // 修改所属组弹出框
       configRoleDialog: false, // 配置角色弹出框
+      deleteId: null, // 要删除的用户id
     }
   },
   methods: {
-    // 搜索
-    searchData () {},
-    handleSizeChange () {
-
+    // 获取列表数据
+    getList () {
+      const params = {
+        'where.proKey': 'qqqq',
+        'where.groupId' : this.groupId,
+        'where.keyWord': this.keyWord,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userListData = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取用户组
+    getAllUserGroup () {
+      const params = {
+        'where.uid': 'this.$store.state.proKey'
+      };
+      getUserGroup(params)
+        .then(res => {
+          if (res) {
+            this.userGroupList = res.data.list;
+          }
+        })
+    },
+    // 搜索用户名/姓名
+    searchData () {
+      this.closeShow = true;
+      this.getList();
+    },
+    // 搜索组
+    searchGroup () {
+      // this.closeShow = true;
+      // this.getList();
+    },
+    // 搜索角色
+    searchRole () {
+      // this.closeShow = true;
+      // this.getList();
+    },
+    // 清空搜索框
+    onClear () {
+      this.closeShow = false;
+      this.keyWord = null;
+      this.getList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
     },
     // 跳至新增用户页面
     showAddUser () {
       this.$router.push({name: 'add_user'});
     },
-    handleCurrentChange () {},
     // 显示重置密码弹出框
     showResetPassword (obj) {
       console.log(obj);
@@ -345,12 +399,75 @@ export default {
     // 显示编辑信息弹出框
     showEditDialog (obj) {
       console.log(obj);
+      this.editUser.uid = obj.uid;
+      this.editUser.userMobile = obj.userMobile;
+      this.editUser.userName = obj.userName;
+      this.editUser.userIdcard = obj.userIdcard;
+      this.editUser.userSex = obj.userSex;
+      this.editUser.userEmail = obj.userEmail;
+      this.editUser.userSex = obj.userSex;
       this.editUserInfoDialog = true;
+    },
+    // 编辑信息
+    editUserInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          updateUser(this.editUser)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                })
+                this.editUserInfoDialog = false;
+                this.getList();
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '修改失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 取消编辑
+    cancelEdit (form) {
+      this.$refs[form].resetFields();
+      this.editUserInfoDialog = false;
     },
     // 显示删除用户弹出框
     showDeleteDialog (obj) {
       console.log(obj);
+      this.deleteId = obj.uid;
       this.delUserDialog = true;
+    },
+    // 删除用户
+    deleteUser () {
+      if (this.deleteId) {
+        delUser(this.deleteId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.newDepartmentDialog = false;
+              this.getList();
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示修改所属组弹出框
     showEditGroupDialog (obj) {
@@ -362,29 +479,53 @@ export default {
       console.log(obj);
       this.configRoleDialog = true;
     },
-    // change用户性别
-    changeSex () {
-
-    },
     // 禁用用户
     forbiddenUser (obj) {
-      console.log(obj);
-      const phone = 18099999999;
-      this.$notify({
-        title: '提示通知',
-        message: phone + '已禁用',
-        iconClass: 'vl_icon vl_icon_event_16'
-      });
+      const params = {
+        uid: obj.uid,
+        isForce: true
+      }
+      isForceUser(params)
+        .then(res => {
+          if (res) {
+            this.$notify({
+              title: '提示通知',
+              message: obj.userMobile + '已禁用',
+              iconClass: 'vl_icon vl_icon_event_16'
+            });
+          } else {
+            this.$message({
+              type: 'error',
+              message: '禁用失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 启用用户
     enableUser (obj) {
-      console.log(obj);
-      const phone = 18099999999;
-      this.$notify({
-        title: '提示通知',
-        message: phone + '已启用',
-        iconClass: 'vl_icon vl_icon_event_18'
-      });
+      const params = {
+        uid: obj.uid,
+        isForce: false
+      }
+      isForceUser(params)
+        .then(res => {
+          if (res) {
+            this.$notify({
+              title: '提示通知',
+              message: obj.userMobile + '已启用',
+              iconClass: 'vl_icon vl_icon_event_18'
+            });
+          } else {
+            this.$message({
+              type: 'error',
+              message: '禁用失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     }
   }
 }
