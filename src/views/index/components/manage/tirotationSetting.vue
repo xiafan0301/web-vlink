@@ -223,7 +223,6 @@ export default {
   padding: 20px;
   .search_box {
     width: 100%;
-    // padding: 20px;
     .search_form {
       width: 100%;
       .select_btn, .reset_btn {
@@ -244,7 +243,7 @@ export default {
     }
   }
   .table_box {
-    padding: 10px 20px;
+    padding: 10px 0;
     .add_ratation_btn {
       width: 108px;
       height: 40px;

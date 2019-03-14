@@ -16,19 +16,20 @@
         <el-form-item>
           <el-select v-model="ctcForm.eventStatus" style="width: 240px;" placeholder="事件状态">
             <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in ctcStatusList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item >
           <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" @click="selectDataList('ctcForm')">查询</el-button>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
           <el-button class="reset_btn" @click="resetForm('ctcForm')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -47,7 +48,7 @@
           >
         </el-table-column>
         <el-table-column
-          label="上报者"
+          label="手机号"
           prop="reportUser"
           show-overflow-tooltip
           >
@@ -73,7 +74,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="上报时间"
+          label="调度时间"
           prop="reportTime"
           show-overflow-tooltip
           >
@@ -113,6 +114,8 @@
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
+import { dataList } from '@/utils/data.js';
+import { getDiciData, getEventList, updateProcess } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -124,11 +127,13 @@ export default {
         'color': '#666666'
       },
       ctcForm: {
+        eventFlag: true,
+        mutualFlag: false,
         reportTime: [], // 日期
-        eventStatus: null, // 事件状态
+        eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
-       ctcList: [
+      ctcList: [
         {
           eventCode: 'XP1000000000000',
           eventType: '治安事件',
@@ -179,17 +184,57 @@ export default {
           eventStatus: '进行中',
           reportContent: 1
         }
-      ] // 表格数据
+      ], // 表格数据
+      ctcStatusList: [], // 调度事件状态
     }
   },
   mounted () {
     this.getOneMonth();
+    this.getCtcStatusList();
   },
   methods: {
-    handleSizeChange () {
-
+    // 获取调度事件状态数据
+    getCtcStatusList () {
+      const status = dataList.ctcStatus;
+      getDiciData(status)
+        .then(res => {
+          if (res) {
+            this.ctcStatusList = res.data;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 获取调度指挥列表数据
+    getCtcList () {
+      let eventStatus;
+      if (this.ctcForm.eventStatus === '全部状态') {
+        eventStatus = '';
+      }
+      const params = {
+        'where.eventFlag': this.ctcForm.eventFlag,
+        'where.mutualFlag': this.ctcForm.mutualFlag,
+        'where.reportTimeStart': this.ctcForm.reportTime[0],
+        'where.reportTimeEnd': this.ctcForm.reportTime[1],
+        'where.eventStatus': eventStatus,
+        pageNum: this.pagination.pageNum
+      }
+      getEventList(params)
+        .then(res => {
+          if(res) {
+            this.ctcList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      // this.getCtcList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      // this.getCtcList();
+    },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
       const start = new Date();
@@ -200,21 +245,27 @@ export default {
       this.ctcForm.reportTime.push(endDate);
     },
     // 根据搜索条件查询
-    selectDataList (form) {
-      this.$refs[form].validator(valid => {
-        if (valid) {
-          console.log(valid)
-        }
-      })
+    selectDataList () {
+      // this.getCtcList();
     },
     // 重置查询条件
     resetForm (form) {
-      this.eventForm.reportTime = [];
+      this.ctcForm.reportTime = [];
       this.$refs[form].resetFields();
       this.getOneMonth();
+      // this.getCtcList();
     },
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
+      // 在点击查看的时候将新反馈数量清零
+      if (obj.reportContent > 0) {
+        const params = {
+          'read_flag': true
+        }
+        updateProcess(obj.uid, params)
+          .then(res => {console.log(res);})
+          .catch(() => {})
+      }
       if (obj.eventStatus === '进行中') {
         this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing'}});
       }

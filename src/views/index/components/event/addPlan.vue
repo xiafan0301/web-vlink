@@ -9,52 +9,52 @@
       </div>
       <div class="content-box">
         <el-form :model="addPlanForm" ref="addPlanForm" :rules="rules" class="add-plan-form" size="small">
-          <el-form-item label="预案名称:" prop="scheduleName" label-width="120px">
-            <el-input v-model="addPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+          <el-form-item label="预案名称:" prop="planName" label-width="120px">
+            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
           </el-form-item>
-          <el-form-item label="预案类型:" label-width="120px" prop="scheduleType">
-          <el-select v-model="addPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
-            <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+          <el-form-item label="预案类型:" label-width="120px" prop="eventType">
+          <el-select v-model="addPlanForm.eventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+            <el-option
+              v-for="(item, index) in planTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
           </el-form-item>
-          <el-form-item label="适用事件等级:" label-width="120px" prop="applyEventLevel">
-            <el-select v-model="addPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
+          <el-form-item label="适用事件等级:" label-width="120px" prop="levelList">
+            <el-select v-model="addPlanForm.levelList" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="(item, index) in eventLevelList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="预案正文:" label-width="120px" prop="scheduleContent">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
+          <el-form-item label="预案正文:" label-width="120px" prop="planDetail">
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.planDetail" placeholder="请输入预案正文"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
               style="width: 500px;"
               action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
+              accept='.txt.pdf,.doc,.docx,.ppt,.pptx'
+              :on-success="handSuccess"
+              :before-upload="beforeUpload"
               :limit="1"
-              :on-exceed="handleExceed"
-              :file-list="fileList">
+              >
               <el-button size="small" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
             </el-upload>
           </el-form-item>
           <el-form-item label="响应处置:" label-width="120px">
-            <div class="response_box" v-for="(item, index) in taskList" :key="index">
+            <div class="response_box" v-for="(item, index) in addPlanForm.taskList" :key="index">
               <div class="plan_form_box">
                 <div class="title">
-                  <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="taskList.length > 1"></i>
+                  <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
                   <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
@@ -71,7 +71,7 @@
                   </el-form-item>
                 </el-form>
               </div>
-              <template v-if="taskList.length === (index + 1)">
+              <template v-if="addPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
                   <i class="vl_icon vl_icon_event_8"></i>
                   <span>添加协同部门</span>
@@ -82,67 +82,94 @@
         </el-form>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">保存</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn function_btn" @click="submitData('addPlanForm')">确定</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { addPlan, getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
       addPlanForm: {
-        scheduleName: null, // 预案名称
-        scheduleType: null, // 预案类型
-        applyEventLevel: [], // 事件等级
-        scheduleContent: null, // 预案正文
+        planName: null, // 预案名称
+        eventType: null, // 预案类型
+        levelList: [], // 事件等级
+        planDetail: null, // 预案正文
+        taskList: [
+          {
+            departmentName: null,
+            taskName: null,
+            taskContent: null,
+            departmentId: null
+          }
+        ],
+        url: null, // 附件
       },
       rules: {
-        scheduleName: [
+        planName: [
           { required: true, message: '请输入预案名称', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        scheduleType: [
+        eventType: [
           { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        applyEventLevel: [
+        levelList: [
           { required: true, message: '请选择事件等级', trigger: 'blur' }
         ],
+        planDetail: [
+          { max: 10000, message: '最多输入10000字' }
+        ]
       },
-      fileList: [],
-      taskList: [
-        {
-          departmentName: null,
-          taskName: null,
-          taskContent: null,
-          departmentId: null
-        }
-      ],
+      planTypeList: [], // 预案类型
+      eventLevelList: [], // 事件等级
     }
   },
+  created () {
+    this.getPlanTypeList();
+    this.getEventLevelList();
+  },
   methods: {
-    handlePreview () {},
-    handleRemove () {},
-    beforeRemove () {},
-    handleExceed () {},
+    // 获取预案类型
+    getPlanTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.planTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件等级
+    getEventLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 上传成功
+    handSuccess () {},
+    // 在上传之前
+    beforeUpload (file) {
+      const isLt = file.size / 1024 / 1024 < 10;
+      if (!isLt) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件大小不能超过 10MB!',
+          customClass: 'upload_file_tip'
+        });
+      }
+      return isLt;
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -150,11 +177,41 @@ export default {
         taskContent: null,
         departmentId: null
       }
-      this.taskList.push(value);
+      this.addPlanForm.taskList.push(value);
     },
     deletePlanBox (index) { // 删除调度方法输入框
-      this.taskList.splice(index, 1);
+      this.addPlanForm.taskList.splice(index, 1);
     },
+    // 提交数据
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          console.log(this.addPlanForm);
+          addPlan(this.addPlanForm)
+            .then(res => {
+              if (res) {
+                  this.$message({
+                    type: 'success',
+                    message: '添加成功',
+                    customClass: 'request_tip'
+                  })
+                  this.$router.push({name: 'ctc_plan'});
+              } else {
+                  this.$message({
+                    type: 'error',
+                    message: '添加失败',
+                    customClass: 'request_tip'
+                  })
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>

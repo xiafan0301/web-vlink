@@ -324,8 +324,7 @@ export default {
         alignX: 'middle',
         alignY: 'middle'
       });
-      console.log('1111', chart.intervalStack().position('percent').color());
-      
+      // console.log('1111', chart.intervalStack().position('percent').color());
       chart.intervalStack().position('percent')
         .color('item', ['#0FB1FF', '#0C70F8', '#6262FF', '#0C70F8'])
         .tooltip('item*percent', function(item, percent) {

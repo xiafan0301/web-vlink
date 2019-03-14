@@ -7,13 +7,34 @@ import ElementUI from 'element-ui';
 // import store from '@/store/store.js';
 import { ajaxCtx } from '@/config/config.js';
 // axios支持跨域cookie
-// axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;er
 // create an axios instance
-const service = axios.create({
-	baseURL: ajaxCtx.base, // api的base_url
-	timeout: 30000, // request timeout
-  withCredentials: true
-})
+const userInfo = localStorage.getItem('userInfo');
+let service;
+if (userInfo) {
+  service = axios.create({
+    baseURL: ajaxCtx.base, // api的base_url
+    timeout: 30000, // request timeout
+    withCredentials: true,
+    headers: {
+      'Auth-Session-Id': JSON.parse(userInfo).sessionId
+    },
+  })
+} else {
+  service = axios.create({
+    baseURL: ajaxCtx.base, // api的base_url
+    timeout: 30000, // request timeout
+    withCredentials: true
+  })
+}
+// const service = axios.create({
+// 	baseURL: ajaxCtx.base, // api的base_url
+// 	timeout: 30000, // request timeout
+//   withCredentials: true,
+//   headers: {
+//     'Auth-Session-Id': userInfo.sessionId && userInfo.sessionId
+//   },
+// })
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
   // console.log('axios request config', config);
@@ -34,7 +55,7 @@ service.interceptors.request.use((config) => {
 });
 // axios添加一个响应拦截器
 service.interceptors.response.use(function (response) {
-  console.log('response', response)
+  // console.log('response', response)
   if (response && response.data) {
     let _data = response.data;
     if (_data.code === '00000000') {

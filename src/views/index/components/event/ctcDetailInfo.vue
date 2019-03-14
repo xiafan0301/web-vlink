@@ -8,88 +8,28 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic :status="$route.query.status"></EventBasic>
-        <div class="event-ctc-content">
+        <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
+        <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
           <div class="header">
             <p class="ctc-title">调度指挥方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">
-            <li>
+            <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
               <div>
                 <span>调度部门：</span>
-                <span>消防部</span>
+                <span>{{item.departmentName}}</span>
               </div>
               <div>
                 <span>任务名称：</span>
-                <span>灭火</span>
+                <span>{{item.taskName}}</span>
               </div>
               <div class="ctc-content">
                 <span>任务内容：</span>
-                <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                  园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                  区门口有电动车起火园区门口有电动
-                  车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-                </span>
+                <span>{{item.taskContent}}</span>
               </div>
             </li>
             <div class="divide-list"></div>
-            <li>
-              <div>
-                <span>调度部门：</span>
-                <span>消防部</span>
-              </div>
-              <div>
-                <span>任务名称：</span>
-                <span>灭火</span>
-              </div>
-              <div class="ctc-content">
-                <span>任务内容：</span>
-                <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                  园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                  区门口有电动车起火园区门口有电动
-                  车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-                </span>
-              </div>
-            </li>
-            <div class="divide-list"></div>
-            <li>
-              <div>
-                <span>调度部门：</span>
-                <span>消防部</span>
-              </div>
-              <div>
-                <span>任务名称：</span>
-                <span>灭火</span>
-              </div>
-              <div class="ctc-content">
-                <span>任务内容：</span>
-                <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                  园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                  区门口有电动车起火园区门口有电动
-                  车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-                </span>
-              </div>
-            </li>
-            <div class="divide-list"></div>
-            <li>
-              <div>
-                <span>调度部门：</span>
-                <span>消防部</span>
-              </div>
-              <div>
-                <span>任务名称：</span>
-                <span>灭火</span>
-              </div>
-              <div class="ctc-content">
-                <span>任务内容：</span>
-                <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                  园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                  区门口有电动车起火园区门口有电动
-                  车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-                </span>
-              </div>
-            </li>
           </ul>
         </div>
         <div class="judge_result">
@@ -104,17 +44,17 @@
             </div>
           </div>
         </div>
-        <div class="summary">
+        <div class="summary" v-show="basicInfo.eventSummary">
           <div class="header">
             <p class="ctc-title">调度总结</p>
           </div>
           <div class="divide"></div>
           <div class="summary-content">
             <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
-            <p>调度总结报告</p>
+            <p>{{basicInfo.eventSummary}}</p>
           </div>
         </div>
-        <div class="event-process">
+        <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
           </div>
@@ -123,27 +63,17 @@
             <div class="department">
               <p>参与部门</p>
               <ul>
-                <li>
-                  <span>消防部</span>
-                  <span>06-25 13:00</span>
-                  <span>未处理</span>
-                </li>
-                <li>
-                  <span>公安部</span>
-                  <span>06-25 13:00</span>
-                  <span>处理中</span>
-                </li>
-                <li>
-                  <span>应急指挥部</span>
-                  <span>06-25 13:00</span>
-                  <span>处理完毕</span>
+                <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
+                  <span>{{item.departmentName}}</span>
+                  <span>{{item.createTime}}</span>
+                  <span>{{item.taskStatusName}}</span>
                 </li>
               </ul>
             </div>
             <div class="process-list">
               <p>事件过程</p>
               <ul>
-                <li>
+                <li v-for="(item, index) in basicInfo.processingList" :key="index">
                   <div class='circle-left'>
                     <div class='big-circle'>
                       <div class='small-circle'></div>
@@ -151,53 +81,17 @@
                   </div>
                   <div class='line'></div>
                   <div class="content-right">
-                    <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                    <div class='time'>2019-01-17 11:57</div>
+                    <div class='content'>{{item.processContent}}（操作人：{{item.opUserName}}）</div>
+                    <div class='time'>{{item.createTime}}</div>
                     <div style="width:100%;margin-top:10px;">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img style="margin-right: 5px;" src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <!-- <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div> -->
+                      <img
+                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
+                        v-for="(itm, index) in item.attachmentList"
+                        :key="'item' + index"
+                        :src="itm.src"
+                        @click="openBigImg(index, item.attachmentList)"
+                      >
                     </div>
-                  </div>
-                </li>
-                <li>
-                  <div class='circle-left'>
-                    <div class='big-circle'>
-                      <div class='small-circle'></div>
-                    </div>
-                  </div>
-                  <div class='line'></div>
-                  <div class="content-right">
-                    <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                    <div class='time'>2019-01-17 11:57</div>
-                    <div style="width:100%;margin-top:10px;">
-                      <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                      <!-- <div class='img-list' style="width:auto" :id="'proImgs'+ index"></div> -->
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class='circle-left'>
-                    <div class='big-circle'>
-                      <div class='small-circle'></div>
-                    </div>
-                  </div>
-                  <div class='line'></div>
-                  <div class="content-right">
-                    <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                    <div class='time'>2019-01-17 11:57</div>
                   </div>
                 </li>
               </ul>
@@ -206,20 +100,132 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">再次调度</el-button>
-        <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <template v-if="$route.query.status === 'ctc_ing'">
+          <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
+          <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
+        </template>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+      <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     </div>
   </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail } from '@/views/index/api/api.js';
+import BigImg from './components/bigImg.vue';
 export default {
-  components: { EventBasic },
+  components: { EventBasic, BigImg },
   data () {
     return {
-
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [],
+      basicInfo: {
+        eventCode: 'XD111111111111111',
+        eventTypeName: '自然灾害',
+        eventLevelName: 'V级',
+        reportTime: '2019-03-12',
+        reporterPhone: '18076543210',
+        eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        casualties: -1,
+        imgList: [
+          {
+            uid: '001',
+            src: require('./img/1.jpg')
+          },
+          {
+            uid: '002',
+            src: require('./img/2.jpg')
+          },
+          {
+            uid: '003',
+            src: require('./img/3.jpg')
+          },
+          {
+            uid: '004',
+            src: require('./img/4.jpg')
+          }
+        ],
+        taskList: [
+          {
+            departmentName: '公安部',
+            taskName: '救火',
+            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+            createTime: '2019-03-12 12:12:12',
+            taskStatusName: '未查看'
+          },
+          {
+            departmentName: '消防部',
+            taskName: '救火',
+            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+            createTime: '2019-03-12 12:12:24',
+            taskStatusName: '已查看'
+          },
+          {
+            departmentName: '就业部',
+            taskName: '救火',
+            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+            createTime: '2019-03-12 19:12:24',
+            taskStatusName: '已完成'
+          }
+        ],
+        processingList: [
+          {
+            createTime: '2019-03-12 12:12:12',
+            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+            opUserName: '张三',
+            attachmentList: [
+              {
+                uid: '001',
+                src: require('./img/1.jpg')
+              },
+              {
+                uid: '002',
+                src: require('./img/2.jpg')
+              },
+              {
+                uid: '003',
+                src: require('./img/3.jpg')
+              },
+              {
+                uid: '004',
+                src: require('./img/4.jpg')
+              }
+            ]
+          },
+          {
+            createTime: '2019-03-12 12:12:12',
+            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+            opUserName: '张三'
+          },
+          {
+            createTime: '2019-03-12 12:12:12',
+            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+            opUserName: '张三',
+            attachmentList: [
+              {
+                uid: '001',
+                src: require('./img/1.jpg')
+              },
+              {
+                uid: '002',
+                src: require('./img/2.jpg')
+              },
+              {
+                uid: '003',
+                src: require('./img/3.jpg')
+              },
+              {
+                uid: '004',
+                src: require('./img/4.jpg')
+              }
+            ]
+          }
+        ],
+        eventSummary: '啊杀掉了空间阿斯卡里的时间看来撒就看到了啊数据利空打击爱上了大家爱上了大家卡是垃圾的爱神的箭卡萨拉大家爱上了大家阿拉斯加的看拉萨就对啦洒家扩大撒娇的撒垃圾大安静多了家啊大家爱神的箭爱上了大家安静的拉开觉得觉得安静的爱了就的阿加大家的克拉克大家案例大家啊是多久啊空间', // 事件总结
+        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      }, // 事件详情
     }
   },
   methods: {
@@ -227,6 +233,40 @@ export default {
     skipCtcEndPage () {
       this.$router.push({name: 'ctc_end'});
     },
+    // 跳至再次调度页面
+    skipAgainCtcPage () {
+      this.$router.push({name: 'ctc_operation'});
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = '';
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.basicInfo = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 图片放大传参
+    emitHandleImg (isShow, index) {
+      this.openBigImg(index, this.basicInfo.imgList);
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>
@@ -293,6 +333,9 @@ export default {
           height: 1px;
           margin: 10px 0;
           border-bottom: 1px dashed #F2F2F2;
+          &:last-child {
+            display: none;
+          }
         }
       }
       .judge_result_content {

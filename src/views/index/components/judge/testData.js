@@ -54,6 +54,7 @@ export const testData = {
       checked: false,
       videoList: [
         {
+          id: 'v1',
           time: '2018-12-11 14:25',
           playing: false,
         }
@@ -67,18 +68,22 @@ export const testData = {
       checked: false,
       videoList: [
         {
+          id: 'v2',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v3',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v4',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v5',
           time: '2018-12-11 14:25',
           playing: false,
         }
@@ -93,35 +98,43 @@ export const testData = {
       checked: false,
       videoList: [
         {
+          id: 'v6',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v7',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v8',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v9',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v10',
           time: '2018-12-11 14:25',
           checked: true,
           playing: false,
         },
         {
+          id: 'v11',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v12',
           time: '2018-12-11 14:25',
           playing: false,
         },
         {
+          id: 'v13',
           time: '2018-12-11 14:25',
           playing: false,
         }
@@ -135,6 +148,7 @@ export const testData = {
       checked: false,
       videoList: [
         {
+          id: 'v14',
           time: '2018-12-11 14:25',
           playing: false,
         }
@@ -149,6 +163,7 @@ export const testData = {
       checked: false,
       videoList: [
         {
+          id: 'v15',
           time: '2018-12-11 14:25',
           playing: false,
         }

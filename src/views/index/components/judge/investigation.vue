@@ -259,7 +259,6 @@ export default {
         point.on('mouseout', (e) => {
           let _i = this.testData.zp.indexOf(e.target.C.extData);
           if (_i !== this.curVideo.indexNum) {
-            console.log('2')
             e.target.C.extData.checked = false;
             this.updatePoint(obj);
             this.updateImg(obj);
@@ -281,6 +280,10 @@ export default {
     },
     showVideo (e) {
       if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.testData.zp.indexOf(e.target.C.extData)) {
+        // 先把所有在播放的视频暂停
+        this.testData.zp[this.curVideo.indexNum].videoList.forEach(d => {
+          d.playing = false;
+        })
         this.testData.zp[this.curVideo.indexNum].checked = false;
         this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
         this.updateImg(this.testData.zp[this.curVideo.indexNum]);
@@ -335,8 +338,7 @@ export default {
       vDom.currentTime = document.getElementById('vlJigLargeV').currentTime;
       this.showLarge = false;
       if (this.curVideo.playing) {
-        this.testData.sxt[this.curVideo.indexNum].playing = true;
-        this.drawPlayBtn(this.testData.sxt);
+        this.testData.zp[this.curVideo.indexNum].videoList[this.curVideo.playNum].playing = true;
         vDom.play();
       }
     },
@@ -421,9 +423,12 @@ export default {
       background: #FFFFFF;
       top: 50%;
       right: 100%;
-      cursor: pointer;
+      -webkit-border-radius: .14rem 0 0 .14rem;
+      -moz-border-radius: .14rem 0 0 .14rem;
+      border-radius: .14rem 0 0 .14rem;
       animation: fadeInRight .2s ease-out .2s both;
       > i {
+        cursor: pointer;
         &:hover {
           color: #409EFF;
         }

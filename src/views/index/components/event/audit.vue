@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="audit">
     <div class="search_box">
       <el-form :inline="true" :model="auditForm" class="event_form" ref="auditForm">
@@ -14,36 +15,39 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="auditForm.eventType" style="width: 240px;" placeholder="审核状态">
+          <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="审核状态">
             <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in auditStatusList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="事件类型">
+          <el-select v-model="auditForm.eventType" style="width: 240px;" placeholder="事件类型">
             <el-option value='全部类型'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in eventTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-select v-model="auditForm.userName" style="width: 240px;" placeholder="上报者身份">
             <el-option value='全部上报者'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in identityList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -57,9 +61,15 @@
       <div class="divide"></div>
     </div>
     <div class="content-box">
-      <div class="select-checkbox">
-        <span>自动审核政务人员的</span>
-        <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
+      <div class="button_box">
+        <div class="add_event_btn" @click="skipAddEventPage">
+          <span>+</span>
+          <span>新增事件</span>
+        </div>
+        <div class="select-checkbox">
+          <span>自动审核政务人员的</span>
+          <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
+        </div>
       </div>
       <el-table
         class="audit_table"
@@ -74,7 +84,7 @@
           <template slot-scope="scope">
             <span class="event_status"
               :class="[scope.row.status === '待审核' ? 'untreated_event'
-                : scope.row.status === '审核通过' ? 'treating_event' : 'end_event']">
+                : scope.row.status === '通过' ? 'treating_event' : 'end_event']">
                 {{scope.row.status}}
             </span>
           </template>
@@ -139,18 +149,21 @@
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       auditForm: {
         reportTime: [], // 日期
-        eventType: null, // 事件类型
-        eventStatus: null, // 事件状态
-        userName: null, // 上报者
+        eventType: '全部类型', // 事件类型
+        eventStatus: '全部状态', // 事件状态
+        userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
       isOpen: true, // 自动审核政务人员
@@ -166,7 +179,7 @@ export default {
           isPicture: '是'
         },
         {
-          status: '审核通过',
+          status: '通过',
           eventType: '治安事件',
           reportUser: '18216061865',
           idCard: '市民',
@@ -176,7 +189,7 @@ export default {
           isPicture: '是'
         },
         {
-          status: '审核不通过',
+          status: '驳回',
           eventType: '治安事件',
           reportUser: '18216061865',
           idCard: '市民',
@@ -205,25 +218,67 @@ export default {
           content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
           isPicture: '是'
         }
-      ]
+      ],
+      auditStatusList: [], // 审核状态
+      eventTypeList: [], // 事件类型
+      identityList: [], // 上报者身份
     }
   },
   mounted () {
     this.getOneMonth();
+    this.getAuditStatusList();
+    this.getEventTypeList();
+    this.getIdentityList();
   },
   methods: {
+    // 获取审核状态数据
+    getAuditStatusList () {
+      const status = dataList.auditStatus;
+      getDiciData(status)
+        .then(res => {
+          if (res) {
+            this.auditStatusList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件类型
+    getEventTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.eventTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取上报者身份
+    getIdentityList () {
+      const identity = dataList.identity;
+      getDiciData(identity)
+        .then(res => {
+          if (res) {
+            this.identityList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     handleSizeChange () {
 
     },
     handleCurrentChange () {},
+    skipAddEventPage () { // 跳到新增事件页面
+      this.$router.push({name: 'add_event'});
+    },
     skipDetailPage (obj) { // 跳转至事件审核详情页
       if (obj.status === '待审核') {
         this.$router.push({name: 'unaudit_event'});
       }
-      if (obj.status === '审核通过') {
+      if (obj.status === '通过') {
         this.$router.push({name: 'audit_event_detail', query: {status: 'pass'}});
       }
-      if (obj.status === '审核不通过') {
+      if (obj.status === '驳回') {
         this.$router.push({name: 'audit_event_detail', query: {status: 'reject'}});
       }
     },
@@ -241,7 +296,6 @@ export default {
       this.$refs[form].validator(valid => {
         if (valid) {
           console.log(valid);
-          
         }
       })
     },
@@ -291,12 +345,32 @@ export default {
   }
   .content-box {
     padding: 0 20px;
-    .select-checkbox {
-      text-align: right;
-      padding: 5px 0;
-      span {
-        color: #333333;
-        margin-right: 5px;
+    .button_box {
+      display: flex;
+      justify-content: space-between;
+      .add_event_btn {
+        width: 108px;
+        height: 40px;
+        background-color: #0C70F8;
+        color: #ffffff;
+        font-size: 14px;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        span:nth-child(1) {
+          font-size: 16px;
+        }
+        span:nth-child(2) {
+          margin-left: 5px;
+        }
+      }
+      .select-checkbox {
+        padding: 5px 0;
+        span {
+          color: #333333;
+          margin-right: 5px;
+        }
       }
     }
     .audit_table {

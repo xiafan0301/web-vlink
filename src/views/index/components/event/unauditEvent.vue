@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>事件审核</el-breadcrumb-item>
+        <el-breadcrumb-item>受理核实</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box">
@@ -22,7 +22,19 @@
                 </li>
                 <li>
                   <span>上报人:</span>
-                  <span class="phone">{{addEventForm.userName}}</span>
+                  <div class="phone_box" style='margin-right:20px;'>
+                    <span class="reportUser">{{addEventForm.userName}}</span>
+                    <div class="phone_dialog">
+                      <div>
+                        <i class="vl_icon vl_icon_event_14"></i>
+                        <span>语音通话</span>
+                      </div>
+                      <div>
+                        <i class="vl_icon vl_icon_event_17"></i>
+                        <span>视频通话</span>
+                      </div>
+                    </div>
+                  </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
@@ -91,7 +103,7 @@
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -103,7 +115,7 @@
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" @click="submitData">通过</el-button>
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <el-dialog
       title="驳回"
@@ -163,6 +175,7 @@ export default {
   },
   mounted () {
     let _this = this;
+     _this.resetMap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -194,6 +207,16 @@ export default {
     _this.mapMark(_this.addEventForm);
   },
   methods: {
+    resetMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
@@ -284,6 +307,10 @@ export default {
         message: '保存成功',
         customClass: 'request_tip'
       })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }
@@ -313,6 +340,7 @@ export default {
           font-size: 14px;
           > li {
             height: 35px;
+            display: flex;
             > span:nth-child(1) {
               padding-right: 10px;
               color: #666666;
@@ -332,6 +360,42 @@ export default {
               }
               &.phone {
                 color: #0C70F8;
+              }
+            }
+            .phone_box {
+              position: relative;
+              padding-right: 10px;
+              &:hover {
+                .phone_dialog {
+                  display: block;
+                }
+              }
+              .reportUser {
+                color: #0C70F8;
+                cursor: pointer;
+              }
+              .phone_dialog {
+                display: none;
+                position: absolute;
+                background-color: #ffffff;
+                right: -30px;
+                bottom: 30px;
+                box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.15);
+                >div {
+                  padding: 5px 10px;
+                  display: flex;
+                  align-items: center;
+                  cursor: pointer;
+                  >span {
+                    color: #333333;
+                    font-size: 12px;
+                  }
+                  &:hover {
+                    >span {
+                      color: #0C70F8;
+                    }
+                  }
+                }
               }
             }
           }
@@ -393,7 +457,7 @@ export default {
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 15px 15px;
+            padding: 15px 10px;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;

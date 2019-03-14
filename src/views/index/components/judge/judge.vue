@@ -191,6 +191,9 @@ export default {
           line-height: .4rem;
           padding: 0 .12rem;
         }
+        .el-select {
+          margin-bottom: .1rem;
+        }
         > div {
           margin-bottom: .1rem;
         }
