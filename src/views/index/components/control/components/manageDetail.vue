@@ -32,7 +32,7 @@
         </ul>
         <div class="manage_d_c_e">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="eventDetailDialog = true;">详情</span></div>
+          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetailById">详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
@@ -184,9 +184,12 @@
             <div>布控结果（200个）</div>
             <div>
               <el-date-picker
+                style="width: 230px;margin: 6px 10px 0 0;"
+                @change="getAlarmSnap"
                 placeholder="请选择起止时间"
                 v-model="controlTimeIsKey"
                 type="daterange"
+                size="small"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -199,6 +202,8 @@
                 remote
                 reserve-keyword
                 placeholder="请输入设备名搜索"
+                size="small"
+                @change="getAlarmSnap"
                 :remote-method="getControlDevice"
                 :loading="loading">
                 <el-option
@@ -210,20 +215,20 @@
               </el-select>
             </div>
           </div>
-          <div class="result_content">
+          <div class="result_content" v-if="controlResList">
             <div>
-              <div class="result_img_box" v-for="item in '12345678'" :key="item.id">
-                <img src="//via.placeholder.com/395x239" alt="">
+              <div class="result_img_box" v-for="item in controlResList.list" :key="item.id">
+                <img :src="item.snapPhoto" alt="" width="395">
                 <div class="result_tool">
-                  <div>抓拍设备</div>
+                  <div>{{item.deviceName}}</div>
                   <div>
                     <i class="vl_icon vl_icon_control_06"></i>
                     <i class="vl_icon vl_icon_control_11"></i>
                   </div>
                 </div>
                 <div>
-                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">匹配名称</span></p>
-                  <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">抓拍时间</span></p>
+                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">{{item.featureName}}</span></p>
+                  <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
                 </div>
               </div>
             </div>
@@ -233,9 +238,9 @@
               @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
               :page-sizes="[100, 200, 300, 400]"
-              :page-size="100"
+              :page-size="controlResList.pageSize"
               layout="total, prev, pager, next, jumper"
-              :total="400">
+              :total="controlResList.total">
             </el-pagination>
           </div>
         </div>
@@ -302,7 +307,7 @@ import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conData, conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
-import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetailById} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
   props: ['state', 'controlId'],
@@ -340,6 +345,8 @@ export default {
       controlTimeIsKey: null,//布控时间
       devListIsKey: null,//设备列表
       devNameIsKey: null,//设备名称
+      loading: false,
+      controlResList: null,//布控抓拍结果列表
     }
   },
   created () {
@@ -353,16 +360,9 @@ export default {
     // this.reset();
     this.getControlDetail();
     this.getControlMap();
+    this.getAlarmSnap();
   },
   methods: {
-    // 获取布控详情
-    getControlDetail () {
-      getControlDetail(this.controlId).then(res => {
-        if (res && res.data) {
-          this.controlDetail = res.data;
-        }
-      })
-    },
     skip (type) {
       this.$emit('changePageType', type);
     },
@@ -379,8 +379,86 @@ export default {
     getControlList () {
       this.$emit('getControlList');
     },
+    // 获取布控详情
+    getControlDetail () {
+      getControlDetail(this.controlId).then(res => {
+        if (res && res.data) {
+          this.controlDetail = res.data;
+        }
+      })
+    },
+    // 获取事件详情
+    getEventDetailById () {
+      this.eventDetailDialog = true;
+      getEventDetailById(this.controlDetail.eventId).then(res => {
+        if (res && res.data) {
+          console.log(res.data)
+        }
+      })
+    },
+    // 获取布控范围
+    controlArea () {
+      this.dpType = '布控范围';
+      controlArea(this.controlId).then(res => {
+        if (res && res.data) {
+          this.devNum = res.data.devNum;
+          this.bayonetNum = res.data.bayonetNum;
+          this.trackPointList = res.data.trackingPointList;
+          this.trackPointList.map(f => {
+            this.$set(f, 'isDropdown', false);
+          });
+          this.mapMark();
+        }
+        
+      })
+    },
+    // 切换设备类型获得设备列表数据
+    getEquList (type, data) {
+      this.type = type;
+      this.devId = data.uid;
+      // if (type === '1') {
+      //   this.devList = data.kk;
+      // }
+    },
+    // 展开或者闭合设备列表
+    dropdown (data) {
+      this.trackPointList.map(f => {
+        if (data.uid === f.uid) {
+          f.isDropdown = !f.isDropdown;
+        } else {
+          f.isDropdown = false;
+        }
+        this.getEquList('0', data);
+      })
+    },
+    // 布控对象列表分页查询
+    getControlObjList () {
+      const params = {
+        pageNum: this.pageNumObj,
+        pageSzie: this.pageSzieObj,
+        orderBy: null,
+        order: null,
+        'where.surveillanceId': this.controlId
+      }
+      getControlObjList(params).then(res => {
+        if (res && res.data) {
+          this.controlDetail.objectList = res.data.list;
+        }
+      })
+    },
+    // 布控对象列表分页
+    handleSizeChangeObj (size) {
+      this.pageSzieObj = size;
+      this.getControlObjList();
+    },
+    // 布控对象列表分页
+    handleCurrentChangeObj (page) {
+      this.pageNumObj = page;
+      this.getControlObjList();
+    },
+   
     // 获取实时监控的布控设备
-    getControlMap () {
+    getControlMap() {
       const params = {
         deviceType: null,//设备类型
         surveillanceStatus: null,//布控状态
@@ -391,7 +469,7 @@ export default {
         eventId: null,//事件Id
         surveillanceObjectId: null//布控对象id
       }
-      getControlMap().then(res => {
+      getControlMap(params).then(res => {
         if (res && res.data) {
           this.situList = res.data;
         }
@@ -418,16 +496,26 @@ export default {
       const params = {
         pageNum: this.pageNumObjRes,
         pageSzie: this.pageSzieRes,
-        surveillanceId: this.controlId,
-        dateStart: this.controlTimeIsKey && this.controlTimeIsKey[0],
-        dateEnd: this.controlTimeIsKey && this.controlTimeIsKey[1],
-        deviceName: this.devNameIsKey
+        'where.surveillanceId': this.controlId,
+        'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
+        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
+        'where.deviceName': this.devNameIsKey
       }
-      getAlarmSnap().then(res => {
+      getAlarmSnap(params).then(res => {
         if (res && res.data) {
-
+          this.controlResList = res.data;
         }
       })
+    },
+    // 布控结果列表分页
+    handleSizeChangeRes (size) {
+      this.pageSzieRes = size;
+      this.getAlarmSnap();
+    },
+    // 布控结果列表分页
+    handleCurrentChangeRes (page) {
+      this.pageNumObjRes = page;
+      this.getAlarmSnap();
     },
     dragstart (e, index) {
       // 使其半透明
@@ -506,25 +594,7 @@ export default {
       }
     },
     
-    // 切换设备类型获得设备列表数据
-    getEquList (type, data) {
-      this.type = type;
-      this.devId = data.uid;
-      // if (type === '1') {
-      //   this.devList = data.kk;
-      // }
-    },
-    // 展开或者闭合设备列表
-    dropdown (data) {
-      this.trackPointList.map(f => {
-        if (data.uid === f.uid) {
-          f.isDropdown = !f.isDropdown;
-        } else {
-          f.isDropdown = false;
-        }
-        this.getEquList('0', data);
-      })
-    },
+    
     mapMark () {
       let _this = this, hoverWindow = null//, data;
       // // 组装右边点标记数据
@@ -619,56 +689,7 @@ export default {
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
       _this.mapMark();
-    },
-    // 获取布控范围
-    controlArea () {
-      this.dpType = '布控范围';
-      controlArea(this.controlId).then(res => {
-        if (res && res.data) {
-          this.devNum = res.data.devNum;
-          this.bayonetNum = res.data.bayonetNum;
-          this.trackPointList = res.data.trackingPointList;
-          this.trackPointList.map(f => {
-            this.$set(f, 'isDropdown', false);
-          });
-          this.mapMark();
-        }
-        
-      })
-    },
-    // 布控对象列表分页查询
-    getControlObjList () {
-      const params = {
-        pageNum: this.pageNumObj,
-        pageSzie: this.pageSzieObj,
-        orderBy: null,
-        order: null,
-        'where.surveillanceId': this.controlId
-      }
-      getControlObjList(params).then(res => {
-        if (res && res.data) {
-          this.controlDetail.objectList = res.data.list;
-        }
-      })
-    },
-    // 布控对象列表分页
-    handleSizeChangeObj (size) {
-      this.pageSzieObj = size;
-      this.getControlObjList();
-    },
-    // 布控对象列表分页
-    handleCurrentChangeObj (page) {
-      this.pageNumObj = page;
-      this.getControlObjList();
-    },
-    // 布控结果列表分页
-    handleSizeChangeRes () {
-
-    },
-    // 布控结果列表分页
-    handleCurrentChangeRes () {
-
-    },
+    }
   }
 }
 </script>

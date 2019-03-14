@@ -66,25 +66,25 @@
       <div class="snap_box" v-if="!isShowFullScreen">
         <el-card shadow="hover" class="more">
           <p>今日抓拍</p>
-          <div>2354</div>
+          <div>{{snapTotal}}</div>
           <el-button size="small">查看更多</el-button>
         </el-card>
-        <el-card class="pic" shadow="hover" v-for="item in snapList" :key="item.name">
+        <el-card class="pic" shadow="hover" v-for="item in snapList" :key="item.deviceId">
           <div class="img">
-            <img :src="item.url" alt="">
+            <img :src="item.snapPhoto" alt="" width="130" height="130">
           </div>
           <ul>
             <li>
               <i class="vl_icon vl_icon_control_26"></i>
-              <span>{{item.name}}</span>
+              <span>{{item.featureName}}</span>
             </li>
             <li>
               <i class="vl_icon vl_icon_control_27"></i>
-              <span>{{item.time}}</span>
+              <span>{{item.snapTime}}</span>
             </li>
             <li>
               <i class="vl_icon vl_icon_control_05"></i>
-              <span>{{item.monitoring}}</span>
+              <span>{{item.deviceName}}</span>
             </li>
           </ul>
         </el-card>
@@ -138,10 +138,8 @@
   </div>
 </template>
 <script>
-import {testData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
-import {objDeepCopy} from '@/utils/util.js';
-import {getControlMap, getControlMapByDevice} from '@/views/index/api/api.js';
+import {getControlMap, getControlMapByDevice, getAlarmSnap} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -186,6 +184,7 @@ export default {
         {url: '//via.placeholder.com/130x130', name: '冯晓宁6', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
         {url: '//via.placeholder.com/130x130', name: '冯晓宁7', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'}
       ],
+      snapTotal: null,//抓拍总数
       // 布控对象列表参数
       controlObjList: [
         {url: '//via.placeholder.com/130x130', name: '冯晓宁1', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
@@ -202,6 +201,7 @@ export default {
   mounted () {
     let _this = this;
     _this.getControlMap();
+    _this.getAlarmSnap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 16, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -518,9 +518,25 @@ export default {
         }
       })
     },
+    // 获取布控抓拍结果列表
+    getAlarmSnap () {
+      const params = {
+        pageNum: 1,
+        pageSzie: 10,
+        'where.surveillanceId': 11,
+        'where.dateStart': '2019-03-01',//formatDate(new Date(), 'yyyy-MM-dd'),
+        'where.dateEnd': '2019-03-14'//formatDate(new Date(), 'yyyy-MM-dd'),
+      }
+      getAlarmSnap(params).then(res => {
+        if (res && res.data) {
+          this.snapList = res.data.list;
+          this.snapTotal = res.data.total;
+        }
+      })
+    },
     // 地图标记
     mapMark () {
-      let _this = this, clickWindow = null;
+      let _this = this;
       let data = _this.controlList;
       console.log(data, 'data')
       _this.map.clearMap();
@@ -662,12 +678,12 @@ export default {
         left: 0;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
         padding: 0 20px;
         .more.el-card{
           width: 152px;
           height: 245px;
           margin-bottom: 20px;
+          margin-right: 1%;
           text-align: center;
           padding: 78px 0 87px 0;
           box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
@@ -686,10 +702,11 @@ export default {
           }
         }
         .pic.el-card{
-          width: 162px;
+          width: 174px;
           height: 245px;
           padding: 15px 0;
           margin-bottom: 20px;
+          margin-right: 1%;
           box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
           ul{
             padding: 16px 0 0 16px;
@@ -702,6 +719,7 @@ export default {
             }
             li:not(:nth-child(1)) span{
               color: #999999;
+              font-size: 12px;
             }
           } 
           .img{

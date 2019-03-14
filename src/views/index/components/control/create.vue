@@ -469,7 +469,7 @@ export default {
             this.controlDetail.surveillancTimeList = time;
             console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
-            putControl(this.controlDetail).then(res => {
+            putControl(this.controlDetail).then(() => {
               this.$message.success('编辑成功');
               this.$emit('getControlList');
             }).finally(() => {

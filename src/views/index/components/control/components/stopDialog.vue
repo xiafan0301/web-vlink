@@ -42,7 +42,7 @@ export default {
         terminationReason: this.stopReason,
         uid: this.controlId
       }
-      controlStop(data).then(res => {
+      controlStop(data).then(() => {
         this.stopManageDialog = false;
         this.$message.success('终止成功');
         this.$emit('getControlList');

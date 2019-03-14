@@ -425,3 +425,14 @@ export function getAlarmSnap(params) {
     mode: ''
   })
 }
+/**
+ * getEventDetailById 通过事件id查询事件详情
+ * @param {object} params
+ */
+export function getEventDetailById(uid) {
+  return request({
+    url: '/api/emi/eventServices/events/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}

@@ -339,7 +339,7 @@ export default {
       // 过滤组
       groupList = this.targetObj.filter(f => f.groupName !== undefined);
       if (groupList.length > 0) {
-        const arr = [];
+        let arr = [];
         groupList.forEach(f => {
           arr = f.map(m => {
             return {
