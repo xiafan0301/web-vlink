@@ -3,12 +3,14 @@
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddUserGroup">新增组</el-button>
       <div class="right-search">
-        <el-input  placeholder="请输入组名搜索查找" style="width: 240px;">
+        <el-input  placeholder="请输入组名搜索查找" style="width: 240px;" v-model="groupName">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 20px;"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="searchData">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
     </div>
@@ -27,7 +29,6 @@
         <el-table-column
           label="组名"
           prop="groupName"
-          width="100"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -53,26 +54,39 @@
         <el-table-column
           label="角色配置"
           prop="roleList"
-          width="200"
           >
+          <template slot-scope="scope">
+            <p v-for="(item, index) in scope.row.roleList" :key="index">
+              <template v-if="index < minRoleLength">
+                {{item.roleName}}
+              </template>
+            </p>
+            <p style="color: #0C70F8;cursor:pointer;" v-show="!isRoleOpen && scope.row.roleList.length > 3" @click="openAllRole(scope.row, true)">
+              <span>展开全部</span>
+              <i class="el-icon-arrow-down"></i>
+            </p>
+            <p style="color: #0C70F8;cursor:pointer;" v-show="isRoleOpen && scope.row.roleList.length > 3" @click="openAllRole(scope.row, false)">
+              <span>收起</span>
+              <i class="el-icon-arrow-up"></i>
+            </p>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="500" fixed="right">
           <template slot-scope="scope">
-            <span class="operation_btn" @click="showSelectGroupDialog(scope)">查看组成员</span>
+            <span class="operation_btn" @click="showSelectGroupDialog(scope.row)">查看组成员</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showEditDialog(scope)">编辑信息</span>
+            <span class="operation_btn" @click="showEditDialog(scope.row)">编辑信息</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showAdminMember(scope)">管理成员</span>
+            <span class="operation_btn" @click="showAdminMember(scope.row)">管理成员</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showConfigRoleDialog(scope)">配置角色</span>
+            <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置角色</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope)">删除用户组</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户组</span>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -92,7 +106,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delUserGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteUserGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--新增用户组弹出框-->
@@ -104,13 +118,14 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <div>
-        <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" v-model="userGroupName"></el-input>
-        <p class="error_tip">请输入用户组名称</p>
-      </div>
+      <el-form :model="userForm" ref="userForm" :rules="rules">
+        <el-form-item label="" prop="groupName">
+          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" style="width: 90%;" v-model="userForm.groupName"></el-input>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="addUserGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addUserGroupDialog = false">保存</el-button>
+        <el-button @click="cancelAdd('userForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="addUserGroup('userForm')">保存</el-button>
       </div>
     </el-dialog>
     <!--编辑用户组弹出框-->
@@ -122,13 +137,14 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <div>
-        <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" v-model="userGroupName"></el-input>
-        <p class="error_tip">请输入用户组名称</p>
-      </div>
+      <el-form :model="userForm" ref="userForm" :rules="rules">
+        <el-form-item label="" prop="groupName">
+          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" style="width: 90%;" v-model="userForm.groupName"></el-input>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="editUserGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserGroupDialog = false">确认</el-button>
+        <el-button @click="cancelEdit('userForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="editUserGroups('userForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--管理成员弹出框-->
@@ -142,18 +158,21 @@
       >
       <div class="userGroup_body">
         <div class="group_left clearfix">
-          <p class="group_number">当前成员 (50个)</p>
+          <p class="group_number">当前成员 (已选{{checkCurrMember.length > 0 ? checkCurrMember.length : 0}}个/共{{currentMembers.length > 0 ? currentMembers.length : 0}}个)</p>
           <div class="checkbox_box_left">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkCurrMember">
+                <el-checkbox v-for="(item, index) in currentMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left">移除所选成员</div>
+          <div class="group_btn group_btn_left" @click="removeMembers">移除所选成员</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选成员 (已选1个/共51个)</p>
+          <p class="group_number">
+            <span>可选成员</span>
+            <span>(已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{selectMembers.length > 0 ? selectMembers.length : 0}}个)</span>
+          </p>
           <el-input placeholder="请输入成员姓名搜索" size="small" style="width: 220px;">
             <i
               class="search_icon vl_icon vl_icon_manage_1"
@@ -163,12 +182,12 @@
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkSelectMember">
+                <el-checkbox v-for="(item ,index) in selectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right">添加所选成员</div>
+          <div class="group_btn group_btn_right" @click="addMembers">添加所选成员</div>
         </div>
       </div>
     </el-dialog>
@@ -183,18 +202,18 @@
       >
       <div class="userGroup_body">
         <div class="group_left clearfix">
-          <p class="group_number">已配角色 (50个)</p>
+          <p class="group_number">已配角色 (已选{{checkCurrRoles.length > 0 ? checkCurrRoles.length : 0}}个/共{{currentRoles.length > 0 ? currentRoles.length : 0}}个)</p>
           <div class="checkbox_box_left">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkCurrRoles">
+                <el-checkbox v-for="item in currentRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left">移除所选角色</div>
+          <div class="group_btn group_btn_left" @click="removeRoles">移除所选角色</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选角色 (已选1个/共51个)</p>
+          <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{selectRoles.length > 0 ? selectRoles.length : 0}}个)</p>
           <el-input placeholder="请输入角色名搜索" size="small" style="width: 220px;">
             <i
               class="search_icon vl_icon vl_icon_manage_1"
@@ -204,12 +223,12 @@
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkSelectRoles">
+                <el-checkbox v-for="item in selectRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right">添加所选角色</div>
+          <div class="group_btn group_btn_right" @click="addSelectRoles">添加所选角色</div>
         </div>
       </div>
     </el-dialog>
@@ -223,24 +242,11 @@
       class="dialog_comp"
       >
       <div class="group-content">
-        <p>组名组名称组名称组名称</p>
+        <p>{{selectGroupData.groupName}}</p>
         <div class="content-detail">
           <vue-scroll>
             <ul class="detail-ul">
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
-              <li>李世海</li>
+              <li v-for="(item, index) in selectGroupData.userList" :key="index">{{item.userName}}</li>
             </ul>
           </vue-scroll>
         </div>
@@ -249,64 +255,438 @@
   </div>
 </template>
 <script>
+import { checkUserName, isJudgeUserGroup } from '@/utils/validator.js';
+import { getUserGroups, createUserGroups, updateUserGroups, delUserGroup, getUserList, getRoleList,
+ addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      minRoleLength: 3, // 所属角色最多显示3个
+      isRoleOpen: false, // 所属角色是否展开
+      groupName: null, // 根据组名搜索
+      isShowError: false, // 是否显示错误提示信息
+      addTips: null, // 添加用户组的提示语
+      closeShow: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      checkedCities: ['上海', '北京'],
-      cities: ['上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳'],
-      userGroupName: null, // 新增用户组名称
-      groupListData: [
-        {
-          groupName: '我是组名1号',
-          opUserName: '石媛',
-          createTime: '2018-12-14 10:00:00',
-          userCount: 10,
-          roleList: []
-        }
-      ],
+      currentMembers: [], // 当前成员
+      selectMembers: [], // 可选成员
+      checkSelectMember: [], // 勾选种的可选成员
+      checkCurrMember: [], // 勾选中的当前成员
+      currentRoles: [], // 当前角色
+      selectRoles: [], // 可选角色
+      checkSelectRoles: [], // 勾选种的可选角色
+      checkCurrRoles: [], // 勾选中的当前角色
+      currentGroupId: null, // 当前用户组id
+      currRoleId: null,
+      groupListData: [],
+      userForm: {
+        groupName: null,
+      },
+      rules: {
+        groupName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { min: 2, message: '长度2-20位', trigger:'blur' },
+          { max: 20, message: '长度2-20位', trigger:'blur' },
+          { validator: checkUserName, trigger: 'blur'},
+          // { validator: isJudgeUserGroup, trigger: 'blur'}
+        ]
+      },
       delUserGroupDialog: false, // 删除用户组弹出框
       addUserGroupDialog: false, // 创建用户组弹出框
       adminMemberDialog: false, // 管理成员弹出框
       configRoleDialog: false, // 配置角色弹出框
       editUserGroupDialog: false, // 编辑信息弹出框
       selectGroupPersonDialog: false, // 查看组成员弹出框
+      editGroupId: null, // 要编辑用户组的id
+      delGroupId: null, // 要删除用户组的id
+      selectGroupData: {}, // 要查看的组成员数据
+      storageInfo: {}, // 存储的用户信息
     }
   },
+  created () {
+    this.storageInfo = JSON.parse(localStorage.getItem('userInfo'));
+  },
+  mounted () {
+    this.getList();
+  },
   methods: {
-    // 搜索
-    searchData () {},
-    handleSizeChange () {
+    // 获取列表数据
+    getList () {
+      const params = {
+        order: 'desc',
+        orderBy: 'create_time',
+        'where.groupName': this.groupName,
+        pageNum: this.pagination.pageNum,
+        'where.proKey': this.storageInfo.proKey
+      };
+      getUserGroups(params)
+        .then(res => {
+          if (res) {
+            // res.data.list.map(item => {
+            //   if (item.roleList) {
+            //     item.roleList[item.roleList.length] = {
+            //       allgroup: 3,
+            //       isShowAllGroup: true
+            //     }
+            //   }
+            // })
+            this.groupListData = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 清除搜索框
+    onClear () {
+      this.groupName = null;
+      this.closeShow = false;
+      this.getList();
+    },
+    // 搜索
+    searchData () {
+      if (this.groupName) {
+        this.closeShow = true;
+        this.getList();
+      }
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 显示创建用户组弹出框
     showAddUserGroup () {
+      this.userForm.groupName = null;
       this.addUserGroupDialog = true;
+    },
+    // 创建用户组
+    addUserGroup (form) {
+      let _this = this;
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            groupName: _this.userForm.groupName,
+            proKey: _this.storageInfo.proKey
+          }
+          createUserGroups(params)
+            .then(res => {
+              if (res) {
+                _this.$message({
+                  type: 'success',
+                  message: '添加成功',
+                  customClass: 'request_tip'
+                })
+                _this.addUserGroupDialog = false;
+                _this.getList();
+              } else {
+                _this.$message({
+                  type: 'error',
+                  message: '添加失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 取消添加
+    cancelAdd (form) {
+      this.$refs[form].resetFields();
+      this.addUserGroupDialog = false;
     },
     // 显示删除用户组弹出框
     showDeleteDialog (obj) {
       console.log(obj);
+      this.delGroupId = obj.uid;
       this.delUserGroupDialog = true;
+    },
+    // 删除用户组
+    deleteUserGroup () {
+      if (this.delGroupId) {
+        const params = {
+          uid: this.delGroupId,
+          proKey: this.storageInfo.proKey
+        }
+        delUserGroup(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.delUserGroupDialog = false;
+              this.getList();
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示管理成员弹出框
     showAdminMember (obj) {
       console.log(obj);
+      this.currentMembers = [];
       this.adminMemberDialog = true;
+      this.currentGroupId = obj.uid;
+      let allMembers; // 所有的用户
+      if (obj.userList.length > 0) {
+        obj.userList.map(item => {
+          this.currentMembers.push({
+            uid: item.uid,
+            userName: item.userName
+          });
+        });
+      }
+      const params = {
+        pageSize: 0,
+        'where.proKey': this.storageInfo.proKey
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            allMembers = JSON.parse(JSON.stringify(res.data.list));
+            if (this.currentMembers.length > 0) {
+              this.currentMembers.map(item => {
+                allMembers.map((itm, idx) => {
+                  if (itm.userName === item.userName) {
+                    allMembers.splice(idx, 1);
+                  }
+                });
+              });
+            }
+            this.selectMembers = JSON.parse(JSON.stringify(allMembers));
+          }
+        })
+        .catch(() => {})
+      
+    },
+    // 移出所选成员
+    removeMembers () {
+      if (this.checkCurrMember.length > 0) {
+        let params = {
+          proKey: this.storageInfo.proKey,
+          groupId: this.currentGroupId,
+          userIdList: []
+        };
+        this.checkCurrMember.map(item => {
+          params.userIdList.push(item.uid);
+        });
+        delMemberInfo(params)
+          .then(res => {
+            if (res) {
+              this.checkCurrMember.map(item => {
+                this.currentMembers.map((itm, idx) => {
+                  if (item.userName === itm.userName) {
+                    this.currentMembers.splice(idx, 1);
+                    this.selectMembers.push({
+                      uid: item.uid,
+                      userName: item.userName
+                    });
+                  }
+                });
+              });
+              this.getList();
+              this.checkCurrMember = [];
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 添加所选成员
+    addMembers () {
+      if (this.checkSelectMember.length > 0) {
+        let params = {
+          proKey: this.storageInfo.proKey,
+          uid: this.currentGroupId,
+          uids: []
+        };
+        this.checkSelectMember.map(item => {
+          params.uids.push(item.uid);
+        });
+        addMemberInfo(params)
+          .then(res => {
+            if (res) {
+              this.checkSelectMember.map(item => {
+                this.selectMembers.map((itm, idx) => {
+                  if (item.userName === itm.userName) {
+                    this.selectMembers.splice(idx, 1);
+                    this.currentMembers.push({
+                      uid: item.uid,
+                      userName: item.userName
+                    });
+                  }
+                });
+              });
+              this.getList();
+              this.checkSelectMember = [];
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示配置角色弹出框
     showConfigRoleDialog (obj) {
       console.log(obj);
+      this.currRoleId = obj.uid;
+      let allRoles = []; // 所有角色
+      this.currentRoles = [];
+      this.selectRoles = [];
       this.configRoleDialog = true;
+      if (obj.roleList.length > 0) {
+        obj.roleList.map(item => {
+          this.currentRoles.push({
+            uid: item.uid,
+            roleName: item.roleName
+          });
+        });
+      }
+      const params = {
+        'where.proKey': this.storageInfo.proKey,
+        pageSize: 0,
+      }
+      getRoleList(params)
+        .then(res => {
+          if (res) {
+            allRoles = JSON.parse(JSON.stringify(res.data.list));
+            if (this.currentRoles.length > 0) {
+              this.currentRoles.map(item => {
+                allRoles.map((itm, index) => {
+                  if (item.roleName === itm.roleName) {
+                    allRoles.splice(index, 1);
+                  }
+                });
+              });
+            }
+            this.selectRoles = JSON.parse(JSON.stringify(allRoles));
+          }
+        });
+    },
+    // 添加所选角色
+    addSelectRoles () {
+      if (this.checkSelectRoles.length > 0) {
+        let params = {
+          proKey: this.storageInfo.proKey,
+          groupId: this.currRoleId,
+          roleIdList: []
+        };
+        this.checkSelectRoles.map(item => {
+          params.roleIdList.push(item.uid);
+        });
+        addUserGroupRoles(params)
+          .then(res => {
+            if (res) {
+              this.checkSelectRoles.map(item => {
+                this.selectRoles.map((itm, idx) => {
+                  if (item.roleName === itm.roleName) {
+                    this.selectRoles.splice(idx, 1);
+                    this.currentRoles.push({
+                      uid: item.uid,
+                      roleName: item.roleName
+                    });
+                  }
+                });
+              });
+              this.getList();
+              this.checkSelectRoles = [];
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 移除所选角色
+    removeRoles () {
+      if (this.checkCurrRoles.length > 0) {
+        let params = {
+          proKey: this.storageInfo.proKey,
+          groupId: this.currRoleId,
+          roleIdList: []
+        };
+        this.checkCurrRoles.map(item => {
+          params.roleIdList.push(item.uid);
+        });
+        delUserGroupRoles(params)
+          .then(res => {
+            if (res) {
+              this.checkCurrRoles.map(item => {
+                this.currentRoles.map((itm, idx) => {
+                  if (item.roleName === itm.roleName) {
+                    this.currentRoles.splice(idx, 1);
+                    this.selectRoles.push({
+                      uid: item.uid,
+                      roleName: item.roleName
+                    });
+                  }
+                });
+              });
+              this.getList();
+              this.checkCurrRoles = [];
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示查看组成员弹出框
     showSelectGroupDialog (obj) {
-      console.log(obj);
+      this.selectGroupData = obj;
       this.selectGroupPersonDialog = true;
     },
     // 显示编辑信息弹出框
     showEditDialog (obj) {
       console.log(obj);
+      this.editGroupId = obj.uid;
+      this.userForm.groupName = obj.groupName;
       this.editUserGroupDialog = true;
+    },
+    // 编辑信息
+    editUserGroups (form) {
+      this.$refs[form].validate(valid => {
+        if(valid) {
+          const params = {
+            proKey: this.storageInfo.proKey,
+            uid: this.editGroupId,
+            groupName: this.userForm.groupName
+          }
+          updateUserGroups(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                })
+                this.editUserGroupDialog = false;
+                this.getList();
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '修改失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 取消编辑
+    cancelEdit (form) {
+      this.editUserGroupDialog = false;
+      this.$refs[form].resetFields();
+    },
+    // 所属角色--展开收起
+    openAllRole (obj, val) {
+      if (val) {
+        this.minRoleLength = obj.roleList.length;
+      } else {
+        this.minRoleLength = 3;
+      }
+      this.isRoleOpen = val;
     }
   }
 }

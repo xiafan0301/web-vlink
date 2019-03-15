@@ -10,87 +10,27 @@
     </div>
     <div class="content-box">
       <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
-      <div class="event-ctc-content">
+      <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
         <div class="header">
           <p class="ctc-title">调度指挥方案</p>
         </div>
         <div class="divide"></div>
         <ul class="content-list">
-          <li>
+          <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
             <div>
               <span>调度部门：</span>
-              <span>消防部</span>
+              <span>{{item.departmentName}}</span>
             </div>
             <div>
               <span>任务名称：</span>
-              <span>灭火</span>
+              <span>{{item.taskName}}</span>
             </div>
             <div class="ctc-content">
               <span>任务内容：</span>
-              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                区门口有电动车起火园区门口有电动
-                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-              </span>
+              <span>{{item.taskContent}}</span>
             </div>
           </li>
           <div class="divide-list"></div>
-          <li>
-            <div>
-              <span>调度部门：</span>
-              <span>消防部</span>
-            </div>
-            <div>
-              <span>任务名称：</span>
-              <span>灭火</span>
-            </div>
-            <div class="ctc-content">
-              <span>任务内容：</span>
-              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                区门口有电动车起火园区门口有电动
-                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-              </span>
-            </div>
-          </li>
-          <div class="divide-list"></div>
-          <li>
-            <div>
-              <span>调度部门：</span>
-              <span>消防部</span>
-            </div>
-            <div>
-              <span>任务名称：</span>
-              <span>灭火</span>
-            </div>
-            <div class="ctc-content">
-              <span>任务内容：</span>
-              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                区门口有电动车起火园区门口有电动
-                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-              </span>
-            </div>
-          </li>
-          <div class="divide-list"></div>
-          <li>
-            <div>
-              <span>调度部门：</span>
-              <span>消防部</span>
-            </div>
-            <div>
-              <span>任务名称：</span>
-              <span>灭火</span>
-            </div>
-            <div class="ctc-content">
-              <span>任务内容：</span>
-              <span>园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火
-                园区门口有电动车起火园区门口有电动车起火园区门口有电动车起火园
-                区门口有电动车起火园区门口有电动
-                车起火园区门口有电动车起火园区门口有电动车起火事件情况文字达到140字的行数。
-              </span>
-            </div>
-          </li>
         </ul>
       </div>
       <div class="ctc-plan-box">
@@ -144,7 +84,12 @@
           <div class="plan-list" v-for="(item, index) in taskList" :key="index">
             <div class="main-content">
               <div class="title">
-                <span>调度指挥方案</span>
+                <template v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
+                  <span>再次调度指挥方案</span>
+                </template>
+                <template v-else>
+                  <span>调度指挥方案</span>
+                </template>
                 <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
               </div>
               <div class="divide"></div>
@@ -195,101 +140,129 @@ export default {
         isShowImg: false, // 是否放大图片
         imgList1: [],
         basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
+          eventCode: 'XD111111111111111',
+          eventTypeName: '自然灾害',
+          eventLevelName: 'V级',
+          reportTime: '2019-03-12',
+          reporterPhone: '18076543210',
+          eventAddress: '湖南省长沙市天心区创谷产业工业园',
+          casualties: -1,
+          taskList: [
+            {
+              departmentName: '公安部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 12:12:12',
+              taskStatusName: '未查看'
+            },
+            {
+              departmentName: '消防部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 12:12:24',
+              taskStatusName: '已查看'
+            },
+            {
+              departmentName: '就业部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 19:12:24',
+              taskStatusName: '已完成'
+            }
+          ],
+          imgList: [
+            {
+              uid: '001',
+              src: require('./img/1.jpg')
+            },
+            {
+              uid: '002',
+              src: require('./img/2.jpg')
+            },
+            {
+              uid: '003',
+              src: require('./img/3.jpg')
+            },
+            {
+              uid: '004',
+              src: require('./img/4.jpg')
+            }
+          ],
+          eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+        }, // 事件详情
+        taskList: [
           {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
+            departmentName: null,
+            taskName: null,
+            taskContent: null,
+            departmentId: null
           }
         ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
-      taskList: [
-        {
-          departmentName: null,
-          taskName: null,
-          taskContent: null,
-          departmentId: null
-        }
-      ],
-       planList: [
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        }
-      ] // 表格数据
+        planList: [
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          }
+        ] // 表格数据
     }
+  },
+  mounted () {
+    this.getDetail();
   },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
-      getEventDetail(eventId)
-        .then(res => {
-          if (res) {
-            this.basicInfo = res.data;
-          }
-        })
-        .catch(() => {})
+      const eventId = this.$route.query.eventId;
+      if (eventId) {
+        getEventDetail(eventId)
+          .then(res => {
+            if (res) {
+              this.basicInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 判断taskList是否都填写完
     judgeData () {
@@ -552,6 +525,9 @@ export default {
           height: 1px;
           margin: 10px 0;
           border-bottom: 1px dashed #F2F2F2;
+          &:last-child {
+            display: none;
+          }
         }
       }
     }

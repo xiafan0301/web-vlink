@@ -130,8 +130,8 @@
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
 .vl_icon_event_3{width: 16px; height: 16px; background-position: -785px -375px;}
 .vl_icon_event_4{width: 28px; height: 28px; background-position: -664px -428px;}
-.vl_icon_event_5{width: 16px; height: 16px; background-position: -664px -486px;}
-.vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;}
+.vl_icon_event_5{width: 16px; height: 16px; background-position: -664px -486px;} /* 事件--文件上传 -- 前图标 */
+.vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;} /* 事件--文件上传下载图标 */
 .vl_icon_event_7{width: 23px; height: 22px; background-position: -903px -375px;}
 .vl_icon_event_8{width: 21px; height: 21px; background-position: -872px -375px;}
 .vl_icon_event_9{width: 124px; height: 124px; background-position: -91px -718px;} /*事件---未处理*/
@@ -588,7 +588,7 @@
 /*所有请求返回的提示样式*/
 .request_tip {
   top: 50%;
-  left: 70%;
+  left: 50%;
 }
 /*部门管理--删除部门的提示样式*/
 .delete_depart {

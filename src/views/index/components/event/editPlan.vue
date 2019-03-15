@@ -9,32 +9,33 @@
       </div>
       <div class="content-box">
         <el-form :model="editPlanForm" ref="editPlanForm" :rules="rules" class="edit-plan-form" size="small">
-          <el-form-item label="预案名称:" prop="scheduleName" label-width="120px">
-            <el-input v-model="editPlanForm.scheduleName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+          <el-form-item label="预案名称:" prop="planName" label-width="120px">
+            <el-input v-model="editPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
           </el-form-item>
-          <el-form-item label="预案类型:" label-width="120px" prop="scheduleType">
-          <el-select v-model="editPlanForm.scheduleType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
-            <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+          <el-form-item label="预案类型:" label-width="120px" prop="eventType">
+          <el-select v-model="editPlanForm.eventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+            <el-option
+              v-for="(item, index) in eventTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
           </el-form-item>
-          <el-form-item label="适用事件等级:" label-width="120px" prop="applyEventLevel">
-            <el-select v-model="editPlanForm.applyEventLevel" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
+          <el-form-item label="适用事件等级:" label-width="120px" prop="levelList">
+            <el-select v-model="editPlanForm.levelList" :multiple="true" placeholder="请选择适用事件等级" style="width: 500px;">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="(item, index) in eventLevelList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="预案正文:" label-width="120px" prop="scheduleContent">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.scheduleContent" placeholder="请输入预案正文"></el-input>
+          <el-form-item label="预案正文:" label-width="120px" prop="planDetail">
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.planDetail" placeholder="请输入预案正文"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
@@ -82,37 +83,24 @@
         </el-form>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn">保存</el-button>
+        <el-button class="operation_btn function_btn" @click="submitData('editPlanForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { getPlanDetail, getDiciData, updatePlan } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
       editPlanForm: {
-        scheduleName: null, // 预案名称
-        scheduleType: null, // 预案类型
-        applyEventLevel: [], // 事件等级
-        scheduleContent: null, // 预案正文
+        planName: null, // 预案名称
+        eventType: null, // 预案类型
+        levelList: [], // 事件等级
+        planDetail: null, // 预案正文
+        taskList: []
       },
       rules: {
         scheduleName: [
@@ -136,9 +124,37 @@ export default {
           departmentId: null
         }
       ],
+      planTypeList: [], // 预案类型
+      eventLevelList: [], // 事件等级
     }
   },
+  created () {
+    this.getPlanTypeList();
+    this.getEventLevelList();
+  },
   methods: {
+    // 获取预案类型
+    getPlanTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.planTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件等级
+    getEventLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     handlePreview () {},
     handleRemove () {},
     beforeRemove () {},
@@ -158,6 +174,42 @@ export default {
     // 返回
     back () {
       this.$router.back(-1);
+    },
+    // 获取预案详情
+    getPlanDetailInfo () {
+      const planId = this.$router.query.planId;
+      getPlanDetail(planId)
+        .then(res => {
+          if (res) {
+            this.editPlanForm = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 提交数据----修改预案
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          updatePlan(this.editPlanForm)
+           .then(res => {
+             if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                })
+                this.$router.push({name: 'ctc_plan'});
+             } else {
+                this.$message({
+                  type: 'error',
+                  message: '修改失败',
+                  customClass: 'request_tip'
+                })
+             }
+           })
+           .catch(() => {})
+        }
+      })
     }
   }
 }

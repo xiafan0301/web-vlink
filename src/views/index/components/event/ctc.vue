@@ -16,19 +16,20 @@
         <el-form-item>
           <el-select v-model="ctcForm.eventStatus" style="width: 240px;" placeholder="事件状态">
             <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in ctcStatusList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item >
           <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" @click="selectDataList('ctcForm')">查询</el-button>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
           <el-button class="reset_btn" @click="resetForm('ctcForm')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -113,6 +114,8 @@
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
+import { dataList } from '@/utils/data.js';
+import { getDiciData, getEventList, updateProcess } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -124,8 +127,10 @@ export default {
         'color': '#666666'
       },
       ctcForm: {
+        eventFlag: true,
+        mutualFlag: false,
         reportTime: [], // 日期
-        eventStatus: null, // 事件状态
+        eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [
@@ -179,13 +184,26 @@ export default {
           eventStatus: '进行中',
           reportContent: 1
         }
-      ] // 表格数据
+      ], // 表格数据
+      ctcStatusList: [], // 调度事件状态
     }
   },
   mounted () {
     this.getOneMonth();
+    this.getCtcStatusList();
   },
   methods: {
+    // 获取调度事件状态数据
+    getCtcStatusList () {
+      const status = dataList.ctcStatus;
+      getDiciData(status)
+        .then(res => {
+          if (res) {
+            this.ctcStatusList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取调度指挥列表数据
     getCtcList () {
       let eventStatus;
@@ -194,11 +212,19 @@ export default {
       }
       const params = {
         'where.eventFlag': this.ctcForm.eventFlag,
+        'where.mutualFlag': this.ctcForm.mutualFlag,
         'where.reportTimeStart': this.ctcForm.reportTime[0],
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
-        'where.eventStatus': this.ctcForm.eventStatus,
+        'where.eventStatus': eventStatus,
         pageNum: this.pagination.pageNum
       }
+      getEventList(params)
+        .then(res => {
+          if(res) {
+            this.ctcList = res.data;
+          }
+        })
+        .catch(() => {})
     },
     handleSizeChange (val) {
       this.pagination.pageNum = 1;
@@ -231,6 +257,15 @@ export default {
     },
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
+      // 在点击查看的时候将新反馈数量清零
+      if (obj.reportContent > 0) {
+        const params = {
+          'read_flag': true
+        }
+        updateProcess(obj.uid, params)
+          .then(res => {console.log(res);})
+          .catch(() => {})
+      }
       if (obj.eventStatus === '进行中') {
         this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing'}});
       }

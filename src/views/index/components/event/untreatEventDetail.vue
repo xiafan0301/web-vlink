@@ -57,7 +57,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -101,7 +101,7 @@ export default {
     }
   },
   mounted () {
-
+    this.getDetail();
   },
   methods: {
     // 图片放大传参
@@ -117,11 +117,12 @@ export default {
     },
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
             console.log(res);
+            this.basicInfo = res.data;
           }
         })
         .catch(() => {})
@@ -133,6 +134,15 @@ export default {
     // 确定---跳页面
     skipEachPage () {
       const type = this.handleType;
+      const eventId = this.$route.query.eventId;
+      const params = {
+        uid: eventId,
+        mutualFlag: this.isMutual
+      }
+      updateEvent(params, eventId)
+        .then(res => {
+          console.log(res)
+        })
       if (type) {
         if (type === 1) {
           // 跳至新增布控页面
@@ -140,15 +150,15 @@ export default {
         }
         if (type === 2) {
           // 跳至事件管理调度指挥页面
-          this.$router.push({name: 'ctc_operation'});
+          this.$router.push({name: 'ctc_operation', query: {eventId: eventId}});
         }
         if (type === 3) {
           // 跳至呈报上级页面
-          this.$router.push({name: 'event_report'});
+          this.$router.push({name: 'event_report', query: {eventId: eventId}});
         }
         if (type === 4) {
           // 跳至转到其他单位页面
-          this.$router.push({name: 'send_other_units'});
+          this.$router.push({name: 'send_other_units', query: {eventId: eventId}});
         }
       }
     },

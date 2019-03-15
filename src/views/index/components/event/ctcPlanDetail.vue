@@ -11,97 +11,65 @@
         <ul>
           <li>
             <span>预案名称:</span>
-            <span>公共区域消防安全应急预案</span>
+            <span>{{planDetail.planName}}</span>
           </li>
           <li>
             <span>预案类型:</span>
-            <span>事故灾难</span>
+            <span>{{planDetail.eventTypeName}}</span>
           </li>
           <li>
             <span>适用事件等级:</span>
-            <span>Ⅰ级(特重)、Ⅱ级(重大)</span>
+            <span>
+              <template v-if='planDetail.levelNameList'>
+                {{planDetail.levelNameList.join()}}
+              </template>
+            </span>
           </li>
           <li>
-            <span>任务内容:</span>
-            <span>
-              任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。
-              调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，
-              段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。
-            </span>
+            <span>预案正文:</span>
+            <span>{{planDetail.planDetail}}</span>
           </li>
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <i class="vl_icon vl_icon_event_5"></i>
-              公共区域消防安全应急预案.docx
-              <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;"></i>
+              <template v-if="planDetail.attachmentName">
+                <i class="vl_icon vl_icon_event_5"></i>
+                {{planDetail.attachmentName}}
+                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.url)"></i>
+              </template>
+              <template v-else>无</template>
             </span>
           </li>
           <li>
             <span>响应处置:</span>
             <div class="res-list">
-              <div class="list-detail">
+              <div
+                class="list-detail"
+                v-for="(item, index) in planDetail.taskList"
+                :key="'item' + index"
+              >
                 <div>
                   <span>协同部门：</span>
-                  <span>协同部门：联动单位A</span>
+                  <span>{{item.departmentName}}</span>
                 </div>
                 <div>
                   <span>任务名称：</span>
-                  <span>任务名称：灭火</span>
+                  <span>{{item.taskName}}</span>
                 </div>
                 <div>
                   <span>任务内容：</span>
-                  <span>
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，
-                    完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，
-                    完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报
-                  </span>
-                </div>
-              </div>
-              <div class="list-detail">
-                <div>
-                  <span>协同部门：</span>
-                  <span>协同部门：联动单位A</span>
-                </div>
-                <div>
-                  <span>任务名称：</span>
-                  <span>任务名称：灭火</span>
-                </div>
-                <div>
-                  <span>任务内容：</span>
-                  <span>任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报</span>
-                </div>
-              </div>
-              <div class="list-detail">
-                <div>
-                  <span>协同部门：</span>
-                  <span>联动单位A</span>
-                </div>
-                <div>
-                  <span>任务名称：</span>
-                  <span>灭火</span>
-                </div>
-                <div>
-                  <span>任务内容：</span>
-                  <span>第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报</span>
+                  <span>{{item.taskContent}}</span>
                 </div>
               </div>
             </div>
           </li>
           <li>
             <span>创建用户:</span>
-            <span>谭某某</span>
+            <span>{{planDetail.createUserName}}</span>
           </li>
           <li>
-            <span>创建事件:</span>
-            <span>2018-07-16 08:56:55</span>
+            <span>创建时间:</span>
+            <span>{{planDetail.createTime}}</span>
           </li>
         </ul>
       </div>
@@ -129,13 +97,43 @@
   </vue-scroll>
 </template>
 <script>
+import { getPlanDetail, delPlan } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       delPlanDialog: false, // 删除预案弹出框
+      planDetail: {
+        planName: '预案名称',
+        eventTypeName: '自然灾害',
+        levelNameList: ['IV级', 'V级'],
+        planDetail: '起火了起火了起火了起火了',
+        attachmentName: '公共文档',
+        url: 'http://www.baidu.com',
+        taskList: [
+          {
+            departmentName: '公安部',
+            taskName: '救火',
+            taskContent: '迅速救火'
+          }
+        ],
+        createUserName: '石媛',
+        createTime: '2019-03-12'
+      }, // 预案详情
     }
   },
   methods: {
+    // 获取预案详情
+    getPlanDetail () {
+      const planId = this.$router.query.planId;
+      if (planId) {
+        getPlanDetail(planId)
+         .then(res => {
+           if (res) {
+             this.planDetail = res.data;
+           }
+         })
+      }
+    },
     // 显示删除预案弹出框
     showDeleteDialog () {
       this.delPlanDialog = true;
@@ -150,8 +148,34 @@ export default {
     },
     // 确认删除预案
     sureDeletePlan () {
-      this.$router.push({name: 'event_ctcplan'});
-    }
+      const delPlanId = this.$router.query.planId;
+      if (delPlanId) {
+        delPlan(delPlanId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.$router.push({name: 'event_ctcplan'});
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+          }
+          })
+          .catch(() => {})
+      }
+    },
+     // 下载文件
+    downloadFile (url) {
+      if (url) {
+        window.open(url);
+      }
+    },
   }
 }
 </script>

@@ -12,7 +12,7 @@
           <li class="user_pl_dis">修改密码</li>
           <li @click="loginOut">退出登录</li>
         </ul>
-        <span slot="reference">管理员&nbsp;<i class="el-icon-arrow-down"></i></span>
+        <span slot="reference">{{ userInfo && userInfo.userRealName}}&nbsp;<i class="el-icon-arrow-down"></i></span>
       </el-popover>
       <ul>
         <li>
@@ -88,14 +88,20 @@
   </header>
 </template>
 <script>
+import { logout } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       sums: {
         msg: 109,
         events: 212
-      }
+      },
+      userInfo: null,
     }
+  },
+  mounted () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    console.log(this.userInfo)
   },
   methods: {
     loginOut () {
@@ -111,11 +117,24 @@ export default {
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '正在退出...';
             // ajax
-            setTimeout(() => {
-              _this.$router.push({name: 'login'});
-              instance.confirmButtonLoading = false;
-              done();
-            }, 2000);
+            const params = {
+              userMobile: _this.userInfo.userMobile
+            }
+            logout(params)
+              .then(res => {
+                if (res) {
+                  _this.$router.push({name: 'login'});
+                  instance.confirmButtonLoading = false;
+                  done();
+                } else {
+                  this.$message({
+                    type: 'error',
+                    message: '退出失败',
+                    customClass: 'request_tip'
+                  })
+                  instance.confirmButtonLoading = false;
+                }
+              })
           } else {
             done();
           }
