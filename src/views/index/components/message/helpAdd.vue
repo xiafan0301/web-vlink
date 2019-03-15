@@ -38,7 +38,7 @@
           </el-form-item>
           <el-form-item>
             <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</p>
+            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
             <el-radio-group v-model="addForm.radio">
@@ -112,6 +112,7 @@ export default {
         ]
       },
       scopeList: [
+        {value: 0, label: '全部推送'},
         {value: 10, label: '10公里以内的'},
         {value: 20, label: '20公里以内的'},
         {value: 30, label: '30公里以内的'},
@@ -245,7 +246,7 @@ export default {
           addMutualHelp(data).then(res => {
             if (res && res.data) {
               this.$message.success('发布成功');
-              this.skip(1); 
+              this.$emit('getMutualHelpList'); 
             }
           }).finally(() => {
               this.loadingBtn = false;
@@ -255,14 +256,6 @@ export default {
         }
       });
     },
-     addForm: {
-        phone: null,
-        time: null,
-        place: null,
-        situation: null,
-        radio: 1,
-        scope: null
-      },
     // 根据id获取民众互助详情,用于回填数据
     getMutualHelpDetail () {
       getMutualHelpDetail(this.helpId).then(res => {
@@ -296,11 +289,9 @@ export default {
               updateUserId: m.updateUserId
             }
           })
-          if (detail.radius > 0) {
+          if (detail.radius >= 0) {
             this.addForm.radio = 0;
             this.addForm.scope = detail.radius;
-          } else if (detail.radius === 0) {
-            this.addForm.radio = 0;
           } else {
             this.addForm.radio = -1;
           }
@@ -325,14 +316,33 @@ export default {
               if (m.response) {
                 return m.response.data.sysAppendixInfo;
               } else {
-                return m;
+                return {
+                  cname: m.cname,
+                  contentUid: m.contentUid,
+                  createTime: m.createTime,
+                  delFlag: m.delFlag,
+                  desci: m.desci,
+                  filePathName: m.filePathName,
+                  fileType: m.fileType,
+                  imgHeight: m.imgHeight,
+                  imgSize: m.imgSize,
+                  imgWidth: m.imgWidth,
+                  opUserId: m.opUserId,
+                  path: m.url,
+                  sort: m.sort,
+                  thumbnailName: m.thumbnailName,
+                  thumbnailPath: m.thumbnailPath,
+                  uid: m.uid,
+                  updateTime: m.updateTime,
+                  updateUserId: m.updateUserId
+                }
               }
             }),//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
             latitude: this.lngLat[0],//事发地点纬度
             longitude: this.lngLat[1],//事发地点经度
-            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
+            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio >= 0 ? this.addForm.scope : '',//推送范围
             reportTime: this.addForm.time,//上报时间
             reporterPhone: this.addForm.phone,//上报手机号
             reporterUserId: 123,//上报人标识
@@ -342,8 +352,8 @@ export default {
           console.log(data)
           putMutualHelp(data).then(res => {
             if (res && res.data) {
-              this.$message.success('修改发布成功');
-              this.skip(1); 
+              this.$message.success('修改成功');
+              this.$emit('getMutualHelpList'); 
             }
           }).finally(() => {
               this.loadingBtn = false;

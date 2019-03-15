@@ -46,10 +46,16 @@ const oDomains = {
     },
     // 用户权限地址
     auth: {
-      dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
-      // dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      // dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
+      dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
+    },
+    // 公共短信服务
+    sms: {
+      dev: 'http://apidev.aorise.org/smart-city-common/',
+      test: 'http://apidev.aorise.org/smart-city-common/',
+      prod: 'http://apidev.aorise.org/smart-city-common/'
     },
     // 应急指挥   : ecc
     ecc: {

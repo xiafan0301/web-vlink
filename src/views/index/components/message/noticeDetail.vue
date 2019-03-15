@@ -7,15 +7,15 @@
         <el-breadcrumb-item>查看详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="notice_det_box">
-      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">这是一个消息标题，文字限制20字</span></div>
+    <div class="notice_det_box" v-if="detail">
+      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">{{detail.title}}</span></div>
       <div>
         <div class="vl_f_666">消息内容：</div>
         <div>
-          <div class="vl_f_333">任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字限制200字。</div>
+          <div class="vl_f_333">{{detail.details}}</div>
           <div class="det_pic_box">
-            <div class="img" v-for="item in '123456789'" :key="item.id">
-              <img src="//via.placeholder.com/117x117" alt="">
+            <div class="img" v-for="item in detail.sysAppendixList" :key="item.id">
+              <img :src="item.path" alt="" width="117" height="117">
             </div>
           </div>
         </div>
@@ -24,16 +24,26 @@
   </div>
 </template>
 <script>
+import {getMsgNoteDetail} from '@/views/index/api/api.js';
 export default {
+  props: ['msgNoteId'],
   data () {
     return {
-    
+      detail: null
     }
   },
   mounted () {
-   
+    this.getMsgNoteDetail();
   },
   methods: {
+    // 获取公告消息详情
+    getMsgNoteDetail () {
+      getMsgNoteDetail(this.msgNoteId).then(res => {
+        if (res && res.data) {
+          this.detail = res.data;
+        }
+      })
+    },
     skip (pageType) {
       this.$emit('changePage', pageType)
     }
@@ -65,7 +75,6 @@ export default {
         padding-top: 20px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
         .img{
           width: 33%;
           height: 137px;

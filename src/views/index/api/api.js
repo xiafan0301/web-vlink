@@ -883,3 +883,98 @@ export function getCommentInfoList(params) {
     mode: 'message'
   })
 }
+/**
+ * addMsgNote 新增消息公告接口
+ * @param {object} params
+ */
+export function addMsgNote(data) {
+  return request({
+    url: '/messageService/msgNote',
+    method: 'post',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * getMsgNoteList 公告消息列表分页查询接口  
+ * @param {object} params
+ */
+export function getMsgNoteList(params) {
+  return request({
+    url: '/messageService/msgNoteList',
+    method: 'get',
+    params,
+    mode: 'message'
+  })
+}
+/**
+ * getMsgNoteDetail 消息公告详情查询接口
+ * @param {object} params
+ */
+export function getMsgNoteDetail(uid) {
+  return request({
+    url: '/messageService/msgNote/' + uid,
+    method: 'get',
+    mode: 'message'
+  })
+}
+/**
+ * putMsgNote 修改消息公告接口    
+ * @param {object} params
+ */
+export function putMsgNote(data) {
+  return request({
+    url: '/messageService/msgNote',
+    method: 'put',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * sendMsg 发送短信消息接口     
+ * @param {object} params
+ */
+export function sendMsg(data) {
+  return request({
+    url: '/messageService/sendMsg',
+    method: 'post',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * getOrganInfos 组织机构列表分页查询接口
+ * @param {object} params
+ */
+export function getOrganInfos(params) {
+  return request({
+    url: '/authServices/organInfos',
+    method: 'get',
+    params,
+    mode: 'auth'
+  })
+}
+/**
+ * getOrganUser 根据组织机构查人员分页接口   
+ * @param {object} params
+ */
+export function getOrganUser(params) {
+  return request({
+    url: '/authServices/organ/user',
+    method: 'get',
+    params,
+    mode: 'auth'
+  })
+}
+/**
+ * getSmsTemplate 通过项目类型查询短信模板列表分页查询接口
+ * @param {object} params
+ */
+export function getSmsTemplate(params) {
+  return request({
+    url: '/SmsController/news/v3/smsTemplate',
+    method: 'get',
+    params,
+    mode: 'sms'
+  })
+}

@@ -11,7 +11,9 @@
                 type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
-                end-placeholder="结束日期">
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
             <el-form-item style="width: 260px;" prop="content">
@@ -99,7 +101,7 @@
         </div>
       </div>
     </div>
-    <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :helpId="helpId" :pageType="pageType" @changePage="skip"></div>
+    <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :helpId="helpId" :pageType="pageType" @changePage="skip" @getMutualHelpList="getMutualHelpList"></div>
     <div is="helpDetail" v-if="pageType === 3" :helpId="helpId" @changePage="skip"></div>
   </div>
 </template>
@@ -140,6 +142,7 @@ export default {
   methods: {
     // 获取民众互助列表
     getMutualHelpList () {
+      this.pageType = 1;
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
@@ -150,7 +153,7 @@ export default {
         'where.keyWord': this.helpForm.content,
         'where.radius': this.helpForm.helpState
       }
-      getMutualHelpList().then(res => {
+      getMutualHelpList(params).then(res => {
         if (res && res.data) {
           this.helpList = res.data;
         }
@@ -165,6 +168,7 @@ export default {
     },
     handleCurrentChange (page) {
       this.pageNum = page;
+      this.currentPage = page;
       this.getMutualHelpList();
     },
     skip (pageType, uid) {

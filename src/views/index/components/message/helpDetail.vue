@@ -25,7 +25,7 @@
         <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{helpDetail.eventDetail}}</span></div>
         <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
       </div>
-      <div class="det_list">
+      <div class="det_list" v-if="commentList.length > 0">
         <div class="list_title">
           <span>{{commentList && commentList.length}}</span><span>条信息</span>
         </div>
@@ -37,7 +37,7 @@
             <li class="con_three">{{item.participateType}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
             <li class="con_five">
-              <img :src="info.path" alt="" v-if="info in item.sysAppendixInfoList" :key="info.uid">
+              <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid">
             </li>
             <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="messageId = item.id;isConfirmation = false;">回复该评论</span></div>

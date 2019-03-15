@@ -261,6 +261,7 @@ export default {
     },
     handleCurrentChange (page) {
       this.pageNum = page;
+      this.currentPage = page;
       this.getControlList();
     },
     // 显示弹出框

@@ -563,7 +563,7 @@ export default {
             }
             //本地上传的
             if (this.fileList.filter(f => f.objType === undefined).length > 0) {
-              fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+              fileListTwo = this.fileList.filter(f => !f.objType).map(m => {
                 return {
                   objId: m.response.data.sysAppendixInfo.uid,
                   objType: 3,
@@ -621,7 +621,7 @@ export default {
         }
         //本地上传的
         if (this.fileList.filter(f => f.objType === undefined).length > 0) {
-          fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+          fileListTwo = this.fileList.filter(f => !f.objType).map(m => {
             return {
               objId: m.response.data.sysAppendixInfo.uid,
               objType: 3,
@@ -680,7 +680,7 @@ export default {
         }
         //本地上传的
         if (this.fileList.filter(f => f.objType === undefined).length > 0) {
-          fileListTwo = this.fileList.filter(f => !f.objType).map((m, i) => {
+          fileListTwo = this.fileList.filter(f => !f.objType).map(m => {
             return {
               objId: m.response.data.sysAppendixInfo.uid,
               objType: 3,

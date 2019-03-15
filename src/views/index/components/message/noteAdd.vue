@@ -12,20 +12,20 @@
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
           <el-form-item label="联系人:" prop="recipient">
             <div class="recipient clearfix">
-              <div class="rec_list" v-for="item in '123456'" :key="item.id">
-                <span>王益&lt;13324922333&gt;</span>
-                <i class="el-icon-close"></i>
+              <div class="rec_list" v-for="item in contactListSel" :key="item.id">
+                <span>{{item.userName}}&lt;{{item.userMobile}}&gt;</span>
+                <i class="el-icon-close" @click="delContact(item.uid)"></i>
               </div>
               <i class="vl_icon vl_icon_message_3 " @click="recDialog = true"></i>
             </div>
           </el-form-item>
           <el-form-item label="短信模板:" prop="template" class="template">
-            <el-select value-key="uid" v-model="addForm.template" filterable placeholder="请选择短信模板" @change="changeTemplate()">
+            <el-select value-key="value" v-model="addForm.template" filterable placeholder="请选择短信模板" @change="changeTemplate()">
               <el-option
                 v-for="item in templateList"
-                :key="item.uid"
+                :key="item.value"
                 :label="item.label"
-                :value="item.value">
+                :value="item">
               </el-option>
             </el-select>
           </el-form-item>
@@ -63,7 +63,7 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="release('addForm')">发送</el-button>
+        <el-button type="primary" @click="sendMsg('addForm')">发送</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -74,14 +74,13 @@
         width="482px"
         top="20vh">
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选2人/共1000人）</h1>
-        <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small"></el-input>
+        <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small" @keyup.prevent.enter.native="getOrganUser"></el-input>
         <div class="rec_box">
           <div class="rec_l">
             <p class="vl_f_999 vl_f_12">组织机构</p>
             <el-tree
               icon-class="el-icon-arrow-right"
-              :data="instList"
-              @node-click="getRightData"
+              :data="organInfoList"
               @check-change="operationChecked"
               show-checkbox
               node-key="id"
@@ -93,16 +92,16 @@
           <div class="rec_r">
             <p class="vl_f_999 vl_f_12">联系人</p>
             <ul>
-              <li v-for="item in '1234567123456'" :key="item.id">
-                <span>冯晓龙</span>
-                <el-checkbox v-model="isChecked"></el-checkbox>
+              <li v-for="item in contactList" :key="item.uid">
+                <span>{{item.userName}}</span>
+                <el-checkbox v-model="item.isChecked"></el-checkbox>
               </li>
             </ul>
           </div>
         </div>
         <div slot="footer">
           <el-button @click="recDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary">确认</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="getRecipient">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -110,6 +109,7 @@
 </template>
 <script>
 import {formatDate} from '@/utils/util.js';
+import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -139,86 +139,173 @@ export default {
           {required: true, message: '请输入地点', trigger: 'blur'}
         ]
       },
+      contactListSel: null,//已选择的联系人列表
       // 弹窗参数
       recDialog: false,
       loadingBtn: false,
       keywords: null,
       // 左边机构 数结构数据
-      instList: [{
-          id: 1,
-          label: '一级 1',
-          children: [{
-            id: 4,
-            label: '二级 1-1',
-            children: [{
-              id: 9,
-              label: '三级 1-1-1'
-            }, {
-              id: 10,
-              label: '三级 1-1-2'
-            }]
-          }]
-        }, {
-          id: 2,
-          label: '一级 2',
-          children: [{
-            id: 5,
-            label: '二级 2-1'
-          }, {
-            id: 6,
-            label: '二级 2-2'
-          }]
-        }, {
-          id: 3,
-          label: '一级 3',
-          children: [{
-            id: 7,
-            label: '二级 3-1'
-          }, {
-            id: 8,
-            label: '二级 3-2'
-          }]
-        }],
+      organInfoList: [],
+      organId: null,//当前筛选的机构id
       defaultProps: {
         children: 'children',
         label: 'label'
       },
       isChecked: false,
-      rgihtData: null,//右边接收人列表数据
+      contactList: null,//右边接收人列表数据
     }
   },
   mounted () {
-   
+    this.getOrganInfos();
+    this.getSmsTemplate();
   },
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
-    getRightData (data) {
-      console.log(data, 'data')
-      this.rgihtData = data;
-    },
     operationChecked (nede, isChecked) {
       console.log(nede, 'nede')
       console.log(isChecked, 'isChecked')
+      if (isChecked) {
+        this.getOrganUser(nede);
+      }
     },
     // 切换短信模板
     changeTemplate () {
-      if (this.addForm.template === '0') {
-        this.addForm.content = `${this.addForm.name ? this.addForm.name : '#name#'}，请于${this.addForm.time ? formatDate(this.addForm.time, 'yyyy-MM-dd HH:mm:ss') : '#time#'}，到达${this.addForm.adress ? this.addForm.adress : 'adress'}`;
-      } else if (this.addForm.template === '1') {
-        this.addForm.content = `${this.addForm.name ? this.addForm.name : '#name#'}，xxxx${this.addForm.time ? formatDate(this.addForm.time, 'yyyy-MM-dd HH:mm:ss') : '#time#'}，xxxx${this.addForm.adress ? this.addForm.adress : 'adress'}`;
-      }
+      this.addForm.content = this.addForm.template.tempContent;
+      this.addForm.content = this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
+      console.log(this.addForm.content)
     },
-    // 确定发送
-    release (formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          console.log('通过验证')
-        } else {
-          return false;
+    // 二维数组转树结构方法
+    translateDataToTree(data) {
+      //没有父节点的数据
+      let parents = data.filter(value => value.parentId == 'undefined' || value.parentId == null)
+      //有父节点的数据
+      let children = data.filter(value => value.parentId !== 'undefined' && value.parentId != null)
+      //定义转换方法的具体实现
+      let translator = (parents, children) => {
+        //遍历父节点数据
+        parents.forEach((parent) => {
+          //遍历子节点数据
+          children.forEach((current, index) => {
+            //此时找到父节点对应的一个子节点
+            if (current.parentId === parent.id) {
+              //对子节点数据进行深复制，这里只支持部分类型的数据深复制，对深复制不了解的童靴可以先去了解下深复制
+              let temp = JSON.parse(JSON.stringify(children))
+              //让当前子节点从temp中移除，temp作为新的子节点数据，这里是为了让递归时，子节点的遍历次数更少，如果父子关系的层级越多，越有利
+              temp.splice(index, 1)
+              //让当前子节点作为唯一的父节点，去递归查找其对应的子节点
+              translator([current], temp)
+              //把找到子节点放入父节点的childrens属性中
+              typeof parent.children !== 'undefined' ? parent.children.push(current) : parent.children = [current]
+            }
+          }
+          )
+        }
+        )
+      }
+      //调用转换方法
+      translator(parents, children)
+      //返回最终的结果
+      return parents
+    },
+    // 获取组织机构
+    getOrganInfos () {
+      const params = {
+        pageNum: 1,
+        pageSize: 10,
+        orderBy: null,
+        order: null,
+        'where.organName': null,
+        'where.proKey': 'd32b803de585906c0ee2f1ac81588a70',
+        'where.organLayer': null,
+        'where.organPid': null
+      }
+      getOrganInfos(params).then(res => {
+        if (res && res.data) {
+          this.organInfoList = res.data.list;
+          this.organInfoList = this.organInfoList.map(m => {
+            return {
+              id: m.uid,
+              label: m.organName,
+              parentId: m.organPid
+            }
+          })
+          this.organInfoList = this.translateDataToTree(this.organInfoList);
+        }
+      })
+    },
+    // 根据组织机构查人员
+    getOrganUser (data) {
+      if (data) {
+        this.organId = data.id;
+      }
+      const params = {
+        'where.uid': this.organId,
+        'where.proKey': 'd32b803de585906c0ee2f1ac81588a70',
+        'where.userName': this.keywords
+      }
+      getOrganUser(params).then(res => {
+        if (res && res.data) {
+          this.contactList = res.data.list;
+          this.contactList.forEach(f => {
+            this.$set(f, 'isChecked', false)
+          })
+        }
+      })
+    },
+    // 获取勾选的接收人列表
+    getRecipient () {
+      console.log(this.contactList)
+      this.recDialog = false;
+      this.contactListSel = this.contactList.filter(f => f.isChecked);
+    },
+    // 删除已选联系人
+    delContact (uid) {
+      this.contactList.forEach(f => {
+        if (f.uid === uid) {
+          f.isChecked = false;
         }
       });
+      this.contactListSel = this.contactListSel.filter(f => f.uid !== uid);
+    },
+    // 获取短信模板
+    getSmsTemplate () {
+      const params = {
+        'where.tempType': 1
+      }
+      getSmsTemplate(params).then(res => {
+        if (res && res.data) {
+          this.templateList = res.data.map(m => {
+            return {
+              label: m.title,
+              value: m.tempId,
+              tempContent: m.tempContent
+            }
+          });
+
+        }
+      })
+    },
+    // 确定发送
+    sendMsg (formName) {
+      // this.$refs[formName].validate((valid) => {
+      //   if (valid) {
+      //     console.log('通过验证')
+          const data = {
+            tempId: this.addForm.template.value,
+            tempValue: this.addForm.content,
+            receiverIdList: this.contactListSel.map(m => m.uid).join(',')
+          }
+          sendMsg(data).then(res => {
+            if (res && res.data) {
+
+            }
+          })
+        // } else {
+        //   return false;
+        // }
+      // });
     },
   }
 }
@@ -238,6 +325,7 @@ export default {
   .rec_dialog{
     .rec_box{
       width: 100%;
+      min-height: 400px;
       border-top: 1px solid #F2F2F2;
       display: flex;
       margin-top: 10px;
@@ -278,6 +366,7 @@ export default {
   }
   .recipient{
     width: 672px;
+    min-height: 40px;
     padding: 4px 4px 0;
     border: 1px solid #dcdfe6;
     border-radius:4px;
@@ -291,11 +380,11 @@ export default {
       cursor: pointer;
     }
     .rec_list{
-      width: 31%;
       height:32px;
       line-height: 30px;
       margin-right: 4px;
       margin-bottom: 4px;
+      padding: 0 2px;
       text-align: center;
       background:rgba(243,243,243,1);
       border-radius:2px;
