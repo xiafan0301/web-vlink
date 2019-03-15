@@ -27,7 +27,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="searchSubmit">查询</el-button>
+          <el-button :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
           <el-button @click="searchSubmit">重置</el-button>
         </el-form-item>
       </el-form>
@@ -64,6 +64,8 @@
   </div>
 </template>
 <script>
+import { apiVideoDownloadList } from "@/views/index/api/api.video.js";
+import { formatDate } from "@/utils/util.js";
 export default {
   data () {78 
     return {
@@ -102,8 +104,9 @@ export default {
           }
         }]
       },
+      searchLoading: false,
       formInline: {
-        time: '',
+        time: [new Date(new Date() - 3600 * 1000 * 24 * 7), new Date()],
         user: '',
         region: ''
       },
@@ -129,9 +132,30 @@ export default {
       });
     }
     this.tableData = testData;
+    this.searchSubmit();
   },
   methods: {
     searchSubmit () {
+      this.getData();
+    },
+    getData () {
+      this.searchLoading = true;
+      apiVideoDownloadList({
+        pageNum: 1,
+        pageSize: 10,
+        // orderBy: '',
+        // order: '',
+        'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
+        'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+        // 'where.oprUserId': '15675256055',
+        'where.oprDeptId': ''
+      }).then(res => {
+        this.searchLoading = false;
+        console.log("userInfo res：", res);
+      }).catch(error => {
+        this.searchLoading = false;
+        console.log("userInfo error：", error);
+      });
     },
     handleSizeChange (val) {
         console.log(`每页 ${val} 条`);

@@ -17,17 +17,11 @@ const oDomains = {
         test: 'http://apidev.aorise.org/vlink-user/userService',
         prod: 'http://apidev.aorise.org/vlink-user/userService',
     },
-    // 应急指挥   : ecc
-    ecc: {
-        dev: 'http://apiemi.aorise.org/api/emi/',
-        test: 'http://apiemi.aorise.org/api/emi/',
-        prod: 'http://apiemi.aorise.org/api/emi/'
-    },
-    // 上传图片
-    upload: {
-        dev: 'http://apidev.aorise.org/education-user-related',
-        test: 'http://apirel.aorise.org/education-user-related',
-        prod: 'http://apirel.aorise.org/education-user-related'
+    // 视频播放服务
+    video: {
+        dev: 'http://apidev.aorise.org/vlink-monitor',
+        test: 'http://apidev.aorise.org/vlink-monitor',
+        prod: 'http://apidev.aorise.org/vlink-monitor',
     }
 };
 let ENV_API = process.env.VUE_APP_API;
