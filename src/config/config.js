@@ -5,7 +5,8 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://apidev.aorise.org/vlink-base',
+        dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'

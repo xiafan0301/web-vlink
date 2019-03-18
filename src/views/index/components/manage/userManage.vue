@@ -305,7 +305,7 @@
   </div>
 </template>
 <script>
-import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
+import { checkIdCard, checkEmail } from '@/utils/validator.js';
 import { getUserList, delUser, isForceUser, updateUser,
   getDepartmentList, getUserGroups, addUserBatchGroups,
   delUserBatchGroups, getRoleList, addUserBatchRoles, delUserBatchRoles,
@@ -405,20 +405,6 @@ export default {
           if (res) {
             this.userListData = res.data.list;
             this.pagination.total = res.data.total;
-            // this.userListData.map(obj => {
-            //   if (obj.sysUserGroupInfos) {
-            //     obj.sysUserGroupInfos[obj.sysUserGroupInfos.length] = {
-            //       allgroup: 3,
-            //       isShowAllGroup: true
-            //     }
-            //   }
-            //   if (obj.sysUserRoleInfos) {
-            //     obj.sysUserRoleInfos[obj.sysUserRoleInfos.length] = {
-            //       allgroup: 3,
-            //       isShowAllGroup: true
-            //     }
-            //   }
-            // });
           }
         })
         .catch(() => {})

@@ -10,7 +10,7 @@
     <div class="content_box">
       <div class="btn_box">
         <div class="bnt_box_left">
-          <span>自定义组</span>
+          <span>{{groupName}}</span>
           <i class="edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
           <i class="del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
@@ -233,7 +233,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="editGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--删除组弹出框-->
@@ -269,9 +269,13 @@
   </div>
 </template>
 <script>
+import { getVehicleInfo, editVeGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isGroup: true, // 是分组还是底库
+      groupId: null, // 要删除或修改的组id
+      groupName: null, // 组名
       currentPage4: 1,
       userGroupName: null,
       showGroup: false,
@@ -310,6 +314,15 @@ export default {
       moveoutGroupDialog: false, // 移出组弹出框
     }
   },
+  mounted () {
+    this.groupName = this.$route.query.name;
+    this.groupId = this.$route.query.id;
+    if (this.$route.query.type === 1) { // 分组查看
+      this.isGroup = true;
+    } else { // 底库查看
+      this.isGroup = false;
+    }
+  },
   methods: {
     handleSizeChange () {
     },
@@ -322,6 +335,29 @@ export default {
     // 显示编辑弹出框
     showEditDialog () {
       this.editGroupDialog = true;
+    },
+    // 编辑组
+    editGroup () {
+      const params = {
+        uid: this.groupId,
+        groupName: this.userGroupName,
+        groupType: 1
+      }
+      if (this.isGroup) {
+        editVeGroup(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '新增成功',
+                customClass: 'request_tip'
+              })
+            } else {
+
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示删除弹出框
     showDeleteDialog () {
