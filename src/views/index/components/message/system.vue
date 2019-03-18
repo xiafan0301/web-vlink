@@ -15,10 +15,10 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item prop="content">
-              <el-input v-model="systemForm.content" placeholder="输入标题或发布者"></el-input>
+              <el-input v-model="systemForm.titleOrPublisher" placeholder="输入标题或发布者"></el-input>
             </el-form-item>
             <el-form-item style="width: 25%;">
-              <el-button type="primary">查询</el-button>
+              <el-button type="primary" @click="getMsgNoteList">查询</el-button>
               <el-button @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
@@ -27,7 +27,7 @@
           <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增系统消息</el-button>
           <div class="table_box">
             <el-table
-              :data="systemList"
+              :data="systemList.list"
               >  
               <el-table-column
                 type="index"
@@ -37,31 +37,31 @@
               </el-table-column>
               <el-table-column
                 label="消息标题"
-                prop="eventType"
+                prop="title"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="内容预览"
-                prop="reportUser"
+                prop="details"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="发布者"
-                prop="idCard"
+                prop="publishUserName"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column
                 label="发布时间"
-                prop="reportTime"
+                prop="publishTime"
                 show-overflow-tooltip
                 >
               </el-table-column>
               <el-table-column label="操作" width="140">
                 <template slot-scope="scope">
-                  <span class="operation_btn" @click="skip(3)">查看</span>
+                  <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -71,20 +71,21 @@
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
-            :page-size="100"
+            :page-size="systemList.pageSize"
             layout="total, prev, pager, next, jumper"
-            :total="400">
+            :total="systemList.total">
           </el-pagination>
         </div>
       </div>
     </div>
-    <div is="systemAdd" v-if="pageType === 2" @changePage="skip"></div>
-    <div is="systemDetail" v-if="pageType === 3" @changePage="skip"></div>
+    <div is="systemAdd" v-if="pageType === 2" @changePage="skip" @getMsgNoteList="getMsgNoteList"></div>
+    <div is="systemDetail" v-if="pageType === 3" @changePage="skip" :systemId="systemId"></div>
   </div>
 </template>
 <script>
 import systemAdd from './systemAdd.vue';
 import systemDetail from './systemDetail.vue';
+import {getMsgNoteList} from '@/views/index/api/api.js';
 export default {
   components: {systemAdd, systemDetail},
   data () {
@@ -93,29 +94,54 @@ export default {
       // 顶部筛选参数
       systemForm: {
         systemDate: null,
-        content: null,
-        systemState: null
+        titleOrPublisher: null
       },
       // 表格参数
       systemList: [{eventType: 'xxx'}],
+      systemId: null,//消息id
       // 翻页参数
       pageSize: 10,
       pageNum: 1,
       currentPage: 1
     }
   },
+  mounted () {
+    this.getMsgNoteList();
+  },
   methods: {
+    // 获取系统消息列表
+    getMsgNoteList () {
+      this.pageType = 1;
+      const params = {
+        pageSize: this.pageSize,
+        pageNum: this.pageNum,
+        orderBy: null,
+        order: null,
+        'where.startDateStr': this.systemForm.systemDate && this.systemForm.systemDate[0],
+        'where.endDateStr': this.systemForm.systemDate && this.systemForm.systemDate[1],
+        'where.titleOrPublisher': this.systemForm.titleOrPublisher,
+      }
+      getMsgNoteList(params).then(res => {
+        if (res && res.data) {
+          this.systemList = res.data;
+        }
+      })
+    },
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange () {
-
+    handleSizeChange (size) {
+      this.pageSize = size;
+      this.getMsgNoteList();
     },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.pageNum = page;
+      this.currentPage = page;
+      this.getMsgNoteList();
     },
-    skip (pageType) {
+    skip (pageType, uid) {
       this.pageType = pageType;
+      this.systemId = uid;
     },
     resetForm () {
       this.$refs['systemForm'].resetFields();

@@ -632,6 +632,76 @@ export function removeVehicle(data) {
     mode: 'control'
   })
 }
+/**
+ * addGroup 新建分组   
+ * @param {object} params
+ */
+export function addGroup(data) {
+  return request({
+    url: '/group',
+    method: 'post',
+    data,
+    mode: ''
+  })
+}
+/**
+ * getGroupListIsPortrait 根据组名【未传查询所有】模糊查询人像组【包含人员数目】      
+ * @param {object} params
+ */
+export function getGroupListIsPortrait(params) {
+  return request({
+    url: '/surveillanceRepertory/portraitGroup',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
+ * getGroupListIsVehicle 根据组名【未传查询所有】模糊查询人像组【包含人员数目】      
+ * @param {object} params
+ */
+export function getGroupListIsVehicle(params) {
+  return request({
+    url: '/surveillanceRepertory/vehicleGroup',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
+ * getGroupsById 根据分组标识查询分组
+ * @param {object} params
+ */
+export function getGroupsById(uid) {
+  return request({
+    url: '/group/' + uid,
+    method: 'get',
+    mode: ''
+  })
+}
+/**
+ * putGroup 修改分组
+ * @param {object} params
+ */
+export function putGroup(data) {
+  return request({
+    url: '/group',
+    method: 'put',
+    data,
+    mode: ''
+  })
+}
+/**
+ * delGroupById 删除分组
+ * @param {object} params
+ */
+export function delGroupById(uid) {
+  return request({
+    url: '/group/' + uid,
+    method: 'delete',
+    mode: ''
+  })
+}
 /* ========== 布控管理 ========== */
 /**
  * addControl 新增布控
@@ -843,7 +913,7 @@ export function addMutualHelp(data) {
 export function getMutualHelpDetail(uid) {
   return request({
     url: '/eventService/mutualHelp/' + uid,
-    method: 'put',
+    method: 'get',
     mode: 'message'
   })
 }
@@ -855,6 +925,30 @@ export function putMutualHelp(data) {
   return request({
     url: '/eventService/mutualHelp',
     method: 'put',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * replyComment 回复事件评论接口   
+ * @param {object} params
+ */
+export function replyComment(data) {
+  return request({
+    url: '/eventService/replyComment',
+    method: 'post',
+    data,
+    mode: 'message'
+  })
+}
+/**
+ * shieldComment 屏蔽评论接口   
+ * @param {object} params
+ */
+export function shieldComment(data) {
+  return request({
+    url: '/eventService/shieldComment',
+    method: 'post',
     data,
     mode: 'message'
   })
@@ -973,6 +1067,18 @@ export function getOrganUser(params) {
 export function getSmsTemplate(params) {
   return request({
     url: '/SmsController/news/v3/smsTemplate',
+    method: 'get',
+    params,
+    mode: 'sms'
+  })
+}
+/**
+ * getSmsList 获取短信分页
+ * @param {object} params
+ */
+export function getSmsList(params) {
+  return request({
+    url: '/SmsController/news/v3/msgRecord',
     method: 'get',
     params,
     mode: 'sms'

@@ -26,14 +26,14 @@
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="getPortraitList(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
+                <i @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
-                <i @click="getVehicleList(item.uid, index, '2')" class="vl_icon vl_icon_control_21"></i>
+                <i @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
           </div>
@@ -403,7 +403,7 @@
         </el-dialog>
       </div>
       <!-- 新增组 -->
-      <div is="groupDialog" operateType="1" ref="groupDialog"></div>
+      <div is="groupDialog" operateType="1" ref="groupDialog" :tabType="tabType" @getGroupList="getGroupList"></div>
       <!-- 确认操作 -->
       <el-dialog
         :visible.sync="toGiveUpDialog"
@@ -421,15 +421,15 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === null" :protraitMemberList="protraitMemberList" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
+        <div is="allPortrait" v-if="groupId === null" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
         <!-- 自定义人像列表 -->
-        <div is="customPortrait" v-else :protraitMemberList="protraitMemberList" :groupId="groupId" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
+        <div is="customPortrait" v-else :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)" @changePage="changePage"></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === null" :carMemberList="carMemberList" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
+        <div is="allCar" v-if="groupId === null" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
         <!-- 自定义车像列表 -->
-        <div is="customCar" v-else :carMemberList="carMemberList" :groupId="groupId" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
+        <div is="customCar" v-else :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)" @changePage="changePage"></div>
       </template>
     </template>
   </div>
@@ -441,7 +441,7 @@ import allPortrait from './components/allPortrait.vue';
 import customCar from './components/customCar.vue';
 import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
-import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle} from '@/views/index/api/api.js';
+import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.js';
 import {objDeepCopy} from '@/utils/util.js';
 import {nationData} from './testData.js';
 export default {
@@ -468,19 +468,9 @@ export default {
       },
       groupIndex: 0,//分组下标
       // 人像组列表数据
-      groupListPortrait: [
-        {groupName: '全部人像', memberNum: 200, uid: null},
-        {groupName: '人像test1', memberNum: 200, uid: '1'},
-        {groupName: '人像test2', memberNum: 201, uid: '2'},
-        {groupName: '人像test3', memberNum: 202, uid: '3'}
-      ],
+      groupListPortrait: [],
       // 车像组列表数据
-      groupListCar: [
-        {groupName: '全部车像', memberNum: 200, uid: null},
-        {groupName: '车像test1', memberNum: 200, uid: '4'},
-        {groupName: '车像test2', memberNum: 201, uid: '5'},
-        {groupName: '车像test3', memberNum: 201, uid: '6'}
-      ],
+      groupListCar: [],
       pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
       sexList: [
@@ -490,29 +480,42 @@ export default {
       ],//性别列表数据
       nationalList: nationData,//民族列表数据
       carTypeList: [
-        {label: '其他', value: 0},
-        {label: '小轿车', value: 1},
-        {label: 'SUV', value: 2},
-        {label: '面包车', value: 3},
-        {label: '中巴车', value: 4},
-        {label: '卡车', value: 5},
-        {label: '自行车', value: 6},
-        {label: '电动车', value: 7},
-        {label: '摩托车', value: 8}
+        {label: '其他', value: 9},
+        {label: '轿车', value: 1},
+        {label: '面包车', value: 2},
+        {label: '客车', value: 3},
+        {label: '货车', value: 4},
+        {label: '自行车', value: 5},
+        {label: '电动车', value: 6},
+        {label: '摩托车', value: 7},
+        {label: '挂车', value: 8}
       ],//车辆类型列表数据
       numTypeList: [
-        {label: '大型汽车号牌', value: 0},
-        {label: '小型汽车号牌', value: 1}
+        {label: '大型汽车', value: 1},
+        {label: '小型汽车', value: 2},
+        {label: '轻便摩托车', value: 8},
+        {label: '挂车', value: 15},
+        {label: '警用汽车', value: 23},
+        {label: '警用摩托', value: 24},
+        {label: '小型新能源汽车', value: 25},
+        {label: '大型新能源汽车', value: 26},
+        {label: '小吨位货车', value: 27},
+        {label: '大吨位货车', value: 28},
+        {label: '客车', value: 29},
+        {label: '其他', value: 99}
       ],//号码类型列表数据
       carColorList: [
-        {label: '其他', value: 0},
-        {label: '黑', value: 1},
-        {label: '红', value: 2},
-        {label: '白', value: 3},
-        {label: '蓝', value: 4},
-        {label: '紫', value: 5},
-        {label: '灰', value: 6},
-        {label: '绿', value: 7}
+        {label: '其他', value: 11},
+        {label: '白', value: 1},
+        {label: '灰', value: 2},
+        {label: '黄', value: 3},
+        {label: '粉', value: 4},
+        {label: '红', value: 5},
+        {label: '紫', value: 6},
+        {label: '绿', value: 7},
+        {label: '蓝', value: 8},
+        {label: '棕', value: 9},
+        {label: '黑', value: 10}
       ],//车身颜色列表
       numColorList: [
         {label: '其他', value: 0},
@@ -521,7 +524,7 @@ export default {
       ],//号牌颜色列表
       // 翻页数据
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 9,
       pageNum: 1,
       // dialog
       addPortraitDialog: false,
@@ -542,15 +545,14 @@ export default {
         vehicleNumber: null,
         vehicleColor: null,
         vehicleType: null,
-        numberType: null,
-        numberColor: null,
+        numberType: 2,
+        numberColor: 2,
         groupIds: [],
         desci: ''
       },
       //证件类型列表数据
       cardTypeList: [
-        {label: '身份证', value: '1'},
-        {label: '护照', value: '2'}
+        {label: '身份证', value: '1'}
       ],
       loadingBtn: false,
       isShowDpList: false,//是否显示下拉列表数据
@@ -599,20 +601,47 @@ export default {
     }
   },
   mounted () {
+    // 获取分组列表
+    this.getGroupList();
     // 默认获取人像库列表
     this.getPortraitList(this.groupId, 0);
     this.picHeight = window.screenHeight + 180;
   },
   methods: {
-    handleSizeChange () {
-
+    // 删除完组后重新获取组列表和组成员
+    changePage () {
+      this.pageType = '1';
+      this.groupIndex = -1;
+      this.getGroupList();
+      if (this.tabType === '1') {
+        this.getPortraitList(null, 0);
+      } else {
+        this.getVehicleList(null, 0);
+      }
     },
-    handleCurrentChange () {
-
+    handleSizeChange (size) {
+      this.pageSize = size;
+      if (this.tabType === '1') {
+        this.getPortraitList(this.groupId, this.groupIndex);
+      } else {
+        this.getVehicleList(this.groupId, this.groupIndex);
+      }
     },
+    handleCurrentChange (page) {
+      this.pageNum = page;
+      if (this.tabType === '1') {
+        this.getPortraitList(this.groupId, this.groupIndex);
+      } else {
+        this.getVehicleList(this.groupId, this.groupIndex);
+      }
+    },
+    // 人像库和车像库切换
     changeTab (tabType) {
       this.tabType = tabType;
       this.groupIndex = 0;
+      this.currentPage = 1;
+      this.pageNum = 1;
+      this.getGroupList();
       if (this.tabType === '1') {
         this.getPortraitList(null, 0);
       } else {
@@ -658,15 +687,22 @@ export default {
       }
       return isJPG && isLt2M;
     },
-    // 新增分组
-    addGrouping (formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          console.log('验证通过');
-        } else {
-          return false;
-        }
-      })
+    // 类型查询组列表
+    getGroupList () {
+      const params = {groupName: this.group};
+      if (this.tabType === '1') {
+        getGroupListIsPortrait(params).then(res => {
+          if (res && res.data) {
+            this.groupListPortrait = res.data;
+          }
+        })
+      } else {
+        getGroupListIsVehicle(params).then(res => {
+          if (res && res.data) {
+            this.groupListCar = res.data;
+          }
+        })
+      }
     },
     // 清除新建/修改人像和车像表单验证和内容
     clearForm (formName, type, uid) {
@@ -801,7 +837,7 @@ export default {
           protraitInfo.birthDate.splice(7, 1, '月');
           protraitInfo.birthDate.splice(10, 0, '日');
           protraitInfo.birthDate = protraitInfo.birthDate.join('');
-          protraitInfo.idType = protraitInfo.groupDict[0].enumValue;
+          protraitInfo.idType = protraitInfo.idTypeDict[0].enumValue;
           protraitInfo.groupIds = protraitInfo.groupDict.map(m => {
             return {
               label: m.enumField,
@@ -880,10 +916,11 @@ export default {
       })
     },
     // 获取全部人像列表，或者根据组id获取人像列表
-    getPortraitList (groupId, index, pageType) {
+    getPortraitList (groupId, index, pageType, groupName) {
       this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
+      this.groupName = groupName;
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
@@ -907,10 +944,12 @@ export default {
       })
     },
     //  获取全部车像列表，或者根据组id获取车像列表
-    getVehicleList (groupId, index, pageType) {
+    getVehicleList (groupId, index, pageType, groupName) {
       this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
+      this.groupName = groupName;
+      console.log(this.groupName)
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,

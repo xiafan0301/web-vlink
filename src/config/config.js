@@ -5,14 +5,15 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://apidev.aorise.org/vlink-base',
+        dev: 'http://10.116.64.92:8082',// 钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
     // 布控部分地址
     control: {
-        dev: 'http://apidev.aorise.org/vlink-control',
-        // dev: 'http://10.116.64.92:8081',//钟赞
+        // dev: 'http://apidev.aorise.org/vlink-control',
+        dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
@@ -53,7 +54,7 @@ const oDomains = {
     },
     // 公共短信服务
     sms: {
-      dev: 'http://apidev.aorise.org/smart-city-common/',
+      dev: 'http://10.116.64.169:8085',
       test: 'http://apidev.aorise.org/smart-city-common/',
       prod: 'http://apidev.aorise.org/smart-city-common/'
     },

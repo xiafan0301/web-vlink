@@ -14,14 +14,16 @@
       </el-form>
       <div slot="footer">
         <el-button @click="groupDialog = false">取消</el-button>
-        <el-button :loading="loadingBtn" type="primary" @click="operateGroup('group')">{{operateType === '1' ? '新增' : '确认'}}</el-button>
+        <el-button v-if="operateType === '1'" :loading="loadingBtn" type="primary" @click="addGroup('group')">新增</el-button>
+        <el-button v-else :loading="loadingBtn" type="primary" @click="putGroup('group')">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import {addGroup, getGroupsById, putGroup} from '@/views/index/api/api.js';
 export default {
-  props: ['operateType'],
+  props: ['operateType', 'tabType', 'groupId'],
   data () {
     return {
       groupDialog: false,
@@ -29,20 +31,66 @@ export default {
       loadingBtn: false
     }
   },
+  watch: {
+    operateType (val) {
+      if (val === '2') {
+        this.getGroupsById();
+      }
+    }
+  },
+  mounted () {
+    if (this.operateType === '2') {
+      this.getGroupsById();
+    }
+  },
   methods: {
-    // 新增/修改组
-    operateGroup (formName) {
+    // 新增分组
+    addGroup (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log('验证通过');
+          const data = {
+            groupName: this.group.groupName,
+            groupType: this.tabType === '1' ? 6 : 7
+          }
+          this.loadingBtn = true;
+          addGroup(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('新增成功');
+              this.groupDialog = false;
+              this.$emit('getGroupList');
+            }
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
         } else {
           return false;
         }
       })
     },
+    // 获取分组信息
+    getGroupsById () {
+      getGroupsById(this.groupId).then(res => {
+        if (res && res.data) {
+          this.group = res.data;
+        }
+      })
+    },
+    // 修改分组名称
+    putGroup () {
+      const data = this.group;
+      this.loadingBtn = true;
+      putGroup(data).then(res => {
+        this.groupDialog = false;
+        this.$message.success('修改成功');
+        this.$emit('sendChildren', this.group.groupName);
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
+    },
     reset () {
       this.groupDialog = true;
-      if (this.$refs['group']) {
+      if (this.$refs['group'] && this.operateType === '1') {
         this.$refs['group'].resetFields();
       }
     }

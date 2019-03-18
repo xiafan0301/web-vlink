@@ -215,8 +215,46 @@ export const getLunarDateString = (lunarDate) => {
 // 深度拷贝
 export const objDeepCopy = (source) => {
   let sourceCopy = source instanceof Array ? [] : {};
-  for (var item in source) {
+  for (let item in source) {
       sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item];
   }
   return sourceCopy;
+}
+
+// 数组去重
+export const uniq = (array) => {
+  let temp = [];
+  let index = [];
+  let l = array.length;
+  for(var i = 0; i < l; i++) {
+      for(let j = i + 1; j < l; j++){
+          if (array[i] === array[j]){
+              i++;
+              j = i;
+          }
+      }
+      temp.push(array[i]);
+      index.push(i);
+  }
+  return temp;
+}
+
+// 数组转树结构方法
+export const translateDataToTree = (data) => {
+  let parents = data.filter(value => value.parentId === 'undefined' || value.parentId === null)
+  let children = data.filter(value => value.parentId !== 'undefined' && value.parentId !== null)
+  let translator = (parents, children) => {
+    parents.forEach((parent) => {
+      children.forEach((current, index) => {
+        if (current.parentId === parent.id) {
+          let temp = objDeepCopy(children);//深度拷贝
+          temp.splice(index, 1)
+          translator([current], temp)
+          typeof parent.children !== 'undefined' ? parent.children.push(current) : parent.children = [current]
+        }
+      })
+    })
+  }
+  translator(parents, children)
+  return parents
 }

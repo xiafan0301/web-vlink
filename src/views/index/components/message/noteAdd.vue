@@ -63,7 +63,7 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="sendMsg('addForm')">发送</el-button>
+        <el-button type="primary" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -81,7 +81,8 @@
             <el-tree
               icon-class="el-icon-arrow-right"
               :data="organInfoList"
-              @check-change="operationChecked"
+              @check="operationChecked"
+              @check-change="isNodeChecked"
               show-checkbox
               node-key="id"
               :default-expanded-keys="[]"
@@ -92,7 +93,7 @@
           <div class="rec_r">
             <p class="vl_f_999 vl_f_12">联系人</p>
             <ul>
-              <li v-for="item in contactList" :key="item.uid">
+              <li v-for="item in contactListTotal" :key="item.uid">
                 <span>{{item.userName}}</span>
                 <el-checkbox v-model="item.isChecked"></el-checkbox>
               </li>
@@ -108,7 +109,7 @@
   </div>
 </template>
 <script>
-import {formatDate} from '@/utils/util.js';
+import {formatDate,translateDataToTree, objDeepCopy, uniq} from '@/utils/util.js';
 import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.js';
 export default {
   data () {
@@ -151,8 +152,11 @@ export default {
         children: 'children',
         label: 'label'
       },
-      isChecked: false,
-      contactList: null,//右边接收人列表数据
+      
+      isChecked: null,
+      contactList: [],//右边接收人列表数据,单独节点
+      contactListTotal: [],//节点总数据
+      loadingBtn: false
     }
   },
   mounted () {
@@ -163,52 +167,38 @@ export default {
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
-    operationChecked (nede, isChecked) {
-      console.log(nede, 'nede')
-      console.log(isChecked, 'isChecked')
-      if (isChecked) {
-        this.getOrganUser(nede);
+    // 获得操作完后显示在右边收件人列表的数据
+    operationChecked (nede) {
+      // 勾选时获取数据
+      if (this.isChecked) {
+        this.getOrganUser(nede).then(res => {
+          console.log(res)
+          this.contactListTotal.push(...this.contactList);
+          this.contactListTotal = uniq(this.contactListTotal);//去重
+        }) 
+      } else {
+        this.getOrganUser(nede).then(res => {
+          console.log(res)
+          // 取消勾选时，删掉已获得的数据
+          const data = objDeepCopy(this.contactListTotal);//深度拷贝
+          data.forEach(f => {
+            this.contactList.forEach(c => {
+              this.contactListTotal = this.contactListTotal.filter(() => f.uid !== c.uid);
+            })
+          })
+        })
       }
+    },
+    // 获得当前节点是否被选中
+    isNodeChecked (nede, isChecked) {
+      this.isChecked = isChecked;
     },
     // 切换短信模板
     changeTemplate () {
       this.addForm.content = this.addForm.template.tempContent;
       this.addForm.content = this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
       console.log(this.addForm.content)
-    },
-    // 二维数组转树结构方法
-    translateDataToTree(data) {
-      //没有父节点的数据
-      let parents = data.filter(value => value.parentId == 'undefined' || value.parentId == null)
-      //有父节点的数据
-      let children = data.filter(value => value.parentId !== 'undefined' && value.parentId != null)
-      //定义转换方法的具体实现
-      let translator = (parents, children) => {
-        //遍历父节点数据
-        parents.forEach((parent) => {
-          //遍历子节点数据
-          children.forEach((current, index) => {
-            //此时找到父节点对应的一个子节点
-            if (current.parentId === parent.id) {
-              //对子节点数据进行深复制，这里只支持部分类型的数据深复制，对深复制不了解的童靴可以先去了解下深复制
-              let temp = JSON.parse(JSON.stringify(children))
-              //让当前子节点从temp中移除，temp作为新的子节点数据，这里是为了让递归时，子节点的遍历次数更少，如果父子关系的层级越多，越有利
-              temp.splice(index, 1)
-              //让当前子节点作为唯一的父节点，去递归查找其对应的子节点
-              translator([current], temp)
-              //把找到子节点放入父节点的childrens属性中
-              typeof parent.children !== 'undefined' ? parent.children.push(current) : parent.children = [current]
-            }
-          }
-          )
-        }
-        )
-      }
-      //调用转换方法
-      translator(parents, children)
-      //返回最终的结果
-      return parents
-    },
+    },  
     // 获取组织机构
     getOrganInfos () {
       const params = {
@@ -231,34 +221,38 @@ export default {
               parentId: m.organPid
             }
           })
-          this.organInfoList = this.translateDataToTree(this.organInfoList);
+          this.organInfoList = translateDataToTree(this.organInfoList);//转成tree
         }
       })
     },
     // 根据组织机构查人员
     getOrganUser (data) {
-      if (data) {
-        this.organId = data.id;
-      }
-      const params = {
-        'where.uid': this.organId,
-        'where.proKey': 'd32b803de585906c0ee2f1ac81588a70',
-        'where.userName': this.keywords
-      }
-      getOrganUser(params).then(res => {
-        if (res && res.data) {
-          this.contactList = res.data.list;
-          this.contactList.forEach(f => {
-            this.$set(f, 'isChecked', false)
-          })
+      return new Promise(resolve => {
+        this.contactList = [];
+        if (data) {
+          this.organId = data.id;
         }
+        const params = {
+          'where.uid': this.organId,
+          'where.proKey': 'd32b803de585906c0ee2f1ac81588a70',
+          'where.userName': this.keywords
+        }
+        getOrganUser(params).then(res => {
+          if (res && res.data) {
+            this.contactList = res.data.list;
+            this.contactList.forEach(f => {
+              this.$set(f, 'isChecked', false);
+            })
+            resolve(1);
+          }
+        })
       })
     },
     // 获取勾选的接收人列表
     getRecipient () {
-      console.log(this.contactList)
+      console.log(this.contactListTotal)
       this.recDialog = false;
-      this.contactListSel = this.contactList.filter(f => f.isChecked);
+      this.contactListSel = this.contactListTotal.filter(f => f.isChecked);
     },
     // 删除已选联系人
     delContact (uid) {
@@ -297,10 +291,14 @@ export default {
             tempValue: this.addForm.content,
             receiverIdList: this.contactListSel.map(m => m.uid).join(',')
           }
+          this.loadingBtn = true;
           sendMsg(data).then(res => {
             if (res && res.data) {
-
+              this.$message.success('发布成功');
+              this.$emit('getSmsList');
             }
+          }).finally(() => {
+            this.loadingBtn = false;
           })
         // } else {
         //   return false;
@@ -423,7 +421,7 @@ export default {
     .el-checkbox{
       position: absolute;
       right: 0;
-      top: 0;
+      top: 3px;
     }
   }
 } 

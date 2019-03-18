@@ -3,7 +3,7 @@
   <div class="set_list">
     <div class="member_title">
       <div>
-        <div><span class="vl_f_333">失踪车辆</span><i class="vl_icon vl_icon_control_25" @click="popGroupDialog(2)"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
+        <div><span class="vl_f_333">{{gName}}</span><i class="vl_icon vl_icon_control_25" @click="popGroupDialog('2')"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
         <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
@@ -12,7 +12,7 @@
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
             <li @click="copyVehicle(item.uid)" v-for="item in groupListCar" :key="item.uid">{{item.groupName}}</li>
-            <li class="group_copy_add" @click="popGroupDialog(1)"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
+            <li class="group_copy_add" @click="popGroupDialog('1')"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
           </ul>
         </el-collapse-transition>
       </div>
@@ -74,7 +74,7 @@
         <p class="vl_f_12 vl_f_999">删除后该分组人像将找不到。</p>
         <div slot="footer">
           <el-button @click="delGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary">确认</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="delGroupById">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -94,15 +94,15 @@
       </el-dialog>
     </div>
     <!-- 新增/修改组 -->
-    <div is="groupDialog" :operateType="operateType" ref="groupDialog"></div>
+    <div is="groupDialog" :operateType="operateType" ref="groupDialog" :groupId="groupId" @sendChildren="getParentData"></div>
   </div>
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {copyVehicle, removeVehicle} from '@/views/index/api/api.js';
+import {copyVehicle, removeVehicle, delGroupById} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['carMemberList', 'groupId'],
+  props: ['carMemberList', 'groupId', 'groupName'],
   data () {
     return {
       // 翻页数据
@@ -114,6 +114,7 @@ export default {
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
       track: null,
       showMoreId: null,//显示更多组的组id
+      gName: null,//组名
       // 车像组列表数据
       groupListCar: [
         {groupName: '全部车像', memberNum: 200, uid: '0'},
@@ -148,7 +149,22 @@ export default {
       this.$set(f, 'isChecked', false);
     })
   },
+  mounted () {
+    this.gName = this.groupName;
+    console.log(this.groupName, 'groupName')
+  },
   methods: {
+    // 删除分组
+    delGroupById () {
+      delGroupById(this.groupId).then(res => {
+        this.delGroupDialog = false;
+        this.$message.success('删除成功');
+        this.$emit('changePage');
+      })
+    },
+    getParentData (data) {
+      this.gName = data;
+    },
     popGroupDialog (type) {
       this.operateType = type;
       this.$refs['groupDialog'].reset();

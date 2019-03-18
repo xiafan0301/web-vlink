@@ -160,8 +160,10 @@ export default {
       ],
       typeList: [
         {label: '全部', value: 0},
-        {label: '球机', value: 1},
-        {label: '枪机', value: 2}
+        {label: '枪机', value: 1},
+        {label: '球机', value: 2},
+        {label: '半球机', value: 3},
+        {label: '红外', value: 4}
       ],
       rankList: [
         {label: '全部', value: 0},

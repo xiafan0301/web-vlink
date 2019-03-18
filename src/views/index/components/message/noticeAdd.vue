@@ -59,6 +59,7 @@ export default {
         ]
       },
       detail: null,//公告管理详情
+      loadingBtn: false,
     }
   },
   mounted () {
@@ -180,6 +181,8 @@ export default {
           this.$message.success('修改成功');
           this.$emit('getMsgNoteList');
         }
+      }).finally(() => {
+        this.loadingBtn = false;
       })
     }
   }
