@@ -51,7 +51,7 @@
             <el-checkbox>全选</el-checkbox>
             <div class="depart_tree_list">
               <vue-scroll>
-                <el-tree icon-class="el-icon-arrow-right" show-checkbox :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+                <el-tree icon-class="el-icon-arrow-right" show-checkbox :data="childDepartList" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
               </vue-scroll>
             </div>
           </div>
@@ -190,7 +190,6 @@
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
-              <el-option label="无" value="shanghai"></el-option>
               <el-option
                 v-for="(item, index) in departmentData"
                 :key="'item' + index"
@@ -245,50 +244,9 @@ export default {
       closeShow: false,
       userName: null, // 要搜索的内容
       tabState: 1,
-      data: [{
-        label: '一级 1',
-        children: [{
-          label: '二级 1-1',
-          children: [{
-            label: '三级 1-1-1',
-            children: [{
-              label: '四级 1-1-1',
-              children: [{
-                label: '五级 1-1-1'
-              }]
-            }]
-          }]
-        }]
-      }, {
-        label: '一级 2',
-        children: [{
-          label: '二级 2-1',
-          children: [{
-            label: '三级 2-1-1'
-          }]
-        }, {
-          label: '二级 2-2',
-          children: [{
-            label: '三级 2-2-1'
-          }]
-        }]
-      }, {
-        label: '一级 3',
-        children: [{
-          label: '二级 3-1',
-          children: [{
-            label: '三级 3-1-1'
-          }]
-        }, {
-          label: '二级 3-2',
-          children: [{
-            label: '三级 3-2-1'
-          }]
-        }]
-      }],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'name'
       },
       memberListData: [],
       departDetailInfo: {}, // 部门详情数据,
@@ -318,6 +276,7 @@ export default {
       checkSelectMember: [], // 勾选种的可选成员
       checkCurrMember: [], // 勾选中的当前成员
       currentGroupId: null, // 当前用户组id
+      childDepartList: [], // 下级部门
     }
   },
   created () {
@@ -326,20 +285,60 @@ export default {
   },
   mounted () {
     this.getDetail();
+    // this.getDepartList();
+    this.getAllUserList();
     this.getUserList();
   },
   methods: {
     // 获取列表数据
     getDepartList () {
+      this.departmentData = [];
+      this.childDepartList = [];
       const params = {
         'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.$route.query.id,
         pageSize: 0,
       };
       getDepartmentList(params)
         .then(res => {
+          console.log('000', res)
           if (res && res.data.list) {
-            this.departmentData = res.data.list;
+            let restArr = [];
+            this.departmentData.push({
+              uid: this.departDetailInfo.uid,
+              organName: this.departDetailInfo.organName
+            });
+            res.data.list.map((item) => {
+              this.departmentData.push({
+                uid: item.uid,
+                organName: item.organName
+              });
+              if (item.organLayer === (this.departDetailInfo.organLayer + 1)) {
+                this.childDepartList.push({
+                  uid: item.uid,
+                  name: item.organName,
+                  isShow: false,
+                  isSelect: false,
+                  children: []
+                });
+              } else {
+                restArr.push(item);
+              }
+              console.log('rest', restArr);
+            });
+            restArr.forEach(a => {
+              this.childDepartList.forEach(b => {
+                if (a.parentOrganName === b.name) {
+                  b.children.push({
+                    uid: a.uid,
+                    name: a.organName,
+                    isSelect: false
+                  })
+                }
+              })
+            })
           }
+          console.log('childDepartList', this.childDepartList)
         })
     },
     // 获取部门详情数据
@@ -354,6 +353,7 @@ export default {
           .then(res => {
             if (res) {
               this.departDetailInfo = res.data;
+              this.getDepartList();
             }
           })
       }
@@ -522,11 +522,9 @@ export default {
     },
     // 显示新增部门弹出框
     showNewDepartment () {
-      this.getDepartList();
-      this.getAllUserList();
       this.addDepartment.organName = null;
-      this.addDepartment.organPid = null;
       this.addDepartment.chargeUserName = null;
+      this.addDepartment.organPid = this.$route.query.id;
       this.newDepartmentDialog = true;
     },
     // 添加部门

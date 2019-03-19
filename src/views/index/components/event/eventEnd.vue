@@ -147,30 +147,31 @@ export default {
         let type;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
+          console.log(type);
           let data;
           res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
-            data = {
-              attachmentType: dictType.imgId,
-              url: res.data.newFileName,
-              attachmentName: res.data.fileName,
-              attachmentSize: res.data.fileSize,
-              attachmentWidth: res.data.imageWidth,
-              attachmentHeight: res.data.imageHeight,
-              thumbnailUrl: res.data.thumbnailUrl,
-              thumbnailWidth: res.data.thumbImageWidth,
-              thumbnailHeight: res.data.thumbImageHeight
-            }
-            this.imgList2.push(res.data);
-          } else {
-            data = {
-              attachmentType: dictType.fileId,
-              url: res.data.newFileName,
-              attachmentName: res.data.fileName,
-              attachmentSize: res.data.fileSize
-            }
-            this.fileList.push(res.data);
-          }
+          // if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          //   data = {
+          //     attachmentType: dictType.imgId,
+          //     url: res.data.newFileName,
+          //     attachmentName: res.data.fileName,
+          //     attachmentSize: res.data.fileSize,
+          //     attachmentWidth: res.data.imageWidth,
+          //     attachmentHeight: res.data.imageHeight,
+          //     thumbnailUrl: res.data.thumbnailUrl,
+          //     thumbnailWidth: res.data.thumbImageWidth,
+          //     thumbnailHeight: res.data.thumbImageHeight
+          //   }
+          //   this.imgList2.push(res.data);
+          // } else {
+          //   data = {
+          //     attachmentType: dictType.fileId,
+          //     url: res.data.newFileName,
+          //     attachmentName: res.data.fileName,
+          //     attachmentSize: res.data.fileSize
+          //   }
+          //   this.fileList.push(res.data);
+          // }
           this.endForm.attachmentList.push(data);
           this.isImgDisabled = false;
         }

@@ -109,6 +109,10 @@
       </div>
     </div>
     <div class="select_map_right">
+      <div class="select_map_right_title">
+        <span>可选设备</span>
+        <span>(300)</span>
+      </div>
       <div id="mapMap"></div>
       <div class="right-flag">
         <ul class="map-rrt map_rrt_u1">
@@ -378,6 +382,7 @@ export default {
       padding: 0 10px;
       border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
+      border-right: 1px solid #F2F2F2;
       >span {
         color: #333333;
       }
@@ -477,6 +482,14 @@ export default {
   .select_map_right {
     width: calc(100% - 300px);
     height: 100%;
+    .select_map_right_title {
+      width: 100%;
+      color: #333333;
+      height: 45px;
+      line-height: 45px;
+      padding: 0 5px;
+      border-top: 1px solid #f2f2f2;
+    }
     #mapMap {
       width: 100%;
       height: 100%;

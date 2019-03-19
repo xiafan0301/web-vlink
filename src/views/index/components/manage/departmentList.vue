@@ -5,11 +5,11 @@
       <el-input  placeholder="请输入部门名称" style="width: 240px;" v-model="organName">
         <i v-show="closeShow" slot="suffix" @click="onClear()" class="search_icon el-icon-close" style="font-size: 20px;"></i>
         <i
-        v-show="!closeShow"
-        class="search_icon vl_icon vl_icon_manage_1"
-        slot="suffix"
-        @click="searchData">
-      </i>
+          v-show="!closeShow"
+          class="search_icon vl_icon vl_icon_manage_1"
+          slot="suffix"
+          @click="searchData">
+        </i>
       </el-input>
     </div>
     <div class="table_box">
@@ -124,8 +124,8 @@
           <el-form-item label=" " prop="organName">
             <el-input v-model="editDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
           </el-form-item>
-          <el-form-item label=" " prop="pid">
-            <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门">
+          <el-form-item label="" prop="pid">
+            <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门" disabled>
               <el-option label="无" value=""></el-option>
               <el-option
                 v-for="(item, index) in departmentData"
@@ -188,25 +188,25 @@
 </template>
 <script>
 // import {isJudgeDepart} from '@/utils/validator.js';
-import { getDepartmentList, updateDepart, delDepart, addDepart, getUserList, judgeDepart } from '@/views/index/api/api.js';
+import { getDepartmentList, updateDepart, delDepart, addDepart, getUserList } from '@/views/index/api/api.js';
 export default {
   data () {
-    var isJudgeDepart = (value, callback) => {
-      if (value) {
-        const params = {
-          proKey: this.userInfo.proKey,
-          organName: this.addDepartment.organName
-        }
-        judgeDepart(params)
-          .then(res => {
-            if (res.data) {
-              console.log(res.data)
-              return callback(new Error('部门已存在'))
-            }
-          })
-          .catch(() => {})
-      }
-    };
+    // var isJudgeDepart = (value, callback) => {
+    //   if (value) {
+    //     const params = {
+    //       proKey: this.userInfo.proKey,
+    //       organName: this.addDepartment.organName
+    //     }
+    //     judgeDepart(params)
+    //       .then(res => {
+    //         if (res.data) {
+    //           console.log(res.data)
+    //           return callback(new Error('部门已存在'))
+    //         }
+    //       })
+    //       .catch(() => {})
+    //   }
+    // };
     return {
       closeShow: false, // 清空搜索框
       organName: null, // 搜索的部门名称
@@ -242,9 +242,6 @@ export default {
         organName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { validator: 'isJudgeDepart', trigger: 'blur' }
-        ],
-        pid: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
       deleteId: null, // 要删除的部门id

@@ -255,7 +255,7 @@
   </div>
 </template>
 <script>
-import { checkUserName, isJudgeUserGroup } from '@/utils/validator.js';
+import { checkUserName } from '@/utils/validator.js';
 import { getUserGroups, createUserGroups, updateUserGroups, delUserGroup, getUserList, getRoleList,
  addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles } from '@/views/index/api/api.js';
 export default {

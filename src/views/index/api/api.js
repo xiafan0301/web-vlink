@@ -592,6 +592,106 @@ export function delRole (data) {
     method: 'delete'
   });
 }
+/* ==========基础信息库============  */
+/* 车辆信息库 *****/
+
+/**
+ * 获取车辆分组数据
+ * @param {*} data 
+ */
+export function getVehicleGroup (params) {
+  return request({
+    url: '/vehicleGroup/list',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 获取车辆底库数据
+ * @param {*} data 
+ */
+export function getVehicleBottomName (params) {
+  return request({
+    url: '/vehicleBank/list',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 获取车辆列表数据
+ * @param {*} data 
+ */
+export function getVehicleDataList (params) {
+  return request({
+    url: '/vehicle/infoPage',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 车辆--新增分组
+ * @param {*} data 
+ */
+export function addGroup (data) {
+  return request({
+    url: '/group',
+    data,
+    method: 'post'
+  });
+}
+/**
+ * 管理车辆分组---修改车辆分组
+ * @param {*} data 
+ */
+export function editVeGroup (data) {
+  return request({
+    url: '/group',
+    data,
+    method: 'put'
+  });
+}
+/**
+ * 管理车辆分组--删除车辆分组
+ * @param {*} data 
+ */
+export function delVeGroup (uid) {
+  return request({
+    url: '/vehicleGroup/delete/' + uid,
+    method: 'delete'
+  });
+}
+/**
+ * 管理车辆分组--获取车辆列表数据
+ * @param {*} data 
+ */
+export function getAdminVelList (params) {
+  return request({
+    url: '/vehicle/page',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 查询车辆详细信息
+ * @param {*} data 
+ */
+export function getVehicleInfo (uid) {
+  return request({
+    url: '/vehicle/details/' + uid,
+    method: 'get'
+  });
+}
+/**
+ * 管理车辆分组---移出分组
+ * @param {*} data 
+ */
+export function moveoutGroup (data) {
+  return request({
+    url: '/vehicleGroup/batchDelete',
+    params: data,
+    method: 'delete'
+  });
+}
 /* ================== 布控模块 =================== */
 /* ========== 布控库 ========== */
 /**
