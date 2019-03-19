@@ -6,6 +6,8 @@ export const dataList = {
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   ctcStatus: 9, // 调度事件状态
+  planType: 12, // 预案类型
   imgId: 14, // 图片id
   videoId: 15, // 视频id
+  fileId: 37, // 文件id
 }

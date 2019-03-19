@@ -47,7 +47,7 @@
             <el-button class="add_btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
             <el-button class="del_btn" @click="showDeleteDialog">删除部门</el-button>
           </div>
-          <div class="depart_tree">
+          <div class="depart_tree" v-show="childDepartList.length > 0">
             <el-checkbox>全选</el-checkbox>
             <div class="depart_tree_list">
               <vue-scroll>
@@ -261,6 +261,9 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ],
         organPid: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        chargeUserName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },

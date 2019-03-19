@@ -161,7 +161,7 @@ export default {
     let _this = this;
     let map = new window.AMap.Map('mapMap', {
       zoom: 18, // 级别
-      center: [112.974691, 28.093846], // 中心点坐标
+      center: [110.596015, 27.907662], // 中心点坐标
       // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
@@ -171,10 +171,6 @@ export default {
     _this.mouseTool = mouseTool;
     // 添加事件
     window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
-      console.log('e', e)
-      // _this.drawPaths = e.obj.getPath();
-      console.log('drawPaths e', e); // 获取路径/范围
-      console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
       setTimeout(() => {
         _this.selAreaRest(true);
         let polygon = new window.AMap.Polygon({ // 构造多边形对象
@@ -187,7 +183,6 @@ export default {
           path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
           zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
         });
-        console.log(polygon);
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
@@ -482,8 +477,14 @@ export default {
   .select_map_right {
     width: calc(100% - 300px);
     height: 100%;
+    position: relative;
     .select_map_right_title {
       width: 100%;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      background-color: #ffffff;
+      position: absolute;
       color: #333333;
       height: 45px;
       line-height: 45px;

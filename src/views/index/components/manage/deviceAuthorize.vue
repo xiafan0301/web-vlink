@@ -107,30 +107,43 @@
                     <span>卡口</span>
                   </div>
                   <ul class="child_temp_detail">
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="effect_status">生效中</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="grant_status">已授权</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="invalid_status">已失效</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
+                  <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                  <span>重点场所</span>
+                </div>
+                <div class="child_temp" v-show="arrowActiveTemp">
+                  <div class="temp_tab">
+                    <span class="active_span">摄像头</span>
+                    <span>卡口</span>
+                  </div>
+                  <ul class="child_temp_detail">
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
+                  <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                  <span>重点场所</span>
+                </div>
+                <div class="child_temp" v-show="arrowActiveTemp">
+                  <div class="temp_tab">
+                    <span class="active_span">摄像头</span>
+                    <span>卡口</span>
+                  </div>
+                  <ul class="child_temp_detail">
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
+                    <li>广场监控点1-300</li>
                   </ul>
                 </div>
               </li>
@@ -183,105 +196,23 @@
                     <span>卡口</span>
                   </div>
                   <ul class="child_temp_detail">
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="effect_status">生效中</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
+                    <li class="right_li">
+                      <span>广场监控点1-300</span>
+                      <span class="effect_status">生效中</span>
+                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
+                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
                     </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="grant_status">已授权</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
+                    <li class="right_li">
+                      <span>广场监控点1-300</span>
+                      <span class="grant_status">已授权</span>
+                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
+                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
                     </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="invalid_status">已失效</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li>
-                <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                  <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                  <span>重点场所</span>
-                </div>
-                <div class="child_temp" v-show="arrowActiveTemp">
-                  <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
-                  </div>
-                  <ul class="child_temp_detail">
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="effect_status">生效中</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="grant_status">已授权</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="invalid_status">已失效</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-              <li>
-                <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                  <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                  <span>重点场所</span>
-                </div>
-                <div class="child_temp" v-show="arrowActiveTemp">
-                  <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
-                  </div>
-                  <ul class="child_temp_detail">
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="effect_status">生效中</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="grant_status">已授权</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                    </li>
-                    <li>
-                      <p>广场监控点1-300</p>
-                      <p>
-                        <span class="invalid_status">已失效</span>
-                        <span class="time"> (2018-1112:00:00至2018-11-21200:00)</span>
-                      </p>
-                      <i class="vl_icon vl_icon_manage_6"></i>
+                    <li class="right_li">
+                      <span>广场监控点1-300</span>
+                      <span class="invalid_status">已失效</span>
+                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
+                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
                     </li>
                   </ul>
                 </div>
@@ -329,7 +260,7 @@ export default {
         label: '北京烤鸭'
       }],
       value: '',
-      tabState: 1,
+      tabState: 2, // 1-机构授权  2-临时授权
       arrowActive: false, // false-未展开的箭头， true-展开的箭头
       arrowActiveTemp: false,
       stopGrantDialog: false, // 终止授权弹出框
@@ -500,53 +431,50 @@ export default {
             width: 100%;
             .temp_tab {
               color: #666666;
-              // margin: 10px 0 10px 40px;
-              // font-size: 12px;
-              // width: 220px;
-              height: 26px;
-              // border: 1px solid #D3D3D3;
-              // border-radius:4px;
+              padding: 10px 10px 0;
+              border-bottom: 1px solid #f2f2f2;
               > span {
                 width: auto;
                 text-align: center;
                 display: inline-block;
                 line-height: 26px;
-                // height: 100%;
+                margin: 0 10px;
                 &.active_span {
                   color: #0C70F8;
                   border-bottom: 2px solid #0C70F8;
                 }
               }
-              span:first-child {
-                border-right: 1px solid #D3D3D3;
-              }
             }
             .child_temp_detail {
-              width: 98%;
+              width: 100%;
               >li {
-                padding-bottom: 10px;
+                padding: 10px 15px 10px;
                 font-size: 14px;
                 color: #666666;
-                position: relative;
+                border-bottom: 1px solid #f2f2f2;
+                span {
+                  margin-right: 15px;
+                }
                 i {
-                  position: absolute;
-                  right: 0;
-                  top: 0;
+                  display: inline-block;
+                  vertical-align: middle;
+                  &:hover {
+                    background-position: -527px -671px;
+                  }
                 }
                 .effect_status {
                   color: #4FCB61;
-                  font-size: 12px;
                 }
                 .grant_status {
-                  font-size: 12px;
                   color: #F94539;
                 }
                 .invalid_status {
                   color: #BFBFBF;
-                  font-size: 12px;
                 }
-                .time {
-                  font-size: 12px;
+              }
+              .right_li {
+                &:hover {
+                  background-color: #E0F2FF;
                 }
               }
             }

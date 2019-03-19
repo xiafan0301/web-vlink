@@ -15,16 +15,20 @@
           <i class="del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
         <div class="bnt_box_right">
-          <el-button class="oper_btn copy_btn" @click="showGroup = !showGroup">复制</el-button>
-          <el-button class="oper_btn move_btn" @click="showMoveoutDialog">移出</el-button>
+          <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
+          <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
           <div class="copy_info" v-show="showGroup">
             <div class="copy_info_list">
               <vue-scroll>
                 <ul class="copy_info_ul">
+                  <li
+                    v-for="(item, index) in copyGroupList"
+                    :key="index"
+                    @click="handleCopyGroup(item.uid)"
+                  >{{item.groupName}}</li>
+                  <!-- <li>分组命名文字限制十字</li>
                   <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
+                  <li>分组命名文字限制十字</li> -->
                 </ul>
               </vue-scroll>
             </div>
@@ -193,12 +197,12 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+        <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
+        <el-input placeholder="请输入组名，名字限制在10个" v-model="addGroupName"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="addCopyGroupDialog">确认</el-button>
       </div>
     </el-dialog>
     <!--修改组弹出框-->
@@ -251,7 +255,7 @@
   </div>
 </template>
 <script>
-import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup } from '@/views/index/api/api.js';
+import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup, copyGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -261,7 +265,8 @@ export default {
       albumId: null, // 要删除或修改的底库id
       groupName: null, // 组名
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      userGroupName: null,
+      userGroupName: null, // 编辑组名
+      addGroupName: null, // 新增组名
       showGroup: false,
       searchForm: {
         keyWord: null
@@ -274,6 +279,7 @@ export default {
       moveoutGroupDialog: false, // 移出组弹出框
       multipleSelection: [], // 表格选中的行
       vehicleDetailInfo: {}, // 车辆详情
+      copyGroupList: [], // 可以复制的分组
     }
   },
   mounted () {
@@ -292,9 +298,15 @@ export default {
       getVehicleGroup()
         .then(res => {
           if (res && res.data) {
+            // this.allGroupList = res.data;
             res.data.map(item => {
               if (item.id === uid) {
                 this.groupName = item.name;
+              } else {
+                this.copyGroupList.push({
+                  uid: item.id,
+                  groupName: item.name
+                })
               }
             });
           }
@@ -418,15 +430,15 @@ export default {
     showMoveoutDialog () {
       const length = this.multipleSelection.length;
       this.delTitle = '是否确定将这 ' + length + ' 条人员数据移出该组?';
-      if (length === 0) {
-        this.$message({
-          type: 'warning',
-          message: '请先选择要移出数据',
-          customClass: 'request_tip'
-        })
-      } else {
-        this.moveoutGroupDialog = true;
-      }
+      // if (length === 0) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '请先选择要移出数据',
+      //     customClass: 'request_tip'
+      //   })
+      // } else {
+      this.moveoutGroupDialog = true;
+      // }
     },
     // 移出分组
     moveoutGroupInfo () {
@@ -453,6 +465,68 @@ export default {
             this.$message({
               type: 'error',
               message: '移出失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 处理复制分组
+    handleCopyGroup (id) {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        // groupName: this.addGroupName || null,
+        groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.showGroup = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '复制失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 复制或新增复制到组
+    addCopyGroupDialog () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        groupName: this.addGroupName || null,
+        // groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.addGroupDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '新增失败',
               customClass: 'request_tip'
             })
           }
@@ -502,14 +576,16 @@ export default {
         position: relative;
         .copy_info {
           z-index: 1;
+          width: auto;
           position: absolute;
+          height: 170px;
           top: 45px;
           background-color: #ffffff;
           color: #333333;
           border-radius: 4px;
           box-shadow:5px 5px 8px 5px #949494;
           .copy_info_list {
-            height: 150px;
+            height: calc(170px - 30px);
             .copy_info_ul {
               >li {
                 padding: 8px 10px;
@@ -521,13 +597,16 @@ export default {
             }
           }
           .add_btn {
+            padding: 0 10px;
             cursor: pointer;
             height: 30px;
             line-height: 30px;
-            display: flex;
-            align-items: center;
-            padding-left: 25%;
+            text-align: center;
             border-top: 1px solid #F2F2F2;
+            span, i {
+              display: inline-block;
+              vertical-align: middle;
+            }
           }
         }
         .oper_btn {
@@ -537,6 +616,11 @@ export default {
         .copy_btn {
           background-color: #0C70F8;
           color: #ffffff;
+        }
+        .disabled_btn {
+          background-color: #D3D3D3;
+          color: #B2B2B2;
+          cursor: default;
         }
       }
     }

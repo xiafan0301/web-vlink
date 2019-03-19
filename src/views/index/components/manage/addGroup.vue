@@ -66,6 +66,7 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
+import { getAllDevices } from '@/views/index/api/api.js';
 export default {
   components: {listSelect, mapSelect},
   data () {

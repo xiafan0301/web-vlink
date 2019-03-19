@@ -6,7 +6,7 @@ import request from '@/config/axios';
  */
 export function login(data) {
   return request({
-    url: '/userService/login',
+    url: '/user-service/login',
     data,
     mode: 'user',
     method: 'post'
@@ -18,7 +18,7 @@ export function login(data) {
  */
 export function logout(data) {
   return request({
-    url: '/userService/logout',
+    url: '/user-service/logout/' + data.userMobile,
     params: data,
     mode: 'user',
     method: 'get'
@@ -30,7 +30,7 @@ export function logout(data) {
  */
 export function isRegister(data) {
   return request({
-    url: '/userService/checkUserMobile',
+    url: '/user-service/check-user-mobile',
     params: data,
     mode: 'user',
     method: 'get'
@@ -42,7 +42,7 @@ export function isRegister(data) {
  */
 export function getDiciData(uid) {
   return request({
-    url: 'dictService/dictList/?pid=' + uid,
+    url: 'dict-service/dict-list/?pid=' + uid,
     method: 'get'
   });
 }
@@ -62,9 +62,9 @@ export function getEventList(data) {
 /**
  * 修改事件
  */
-export function updateEvent(data, uid) {
+export function updateEvent(data) {
   return request({
-    url: 'eventServices/events/' + uid,
+    url: 'eventServices/events/update',
     method: 'put',
     data,
     mode: 'event'
@@ -601,7 +601,7 @@ export function delRole (data) {
  */
 export function getVehicleGroup (params) {
   return request({
-    url: '/vehicleGroup/list',
+    url: '/vehicle-group/list',
     params,
     method: 'get'
   });
@@ -612,7 +612,7 @@ export function getVehicleGroup (params) {
  */
 export function getVehicleBottomName (params) {
   return request({
-    url: '/vehicleBank/list',
+    url: '/vehicle-bank/list',
     params,
     method: 'get'
   });
@@ -623,7 +623,7 @@ export function getVehicleBottomName (params) {
  */
 export function getVehicleDataList (params) {
   return request({
-    url: '/vehicle/infoPage',
+    url: '/vehicle/info-page',
     params,
     method: 'get'
   });
@@ -656,7 +656,7 @@ export function editVeGroup (data) {
  */
 export function delVeGroup (uid) {
   return request({
-    url: '/vehicleGroup/delete/' + uid,
+    url: '/vehicle-group/delete/' + uid,
     method: 'delete'
   });
 }
@@ -687,8 +687,77 @@ export function getVehicleInfo (uid) {
  */
 export function moveoutGroup (data) {
   return request({
-    url: '/vehicleGroup/batchDelete',
+    url: '/vehicle-group/batch-delete',
     params: data,
+    method: 'delete'
+  });
+}
+/**
+ * 管理车辆分组---复制分组
+ * @param {*} data 
+ */
+export function copyGroup (data) {
+  return request({
+    url: '/vehicle-group/copy',
+    data,
+    method: 'post'
+  });
+}
+/***======== 人员信息库 ========== */
+/**
+ * 底库列表查询
+ * @param {*} data 
+ */
+export function getPerBottomBankList (params) {
+  return request({
+    url: '/portrait/bottom-bank',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 分组列表查询
+ * @param {*} data 
+ */
+export function getPerGroupList (params) {
+  return request({
+    url: '/portrait/group',
+    params,
+    method: 'get'
+  });
+}
+
+/*** =======================视频设置=========================== */
+/**===== 自定义组 ===== */
+/**
+ * 获取所有分组
+ * @param {*} data 
+ */
+export function getCusGroup (params) {
+  return request({
+    url: '/group-device-service/groups-devices',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 获取所有设备列表
+ * @param {*} data 
+ */
+export function getAllDevices (params) {
+  return request({
+    url: '/area-device-service/areas-devices',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 删除分组设备
+ * @param {*} data 
+ */
+export function delGroupDevice (id) {
+  return request({
+    url: '/group-service/group-info/' + id,
     method: 'delete'
   });
 }

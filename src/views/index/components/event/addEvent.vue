@@ -193,7 +193,7 @@ export default {
       // _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
