@@ -64,7 +64,7 @@
       </div>
     </div>
     <!-- 新增组 -->
-    <div is="groupDialog" operateType="1" ref="groupDialog"></div>
+    <div is="groupDialog" :tabType="tabType" operateType="1" ref="groupDialog" @getGroupList="getGroupListIsVehicle"></div>
     <!-- 删除车像 -->
     <div class="del_car_dialog">
       <el-dialog
@@ -84,10 +84,10 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delVehicle, copyVehicle} from '@/views/index/api/api.js';
+import {delVehicle, copyVehicle, getGroupListIsVehicle} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['carMemberList'],
+  props: ['carMemberList', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -98,12 +98,7 @@ export default {
       track: null,
       showMoreId: null,//显示更多组的组id
       // 车像组列表数据
-      groupListCar: [
-        {groupName: '全部车像', memberNum: 200, uid: '0'},
-        {groupName: '车像test1', memberNum: 200, uid: '4'},
-        {groupName: '车像test2', memberNum: 201, uid: '5'},
-        {groupName: '车像test3', memberNum: 201, uid: '6'}
-      ],
+      groupListCar: [],
       // 弹出框参数
       delCarDialog: false,
       loadingBtn: false,
@@ -123,12 +118,15 @@ export default {
       return this.memberList.filter(f => f.isChecked).length;
     }
   },
-    created () {
-      this.memberList = this.carMemberList && this.carMemberList.list;
-      this.memberList.forEach(f => {
-        this.$set(f, 'isChecked', false);
-      })
-    },
+  created () {
+    this.memberList = this.carMemberList && this.carMemberList.list;
+    this.memberList.forEach(f => {
+      this.$set(f, 'isChecked', false);
+    })
+  },
+  mounted () {
+    this.getGroupListIsVehicle();
+  },
   methods: {
     popGroupDialog () {
       this.$refs['groupDialog'].reset();
@@ -181,6 +179,14 @@ export default {
     // 复制到自定义组
     copyIsGroup () {
       this.isShowGroupCopy = !this.isShowGroupCopy;
+    },
+    // 获取车像组列表
+    getGroupListIsVehicle () {
+      getGroupListIsVehicle().then(res => {
+        if (res && res.data) {
+          this.groupListCar = res.data.filter(f => f.uid !== null);
+        }
+      })
     },
     // 批量删除车像
     delVehicle () {

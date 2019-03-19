@@ -177,25 +177,10 @@ export default {
       map: null,
       controlList: null, // 布控数据列表
       // 抓拍列表参数
-      snapList: [
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁1', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁2', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁4', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁5', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁6', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁7', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'}
-      ],
+      snapList: [],
       snapTotal: null,//抓拍总数
       // 布控对象列表参数
-      controlObjList: [
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁1', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁2', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},     
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},      
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'},      
-        {url: '//via.placeholder.com/130x130', name: '冯晓宁3', time: '18-12-24 14:12:17', monitoring: '环保路摄像头002'}      
-      ],
+      controlObjList: [],
       isShowFullScreen: false, // 是否显示全屏播放页面
       videoHeight: null
     }

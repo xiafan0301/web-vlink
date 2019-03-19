@@ -121,10 +121,10 @@ export default {
     },
     // 获取评论列表数据
     getCommentInfoList () {
-      const params = {
-        eventId: 1//this.helpId
-      }
-      getCommentInfoList(params).then(res => {
+      // const params = {
+      //   eventId: 1//this.helpId
+      // }
+      getCommentInfoList(1).then(res => {
         if (res && res.data) {
           this.commentList = res.data;
         }

@@ -77,7 +77,7 @@
         <p class="vl_f_12 vl_f_999">删除后该分组人像将找不到。</p>
         <div slot="footer">
           <el-button @click="delGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="delGroupById">确认</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="delPortraitGroupById">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -97,15 +97,15 @@
       </el-dialog>
     </div>
     <!-- 新增/修改组 -->
-    <div is="groupDialog" :operateType="operateType" ref="groupDialog" :groupId="groupId" @sendChildren="getParentData"></div>
+    <div is="groupDialog" :tabType="tabType" :operateType="operateType" ref="groupDialog" :groupId="groupId" @sendChildren="getParentData" @getGroupList="getGroupListIsPortrait"></div>
   </div>
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {copyPortrait, removePortrait, delGroupById} from '@/views/index/api/api.js';
+import {copyPortrait, removePortrait, delPortraitGroupById, getGroupListIsPortrait} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList', 'groupId', 'groupName'],
+  props: ['protraitMemberList', 'groupId', 'groupName', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -118,12 +118,7 @@ export default {
       track: null,
       showMoreId: null,//显示更多组的组id
       // 人像组列表数据
-      groupListPortrait: [
-        {groupName: '全部人像', memberNum: 200, uid: '0'},
-        {groupName: '人像test1', memberNum: 200, uid: '1'},
-        {groupName: '人像test2', memberNum: 201, uid: '2'},
-        {groupName: '人像test3', memberNum: 202, uid: '3'}
-      ],
+      groupListPortrait: [],
       gName: null,//组名
       // 弹出框参数
       delGroupDialog: false,
@@ -153,16 +148,25 @@ export default {
     })
   },
   mounted () {
+    this.getGroupListIsPortrait();
     this.gName = this.groupName;
      console.log(this.gName)
   },
   methods: {
     // 删除分组
-    delGroupById () {
-      delGroupById(this.groupId).then(res => {
+    delPortraitGroupById () {
+      delPortraitGroupById(this.groupId).then(res => {
         this.delGroupDialog = false;
         this.$message.success('删除成功');
         this.$emit('changePage');
+      })
+    },
+    // 获取人像组列表
+    getGroupListIsPortrait () {
+      getGroupListIsPortrait().then(res => {
+        if (res && res.data) {
+          this.groupListPortrait = res.data.filter(f => f.uid !== null);
+        }
       })
     },
     getParentData (data) {

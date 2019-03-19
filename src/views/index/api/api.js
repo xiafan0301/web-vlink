@@ -447,7 +447,7 @@ export function delMemberInfo (params) {
  */
 export function addPortrait(data) {
   return request({
-    url: '/surveillanceRepertory/portrait',
+    url: '/surveillance-repertory/portrait',
     method: 'post',
     data,
     mode: 'control'
@@ -459,7 +459,7 @@ export function addPortrait(data) {
  */
 export function delPortrait(data) {
   return request({
-    url: '/surveillanceRepertory/portrait/batch',
+    url: '/surveillance-repertory/portraits',
     method: 'delete',
     data,
     mode: 'control'
@@ -471,7 +471,7 @@ export function delPortrait(data) {
  */
 export function getPortraitList(params) {
   return request({
-    url: '/surveillanceRepertory/portrait/page',
+    url: '/surveillance-repertory/portrait/page',
     method: 'get',
     params,
     mode: 'control'
@@ -483,7 +483,7 @@ export function getPortraitList(params) {
  */
 export function getPortraitById(uid) {
   return request({
-    url: '/surveillanceRepertory/portrait/withGroup/' + uid,
+    url: '/surveillance-repertory/portrait/' + uid,
     method: 'get',
     mode: 'control'
   })
@@ -494,7 +494,7 @@ export function getPortraitById(uid) {
  */
 export function putPortrait(data) {
   return request({
-    url: '/surveillanceRepertory/portrait',
+    url: '/surveillance-repertory/portrait',
     method: 'put',
     data,
     mode: 'control'
@@ -506,7 +506,7 @@ export function putPortrait(data) {
  */
 export function getPortraitByIdNo(params) {
   return request({
-    url: '/surveillanceRepertory/portrait/byIdNo',
+    url: '/surveillance-repertory/portrait',
     method: 'get',
     params,
     mode: 'control'
@@ -518,7 +518,7 @@ export function getPortraitByIdNo(params) {
  */
 export function copyPortrait(data) {
   return request({
-    url: '/surveillanceRepertory/portrait/group/copy/batch',
+    url: '/surveillance-repertory/portraits/portrait-group',
     method: 'post',
     data,
     mode: 'control'
@@ -530,7 +530,7 @@ export function copyPortrait(data) {
  */
 export function removePortrait(data) {
   return request({
-    url: '/surveillanceRepertory/portrait/group/delete/batch',
+    url: '/surveillance-repertory/portraits/portrait-group',
     method: 'delete',
     data,
     mode: 'control'
@@ -543,7 +543,7 @@ export function removePortrait(data) {
  */
 export function addVehicle(data) {
   return request({
-    url: '/surveillanceRepertory/vehicle',
+    url: '/surveillance-repertory/vehicle',
     method: 'post',
     data,
     mode: 'control'
@@ -555,7 +555,7 @@ export function addVehicle(data) {
  */
 export function delVehicle(data) {
   return request({
-    url: '/surveillanceRepertory/vehicle/batch',
+    url: '/surveillance-repertory/vehicles',
     method: 'delete',
     data,
     mode: 'control'
@@ -567,7 +567,7 @@ export function delVehicle(data) {
  */
 export function getVehicleList(params) {
   return request({
-    url: '/surveillanceRepertory/vehicle/page',
+    url: '/surveillance-repertory/vehicle/page',
     method: 'get',
     params,
     mode: 'control'
@@ -579,7 +579,7 @@ export function getVehicleList(params) {
  */
 export function getVehicleById(uid) {
   return request({
-    url: '/surveillanceRepertory/vehicle/withGroup/' + uid,
+    url: '/surveillance-repertory/vehicle/' + uid,
     method: 'get',
     mode: 'control'
   })
@@ -590,7 +590,7 @@ export function getVehicleById(uid) {
  */
 export function getVehicleByIdNo(params) {
   return request({
-    url: '/surveillanceRepertory/vehicle/byIdNo',
+    url: '/surveillance-repertory/vehicle/byIdNo',
     method: 'get',
     params,
     mode: 'control'
@@ -602,19 +602,19 @@ export function getVehicleByIdNo(params) {
  */
 export function putVehicle(data) {
   return request({
-    url: '/surveillanceRepertory/vehicle',
+    url: '/surveillance-repertory/vehicle',
     method: 'put',
     data,
     mode: 'control'
   })
 }
 /**
- * copyVehicle 批量复制车像到别的分组
+ * copyVehicle 批量复制车像到别的分组  
  * @param {object} data
  */
 export function copyVehicle(data) {
   return request({
-    url: '/surveillanceRepertory/vehicle/group/copy/batch',
+    url: '/surveillance-repertory/vehicles/vehicle-group',
     method: 'post',
     data,
     mode: 'control'
@@ -626,7 +626,7 @@ export function copyVehicle(data) {
  */
 export function removeVehicle(data) {
   return request({
-    url: '/surveillanceRepertory/vehicle/group/delete/batch',
+    url: '/surveillance-repertory/vehicles/vehicle-group',
     method: 'delete',
     data,
     mode: 'control'
@@ -650,7 +650,7 @@ export function addGroup(data) {
  */
 export function getGroupListIsPortrait(params) {
   return request({
-    url: '/surveillanceRepertory/portraitGroup',
+    url: '/surveillance-repertory/portrait-group',
     method: 'get',
     params,
     mode: 'control'
@@ -662,7 +662,7 @@ export function getGroupListIsPortrait(params) {
  */
 export function getGroupListIsVehicle(params) {
   return request({
-    url: '/surveillanceRepertory/vehicleGroup',
+    url: '/surveillance-repertory/vehicle-group',
     method: 'get',
     params,
     mode: 'control'
@@ -692,14 +692,25 @@ export function putGroup(data) {
   })
 }
 /**
- * delGroupById 删除分组
+ * delPortraitGroupById 删除人像组  
  * @param {object} params
  */
-export function delGroupById(uid) {
+export function delPortraitGroupById(uid) {
   return request({
-    url: '/group/' + uid,
+    url: '/surveillance-repertory/portrait-group/' + uid,
     method: 'delete',
-    mode: ''
+    mode: 'control'
+  })
+}
+/**
+ * delVehicleGroupById 删除车辆组  
+ * @param {object} params
+ */
+export function delVehicleGroupById(uid) {
+  return request({
+    url: '/surveillance-repertory/vehicle-group/' + uid,
+    method: 'delete',
+    mode: 'control'
   })
 }
 /* ========== 布控管理 ========== */
@@ -721,7 +732,7 @@ export function addControl(data) {
  */
 export function getControlInfoByName(params) {
   return request({
-    url: '/surveillance/byName',
+    url: '/surveillance',
     method: 'get',
     params,
     mode: 'control'
@@ -769,7 +780,7 @@ export function getControlDevice(params) {
  */
 export function getControlDetail(uid) {
   return request({
-    url: '/surveillance/detail/' + uid,
+    url: '/surveillance/' + uid + '/detail',
     method: 'get',
     mode: 'control'
   })
@@ -780,7 +791,7 @@ export function getControlDetail(uid) {
  */
 export function getControlDetailIsEditor(uid) {
   return request({
-    url: '/surveillance/beforeUpdate/' + uid,
+    url: '/surveillance/' + uid,
     method: 'get',
     mode: 'control'
   })
@@ -826,7 +837,7 @@ export function delControl(uid) {
  */
 export function controlArea(uid) {
   return request({
-    url: '/surveillance/area/' + uid,
+    url: '/surveillance/' + uid + '/area' ,
     method: 'get',
     mode: 'control'
   })
@@ -837,7 +848,7 @@ export function controlArea(uid) {
  */
 export function controlStop(data) {
   return request({
-    url: '/surveillance/stop/' + data.uid,
+    url: '/surveillance/' + data.uid + '/stop' ,
     method: 'put',
     data,
     mode: 'control'
@@ -862,7 +873,7 @@ export function repertorySel(params) {
  */
 export function getControlMap(params) {
   return request({
-    url: '/controlMap',
+    url: '/control-map/devices',
     method: 'get',
     params,
     mode: 'control'
@@ -874,7 +885,7 @@ export function getControlMap(params) {
  */
 export function getControlMapByDevice(params) {
   return request({
-    url: '/controlMap/byDevice',
+    url: '/control-map/device/' + params.uid + '/surveillance-detail',
     method: 'get',
     params,
     mode: 'control'
@@ -899,7 +910,7 @@ export function getAlarmSnap(params) {
  */
 export function addMutualHelp(data) {
   return request({
-    url: '/eventService/mutualHelp',
+    url: '/event-service/mutual-help',
     method: 'post',
     data,
     mode: 'message'
@@ -912,7 +923,7 @@ export function addMutualHelp(data) {
  */
 export function getMutualHelpDetail(uid) {
   return request({
-    url: '/eventService/mutualHelp/' + uid,
+    url: '/event-service/mutual-help/' + uid,
     method: 'get',
     mode: 'message'
   })
@@ -923,7 +934,7 @@ export function getMutualHelpDetail(uid) {
  */
 export function putMutualHelp(data) {
   return request({
-    url: '/eventService/mutualHelp',
+    url: '/event-service/mutual-help',
     method: 'put',
     data,
     mode: 'message'
@@ -935,7 +946,7 @@ export function putMutualHelp(data) {
  */
 export function replyComment(data) {
   return request({
-    url: '/eventService/replyComment',
+    url: '/event-service/reply-comment',
     method: 'post',
     data,
     mode: 'message'
@@ -947,7 +958,7 @@ export function replyComment(data) {
  */
 export function shieldComment(data) {
   return request({
-    url: '/eventService/shieldComment',
+    url: '/event-service/shield-comment',
     method: 'post',
     data,
     mode: 'message'
@@ -959,7 +970,7 @@ export function shieldComment(data) {
  */
 export function getMutualHelpList(params) {
   return request({
-    url: '/eventService/mutualHelpList',
+    url: '/event-service/mutual-help-list',
     method: 'get',
     params,
     mode: 'message'
@@ -969,11 +980,10 @@ export function getMutualHelpList(params) {
  * getCommentInfoList 事件评论列表分页查询接口
  * @param {object} params
  */
-export function getCommentInfoList(params) {
+export function getCommentInfoList(uid) {
   return request({
-    url: '/eventService/commentInfoList',
+    url: '/event-service/comment-info-list/' + uid,
     method: 'get',
-    params,
     mode: 'message'
   })
 }
@@ -983,7 +993,7 @@ export function getCommentInfoList(params) {
  */
 export function addMsgNote(data) {
   return request({
-    url: '/messageService/msgNote',
+    url: '/message-service/msg-note',
     method: 'post',
     data,
     mode: 'message'
@@ -995,7 +1005,7 @@ export function addMsgNote(data) {
  */
 export function getMsgNoteList(params) {
   return request({
-    url: '/messageService/msgNoteList',
+    url: '/message-service/msg-note-list',
     method: 'get',
     params,
     mode: 'message'
@@ -1007,7 +1017,7 @@ export function getMsgNoteList(params) {
  */
 export function getMsgNoteDetail(uid) {
   return request({
-    url: '/messageService/msgNote/' + uid,
+    url: '/message-service/msg-note/' + uid,
     method: 'get',
     mode: 'message'
   })
@@ -1018,7 +1028,7 @@ export function getMsgNoteDetail(uid) {
  */
 export function putMsgNote(data) {
   return request({
-    url: '/messageService/msgNote',
+    url: '/message-service/msg-note',
     method: 'put',
     data,
     mode: 'message'
@@ -1030,7 +1040,7 @@ export function putMsgNote(data) {
  */
 export function sendMsg(data) {
   return request({
-    url: '/messageService/sendMsg',
+    url: '/message-service/send-msg',
     method: 'post',
     data,
     mode: 'message'

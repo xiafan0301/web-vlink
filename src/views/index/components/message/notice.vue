@@ -39,6 +39,7 @@
           <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增公告消息</el-button>
             <div class="table_box">
             <el-table
+              v-loading="loading"
               :data="noticeList.list"
               >
               <el-table-column
@@ -131,7 +132,8 @@ export default {
       // 翻页参数
       pageSize: 10,
       pageNum: 1,
-      currentPage: 1
+      currentPage: 1,
+      loading: false
     }
   },
   mounted () {
@@ -152,10 +154,13 @@ export default {
         'where.isTop': this.noticeForm.noticeState,
         'where.messageType': null
       }
+      this.loading = true;
       getMsgNoteList(params).then(res => {
         if (res && res.data) {
           this.noticeList = res.data;
         }
+      }).finally(() => {
+        this.loading = false;
       })
     },
     // 修改公告消息

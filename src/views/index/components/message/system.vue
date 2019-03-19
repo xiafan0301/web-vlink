@@ -27,6 +27,7 @@
           <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增系统消息</el-button>
           <div class="table_box">
             <el-table
+              v-loading="loading"
               :data="systemList.list"
               >  
               <el-table-column
@@ -102,7 +103,8 @@ export default {
       // 翻页参数
       pageSize: 10,
       pageNum: 1,
-      currentPage: 1
+      currentPage: 1,
+      loading: false
     }
   },
   mounted () {
@@ -121,10 +123,13 @@ export default {
         'where.endDateStr': this.systemForm.systemDate && this.systemForm.systemDate[1],
         'where.titleOrPublisher': this.systemForm.titleOrPublisher,
       }
+      this.loading = true;
       getMsgNoteList(params).then(res => {
         if (res && res.data) {
           this.systemList = res.data;
         }
+      }).finally(() => {
+        this.loading = false;
       })
     },
     indexMethod (index) {

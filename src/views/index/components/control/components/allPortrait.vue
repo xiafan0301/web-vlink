@@ -67,7 +67,7 @@
       </div>
     </div>
     <!-- 新增组 -->
-    <div is="groupDialog" operateType="1" ref="groupDialog"></div>
+    <div is="groupDialog" :tabType="tabType" operateType="1" ref="groupDialog" @getGroupList="getGroupListIsPortrait"></div>
     <!-- 删除人像 -->
     <div class="del_portrait_dialog">
       <el-dialog
@@ -87,10 +87,10 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delPortrait, copyPortrait} from '@/views/index/api/api.js';
+import {delPortrait, copyPortrait, getGroupListIsPortrait} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList'],
+  props: ['protraitMemberList', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -101,12 +101,7 @@ export default {
       track: null,
       showMoreId: null,//显示更多组的组id
       // 人像组列表数据
-      groupListPortrait: [
-        {groupName: '全部人像', memberNum: 200, uid: '0'},
-        {groupName: '人像test1', memberNum: 200, uid: '1'},
-        {groupName: '人像test2', memberNum: 201, uid: '2'},
-        {groupName: '人像test3', memberNum: 202, uid: '3'}
-      ],
+      groupListPortrait: [],
       // 弹出框参数
       delPortraitDialog: false,
       loadingBtn: false,
@@ -131,6 +126,9 @@ export default {
     this.memberList.forEach(f => {
       this.$set(f, 'isChecked', false);
     })
+  },
+  mounted () {
+    this.getGroupListIsPortrait();
   },
   methods: {
     popGroupDialog () {
@@ -180,6 +178,14 @@ export default {
       } else {
         this.delPortraitDialog = true;
       }
+    },
+    // 获取人像组列表
+    getGroupListIsPortrait () {
+      getGroupListIsPortrait().then(res => {
+        if (res && res.data) {
+          this.groupListPortrait = res.data.filter(f => f.uid !== null);
+        }
+      })
     },
     // 批量删除人像
     delPortrait () {

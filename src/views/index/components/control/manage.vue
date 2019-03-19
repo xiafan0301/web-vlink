@@ -92,6 +92,7 @@
         </div>
         <div class="table_box">
           <el-table
+            v-loading="loading"
             :data="manageList.list"
             >
             <el-table-column
@@ -343,10 +344,13 @@ export default {
         'where.objType': null,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
         'where.deviceId': this.manageForm.facilityId//布控设备id
       }
+      this.loading = true;
       getControlList(params).then(res => {
         if (res && res.data) {
           this.manageList = res.data;
         }
+      }).finally(() => {
+        this.loading = false;
       })
     },
   }

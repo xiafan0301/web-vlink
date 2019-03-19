@@ -39,6 +39,7 @@
           <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
             <div class="table_box">
             <el-table
+              v-loading="loading"
               :data="helpList.list"
               >
               <el-table-column
@@ -133,7 +134,8 @@ export default {
       // 翻页参数
       pageSize: 10,
       pageNum: 1,
-      currentPage: 1
+      currentPage: 1,
+      loading: false
     }
   },
   mounted () {
@@ -153,10 +155,13 @@ export default {
         'where.keyWord': this.helpForm.content,
         'where.radius': this.helpForm.helpState
       }
+      this.loading = true;
       getMutualHelpList(params).then(res => {
         if (res && res.data) {
           this.helpList = res.data;
         }
+      }).finally(() => {
+        this.loading = false;
       })
     },
     indexMethod (index) {

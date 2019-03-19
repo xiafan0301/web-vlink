@@ -14,7 +14,7 @@
         </div>
         <div class="group_input">
           <el-input v-model="group" size="small" placeholder="搜索组">
-            <i slot="suffix" class="el-input__icon el-icon-search"></i>
+            <i slot="suffix" class="el-input__icon el-icon-search" @click="getGroupList(1)"></i>
           </el-input>
         </div>
         <vue-scroll>
@@ -25,14 +25,14 @@
             <!-- 人像库组列表 -->
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
-                <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
                 <i @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
-                <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.memberNum}})</span></div>
+                <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
                 <i @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
@@ -142,7 +142,7 @@
           <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
           <el-button v-else type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
-        <div class="list_box">
+        <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
             <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
               <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;"></div>
@@ -280,10 +280,13 @@
                 </el-form-item>
                 <!-- 选择归属组 -->
                 <el-form-item style="width: 415px;position: relative;">
-                  <div class="group_sel">
+
+
+
+                  <!-- <div class="group_sel">
                     <span v-show="!isShowDpList && portraitForm.groupIds.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
                     <div class="group" v-for="item in portraitForm.groupIds" :key="item.value" @click="delSelGroup(item, 1)">
-                      <span class="vl_f_999">{{item.label}}</span>
+                      <span class="vl_f_999">{{item.groupName}}</span>
                       <i class="el-icon-close"></i>
                     </div>
                     <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
@@ -292,10 +295,22 @@
                   <el-collapse-transition>
                     <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
                       <el-checkbox-group v-model="portraitForm.groupIds">
-                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
+                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.groupName}}</el-checkbox>
                       </el-checkbox-group>
                     </div>
-                  </el-collapse-transition>
+                  </el-collapse-transition> -->
+
+
+
+
+                  <el-select v-model="portraitForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
+                    <el-option
+                      v-for="item in groupDropdownList"
+                      :key="item.uid"
+                      :label="item.groupName"
+                      :value="item.uid">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" class="desc" prop="remarks">
                   <div>
@@ -357,10 +372,14 @@
                 </el-form-item>
                 <!-- 归属组 -->
                 <el-form-item style="width: 415px;">
-                  <div class="group_sel">
+
+
+
+
+                  <!-- <div class="group_sel">
                     <span v-show="!isShowDpList && carForm.groupIds.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
                     <div class="group" v-for="item in carForm.groupIds" :key="item.value" @click="delSelGroup(item, 2)">
-                      <span class="vl_f_999">{{item.label}}</span>
+                      <span class="vl_f_999">{{item.groupName}}</span>
                       <i class="el-icon-close"></i>
                     </div>
                     <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
@@ -369,10 +388,21 @@
                   <el-collapse-transition>
                     <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
                       <el-checkbox-group v-model="carForm.groupIds">
-                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.label}}</el-checkbox>
+                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.groupName}}</el-checkbox>
                       </el-checkbox-group>
                     </div>
-                  </el-collapse-transition>
+                  </el-collapse-transition> -->
+
+
+
+                <el-select v-model="carForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
+                  <el-option
+                    v-for="item in groupDropdownList"
+                    :key="item.uid"
+                    :label="item.groupName"
+                    :value="item.uid">
+                  </el-option>
+                </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" class="desc" prop="desci">
                   <div>
@@ -421,15 +451,15 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === null" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
+        <div is="allPortrait" v-if="groupId === null" :tabType="tabType" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
         <!-- 自定义人像列表 -->
-        <div is="customPortrait" v-else :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)" @changePage="changePage"></div>
+        <div is="customPortrait" v-else :tabType="tabType" :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)" @changePage="changePage"></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === null" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
+        <div is="allCar" v-if="groupId === null" :tabType="tabType" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
         <!-- 自定义车像列表 -->
-        <div is="customCar" v-else :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)" @changePage="changePage"></div>
+        <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)" @changePage="changePage"></div>
       </template>
     </template>
   </div>
@@ -555,16 +585,10 @@ export default {
         {label: '身份证', value: '1'}
       ],
       loadingBtn: false,
+      loading: false,
       isShowDpList: false,//是否显示下拉列表数据
       operationType: null,//新增还是修改人像/车像，1-新增，2-修改
-      groupDropdownList: [
-        {label: '失踪儿童', value: '1'},
-        {label: '拐卖妇女', value: '2'},
-        {label: '失踪儿童', value: '3'},
-        {label: '失踪儿童', value: '4'},
-        {label: '失踪儿童', value: '5'},
-        {label: '失踪儿童', value: '6'}
-      ],//归属组下拉列表数据
+      groupDropdownList: [],//归属组下拉列表数据
       portraitRules: {
         name: [
           {required: true, message: '请填写姓名', trigger: 'blur'},
@@ -594,9 +618,9 @@ export default {
   computed: {
     memberNum () {
       if (this.tabType === '1') {
-        return this.protraitMemberList.list && this.protraitMemberList.list.length;
+        return this.protraitMemberList.total;
       } else {
-        return this.carMemberList.list && this.carMemberList.list.length;
+        return this.carMemberList.total;
       }
     }
   },
@@ -687,19 +711,24 @@ export default {
       }
       return isJPG && isLt2M;
     },
-    // 类型查询组列表
-    getGroupList () {
+    // 查询组列表
+    getGroupList (type) {
+      if (!type) {
+        this.group = null;
+      }
       const params = {groupName: this.group};
       if (this.tabType === '1') {
         getGroupListIsPortrait(params).then(res => {
           if (res && res.data) {
             this.groupListPortrait = res.data;
+            this.groupDropdownList = this.groupListPortrait.filter(f => f.uid !== null);
           }
         })
       } else {
         getGroupListIsVehicle(params).then(res => {
           if (res && res.data) {
             this.groupListCar = res.data;
+            this.groupDropdownList = this.groupListCar.filter(f => f.uid !== null);
           }
         })
       }
@@ -765,12 +794,16 @@ export default {
         if (valid) {
           this.loadingBtn = true;
           let data = objDeepCopy(this.portraitForm);
+          if (data.uid !== undefined) {
+            delete data['uid'];
+            delete data['groupList'];
+          }
           data.birthDate = data.birthDate.split('');
           data.birthDate.splice(4, 1, '-');
           data.birthDate.splice(7, 1, '-');
           data.birthDate.splice(10, 1);
           data.birthDate = data.birthDate.join('');
-          data.groupIds = data.groupIds.map(m => m.value).join(',');
+          data.groupIds = data.groupIds.join(',');
           data.origin = 1;
           data.photoUrl = this.dialogImageUrl;
           addPortrait(data).then(res => {
@@ -779,6 +812,7 @@ export default {
               this.addPortraitDialog = false;
               this.$message.success('新增成功！');             
               this.getPortraitList(this.groupId, this.groupIndex);
+              this.getGroupList();
             }
           }).finally(() => {
             this.loadingBtn = false;
@@ -808,7 +842,11 @@ export default {
         if (valid) {
           this.loadingBtn = true;
           let data = objDeepCopy(this.carForm);
-          data.groupIds = data.groupIds.map(m => m.value).join(',');
+          if (data.uid !== undefined) {
+            delete data['uid'];
+            delete data['groupList'];
+          }
+          data.groupIds = data.groupIds.join(',');
           data.origin = 1;
           data.vehicleImagePath = this.dialogImageUrl;
           addVehicle(data).then(res => {
@@ -817,6 +855,7 @@ export default {
               this.addPortraitDialog = false;
               this.$message.success('新增成功！');
               this.getVehicleList(this.groupId, this.groupIndex);
+              this.getGroupList();
             }
           }).finally(() => {
             this.loadingBtn = false;
@@ -837,13 +876,8 @@ export default {
           protraitInfo.birthDate.splice(7, 1, '月');
           protraitInfo.birthDate.splice(10, 0, '日');
           protraitInfo.birthDate = protraitInfo.birthDate.join('');
-          protraitInfo.idType = protraitInfo.idTypeDict[0].enumValue;
-          protraitInfo.groupIds = protraitInfo.groupDict.map(m => {
-            return {
-              label: m.enumField,
-              value: m.enumValue
-            }
-          });
+          protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
+          protraitInfo.groupIds = protraitInfo.groupList.map(m => m.uid);
           this.portraitForm = protraitInfo;
           console.log(this.portraitForm)
         }
@@ -860,7 +894,7 @@ export default {
           data.birthDate.splice(7, 1, '-');
           data.birthDate.splice(10, 1);
           data.birthDate = data.birthDate.join('');
-          data.groupIds = data.groupIds.map(m => m.value).join(',');
+          data.groupIds = data.groupIds.join(',');
           data.origin = 1;
           data.photoUrl = this.dialogImageUrl;
           putPortrait(data).then(res => {
@@ -882,12 +916,7 @@ export default {
         if (res && res.data) {
           let carInfo = res.data;
           this.fileList = [{url: carInfo.vehicleImagePath}];//回填图片
-          carInfo.groupIds = carInfo.groupDict.map(m => {
-            return {
-              label: m.enumField,
-              value: m.enumValue
-            }
-          });
+          carInfo.groupIds = carInfo.groupList.map(m => m.uid);
           this.carForm = carInfo;
           console.log(this.carForm)
         }
@@ -899,7 +928,7 @@ export default {
         if (valid) {
           this.loadingBtn = true;
           let data = objDeepCopy(this.carForm);
-          data.groupIds = data.groupIds.map(m => m.value).join(',');
+          data.groupIds = data.groupIds.join(',');
           data.origin = 1;
           data.vehicleImagePath = this.dialogImageUrl;
           putVehicle(data).then(res => {
@@ -921,7 +950,7 @@ export default {
       this.groupIndex = index;
       this.groupId = groupId;
       this.groupName = groupName;
-      const params = {
+      let params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         orderBy: null,
@@ -930,9 +959,10 @@ export default {
         'where.dateEnd': this.libPortraitForm.perTime && this.libPortraitForm.perTime[1],
         'where.sex': this.libPortraitForm.sex,
         'where.nation': this.libPortraitForm.nation,
-        'where.card': this.libPortraitForm.card,
         'where.groupId': groupId
       }
+      this.libPortraitForm.card && (params['where.idNo'] = this.libPortraitForm.card);
+      this.loading = true;
       getPortraitList(params).then(res => {
         if (res && res.data) {
           this.protraitMemberList = res.data;
@@ -941,6 +971,8 @@ export default {
             this.pageType = pageType;
           }
         }
+      }).finally(() => {
+        this.loading = false;
       })
     },
     //  获取全部车像列表，或者根据组id获取车像列表
@@ -950,7 +982,7 @@ export default {
       this.groupId = groupId;
       this.groupName = groupName;
       console.log(this.groupName)
-      const params = {
+      let params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
         orderBy: null,
@@ -960,9 +992,10 @@ export default {
         'where.vehicleColor': this.libVehicleForm.vehicleColor,
         'where.vehicleType': this.libVehicleForm.vehicleType,
         'where.numberType': this.libVehicleForm.numberType,
-        'where.vehicleNumber': this.libVehicleForm.vehicleNumber,
         'where.groupId': groupId
       }
+      this.libVehicleForm.vehicleNumber && (params['where.vehicleNumber'] = this.libVehicleForm.vehicleNumber);
+      this.loading = true;
       getVehicleList(params).then(res => {
         if (res && res.data) {
           this.carMemberList = res.data;
@@ -971,6 +1004,8 @@ export default {
             this.pageType = pageType;
           }
         }
+      }).finally(() => {
+        this.loading = false;
       })
     }
   }
@@ -1235,48 +1270,48 @@ export default {
       .portrait_form{
         width: 480px;
         padding-left: 30px;
-        .group_sel{
-          min-height: 40px;
-          border-radius: 4px;
-          border: 1px solid #dcdfe6;
-          padding-right: 30px;
-          padding-bottom: 4px;
-          position: relative;
-          display: flex;
-          flex-wrap: wrap;
-          > span{
-            width: 100%;
-            display: inline-block;
-            margin-left: 16px;
-            line-height: 34px;
-            color: #dcdfe6;
-            cursor: pointer;
-          }
-          .group{
-            height:30px;
-            line-height: 30px;
-            padding: 0 8px;
-            margin: 4px 0px 0 2px;
-            background:rgba(242,242,242,1);
-            border:1px solid rgba(211,211,211,1);
-            border-radius:3px;
-            cursor: pointer;
-            &:hover{
-              background:rgba(16,115,248,1);
-              border-radius:3px;
-              color: #fff;
-              > span{
-                color: #fff;
-              }
-            }
-          }
-          > i{
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            cursor: pointer;
-          }
-        }
+        // .group_sel{
+        //   min-height: 40px;
+        //   border-radius: 4px;
+        //   border: 1px solid #dcdfe6;
+        //   padding-right: 30px;
+        //   padding-bottom: 4px;
+        //   position: relative;
+        //   display: flex;
+        //   flex-wrap: wrap;
+        //   > span{
+        //     width: 100%;
+        //     display: inline-block;
+        //     margin-left: 16px;
+        //     line-height: 34px;
+        //     color: #dcdfe6;
+        //     cursor: pointer;
+        //   }
+        //   .group{
+        //     height:30px;
+        //     line-height: 30px;
+        //     padding: 0 8px;
+        //     margin: 4px 0px 0 2px;
+        //     background:rgba(242,242,242,1);
+        //     border:1px solid rgba(211,211,211,1);
+        //     border-radius:3px;
+        //     cursor: pointer;
+        //     &:hover{
+        //       background:rgba(16,115,248,1);
+        //       border-radius:3px;
+        //       color: #fff;
+        //       > span{
+        //         color: #fff;
+        //       }
+        //     }
+        //   }
+        //   > i{
+        //     position: absolute;
+        //     right: 10px;
+        //     top: 10px;
+        //     cursor: pointer;
+        //   }
+        // }
       }
     }
   }
@@ -1352,27 +1387,27 @@ export default {
           text-align: right;
         }
       }
-      .group_li{
-        width: 100%;
-        position: absolute;
-        left: 0;
-        z-index: 999;
-        margin-top: 4px;
-        background:rgba(255,255,255,1);
-        border:1px solid rgba(211,211,211,1);
-        border-radius:4px;
-        .el-checkbox{
-          display: block;
-          height: 30px;
-          line-height: 30px;
-          margin-left: 0px;
-          padding-left: 20px;
-          &:hover{
-            background:rgba(237,249,255,1);
-            border-radius: 4px;
-          }
-        }
-      }
+      // .group_li{
+      //   width: 100%;
+      //   position: absolute;
+      //   left: 0;
+      //   z-index: 999;
+      //   margin-top: 4px;
+      //   background:rgba(255,255,255,1);
+      //   border:1px solid rgba(211,211,211,1);
+      //   border-radius:4px;
+      //   .el-checkbox{
+      //     display: block;
+      //     height: 30px;
+      //     line-height: 30px;
+      //     margin-left: 0px;
+      //     padding-left: 20px;
+      //     &:hover{
+      //       background:rgba(237,249,255,1);
+      //       border-radius: 4px;
+      //     }
+      //   }
+      // }
       .el-button.active{
         background: #fff;
         border-color: #409EFF;

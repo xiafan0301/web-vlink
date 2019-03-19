@@ -74,7 +74,7 @@
         <p class="vl_f_12 vl_f_999">删除后该分组人像将找不到。</p>
         <div slot="footer">
           <el-button @click="delGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="delGroupById">确认</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="delVehicleGroupById">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -94,15 +94,15 @@
       </el-dialog>
     </div>
     <!-- 新增/修改组 -->
-    <div is="groupDialog" :operateType="operateType" ref="groupDialog" :groupId="groupId" @sendChildren="getParentData"></div>
+    <div is="groupDialog" :tabType="tabType" :operateType="operateType" ref="groupDialog" :groupId="groupId" @sendChildren="getParentData" @getGroupList="getGroupListIsVehicle"></div>
   </div>
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {copyVehicle, removeVehicle, delGroupById} from '@/views/index/api/api.js';
+import {copyVehicle, removeVehicle, delVehicleGroupById, getGroupListIsVehicle} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['carMemberList', 'groupId', 'groupName'],
+  props: ['carMemberList', 'groupId', 'groupName', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -116,12 +116,7 @@ export default {
       showMoreId: null,//显示更多组的组id
       gName: null,//组名
       // 车像组列表数据
-      groupListCar: [
-        {groupName: '全部车像', memberNum: 200, uid: '0'},
-        {groupName: '车像test1', memberNum: 200, uid: '4'},
-        {groupName: '车像test2', memberNum: 201, uid: '5'},
-        {groupName: '车像test3', memberNum: 201, uid: '6'}
-      ],
+      groupListCar: [],
       // 弹出框参数
       delGroupDialog: false,
       removeGroupDialog: false,
@@ -150,16 +145,25 @@ export default {
     })
   },
   mounted () {
+    this.getGroupListIsVehicle();
     this.gName = this.groupName;
     console.log(this.groupName, 'groupName')
   },
   methods: {
     // 删除分组
-    delGroupById () {
-      delGroupById(this.groupId).then(res => {
+    delVehicleGroupById () {
+      delVehicleGroupById(this.groupId).then(res => {
         this.delGroupDialog = false;
         this.$message.success('删除成功');
         this.$emit('changePage');
+      })
+    },
+    // 获取车像组列表
+    getGroupListIsVehicle () {
+      getGroupListIsVehicle().then(res => {
+        if (res && res.data) {
+          this.groupListCar = res.data.filter(f => f.uid !== null);
+        }
       })
     },
     getParentData (data) {
