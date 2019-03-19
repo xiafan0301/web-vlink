@@ -18,12 +18,12 @@
                 </li>
                 <li>
                   <span>事件编号:</span>
-                  <span>{{addEventForm.eventNumber}}</span>
+                  <span>{{addEventForm.eventCode}}</span>
                 </li>
                 <li>
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
-                    <span class="reportUser">{{addEventForm.userName}}</span>
+                    <span class="reportUser">{{addEventForm.reporterPhone}}</span>
                     <div class="phone_dialog">
                       <div>
                         <i class="vl_icon vl_icon_event_14"></i>
@@ -38,19 +38,19 @@
                 </li>
                 <li>
                   <span>上报时间:</span>
-                  <span>{{addEventForm.createTime}}</span>
+                  <span>{{addEventForm.reportTime}}</span>
                 </li>
               </ul>
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
                 <el-form-item label="事发地点:" label-width="85px" prop="eventAddress">
                   <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @input="changeAddress" />
                 </el-form-item>
-                <el-form-item label="事件情况:" label-width="85px" prop="describe">
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.describe" />
+                <el-form-item label="事件情况:" label-width="85px" prop="eventDetail">
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <el-form-item label-width="85px" class="img-form-item">
                   <el-upload
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
@@ -68,30 +68,50 @@
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
                 </el-form-item>
-                <el-form-item  label="处理单位:" prop="handleCompany" label-width="85px">
-                  <el-select v-model="addEventForm.handleCompany" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
+                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                  <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
+                    <el-option
+                      v-for="(item, index) in handleUnitList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="index"
+                    >
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
+                    <el-option
+                      v-for="(item, index) in eventTypeList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="item.uid"
+                    >
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="事件等级:" prop="eventLevel" label-width="85px">
                   <el-select v-model="addEventForm.eventLevel" style='width: 95%'>
-                    <el-option label="区域一" value="shanghai"></el-option>
-                    <el-option label="区域二" value="beijing"></el-option>
+                    <el-option
+                      v-for="(item, index) in eventLevelList"
+                      :key="index"
+                      :label="item.enumValue"
+                      :value="item.uid"
+                    >
+                    </el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="伤亡人员:" prop="casualtiesFlag" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualtiesFlag" style='width: 95%'>
+                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
                     <el-radio label="无"></el-radio>
                     <el-radio label="不确定"></el-radio>
                     <el-radio label="有"></el-radio>
                   </el-radio-group>
+                  <template v-if="addEventForm.casualties === '有'">
+                    <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
+                    <span style='margin-left:1%'>人</span>
+                    <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
+                  </template>
                 </el-form-item>
               </el-form>
             </div>
@@ -113,7 +133,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="submitData">通过</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">通过</el-button>
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
@@ -135,78 +155,142 @@
   </div>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { ajaxCtx } from '@/config/config.js';
+import { getEventDetail, updateEvent, getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      uploadUrl: ajaxCtx.upload + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
       isImgNumber: false,
       newMarker: null,
       addEventForm: {
-        eventNumber: 'X23912831283129038210938', // 事件编号
-        userName: '18077777777', // 报案人  手机号码
-        createTime: '2019-1-12 12:12:12', // 上报时间
-        eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        describe: null, // 事件情况
-        eventType: null, // 事件类型
-        eventLevel: null, // 事件等级
-        casualtiesFlag: null, // 伤亡人员
-        longitude: 112.975828, // 经度
-        latitude: 28.093804, // 纬度
-        handleCompany: null, // 处理单位
-        fileList: [], // 图片文件
+        // eventCode: 'X23912831283129038210938', // 事件编号
+        // userName: '18077777777', // 报案人  手机号码
+        // createTime: '2019-1-12 12:12:12', // 上报时间
+        // eventAddress: '湖南省怀化市溆浦县', // 事发地点
+        // describe: null, // 事件情况
+        // eventType: null, // 事件类型
+        // eventLevel: null, // 事件等级
+        // casualtiesFlag: null, // 伤亡人员
+        // longitude: 112.975828, // 经度
+        // latitude: 28.093804, // 纬度
+        // handleCompany: null, // 处理单位
+        // fileList: [], // 图片文件
       },
       rules: {
         eventAddress: [
-          { required: true, message: '请输入或选择事发地址' }
+          { required: true, message: '请输入或选择事发地址', trigger: 'blur' }
         ],
-        describe: [
-          { required: true, message: '请输入事件情况' },
-          { max: 140, message: '最多输入140字' }
+        eventDetail: [
+          { required: true, message: '请输入事件情况', trigger: 'blur' },
+          { max: 140, message: '最多输入140字', trigger: 'blur' }
         ],
         eventType: [
-          { required: true, message: '请选择事发类型' }
+          { required: true, message: '请选择事发类型', trigger: 'blur' }
         ],
-        handleCompany: [
-          { required: true, message: '请选择处理单位' }
+        dealOrgId: [
+          { required: true, message: '请选择处理单位', trigger: 'blur' }
         ]
       },
-      map: null
+      map: null,
+      dieNumber: null, // 死亡人数
+      isDieError: false,
+      dieTip: '死亡人数只能为正整数',
+      eventLevelList: [], // 事件等级列表数据
+      eventTypeList: [], // 事件类型列表数据
+      handleUnitList: [], // 处理单位列表数据
     }
   },
+  created () {
+    this.getEventLevelList();
+    this.getHandleUnit();
+    this.getEventTypeList();
+  },
   mounted () {
-    let _this = this;
-     _this.resetMap();
-    let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
-    map.on('click', function(e) {
-      console.log(e);  
-      if (_this.newMarker) {
-        _this.map.remove(_this.newMarker);
-        _this.newMarker = null;
-      }
-      _this.addEventForm.longitude = e.lnglat.getLng();
-      _this.addEventForm.latitude = e.lnglat.getLat();
-      window.AMap.service('AMap.Geocoder', function () { // 回调函数
-        let geocoder = new window.AMap.Geocoder({});
-        geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
-          let sAddr = '';
-          if (status === 'complete' && result.info === 'OK') {
-            // 获得了有效的地址信息: result.regeocode.formattedAddress
-            // console.log(result.regeocode.formattedAddress);
-            sAddr = result.regeocode.formattedAddress;
-          }
-          _this.addEventForm.eventAddress = sAddr;
-          _this.mapMark(_this.addEventForm);
-        });
-      });
-    });
-    _this.mapMark(_this.addEventForm);
+    this.getDetail();
+    this.initMap();
   },
   methods: {
+    // 获取处理单位
+    getHandleUnit () {
+      const handleUnit = dataList.handleUnit;
+      getDiciData(handleUnit)
+        .then(res => {
+          if (res) {
+            this.handleUnitList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件类型
+    getEventTypeList () {
+      const type = dataList.eventType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.eventTypeList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件等级
+    getEventLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.eventId;
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            console.log(res);
+            this.addEventForm = res.data;
+            this.mapMark(this.addEventForm);
+          }
+        })
+        .catch(() => {})
+    },
+    initMap () {
+      let _this = this;
+      _this.resetMap();
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+      map.on('click', function(e) {
+        console.log(e);  
+        if (_this.newMarker) {
+          _this.map.remove(_this.newMarker);
+          _this.newMarker = null;
+        }
+        _this.addEventForm.longitude = e.lnglat.getLng();
+        _this.addEventForm.latitude = e.lnglat.getLat();
+        window.AMap.service('AMap.Geocoder', function () { // 回调函数
+          let geocoder = new window.AMap.Geocoder({});
+          geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
+            let sAddr = '';
+            if (status === 'complete' && result.info === 'OK') {
+              // 获得了有效的地址信息: result.regeocode.formattedAddress
+              // console.log(result.regeocode.formattedAddress);
+              sAddr = result.regeocode.formattedAddress;
+            }
+            _this.addEventForm.eventAddress = sAddr;
+            _this.mapMark(_this.addEventForm);
+          });
+        });
+      });
+    },
     resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
@@ -289,10 +373,19 @@ export default {
     handlePictureCardPreview () {},
     handleRemove () {},
     // 图片上传成功
-    handleSuccess (res, file) {
-      console.log('res', res);
-      console.log('file', file);
-      
+    handleSuccess (res) {
+      const data = {
+        contentUid: 0,
+        fileType: dataList.imgId,
+        path: res.data.fileFullPath,
+        filePathName: res.data.filePath,
+        cname: res.data.fileName,
+        imgSize: res.data.fileSize,
+        imgWidth: res.data.fileWidth,
+        imgHeight: res.data.fileHeight,
+        thumbnailPath: res.data.thumbnailFileFullPath
+      }
+      this.addEventForm.attachmentList.push(data);
     },
     // 图片数量超出最大值限制
     handleImgNumber () {
@@ -301,11 +394,56 @@ export default {
     showRejectDialog () {
       this.rejectDialogVisible = true;
     },
-    submitData () { // 审核通过
-      this.$message({
-        type: 'success',
-        message: '保存成功',
-        customClass: 'request_tip'
+    // 处理要提交的数据
+    handleFormData () {
+      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+      if (this.addEventForm.casualties === '无') {
+        this.addEventForm.casualties = 0;
+      } else if (this.addEventForm.casualties === '不确定') {
+        this.addEventForm.casualties = -1;
+      } else if (this.addEventForm.casualties === '有') {
+        if (!reg.test(this.dieNumber)) {
+          this.isDieError = true;
+          this.dieTip = '死亡人数只能为正整数';
+          return false;
+        } else {
+          this.isDieError = false;
+          this.dieTip = '';
+        }
+        if (parseInt(this.dieNumber) > 9999) {
+          this.isDieError = true;
+          this.dieTip = '可输入的最大死亡人数为9999';
+          return false;
+        } else {
+          this.isDieError = false;
+          this.dieTip = '';
+        }
+        this.addEventForm.casualties = this.dieNumber;
+      }
+    },
+    submitData (form) { // 审核通过
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          this.handleFormData();
+          updateEvent(this.addEventForm, this.addEventForm.uid)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '保存成功',
+                  customClass: 'request_tip'
+                })
+                this.$router.push({name: 'event_audit'});
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '保存失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
       })
     },
     // 返回

@@ -59,8 +59,12 @@
                 <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
                   <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
-                      <el-option label="区域一" value="shanghai"></el-option>
-                      <el-option label="区域二" value="beijing"></el-option>
+                      <el-option
+                        v-for="(item, index) in departmentList"
+                        :key="'item' + index"
+                        :label="item.organName"
+                        :value="item.uid">
+                      </el-option>
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
@@ -90,7 +94,7 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
-import { addPlan, getDiciData } from '@/views/index/api/api.js';
+import { addPlan, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -127,11 +131,15 @@ export default {
       },
       planTypeList: [], // 预案类型
       eventLevelList: [], // 事件等级
+      userInfo: {}, // 存储的用户信息
+      departmentList: [], // 部门列表
     }
   },
   created () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
     this.getPlanTypeList();
     this.getEventLevelList();
+    this.getDepartList();
   },
   methods: {
     // 获取预案类型
@@ -152,6 +160,22 @@ export default {
         .then(res => {
           if (res) {
             this.eventLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            console.log('res', res);
+            
+            this.departmentList = res.data.list;
           }
         })
         .catch(() => {})

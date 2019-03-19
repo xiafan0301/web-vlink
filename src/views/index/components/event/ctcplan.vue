@@ -129,8 +129,8 @@ export default {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       planForm: {
-        planLevel: null, // 适用等级
-        planType: null, // 预案类型
+        planLevel: '全部等级', // 适用等级
+        planType: '全部类型', // 预案类型
         planName: null // 预案名称
       },
       planList: [
@@ -165,6 +165,7 @@ export default {
   created () {
     this.getPlanTypeList();
     this.getPlanLevelList();
+    this.getPlanList();
   },
   methods: {
     // 获取预案类型
@@ -193,12 +194,12 @@ export default {
     getPlanList () {
       let planType, planLevel;
       if (this.planForm.planType === '全部类型') {
-        planType = '';
+        planType = null;
       } else {
         planType = this.planForm.planType;
       }
       if (this.planForm.planLevel === '全部等级') {
-        planLevel = '';
+        planLevel = null;
       } else {
         planLevel = this.planForm.planLevel;
       }

@@ -185,6 +185,7 @@ export default {
   width: 100%;
   display: flex;
   height: 490px;
+  border-top: 1px solid #f2f2f2;
   .select_list_left {
     width: 300px;
     height: 100%;
@@ -195,7 +196,7 @@ export default {
       height: 45px;
       line-height: 45px;
       padding: 0 10px;
-      border-top: 1px solid #F2F2F2;
+      // border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
       >span {
         color: #333333;
@@ -306,7 +307,7 @@ export default {
       height: 45px;
       line-height: 45px;
       padding: 0 10px;
-      border-top: 1px solid #F2F2F2;
+      // border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
       >span {
         color: #333333;

@@ -640,7 +640,7 @@ export function addGroup (data) {
   });
 }
 /**
- * 修改车辆分组
+ * 管理车辆分组---修改车辆分组
  * @param {*} data 
  */
 export function editVeGroup (data) {
@@ -651,6 +651,27 @@ export function editVeGroup (data) {
   });
 }
 /**
+ * 管理车辆分组--删除车辆分组
+ * @param {*} data 
+ */
+export function delVeGroup (uid) {
+  return request({
+    url: '/vehicleGroup/delete/' + uid,
+    method: 'delete'
+  });
+}
+/**
+ * 管理车辆分组--获取车辆列表数据
+ * @param {*} data 
+ */
+export function getAdminVelList (params) {
+  return request({
+    url: '/vehicle/page',
+    params,
+    method: 'get'
+  });
+}
+/**
  * 查询车辆详细信息
  * @param {*} data 
  */
@@ -658,6 +679,17 @@ export function getVehicleInfo (uid) {
   return request({
     url: '/vehicle/details/' + uid,
     method: 'get'
+  });
+}
+/**
+ * 管理车辆分组---移出分组
+ * @param {*} data 
+ */
+export function moveoutGroup (data) {
+  return request({
+    url: '/vehicleGroup/batchDelete',
+    params: data,
+    method: 'delete'
   });
 }
 /* ================== 布控模块 =================== */

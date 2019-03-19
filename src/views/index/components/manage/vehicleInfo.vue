@@ -31,7 +31,7 @@
               <li @click="getVeDetailInfo(1)">全部车辆({{allVelGroupNumber}})</li>
               <li v-for="(item, index) in vehicleGroupList" :key="'item' + index" @click="getVeDetailInfo(item, 1)">
                 <span>{{item.name}}({{item.portraitNum}})</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, item.name, 1, $event)"></i>
+                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 1, $event)"></i>
               </li>
             </ul>
           </vue-scroll>
@@ -44,7 +44,7 @@
               <li @click="getVeDetailInfo(2)">全部底库({{allVelBottomNameNumber}})</li>
               <li v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
                 <span>{{item.title}}({{item.portraitNum}})</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, item.title, 2, $event)"></i>
+                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
               </li>
             </ul>
           </vue-scroll>
@@ -322,8 +322,6 @@ export default {
   },
   mounted () {
     this.getVeGroupInfo();
-    this.getVelBottomNameInfo();
-    this.getVehicleInfoList();
   },
   methods: {
     // 列表查询
@@ -338,6 +336,7 @@ export default {
     // 获取车辆列表数据
     getVehicleInfoList () {
       const params = {
+        'where.type': this.selectMethod,
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -378,6 +377,7 @@ export default {
             this.vehicleGroupList.map(item => {
               this.allVelGroupNumber += item.portraitNum;
             })
+            this.getVehicleInfoList();
           }
         })
         .catch(() => {})
@@ -395,7 +395,7 @@ export default {
             this.vehicleBottomNameList.map(item => {
               this.allVelBottomNameNumber += item.portraitNum;
             })
-            // this.getVehicleInfoList();
+            this.getVehicleInfoList();
           }
         })
         .catch(() => {})
@@ -494,9 +494,9 @@ export default {
       this.getVehicleDetailInfo(obj.uid);
     },
     // 跳至管理车辆组信息页面
-    skipAdminVehiclePage (id, name, val, e) {
+    skipAdminVehiclePage (id, val, e) {
       e.stopPropagation();
-      this.$router.push({name: 'admin_vehicle_info', query: {type: val, id: id, name: name}});
+      this.$router.push({name: 'admin_vehicle_info', query: {type: val, id: id}});
     }
   }
 }

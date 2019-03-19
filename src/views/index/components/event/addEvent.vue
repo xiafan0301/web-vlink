@@ -26,12 +26,11 @@
                 </el-form-item>
                 <el-form-item  label-width="85px" class="img-form-item">
                   <el-upload
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
                     :before-upload='handleBeforeUpload'
-                    :on-preview="handlePictureCardPreview"
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'
                     :on-exceed="handleImgNumber"
@@ -117,6 +116,7 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
+import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
 import BigImg from './components/bigImg.vue';
 import { addEvent, getDiciData } from '@/views/index/api/api.js';
@@ -124,7 +124,8 @@ export default {
   components: { BigImg },
   data () {
     return {
-      isImgNumber: true, // 是否显示图片超过最大数提示
+      uploadUrl: ajaxCtx.upload + '/new', // 图片上传地址
+      isImgNumber: false, // 是否显示图片超过最大数提示
       pickerOptions0: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
@@ -340,7 +341,23 @@ export default {
     },
     handlePictureCardPreview () {},
     handleRemove () {},
-    handleSuccess () {},
+    // 图片上传成功
+    handleSuccess (res) {
+      const data = {
+        contentUid: 0,
+        fileType: dataList.imgId,
+        path: res.data.fileFullPath,
+        filePathName: res.data.filePath,
+        cname: res.data.fileName,
+        imgSize: res.data.fileSize,
+        imgWidth: res.data.fileWidth,
+        imgHeight: res.data.fileHeight,
+        thumbnailPath: res.data.thumbnailFileFullPath,
+        // thumbnailWidth: res.data.thumbnailFileWidth,
+        // thumbnailHeight: res.data.thumbnailFileHeight
+      }
+      this.addEventForm.attachmentList.push(data);
+    },
     // 保存提交数据
     submitData (form) {
       this.$refs[form].validate(valid => {

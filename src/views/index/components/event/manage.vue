@@ -163,63 +163,7 @@ export default {
         phoneOrNumber: null // 手机号或事件编号
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      eventList: [
-        {
-          eventNumber: 'XP1000000000000',
-          eventType: '治安事件',
-          userName: '17899999999',
-          idCard: '市民',
-          createTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '城管',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '处理中',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '否'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '接警员',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '已结束',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '-'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        }
-      ], // 表格数据
+      eventList: [], // 表格数据
       eventStatusList: [], // 事件状态数据
       eventTypeList: [], // 事件类型
       identityList: [], // 上报者身份
@@ -339,9 +283,7 @@ export default {
     },
     // 重置查询条件
     resetForm (form) {
-      this.eventForm.reportTime = [];
       this.$refs[form].resetFields();
-      console.log(this.eventForm)
       this.getOneMonth();
       this.getEventData();
     }
