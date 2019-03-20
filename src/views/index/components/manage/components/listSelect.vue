@@ -5,178 +5,108 @@
         <span>已有设备 (12)</span>
         <p>移除设备</p>
       </div>
-      <div class="detail_list">
-        <vue-scroll>
-          <ul class="temp_detail_info">
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveLeft === true}" @click="arrowActiveLeft = !arrowActiveLeft">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveLeft === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveLeft">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+      <template v-if="currentDeviceList.length > 0">
+        <div class="detail_list">
+          <vue-scroll>
+            <ul class="temp_detail_info">
+              <li v-for="(item, index) in currentDeviceList" :key="'item' + index">
+                <div class="parent_temp_li" :class="{'temp_active': arrowActiveLeft === true}" @click="arrowActiveLeft = !arrowActiveLeft">
+                  <el-checkbox style="margin-right: 10px;"></el-checkbox>
+                  <i :class="[arrowActiveLeft === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                  <span>{{item.cname}}</span>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </vue-scroll>
-      </div>
+                <div class="child_temp" v-show="arrowActiveLeft">
+                  <div class="temp_tab">
+                    <span class="active_span">摄像头</span>
+                    <span>卡口</span>
+                  </div>
+                  <ul class="child_temp_detail">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                      <el-checkbox></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </vue-scroll>
+        </div>
+      </template>
     </div>
     <div class="select_list_right">
       <div class="select_top">
-        <span>可选设备 (12)</span>
+        <span>可选设备 ({{selectDeviceNumber}})</span>
         <p>添加设备</p>
       </div>
-      <div class="search_box">
-        <el-input placeholder="请输入设备名称" size="small">
-          <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="handleIconClick">
-        </i>
-        </el-input>
-      </div>
-      <div class="all_select_checkbox">
-        <el-checkbox>全选</el-checkbox>
-      </div>
-      <div class="detail_list">
-        <vue-scroll>
-          <ul class="temp_detail_info">
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveRight === true}" @click="arrowActiveRight = !arrowActiveRight">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveRight">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+      <template v-if="selectDeviceList.length > 0">
+        <div class="search_box">
+          <el-input placeholder="请输入设备名称" size="small">
+            <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
+            <i
+              v-show="!closeShow"
+              class="search_icon vl_icon vl_icon_manage_1"
+              slot="suffix"
+              @click="searchData">
+            </i>
+          </el-input>
+        </div>
+        <div class="all_select_checkbox">
+          <el-checkbox>全选</el-checkbox>
+        </div>
+        <div class="detail_list">
+          <vue-scroll>
+            <ul class="temp_detail_info">
+              <li v-for="(item, index) in selectDeviceList" :key="'item' + index">
+                <span>{{item.isOpenArrow}}</span>
+                <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="item.isOpenArrow = !item.isOpenArrow">
+                  <el-checkbox style="margin-right: 10px;"></el-checkbox>
+                  <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                  <span>{{item.cname}}</span>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveRight === true}" @click="arrowActiveRight = !arrowActiveRight">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveRight">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+                <div class="child_temp" v-show="item.isOpenArrow === true">
+                  <div class="temp_tab">
+                    <span class="active_span">摄像头</span>
+                    <span>卡口</span>
+                  </div>
+                  <ul class="child_temp_detail">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                      <el-checkbox></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveRight === true}" @click="arrowActiveRight = !arrowActiveRight">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveRight === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveRight">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </vue-scroll>
-      </div>
+              </li>
+            </ul>
+          </vue-scroll>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 <script>
 export default {
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'currentDeviceList' ],
   data () {
     return {
-      arrowActiveRight: false,
-      arrowActiveLeft: false,
+      arrowActiveRight: -1, // 右侧展开箭头
+      arrowActiveLeft: false, // 左侧展开箭头
       arrowActiveTemp: false,
+      closeShow: false,
     }
   },
   methods: {
-    handleIconClick () {}
+    // 清空搜索框
+    onClear () {
+      this.closeShow = false;
+    },
+    // 搜索设备
+    searchData () {
+      this.closeShow = true;
+    },
+    // 展开右侧列表
+    openRightArrow (index) {
+      this.arrowActiveRight = index;
+    }
   }
 }
 </script>
@@ -196,7 +126,6 @@ export default {
       height: 45px;
       line-height: 45px;
       padding: 0 10px;
-      // border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
       >span {
         color: #333333;
@@ -287,9 +216,6 @@ export default {
                 >span {
                   margin: 0 80px 0 15px;
                 }
-                i:hover {
-
-                }
               }
             }
           }
@@ -307,7 +233,6 @@ export default {
       height: 45px;
       line-height: 45px;
       padding: 0 10px;
-      // border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
       >span {
         color: #333333;

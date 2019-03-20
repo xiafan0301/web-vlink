@@ -121,10 +121,13 @@ export default {
       }, // 预案详情
     }
   },
+  mounted () {
+    this.getPlanDetail();
+  },
   methods: {
     // 获取预案详情
     getPlanDetail () {
-      const planId = this.$router.query.planId;
+      const planId = this.$route.query.planId;
       if (planId) {
         getPlanDetail(planId)
          .then(res => {
@@ -140,7 +143,7 @@ export default {
     },
     // 跳至修改预案页面
     skipEditPage () {
-      this.$router.push({name: 'edit_plan'});
+      this.$router.push({name: 'edit_plan', query:{planId: this.$route.query.planId}});
     },
     // 返回
     back () {
@@ -148,7 +151,7 @@ export default {
     },
     // 确认删除预案
     sureDeletePlan () {
-      const delPlanId = this.$router.query.planId;
+      const delPlanId = this.$route.query.planId;
       if (delPlanId) {
         delPlan(delPlanId)
           .then(res => {
@@ -158,6 +161,7 @@ export default {
                 message: '删除成功',
                 customClass: 'request_tip'
               })
+              this.delPlanDialog = false;
               this.$router.push({name: 'event_ctcplan'});
             } else {
               this.$message({

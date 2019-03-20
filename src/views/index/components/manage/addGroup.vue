@@ -21,43 +21,51 @@
             <li :class="{'active_li': tabState === 2}" @click="tabState = 2">列表选择</li>
           </ul>
           <div class="search_box">
-            <el-form :inline="true" :model="searchForm" class="search_form">
-              <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.eventType" placeholder="行政区划">
+            <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+              <el-form-item prop="areaId">
+                <el-select  style="width: 240px;" v-model="searchForm.areaId" placeholder="行政区划">
+                  <el-option label="区域一" value="shanghai"></el-option>
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="intelCharac">
+                <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option label="区域一" value="shanghai"></el-option>
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="dutyOrganId">
+                <el-select  style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.eventStatus" placeholder="智能特性">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.userName" placeholder="责任部门">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button class="select_btn">查询</el-button>
-                <el-button class="reset_btn">重置</el-button>
+                <el-button class="select_btn" @click="searchData">查询</el-button>
+                <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
               </el-form-item>
             </el-form>
           </div>
           <template v-if="tabState === 1">
-            <mapSelect></mapSelect>
+            <mapSelect
+              :selectDeviceList="allDeviceList" 
+              :currentDeviceList="currentDeviceList" 
+              :selectDeviceNumber="selectDeviceNumber"
+            ></mapSelect>
           </template>
           <template v-if="tabState === 2">
-            <listSelect></listSelect>
+            <listSelect 
+              :selectDeviceList="allDeviceList" 
+              :currentDeviceList="currentDeviceList" 
+              :selectDeviceNumber="selectDeviceNumber">
+            </listSelect>
           </template>
         </div>
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">保存</el-button>
-      <el-button class="operation_btn back_btn">取消</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
   </div>
 
@@ -71,16 +79,52 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 1, // 地图选择
+      tabState: 2, // 地图选择
       searchForm: {
-        eventType: null,
-        eventStatus: null,
-        userName: null
+        areaId: null, // 行政区域
+        intelCharac: null, // 智能特性
+        dutyOrganId: null // 责任部门
       },
+      allDeviceList: [], // 所有设备列表数据
+      selectDeviceNumber: 0, // 可选设备数量
+      currentDeviceList: [], // 已有的设备数据
     }
   },
+  mounted () {
+    this.getAllDevicesList();
+  },
   methods: {
-    
+    // 获取所有可选的设备
+    getAllDevicesList () {
+      getAllDevices(this.searchForm)
+        .then(res => {
+          if (res) {
+            this.allDeviceList = res.data;
+            this.allDeviceList.map(item => {
+              item.isOpenArrow = false;
+              this.selectDeviceNumber += item.deviceList.length;
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 搜索框
+    searchData () {
+      this.getAllDevicesList();
+    },
+    // 重置搜索框
+    resetForm(form) {
+      this.$refs[form].resetFields();
+      this.getAllDevicesList();
+    },
+    // 新增分组
+    submitData () {
+
+    },
+    // 取消添加
+    cancelAdd () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>

@@ -116,7 +116,7 @@ export default {
         ],
         url: null, // 附件
         attachmentType: null,
-        attachmentName: null
+        cname: null // 附件名称
       },
       rules: {
         planName: [
@@ -188,7 +188,7 @@ export default {
       console.log('res', res)
       if (res.data) {
         this.addPlanForm.url = res.data.fileFullPath;
-        this.addPlanForm.attachmentName = res.data.fileName;
+        this.addPlanForm.cname = res.data.fileName;
         this.addPlanForm.attachmentType = dataList.fileId;
       }
     },
@@ -221,10 +221,11 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           console.log(this.addPlanForm);
+          console.log(this.planTypeList)
           this.planTypeList.map((item) => {
             if (item.enumValue == this.addPlanForm.eventType) {
               this.addPlanForm.eventType = item.uid;
-              this.addPlanForm.eventTypeName = null;
+              return;
             } else {
               this.addPlanForm.eventType = null;
               this.addPlanForm.eventTypeName = this.addPlanForm.eventType;
@@ -245,7 +246,7 @@ export default {
                     message: '添加成功',
                     customClass: 'request_tip'
                   })
-                  this.$router.push({name: 'ctc_plan'});
+                  this.$router.push({name: 'event_ctcplan'});
               } else {
                   this.$message({
                     type: 'error',

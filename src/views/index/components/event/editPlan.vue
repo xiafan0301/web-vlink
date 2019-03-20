@@ -15,7 +15,7 @@
           <el-form-item label="预案类型:" label-width="120px" prop="eventType">
           <el-select v-model="editPlanForm.eventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
             <el-option
-              v-for="(item, index) in eventTypeList"
+              v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
               :value="item.uid"
@@ -41,11 +41,9 @@
             <el-upload
               style="width: 500px;"
               action="https://jsonplaceholder.typicode.com/posts/"
-              :on-preview="handlePreview"
-              :on-remove="handleRemove"
-              :before-remove="beforeRemove"
+              :on-success="handSuccess"
+              :before-upload="beforeUpload"
               :limit="1"
-              :on-exceed="handleExceed"
               :file-list="fileList">
               <el-button size="small" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
@@ -96,24 +94,27 @@ export default {
   data () {
     return {
       editPlanForm: {
-        planName: null, // 预案名称
-        eventType: null, // 预案类型
-        levelList: [], // 事件等级
-        planDetail: null, // 预案正文
-        taskList: []
+        // planName: null, // 预案名称
+        // eventType: null, // 预案类型
+        // levelList: [], // 事件等级
+        // planDetail: null, // 预案正文
+        // taskList: []
       },
       rules: {
-        scheduleName: [
+        planName: [
           { required: true, message: '请输入预案名称', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        scheduleType: [
+        eventType: [
           { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        applyEventLevel: [
+        levelList: [
           { required: true, message: '请选择事件等级', trigger: 'blur' }
         ],
+        planDetail: [
+          { max: 10000, message: '最多输入10000字' }
+        ]
       },
       fileList: [],
       taskList: [
@@ -131,11 +132,15 @@ export default {
   created () {
     this.getPlanTypeList();
     this.getEventLevelList();
+
+  },
+  mounted () {
+    this.getPlanDetailInfo();
   },
   methods: {
     // 获取预案类型
     getPlanTypeList () {
-      const type = dataList.eventType;
+      const type = dataList.planType;
       getDiciData(type)
         .then(res => {
           if (res) {
@@ -155,10 +160,27 @@ export default {
         })
         .catch(() => {})
     },
-    handlePreview () {},
-    handleRemove () {},
-    beforeRemove () {},
-    handleExceed () {},
+    // 上传成功
+    handSuccess (res) {
+      console.log('res', res)
+      if (res.data) {
+        this.editPlanForm.url = res.data.fileFullPath;
+        this.editPlanForm.cname = res.data.fileName;
+        this.editPlanForm.attachmentType = dataList.fileId;
+      }
+    },
+    // 在上传之前
+    beforeUpload (file) {
+      const isLt = file.size / 1024 / 1024 < 10;
+      if (!isLt) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件大小不能超过 10MB!',
+          customClass: 'upload_file_tip'
+        });
+      }
+      return isLt;
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -177,11 +199,12 @@ export default {
     },
     // 获取预案详情
     getPlanDetailInfo () {
-      const planId = this.$router.query.planId;
+      const planId = this.$route.query.planId;
       getPlanDetail(planId)
         .then(res => {
           if (res) {
             this.editPlanForm = res.data;
+            this.editPlanForm.eventType = this.editPlanForm.eventTypeName;
           }
         })
         .catch(() => {})
@@ -198,7 +221,7 @@ export default {
                   message: '修改成功',
                   customClass: 'request_tip'
                 })
-                this.$router.push({name: 'ctc_plan'});
+                this.$router.push({name: 'event_ctcplan'});
              } else {
                 this.$message({
                   type: 'error',
