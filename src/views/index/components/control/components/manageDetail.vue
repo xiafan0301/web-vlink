@@ -369,7 +369,7 @@ export default {
     },
     // 跳转至新建布控页-复用
     skipIsCreate () {
-      this.$router.push({ name: 'control_create', query: {createType: 3} });
+      this.$router.push({ name: 'control_create', query: {controlId: this.controlId, createType: 3} });
     },
     // 显示弹出框
     showDialog (formName) {

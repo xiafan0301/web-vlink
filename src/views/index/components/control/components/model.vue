@@ -807,6 +807,9 @@ export default {
                   console.log(11111)
                 }
               }
+              const p1 = [_obj.longitude, _obj.latitude];
+              let distance = new window.AMap.GeometryUtil.distance(_this.lnglat, p1);
+              console.log(distance, 'distance')
               _obj.isSelected = true;//在覆盖物内的置为选中-多选框
               _this.trackPointList[index].devList.push(_obj);
             })

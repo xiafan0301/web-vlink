@@ -44,7 +44,7 @@ export function isRegister(data) {
  */
 export function getDiciData(uid) {
   return request({
-    url: 'dictService/dictList/?pid=' + uid,
+    url: 'dict-service/dict-list/?pid=' + uid,
     method: 'get'
   });
 }
@@ -897,7 +897,7 @@ export function getControlMapByDevice(params) {
  */
 export function getAlarmSnap(params) {
   return request({
-    url: '/surveillance/alarmSnap/page',
+    url: '/surveillance/alarm-snap/page',
     method: 'get',
     params,
     mode: 'control'

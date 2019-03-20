@@ -131,7 +131,7 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -145,13 +145,7 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],//布控类型
-      controlRankList: [
-        {label: '一级', value: 0},
-        {label: '二级', value: 1},
-        {label: '三级', value: 2},
-        {label: '四级', value: 3},
-        {label: '五级', value: 4}
-      ],//告警类型
+      controlRankList: [],//告警类型
       createForm: {
         controlName: null,
         event: null,
@@ -184,6 +178,7 @@ export default {
     }
   },
   created () {
+    this.getDiciData();
     // 编辑页-2
     if (this.createType) {
       this.type = this.createType;
@@ -230,6 +225,19 @@ export default {
         this.$router.push({ name: 'control_manage' });
       }
       this.toGiveUpDialog = false;
+    },
+    // 获取告警级别字段
+    getDiciData () {
+      getDiciData(11).then(res => {
+        if (res && res.data) {
+          this.controlRankList = res.data.map(m => {
+            return {
+              value: parseInt(m.enumField),
+              label: m.enumValue
+            }
+          })
+        }
+      })
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
@@ -370,7 +378,7 @@ export default {
           this.createForm.event = this.controlDetail.eventCode;
           this.createForm.controlType = this.controlDetail.surveillanceType;
           this.createForm.controlDate = (this.type === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
-          this.createForm.controlRank = parseInt(this.controlDetail.alarmLevelDict[0].enumValue);
+          this.createForm.controlRank = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
               startTime: new Date(2019, 9, 10, m.startTime.split(':')[0], m.startTime.split(':')[1]),
@@ -459,7 +467,7 @@ export default {
                 endTime: formatDate(m.endTime, 'HH:mm:ss')
               }
             })
-            this.controlDetail.alarmLevelDict[0].enumValue = this.createForm.controlRank;
+            this.controlDetail.alarmLevel = this.createForm.controlRank;
             this.controlDetail.eventId = parseInt(this.createForm.event);
             this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];
             this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];

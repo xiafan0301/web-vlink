@@ -203,7 +203,7 @@ import manageDetail from './components/manageDetail.vue';
 import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.js';
+import {getDiciData, getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -231,13 +231,7 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],
-      rankList: [
-        {label: '一级', value: 1},
-        {label: '二级', value: 2},
-        {label: '三级', value: 3},
-        {label: '四级', value: 4},
-        {label: '五级', value: 5}
-      ],
+      rankList: [],
       // 布控管理列表数据
       manageList: [],
       // 翻页数据
@@ -246,6 +240,9 @@ export default {
       pageNum: 1,
       controlId: null,//布控id
     }
+  },
+  created () {
+    this.getDiciData();
   },
   mounted () {
     const data = this.$route.query;
@@ -256,6 +253,19 @@ export default {
     this.getControlList();
   },
   methods: {
+    // 获取告警级别字段
+    getDiciData () {
+      getDiciData(11).then(res => {
+        if (res && res.data) {
+          this.rankList = res.data.map(m => {
+            return {
+              value: parseInt(m.enumField),
+              label: m.enumValue
+            }
+          })
+        }
+      })
+    },
     handleSizeChange (size) {
       this.pageType = size;
       this.getControlList();

@@ -155,7 +155,7 @@ export default {
   methods: {
     // 删除分组
     delPortraitGroupById () {
-      delPortraitGroupById(this.groupId).then(res => {
+      delPortraitGroupById(this.groupId).then(() => {
         this.delGroupDialog = false;
         this.$message.success('删除成功');
         this.$emit('changePage');

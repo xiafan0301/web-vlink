@@ -152,7 +152,7 @@ export default {
   methods: {
     // 删除分组
     delVehicleGroupById () {
-      delVehicleGroupById(this.groupId).then(res => {
+      delVehicleGroupById(this.groupId).then(() => {
         this.delGroupDialog = false;
         this.$message.success('删除成功');
         this.$emit('changePage');

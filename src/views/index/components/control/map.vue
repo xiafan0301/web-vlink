@@ -139,7 +139,7 @@
 </template>
 <script>
 import {random14} from '../../../../utils/util.js';
-import {getControlMap, getControlMapByDevice, getAlarmSnap} from '@/views/index/api/api.js';
+import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -165,14 +165,7 @@ export default {
         {label: '半球机', value: 3},
         {label: '红外', value: 4}
       ],
-      rankList: [
-        {label: '全部', value: 0},
-        {label: '一级', value: 1},
-        {label: '二级', value: 2},
-        {label: '三级', value: 3},
-        {label: '四级', value: 4},
-        {label: '五级', value: 5}
-      ],
+      rankList: [],
       // 地图参数
       map: null,
       controlList: null, // 布控数据列表
@@ -184,6 +177,9 @@ export default {
       isShowFullScreen: false, // 是否显示全屏播放页面
       videoHeight: null
     }
+  },
+  created () {
+    this.getDiciData();
   },
   mounted () {
     let _this = this;
@@ -200,6 +196,19 @@ export default {
     _this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 获取告警级别字段
+    getDiciData () {
+      getDiciData(11).then(res => {
+        if (res && res.data) {
+          this.rankList = res.data.map(m => {
+            return {
+              value: parseInt(m.enumField),
+              label: m.enumValue
+            }
+          })
+        }
+      })
+    },
     // 获取实时监控的布控设备
     getControlMap () {
       const params = {
@@ -214,7 +223,14 @@ export default {
       }
       getControlMap(params).then(res => {
         if (res && res.data) {
-          this.controlList = res.data;
+          let data = [];
+          res.data.forEach(f => {
+            f.devList.forEach(d => {
+              data.push(d);
+            })
+          })
+          this.controlList = data;
+          console.log(this.controlList)
           this.changeState();
         }
       })
@@ -600,14 +616,14 @@ export default {
     // 按布控状态来筛选地图标记
     changeState () {
       // this.controlList = objDeepCopy(testData);
-      this.controlList = this.controlList.filter(f => f.surveillanceStatus === this.mapForm.state);
+      // this.controlList = this.controlList.filter(f => f.surveillanceStatus === this.mapForm.state);
       // this.controlList = this.controlList.filter(f => f.controlList.length > 0);
       console.log(this.controlList)
-      this.controlList.forEach((f, i) => {
-        f.latitude = '28.10' + i + '253';
-        f.longitude = '112.9' + i + '1563';
-        f.deviceName = i;
-      });
+      // this.controlList.forEach((f, i) => {
+      //   f.latitude = '28.10' + i + '253';
+      //   f.longitude = '112.9' + i + '1563';
+      //   f.deviceName = i;
+      // });
       this.mapMark();
     },
     // 重置表单
