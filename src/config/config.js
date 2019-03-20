@@ -39,17 +39,11 @@ const oDomains = {
       test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
     },
-    // 应急指挥   : ecc
-    ecc: {
-        dev: 'http://apiemi.aorise.org/api/emi/',
-        test: 'http://apiemi.aorise.org/api/emi/',
-        prod: 'http://apiemi.aorise.org/api/emi/'
-    },
-    // 文件上传
-    upload: {
-        dev: 'http://apidev.aorise.org/vlink-base',
-        test: 'http://apidev.aorise.org/vlink-base',
-        prod: 'http://apidev.aorise.org/vlink-base'
+    // 视频播放服务
+    video: {
+        dev: 'http://apidev.aorise.org/vlink-monitor',
+        test: 'http://apidev.aorise.org/vlink-monitor',
+        prod: 'http://apidev.aorise.org/vlink-monitor',
     }
 };
 let ENV_API = process.env.VUE_APP_API;
