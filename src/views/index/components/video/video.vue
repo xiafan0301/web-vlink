@@ -262,9 +262,8 @@ export default {
         margin: 0 auto;
       }
       &.vid_show_empty {
+        width: 100%; height: 100%;
         background-color: #fff;
-        background: url(../../../../assets/img/video/vi_101.png) center center no-repeat #fff;
-        background-size: auto 100%;
       }
     }
   }
