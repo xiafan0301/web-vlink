@@ -18,7 +18,7 @@
             <el-date-picker
               style="width: 175px"
               size="small"
-              v-model="startTime"
+              v-model="endTime"
               type="datetime"
               placeholder="选择结束时间">
             </el-date-picker>
@@ -40,7 +40,7 @@
               placeholder="请输入内容"
               v-model="searchVal">
             </el-input>
-            <i class="el-icon-search"></i>
+            <i class="el-icon-search" @click="searchSubmit"></i>
           </div>
         </div>
         <ul class="sign_content_list">
@@ -48,9 +48,9 @@
             <p :title="item.title">
               <i v-if="item.type === 1">最新</i>
               <i v-if="item.type === 3">已过期</i>
-              {{item.title | strCutWithLen(45)}}
+              {{item.content | strCutWithLen(45)}}
             </p>
-            <div>{{item.name}}&nbsp;&nbsp;{{item.time}}<i class="el-icon-delete"></i></div>
+            <div>{{item.userName}}&nbsp;&nbsp;{{item.time}}<i class="el-icon-delete"></i></div>
           </li>
         </ul>
       </div>
@@ -67,30 +67,16 @@
   </div>
 </template>
 <script>
+import { apiVideoList } from "@/views/index/api/api.video.js";
+import { formatDate } from "@/utils/util.js";
 export default {
   data () {
     return {
-      signList: [
-        {
-          type: 1,
-          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
-          name: '李奕明',
-          time: '18-11-25 09:12'
-        }, {
-          type: 2,
-          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
-          name: '李奕明',
-          time: '18-11-25 09:12'
-        }, {
-          type: 3,
-          title: '拐卖儿童犯罪嫌疑人王某某经常出入雀园路004摄像头处，多加观察。',
-          name: '李奕明',
-          time: '18-11-25 09:12'
-        }
-      ],
+      searchLoading: false,
+      signList: [],
       searchVal: '',
-      startTime: '',
-      endTime: '',
+      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
+      endTime: new Date(),
       signer: '',
       options: [{
           value: '选项1',
@@ -111,7 +97,29 @@ export default {
       ]
     }
   },
+  mounted () {
+    this.searchSubmit();
+  },
   methods: {
+    searchSubmit () {
+      this.getData();
+    },
+    getData () {
+      this.searchLoading = true;
+      apiVideoList({
+        startTime: formatDate(this.startTime),
+        endTime: formatDate(this.endTime),
+        userId: '1'
+      }).then(res => {
+        if (res && res.data) {
+          this.signList = res.data;
+        }
+        this.searchLoading = false;
+      }).catch(error => {
+        this.searchLoading = false;
+        console.log("apiVideoList error：", error);
+      });
+    }
   }
 }
 </script>

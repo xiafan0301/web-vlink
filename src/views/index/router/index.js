@@ -421,6 +421,11 @@ export default new Router({
             path: '/findPwd',
             name: 'findPwd',
             component: () => import('@/views/index/components/findPwd.vue')
-        }
+        },
+        { 
+          path: '/player',
+          name: 'player',
+          component: () => import('@/components/common/rtmpplayer.vue')
+      }
     ]
 })
