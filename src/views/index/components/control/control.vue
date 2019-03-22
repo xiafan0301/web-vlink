@@ -56,7 +56,7 @@ export default {
           box-shadow:4px 0px 15px 0px rgba(131,131,131,0.23),0px 0px 13px 0px rgba(255,255,255,0.55);
           border:1px solid rgba(223,223,223,1);
         }
-        > div:nth-child(1){
+        .manage_t{
           width: 100%;
           height: 78px;
           padding-left: 20px;
@@ -71,7 +71,7 @@ export default {
         .equ_h{
           height: 80px!important;
         }
-        > div:nth-child(2){
+        .manage_b{
           width: 100%;
           height: 667px;
           margin-top: 20px;

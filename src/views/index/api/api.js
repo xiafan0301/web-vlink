@@ -866,6 +866,18 @@ export function repertorySel(params) {
     mode: 'control'
   })
 }
+/**
+ * getAllMonitorList 通过行政编码所有监控设备列表   
+ * @param {object} params
+ */
+export function getAllMonitorList(params) {
+  return request({
+    url: '/device-service/all-monitor-list',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
 /* ========== 布控地图 ========== */
 /**
  * getControlMap 根据条件查询布控的所有设备点位【默认查询正在进行的布控的所有设备】

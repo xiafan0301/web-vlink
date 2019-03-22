@@ -55,7 +55,9 @@
                 v-model="manageForm.controlObjId"
                 filterable
                 remote
+                allow-create
                 reserve-keyword
+                value-key="value"
                 placeholder="请输入对象搜索"
                 :remote-method="getControlObject"
                 :loading="loading">
@@ -72,7 +74,9 @@
                 v-model="manageForm.facilityId"
                 filterable
                 remote
+                allow-create
                 reserve-keyword
+                value-key="value"
                 placeholder="请输入设备名搜索"
                 :remote-method="getControlDevice"
                 :loading="loading">
@@ -305,9 +309,9 @@ export default {
       this.$refs['manageForm'].resetFields();
     },
     // 获取所有布控对象
-    getControlObject () {
+    getControlObject (query) {
       const params = {
-        name: this.manageForm.controlObjId
+        name: query
       }
       getControlObject(params).then(res => {
         if (res && res.data) {
@@ -321,9 +325,9 @@ export default {
       })
     },
     // 获取所有布控设备
-    getControlDevice () {
+    getControlDevice (query) {
       const params = {
-        name: this.manageForm.facilityId
+        name: query
       }
       getControlDevice(params).then(res => {
         if (res && res.data) {

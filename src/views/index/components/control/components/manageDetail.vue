@@ -66,11 +66,7 @@
             <div class="manage_d_s_m" v-show="dpType === '布控范围'">
               <div id="mapBox"></div>
               <div class="manage_d_s_m_l">
-                <div>
-                  <p><span class="vl_f_666">设备组：</span><span class="vl_f_333">自定义组1</span></p>
-                  <p><span class="vl_f_666">设备特性：</span><span class="vl_f_333">人脸识别</span></p>
-                </div>
-                <div>
+                <div class="manage_b" style="margin-top: 0;">
                   <div class="vl_f_333 top">布控设备（12）</div>
                   <div class="dp_box">
                     <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
@@ -305,7 +301,7 @@
 <script>
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
-import {conData, conDetail} from '../testData.js';
+import {conDetail} from '../testData.js';
 import {random14} from '../../../../../utils/util.js';
 import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
@@ -405,7 +401,7 @@ export default {
           this.devNum = res.data.devNum;
           this.bayonetNum = res.data.bayonetNum;
           this.trackPointList = res.data.trackingPointList;
-          this.trackPointList.map(f => {
+          this.trackPointList && this.trackPointList.map(f => {
             this.$set(f, 'isDropdown', false);
           });
           this.mapMark();
@@ -472,7 +468,13 @@ export default {
       }
       getControlMap(params).then(res => {
         if (res && res.data) {
-          this.situList = res.data;
+          let data = [];
+          res.data.forEach(f => {
+            f.devList.forEach(d => {
+              data.push(d);
+            })
+          })
+          this.situList = data;
         }
       })
     },
@@ -597,39 +599,43 @@ export default {
     
     
     mapMark () {
-      let _this = this, hoverWindow = null//, data;
-      // // 组装右边点标记数据
-      // let devList = [];
-      // _this.trackPointList.forEach(f => {
-      //   if (f.devList && f.devList.length > 0) {
-      //     devList = [...devList, ...f.devList];
-      //   }
-      // })
-      // devList.forEach(f => f.type = 1);//设置属性type:1为摄像头，2为卡口
-      // let bayonetList = [];
-      // _this.trackPointList.forEach(f => {
-      //   if (f.bayonetList && f.bayonetList.length > 0) {
-      //     bayonetList = [...bayonetList, ...f.bayonetList];
-      //   }
-      // })
-      // bayonetList.forEach(f => f.type = 2);//设置属性type:1为摄像头，2为卡口
-      // data = [...devList, ...bayonetList];
-      let data = conData;
+      let _this = this, hoverWindow = null, data = null;
+      if (!_this.trackPointList) {
+        return false;
+      }
+      // 组装右边点标记数据
+      let devList = [];
+      _this.trackPointList.forEach(f => {
+        if (f.devList && f.devList.length > 0) {
+          devList = [...devList, ...f.devList];
+        }
+      })
+      devList.forEach(f => f.type = 1);//设置属性type:1为摄像头，2为卡口
+      let bayonetList = [];
+      _this.trackPointList.forEach(f => {
+        if (f.bayonetList && f.bayonetList.length > 0) {
+          bayonetList = [...bayonetList, ...f.bayonetList];
+        }
+      })
+      bayonetList.forEach(f => f.type = 2);//设置属性type:1为摄像头，2为卡口
+      data = [...devList, ...bayonetList];
+      console.log(data, 'data')
       _this.map.clearMap();
-      for (let i = 0; i < data.devList.length; i++) {
-        let obj = data.devList[i];
-        obj.sid = obj.name + '_' + i + '_' + random14();
+      for (let i = 0; i < data.length; i++) {
+        let obj = data[i];
+        obj.sid = obj.deviceName + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
           let _content = null;
-          if (obj.type === 'sxt') {
-            if (obj.isNormal && obj.isSelected) {
-              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
-            } else if (obj.isNormal && !obj.isSelected) {
-              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            } else if (!obj.isNormal) {
-              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
-            }
+          if (obj.type === 1) {
+            // if (obj.isNormal && obj.isSelected) {
+            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
+            // } else if (obj.isNormal && !obj.isSelected) {
+            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
+            // } else if (!obj.isNormal) {
+            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+            // }
+             _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
           } else {
             if (obj.isNormal && obj.isSelected) {
               _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_kk"></div>';
@@ -649,11 +655,11 @@ export default {
             content: _content
           });
           // hover
-          marker.on('mouseover', function () {
+          marker.on('click', function () {
             let sContent = '<div class="vl_map_hover">' +
               '<div class="vl_map_hover_main"><ul>' + 
-                '<li><span>设备名称：</span>' + obj.equName + '</li>' + 
-                '<li><span>设备地址：</span>' + obj.addr + '</li>' + 
+                '<li><span>设备名称：</span>' + obj.deviceName + '</li>' + 
+                '<li><span>设备地址：</span>' + obj.address + '</li>' + 
               '</ul></div>';
             hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
@@ -662,12 +668,6 @@ export default {
               content: sContent
             });
             hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-            hoverWindow.on('close', function () {
-              // console.log('infoWindow close')
-            });
-          });
-          marker.on('mouseout', function () {
-            if (hoverWindow) { hoverWindow.close(); }
           });
           marker.setMap(_this.map);
         }

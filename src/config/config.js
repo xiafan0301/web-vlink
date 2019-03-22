@@ -5,22 +5,22 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        // dev: 'http://apidev.aorise.org/vlink-base',
-        dev: 'http://10.116.66.29:8082',// 钟赞
+        dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://10.116.66.29:8082',// 钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
     // 布控部分地址
     control: {
-        // dev: 'http://apidev.aorise.org/vlink-control',
-        dev: 'http://10.116.66.29:8081',//钟赞
+        dev: 'http://apidev.aorise.org/vlink-control',
+        // dev: 'http://10.116.66.29:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
     // 消息部分地址
     message: {
-        // dev: 'http://apidev.aorise.org/vlink-message',
-        dev: 'http://10.116.64.169:8081',//花艳玲
+        dev: 'http://apidev.aorise.org/vlink-message',
+        // dev: 'http://10.116.64.169:8081',//花艳玲
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },

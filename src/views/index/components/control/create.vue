@@ -85,7 +85,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <div class="create_model">
+          <div class="create_model" v-if="mapData.length > 0">
             <span class="vl_f_666">分析模型：</span>
             <div class="create_model_box">
               <div class="model_checkbox">
@@ -97,13 +97,13 @@
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" mapId="mapOne" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" :mapData="mapData" mapId="mapOne" :pType="type" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" mapId="mapTwo" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" :mapData="mapData" mapId="mapTwo" :pType="type" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
+              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" mapId="mapFour" :pType="type" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" :mapData="mapData" mapId="mapFour" :pType="type" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
             </div>
           </div>
         </el-form>
@@ -131,7 +131,7 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -160,6 +160,7 @@ export default {
         ],
       },
       // 分析模型数据
+      mapData: [],
       checkList: [],//多选
       modelType: null,//模型类型序号
       modelDataOne: null,// 人员追踪数据
@@ -179,6 +180,7 @@ export default {
   },
   created () {
     this.getDiciData();
+    this.getAllMonitorList();
     // 编辑页-2
     if (this.createType) {
       this.type = this.createType;
@@ -197,6 +199,19 @@ export default {
     }
   },
   methods: {
+    // 获取所有监控设备列表
+    getAllMonitorList () {
+      const params = {ccode: 431224}
+      getAllMonitorList(params).then(res => {
+        if (res && res.data) {
+          this.mapData = res.data;
+          this.mapData.forEach(f => {
+            this.$set(f, 'isSelected', false);
+          });
+          console.log(this.mapData)
+        }
+      })
+    },
     // 新增时间段
     addPeriodTime() {
       if (this.createForm.periodTime.length === 5) {
