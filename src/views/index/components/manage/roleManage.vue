@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="role-manage">
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddRole">创建角色</el-button>
@@ -94,8 +95,9 @@
       >
       <div style="margin-top: 15px;">
         <el-form :model="addRole" :rules="rules" ref="addRole" label-width="15px">
-          <el-form-item prop="roleName" label=" ">
+          <el-form-item prop="roleName" label=" " class="role_name">
             <el-input v-model="addRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
             <el-input type="textarea" rows="6" v-model="addRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
@@ -118,8 +120,9 @@
       >
       <div style="margin-top: 15px;">
         <el-form :model="editRole" :rules="rules" ref="editRole" label-width="15px">
-          <el-form-item prop="roleName" label=" ">
+          <el-form-item prop="roleName" label=" " class="role_name">
             <el-input v-model="editRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
             <el-input type="textarea" rows="6" v-model="editRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
@@ -205,12 +208,14 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
-import { getRoleList, createRole, delRole, updateRole } from '@/views/index/api/api.js';
+import { getRoleList, createRole, delRole, updateRole, judgeRoleName } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isShowOrganError: false,
       closeShow: false, //是否显示清空搜索框
       roleName: null, // 角色名搜索
       data: [{
@@ -275,6 +280,9 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { min: 2, message: '最少输入2个字符' },
           { max: 20, message: '最多输入20个字符' }
+        ],
+        roleDesc: [
+          { max: 50, message: '最多输入50个字符' }
         ]
       },
       roleListData: [],
@@ -334,38 +342,57 @@ export default {
     },
     // 显示创建角色弹出框
     showAddRole () {
+      this.isShowOrganError = false;
       this.createRoleDialog = true;
     },
     // 创建用户
     addUser (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          createRole(this.addRole)
+          const params = {
+            proKey: this.userInfo.proKey,
+            roleName: this.addRole.roleName
+          }
+          judgeRoleName(params)
             .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '添加成功',
-                  customClass: 'request_tip'
-                })
-                this.createRoleDialog = false;
-                this.getList();
-                this.$refs[form].resetFields();
+              if (res.data) {
+                this.isShowOrganError = true;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '添加失败',
-                  customClass: 'request_tip'
-                })
+                this.isShowOrganError = false;
+                this.handleAddRole();
               }
             })
             .catch(() => {})
+          
         }
       })
+    },
+    handleAddRole () {
+      createRole(this.addRole)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '添加成功',
+              customClass: 'request_tip'
+            })
+            this.createRoleDialog = false;
+            this.getList();
+            this.$refs[form].resetFields();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '添加失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 取消添加用户
     cancelAdd (form) {
       this.$refs[form].resetFields();
+      this.isShowOrganError = false;
       this.createRoleDialog = false;
     },
     // 显示删除角色弹出框
@@ -402,6 +429,7 @@ export default {
     },
     // 显示编辑角色弹出框
     showEditDialog (obj) {
+      this.isShowOrganError = false;
       this.editRole.uid = obj.uid;
       this.editRole.proKey = this.userInfo.proKey;
       this.editRole.roleName = obj.roleName;
@@ -412,29 +440,47 @@ export default {
     editRoleInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          updateRole(this.editRole)
+          const params = {
+            proKey: this.userInfo.proKey,
+            roleName: this.editRole.roleName
+          }
+          judgeRoleName(params)
             .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '修改成功',
-                  customClass: 'request_tip'
-                })
-                this.editRoleDialog = false;
-                this.getList();
+              if (res.data) {
+                this.isShowOrganError = true;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '修改失败',
-                  customClass: 'request_tip'
-                })
+                this.isShowOrganError = false;
+                this.handleEditRoleInfo();
               }
             })
+            .catch(() => {})
         }
       })
     },
+    handleEditRoleInfo () {
+      updateRole(this.editRole)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.editRoleDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '修改失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 取消编辑
     cancelEdit (form) {
+      this.isShowOrganError = false;
       this.$refs[form].resetFileds();
       this.editRoleDialog = false;
     },
@@ -560,6 +606,20 @@ export default {
       /deep/.el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner {
         background-color: #0C70F8;
         border-color: #0C70F8;
+      }
+    }
+  }
+  .dialog_comp {
+    .group_name {
+      position: relative;
+      .group_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }

@@ -124,7 +124,7 @@ export default {
   components: { BigImg },
   data () {
     return {
-      uploadUrl: ajaxCtx.upload + '/new', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       isImgNumber: false, // 是否显示图片超过最大数提示
       pickerOptions0: {
         disabledDate (time) {

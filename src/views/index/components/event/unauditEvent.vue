@@ -161,7 +161,7 @@ import { getEventDetail, updateEvent, getDiciData } from '@/views/index/api/api.
 export default {
   data () {
     return {
-      uploadUrl: ajaxCtx.upload + '/new', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
       isImgNumber: false,
       newMarker: null,

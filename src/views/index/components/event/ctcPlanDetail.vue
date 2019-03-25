@@ -32,10 +32,10 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <template v-if="planDetail.attachmentName">
+              <template v-if="planDetail.cname">
                 <i class="vl_icon vl_icon_event_5"></i>
-                {{planDetail.attachmentName}}
-                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.url)"></i>
+                {{planDetail.cname}}
+                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.path)"></i>
               </template>
               <template v-else>无</template>
             </span>
@@ -102,23 +102,7 @@ export default {
   data () {
     return {
       delPlanDialog: false, // 删除预案弹出框
-      planDetail: {
-        planName: '预案名称',
-        eventTypeName: '自然灾害',
-        levelNameList: ['IV级', 'V级'],
-        planDetail: '起火了起火了起火了起火了',
-        attachmentName: '公共文档',
-        url: 'http://www.baidu.com',
-        taskList: [
-          {
-            departmentName: '公安部',
-            taskName: '救火',
-            taskContent: '迅速救火'
-          }
-        ],
-        createUserName: '石媛',
-        createTime: '2019-03-12'
-      }, // 预案详情
+      planDetail: {}, // 预案详情
     }
   },
   mounted () {
@@ -132,6 +116,7 @@ export default {
         getPlanDetail(planId)
          .then(res => {
            if (res) {
+             console.log('res', res.data)
              this.planDetail = res.data;
            }
          })

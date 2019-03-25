@@ -185,8 +185,9 @@
       >
       <div style="margin-top: 10px;">
         <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
-          <el-form-item label=" " prop="organName">
-            <el-input v-model="addDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+          <el-form-item label=" " prop="organName" class="organ_name">
+            <el-input v-model="addDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+            <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
@@ -236,10 +237,11 @@
 </vue-scroll>
 </template>
 <script>
-import { getDepartDetail, getUserMember, getUserList, delUserMember, addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.js';
+import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember, addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isShowOrganError: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       closeShow: false,
       userName: null, // 要搜索的内容
@@ -523,8 +525,15 @@ export default {
           .catch(() => {})
       }
     },
+    // 部门名称change
+    handleChangeOrganName (val) {
+      if (!val) {
+        this.isShowOrganError = false;
+      } 
+    },
     // 显示新增部门弹出框
     showNewDepartment () {
+      this.isShowOrganError = false;
       this.addDepartment.organName = null;
       this.addDepartment.chargeUserName = null;
       this.addDepartment.organPid = this.$route.query.id;
@@ -534,30 +543,47 @@ export default {
     addDepartmentInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          addDepart(this.addDepartment)
+          const params = {
+            proKey: this.userInfo.proKey,
+            organName: this.addDepartment.organName
+          }
+          judgeDepart(params)
             .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '添加成功',
-                  customClass: 'request_tip'
-                })
-                this.newDepartmentDialog = false;
-                this.getDetail();
+              if (res.data) {
+                this.isShowOrganError = true;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '添加失败',
-                  customClass: 'request_tip'
-                })
+                this.isShowOrganError = false;
+                this.handleAddDepartment();
               }
             })
             .catch(() => {})
         }
       })
     },
+    handleAddDepartment () {
+      addDepart(this.addDepartment)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '添加成功',
+              customClass: 'request_tip'
+            })
+            this.newDepartmentDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '添加失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 取消添加
     cancelAdd (form) {
+      this.isShowOrganError = false;
       this.$refs[form].resetFields();
       this.newDepartmentDialog = false;
     },
@@ -812,6 +838,20 @@ export default {
         /deep/ .el-checkbox__input {
           float: right;
         }
+      }
+    }
+  }
+  .dialog_comp {
+    .organ_name {
+      position: relative;
+      .organ_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }

@@ -209,6 +209,79 @@ export function updateProcess(uid, data) {
     mode: 'ctc'
   });
 }
+/** ===== 事件统计分析 ====== */
+/**
+ * 事件总体情况统计
+ * @param {*} data 
+ */
+export function getGeneralcondition(data) {
+  return request({
+    url: 'eventCountServices/generalCondition',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件等级分析
+ * @param {*} data 
+ */
+export function getRankAnalysis(data) {
+  return request({
+    url: 'eventCountServices/rankAnalysis',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件类型分析
+ * @param {*} data 
+ */
+export function getTypeAnalysis(data) {
+  return request({
+    url: 'eventCountServices/typeAnalysis',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件数量分析
+ * @param {*} data 
+ */
+export function getQuantitativeTrend(data) {
+  return request({
+    url: 'eventCountServices/quantitativeTrend',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件高发地点分析
+ * @param {*} data 
+ */
+export function getHotLocation(data) {
+  return request({
+    url: 'eventCountServices/hotLocation',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件布控统计分析
+ * @param {*} data 
+ */
+export function getSurveillance(data) {
+  return request({
+    url: 'eventCountServices/surveillance',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
 /* ================== 管理模块 =================== */
 /*****  部门架构  ** */
 
@@ -372,8 +445,8 @@ export function isForceUser (data) {
  */
 export function updateUser (data) {
   return request({
-    url: 'userService/userInfo',
-    data,
+    url: 'user-service/user-info',
+    data: data,
     mode: 'user',
     method: 'put'
   });
@@ -384,7 +457,7 @@ export function updateUser (data) {
  */
 export function createUser (data) {
   return request({
-    url: 'userService/userInfo',
+    url: 'user-service/user-info',
     data,
     mode: 'user',
     method: 'post'
@@ -460,6 +533,18 @@ export function delUserBatchRoles (data) {
     data,
     mode: 'auth',
     method: 'delete'
+  });
+}
+/**
+ * 判断用户角色是否重名
+ * @param {*} data 
+ */
+export function judgeRoleName (data) {
+  return request({
+    url: 'authServices/userRoleRename',
+    params: data,
+    mode: 'auth',
+    method: 'get'
   });
 }
 /**
@@ -759,6 +844,63 @@ export function delGroupDevice (id) {
   return request({
     url: '/group-service/group-info/' + id,
     method: 'delete'
+  });
+}
+/**
+ * 新增分组
+ * @param {*} data 
+ */
+export function addGroupDevice (data) {
+  return request({
+    url: '/group-device-service/group-info',
+    method: 'post',
+    data
+  });
+}
+/* ========== 设备授权 ========== */
+/** ==== 临时授权 ==== */
+/**
+ * 点击用户获取可用设备
+ * @param {*} data 
+ */
+export function getTempDeviceList (data) {
+  return request({
+    url: '/dev-auth-temp-service/devices',
+    method: 'get',
+    params: data
+  });
+}
+/**
+ * 终止授权
+ * @param {*} data 
+ */
+export function stopTerminate (data) {
+  return request({
+    url: '/dev-auth-temp-service/terminate',
+    method: 'delete',
+    params: data
+  });
+}
+/**
+ * 单个设备终止授权
+ * @param {*} data 
+ */
+export function stopOneTerminate (data) {
+  return request({
+    url: '/dev-auth-temp-service/terminate/' + data.uid,
+    method: 'delete',
+    params: data
+  });
+}
+/**
+ * 新增临时授权---获取可用设备
+ * @param {*} data 
+ */
+export function getASelectDevice (data) {
+  return request({
+    url: '/dev-auth-temp-service/auth-devices',
+    method: 'get',
+    params: data
   });
 }
 /* ================== 布控模块 =================== */

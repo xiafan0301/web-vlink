@@ -107,7 +107,7 @@
 .vl_icon_control_20{width: 20px; height: 20px; background-position: -584px -374px;}
 .vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -374px;}
 .vl_icon_control_22{width: 20px; height: 20px; background-position: -500px -347px;}
-.vl_icon_control_23{width: 40px; height: 40px; background-position: -636px -128px;}
+.vl_icon_control_23{width: 39px; height: 38px; background-position: -636px -128px;}
 .vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -345px;}
 .vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -345px;}
 .vl_icon_control_26{width: 20px; height: 20px; background-position: -755px -374px;}
@@ -178,6 +178,8 @@
 .vl_icon_manage_14{width: 22px; height: 22px; background-position: -831px -554px;} /*权限管理---添加--选中*/
 .vl_icon_manage_15{width: 18px; height: 22px; background-position: -370px -376px;} /*禁用摄像头--视频设置--临时授权*/
 .vl_icon_manage_16{width: 16px; height: 16px; background-position: -482px -671px;} /*视频设置--临时授权--终止*/
+.vl_icon_manage_17{width: 16px; height: 16px; background-position: -713px -585px;} /* 文件下载 */
+.vl_icon_manage_18{width: 16px; height: 16px; background-position: -744px -585px;} /* 文件上传 */
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -616,7 +618,7 @@
   width: 200px;
   left: auto !important;
   right: 40px !important;
-  top: 25% !important;
+  top: 5% !important;
   overflow: hidden !important;
 }
 .e_stat_tb_ld1 .g2-legend-list {
@@ -672,7 +674,7 @@
   left: auto !important;
   right: 30px !important;
   width: 200px !important;
-  top: 50% !important;
+  top: 25% !important;
 }
 .e_stat_tb_ld4 .g2-legend-list-item {
   margin-right: 0 !important;

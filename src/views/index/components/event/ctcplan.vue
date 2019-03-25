@@ -68,9 +68,9 @@
           prop="levelNameList"
           show-overflow-tooltip
           >
-          <!-- <template slot-scope="scope">
+          <template slot-scope="scope">
             <span>{{scope.row.levelNameList.join()}}</span>
-          </template> -->
+          </template>
         </el-table-column>
         <el-table-column
           label="创建用户"

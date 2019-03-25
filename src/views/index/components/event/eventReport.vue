@@ -13,40 +13,28 @@
         <div class="report-operation">
           <el-form :model="reportForm" class="report-form" size="middle" :rules="rules" ref="reportForm">
             <el-form-item label="接收者:" label-width="100px" prop="reportUser" class="report_user">
-              <div class="report_user_box">
-                <div
-                  class="report_user_list"
-                  v-for="(item, index) in reportUserList"
-                  :key="index"
-                >
-                  <span>{{item}}</span>
-                  <i class="el-icon-close" @click="closeUser(index)"></i>
-                </div>
-                <div class="add_text">
-                  <el-input :autofocus="true" class="input_user" v-model="reportForm.reportUser" @input="selectUser"></el-input>
-                  <div class="hidden_box"></div>
-                </div>
-                <template v-if="isMatchUser">
-                  <div class="search-result">
-                    <vue-scroll>
-                      <ul>
-                        <li
-                          v-for="(item, index) in userList"
-                          :key="index"
-                          @click="getUserName(item.userName)"
-                        >
-                          {{item.userName}}
-                        </li>
-                      </ul>
-                    </vue-scroll>
-                  </div>
-                </template>
-              </div>
+              <el-select
+                style="width: 100%;"
+                v-model="value9"
+                multiple
+                filterable
+                remote
+                allow-create
+                reserve-keyword
+                placeholder="请输入关键词"
+                :remote-method="remoteMethod"
+                :loading="loading">
+                <el-option
+                  v-for="item in options4"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="情况说明:" label-width="100px" prop="explain">
               <el-input type="textarea" rows="6" v-model="reportForm.explain"></el-input>
             </el-form-item>
-            
           </el-form>
         </div>
       </div>
@@ -82,6 +70,28 @@ export default {
   components: { EventBasic, BigImg },
   data () {
     return {
+      options4: [],
+      value9: [],
+      list: [],
+      loading: false,
+      states: ["Alabama", "Alaska", "Arizona",
+        "Arkansas", "California", "Colorado",
+        "Connecticut", "Delaware", "Florida",
+        "Georgia", "Hawaii", "Idaho", "Illinois",
+        "Indiana", "Iowa", "Kansas", "Kentucky",
+        "Louisiana", "Maine", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota",
+        "Mississippi", "Missouri", "Montana",
+        "Nebraska", "Nevada", "New Hampshire",
+        "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Ohio",
+        "Oklahoma", "Oregon", "Pennsylvania",
+        "Rhode Island", "South Carolina",
+        "South Dakota", "Tennessee", "Texas",
+        "Utah", "Vermont", "Virginia",
+        "Washington", "West Virginia", "Wisconsin",
+        "Wyoming"
+      ],
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
@@ -151,9 +161,25 @@ export default {
   //   }
   // },
   mounted () {
-    
+    this.list = this.states.map(item => {
+      return { value: item, label: item };
+    });
   },
   methods: {
+    remoteMethod(query) {
+      if (query !== '') {
+        this.loading = true;
+        setTimeout(() => {
+          this.loading = false;
+          this.options4 = this.list.filter(item => {
+            return item.label.toLowerCase()
+              .indexOf(query.toLowerCase()) > -1;
+          });
+        }, 200);
+      } else {
+        this.options4 = [];
+      }
+    },
     // 获取事件详情
     getDetail () {
       const eventId = '';

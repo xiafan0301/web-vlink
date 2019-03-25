@@ -99,7 +99,7 @@ import { addPlan, getDiciData, getDepartmentList } from '@/views/index/api/api.j
 export default {
   data () {
     return {
-      uploadUrl: ajaxCtx.upload + '/new', // 文件上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 文件上传地址
       addPlanForm: {
         planName: null, // 预案名称
         eventType: null, // 预案类型
@@ -114,7 +114,7 @@ export default {
             departmentId: null
           }
         ],
-        url: null, // 附件
+        path: null, // 附件
         attachmentType: null,
         cname: null // 附件名称
       },
@@ -187,7 +187,7 @@ export default {
     handSuccess (res) {
       console.log('res', res)
       if (res.data) {
-        this.addPlanForm.url = res.data.fileFullPath;
+        this.addPlanForm.path = res.data.fileFullPath;
         this.addPlanForm.cname = res.data.fileName;
         this.addPlanForm.attachmentType = dataList.fileId;
       }
@@ -220,8 +220,6 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(this.addPlanForm);
-          console.log(this.planTypeList)
           this.planTypeList.map((item) => {
             if (item.enumValue == this.addPlanForm.eventType) {
               this.addPlanForm.eventType = item.uid;

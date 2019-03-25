@@ -1,33 +1,47 @@
 <template>
-  <vue-scroll>
-    <div class="stat-box">
-      <div class="search-box">
-         <el-date-picker
-          style="width: 250px;"
-          v-model="dateTime"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker>
-        <el-select v-model="value" placeholder="请选择" style="margin-left: 10px;">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <el-button class="operation_btn">查询</el-button>
-      </div>
-      <div class="stat-content">
-        <!--    综合统计    -->
-        <ul class="stat-zt">
+<vue-scroll>
+  <div class="stat-box">
+    <!-- 查询条件 -->
+    <div class="e_stat_s search-box">
+      <el-form :inline="true" :model="searchForm">
+        <el-form-item>
+          <el-date-picker
+            class="e_stat_dp"
+            v-model="searchForm.dateTime"
+            type="daterange"
+            align="left"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :editable="false"
+            :clearable="false"
+            :picker-options="pickerOptions2">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item>
+          <el-select v-model="searchForm.eventDealOrgId" clearable placeholder="请选择" style="margin-left: 10px;">
+            <el-option
+            v-for="(item, index) in departmentData"
+            :key="index"
+            :label="item.organName"
+            :value="item.uid"
+          ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="operation_btn" :loading="searchLoading" @click="searchData">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="e_stat_content" v-loading="searchLoading">
+      <!-- 综合统计 -->
+      <ul class="stat-zt">
           <li>
             <div class="stat-zt-box">
               <div class="left-icon-number"><i class="vl_icon vl_icon_statistics_8"></i></div>
               <div class="stat-zt-value">
-                <h3>208</h3>
+                <h3>{{generalData.totalCount}}</h3>
                 <p>事件数量</p>
               </div>
               <div class="right-icon">
@@ -41,7 +55,7 @@
                 <i class="vl_icon vl_icon_statistics_7"></i>
               </div>
               <div class="stat-zt-value">
-                <h3>208</h3>
+                <h3>{{generalData.finishCount}}</h3>
                 <p>处理完成</p>
               </div>
               <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div>
@@ -53,7 +67,7 @@
                 <i class="vl_icon vl_icon_statistics_6"></i>
               </div>
               <div class="stat-zt-value">
-                <h3>208</h3>
+                <h3>{{generalData.processingCount}}</h3>
                 <p>处理中</p>
               </div>
               <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div>
@@ -65,202 +79,171 @@
                 <i class="vl_icon vl_icon_statistics_5"></i>
               </div>
               <div class="stat-zt-value">
-                <h3>208</h3>
+                <h3>{{generalData.pendingCount}}</h3>
                 <p>待处理</p>
               </div>
               <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div>
             </div>
           </li>
         </ul>
-        <!--   统计图表    --->
-        <ul class="stat-tt">
-          <li>
-            <div>
-              <h4 class="stat_title">事件等级分析</h4>
-              <div class="stat_tt_item" id="stat_1"></div>
+      <!-- 统计图表 -->
+      <ul class="e_stat_tt">
+        <li>
+          <div>
+            <h4 class="stat_title">事件等级分析</h4>
+            <div class="stat_tt_item" id="stat_1">
             </div>
-          </li>
-          <li>
-            <div>
-              <h4 class="stat_title">事件类型分析</h4>
-              <div class="stat_tt_item" id="stat_2"></div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h4 class="stat_title">事件类型分析</h4>
+            <div class="stat_tt_item" id="stat_2">
             </div>
-          </li>
-          <li>
-            <div>
-              <h4 class="stat_title">事件数量趋势</h4>
-              <div class="stat_tt_item" id="stat_3"></div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h4 class="stat_title">事件数量趋势</h4>
+            <div class="stat_tt_item" id="stat_3">
             </div>
-          </li>
-          <li>
-            <div>
-              <h4 class="stat_title">事件布控统计</h4>
-              <div class="stat_tt_item" id="stat_4"></div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h4 class="stat_title">事件布控统计</h4>
+            <div class="stat_tt_item" id="stat_4">
             </div>
-          </li>
-        </ul>
-        <!-- 地图统计 -->
-        <div class="e_stat_map">
-          <!-- <div class="stat_map_c">
-            <div class="stat_map_cl">
-              <h4 class="stat_title">事件高发地点分析</h4>
-              <ul class="stat_map_cl_ul">
-                <template v-if="polygons && polygons.length > 0">
-                  <li v-if="polygons.length > 0">
-                    <span></span>
-                    <h5>{{polygons[0].areaName}}</h5>
-                    <div><span>{{polygons[0].eventCount}}</span>&nbsp;件</div>
-                  </li>
-                  <li v-if="polygons.length > 1">
-                    <span></span>
-                    <h5>{{polygons[1].areaName}}</h5>
-                    <div><span>{{polygons[1].eventCount}}</span>&nbsp;件</div>
-                  </li>
-                  <li v-if="polygons.length > 2">
-                    <span></span>
-                    <h5>{{polygons[2].areaName}}</h5>
-                    <div><span>{{polygons[2].eventCount}}</span>&nbsp;件</div>
-                  </li>
-                  <li v-if="polygons.length > 3">
-                    <span></span>
-                    <h5>{{polygons[3].areaName}}</h5>
-                    <div><span>{{polygons[3].eventCount}}</span>&nbsp;件</div>
-                  </li>
-                  <li v-if="polygons.length > 4">
-                    <span></span>
-                    <h5>{{polygons[4].areaName}}</h5>
-                    <div><span>{{polygons[4].eventCount}}</span>&nbsp;件</div>
-                  </li>
-                </template>
-              </ul>
-            </div>
-            <div class="stat_map_cr" id="drawEdge"></div>
-            <div class="de-close-btn">
-              <span class="de-btn-r" @click="setMapStatus('1')"></span>
-              <span class="de-btn-fd" @click="setMapStatus('2')" :class="{'de-btn-dis': mapScale.fd}"></span>
-              <span class="de-btn-sx" @click="setMapStatus('3')" :class="{'de-btn-dis': mapScale.sx}"></span>
-            </div>
-          </div> -->
+          </div>
+        </li>
+      </ul>
+      <!-- 地图统计 -->
+      <div class="e_stat_map">
+        <div class="stat_map_c">
+          <div class="stat_map_cl">
+            <h4 class="stat_title">事件高发地点分析</h4>
+            <ul class="stat_map_cl_ul">
+              <template v-if="polygons && polygons.length > 0">
+                <li v-if="polygons.length > 0">
+                  <span></span>
+                  <h5>{{polygons[0].areaName}}</h5>
+                  <div><span>{{polygons[0].eventCount}}</span>&nbsp;件</div>
+                </li>
+                <li v-if="polygons.length > 1">
+                  <span></span>
+                  <h5>{{polygons[1].areaName}}</h5>
+                  <div><span>{{polygons[1].eventCount}}</span>&nbsp;件</div>
+                </li>
+                <li v-if="polygons.length > 2">
+                  <span></span>
+                  <h5>{{polygons[2].areaName}}</h5>
+                  <div><span>{{polygons[2].eventCount}}</span>&nbsp;件</div>
+                </li>
+                <li v-if="polygons.length > 3">
+                  <span></span>
+                  <h5>{{polygons[3].areaName}}</h5>
+                  <div><span>{{polygons[3].eventCount}}</span>&nbsp;件</div>
+                </li>
+                <li v-if="polygons.length > 4">
+                  <span></span>
+                  <h5>{{polygons[4].areaName}}</h5>
+                  <div><span>{{polygons[4].eventCount}}</span>&nbsp;件</div>
+                </li>
+              </template>
+            </ul>
+          </div>
+          <div class="stat_map_cr" id="drawEdge"></div>
+          <div class="de-close-btn">
+            <ul class="first_ul">
+              <li>
+                <i class="vl_icon vl_icon_control_23" @click="setMapStatus('1')"></i>
+              </li>
+            </ul>
+            <ul class="second_ul">
+              <li>
+                <i class="el-icon-plus" @click="setMapStatus('2')" :class="{'de-btn-dis': mapScale.fd}"></i>
+                <span class="divide"></span>
+              </li>
+              <li>
+                <i class="el-icon-minus" @click="setMapStatus('3')" :class="{'de-btn-dis': mapScale.sx}"></i>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </vue-scroll>
+  </div>
+</vue-scroll>
 </template>
 <script>
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import { getQuantitativeTrend, getTypeAnalysis, getRankAnalysis, getGeneralcondition,
+getHotLocation, getDepartmentList, getSurveillance } from '@/views/index/api/api.js';
+import {formatDate} from '@/utils/util.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   data () {
     return {
-      dateTime: null,
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value: '',
+      searchForm: {
+        dateTime: [new Date(new Date().getTime() - 3600 * 1000 * 24 * 30), new Date()],
+        eventDealOrgId: null
+      },
+      pickerOptions2: {
+        shortcuts: [
+          {
+            text: '今天',
+            onClick (picker) {
+              const end = new Date();
+              const start = new Date();
+              // start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一周',
+            onClick (picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick (picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick (picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一年',
+            onClick (picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 365);
+              picker.$emit('pick', [start, end]);
+            }
+          }
+        ]
+      },
       charts: {
         chart1: null,
         chart2: null,
         chart3: null,
         chart4: null
       },
-      chart1Data: [
-        {
-          item: '1级事件(件)',
-          count: 40,
-          percent: 0.4
-        }, {
-          item: '2级事件(件)',
-          count: 21,
-          percent: 0.21
-        }, {
-          item: '3级事件(件)',
-          count: 17,
-          percent: 0.17
-        }, {
-          item: '4级事件(件)',
-          count: 13,
-          percent: 0.13
-        }, {
-          item: '5级事件(件)',
-          count: 9,
-          percent: 0.09
-        }
-      ],
-      chart2Data: [
-        {
-          sales: 56,
-          year: '自然灾害'
-        },
-        {
-          sales: 20,
-          year: '事故灾难'
-        },
-        {
-          sales: 46,
-          year: '公共卫生'
-        },
-        {
-          sales: 90,
-          year: '社会安全'
-        },
-        {
-          sales: 80,
-          year: '其他'
-        }
-      ],
-      chart3Data: [
-        {
-          value: 12,
-          year: '2018-12-09'
-        },
-        {
-          value: 45,
-          year: '2018-12-12'
-        },
-        {
-          value: 34,
-          year: '2018-12-29'
-        },
-        {
-          value: 78,
-          year: '2019-1-19'
-        },
-        {
-          value: 124,
-          year: '2019-2-19'
-        },
-        {
-          value: 100,
-          year: '2019-3-19'
-        },
-        {
-          value: 89,
-          year: '2019-4-19'
-        }
-      ],
-      chart4Data: [
-        {
-          value: 105,
-          name: '已布控事件'
-        },
-        {
-          value: 180,
-          name: '未布控事件'
-        }
-      ],
+      chart1Data: [],
+      chart2Data: [],
+      chart3Data: [],
+      chart4Data: [],
       colors: [
         ['#0D9DF4', '#6262FF', '#8949F3', '#115BFA', '#0C70F8'],
         [
@@ -271,16 +254,121 @@ export default {
           [137, 73, 243]
         ]
       ],
+       // 事件总体情况统计数据
+      generalData: {
+        finishCount: 0,
+        pendingCount: 0,
+        processingCount: 0,
+        totalCount: 0
+      },
+      searchLoading: false,
+      loadingHandler: true,
+      polygons: null,
+      amap: null,
+      zoom: 10,
+      zooms: [9, 17],
+      sonPolygons: null,
+      textMarkers: null,
+      mapScale: {
+        fd: false,
+        sx: false
+      },
+      userInfo: {},
+      departmentData: []
     }
   },
+  created () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  },
   mounted () {
+    this.getDepartList();
     this.intitReportSize();
-    this.setStats1(this.chart1Data);
-    this.setStats2(this.chart2Data);
-    this.setStats3(this.chart3Data);
-    this.setStats4(this.chart4Data);
+    this.searchData();
+    this.initMap();
   },
   methods: {
+    // 地图
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('drawEdge', {
+        // defaultCursor: 'point',
+        resizeEnable: true,
+        center: mapXupuxian.center, // e.g. 溆浦县中心点
+        zoom: this.zoom,
+        zooms: this.zooms
+      });
+      map.setMapStyle('amap://styles/light');
+      this.amap = map;
+    },
+    setMapStatus (status) {
+      if (this.amap) {
+        if (status === '1') {
+          this.amap.setZoomAndCenter(this.zoom, mapXupuxian.center);
+        } else if (status === '2') {
+          let iZoom = this.amap.getZoom() + 1;
+          if (iZoom <= this.zooms[1]) {
+            this.amap.setZoom(iZoom);
+          }
+        } else if (status === '3') {
+          let iZoom = this.amap.getZoom() - 1;
+          if (iZoom >= this.zooms[0]) {
+            this.amap.setZoom(iZoom);
+          }
+        }
+      }
+    },
+    // 行政边界
+    getSonBoundary () {
+      let _this = this;
+      window.AMap.service('AMap.DistrictSearch', function () { // 回调函数
+        // 实例化DistrictSearch
+        let districtSearch = new window.AMap.DistrictSearch({
+          level: 'biz_area', // country、province、city、district、biz_area
+          subdistrict: 0, // 返回下一级行政区
+          showbiz: true, // 最后一级返回街道信息
+          extensions: 'all' // 返回行政区边界坐标组等具体信息
+        });
+        // 使用districtSearch对象调用行政区查询的功能
+        districtSearch.search(mapXupuxian.adcode, function (status, result) {
+          // console.log('result', result)
+          if (result && result.districtList && result.districtList[0]) {
+            let oDis = result.districtList[0];
+            let bounds = oDis.boundaries;
+            // 行政区边界渲染，使用多边形覆盖物实现
+            let polygon = new window.AMap.Polygon({
+              map: _this.amap,
+              strokeWeight: 2,
+              path: bounds,
+              fillOpacity: 0, // 0.95
+              fillColor: '#02269e', // 0b21a0 032488
+              strokeColor: '#0dd8ff',
+              strokeOpacity: 0.5,
+              zIndex: 10
+            });
+            polygon.on('click', function (e) {
+            });
+            polygon.on('dblclick', function (e) {
+              _this.amap.setZoom(_this.amap.getZoom() + 1);
+            });
+          }
+          // map.setFitView();
+        })
+        // map.setZooms(9.8);
+      });
+    },
+    // 获取列表数据
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.departmentData = res.data.list;
+          }
+        })
+    },
     intitReportSize () {
       let $list = $('.stat_tt_item');
       if ($list && $list.length > 0) {
@@ -550,7 +638,7 @@ export default {
       });
       outterView.intervalStack()
         .position('percent')
-        .color('name', ['#bf2cfe', '#1774f2', '#228ed6'])
+        .color('name', ['#0C70F8', '#8949F3'])
         .label('name')
         .tooltip('name*percent', function (item, percent) {
           percent = (percent * 100).toFixed(2) + '%';
@@ -578,7 +666,7 @@ export default {
       });
       middleView.intervalStack()
         .position('percent')
-        .color('name', ['#d98ff9', '#85b3f3', '#8ac2e5'])
+        .color('name', ['#0C70F8', '#8949F3'])
         // .label('name')
         .tooltip('name*percent', function (item, percent) {
           percent = (percent * 100).toFixed(2) + '%';
@@ -606,7 +694,7 @@ export default {
       });
       innerView.intervalStack()
         .position('percent')
-        .color('name', ['#efd2fc', '#cee1fa', '#d0e6f4'])
+        .color('name', ['#efd2fc', '#cee1fa'])
         // .label('name')
         .tooltip('name*percent', function (item, percent) {
           percent = (percent * 100).toFixed(2) + '%';
@@ -622,17 +710,259 @@ export default {
       chart.render();
       this.charts.chart4 = chart;
     },
+    // 搜索数据
+    searchData () {
+      this.searchLoading = true;
+      this.loadingHandler = true;
+      this.initDatas();
+    },
+    initDatas () {
+      // 事件总体情况统计
+      this.getGeneralData();
+      // 事件数量趋势分析
+      this.getQuantitativetyData();
+      // 事件等级分析
+      this.getRankAnalysisData();
+      // 事件类型分析
+      this.getTypeAnalysisData();
+      // 事件高发地点分析
+      this.getHotLocationData();
+      // 事件布控统计分析
+      this.getSurveillanceData();
+    },
+    // 事件总体情况统计
+    getGeneralData () {
+      let params = this.getSearchParams();
+      getGeneralcondition(params)
+        .then(res => {
+          if (res && res.data) {
+            this.generalData = res.data;
+            this.loadHandler();
+          }
+        })
+        .catch(() => { this.loadHandler(); })
+    },
+    // 事件等级分析
+    getRankAnalysisData () {
+      let params = this.getSearchParams();
+     getRankAnalysis(params)
+        .then((res) => {
+          if (res && res.data) {
+            let _data = [];
+            for (let i = 0; i < res.data.length; i++) {
+              _data.push({
+                item: res.data[i].level,
+                count: res.data[i].count,
+                percent: isNaN(res.data[i].proportion) ? 0 : (Number(res.data[i].proportion) / 100)
+              });
+            }
+            this.setStats1(_data);
+            this.loadHandler();
+          }
+        })
+        .catch(() => { 
+          this.loadHandler(); 
+        })
+    },
+    // 事件类型分析
+    getTypeAnalysisData () {
+      let params = this.getSearchParams();
+      getTypeAnalysis(params)
+        .then((res) => {
+          // console.log('事件类型分析', res);
+          if (res && res.data) {
+            let _data = [];
+            for (let i = 0; i < res.data.length; i++) {
+              _data.push({
+                year: res.data[i].type,
+                sales: Number(res.data[i].count)
+              });
+            }
+            this.setStats2(_data);
+            this.loadHandler();
+          }
+        })
+        .catch(() => { 
+          this.loadHandler(); 
+        })
+    },
+    // 事件数量趋势分析
+    getQuantitativetyData () {
+      let params = this.getSearchParams();
+      getQuantitativeTrend(params)
+        .then((res) => {
+          if (res) {
+            // console.log('事件数量趋势分析', res);
+            let _data = [];
+            for (let i = 0; i < res.data.length; i++) {
+              _data.push({
+                year: res.data[i].time,
+                value: Number(res.data[i].count)
+              });
+            }
+            this.setStats3(_data);
+            this.loadHandler();
+          }
+        })
+        .catch(() => { 
+          this.loadHandler(); 
+        })
+    },
+    // 事件高发地点分析
+    getHotLocationData () {
+      let params = this.getSearchParams();
+      getHotLocation(params)
+        .then((res) => {
+          if (res && res.data) {
+            // console.log('事件高发地点分析', res);
+            this.polygons = res.data;
+            console.log('polygons', this.polygons)
+            this.setsonPolygons(res.data);
+          }
+        })
+        .catch(() => { this.loadHandler(); })
+    },
+    // 事件布控统计
+    getSurveillanceData () {
+      let params = this.getSearchParams();
+     getSurveillance(params)
+        .then((res) => {
+          if (res && res.data) {
+            let _data = [];
+            res.data.map(item => {
+              let name = '';
+              if (item.isSurv === 1) {
+                name = '已布控事件';
+              } else {
+                name = '未布控事件';
+              }
+              const params = {
+                value: Number(item.evtCount),
+                name: name
+              }
+              _data.push(params);
+            })
+            this.setStats4(_data);
+            this.loadHandler();
+          }
+        })
+        .catch(() => { this.loadHandler(); })
+    },
+    setsonPolygons (data) {
+      let _this = this;
+      if (this.amap && this.sonPolygons) {
+        this.amap.remove(this.sonPolygons);
+        this.sonPolygons = null;
+      }
+      if (this.amap && this.textMarkers) {
+        this.amap.remove(this.textMarkers);
+        this.textMarkers = null;
+      }
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] && data[i].borderList) {
+          // let oDis = result.districtList[0];
+          // console.log('this.tableData[i]', this.tableData[i]);
+          let borderList = data[i].borderList;
+          let bounds = [];
+          for (let j = 0; j < borderList.length; j++) {
+            if (borderList[j].longitude > 0 && borderList[j].latitude > 0) {
+              bounds.push(new window.AMap.LngLat(borderList[j].longitude, borderList[j].latitude));
+            }
+          }
+          // console.log('setsonPolygons bounds', bounds);
+          // 行政区边界渲染，使用多边形覆盖物实现
+          // let _name = data[i].areaName;
+          let polygonStyles = {
+            n: {
+              fillOpacity: 1, // 0.95
+              strokeColor: '#fff',
+              fillColor: '#088bfd'
+            },
+            s: {
+              fillOpacity: 1, // 0.95
+              strokeColor: '#fff',
+              fillColor: '#f9783f'
+            }
+          };
+          let polygon = new window.AMap.Polygon(Object.assign({
+            map: this.amap,
+            path: [bounds],
+            bubble: false, // 是否将覆盖物的鼠标或touch等事件冒泡到地图上
+            zIndex: 12,
+            extData: {
+              // areaName: _name
+            }
+          }, this.getPolygonStyles(i)));
+          if (!this.sonPolygons) {
+            this.sonPolygons = [];
+          }
+          this.sonPolygons.push(polygon);
+        }
+        if (data[i] && data[i].nameLocation) {
+          if (data[i].nameLocation.latitude > 0 && data[i].nameLocation.longitude > 0) {
+            let textMarker = new window.AMap.Text({
+              text: data[i].areaName,
+              map: this.amap,
+              style: {
+                'background': 'inherit',
+                color: '#fff',
+                border: 0
+              },
+              bubble: false, // 是否将覆盖物的鼠标或touch等事件冒泡到地图上
+              position: new window.AMap.LngLat(data[i].nameLocation.longitude, data[i].nameLocation.latitude),
+              zIndex: 12
+            });
+            if (!this.textMarkers) {
+              this.textMarkers = [];
+            }
+            this.textMarkers.push(textMarker);
+          }
+        }
+      }
+      // console.log('this.sonPolygons', this.sonPolygons)
+    },
+    getPolygonStyles (_index) {
+      let _o = {
+        fillOpacity: 1,
+        strokeColor: '#fff'
+      };
+      let fillColors = ['#00A2FF', '#0F70C4', '#0054FE', '#4E2DF6', '#BF2CFE'];
+      if (_index < 5) {
+        _o.strokeWeight = 3;
+        _o.fillColor = fillColors[_index];
+      } else {
+        _o.fillColor = '#088bfd';
+        _o.strokeWeight = 1;
+      }
+      return _o;
+    },
+    // 查询参数
+    getSearchParams () {
+      return {
+        'where.reportTimeStart': formatDate(this.searchForm.dateTime[0], 'yyyy-MM-dd'),
+        'where.reportTimeEnd': formatDate(this.searchForm.dateTime[1], 'yyyy-MM-dd'),
+        'where.eventDealOrgId': this.searchForm.eventDealOrgId
+      }
+    },
+    loadHandler () {
+      if (this.loadingHandler) {
+        setTimeout(() => {
+          this.searchLoading = false;
+        }, 500);
+        this.loadingHandler = false;
+      }
+    },
   }
 }
 </script>
 <style lang="scss" scoped>
-.stat-box {
-  width: 100%;
-  padding: 15px;
-  .search-box {
-    padding: 10px;
-    width: 100%;
-    background-color: #ffffff;
+  .stat-box {
+    padding: 10px 0 0 ;
+  }
+  .e_stat_s {
+    padding: 20px 0 0 20px;
+    margin: 0 20px 0 20px;
+    background-color: #fff;
     .operation_btn {
       padding: 0;
       width: 100px;
@@ -643,87 +973,82 @@ export default {
       margin-left: 10px;
     }
   }
-  .stat-content {
-    width: 100%;
-    margin-top: 20px;
-    .stat-zt {
-      width: 100%;
-      li {
-        width: 24.25%;
-        margin-right: 1%;
-        box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
-        float: left;
-        &:last-child {
-          margin-right: 0px;
+  .e_stat_content {
+    overflow: hidden;
+    // margin-top: 20px;
+  }
+  .stat-zt {
+    padding: 10px 10px 0 10px;
+    overflow: hidden;
+    li {
+      width: 25%;
+      float: left;
+      padding: 10px;
+      box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+      // float: left;
+      &:last-child {
+        margin-right: 0px;
+      }
+      .stat-zt-box {
+        background-color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        >div {
+          &:first-child {
+            width: 110px;
+            text-align: center;
+            padding: 20px 0;
+            box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+          }
         }
-        .stat-zt-box {
-          background-color: #ffffff;
+        .left-icon-number {
+          background-color: #0C70F8;
+        }
+        .left-icon-finish {
+          background-color: #0D9DF4;
+        }
+        .left-icon-ing {
+          background-color: #6262FF;
+        }
+        .left-icon-unhandle {
+          background-color: #8949F3;
+        }
+        .stat-zt-value {
+          width: 40%;
           display: flex;
-          justify-content: space-between;
-          >div {
-            &:first-child {
-              width: 110px;
-              text-align: center;
-              padding: 20px 0;
-              box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
-            }
+          padding-top: 25px;
+          padding-left: 15px;
+          flex-direction: column;
+          color: #666666;
+          h3 {
+            font-size: 20px;
+            font-weight: bold;
           }
-          .left-icon-number {
-            background-color: #0C70F8;
+          span:first-child {
+            font-size:32px;
+            font-weight:bold;
           }
-          .left-icon-finish {
-            background-color: #0D9DF4;
-          }
-          .left-icon-ing {
-            background-color: #6262FF;
-          }
-          .left-icon-unhandle {
-            background-color: #8949F3;
-          }
-          .stat-zt-value {
-            width: 40%;
-            display: flex;
-            padding-top: 25px;
-            padding-left: 15px;
-            flex-direction: column;
-            color: #666666;
-            h3 {
-              font-size: 20px;
-              font-weight: bold;
-            }
-            span:first-child {
-              font-size:32px;
-              font-weight:bold;
-            }
-          }
-          .right-icon {
-            margin-right: 10px;
-            i {
-              margin-top: 28px;
-            }
+        }
+        .right-icon {
+          margin-right: 10px;
+          i {
+            margin-top: 28px;
           }
         }
       }
     }
-    .stat-tt {
-      > li {
-        width: 49.5%;
-        margin-top: 20px;
-        float: left;
-        &:nth-child(odd){
-          margin-right: 1%;
-        }
-        > div {
-          padding: 20px 0 10px 0;
-          background-color: #fff;
-
-        }
+  }
+  .e_stat_tt {
+    padding: 0 10px 0 10px;
+    overflow: hidden;
+    > li {
+      width: 50%;
+      float: left;
+      padding: 10px;
+      > div {
+        padding: 20px 0 10px 0;
+        background-color: #fff;
       }
-    }
-    .stat_title {
-      color: #333333;
-      font-weight: bold;
-      padding: 0 0 0 20px;
     }
   }
   .e_stat_map {
@@ -747,5 +1072,109 @@ export default {
       }
     }
   }
-}
+  .stat_title {
+    // border-left: 3px solid #0785FD;
+    color: #333333; font-weight: bold;
+    padding: 0 0 0 40px;
+  }
+  .stat_map_cl_ul {
+    padding-top: 20px;
+    > li {
+      position: relative;
+      border-top: 1px solid #E9F7FF;
+      border-bottom: 1px solid #E9F7FF;
+      height: 80px;
+      background-image: url(../../../../assets/img/stat/stat_031.png);
+      background-repeat: no-repeat;
+      background-position: -10px center;
+      background-size: auto 120%;
+      color: #00A2FF;
+      > span {
+        position: absolute; top: 30px; left: 20px;
+        width: 20px; height: 20px;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 100% 100%;
+        background-image: url(../../../../assets/img/stat/stat-041.png);
+      }
+      > h5 {
+        padding: 30px 0 0 45px;
+      }
+      > div {
+        position: absolute; top: 30px; right: 20px;
+        color: #666; font-size: 12px;
+        > span {
+          font-weight: bold;
+          font-size: 20px;
+        }
+      }
+      &:nth-child(2) {
+        color: #0F70C4;
+        background-position: -22px center;
+        > span { background-image: url(../../../../assets/img/stat/stat-043.png); }
+      }
+      &:nth-child(3) {
+        color: #0054FE;
+        background-position: -34px center;
+        > span { background-image: url(../../../../assets/img/stat/stat-042.png); }
+      }
+      &:nth-child(4) {
+        color: #4E2DF6;
+        background-position: -46px center;
+        > span { background-image: url(../../../../assets/img/stat/stat-044.png); }
+      }
+      &:nth-child(5) {
+        color: #BF2CFE;
+        background-position: -58px center;
+        > span { background-image: url(../../../../assets/img/stat/stat-045.png); }
+      }
+    }
+  }
+  .stat_tt_item {
+    position: relative;
+  }
+
+  .de-close-btn {
+    position: absolute; top: 20px; right: 10px; z-index:11;
+    > ul {
+      float: left;
+      display: inline-block;
+      background-color: #ffffff;
+      margin-right: 20px;
+      cursor: pointer;
+      > li {
+        width: 70px;
+        height: 70px;
+        line-height: 70px;
+        text-align: center;
+        position: relative;
+        i {
+          display: inline-block;
+          vertical-align: middle;
+        }
+        .divide {
+          display: inline-block;
+          right: 0;
+          top: 25%;
+          position: absolute;
+          width: 1px;
+          height: 40px;
+          background-color: #F2F2F2;
+        }
+      }
+    }
+    .second_ul {
+      >li {
+        float: left;
+        i {
+          font-size: 25px;
+          color: #0C70F8;
+        }
+        de-btn-dis {
+          color: #999999;
+          cursor: default;
+        }
+      }
+    }
+  }
 </style>

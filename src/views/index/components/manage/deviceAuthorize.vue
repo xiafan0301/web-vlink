@@ -7,33 +7,14 @@
       </ul>
       <template v-if="tabState === 1">
         <ul class="au_left_content">
-          <li>
-            <div class="parent_content" :class="{'active_li': arrowActive === true}" @click="arrowActive = !arrowActive">
-              <i :class="[arrowActive === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-              <span>所属部门</span>
+          <li v-for="(item, index) in departmentData" :key="'item' + index">
+            <div class="parent_content" :class="{'active_li': item.isOpen === true}" @click="getMemberInfo(item.uid, index)">
+              <i :class="[item.isOpen === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+              <span>{{item.organName}}</span>
             </div>
-            <template v-if="arrowActive === true">
+            <template v-if="item.isOpen === true">
               <div class="content_detail">
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-              </div>
-            </template>
-          </li>
-          <li>
-            <div class="parent_content" :class="{'active_li': arrowActive === true}" @click="arrowActive = !arrowActive">
-              <i :class="[arrowActive === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-              <span>所属部门</span>
-            </div>
-            <template v-if="arrowActive === true">
-              <div class="content_detail">
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
-                <p>镇综治中心</p>
+                <p v-for="(itm, idx) in memberListData" :key="'itm' + idx">{{itm.userName}}</p>
               </div>
             </template>
           </li>
@@ -46,11 +27,12 @@
             <span>临时授权</span>
           </div>
           <ul>
-            <li class="active_name">镇综治中心</li>
-            <li>镇综治中心</li>
-            <li>镇综治中心</li>
-            <li>镇综治中心</li>
-            <li>镇综治中心</li>
+            <li
+              v-for="(item, index) in userListData"
+              :key="item.uid"
+              :class="[tempActiveUser === index ? 'active_name' : '']"
+              @click="getTempDetailDevice(item.uid, index)"
+            >{{item.userName}}</li>
           </ul>
         </div>
       </template>
@@ -157,74 +139,74 @@
         <div class="info_top">
           <p>
             <i class="vl_icon vl_icon_manage_5"></i>
-            <span>可用设备 (100个)</span>
+            <span>可用设备 ({{tempDeviceNumber}}个)</span>
           </p>
           <div class="search_box" style="margin-top: 15px;">
             <el-date-picker
               style="width: 300px;margin-right: 30px;"
-              v-model="value6"
+              v-model="tempSearchForm.selectTime"
+              :picker-options="pickerOptions0"
               type="daterange"
+              value-format="yyyy-MM-dd"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
             </el-date-picker>
-            <el-select v-model="value" placeholder="请选择" style="margin-right: 30px;width: 250px;">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
+            <el-select v-model="tempSearchForm.authState" placeholder="请选择" style="margin-right: 30px;width: 250px;">
+              <el-option label="已授权" :value="1"></el-option>
+              <el-option label="生效中" :value="2"></el-option>
+              <el-option label="已失效" :value="3"></el-option>
             </el-select>
-            <el-button class="select_btn">查询</el-button>
-            <el-button class="reset_btn">重置</el-button>
+            <el-button class="select_btn" @click="tempSearchData">查询</el-button>
+            <el-button class="reset_btn" @click="tempResetData">重置</el-button>
           </div>
           <div class="divide"></div>
         </div>
-        <el-button class="all_stop_btn" @click="showGrantDialog">全部终止</el-button>
-        <div class="templ_detail_box">
-          <vue-scroll>
-            <ul class="temp_detail_info">
-              <li>
-                <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                  <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                  <span>重点场所</span>
-                </div>
-                <div class="child_temp" v-show="arrowActiveTemp">
-                  <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
+        <template v-if="tempDeviceList.length > 0">
+          <el-button class="all_stop_btn" @click="showGrantDialog">全部终止</el-button>
+          <div class="templ_detail_box">
+            <vue-scroll>
+              <ul class="temp_detail_info">
+                <li v-for="(item, index) in tempDeviceList" :key="'item' + index">
+                  <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openTempArrow(index)">
+                    <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                    <span>{{item.groupName}}</span>
                   </div>
-                  <ul class="child_temp_detail">
-                    <li class="right_li">
-                      <span>广场监控点1-300</span>
-                      <span class="effect_status">生效中</span>
-                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
-                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
-                    </li>
-                    <li class="right_li">
-                      <span>广场监控点1-300</span>
-                      <span class="grant_status">已授权</span>
-                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
-                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
-                    </li>
-                    <li class="right_li">
-                      <span>广场监控点1-300</span>
-                      <span class="invalid_status">已失效</span>
-                      <span> (2018-1112:00:00至2018-11-21200:00)</span>
-                      <i class="vl_icon vl_icon_manage_16" title="终止授权"></i>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </vue-scroll>
-        </div>
+                  <div class="child_temp" v-show="item.isOpenArrow">
+                    <div class="temp_tab">
+                      <span class="active_span">摄像头</span>
+                      <span>卡口</span>
+                    </div>
+                    <ul class="child_temp_detail">
+                      <li class="right_li" v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                        <span>{{itm.deviceName}}</span>
+                        <template v-if="itm.authStatus === 1">
+                          <span class="grant_status">已授权</span>
+                        </template>
+                        <template v-if="itm.authStatus === 2">
+                          <span class="effect_status">生效中</span>
+                        </template>
+                        <template v-if="itm.authStatus === 3">
+                          <span class="invalid_status">已失效</span>
+                        </template>
+                        <span> ({{itm.authStartTime | fmTimestamp}}至{{itm.authEndTime | fmTimestamp}})</span>
+                        <i v-show="itm.authStatus !== 3" class="vl_icon vl_icon_manage_16" title="终止授权" @click="showAloneStopTerminateDialog(itm.authId)"></i>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </vue-scroll>
+          </div>
+        </template>
+        <template v-else>
+          无相关数据
+        </template>
       </div>
     </template>
     <!--全部终止授权弹出框-->
     <el-dialog
-      title="是否终止对用户的全部临时授权?"
+      :title="stopTitle"
       :visible.sync="stopGrantDialog"
       width="482px"
       :close-on-click-modal="false"
@@ -233,42 +215,182 @@
       >
       <div slot="footer" class="dialog-footer">
         <el-button @click="stopGrantDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="stopGrantDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="aloneStopTerminate">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { getUserList, getDepartmentList, getUserMember, getTempDeviceList, stopTerminate, stopOneTerminate } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      value6: null,
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value: '',
+      stopTitle: null,
+      tempSearchForm: {
+        selectTime: [],
+        authState: 1, // 授权状态
+      },
+      pickerOptions0: {
+        disabledDate (time) {
+          console.log(time.getTime())
+          return time.getTime() < (new Date().getTime() - 3600 * 1000 * 24) ||  time.getTime() > (new Date().getTime() + 3600 * 1000 * 24 * 90);
+        }
+      },
+      tempActiveUser: 0, // 临时授权选中的授权对象
       tabState: 2, // 1-机构授权  2-临时授权
       arrowActive: false, // false-未展开的箭头， true-展开的箭头
       arrowActiveTemp: false,
       stopGrantDialog: false, // 终止授权弹出框
+      userInfo: {}, // 存储的用户信息
+      userListData: [], // 所有的用户--授权对象
+      departmentData: [], // 所有的机构
+      memberListData: [], // 机构下的成员
+      tempDeviceList: [], // 临时授权--可选的设备列表
+      tempDeviceNumber: 0, // 临时授权--可用设备数量
+      userId: null, // 点击的授权对象
+      stopGrantId: null, // 单个终止授权id
     }
   },
+  created () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  },
+  mounted () {
+    this.getList();
+    this.getDepartList();
+  },
   methods: {
+    // 获取列表数据
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.departmentData = JSON.parse(JSON.stringify(res.data.list));
+            this.departmentData.map(item => {
+              item.isOpen = false;
+              // if (item.deviceList && item.deviceList.length > 0) {
+              //   this.tempDeviceNumber += item.deviceList.length;
+              // }
+            })
+          }
+        })
+    },
+    // 获取机构下的成员
+    getMemberInfo (id, index) {
+      if (id) {
+        const params = {
+          'where.uid': id,
+          'where.proKey': this.userInfo.proKey,
+          pageSize: 0
+        };
+        getUserMember(params)
+        .then(res => {
+          if (res) {
+            this.memberListData = res.data.list;
+          }
+        })
+        .catch(() => {})
+      }
+      this.departmentData[index].isOpen = !this.departmentData[index].isOpen;
+      this.departmentData = JSON.parse(JSON.stringify(this.departmentData));
+    },
+    // 获取所有的用户
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userListData = res.data.list;
+            this.getTempDetailDevice(res.data.list[0].uid, 0);
+          }
+        })
+        .catch(() => {})
+    },
+    // 临时授权---点击左侧授权对象获取设备列表
+    getTempDetailDevice (id, index) {
+      this.tempDeviceNumber = 0;
+      this.tempActiveUser = index;
+      this.userId = id;
+      if (id) {
+        const params = {
+          uid: id,
+          startTime: this.tempSearchForm.selectTime[0],
+          endTime: this.tempSearchForm.selectTime[1],
+          authState: this.tempSearchForm.authState,
+          type: 2 // 1-机构 2-用户
+        };
+        getTempDeviceList (params)
+          .then(res => {
+            if (res) {
+              this.tempDeviceList = JSON.parse(JSON.stringify(res.data));
+              this.tempDeviceList.map(item => {
+                item.isOpenArrow = false;
+                if (item.deviceList && item.deviceList.length > 0) {
+                  this.tempDeviceNumber += item.deviceList.length;
+                }
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 临时授权--搜索数据
+    tempSearchData () {
+      this.getTempDetailDevice(this.userId);
+    },
+    // 临时授权--重置
+    tempResetData() {
+      this.tempSearchForm.selectTime = [];
+      this.tempSearchForm.authState = 1;
+      this.getTempDetailDevice(this.userId);
+    },
+    // 临时授权--右侧设备展开
+    openTempArrow (index) {
+      console.log(index)
+      this.tempDeviceList[index].isOpenArrow = !this.tempDeviceList[index].isOpenArrow;
+      this.tempDeviceList = JSON.parse(JSON.stringify(this.tempDeviceList));
+    },
+    // 显示单个终止授权弹出框
+    showAloneStopTerminateDialog (uid) {
+      this.stopGrantId = uid;
+      this.stopTitle = '是否终止该设备的临时授权?';
+      this.stopGrantDialog = true;
+    },
+    // 单个设备终止授权
+    aloneStopTerminate () {
+      const params = {
+        uid: this.stopGrantId,
+        type: 2, // 1--机构  2--用户
+      };
+      stopOneTerminate(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '终止成功',
+              customClass: 'request_tip'
+            });
+            this.stopGrantDialog = false;
+            this.getTempDetailDevice(this.userId);
+          } else {
+            this.$message({
+              type: 'error',
+              message: '终止失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 显示终止授权的弹出框
     showGrantDialog () {
+      this.stopTitle = '是否终止对用户的全部临时授权?';
       this.stopGrantDialog = true;
     },
     // 跳至临时授权页面

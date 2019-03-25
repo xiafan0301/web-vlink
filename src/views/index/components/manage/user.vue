@@ -5,10 +5,7 @@
       <div><router-link :to="{ name: 'group_manage'}" @click.native = "state = 2">组</router-link></div>
     </div>
     <div>
-      <!-- <transition enter-active-class="fade-in" leave-active-class="leave-immediately"
-                  :duration="{ enter: 100, leave: 100 }"> -->
-        <router-view></router-view>
-      <!-- </transition> -->
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -24,6 +21,8 @@ export default {
 <style lang="scss" scoped>
 .main {
   padding: 20px;
+  height: 100%;
+  overflow: scroll;
   > .ar-tab-nav {
     background-color: #ffffff;
     padding-top: 8px;
