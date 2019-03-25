@@ -146,9 +146,9 @@ export default {
 
       // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList));
       // 过滤出父级中没有选中
-      let checkedParentArr = this.leftDeviceList.filter(itm => {
-        return itm.isChecked === false;
-      });
+      // let checkedParentArr = this.leftDeviceList.filter(itm => {
+      //   return itm.isChecked === false;
+      // });
     },
     // 左侧---展开左侧列表
     openLeftArrow (index) {
@@ -165,9 +165,9 @@ export default {
       });
       // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
       // 过滤出父级中没有选中
-      let checkedParentArr = this.leftDeviceList.filter(itm => {
-        return itm.isChecked === false;
-      });
+      // let checkedParentArr = this.leftDeviceList.filter(itm => {
+      //   return itm.isChecked === false;
+      // });
     },
     // 添加设备
     addDeviceToLeft () {

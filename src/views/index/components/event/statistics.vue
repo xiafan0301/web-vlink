@@ -289,7 +289,7 @@ export default {
   methods: {
     // 地图
     initMap () {
-      let _this = this;
+      // let _this = this;
       let map = new window.AMap.Map('drawEdge', {
         // defaultCursor: 'point',
         resizeEnable: true,
@@ -345,9 +345,9 @@ export default {
               strokeOpacity: 0.5,
               zIndex: 10
             });
-            polygon.on('click', function (e) {
+            polygon.on('click', function () {
             });
-            polygon.on('dblclick', function (e) {
+            polygon.on('dblclick', function () {
               _this.amap.setZoom(_this.amap.getZoom() + 1);
             });
           }
@@ -849,7 +849,7 @@ export default {
         .catch(() => { this.loadHandler(); })
     },
     setsonPolygons (data) {
-      let _this = this;
+      // let _this = this;
       if (this.amap && this.sonPolygons) {
         this.amap.remove(this.sonPolygons);
         this.sonPolygons = null;
@@ -872,18 +872,18 @@ export default {
           // console.log('setsonPolygons bounds', bounds);
           // 行政区边界渲染，使用多边形覆盖物实现
           // let _name = data[i].areaName;
-          let polygonStyles = {
-            n: {
-              fillOpacity: 1, // 0.95
-              strokeColor: '#fff',
-              fillColor: '#088bfd'
-            },
-            s: {
-              fillOpacity: 1, // 0.95
-              strokeColor: '#fff',
-              fillColor: '#f9783f'
-            }
-          };
+          // let polygonStyles = {
+          //   n: {
+          //     fillOpacity: 1, // 0.95
+          //     strokeColor: '#fff',
+          //     fillColor: '#088bfd'
+          //   },
+          //   s: {
+          //     fillOpacity: 1, // 0.95
+          //     strokeColor: '#fff',
+          //     fillColor: '#f9783f'
+          //   }
+          // };
           let polygon = new window.AMap.Polygon(Object.assign({
             map: this.amap,
             path: [bounds],

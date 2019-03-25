@@ -378,7 +378,7 @@ export default {
             })
             this.createRoleDialog = false;
             this.getList();
-            this.$refs[form].resetFields();
+            // this.$refs[form].resetFields();
           } else {
             this.$message({
               type: 'error',
