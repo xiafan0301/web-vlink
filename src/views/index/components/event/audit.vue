@@ -78,14 +78,14 @@
         <el-table-column
           fixed
           label="审核状态"
-          prop="eventStatusName"
+          prop="acceptFlagName"
           :show-overflow-tooltip='true'
           >
           <template slot-scope="scope">
             <span class="event_status"
-              :class="[scope.row.eventStatusName === '待审核' ? 'untreated_event'
-                : scope.row.eventStatusName === '通过' ? 'treating_event' : 'end_event']">
-                {{scope.row.eventStatusName}}
+              :class="[scope.row.acceptFlagName === '待审核' ? 'untreated_event'
+                : scope.row.acceptFlagName === '通过' ? 'treating_event' : 'end_event']">
+                {{scope.row.acceptFlagName}}
             </span>
           </template>
         </el-table-column>
@@ -255,13 +255,13 @@ export default {
       this.$router.push({name: 'add_event'});
     },
     skipDetailPage (obj) { // 跳转至事件审核详情页
-      if (obj.eventStatusName === '待审核') {
+      if (obj.acceptFlagName === '待审核') {
         this.$router.push({name: 'unaudit_event', query: {eventId: obj.eventId}});
       }
-      if (obj.eventStatusName === '通过') {
+      if (obj.acceptFlagName === '通过') {
         this.$router.push({name: 'audit_event_detail', query: {status: 'pass', eventId: obj.eventId}});
       }
-      if (obj.eventStatusName === '驳回') {
+      if (obj.acceptFlagName === '驳回') {
         this.$router.push({name: 'audit_event_detail', query: {status: 'reject', eventId: obj.eventId}});
       }
     },

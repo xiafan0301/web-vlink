@@ -119,8 +119,9 @@
       class="dialog_comp"
       >
       <el-form :model="userForm" ref="userForm" :rules="rules">
-        <el-form-item label="" prop="groupName">
-          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" style="width: 90%;" v-model="userForm.groupName"></el-input>
+        <el-form-item label="" prop="groupName" class="group_name">
+          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" @change="changeGroupName" style="width: 90%;" v-model="userForm.groupName"></el-input>
+          <p class="group_error_tip" v-show="isShowOrganError">用户组已存在</p>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -138,8 +139,9 @@
       class="dialog_comp"
       >
       <el-form :model="userForm" ref="userForm" :rules="rules">
-        <el-form-item label="" prop="groupName">
-          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" style="width: 90%;" v-model="userForm.groupName"></el-input>
+        <el-form-item label="" prop="groupName" class="group_name">
+          <el-input placeholder="请输入用户组名称2-20位，中英文皆可，但不可重复" @change="changeGroupName" style="width: 90%;" v-model="userForm.groupName"></el-input>
+          <p class="group_error_tip" v-show="isShowOrganError">用户组已存在</p>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -255,12 +257,13 @@
   </div>
 </template>
 <script>
-import { checkUserName } from '@/utils/validator.js';
+// import { checkUserName } from '@/utils/validator.js';
 import { getUserGroups, createUserGroups, updateUserGroups, delUserGroup, getUserList, getRoleList,
- addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles } from '@/views/index/api/api.js';
+ addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles, judgeUserGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isShowOrganError: false,
       minRoleLength: 3, // 所属角色最多显示3个
       isRoleOpen: false, // 所属角色是否展开
       groupName: null, // 根据组名搜索
@@ -286,9 +289,7 @@ export default {
         groupName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { min: 2, message: '长度2-20位', trigger:'blur' },
-          { max: 20, message: '长度2-20位', trigger:'blur' },
-          { validator: checkUserName, trigger: 'blur'},
-          // { validator: isJudgeUserGroup, trigger: 'blur'}
+          { max: 20, message: '长度2-20位', trigger:'blur' }
         ]
       },
       delUserGroupDialog: false, // 删除用户组弹出框
@@ -322,14 +323,6 @@ export default {
       getUserGroups(params)
         .then(res => {
           if (res) {
-            // res.data.list.map(item => {
-            //   if (item.roleList) {
-            //     item.roleList[item.roleList.length] = {
-            //       allgroup: 3,
-            //       isShowAllGroup: true
-            //     }
-            //   }
-            // })
             this.groupListData = res.data.list;
             this.pagination.total = res.data.total;
           }
@@ -353,8 +346,14 @@ export default {
       this.pagination.pageNum = page;
       this.getList();
     },
+    changeGroupName (val) {
+      if (!val) {
+        this.isShowOrganError = false;
+      }
+    },
     // 显示创建用户组弹出框
     showAddUserGroup () {
+      this.isShowOrganError = false;
       this.userForm.groupName = null;
       this.addUserGroupDialog = true;
     },
@@ -363,35 +362,52 @@ export default {
       let _this = this;
       this.$refs[form].validate(valid => {
         if (valid) {
-          const params = {
+           const params = {
+            proKey: _this.storageInfo.proKey,
             groupName: _this.userForm.groupName,
-            proKey: _this.storageInfo.proKey
           }
-          createUserGroups(params)
+          judgeUserGroup(params)
             .then(res => {
-              if (res) {
-                _this.$message({
-                  type: 'success',
-                  message: '添加成功',
-                  customClass: 'request_tip'
-                })
-                _this.addUserGroupDialog = false;
-                _this.getList();
+              if (res.data) {
+                _this.isShowOrganError = true;
               } else {
-                _this.$message({
-                  type: 'error',
-                  message: '添加失败',
-                  customClass: 'request_tip'
-                })
+                _this.isShowOrganError = false;
+                _this.handleAddGroup(params);
               }
             })
             .catch(() => {})
         }
       })
     },
+    handleAddGroup (obj) {
+      // const params = {
+      //   groupName: this.userForm.groupName,
+      //   proKey: this.storageInfo.proKey
+      // }
+      createUserGroups(obj)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '添加成功',
+              customClass: 'request_tip'
+            })
+            this.addUserGroupDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '添加失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 取消添加
     cancelAdd (form) {
       this.$refs[form].resetFields();
+      this.isShowOrganError = false;
       this.addUserGroupDialog = false;
     },
     // 显示删除用户组弹出框
@@ -640,43 +656,62 @@ export default {
     showEditDialog (obj) {
       console.log(obj);
       this.editGroupId = obj.uid;
+      this.isShowOrganError = false;
       this.userForm.groupName = obj.groupName;
       this.editUserGroupDialog = true;
     },
     // 编辑信息
     editUserGroups (form) {
+      let _this = this;
       this.$refs[form].validate(valid => {
         if(valid) {
           const params = {
-            proKey: this.storageInfo.proKey,
-            uid: this.editGroupId,
-            groupName: this.userForm.groupName
+            proKey: _this.storageInfo.proKey,
+            groupName: _this.userForm.groupName,
           }
-          updateUserGroups(params)
+          judgeUserGroup(params)
             .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '修改成功',
-                  customClass: 'request_tip'
-                })
-                this.editUserGroupDialog = false;
-                this.getList();
+              if (res.data) {
+                _this.isShowOrganError = true;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '修改失败',
-                  customClass: 'request_tip'
-                })
+                _this.isShowOrganError = false;
+                _this.handleEditGroups();
               }
             })
             .catch(() => {})
         }
       })
     },
+    handleEditGroups () {
+      const params = {
+        proKey: this.storageInfo.proKey,
+        uid: this.editGroupId,
+        groupName: this.userForm.groupName
+      }
+      updateUserGroups(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.editUserGroupDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '修改失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 取消编辑
     cancelEdit (form) {
       this.editUserGroupDialog = false;
+      this.isShowOrganError = false;
       this.$refs[form].resetFields();
     },
     // 所属角色--展开收起
@@ -812,6 +847,18 @@ export default {
     }
   }
   .dialog_comp {
+    .group_name {
+      position: relative;
+      .group_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
+      }
+    }
     .group-content {
       >p {
         color: #999999;

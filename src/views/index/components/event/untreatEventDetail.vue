@@ -106,8 +106,6 @@ export default {
   methods: {
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
       this.openBigImg(index, this.basicInfo.imgList);
     },
     // 关闭图片放大
@@ -139,7 +137,7 @@ export default {
         uid: eventId,
         mutualFlag: this.isMutual
       }
-      updateEvent(params, eventId)
+      updateEvent(params)
         .then(res => {
           console.log(res)
         })

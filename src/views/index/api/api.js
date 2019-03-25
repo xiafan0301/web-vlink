@@ -6,7 +6,7 @@ import request from '@/config/axios';
  */
 export function login(data) {
   return request({
-    url: '/userService/login',
+    url: '/user-service/login',
     data,
     mode: 'user',
     method: 'post'
@@ -18,7 +18,7 @@ export function login(data) {
  */
 export function logout(data) {
   return request({
-    url: '/userService/logout',
+    url: '/user-service/logout/' + data.userMobile,
     params: data,
     mode: 'user',
     method: 'get'
@@ -30,7 +30,7 @@ export function logout(data) {
  */
 export function isRegister(data) {
   return request({
-    url: '/userService/checkUserMobile',
+    url: '/user-service/check-user-mobile',
     params: data,
     mode: 'user',
     method: 'get'
@@ -42,7 +42,7 @@ export function isRegister(data) {
  */
 export function getDiciData(uid) {
   return request({
-    url: 'dictService/dictList/?pid=' + uid,
+    url: 'dict-service/dict-list/?pid=' + uid,
     method: 'get'
   });
 }
@@ -62,9 +62,9 @@ export function getEventList(data) {
 /**
  * 修改事件
  */
-export function updateEvent(data, uid) {
+export function updateEvent(data) {
   return request({
-    url: 'eventServices/events/' + uid,
+    url: 'eventServices/events/update',
     method: 'put',
     data,
     mode: 'event'
@@ -207,6 +207,79 @@ export function updateProcess(uid, data) {
     method: 'put',
     params: data,
     mode: 'ctc'
+  });
+}
+/** ===== 事件统计分析 ====== */
+/**
+ * 事件总体情况统计
+ * @param {*} data 
+ */
+export function getGeneralcondition(data) {
+  return request({
+    url: 'eventCountServices/generalCondition',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件等级分析
+ * @param {*} data 
+ */
+export function getRankAnalysis(data) {
+  return request({
+    url: 'eventCountServices/rankAnalysis',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件类型分析
+ * @param {*} data 
+ */
+export function getTypeAnalysis(data) {
+  return request({
+    url: 'eventCountServices/typeAnalysis',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件数量分析
+ * @param {*} data 
+ */
+export function getQuantitativeTrend(data) {
+  return request({
+    url: 'eventCountServices/quantitativeTrend',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件高发地点分析
+ * @param {*} data 
+ */
+export function getHotLocation(data) {
+  return request({
+    url: 'eventCountServices/hotLocation',
+    method: 'get',
+    params: data,
+    mode: 'event'
+  });
+}
+/**
+ * 事件布控统计分析
+ * @param {*} data 
+ */
+export function getSurveillance(data) {
+  return request({
+    url: 'eventCountServices/surveillance',
+    method: 'get',
+    params: data,
+    mode: 'event'
   });
 }
 /* ================== 管理模块 =================== */
@@ -372,8 +445,8 @@ export function isForceUser (data) {
  */
 export function updateUser (data) {
   return request({
-    url: 'userService/userInfo',
-    data,
+    url: 'user-service/user-info',
+    data: data,
     mode: 'user',
     method: 'put'
   });
@@ -384,7 +457,7 @@ export function updateUser (data) {
  */
 export function createUser (data) {
   return request({
-    url: 'userService/userInfo',
+    url: 'user-service/user-info',
     data,
     mode: 'user',
     method: 'post'
@@ -460,6 +533,18 @@ export function delUserBatchRoles (data) {
     data,
     mode: 'auth',
     method: 'delete'
+  });
+}
+/**
+ * 判断用户角色是否重名
+ * @param {*} data 
+ */
+export function judgeRoleName (data) {
+  return request({
+    url: 'authServices/userRoleRename',
+    params: data,
+    mode: 'auth',
+    method: 'get'
   });
 }
 /**
@@ -601,7 +686,7 @@ export function delRole (data) {
  */
 export function getVehicleGroup (params) {
   return request({
-    url: '/vehicleGroup/list',
+    url: '/vehicle-group/list',
     params,
     method: 'get'
   });
@@ -612,7 +697,7 @@ export function getVehicleGroup (params) {
  */
 export function getVehicleBottomName (params) {
   return request({
-    url: '/vehicleBank/list',
+    url: '/vehicle-bank/list',
     params,
     method: 'get'
   });
@@ -623,7 +708,7 @@ export function getVehicleBottomName (params) {
  */
 export function getVehicleDataList (params) {
   return request({
-    url: '/vehicle/infoPage',
+    url: '/vehicle/info-page',
     params,
     method: 'get'
   });
@@ -656,7 +741,7 @@ export function editVeGroup (data) {
  */
 export function delVeGroup (uid) {
   return request({
-    url: '/vehicleGroup/delete/' + uid,
+    url: '/vehicle-group/delete/' + uid,
     method: 'delete'
   });
 }
@@ -687,9 +772,135 @@ export function getVehicleInfo (uid) {
  */
 export function moveoutGroup (data) {
   return request({
-    url: '/vehicleGroup/batchDelete',
+    url: '/vehicle-group/batch-delete',
     params: data,
     method: 'delete'
+  });
+}
+/**
+ * 管理车辆分组---复制分组
+ * @param {*} data 
+ */
+export function copyGroup (data) {
+  return request({
+    url: '/vehicle-group/copy',
+    data,
+    method: 'post'
+  });
+}
+/***======== 人员信息库 ========== */
+/**
+ * 底库列表查询
+ * @param {*} data 
+ */
+export function getPerBottomBankList (params) {
+  return request({
+    url: '/portrait/bottom-bank',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 分组列表查询
+ * @param {*} data 
+ */
+export function getPerGroupList (params) {
+  return request({
+    url: '/portrait/group',
+    params,
+    method: 'get'
+  });
+}
+
+/*** =======================视频设置=========================== */
+/**===== 自定义组 ===== */
+/**
+ * 获取所有分组
+ * @param {*} data 
+ */
+export function getCusGroup (params) {
+  return request({
+    url: '/group-device-service/groups-devices',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 获取所有设备列表
+ * @param {*} data 
+ */
+export function getAllDevices (params) {
+  return request({
+    url: '/area-device-service/areas-devices',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 删除分组设备
+ * @param {*} data 
+ */
+export function delGroupDevice (id) {
+  return request({
+    url: '/group-service/group-info/' + id,
+    method: 'delete'
+  });
+}
+/**
+ * 新增分组
+ * @param {*} data 
+ */
+export function addGroupDevice (data) {
+  return request({
+    url: '/group-device-service/group-info',
+    method: 'post',
+    data
+  });
+}
+/* ========== 设备授权 ========== */
+/** ==== 临时授权 ==== */
+/**
+ * 点击用户获取可用设备
+ * @param {*} data 
+ */
+export function getTempDeviceList (data) {
+  return request({
+    url: '/dev-auth-temp-service/devices',
+    method: 'get',
+    params: data
+  });
+}
+/**
+ * 终止授权
+ * @param {*} data 
+ */
+export function stopTerminate (data) {
+  return request({
+    url: '/dev-auth-temp-service/terminate',
+    method: 'delete',
+    params: data
+  });
+}
+/**
+ * 单个设备终止授权
+ * @param {*} data 
+ */
+export function stopOneTerminate (data) {
+  return request({
+    url: '/dev-auth-temp-service/terminate/' + data.uid,
+    method: 'delete',
+    params: data
+  });
+}
+/**
+ * 新增临时授权---获取可用设备
+ * @param {*} data 
+ */
+export function getASelectDevice (data) {
+  return request({
+    url: '/dev-auth-temp-service/auth-devices',
+    method: 'get',
+    params: data
   });
 }
 /* ================== 布控模块 =================== */

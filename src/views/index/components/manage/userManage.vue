@@ -67,7 +67,12 @@
           width="200"
           >
           <template slot-scope="scope">
-            <span>{{scope.row.lastLoginTime | fmTimestamp}}</span>
+            <template v-if="!scope.row.lastLoginTime">
+              <span>未登录</span>
+            </template>
+            <template v-else>
+              <span>{{scope.row.lastLoginTime | fmTimestamp}}</span>
+            </template>
           </template>
         </el-table-column>
         <el-table-column
@@ -119,7 +124,7 @@
             <span v-show="!scope.row.isForce">启用</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300">
+        <el-table-column label="操作" width="300" fixed="right">
           <template slot-scope="scope">
             <span class="operation_btn" @click="showEditDialog(scope.row)">编辑信息</span>
             <span style="color: #f2f2f2">|</span>

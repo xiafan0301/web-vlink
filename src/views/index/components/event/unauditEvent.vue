@@ -145,11 +145,11 @@
       >
       <div class="content-body">
         <p>请输入驳回的原因。</p>
-        <el-input type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
+        <el-input v-model="rejectReason" type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="rejectDialogVisible = false">取 消</el-button>
-        <el-button class="operation_btn function_btn" @click="rejectDialogVisible = false">确 定</el-button>
+        <el-button class="operation_btn function_btn" @click="rejectEvent">确 定</el-button>
       </div>
     </el-dialog>  
   </div>
@@ -161,24 +161,11 @@ import { getEventDetail, updateEvent, getDiciData } from '@/views/index/api/api.
 export default {
   data () {
     return {
-      uploadUrl: ajaxCtx.upload + '/new', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
       isImgNumber: false,
       newMarker: null,
-      addEventForm: {
-        // eventCode: 'X23912831283129038210938', // 事件编号
-        // userName: '18077777777', // 报案人  手机号码
-        // createTime: '2019-1-12 12:12:12', // 上报时间
-        // eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        // describe: null, // 事件情况
-        // eventType: null, // 事件类型
-        // eventLevel: null, // 事件等级
-        // casualtiesFlag: null, // 伤亡人员
-        // longitude: 112.975828, // 经度
-        // latitude: 28.093804, // 纬度
-        // handleCompany: null, // 处理单位
-        // fileList: [], // 图片文件
-      },
+      addEventForm: {},
       rules: {
         eventAddress: [
           { required: true, message: '请输入或选择事发地址', trigger: 'blur' }
@@ -194,6 +181,7 @@ export default {
           { required: true, message: '请选择处理单位', trigger: 'blur' }
         ]
       },
+      rejectReason: null, // 驳回理由
       map: null,
       dieNumber: null, // 死亡人数
       isDieError: false,
@@ -253,7 +241,15 @@ export default {
         .then(res => {
           if (res) {
             console.log(res);
-            this.addEventForm = res.data;
+            this.addEventForm = JSON.parse(JSON.stringify(res.data));
+            if (res.data.casualties === -1) {
+                this.addEventForm.casualties = '不确定';
+              } else if (res.data.casualties === 0) {
+                this.addEventForm.casualties = '无';
+              } else if (res.data.casualties > 0) {
+                this.addEventForm.casualties = '有';
+                this.dieNumber = res.data.casualties;
+              }
             this.mapMark(this.addEventForm);
           }
         })
@@ -264,7 +260,7 @@ export default {
       _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -391,8 +387,35 @@ export default {
     handleImgNumber () {
       this.isImgNumber = true;
     },
+    // 显示驳回弹出框
     showRejectDialog () {
       this.rejectDialogVisible = true;
+    },
+    // 驳回
+    rejectEvent () {
+      const params = {
+        eventId: this.addEventForm.uid,
+        closeRemark: this.rejectReason
+      }
+      updateEvent(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '驳回成功',
+              customClass: 'request_tip'
+            })
+            this.$router.push({name: 'event_audit'});
+            this.rejectDialogVisible = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '驳回失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 处理要提交的数据
     handleFormData () {
@@ -425,7 +448,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.handleFormData();
-          updateEvent(this.addEventForm, this.addEventForm.uid)
+          updateEvent(this.addEventForm)
             .then(res => {
               if (res) {
                 this.$message({
