@@ -12,118 +12,129 @@
         <ul>
           <li>
             <span>预案名称:</span>
-            <span>公共区域消防安全应急预案</span>
+            <span>{{planDetailInfo.planName}}</span>
           </li>
           <li>
             <span>预案类型:</span>
-            <span>事故灾难</span>
+            <span>{{planDetailInfo.eventTypeName}}</span>
           </li>
           <li>
             <span>适用事件等级:</span>
-            <span>Ⅰ级(特重)、Ⅱ级(重大)</span>
+            <span>
+              <template v-if='planDetailInfo.levelNameList'>
+                {{planDetailInfo.levelNameList.join()}}
+              </template>
+            </span>
           </li>
           <li>
-            <span>任务内容:</span>
-            <span>
-              任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。
-              调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，
-              段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。
-            </span>
+            <span>预案正文:</span>
+            <span>{{planDetailInfo.planDetail}}</span>
           </li>
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
               <i class="vl_icon vl_icon_event_5"></i>
-              公共区域消防安全应急预案.docx
-              <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;"></i>
+              <template v-if="planDetailInfo.attachmentName">
+                {{planDetailInfo.attachmentName}}
+              </template>
+              <template v-else>
+                无
+              </template>
+              <i class="vl_icon vl_icon_event_6" v-show="planDetailInfo.url" @click="downloadFile(planDetailInfo.url)" style="margin-left:5px;cursor:pointer;"></i>
             </span>
           </li>
           <li>
             <span>响应处置:</span>
             <div class="res-list">
-              <div class="list-detail">
+              <div class="list-detail" v-for="(item, index) in planDetailInfo.taskList" :key="index">
                 <div>
                   <span>协同部门：</span>
-                  <span>协同部门：联动单位A</span>
+                  <span>{{item.departmentName}}</span>
                 </div>
                 <div>
                   <span>任务名称：</span>
-                  <span>任务名称：灭火</span>
+                  <span>{{item.taskName}}</span>
                 </div>
                 <div>
                   <span>任务内容：</span>
-                  <span>
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，
-                    完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，
-                    完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报
-                  </span>
-                </div>
-              </div>
-              <div class="list-detail">
-                <div>
-                  <span>协同部门：</span>
-                  <span>协同部门：联动单位A</span>
-                </div>
-                <div>
-                  <span>任务名称：</span>
-                  <span>任务名称：灭火</span>
-                </div>
-                <div>
-                  <span>任务内容：</span>
-                  <span>任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报</span>
-                </div>
-              </div>
-              <div class="list-detail">
-                <div>
-                  <span>协同部门：</span>
-                  <span>联动单位A</span>
-                </div>
-                <div>
-                  <span>任务名称：</span>
-                  <span>灭火</span>
-                </div>
-                <div>
-                  <span>任务内容：</span>
-                  <span>第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：
-                    第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报</span>
+                  <span>{{item.taskContent}}</span>
                 </div>
               </div>
             </div>
           </li>
           <li>
             <span>创建用户:</span>
-            <span>谭某某</span>
+            <span>{{planDetailInfo.createUserName}}</span>
           </li>
           <li>
-            <span>创建事件:</span>
-            <span>2018-07-16 08:56:55</span>
+            <span>创建时间:</span>
+            <span>{{planDetailInfo.createTime}}</span>
           </li>
         </ul>
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipReplanPage">启用</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
   </vue-scroll>
 </template>
 <script>
+import { getPlanDetail } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-
+      planDetailInfo: {
+        planName: '救火救火救火救火救火',
+        eventTypeName: '事故灾难',
+        levelNameList: ['V级','IV级'],
+        planDetail: '任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，',
+        attachmentName: '公共区域消防安全应急预案.docx',
+        url: 'http://baidu.com',
+        taskList: [
+          {
+            departmentName: '协同部门',
+            taskName: '灭火',
+            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
+          },
+          {
+            departmentName: '协同部门',
+            taskName: '灭火',
+            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
+          }
+        ],
+        createUserName: '张三',
+        createTime: '2019-03-12'
+      } // 预案详情
     }
   },
   methods: {
+    // 获取预案详情
+    getPlanDetailInfo () {
+      const planId = this.$router.query.planId;
+      if (planId) {
+        getPlanDetail(planId)
+          .then(res => {
+            if (res && res.data) {
+              this.planDetailInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 下载文件
+    downloadFile (url) {
+      if (url) {
+        window.open(url);
+      }
+    },
     // 跳至启用预案页面
     skipReplanPage () {
       this.$router.push({name: 'enable_plan'});
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }

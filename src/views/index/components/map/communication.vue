@@ -704,6 +704,11 @@ export default {
         this.mapTypeList = [];
       }
     }
+  },
+  destroyed () {
+    if (this.map) {
+      this.map.destroy();
+    }
   }
 }
 </script>

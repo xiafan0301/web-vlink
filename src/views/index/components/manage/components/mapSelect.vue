@@ -13,8 +13,8 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
+                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
+                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveTemp">
                 <div class="temp_tab">
@@ -45,8 +45,6 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveTemp">
                 <div class="temp_tab">
@@ -77,8 +75,6 @@
                 <el-checkbox style="margin-right: 10px;"></el-checkbox>
                 <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
                 <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
               </div>
               <div class="child_temp" v-show="arrowActiveTemp">
                 <div class="temp_tab">
@@ -109,6 +105,10 @@
       </div>
     </div>
     <div class="select_map_right">
+      <div class="select_map_right_title">
+        <span>可选设备</span>
+        <span>(300)</span>
+      </div>
       <div id="mapMap"></div>
       <div class="right-flag">
         <ul class="map-rrt map_rrt_u1">
@@ -157,7 +157,7 @@ export default {
     let _this = this;
     let map = new window.AMap.Map('mapMap', {
       zoom: 18, // 级别
-      center: [112.974691, 28.093846], // 中心点坐标
+      center: [110.596015, 27.907662], // 中心点坐标
       // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
@@ -167,10 +167,6 @@ export default {
     _this.mouseTool = mouseTool;
     // 添加事件
     window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
-      console.log('e', e)
-      // _this.drawPaths = e.obj.getPath();
-      console.log('drawPaths e', e); // 获取路径/范围
-      console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
       setTimeout(() => {
         _this.selAreaRest(true);
         let polygon = new window.AMap.Polygon({ // 构造多边形对象
@@ -183,7 +179,6 @@ export default {
           path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
           zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
         });
-        console.log(polygon);
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
@@ -378,6 +373,7 @@ export default {
       padding: 0 10px;
       border-top: 1px solid #F2F2F2;
       border-bottom: 1px solid #F2F2F2;
+      border-right: 1px solid #F2F2F2;
       >span {
         color: #333333;
       }
@@ -408,7 +404,16 @@ export default {
               float: right;
               margin: 5px 5px 0;
             }
-            
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
+            }
             &.temp_active {
               &:hover {
                 background-color: #E0F2FF;
@@ -468,6 +473,20 @@ export default {
   .select_map_right {
     width: calc(100% - 300px);
     height: 100%;
+    position: relative;
+    .select_map_right_title {
+      width: 100%;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      background-color: #ffffff;
+      position: absolute;
+      color: #333333;
+      height: 45px;
+      line-height: 45px;
+      padding: 0 5px;
+      border-top: 1px solid #f2f2f2;
+    }
     #mapMap {
       width: 100%;
       height: 100%;

@@ -9,7 +9,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic></EventBasic>
+        <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="ctc-plan-box">
           <div class="plan-box">
             <div class="plan-list" v-for="(item, index) in taskList" :key="index">
@@ -21,49 +21,59 @@
                 <div class="divide"></div>
                 <div class="plan-form-box">
                   <el-form class="plan-form" label-width="90px" :model="item"  size="middle" >
-                    <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                    <el-form-item label="执行部门:" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                       <el-select v-model="item.departmentId" placeholder="请选择执行部门">
                         <el-option label="区域一" value="shanghai"></el-option>
                         <el-option label="区域二" value="beijing"></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                    <el-form-item label="任务名称:"  :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
                       <el-input v-model="item.taskName"></el-input>
                     </el-form-item>
-                    <el-form-item label="任务内容:" :prop="item.taskContent" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                      <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
+                    <el-form-item label="任务内容:"  :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                      <el-input type="textarea" rows="9" v-model="item.taskContent"></el-input>
                     </el-form-item>
                   </el-form>
                 </div>
               </div>
-              <template v-if="taskList.length === (index + 1)">
-                <div class="add-ctc" @click="addTask">
+              <template v-if="!isInitial">
+                <div class="add-ctc" @click="addTask" v-if="taskList.length === (index + 1)">
                   <i class="vl_icon vl_icon_event_8"></i>
                   <span>调度指挥任务添加</span>
                 </div>
               </template>
             </div>
+            <template v-if="isInitial">
+              <div class="plan_add_box">
+                <div class="add-ctc" @click="initAddTask">
+                  <i class="vl_icon vl_icon_event_8"></i>
+                  <span>调度指挥任务添加</span>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+      <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     </div>
   </vue-scroll>
 </template>
 <script>
+import BigImg from './components/bigImg.vue';
 import EventBasic from './components/eventBasic';
+import { getPlanDetail, ctcTasks } from '@/views/index/api/api.js';
 export default {
-  components: { EventBasic },
+  components: { EventBasic, BigImg },
   data () {
     return {
-      planForm: {
-        department: null,
-        taskName: null,
-        taskContent: null
-      },
+      isInitial: true, //  页面初始化进来
+      imgList1: [],
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
       taskList: [
         {
           departmentName: null,
@@ -71,10 +81,72 @@ export default {
           taskContent: null,
           departmentId: null
         }
-      ]
+      ],
+      basicInfo: {
+        eventCode: 'XD111111111111111',
+        eventTypeName: '自然灾害',
+        eventLevelName: 'V级',
+        reportTime: '2019-03-12',
+        reporterPhone: '18076543210',
+        eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        casualties: -1,
+        imgList: [
+          {
+            uid: '001',
+            src: require('./img/1.jpg')
+          },
+          {
+            uid: '002',
+            src: require('./img/2.jpg')
+          },
+          {
+            uid: '003',
+            src: require('./img/3.jpg')
+          },
+          {
+            uid: '004',
+            src: require('./img/4.jpg')
+          }
+        ],
+        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      }, // 事件详情
     }
   },
   methods: {
+    // 获取预案详情
+    getPlanDetailInfo() {
+      const planId = this.$router.query.planId;
+      if (planId) {
+        getPlanDetail(planId)
+          .then(res => {
+            if (res) {
+              this.taskList = JSON.parse(JSON.stringify(res.data.taskList));
+            }
+          })
+      }
+    },
+    // 图片放大传参
+    emitHandleImg (isShow, index) {
+      console.log(isShow);
+      console.log(index);
+      this.openBigImg(index, this.basicInfo.imgList);
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 第一次添加
+    initAddTask () {
+      this.isInitial = false;
+      const value = {
+        departmentName: null,
+        taskName: null,
+        taskContent: null,
+        departmentId: null
+      }
+      this.taskList.push(value);
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -86,9 +158,68 @@ export default {
     },
     deletePlanBox (index) { // 删除调度方法输入框
       this.taskList.splice(index, 1);
+      if (this.taskList.length === 1) {
+        this.isInitial = true;
+      }
+    },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve) => {
+        let arr = [];
+        _this.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
     },
     onSubmit () { // 提交-启用预案
-      console.log(this.taskList)
+      let _this = this;
+      const eventId = _this.$router.query.eventId;
+      _this.judgeData().then(result => {
+        console.log(result);
+        if (result === false) {
+          this.$message({
+            type: 'error',
+            message: '请先填写完信息',
+            customClass: 'request_tip'
+          })
+        } else {
+          console.log('已填完');
+          ctcTasks(_this.taskList, eventId)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '启用成功',
+                  customClass: 'request_tip'
+                })
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '启用失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
     }
   }
 }
@@ -174,8 +305,25 @@ export default {
             }
           }
         }
-      }
-      
+        .plan_add_box {
+          width: 49%;
+          height: 480px;
+          background-color: #ffffff;
+          .add-ctc {
+            text-align: center;
+            margin-top: 30%;
+            i {
+              vertical-align: middle;
+              margin-right: 5px;
+              cursor: pointer;
+            }
+            > span {
+              color: #0C70F8;
+              vertical-align: middle;
+            }
+          }
+        }
+      }  
     }
   }
   .operation-footer {

@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>事件审核</el-breadcrumb-item>
+        <el-breadcrumb-item>受理核实</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box">
@@ -18,43 +18,77 @@
                 </li>
                 <li>
                   <span>事件编号:</span>
-                  <span>XPZ180724001</span>
+                  <span>{{detailInfo.eventCode}}</span>
                 </li>
                 <li>
                   <span>上报人:</span>
-                  <span class="phone">13890908080</span>
+                  <div class="phone_box" style='margin-right:20px;'>
+                    <template v-if="$route.query.status === 'reject'">
+                      <span >{{detailInfo.reporterPhone}}</span>
+                    </template>
+                    <template v-else>
+                      <span class="reportUser">{{detailInfo.reporterPhone}}</span>
+                      <div class="phone_dialog">
+                        <div>
+                          <i class="vl_icon vl_icon_event_14"></i>
+                          <span>语音通话</span>
+                        </div>
+                        <div>
+                          <i class="vl_icon vl_icon_event_17"></i>
+                          <span>视频通话</span>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
-                  <span>2018-05-16 13:57:34</span>
+                  <span>{{detailInfo.reportTime}}</span>
                 </li>
                 <li>
                   <span>事发地点:</span>
-                  <span>创谷产业园</span>
+                  <span>{{detailInfo.eventAddress}}</span>
                 </li>
                 <li>
                   <span>事件情况:</span>
-                  <span>创谷产业园啊撒扩大埃里克大数据看到家啊大家阿拉斯加的阿拉山口大家啊撒可怜见的克拉斯大街路就爱上邓丽君了</span>
+                  <span>{{detailInfo.eventDetail}}</span>
+                  <div class="img_list">
+                    <img
+                      v-for="(item, index) in detailInfo.attachmentList"
+                      :key="index"
+                      :src="item.path"
+                      @click="handleBigImg(index)"
+                      alt="" 
+                    />
+                  </div>
                 </li>
                 <li>
                   <span>处理单位:</span>
-                  <span>公安</span>
+                  <span>{{detailInfo.handleCompany}}</span>
                 </li>
                 <li>
                   <span>事件类型:</span>
-                  <span>刑事</span>
+                  <span>{{detailInfo.eventTypeName}}</span>
                 </li>
                 <li>
                   <span>事件等级:</span>
-                  <span>I级</span>
+                  <span>{{detailInfo.eventLevelName}}</span>
                 </li>
                 <li>
                   <span>伤亡人员:</span>
-                  <span>不确定</span>
+                  <template v-if='detailInfo.casualties == -1'>
+                    <span>不确定</span>
+                  </template>
+                  <template v-else-if='detailInfo.casualties == 0'>
+                    <span>无</span>
+                  </template>
+                  <template v-if='detailInfo.casualties > 0'>
+                    <span>{{detailInfo.casualties}}</span>
+                  </template>
                 </li>
                 <li>
                   <span>驳回原因:</span>
-                  <span>不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定不确定</span>
+                  <span>{{detailInfo.rejectReason}}</span>
                 </li>
               </ul>
             </div>
@@ -66,7 +100,7 @@
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
-            <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+            <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
           </ul>
           <ul class="map-rrt map_rrt_u2">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -78,40 +112,116 @@
     <div class="operation-footer">
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
+import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
+  components: { BigImg },
   data () {
     return {
-      addEventForm: {
-        eventNumber: 'X23912831283129038210938', // 事件编号
-        userName: '18077777777', // 报案人  手机号码
-        createTime: '2019-1-12 12:12:12', // 上报时间
-        eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        describe: null, // 事件情况
-        eventType: null, // 事件类型
-        eventLevel: null, // 事件等级
-        casualtiesFlag: null, // 伤亡人员
-        longitude: 112.975828, // 经度
-        latitude: 28.093804, // 纬度
-        handleCompany: null, // 处理单位
-        fileList: [], // 图片文件
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [],
+      imgList: [
+        {
+          uid: '001',
+          src: require('./img/1.jpg')
+        },
+        {
+          uid: '002',
+          src: require('./img/2.jpg')
+        },
+        {
+          uid: '003',
+          src: require('./img/3.jpg')
+        },
+        {
+          uid: '004',
+          src: require('./img/4.jpg')
+        },
+        {
+          uid: '005',
+          src: require('./img/4.jpg')
+        }
+      ],
+      detailInfo: {
+        // eventNumber: 'X23912831283129038210938', // 事件编号
+        // userName: '18077777777', // 报案人  手机号码
+        // createTime: '2019-1-12 12:12:12', // 上报时间
+        // eventAddress: '湖南省怀化市溆浦县', // 事发地点
+        // describe: '啊撒可怜见的昂克赛拉的骄傲啊看来撒娇的啊卢卡斯就的看拉萨角度来看啊卢卡斯就的', // 事件情况
+        // eventType: '自然灾害', // 事件类型
+        // eventLevel: 'IV级', // 事件等级
+        // casualtiesFlag: '无', // 伤亡人员
+        // longitude: 112.975828, // 经度
+        // latitude: 28.093804, // 纬度
+        // handleCompany: '公安部', // 处理单位
+        // fileList: [
+        //   {
+        //     uid: '001',
+        //     src: require('./img/1.jpg')
+        //   },
+        //   {
+        //     uid: '002',
+        //     src: require('./img/2.jpg')
+        //   },
+        //   {
+        //     uid: '003',
+        //     src: require('./img/3.jpg')
+        //   },
+        //   {
+        //     uid: '004',
+        //     src: require('./img/4.jpg')
+        //   },
+        //   {
+        //     uid: '005',
+        //     src: require('./img/4.jpg')
+        //   }
+        // ], // 图片文件
+        // rejectReason: '你猜你猜你猜你猜你猜你猜你猜', // 驳回原因
       },
       map: null
     }
   },
   mounted () {
-    let _this = this;
-    let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
-    _this.mapMark(_this.addEventForm);
+    this.initMap();
+    this.getDetail();
   },
   methods: {
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.eventId;
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.detailInfo = res.data;
+            this.mapMark(this.detailInfo);
+          }
+        })
+        .catch(() => {})
+    },
+    resetMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
@@ -157,6 +267,17 @@ export default {
     },
     back () { // 返回
       this.$router.back(-1);
+    },
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 图片放大
+    handleBigImg (index) {
+      console.log(index)
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(this.imgList));
     }
   }
 }
@@ -188,6 +309,7 @@ export default {
             > li {
               line-height: 30px;
               display: flex;
+              flex-wrap: wrap;
               width: 100%;
               > span:nth-child(1) {
                 padding-right: 10px;
@@ -213,46 +335,59 @@ export default {
                 }
                 &.phone {
                   color: #0C70F8;
+                  cursor: pointer;
                 }
               }
-            }
-          }
-          .add_event_form {
-            width: 100%;
-            /deep/ .el-form-item {
-              margin-bottom: 15px;
-            }
-            .imgTips {
-              width: 160px;
-              border-radius: 2px;
-              position: absolute;
-              color: #F94539;
-              padding-top: 0;
-              -ms-flex-item-align: center;
-              align-self: center;
-              left: 90px;
-              top: 35px;
-            }
-            .img-form-item /deep/ .el-form-item__content{
-              display: flex;
-              .img-list {
-                width: 104px;
-                height: 104px;
-                margin-left: 10px;
-                margin-bottom: 10px;
-                display: flex;
-                .error-item {
+              .phone_box {
+                position: relative;
+                padding-right: 10px;
+                &:hover {
+                  .phone_dialog {
+                    display: block;
+                  }
+                }
+                .reportUser {
+                  color: #0C70F8;
+                  cursor: pointer;
+                }
+                .phone_dialog {
+                  display: none;
                   position: absolute;
-                  top: -10px;
-                  right: -8px;
-                  font-size: 18px;
-                  color: #666;
-                  z-index: 1;
+                  background-color: #ffffff;
+                  right: -30px;
+                  bottom: 30px;
+                  box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.15);
+                  >div {
+                    padding: 0 10px;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    >span {
+                      color: #333333;
+                      font-size: 12px;
+                    }
+                    &:hover {
+                      >span {
+                        color: #0C70F8;
+                      }
+                    }
+                  }
                 }
               }
-            }
-            /deep/ .el-form-item__label {
-              color: #666666;
+              .img_list {
+                width: 100%;
+                flex-wrap: wrap;
+                display: flex;
+                margin-left: 20%;
+                img {
+                  cursor: pointer;
+                  width: 80px;
+                  height: 80px;
+                  border-radius: 4px;
+                  margin-bottom: 5px;
+                  margin-right: 5px;
+                }
+              }
             }
           }
         }

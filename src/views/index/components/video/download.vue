@@ -1,7 +1,7 @@
 <template>
   <div class="vl_dl_hi">
     <div class="dl_hi_main">
-      <el-form :inline="true" :model="formInline" class="dl_hi_sf" size="small">
+      <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf" size="small">
         <el-form-item>
           <el-date-picker
             v-model="formInline.time"
@@ -27,8 +27,8 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="searchSubmit">查询</el-button>
-          <el-button @click="searchSubmit">重置</el-button>
+          <el-button :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
+          <el-button @click="searchReset('formInline')">重置</el-button>
         </el-form-item>
       </el-form>
       <el-table
@@ -37,17 +37,17 @@
         style="width: 100%">
         <el-table-column type="index" width="120" label="序号" align="center">
         </el-table-column>
-        <el-table-column prop="time" label="下载时间" min-width="180">
+        <el-table-column prop="createTime" :formatter="tableFnDateTime" label="下载时间" min-width="180">
         </el-table-column>
-        <el-table-column prop="dept" label="操作部门" min-width="180" :show-overflow-tooltip="true">
+        <el-table-column prop="depName" label="操作部门" min-width="180" :show-overflow-tooltip="true">
         </el-table-column>
-        <el-table-column prop="user" label="操作用户" min-width="180">
+        <el-table-column prop="userName" label="操作用户" min-width="180">
         </el-table-column>
-        <el-table-column prop="name" label="设备名称" min-width="180" :show-overflow-tooltip="true">
+        <el-table-column prop="devName" label="设备名称" min-width="180" :show-overflow-tooltip="true">
         </el-table-column>
-        <el-table-column prop="startTime" label="视频开始时间" min-width="180">
+        <el-table-column prop="startTime" :formatter="tableFnDateTime" label="视频开始时间" min-width="180">
         </el-table-column>
-        <el-table-column prop="endTime" label="视频结束时间" min-width="180">
+        <el-table-column prop="endTime" :formatter="tableFnDateTime" label="视频结束时间" min-width="180">
         </el-table-column>
       </el-table>
       <el-pagination
@@ -64,6 +64,8 @@
   </div>
 </template>
 <script>
+import { apiVideoDownloadList } from "@/views/index/api/api.video.js";
+import { formatDate } from "@/utils/util.js";
 export default {
   data () {78 
     return {
@@ -102,8 +104,9 @@ export default {
           }
         }]
       },
+      searchLoading: false,
       formInline: {
-        time: '',
+        time: [new Date(new Date() - 3600 * 1000 * 24 * 7), new Date()],
         user: '',
         region: ''
       },
@@ -112,32 +115,57 @@ export default {
       pagination: {
         currentPage: 1,
         pageSize: 10,
-        total: 1000
+        total: 0
       }
     }
   },
   mounted () {
-    let testData = [];
-    for (let i = 0; i < 10; i++) {
-      testData.push({
-        time: '2019-01-11 11:11:11',
-        user: '管理员——' + i,
-        dept: '管理部',
-        name: '上街镇甫发大街广发银行东门-0' + i,
-        startTime: '00:00:00',
-        endTime: '00:00:51'
-      });
-    }
-    this.tableData = testData;
+    this.searchSubmit();
   },
   methods: {
+    searchReset (formName) {
+      this.$refs[formName].resetFields();
+      this.formInline = {
+        time: [new Date(new Date() - 3600 * 1000 * 24 * 7), new Date()],
+        user: '',
+        region: ''
+      }
+    },
     searchSubmit () {
+      this.getData();
+    },
+    getData () {
+      this.searchLoading = true;
+      apiVideoDownloadList({
+        pageNum: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize,
+        // orderBy: '',
+        // order: '',
+        'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
+        'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
+        'where.oprUserId': '1',
+        'where.oprDeptId': '1'
+      }).then(res => {
+        if (res && res.data) {
+          this.pagination.total = res.data.total;
+          this.tableData = res.data.list;
+        }
+        this.searchLoading = false;
+      }).catch(error => {
+        this.searchLoading = false;
+        console.log("apiVideoDownloadList error：", error);
+      });
+    },
+    tableFnDateTime (row, column, cellValue) {
+      // console.log(cellValue);
+      return formatDate(cellValue);
     },
     handleSizeChange (val) {
-        console.log(`每页 ${val} 条`);
+      console.log(`每页 ${val} 条`);
     },
     handleCurrentChange (val) {
-      console.log(`当前页: ${val}`);
+      this.pagination.currentPage = val;
+      this.searchSubmit();
     }
   }
 }

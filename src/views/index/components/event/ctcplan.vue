@@ -2,33 +2,35 @@
   <div class="plan-list">
     <div class="search_box">
       <el-form :inline="true" :model="planForm" class="ctc_form" ref="planForm">
-        <el-form-item>
-          <el-select v-model="planForm.scheduleType" style="width: 240px;" placeholder="预案类型">
+        <el-form-item prop="planType">
+          <el-select v-model="planForm.planType" style="width: 240px;" placeholder="预案类型">
             <el-option value='全部类型'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+              v-for="(item, index) in planTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-select v-model="planForm.level" style="width: 240px;" placeholder="适用等级">
+        <el-form-item prop="planLevel">
+          <el-select v-model="planForm.planLevel" style="width: 240px;" placeholder="适用等级">
             <el-option value='全部等级'></el-option>
-            <!-- <el-option
-              v-for="item in eventStatusList"
-              :key="item.dictId"
-              :label="item.dictContent"
-              :value="item.dictId"
-            ></el-option> -->
+            <el-option
+                v-for="(item, index) in planLevelList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
+              </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item >
-          <el-input style="width: 240px;" type="text" placeholder="请输入预案名称筛选查找" v-model="planForm.content" />
+        <el-form-item prop="planName">
+          <el-input style="width: 240px;" type="text" placeholder="请输入预案名称" v-model="planForm.planName" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" @click="selectDataList('planForm')">查询</el-button>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
           <el-button class="reset_btn" @click="resetForm('planForm')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -51,25 +53,28 @@
         </el-table-column>
         <el-table-column
           label="预案名称"
-          prop="scheduleName"
+          prop="planName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="预案类型"
-          prop="scheduleType"
+          prop="eventTypeName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="适用事件等级"
-          prop="applyEventLevel"
+          prop="levelNameList"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.levelNameList.join()}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="创建用户"
-          prop="opUserName"
+          prop="createUserName"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -91,8 +96,7 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
+      @current-change="onPageChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
@@ -111,77 +115,140 @@
       <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delPlanDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delPlanDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="deletePlan">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { dataList } from '@/utils/data.js';
+import { getPlanData, getDiciData, delPlan } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       planForm: {
-        level: null, // 适用等级
-        scheduleType: null, // 预案类型
-        content: null // 预案名称
+        planLevel: '全部等级', // 适用等级
+        planType: '全部类型', // 预案类型
+        planName: null // 预案名称
       },
-       planList: [
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-      ], // 表格数据
+      planList: [], // 表格数据
       delPlanDialog: false, // 删除预案弹出框
+      planLevelList: [], // 适用等级
+      planTypeList: [], // 预案类型
+      dePlanId: null, // 要删除的预案id
     }
   },
+  created () {
+    this.getPlanTypeList();
+    this.getPlanLevelList();
+    this.getPlanList();
+  },
   methods: {
-    handleSizeChange () {
-
+    // 获取预案类型
+    getPlanTypeList () {
+      const type = dataList.planType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.planTypeList = res.data;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 获取适用等级
+    getPlanLevelList () {
+      const level = dataList.eventLevel;
+      getDiciData(level)
+        .then(res => {
+          if (res) {
+            this.planLevelList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取预案列表数据
+    getPlanList () {
+      let planType, planLevel;
+      if (this.planForm.planType === '全部类型') {
+        planType = null;
+      } else {
+        planType = this.planForm.planType;
+      }
+      if (this.planForm.planLevel === '全部等级') {
+        planLevel = null;
+      } else {
+        planLevel = this.planForm.planLevel;
+      }
+      const params = {
+        'where.planType': planType,
+        'where.planLevel': planLevel,
+        'where.planName': this.planForm.planName,
+        pageNum: this.pagination.pageNum
+      }
+      getPlanData(params)
+        .then(res => {
+          if (res) {
+            this.planList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    onPageChange (page) {
+      this.pagination.pageNum = page;
+      this.getPlanList();
+    },
     skipAddPlanPage () { // 跳到新增预案页面
       this.$router.push({name: 'add_plan'});
     },
     // 根据搜索条件查询
-    selectDataList (form) {
-      console.log(form);
+    selectDataList () {
+      this.getPlanList();
     },
     // 重置查询条件
     resetForm (form) {
       this.$refs[form].resetFields();
+      this.getPlanList();
     },
     // 显示删除预案弹出框
     showDeleteDialog (obj) {
-      console.log(obj);
+      this.dePlanId = obj.uid;
       this.delPlanDialog = true;
     },
     // 跳至修改预案页面
     skipEditPage (obj) {
       console.log(obj);
-      this.$router.push({name: 'edit_plan'});
+      this.$router.push({name: 'edit_plan', query:{planId: obj.uid}});
     },
     // 跳至预案详情页面
     skipDetailPage (obj) {
       console.log(obj);
-      this.$router.push({name: 'ctc_plan_detail'});
+      this.$router.push({name: 'ctc_plan_detail', query:{planId: obj.uid}});
+    },
+    // 确认删除
+    deletePlan () {
+      if (this.dePlanId) {
+        delPlan(this.dePlanId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.getPlanList();
+              this.delPlanDialog = false;
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
     }
   }
 }

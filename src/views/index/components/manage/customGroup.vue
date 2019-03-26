@@ -2,12 +2,14 @@
   <div class="custom_group">
     <div class="custom_group_left">
       <div class="search_box">
-        <el-input  placeholder="搜索组" size="small" style="width: 220px;">
+        <el-input  placeholder="搜索组" size="small" style="width: 220px;" v-model="keyWord">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="handleIconClick">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
       <div class="add_btn">
@@ -17,113 +19,15 @@
       <div class="content_box">
         <vue-scroll>
           <ul class="temp_detail_info">
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="operation_btn del_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>其他自定义</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li class="isProhibit">
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_15"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
+            <li
+              :class="[activeGroupId === item.uid ? 'temp_active' : '']"
+              v-for="(item, index) in groupList"
+              :key="'item' + index"
+              @click="showGroupDeviceInfo(item.uid)"
+            >
+              <span>{{item.groupName}}</span>
+              <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
+              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
             </li>
           </ul>
         </vue-scroll>
@@ -133,51 +37,124 @@
       <div class="no_data">
         <i class="vl_icon_manage_9 vl_icon"></i>
       </div>
+      <div class="detail_info_right">
+        <ul class="tab_ul clearfix">
+          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头</li>
+          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
+        </ul>
+        <div class="data_list">
+          <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+        </div>
+      </div>
     </div>
+    <!--删除分组设备弹出框-->
+    <el-dialog
+      title="是否删除该组?"
+      :visible.sync="delGroupDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">解散时，将移出组内设备，并删除该组。</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delGroupDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteGroup">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { getCusGroup, delGroupDevice } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      arrowActiveTemp: false,
-      groupData: [
-        {
-          groupName: '常用点位',
-          deviceList: [
-            {
-              name: '广场监控点1-300',
-              isProhibit: false
-            }
-          ]
-        },
-        {
-          groupName: '常用点位',
-          deviceList: [
-            {
-              name: '广场监控点1-300',
-              isProhibit: false
-            }
-          ]
-        },
-        {
-          groupName: '常用点位',
-          deviceList: [
-            {
-              name: '广场监控点1-300',
-              isProhibit: false
-            }
-          ]
-        }
-      ], // 所有的组名数据
+      delGroupDialog: false, // 删除分组弹出框
+      arrowActive: 1, // tab选中
+      activeGroupId: null, // 选中的分组行
+      keyWord: null, // 搜索组名
+      closeShow: false,
+      groupList: [], // 所有的分组
+      deviceList: [], // 设备列表
+      deleteId: null, // 要删除的分组设备id
     }
   },
+  mounted () {
+    this.getGroupList();
+  },
   methods: {
-    handleIconClick () {},
+    // 获取所有的分组
+    getGroupList () {
+      const params = {
+        keyWord: this.keyWord
+      };
+      getCusGroup(params)
+        .then(res => {
+          if (res) {
+            this.groupList = res.data;
+            // this.activeGroupId = this.groupList[0].uid;
+            this.showGroupDeviceInfo(this.groupList[0].uid)
+          }
+        })
+        .catch(() => {})
+    },
+    // 清空搜索框
+    onClear () {
+      this.closeShow = false;
+      this.keyWord = null;
+      this.getGroupList();
+    },
+    // 搜索
+    searchData () {
+      this.closeShow = true;
+      this.getGroupList();
+    },
+    // 点击左边分组获取右边设备信息
+    showGroupDeviceInfo (id) {
+      this.activeGroupId = id;
+      this.groupList.map(item => {
+        if (item.uid === id) {
+          this.deviceList = JSON.parse(JSON.stringify(item.deviceList));
+        }
+      })
+    },
     // 跳至新增分组页面
     skipAddGroupPage () {
       this.$router.push({name: 'add_group'});
     },
+    // change  tab
+    changeTab (val) {
+      this.arrowActive = val;
+    },
+    // 显示删除分组设备弹出框
+    showDeleteDialog (id) {
+      this.deleteId = id;
+      this.delGroupDialog = true;
+    },
+    // 删除分组设备
+    deleteGroup () {
+      if (this.deleteId) {
+        delGroupDevice (this.deleteId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.delGroupDialog = false;
+              this.getGroupList();
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    }
   }
 }
 </script>
@@ -191,7 +168,7 @@ export default {
     width: 260px;
     border-right: 1px solid #F2F2F2;
     .search_box {
-      padding: 15px;
+      padding: 15px 15px 10px;
       /deep/ .el-input--small .el-input__inner {
         border-radius: 40px;
         background-color: #F2F2F2;
@@ -203,7 +180,7 @@ export default {
       }
     }
     .add_btn {
-      padding: 15px;
+      padding: 0 15px 10px;
       display: flex;
       color: #333333;
       align-items: center;
@@ -225,8 +202,7 @@ export default {
           font-size: 14px;
           line-height: 26px;
           color: #333333;
-          .parent_temp_li {
-            padding: 0 10px;
+          padding: 0 30px 0;
             >span {
               margin-left: 5px;
             }
@@ -245,59 +221,18 @@ export default {
                 background-position: -584px -350px !important;
               }
             }
-            &.temp_active {
-              &:hover {
-                background-color: #E0F2FF;
-                .operation_btn {
-                  display: block;
-                }
+            &:hover {
+              background-color: #E0F2FF;
+              .operation_btn {
+                display: block;
               }
+            }
+            &.temp_active {
+              background-color: #E0F2FF;
               i, span {
                 color: #0C70F8;
               }
             }
-          }
-          .child_temp {
-            width: 100%;
-            .temp_tab {
-              color: #666666;
-              margin: 10px 0 10px 20px;
-              font-size: 12px;
-              width: 220px;
-              height: 26px;
-              border: 1px solid #D3D3D3;
-              border-radius:4px;
-              > span {
-                width: 50%;
-                text-align: center;
-                display: inline-block;
-                line-height: 26px;
-                height: 100%;
-                &.active_span {
-                  color: #0C70F8;
-                  background-color: #E0F2FF;
-                }
-              }
-              span:first-child {
-                border-right: 1px solid #D3D3D3;
-              }
-            }
-            .child_temp_detail {
-              padding-left: 30px;
-              padding-right: 10px;
-              >li {
-                padding-bottom: 10px;
-                font-size: 14px;
-                color: #666666;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-              }
-              .isProhibit {
-                color: #DFDFDF;
-              }
-            }
-          }
         }
       }
     }
@@ -305,10 +240,35 @@ export default {
   .custom_group_right {
     width: calc(100% - 260px);
     .no_data {
+      display: none;
       width: 186px;
       height: 196px;
       margin-left: 40%;
       margin-top: 15%;
+    }
+    .detail_info_right {
+      width: 100%;
+      .tab_ul {
+        clear: both;
+        padding: 10px 10px 0;
+        border-bottom: 1px solid #f2f2f2;
+        .tab_ul_li {
+          width: auto;
+          float: left;
+          padding: 0 15px 10px;
+          cursor: pointer;
+          &.active_tab_li {
+            color: #0C70F8;
+            border-bottom: 2px solid #0C70F8;
+          }
+        }
+      }
+      .data_list {
+        p {
+          padding: 10px 20px 0;
+          color: #666666;
+        }
+      }
     }
   }
 }

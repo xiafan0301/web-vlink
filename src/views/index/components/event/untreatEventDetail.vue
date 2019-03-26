@@ -8,7 +8,7 @@
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic :status="$route.query.status"></EventBasic>
+        <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-handle">
           <div class="event-handle-header">
             <span>处理事件</span>
@@ -49,25 +49,82 @@
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipEachPage">确定</el-button>
         <el-button class="operation_btn function_btn" @click="skipEventEndPage">结束事件</el-button>
-        <el-button class="operation_btn back_btn">返回</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+      <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     </div>
   </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.js';
+import BigImg from './components/bigImg.vue';
 export default {
-  components: { EventBasic },
+  components: { EventBasic, BigImg },
   data () {
     return {
       status: null, // 
       isMutual: false, // 是否发布民众互助
       handleType: 1, // 选择处理的方式
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [],
+      basicInfo: {
+        eventCode: 'XD111111111111111',
+        eventTypeName: '自然灾害',
+        eventLevelName: 'V级',
+        reportTime: '2019-03-12',
+        reporterPhone: '18076543210',
+        eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        casualties: -1,
+        imgList: [
+          {
+            uid: '001',
+            src: require('./img/1.jpg')
+          },
+          {
+            uid: '002',
+            src: require('./img/2.jpg')
+          },
+          {
+            uid: '003',
+            src: require('./img/3.jpg')
+          },
+          {
+            uid: '004',
+            src: require('./img/4.jpg')
+          }
+        ],
+        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      }, // 事件详情
+      // detailInfo: {}, // 事件详情
     }
   },
   mounted () {
+    this.getDetail();
   },
   methods: {
+    // 图片放大传参
+    emitHandleImg (isShow, index) {
+      this.openBigImg(index, this.basicInfo.imgList);
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.eventId;
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            console.log(res);
+            this.basicInfo = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 跳至结束事件页面
     skipEventEndPage () {
       this.$router.push({name: 'event_end'});
@@ -75,6 +132,15 @@ export default {
     // 确定---跳页面
     skipEachPage () {
       const type = this.handleType;
+      const eventId = this.$route.query.eventId;
+      const params = {
+        uid: eventId,
+        mutualFlag: this.isMutual
+      }
+      updateEvent(params)
+        .then(res => {
+          console.log(res)
+        })
       if (type) {
         if (type === 1) {
           // 跳至新增布控页面
@@ -82,21 +148,31 @@ export default {
         }
         if (type === 2) {
           // 跳至事件管理调度指挥页面
-          this.$router.push({name: 'ctc_operation'});
+          this.$router.push({name: 'ctc_operation', query: {eventId: eventId}});
         }
         if (type === 3) {
           // 跳至呈报上级页面
-          this.$router.push({name: 'event_report'});
+          this.$router.push({name: 'event_report', query: {eventId: eventId}});
         }
         if (type === 4) {
           // 跳至转到其他单位页面
-          this.$router.push({name: 'send_other_units'});
+          this.$router.push({name: 'send_other_units', query: {eventId: eventId}});
         }
       }
     },
     // 处理方式change
     handleHandleMode () {
-    }
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
   }
 }
 </script>

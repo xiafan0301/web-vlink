@@ -55,15 +55,15 @@
 .vl_icon_kk_uncheck { width: 41px; height: 48px; background-position: -820px -188px; }
 /* 地图板块 工具栏 */
 .vl_icon_041 { width: 20px; height: 20px; background-position: -97px -375px; }
-.vl_icon_sed .vl_icon_041 { background-position: -97px -345px; }
+.vl_icon_sed .vl_icon_041 { background-position: -97px -347px; }
 .vl_icon_042 { width: 20px; height: 20px; background-position: -232px -375px; }
-.vl_icon_sed .vl_icon_042 { background-position: -232px -345px; }
+.vl_icon_sed .vl_icon_042 { background-position: -232px -347px; }
 .vl_icon_043 { width: 20px; height: 20px; background-position: -142px -375px; }
-.vl_icon_sed .vl_icon_043 { background-position: -142px -345px; }
+.vl_icon_sed .vl_icon_043 { background-position: -142px -347px; }
 .vl_icon_044 { width: 20px; height: 20px; background-position: -187px -375px; }
-.vl_icon_sed .vl_icon_044 { background-position: -187px -345px; }
+.vl_icon_sed .vl_icon_044 { background-position: -187px -347px; }
 .vl_icon_045 { width: 20px; height: 20px; background-position: -277px -375px; }
-.vl_icon_sed .vl_icon_045 { background-position: -277px -345px; }
+.vl_icon_sed .vl_icon_045 { background-position: -277px -347px; }
 /* 地图板块 标注 */
 .vl_icon_051 { width: 31px; height: 34px; background-position: -477px -196px; }
 /* 地图板块 视频通话 */
@@ -119,7 +119,7 @@
 .vl_icon_control_20{width: 20px; height: 20px; background-position: -584px -374px;}
 .vl_icon_control_21{width: 20px; height: 20px; background-position: -414px -374px;}
 .vl_icon_control_22{width: 20px; height: 20px; background-position: -500px -347px;}
-.vl_icon_control_23{width: 40px; height: 40px; background-position: -636px -128px;}
+.vl_icon_control_23{width: 39px; height: 38px; background-position: -636px -128px;}
 .vl_icon_control_24{width: 20px; height: 20px; background-position: -694px -345px;}
 .vl_icon_control_25{width: 20px; height: 20px; background-position: -584px -345px;}
 .vl_icon_control_26{width: 20px; height: 20px; background-position: -755px -374px;}
@@ -142,8 +142,8 @@
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
 .vl_icon_event_3{width: 16px; height: 16px; background-position: -785px -375px;}
 .vl_icon_event_4{width: 28px; height: 28px; background-position: -664px -428px;}
-.vl_icon_event_5{width: 16px; height: 16px; background-position: -664px -486px;}
-.vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;}
+.vl_icon_event_5{width: 16px; height: 16px; background-position: -664px -486px;} /* 事件--文件上传 -- 前图标 */
+.vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;} /* 事件--文件上传下载图标 */
 .vl_icon_event_7{width: 23px; height: 22px; background-position: -903px -375px;}
 .vl_icon_event_8{width: 21px; height: 21px; background-position: -872px -375px;}
 .vl_icon_event_9{width: 124px; height: 124px; background-position: -91px -718px;} /*事件---未处理*/
@@ -156,6 +156,12 @@
 .vl_icon_event_16{width: 24px; height: 26px; background-position: -820px -428px;} /*事件---暂无数据--表情*/
 .vl_icon_event_17{width: 22px; height: 12px; background-position: -809px -1126px;} /*事件---视频通话*/
 .vl_icon_event_18{width: 24px; height: 26px; background-position: -770px -428px;} /*事件---开心的表情--表情*/
+.vl_icon_event_19{width: 70px; height: 70px; background-position: -93px -863px;} /*事件---图片切换-可用-右*/
+.vl_icon_event_20{width: 70px; height: 70px; background-position: -186px -863px;} /*事件---图片切换-可用-左*/
+.vl_icon_event_21{width: 70px; height: 70px; background-position: -282px -863px;} /*事件---图片切换-不可用-左*/
+.vl_icon_event_22{width: 70px; height: 70px; background-position: -370px -863px;} /*事件---图片切换-不可用-右*/
+.vl_icon_event_23{width: 35px; height: 35px; background-position: -554px -293px;} /*事件---图片放大-关闭*/
+.vl_icon_event_24{width: 20px; height: 20px; background-position: -615px -309px;} /*事件---图片--关闭*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/
@@ -183,6 +189,9 @@
 .vl_icon_manage_13{width: 22px; height: 22px; background-position: -831px -529px;} /*权限管理---添加--未选中*/
 .vl_icon_manage_14{width: 22px; height: 22px; background-position: -831px -554px;} /*权限管理---添加--选中*/
 .vl_icon_manage_15{width: 18px; height: 22px; background-position: -370px -376px;} /*禁用摄像头--视频设置--临时授权*/
+.vl_icon_manage_16{width: 16px; height: 16px; background-position: -482px -671px;} /*视频设置--临时授权--终止*/
+.vl_icon_manage_17{width: 16px; height: 16px; background-position: -713px -585px;} /* 文件下载 */
+.vl_icon_manage_18{width: 16px; height: 16px; background-position: -744px -585px;} /* 文件上传 */
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -594,12 +603,17 @@
 /*所有请求返回的提示样式*/
 .request_tip {
   top: 50%;
-  left: 70%;
+  left: 50%;
 }
 /*部门管理--删除部门的提示样式*/
 .delete_depart {
   top: 350px;
   left: 450px;
+}
+/*添加预案--上传文件的提示样式*/
+.upload_file_tip {
+  top: 320px;
+  left: 460px;
 }
 .el-message--success, .el-message--warning {
   background:#000000;
@@ -616,7 +630,7 @@
   width: 200px;
   left: auto !important;
   right: 40px !important;
-  top: 25% !important;
+  top: 5% !important;
   overflow: hidden !important;
 }
 .e_stat_tb_ld1 .g2-legend-list {
@@ -672,7 +686,7 @@
   left: auto !important;
   right: 30px !important;
   width: 200px !important;
-  top: 50% !important;
+  top: 25% !important;
 }
 .e_stat_tb_ld4 .g2-legend-list-item {
   margin-right: 0 !important;

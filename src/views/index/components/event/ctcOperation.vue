@@ -9,7 +9,30 @@
       </el-breadcrumb>
     </div>
     <div class="content-box">
-      <EventBasic></EventBasic>
+      <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
+      <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
+        <div class="header">
+          <p class="ctc-title">调度指挥方案</p>
+        </div>
+        <div class="divide"></div>
+        <ul class="content-list">
+          <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
+            <div>
+              <span>调度部门：</span>
+              <span>{{item.departmentName}}</span>
+            </div>
+            <div>
+              <span>任务名称：</span>
+              <span>{{item.taskName}}</span>
+            </div>
+            <div class="ctc-content">
+              <span>任务内容：</span>
+              <span>{{item.taskContent}}</span>
+            </div>
+          </li>
+          <div class="divide-list"></div>
+        </ul>
+      </div>
       <div class="ctc-plan-box">
         <div class="plan-box">
           <div class="plan-operation-box">
@@ -61,29 +84,34 @@
           <div class="plan-list" v-for="(item, index) in taskList" :key="index">
             <div class="main-content">
               <div class="title">
-                <span>调度指挥方案</span>
+                <template v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
+                  <span>再次调度指挥方案</span>
+                </template>
+                <template v-else>
+                  <span>调度指挥方案</span>
+                </template>
                 <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
               </div>
               <div class="divide"></div>
               <div class="plan-form-box">
-                <el-form class="plan-form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <el-form class="plan-form" label-width="90px" :model="item"  size="middle">
+                  <el-form-item label="执行部门:"  :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" placeholder="请选择执行部门">
                       <el-option label="区域一" value="shanghai"></el-option>
                       <el-option label="区域二" value="beijing"></el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                  <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
                     <el-input v-model="item.taskName"></el-input>
                   </el-form-item>
-                  <el-form-item label="任务内容:" :prop="item.taskContent" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                  <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
                     <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
             </div>
             <template v-if="taskList.length === (index + 1)">
-              <div class="add-ctc" @click="addTask">
+              <div class="add-ctc" @click="addTask('form' + index)">
                 <i class="vl_icon vl_icon_event_8"></i>
                 <span>调度指挥任务添加</span>
               </div>
@@ -94,76 +122,182 @@
     </div>
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
-      <el-button class="operation_btn back_btn">返回</el-button>
+      <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
+import { getEventDetail } from '@/views/index/api/api.js';
+import BigImg from './components/bigImg.vue';
 export default {
-  components: { EventBasic },
+  components: { EventBasic, BigImg },
   data () {
     return {
-      taskList: [
-        {
-          departmentName: null,
-          taskName: null,
-          taskContent: null,
-          departmentId: null
-        }
-      ],
-       planList: [
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        },
-        {
-          planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          planType: '事故灾难',
-          eventLevel: 'IV级（一般）、V级（较大）'
-        }
-      ] // 表格数据
+        imgIndex: 0, // 点击的图片索引
+        isShowImg: false, // 是否放大图片
+        imgList1: [],
+        basicInfo: {
+          eventCode: 'XD111111111111111',
+          eventTypeName: '自然灾害',
+          eventLevelName: 'V级',
+          reportTime: '2019-03-12',
+          reporterPhone: '18076543210',
+          eventAddress: '湖南省长沙市天心区创谷产业工业园',
+          casualties: -1,
+          taskList: [
+            {
+              departmentName: '公安部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 12:12:12',
+              taskStatusName: '未查看'
+            },
+            {
+              departmentName: '消防部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 12:12:24',
+              taskStatusName: '已查看'
+            },
+            {
+              departmentName: '就业部',
+              taskName: '救火',
+              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+              createTime: '2019-03-12 19:12:24',
+              taskStatusName: '已完成'
+            }
+          ],
+          imgList: [
+            {
+              uid: '001',
+              src: require('./img/1.jpg')
+            },
+            {
+              uid: '002',
+              src: require('./img/2.jpg')
+            },
+            {
+              uid: '003',
+              src: require('./img/3.jpg')
+            },
+            {
+              uid: '004',
+              src: require('./img/4.jpg')
+            }
+          ],
+          eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+        }, // 事件详情
+        taskList: [
+          {
+            departmentName: null,
+            taskName: null,
+            taskContent: null,
+            departmentId: null
+          }
+        ],
+        planList: [
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          },
+          {
+            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
+            planType: '事故灾难',
+            eventLevel: 'IV级（一般）、V级（较大）'
+          }
+        ] // 表格数据
     }
   },
+  mounted () {
+    this.getDetail();
+  },
   methods: {
-    onSubmit () {},
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.eventId;
+      if (eventId) {
+        getEventDetail(eventId)
+          .then(res => {
+            if (res) {
+              this.basicInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve) => {
+        let arr = [];
+        _this.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    },
+    // 提交数据
+    onSubmit () {
+      let _this = this;
+      _this.judgeData().then(result => {
+        console.log(result);
+        if (result === false) {
+          console.log('未填完')
+        } else {
+          console.log('已填完');
+        }
+      })
+    },
     addTask () {
       const value = {
         departmentName: null,
@@ -188,7 +322,28 @@ export default {
     skipReplanPage (obj) {
       console.log(obj);
       this.$router.push({name: 'enable_plan'});
-    }
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 图片放大传参
+    emitHandleImg (isShow, index) {
+      console.log(isShow);
+      console.log(index);
+      this.openBigImg(index, this.basicInfo.imgList);
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
   }
 }
 </script>
@@ -199,7 +354,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box {
+    .ctc-plan-box, {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -211,7 +366,7 @@ export default {
           background: #ffffff;
           height: 480px;
           .plan-title {
-            padding: 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             span:nth-child(1) {
@@ -310,6 +465,68 @@ export default {
               color: #0C70F8;
               vertical-align: middle;
             }
+          }
+        }
+      }
+    }
+    .event-ctc-content {
+      width: 100%;
+      margin-bottom: 20px;
+      background-color: #ffffff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+      .header {
+        padding: 10px 20px 0 20px;
+        > p {
+          color: #333333;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .ctc-title {
+          margin-bottom: 10px;
+        }
+      }
+      .divide {
+        width: 100%;
+        height: 1px;
+        background-color: #F2F2F2;
+      }
+      .content-list {
+        padding: 10px 20px 10px 20px;
+        > li {
+          display: flex;
+          flex-wrap: wrap;
+          > div {
+            // height: 30px;
+            line-height: 30px;
+            span:nth-child(1) {
+              color: #666666;
+            }
+            span:nth-child(2) {
+              color: #333333;
+            }
+            &:nth-child(1) {
+              width: 25%;
+            }
+            &:nth-child(2) {
+              width: 60%;
+            }
+            &:nth-child(3) {
+              display: flex;
+              span:nth-child(2) {
+                width: 750px;
+                display: inline-block;
+              }
+            }
+          }
+        }
+        .divide-list {
+          width: 100%;
+          height: 1px;
+          margin: 10px 0;
+          border-bottom: 1px dashed #F2F2F2;
+          &:last-child {
+            display: none;
           }
         }
       }
