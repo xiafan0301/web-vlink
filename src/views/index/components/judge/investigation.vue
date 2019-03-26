@@ -2,25 +2,31 @@
   <div class="vl_judge_tc">
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
-        <el-input v-model="searchData.name" placeholder="关联事件编号搜索"></el-input>
+        <el-autocomplete
+          v-model="searchData.eventNo"
+          :fetch-suggestions="autoEvent"
+          @select="showChoose"
+          value-key="eventDetail"
+          placeholder="关联事件编号搜索">
+        </el-autocomplete>
         <el-date-picker
           v-model="searchData.time"
           type="daterange"
           range-separator="-"
-          value-format="timestamp"
+          value-format="yyyy-MM-dd"
           format="yy/MM/dd"
           :picker-options="pickerOptions"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
         <el-input v-model="searchData.carNum" placeholder="选择范围"></el-input>
-        <el-button style="padding: 0 .22rem;" @click="resetSearch">重置</el-button>
-        <el-button style="padding: 0 .22rem;" type="primary" @click="beginSearch">搜索</el-button>
+        <el-button  @click="resetSearch">重置</el-button>
+        <el-button  :loading="searching" :disabled="!curEvent" type="primary" @click="beginSearch">搜索</el-button>
       </div>
     </div>
     <div class="vl_j_right">
       <div id="tcMap"></div>
-      <div class="vl_jig_right" v-show="showVideoList">
+      <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
           <span>{{curSXT.name}}</span>
           <span>抓拍{{curSXT.times}}次</span>
@@ -62,16 +68,14 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
+import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api';
 export default {
   data() {
     return {
       testData: testData,
       searchData: {
-        targetType: 0, // 0：人， 1： 车
-        name: null, // 目标姓名
-        cardId: null, // 目标身份证号
-        time: null,
-        carNum: null // 车牌号
+        eventNo: '',
+        time: null
       },
       pickerOptions: {
         disabledDate (time) {
@@ -99,6 +103,8 @@ export default {
         playNum: null, // 当前摄像头里正在大屏播放的索引
         playing: false
       }, // 当前被放大播放的video
+      curEvent: null,
+      searching: false,
       showVideoList: false,
       curSXT: {}, // 显示的摄像头数据
       showLarge: false,
@@ -108,6 +114,7 @@ export default {
     }
   },
   mounted () {
+    console.log(this)
     this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
@@ -125,22 +132,39 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 15 * 24 * 3600 * 1000;
-      this.searchData.time = [curDate - curS, date.getTime()]
+      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+      let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      this.searchData.time = [_s, _e]
     },
     resetSearch () {
-      this.searchData = {
-        targetType: 0, // 0：人， 1： 车
-        name: null, // 目标姓名
-        cardId: null, // 目标身份证号
-        carNum: null // 车牌号
+      this.searchData.eventNo = '';
+    },
+    autoEvent (queryString, cb) {
+      if (queryString === '') {
+        cb([])
+      } else {
+        JigGETEvent({'where.otherQuery': queryString, 'where.eventFlag': true}).then(result => {
+          cb(result.data.list);
+        })
       }
-      this.uploadFileList.splice(0, this.uploadFileList.length);
-      this.imgList = ['', '', ''];
-      this.curImageUrl = '';
-      this.curImgNum = 0;
+    },
+    showChoose (e) {
+      this.curEvent = e;
     },
     beginSearch () {
-      console.log(this.searchData.time)
+      this.searching = true;
+      let params = {
+        eventId: this.curEvent.eventId,
+        dateStart: this.searchData.time[0],
+        dateEnd: this.searchData.time[1]
+      }
+      JigGETEventAlarm(params)
+        .then(res => {
+          if (res) {
+            this.searching = false;
+            console.log(res)
+          }
+        })
     },
     drawMarkers (data) {
       let cWin = document.documentElement.clientWidth;
@@ -165,7 +189,7 @@ export default {
           });
           this.markerImg.push(markerWindow);
           // 摄像头
-          let _class = 'vl_icon_sxt';
+          let _class = 'vl_icon_judge_04';
           if (obj.checked) {
             _class = 'vl_icon_judge_02';
           }
@@ -173,7 +197,7 @@ export default {
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
@@ -239,7 +263,8 @@ export default {
     }, // 更新抓拍人像
     updatePoint (obj) {
       let _i = this.testData.zp.indexOf(obj);
-      let _class = 'vl_icon_sxt';
+      console.log(obj)
+      let _class = 'vl_icon_judge_04';
       if (obj.checked) {
         _class = 'vl_icon_judge_02';
       }
@@ -248,7 +273,7 @@ export default {
         let point = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
           // 自定义点标记覆盖物内容
@@ -268,12 +293,17 @@ export default {
         setTimeout(() => {
           self.amap.remove(this.markerPoint[_i]);
           self.markerPoint[_i] = point;
-        }, 800)
+        }, 0)
       }
     }, // 更新摄像头点
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
+        this.testData.zp.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+          z.checked = false;
+          this.updatePoint(z);
+          this.updateImg(z);
+        })
         this.updatePoint(e.target.C.extData);
         this.updateImg(e.target.C.extData);
       }
@@ -294,7 +324,8 @@ export default {
       this.pointHover(e);
     },
     hideVideoList () {
-      this.testData.zp[this.curVideo.indexNum].checked = false;
+      this.testData.zp.forEach(x => x.checked = false);
+      // this.testData.zp[this.curVideo.indexNum].checked = false;
       this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
       this.updateImg(this.testData.zp[this.curVideo.indexNum]);
       this.curVideo.indexNum = null;
@@ -308,6 +339,7 @@ export default {
         vDom.play();
         vDom.addEventListener('ended', (e) => {
           e.target.currentTime = 0;
+          vDom.pause();
           this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
         })
       }
@@ -324,6 +356,7 @@ export default {
         document.getElementById('vlJigLargeV').play();
         document.getElementById('vlJigLargeV').addEventListener('ended', (e) => {
           e.target.currentTime = 0;
+          document.getElementById('vlJigLargeV').pause();
           this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
           this.showLarge = false;
         })
@@ -367,7 +400,7 @@ export default {
 }
 </script>
 <style lang="scss">
-  .vl_jig_right {
+  .vl_jfo_right {
     position: absolute;
     right: .2rem;
     top: 0;

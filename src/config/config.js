@@ -5,8 +5,8 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        // dev: 'http://emi.aorise.org/api/vis/',
-        dev: 'http://10.116.64.92:8081',//钟赞
+        dev: 'http://apidev.aorise.org/vlink-base/',
+        // dev: 'http://apidev.aorise.org/vlink-judge/',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
@@ -20,7 +20,20 @@ const oDomains = {
     upload: {
         dev: 'http://apidev.aorise.org/education-user-related',
         test: 'http://apirel.aorise.org/education-user-related',
-        prod: 'http://apirel.aorise.org/education-user-related'
+        prod: 'http://apidev.aorise.org/education-user-related'
+    },
+    // 研判检索服务
+    judge: {
+        // dev: 'http://10.116.64.127:8081/',
+        dev: 'http://apidev.aorise.org/vlink-judge/',
+        test: 'http://apirel.aorise.org/vlink-judge/',
+        prod: 'http://apidev.aorise.org/vlink-judge/',
+    },
+    // 事件服务
+    event: {
+        dev: 'http://apidev.aorise.org/vlink-event/api/emi',
+        test: 'http://apirel.aorise.org/vlink-event/api/emi',
+        prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

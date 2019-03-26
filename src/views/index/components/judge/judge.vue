@@ -100,6 +100,9 @@ export default {
             text-align: center;
             font-size: 0.14rem;
             width: 100%;
+            &:hover {
+              text-decoration: underline;
+            }
           }
         }
         .vl_jtc_img_list {
@@ -190,6 +193,13 @@ export default {
           height: .4rem;
           line-height: .4rem;
           padding: 0 .12rem;
+          background-color: #0C70F8!important;
+          border-color: #0C70F8!important;
+          color: #FFFFFF;
+          &:hover {
+          background-color: #409EFF!important;
+            border-color: #409EFF!important;
+          }
         }
         .el-select {
           margin-bottom: .1rem;
@@ -203,6 +213,7 @@ export default {
       display: inline-block;
       width: calc(100% - 2.52rem);
       height: 100%;
+      position: relative;
       #tcMap {
         width: 100%;
         height: 100%;
@@ -334,6 +345,47 @@ export default {
           background-color: #409EFF;
           content: '✓';
           font-size: 10px;
+        }
+      }
+    }
+    .history-pic-dialog {
+      .el-dialog {
+        max-width: 12.6rem;
+        width: 100%!important;
+      }
+      .el-dialog__title {
+        font-size: .16rem;
+        color: #333333;
+      }
+      .el-dialog__body {
+        padding: 0 .76rem .3rem;
+      }
+      .his-pic-box {
+        width: 100%;
+        height: 4.6rem!important;
+        .his-pic-item {
+          float: left;
+          width: 1.38rem;
+          height: 1.38rem;
+          border: .02rem solid #FFFFFF;
+          margin-right: .2rem;
+          margin-bottom: .2rem;
+          cursor: pointer;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+        }
+        .active {
+          border-color: #0C70F8;
+        }
+      }
+      .el-dialog__footer {
+        button {
+          width: 1.4rem!important;
+          height: .4rem;
+          line-height: .4rem;
+          padding: 0;
         }
       }
     }

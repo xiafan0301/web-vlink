@@ -63,14 +63,14 @@
           </el-select>
         </div>
         <el-date-picker
-                v-model="searchData.time"
-                type="daterange"
-                range-separator="-"
-                value-format="timestamp"
-                format="yy/MM/dd"
-                :picker-options="pickerOptions"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
+          v-model="searchData.time"
+          type="daterange"
+          range-separator="-"
+          value-format="yyyy-MM-dd"
+          format="yy/MM/dd"
+          :picker-options="pickerOptions"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
         </el-date-picker>
         <el-input v-model="searchData.carNum" placeholder="关注范围"></el-input>
         <el-button style="padding: 0 .22rem;" @click="resetSearch">重置</el-button>
@@ -83,7 +83,7 @@
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">活动范围</span></div>
         <div><span :class="{'active': switchType === 1}" @click="switchType = 1">关联事件</span></div>
       </div>
-      <div class="vl_jig_right" v-show="showVideoList">
+      <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
           <span>{{curSXT.name}}</span>
           <span>抓拍{{curSXT.times}}次</span>
@@ -100,6 +100,56 @@
           </div>
         </vue-scroll>
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
+      </div>
+      <div class="vl_jig_event" v-show="switchType === 1">
+        <div class="vl_jfo_event_box">
+          <el-table
+            :data="eventList"
+            style="width: 100%">
+            <el-table-column
+              prop="date"
+              label="布控图片"
+              align="center"
+              min-width="120">
+            </el-table-column>
+            <el-table-column
+              prop="name"
+              label="事件编号"
+              align="left"
+              min-width="140">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              min-width="120"
+              label="事件内容">
+            </el-table-column>
+            <el-table-column
+              prop="date"
+              label="处理单位"
+              min-width="120">
+            </el-table-column>
+            <el-table-column
+              prop="name"
+              label="上报时间"
+              min-width="120">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              min-width="140"
+              label="发生地点">
+            </el-table-column>
+            <el-table-column
+              prop="date"
+              label="处理状态"
+              min-width="100">
+            </el-table-column>
+            <el-table-column
+              prop="name"
+              label="操作"
+              min-width="100">
+            </el-table-column>
+          </el-table>
+        </div>
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
@@ -173,7 +223,8 @@ export default {
       showLarge: false,
       showCut: false,
       curVideoUrl: '',
-      demoImg: ''
+      demoImg: '',
+      eventList: []
     }
   },
   mounted () {
@@ -188,6 +239,15 @@ export default {
     $(window).bind('resize', () => {
       this.drawImg(this.testData.zp);
     })
+    let tt = [];
+    for (let i = 0; i < 10; i++) {
+      tt.push({
+        name: '22',
+        address: '11',
+        date: '33'
+      })
+    }
+    this.eventList = tt;
   },
   methods: {
     chooseType () {},
@@ -195,7 +255,9 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 15 * 24 * 3600 * 1000;
-      this.searchData.time = [curDate - curS, date.getTime()]
+      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+      let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      this.searchData.time = [_s, _e]
     },
     resetSearch () {
       this.searchData = {
@@ -235,7 +297,7 @@ export default {
           });
           this.markerImg.push(markerWindow);
           // 摄像头
-          let _class = 'vl_icon_sxt';
+          let _class = 'vl_icon_judge_04';
           if (obj.checked) {
             _class = 'vl_icon_judge_02';
           }
@@ -243,7 +305,7 @@ export default {
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+            offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
@@ -309,7 +371,7 @@ export default {
     }, // 更新抓拍人像
     updatePoint (obj) {
       let _i = this.testData.zp.indexOf(obj);
-      let _class = 'vl_icon_sxt';
+      let _class = 'vl_icon_judge_04';
       if (obj.checked) {
         _class = 'vl_icon_judge_02';
       }
@@ -318,7 +380,7 @@ export default {
         let point = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
           // 自定义点标记覆盖物内容
@@ -338,12 +400,17 @@ export default {
         setTimeout(() => {
           self.amap.remove(this.markerPoint[_i]);
           self.markerPoint[_i] = point;
-        }, 800)
+        }, 0)
       }
     }, // 更新摄像头点
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
+        this.testData.zp.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+          z.checked = false;
+          this.updatePoint(z);
+          this.updateImg(z);
+        })
         this.updatePoint(e.target.C.extData);
         this.updateImg(e.target.C.extData);
       }
@@ -444,7 +511,8 @@ export default {
     box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
     position: absolute;
     top: .2rem;
-    left: calc(50% + 1.17rem);
+    left: calc(50% - 1.17rem);
+    z-index: 99;
     &:after {
       display: block;
       content: ' ';
@@ -479,7 +547,24 @@ export default {
       border-bottom: .02rem solid #1264F8;
     }
   }
-  .vl_jig_right {
+  .vl_jig_event {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #fafafa;
+    animation: fadeInRight .1s ease-out .1s both;
+    z-index: 9;
+    padding: 0 .2rem .4rem .2rem;
+    .vl_jfo_event_box {
+      width: 100%;
+      height: 100%;
+      background: #FFFFFF;
+      padding-top: .9rem;
+    }
+  }
+  .vl_jfo_right {
     position: absolute;
     right: .2rem;
     top: 0;
@@ -488,7 +573,6 @@ export default {
     padding: .3rem .2rem .2rem .2rem;
     box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
     background: #ffffff;
-    animation: fadeInRight .4s ease-out .4s both;
     &:hover {
       .vl_jig_right_close {
         display: block;
