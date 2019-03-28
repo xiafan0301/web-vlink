@@ -5,9 +5,7 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://apidev.aorise.org/vlink-base',
-        // dev: 'http://10.116.64.142:8083',
-        // dev: 'http://10.116.64.92:8081',//钟赞
+        dev: 'http://apidev.aorise.org/vlink-base/',
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
@@ -17,6 +15,19 @@ const oDomains = {
       dev: 'http://10.116.64.134:8082/api/vlink',
       test: 'http://apirel.aorise.org/vlink-event/api/vlink',
       prod: 'http://apidev.aorise.org/vlink-event/api/vlink'
+    },
+    // 上传图片
+    upload: {
+        dev: 'http://apidev.aorise.org/education-user-related',
+        test: 'http://apirel.aorise.org/education-user-related',
+        prod: 'http://apidev.aorise.org/education-user-related'
+    },
+    // 研判检索服务
+    judge: {
+        // dev: 'http://10.116.64.127:8082/',
+        dev: 'http://apidev.aorise.org/vlink-judge/',
+        test: 'http://apirel.aorise.org/vlink-judge/',
+        prod: 'http://apidev.aorise.org/vlink-judge/',
     },
     // 调度和预案部分地址
     ctc: {

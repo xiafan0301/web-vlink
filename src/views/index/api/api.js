@@ -2,7 +2,7 @@ import request from '@/config/axios';
 
 /**
  * 用户登录
- * @param {*} data 
+ * @param {*} data
  */
 export function login(data) {
   return request({
@@ -14,7 +14,7 @@ export function login(data) {
 }
 /**
  * 用户退出登录
- * @param {*} data 
+ * @param {*} data
  */
 export function logout(data) {
   return request({
@@ -62,7 +62,7 @@ export function resetPassword(data) {
 }
 /**
  * 判断用户是否注册
- * @param {*} data 
+ * @param {*} data
  */
 export function isRegister(data) {
   return request({
@@ -74,7 +74,7 @@ export function isRegister(data) {
 }
 /**
  * 字典接口
- * @param {*} data 
+ * @param {*} data
  */
 export function getDiciData(uid) {
   return request({
@@ -96,7 +96,7 @@ export function openAutoCheck(data) {
 }
 /**
  * 获取事件列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getEventList(data) {
   return request({
@@ -130,7 +130,7 @@ export function addEvent(data) {
 }
 /**
  * 获取事件详情
- * @param {*} data 
+ * @param {*} data
  */
 export function getEventDetail(uid) {
   return request({
@@ -141,7 +141,7 @@ export function getEventDetail(uid) {
 }
 /**
  * 获取调度指挥列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getCtcList(data) {
   return request({
@@ -153,7 +153,7 @@ export function getCtcList(data) {
 }
 /**
  * 分页查询预案
- * @param {*} data 
+ * @param {*} data
  */
 export function getPlanData(data) {
   return request({
@@ -165,7 +165,7 @@ export function getPlanData(data) {
 }
 /**
  * 获取预案详情
- * @param {*} data 
+ * @param {*} data
  */
 export function getPlanDetail(uid) {
   return request({
@@ -176,7 +176,7 @@ export function getPlanDetail(uid) {
 }
 /**
  * 添加预案
- * @param {*} data 
+ * @param {*} data
  */
 export function addPlan(data) {
   return request({
@@ -188,7 +188,7 @@ export function addPlan(data) {
 }
 /**
  * 修改预案
- * @param {*} data 
+ * @param {*} data
  */
 export function updatePlan(data) {
   return request({
@@ -200,7 +200,7 @@ export function updatePlan(data) {
 }
 /**
  * 删除预案
- * @param {*} data 
+ * @param {*} data
  */
 export function delPlan(uid) {
   return request({
@@ -211,7 +211,7 @@ export function delPlan(uid) {
 }
 /**
  * 预览预案
- * @param {*} data 
+ * @param {*} data
  */
 export function previewPlan(uid) {
   return request({
@@ -222,7 +222,7 @@ export function previewPlan(uid) {
 }
 /**
  * 分页获取调度任务
- * @param {*} data 
+ * @param {*} data
  */
 export function getCtcData(data) {
   return request({
@@ -234,7 +234,7 @@ export function getCtcData(data) {
 }
 /**
  * 调度指挥
- * @param {*} data 
+ * @param {*} data
  */
 export function ctcTasks(data, uid) {
   return request({
@@ -246,7 +246,7 @@ export function ctcTasks(data, uid) {
 }
 /**
  * 修改事件过程状态
- * @param {*} data 
+ * @param {*} data
  */
 export function updateProcess(uid, data) {
   return request({
@@ -271,7 +271,7 @@ export function addTaskInfo(data, uid) {
 /** ===== 事件统计分析 ====== */
 /**
  * 事件总体情况统计
- * @param {*} data 
+ * @param {*} data
  */
 export function getGeneralcondition(data) {
   return request({
@@ -283,7 +283,7 @@ export function getGeneralcondition(data) {
 }
 /**
  * 事件等级分析
- * @param {*} data 
+ * @param {*} data
  */
 export function getRankAnalysis(data) {
   return request({
@@ -295,7 +295,7 @@ export function getRankAnalysis(data) {
 }
 /**
  * 事件类型分析
- * @param {*} data 
+ * @param {*} data
  */
 export function getTypeAnalysis(data) {
   return request({
@@ -307,7 +307,7 @@ export function getTypeAnalysis(data) {
 }
 /**
  * 事件数量分析
- * @param {*} data 
+ * @param {*} data
  */
 export function getQuantitativeTrend(data) {
   return request({
@@ -319,7 +319,7 @@ export function getQuantitativeTrend(data) {
 }
 /**
  * 事件高发地点分析
- * @param {*} data 
+ * @param {*} data
  */
 export function getHotLocation(data) {
   return request({
@@ -331,7 +331,7 @@ export function getHotLocation(data) {
 }
 /**
  * 事件布控统计分析
- * @param {*} data 
+ * @param {*} data
  */
 export function getSurveillance(data) {
   return request({
@@ -346,7 +346,7 @@ export function getSurveillance(data) {
 
 /**
  * 获取部门列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getDepartmentList (data) {
   return request({
@@ -358,7 +358,7 @@ export function getDepartmentList (data) {
 }
 /**
  * 编辑部门
- * @param {*} data 
+ * @param {*} data
  */
 export function updateDepart (data) {
   return request({
@@ -370,7 +370,7 @@ export function updateDepart (data) {
 }
 /**
  * 删除部门
- * @param {*} data 
+ * @param {*} data
  */
 export function delDepart (data) {
   return request({
@@ -381,7 +381,7 @@ export function delDepart (data) {
 }
 /**
  * 判断部门名称是否重复
- * @param {*} data 
+ * @param {*} data
  */
 export function judgeDepart (data) {
   return request({
@@ -393,7 +393,7 @@ export function judgeDepart (data) {
 }
 /**
  * 根据组织机构查人员
- * @param {*} data 
+ * @param {*} data
  */
 export function getUserMember (data) {
   return request({
@@ -405,7 +405,7 @@ export function getUserMember (data) {
 }
 /**
  * 组织机构批量添加人员
- * @param {*} data 
+ * @param {*} data
  */
 export function addUserMember (data) {
   return request({
@@ -417,7 +417,7 @@ export function addUserMember (data) {
 }
 /**
  * 组织机构批量删除人员
- * @param {*} data 
+ * @param {*} data
  */
 export function delUserMember (data) {
   return request({
@@ -429,7 +429,7 @@ export function delUserMember (data) {
 }
 /**
  * 添加部门
- * @param {*} data 
+ * @param {*} data
  */
 export function addDepart (data) {
   return request({
@@ -441,7 +441,7 @@ export function addDepart (data) {
 }
 /**
  * 获取用户列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getUserList (data) {
   return request({
@@ -453,7 +453,7 @@ export function getUserList (data) {
 }
 /**
  * 获取部门详情
- * @param {*} data 
+ * @param {*} data
  */
 export function getDepartDetail (data) {
   return request({
@@ -465,7 +465,7 @@ export function getDepartDetail (data) {
 }
 /**
  * 删除用户
- * @param {*} data 
+ * @param {*} data
  */
 export function delUser (params) {
   return request({
@@ -476,7 +476,7 @@ export function delUser (params) {
 }
 /**
  * 重置密码
- * @param {*} data 
+ * @param {*} data
  */
 export function resetPwd (data) {
   return request({
@@ -488,7 +488,7 @@ export function resetPwd (data) {
 }
 /**
  * 启用/禁用用户
- * @param {*} data 
+ * @param {*} data
  */
 export function isForceUser (data) {
   return request({
@@ -500,7 +500,7 @@ export function isForceUser (data) {
 }
 /**
  * 编辑用户
- * @param {*} data 
+ * @param {*} data
  */
 export function updateUser (data) {
   return request({
@@ -512,7 +512,7 @@ export function updateUser (data) {
 }
 /**
  * 创建用户
- * @param {*} data 
+ * @param {*} data
  */
 export function createUser (data) {
   return request({
@@ -524,7 +524,7 @@ export function createUser (data) {
 }
 /**
  * 获取用户组
- * @param {*} data 
+ * @param {*} data
  */
 export function getUserGroups (params) {
   return request({
@@ -536,7 +536,7 @@ export function getUserGroups (params) {
 }
 /**
  * 创建用户组
- * @param {*} data 
+ * @param {*} data
  */
 export function createUserGroups (data) {
   return request({
@@ -548,7 +548,7 @@ export function createUserGroups (data) {
 }
 /**
  * 批量新增所选组
- * @param {*} data 
+ * @param {*} data
  */
 export function addUserBatchGroups (data) {
   return request({
@@ -560,7 +560,7 @@ export function addUserBatchGroups (data) {
 }
 /**
  * 批量新增所选角色
- * @param {*} data 
+ * @param {*} data
  */
 export function addUserBatchRoles (data) {
   return request({
@@ -572,7 +572,7 @@ export function addUserBatchRoles (data) {
 }
 /**
  * 批量删除所选组
- * @param {*} data 
+ * @param {*} data
  */
 export function delUserBatchGroups (data) {
   return request({
@@ -584,7 +584,7 @@ export function delUserBatchGroups (data) {
 }
 /**
  * 批量删除所选角色
- * @param {*} data 
+ * @param {*} data
  */
 export function delUserBatchRoles (data) {
   return request({
@@ -596,7 +596,7 @@ export function delUserBatchRoles (data) {
 }
 /**
  * 判断用户角色是否重名
- * @param {*} data 
+ * @param {*} data
  */
 export function judgeRoleName (data) {
   return request({
@@ -608,7 +608,7 @@ export function judgeRoleName (data) {
 }
 /**
  * 编辑用户组
- * @param {*} data 
+ * @param {*} data
  */
 export function updateUserGroups (data) {
   return request({
@@ -620,7 +620,7 @@ export function updateUserGroups (data) {
 }
 /**
  * 判断用户组名称是否重复
- * @param {*} data 
+ * @param {*} data
  */
 export function judgeUserGroup (data) {
   return request({
@@ -632,7 +632,7 @@ export function judgeUserGroup (data) {
 }
 /**
  * 删除用户组
- * @param {*} data 
+ * @param {*} data
  */
 export function delUserGroup (params) {
   return request({
@@ -643,7 +643,7 @@ export function delUserGroup (params) {
 }
 /**
  * 用户组批量添加所选用户成员
- * @param {*} data 
+ * @param {*} data
  */
 export function addMemberInfo (data) {
   return request({
@@ -655,7 +655,7 @@ export function addMemberInfo (data) {
 }
 /**
  * 用户组批量删除所选用户成员
- * @param {*} data 
+ * @param {*} data
  */
 export function delMemberInfo (data) {
   return request({
@@ -667,7 +667,7 @@ export function delMemberInfo (data) {
 }
 /**
  * 用户组批量添加所选角色
- * @param {*} data 
+ * @param {*} data
  */
 export function addUserGroupRoles (data) {
   return request({
@@ -679,7 +679,7 @@ export function addUserGroupRoles (data) {
 }
 /**
  * 用户组批量删除所选角色
- * @param {*} data 
+ * @param {*} data
  */
 export function delUserGroupRoles (data) {
   return request({
@@ -691,7 +691,7 @@ export function delUserGroupRoles (data) {
 }
 /**
  * 获取角色列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getRoleList (params) {
   return request({
@@ -703,7 +703,7 @@ export function getRoleList (params) {
 }
 /**
  * 创建角色
- * @param {*} data 
+ * @param {*} data
  */
 export function createRole (data) {
   return request({
@@ -715,7 +715,7 @@ export function createRole (data) {
 }
 /**
  * 编辑角色
- * @param {*} data 
+ * @param {*} data
  */
 export function updateRole (data) {
   return request({
@@ -727,7 +727,7 @@ export function updateRole (data) {
 }
 /**
  * 删除角色
- * @param {*} data 
+ * @param {*} data
  */
 export function delRole (data) {
   return request({
@@ -741,7 +741,7 @@ export function delRole (data) {
 
 /**
  * 获取车辆分组数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getVehicleGroup (params) {
   return request({
@@ -752,7 +752,7 @@ export function getVehicleGroup (params) {
 }
 /**
  * 获取车辆底库数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getVehicleBottomName (params) {
   return request({
@@ -763,7 +763,7 @@ export function getVehicleBottomName (params) {
 }
 /**
  * 获取车辆列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getVehicleDataList (params) {
   return request({
@@ -774,7 +774,7 @@ export function getVehicleDataList (params) {
 }
 /**
  * 车辆--新增分组
- * @param {*} data 
+ * @param {*} data
  */
 export function addGroup (data) {
   return request({
@@ -785,7 +785,7 @@ export function addGroup (data) {
 }
 /**
  * 管理车辆分组---修改车辆分组
- * @param {*} data 
+ * @param {*} data
  */
 export function editVeGroup (data) {
   return request({
@@ -796,7 +796,7 @@ export function editVeGroup (data) {
 }
 /**
  * 管理车辆分组--删除车辆分组
- * @param {*} data 
+ * @param {*} data
  */
 export function delVeGroup (uid) {
   return request({
@@ -806,7 +806,7 @@ export function delVeGroup (uid) {
 }
 /**
  * 管理车辆分组--获取车辆列表数据
- * @param {*} data 
+ * @param {*} data
  */
 export function getAdminVelList (params) {
   return request({
@@ -817,7 +817,7 @@ export function getAdminVelList (params) {
 }
 /**
  * 查询车辆详细信息
- * @param {*} data 
+ * @param {*} data
  */
 export function getVehicleInfo (uid) {
   return request({
@@ -827,7 +827,7 @@ export function getVehicleInfo (uid) {
 }
 /**
  * 管理车辆分组---移出分组
- * @param {*} data 
+ * @param {*} data
  */
 export function moveoutGroup (data) {
   return request({
@@ -838,7 +838,7 @@ export function moveoutGroup (data) {
 }
 /**
  * 管理车辆分组---复制分组
- * @param {*} data 
+ * @param {*} data
  */
 export function copyGroup (data) {
   return request({
@@ -850,7 +850,7 @@ export function copyGroup (data) {
 /***======== 人员信息库 ========== */
 /**
  * 底库列表查询
- * @param {*} data 
+ * @param {*} data
  */
 export function getPerBottomBankList (params) {
   return request({
@@ -861,7 +861,7 @@ export function getPerBottomBankList (params) {
 }
 /**
  * 分组列表查询
- * @param {*} data 
+ * @param {*} data
  */
 export function getPerGroupList (params) {
   return request({
@@ -885,7 +885,7 @@ export function getPersonData (params) {
 /**===== 自定义组 ===== */
 /**
  * 获取所有分组
- * @param {*} data 
+ * @param {*} data
  */
 export function getCusGroup (params) {
   return request({
@@ -896,7 +896,7 @@ export function getCusGroup (params) {
 }
 /**
  * 获取所有设备列表
- * @param {*} data 
+ * @param {*} data
  */
 export function getAllDevices (params) {
   return request({
@@ -907,7 +907,7 @@ export function getAllDevices (params) {
 }
 /**
  * 删除分组设备
- * @param {*} data 
+ * @param {*} data
  */
 export function delGroupDevice (id) {
   return request({
@@ -917,7 +917,7 @@ export function delGroupDevice (id) {
 }
 /**
  * 新增分组
- * @param {*} data 
+ * @param {*} data
  */
 export function addGroupDevice (data) {
   return request({
@@ -930,7 +930,7 @@ export function addGroupDevice (data) {
 /** ==== 临时授权 ==== */
 /**
  * 点击用户获取可用设备
- * @param {*} data 
+ * @param {*} data
  */
 export function getTempDeviceList (data) {
   return request({
@@ -941,7 +941,7 @@ export function getTempDeviceList (data) {
 }
 /**
  * 终止授权
- * @param {*} data 
+ * @param {*} data
  */
 export function stopTerminate (data) {
   return request({
@@ -952,7 +952,7 @@ export function stopTerminate (data) {
 }
 /**
  * 单个设备终止授权
- * @param {*} data 
+ * @param {*} data
  */
 export function stopOneTerminate (data) {
   return request({
@@ -963,7 +963,7 @@ export function stopOneTerminate (data) {
 }
 /**
  * 新增临时授权---获取可用设备
- * @param {*} data 
+ * @param {*} data
  */
 export function getASelectDevice (data) {
   return request({
@@ -1129,3 +1129,224 @@ export function getVehicleListByGroup(params) {
     mode: ''
   })
 }
+
+/*--------------------------  研判start  ---------------------------------*/
+/**
+ * JtcPOSTAppendixInfo 指定记录上传附件
+ * @param {object} params
+ */
+export function JtcPOSTAppendixInfo(data) {
+  return request({
+    url: '/appendixes',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+ * JtcGETAppendixInfoList 历史上传图片
+ * @param {object} params
+ */
+export function JtcGETAppendixInfoList(params) {
+  return request({
+    url: '/appendixes/page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JtcGETTrail 布控抓拍结果图片检索接口
+ * @param {object} params
+ */
+export function JtcGETTrail(params) {
+  return request({
+    url: '/structures',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JigGETEvent 事件编号查询列表接口
+ * @param {object} params
+ */
+export function JigGETEvent(params) {
+  return request({
+    url: '/event-services/events/page',
+    method: 'get',
+    params: params,
+    mode: 'event'
+  })
+}
+/**
+ * JigGETEventAlarm 事件侦查检索接口
+ * @param {object} params
+ */
+export function JigGETEventAlarm(params) {
+  return request({
+    url: '/events/' + params.eventId + '/alarm-snaps',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JigGETAlarmSnapList 设备抓拍结果列表接口
+ * @param {object} params
+ */
+export function JigGETAlarmSnapList(params) {
+  return request({
+    url: '/surveillances/' + params.surveillanceId + '/alarm-snaps',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JfoGETGroup 分组列表查询接口
+ * @param {object} params
+ */
+export function JfoGETGroup(params) {
+  return request({
+    url: '/group',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JfoGETSurveillanceObject 布控范围内监控设备列表查询接口
+ * @param {object} params
+ */
+export function JfoGETSurveillanceObject(params) {
+  return request({
+    url: '/alarm-snaps/by-group',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JfoGETEventList 事件列表查询接口
+ * @param {object} params
+ */
+export function JfoGETEventList(params) {
+  return request({
+    url: '/events/by-surveillance',
+    method: 'get',
+    params: params,
+    mode: 'event'
+  })
+}
+/**
+ * JhaGETStatisicByAddress 高危人员抓拍区域统计接口
+ * @param {object} params
+ */
+export function JhaGETStatisicByAddress(params) {
+  return request({
+    url: '/alarm-snaps/by-address',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * JhaGETAlarmSnapByAddress 高危人员抓拍结果列表查询接口
+ * @param {object} params
+ */
+export function JhaGETAlarmSnapByAddress(params) {
+  return request({
+    url: '/devices/' + params.deviceId + '/alarm-snap',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  研判end  ---------------------------------*/
+/*--------------------------  检索start  ---------------------------------*/
+/**
+ * ScpGETPortraitInfo 人像检索接口
+ * @param {object} params
+ */
+export function ScpGETPortraitInfo(params) {
+  return request({
+    url: '/portrait-structures/page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETstrucInfoList 抓拍检索列表接口
+ * @param {object} params
+ */
+export function ScpGETstrucInfoList(params) {
+  return request({
+    url: '/structures/page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETbasePortraitInfo 信息库人员查询接口
+ * @param {object} params
+ */
+export function ScpGETbasePortraitInfo(params) {
+  return request({
+    url: '/portraits/by-idno',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETportraitCmpInfo 人像比对接口
+ * @param {object} params
+ */
+export function ScpGETportraitCmpInfo(params) {
+  return request({
+    url: '/portrait-structures/compare',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETretrievalHisList 历史检索记录查询接口
+ * @param {object} params
+ */
+export function ScpGETretrievalHisList(params) {
+  return request({
+    url: '/retrieval-histories/page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETretrievalHisById 历史检索记录详情查询接口
+ * @param {object} params
+ */
+export function ScpGETretrievalHisById(params) {
+  return request({
+    url: '/retrieval-histories/' + params,
+    method: 'get',
+    mode: 'judge'
+  })
+}
+/**
+ * ScpGETdeviceListById
+ 通过用户id查询监控设备列表
+ * @param {object} params
+ */
+export function ScpGETdeviceListById(params) {
+  return request({
+    url: '/device-service/device-list',
+    method: 'get',
+    mode: 'base',
+    params: params
+  })
+}
+/*--------------------------  检索end  ---------------------------------*/
