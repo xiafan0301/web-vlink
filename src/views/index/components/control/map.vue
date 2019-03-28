@@ -50,7 +50,9 @@
             type="daterange"
             range-separator="-"
             start-placeholder="开始时间"
-            end-placeholder="结束时间">
+            end-placeholder="结束时间"
+            value-format="yyyy-MM-dd"
+            :default-time="['00:00:00', '23:59:59']">
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
@@ -138,8 +140,7 @@
   </div>
 </template>
 <script>
-import {random14} from '../../../../utils/util.js';
-import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap} from '@/views/index/api/api.js';
+import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap, getAlarmListByDev} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -159,7 +160,6 @@ export default {
         {label: '已结束', value: 3}
       ],
       typeList: [
-        {label: '全部', value: 0},
         {label: '枪机', value: 1},
         {label: '球机', value: 2},
         {label: '半球机', value: 3},
@@ -168,7 +168,9 @@ export default {
       rankList: [],
       // 地图参数
       map: null,
-      controlList: null, // 布控数据列表
+      devicesList: null, // 布控数据列表
+      markerAlarmList: [],//告警列表
+      timer: null,
       // 抓拍列表参数
       snapList: [],
       snapTotal: null,//抓拍总数
@@ -182,20 +184,47 @@ export default {
     this.getDiciData();
   },
   mounted () {
-    let _this = this;
-    _this.getControlMap();
-    _this.getAlarmSnap();
+    this.getControlMap();
+    this.getAlarmSnap();
     let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
+      zoom: 12, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
       // viewMode: '3D' // 使用3D视图
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
-    
-    _this.videoHeight = document.body.clientHeight - 336;
+    this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 获得设备报警列表
+    getAlarmListByDev () {
+      const params = {
+        deviceIds: this.devicesList.map(m => m.uid).join(',')
+      }
+      getAlarmListByDev(params).then(res => {
+        if (res && res.data) {
+          this.markerAlarmList = res.data;
+          this.markerAlarmList.forEach(dev => {
+            if (res.timestamp - dev.snapTime > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
+            const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
+            // 给有警情的点标记追加class
+            this.$nextTick(() => {
+              $('#mapBox #' + dev.deviceId).append(childDiv);
+              $('#mapBox #' + dev.deviceId).addClass("vl_icon_alarm");
+              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_02");
+              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_01");
+            })
+            // 让有警情的点标记的class 10s后移除
+            setTimeout(() => {
+              $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
+              $('#mapBox .vl_icon_warning').remove();
+              $('#mapBox #' + dev.deviceId).removeClass("vl_icon_control_02");
+              $('#mapBox #' + dev.deviceId).addClass("vl_icon_control_01");
+            }, 10000);
+          })
+        }
+      })
+    },
     // 获取告警级别字段
     getDiciData () {
       getDiciData(11).then(res => {
@@ -229,19 +258,20 @@ export default {
               data.push(d);
             })
           })
-          this.controlList = data;
-          console.log(this.controlList)
-          this.changeState();
+          this.devicesList = data;
         }
+      }).then(() => {
+        this.mapMark();
       })
     },
     // 获取设备下布控列表查询接口
     getControlMapByDevice (obj) {
+      console.log(obj, 'obj')
       const params = {
-        deviceName: 1,//obj.deviceName
-        uid: 1,//obj.uid
-        surveillanceIds: 11,//obj.surveillanceIds
-        surveillanceStatus: 1//obj.surveillanceStatus
+        deviceName: obj.deviceName,
+        uid: obj.uid,
+        surveillanceIds: obj.surveillanceIds,
+        surveillanceStatus: obj.surveillanceStatus
       }
       getControlMapByDevice(params).then(res => {
         if (res && res.data) {
@@ -260,7 +290,7 @@ export default {
                       <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
                       <div class="vl_map_state">进行中</div>
                       <div class="vl_map_operate">
-                        <div>${_this.controlObjList.deviceName}</div>
+                        <div>${obj.deviceName}</div>
                         <div>
                           <i class="vl_icon vl_icon_control_06"></i>
                           <i class="vl_icon vl_icon_control_07"></i>
@@ -304,7 +334,7 @@ export default {
                       <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
                       <div class="vl_map_state">进行中</div>
                       <div class="vl_map_operate">
-                        <div>${_this.controlObjList.deviceName} </div>
+                        <div>${obj.deviceName} </div>
                         <div>
                           <i class="vl_icon vl_icon_control_06"></i>
                           <i class="vl_icon vl_icon_control_07"></i>
@@ -336,7 +366,7 @@ export default {
                   <div class="vl_map_click_main">
                     <div class="vl_map_start">
                       <div class="vl_map_state">待开始</div>
-                      <span>${_this.controlObjList.deviceName}</span>
+                      <span>${obj.deviceName}</span>
                     </div>
                     <div class="vl_map_info">
                       <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
@@ -371,7 +401,7 @@ export default {
                   <div class="vl_map_click_main">
                     <div class="vl_map_start">
                       <div class="vl_map_state">待开始</div>
-                      <span>${_this.controlObjList.deviceName}</span>
+                      <span>${obj.deviceName}</span>
                     </div>`;
                     for (let item of _this.controlObjList.list) {
                       sContent += 
@@ -540,71 +570,68 @@ export default {
     // 地图标记
     mapMark () {
       let _this = this;
-      let data = _this.controlList;
-      console.log(data, 'data')
+      let data = _this.devicesList;
       _this.map.clearMap();
-      for (let i = 0; i < data.length; i++) {
-        let obj = data[i];
-        obj.sid = obj.deviceName + '_' + i + '_' + random14();
-        let content = '';
-        // 暂时默认告警级别为五级时出现告警闪烁
-        if (obj.uid === 1) {
-          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_02 vl_icon_alarm"><div class="vl_icon_warning">发现可疑目标</div></div>';
-        } else {
-          content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_control_01"></div>';
-        }
-        if (obj.longitude > 0 && obj.latitude > 0) {
-          let offSet = [-20.5, -48];
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.map,
-            position: [obj.longitude, obj.latitude],
-            offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            extData: obj,
-            // 自定义点标记覆盖物内容
-            content: content
-          });
-          marker.setMap(_this.map);
-          // 让告警闪烁图标10s后自动消失
-          if (obj.uid === 1) {
-            setTimeout(() => {
-              $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-              $('#mapBox .vl_icon_warning').remove();
-              $('#' + obj.sid).removeClass("vl_icon_control_02");
-              $('#' + obj.sid).addClass("vl_icon_control_01");
-            }, 10000);
-          }
-          marker.on('click', function(e) {
-            console.log(e.target.C.extData, 'e')
-            // 点击切换告警闪烁图标
-            if (e.target.C.extData.uid === 1) {
-              if (!$('#' + e.target.C.extData.sid).hasClass('vl_icon_control_02')) {
-                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
-                $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
-                $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
+      new Promise((resolve) => { 
+        for (let i = 0; i < data.length; i++) {
+          let obj = data[i];
+          let content = '';
+          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+          if (obj.longitude > 0 && obj.latitude > 0) {
+            let offSet = [-20.5, -48];
+            let marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [obj.longitude, obj.latitude],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: obj,
+              // 自定义点标记覆盖物内容
+              content: content
+            });
+            // 点标记点击事件
+            marker.on('click', function(e) {
+              // 点击切换告警闪烁图标
+              if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
+                if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
+                  $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                  $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
+                  $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                } else {
+                  $('#' + e.target.C.extData.uid).removeClass("vl_icon_alarm");
+                  $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
+                  $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
+                  $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                  $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
+                  $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
+                }
               } else {
-                $('#mapBox .vl_icon_control_02').removeClass("vl_icon_alarm");
-                $('#mapBox .vl_icon_warning').remove();
-                $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_02");
-                $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.sid})`).addClass("vl_icon_control_01");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.sid})`).removeClass("vl_icon_control_03");
+                // 点击切换普通点标记图标
+                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
+                $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
               }
-            } else {
-              // 点击切换普通点标记图标
-              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
-              $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.sid).addClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.sid).removeClass("vl_icon_control_01");
-            }
-            _this.getControlMapByDevice(obj);
-            // if (_this.controlObjList.num === undefined) {
-            //   return false;
-            // }
-            
-          });
+              _this.getControlMapByDevice(e.target.C.extData);
+            })
+            marker.setMap(_this.map);
+          }
         }
-      }
+        resolve();
+      }).then(() => {
+        clearInterval(_this.timer);
+        if (this.mapForm.state !== 1) {
+          return;
+        }
+        _this.getAlarmListByDev();
+        // 12s重新加载一次
+        _this.timer = setInterval(() => {
+          _this.getAlarmListByDev();
+        }, 12000);
+        // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+        _this.$once('hook:beforeDestroy', () => {
+          clearInterval(_this.timer);
+        })
+      })
     },
     // 跳转至视频回放页面
     skipIsVideo () {
@@ -612,19 +639,6 @@ export default {
         name: 'video_playback'
       })
       window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
-    },
-    // 按布控状态来筛选地图标记
-    changeState () {
-      // this.controlList = objDeepCopy(testData);
-      // this.controlList = this.controlList.filter(f => f.surveillanceStatus === this.mapForm.state);
-      // this.controlList = this.controlList.filter(f => f.controlList.length > 0);
-      console.log(this.controlList)
-      // this.controlList.forEach((f, i) => {
-      //   f.latitude = '28.10' + i + '253';
-      //   f.longitude = '112.9' + i + '1563';
-      //   f.deviceName = i;
-      // });
-      this.mapMark();
     },
     // 重置表单
     resetForm () {

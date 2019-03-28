@@ -830,7 +830,7 @@ export default {
       }
       if (idNo) {
         getVehicleByIdNo(params).then(res => {
-          if (res && res.data) {
+          if (res && res.data && res.data.length > 0) {
             this.$message.error('车牌号已存在');
           }
         })
@@ -1143,6 +1143,7 @@ export default {
       .list_info{
         margin: 0 0.5%;
         width: 32%;
+        height: 240px;
         padding: 20px;
         margin-bottom: 20px;
         background:rgba(255,255,255,1);

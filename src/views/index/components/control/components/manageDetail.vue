@@ -19,7 +19,7 @@
         <ul>
           <li>
             <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
-            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.type === 1 ? '短期布控' : controlDetail.type === 2 ? '长期布控' : '' }}</span></div>
+            <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType}}</span></div>
           </li>
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
@@ -82,14 +82,12 @@
                           <vue-scroll>
                             <ul v-if="type === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li :key="equ.uid"><span>{{equ.uid}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <!-- <li :key="equ.uid"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li> -->
+                                <li :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
                             <ul v-if="type === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.bayonetList">
-                                <li :key="equ.uid"><span>{{equ.uid}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                                <!-- <li :key="equ.uid"><span style="color: #b2b2b2;">{{equ.equName}}</span><i class="vl_icon vl_icon_control_32"></i></li> -->
+                                <li :key="equ.uid"><span>{{equ.bayonetName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
                           </vue-scroll>
@@ -177,7 +175,7 @@
         <!-- 布控结果 -->
         <div class="manage_d_c_result" v-if="controlState !== '0'">
           <div class="result_title">
-            <div>布控结果（200个）</div>
+            <div>布控结果（{{controlResList && controlResList.list && controlResList.list.length}}个）</div>
             <div>
               <el-date-picker
                 style="width: 230px;margin: 6px 10px 0 0;"
@@ -302,7 +300,6 @@
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
-import {random14} from '../../../../../utils/util.js';
 import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog},
@@ -329,15 +326,11 @@ export default {
       pageSzieRes: 8,
       pageNumObjRes: 1,
       // 实时监控设备列表
-      situList: [
-        {name: '设备1', id: '01', src: require('../../../../../assets/video/video.mp4'), index: 0},
-        {name: '设备2', id: '02', src: require('../../../../../assets/video/video.mp4'), index: 1},
-        {name: '设备3', id: '03', src: require('../../../../../assets/video/video.mp4'), index: 2},
-        {name: '设备4', id: '04', src: require('../../../../../assets/video/video.mp4'), index: 3}
-      ],
+      situList: [],
       rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
       eventDetailDialog: false,//事件详情弹窗
+      lastIndex: null,
       // 布控结果筛选参数
       controlTimeIsKey: null,//布控时间
       devListIsKey: null,//设备列表
@@ -413,9 +406,6 @@ export default {
     getEquList (type, data) {
       this.type = type;
       this.devId = data.uid;
-      // if (type === '1') {
-      //   this.devList = data.kk;
-      // }
     },
     // 展开或者闭合设备列表
     dropdown (data) {
@@ -557,10 +547,9 @@ export default {
       console.log(e.target)
       if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
           e.target.style.background = "";
-          let videoSrc = this.situList[this.dragstartIndex].src;
-          let sid = this.situList[this.dragstartIndex].id + '_' + random14();
+          let sid = this.situList[this.dragstartIndex].uid;
           let div = document.createElement('div');
-          let video = `<video src="${videoSrc}" autoplay loop controls></video>
+          let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
             <div>
               <i class="vl_icon vl_icon_control_06"></i>
               <i class="vl_icon vl_icon_control_11"></i>
@@ -571,27 +560,30 @@ export default {
           div.innerHTML = video;
           e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
           // 从左往右边拖拽逻辑
+          const rightVideoList = [{},{},{},{}]
           let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
-          if (this.rightVideoList[index].id) {
-            let _video = this.rightVideoList.splice(index, 1)[0];
+          delVideo[0]['index'] = this.dragstartIndex;
+          if (rightVideoList[index].uid) {
+            let _video = rightVideoList.splice(index, 1)[0];
             let _index = _video.index;
             this.situList.splice(_index, 1 , _video);
-            this.rightVideoList.splice(index, 1, ...delVideo);
+            rightVideoList.splice(index, 1, {});
           } else {
-            this.rightVideoList.splice(index, 1, ...delVideo);
+            rightVideoList.splice(index, 1, ...delVideo);
           }
-          console.log(this.rightVideoList) 
+          console.log(delVideo) 
           // 防止重复绑定点击事件，先解绑
-          // $('.situ_right').unbind('click');
+          $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
           // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
           let _this = this;
-          $('.situ_right').on('click', '#' + sid, function (e) {
+          $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
             let _div = document.createElement('div');
             _div.className = 'situ_r_img';
             _div.innerHTML = '<div></div>'
             e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-            let _video = _this.rightVideoList.splice(index, 1, {})[0];
+            let _video = rightVideoList.splice(index, 1, {})[0];
             let _index = _video.index;
+            
             _this.situList.splice(_index, 1, _video);
           })
       }
@@ -623,27 +615,26 @@ export default {
       _this.map.clearMap();
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
-        obj.sid = obj.deviceName + '_' + i + '_' + random14();
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
           let _content = null;
           if (obj.type === 1) {
             // if (obj.isNormal && obj.isSelected) {
-            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
+            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
             // } else if (obj.isNormal && !obj.isSelected) {
-            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
+            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             // } else if (!obj.isNormal) {
-            //   _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+            //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
             // }
-             _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
+             _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
           } else {
-            if (obj.isNormal && obj.isSelected) {
-              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_kk"></div>';
-            } else if (obj.isNormal && !obj.isSelected) {
-              _content = '<div id="' + obj.sid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
-            } else if (!obj.isNormal) {
-              _content = '';
-            }
+            // if (obj.isNormal && obj.isSelected) {
+              _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk"></div>';
+            // } else if (obj.isNormal && !obj.isSelected) {
+              // _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
+            // } else if (!obj.isNormal) {
+              // _content = '';
+            // }
           }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: _this.map,

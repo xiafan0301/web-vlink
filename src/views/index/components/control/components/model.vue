@@ -1,29 +1,40 @@
 <template>
   <el-form :ref="mapId" :model="modelForm">
     <!-- 图片上传 -->
-    <el-form-item label="人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
+    <el-form-item :label="changeObj" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
       <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
       <div class="pic_format">
         <div @click="popSel">从库中选择</div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
-      <el-select v-model="modelForm.licenseNum" multiple filterable allow-create default-first-option placeholder="请选择" @change="getLicenseNum">
+      <el-select
+        v-model="modelForm.licenseNum"
+        filterable
+        remote
+        multiple
+        reserve-keyword
+        allow-create
+        @change="getLicenseNum"
+        value-key="value"
+        placeholder="请输入车牌信息"
+        :remote-method="getVehicleByIdNo"
+        :loading="loading">
         <el-option
           v-for="item in licenseNumList"
           :key="item.value"
           :label="item.label"
-          :value="item.value">
+          :value="item.label">
         </el-option>
       </el-select>
     </el-form-item>
     <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
-      <el-select value-key="uid" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请选择" @change="getLimitedScope">
+      <el-select value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getLimitedScope">
         <el-option
           v-for="item in limitationList"
-          :key="item.uid"
+          :key="item.value"
           :label="item.label"
-          :value="item.value">
+          :value="item.label">
         </el-option>
       </el-select>
     </el-form-item>
@@ -65,7 +76,7 @@
                   <vue-scroll>
                     <ul style="max-height: 346px;">
                       <template v-for="equ in trackPoint.devList">
-                        <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 2 || equ.type === 3">
+                        <li :key="equ.uid" @click="devId = equ.uid" :class="['normal', {'active': devId === equ.uid}]" v-if="equ.type === 2 || equ.type === 3">
                           <span :class="{'four': modelType === '4'}">{{equ.deviceName}}<br/><span v-if="modelType === '1' || modelType === '2'" class="vl_f_666">距追踪点001 <span style="color: orange;">{{equ.distance}}km</span></span></span>
                           <div>
                             <i v-if="equ.deviceStatus" class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
@@ -84,7 +95,7 @@
                   <vue-scroll>
                     <ul style="max-height: 346px;">
                       <template v-for="equ in trackPoint.devList">
-                        <li :key="equ.sid" @click="sid = equ.sid" :class="['normal', {'active': sid === equ.sid}]" v-if="equ.type === 'kk' && equ.deviceStatus">
+                        <li :key="equ.uid" @click="devId = equ.uid" :class="['normal', {'active': devId === equ.uid}]" v-if="equ.type === 'kk' && equ.deviceStatus">
                           <span style="margin-top: 8px;">{{equ.deviceName}}</span>
                           <div>
                             <i v-if="equ.deviceStatus" class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
@@ -195,15 +206,13 @@
   </el-form>
 </template>
 <script>
-// import {conData} from '../testData.js';
-// import {random14} from '../../../../../utils/util.js';
 import {objDeepCopy} from '@/utils/util.js';
-import {repertorySel} from '@/views/index/api/api.js';
+import {repertorySel, getVehicleByIdNo} from '@/views/index/api/api.js';
 import uploadPic from './uploadPic.vue';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId', 'mapData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
   data () {
     return {
       modelForm: {
@@ -218,16 +227,7 @@ export default {
           value: '431224',
           label: '溆浦县'
         }],
-      licenseNumList: [{
-          value: '沪CR8706',
-          label: '沪CR8706'
-        }, {
-          value: '沪CR8725',
-          label: '沪CR8725'
-        }, {
-          value: '沪CR1235',
-          label: '沪CR1235'
-        }],
+      licenseNumList: [],
       // 地图数据
       map: null,
       mouseTool: null,
@@ -245,7 +245,7 @@ export default {
       trackPointList: [],
       type: '0',// 设备类型
       tid: null,//追踪点列表id
-      sid: null,//设备列表id
+      devId: null,//设备列表id
       features: 1,//设备特性
       featuresTypeList: [
         {label: '人脸识别', value: 1},
@@ -288,10 +288,40 @@ export default {
       }
     }
   },
+  computed: {
+    changeObj () {
+      if (this.modelType === '1') {
+        return '人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+      } else if (this.modelType === '2') {
+        return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+      } else {
+        return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+      }
+    }
+  },
   mounted () {
     this.resetMap();
   },
   methods: {
+    // 通过车牌号搜索车像列表
+    getVehicleByIdNo (query) {
+      const idNo = this.Trim(query, 'g');
+      const params = {
+        vehicleNumber: idNo
+      }
+      if (idNo) {
+        getVehicleByIdNo(params).then(res => {
+          if (res && res.data && res.data.length > 0) {
+            this.licenseNumList = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.vehicleNumber
+              }
+            });
+          }
+        })
+      }
+    },
     // 弹出从库中选择框
     popSel () {
       this.targetObj = [];
@@ -386,30 +416,30 @@ export default {
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
     changeSelectedStatus (_obj) {
       console.log(_obj, 'two')
-      const sid = $(`#${this.mapId} #${_obj.sid}`);
+      const devDom = $(`#${this.mapId} #${_obj.uid}`);
       // 摄像头
       if (_obj.type === 2 || _obj.type === 3) {
         if (_obj.deviceStatus && _obj.isSelected) {
-          sid.removeClass('vl_icon_sxt');
-          sid.addClass('vl_icon_sxt_uncheck');
+          devDom.removeClass('vl_icon_sxt');
+          devDom.addClass('vl_icon_sxt_uncheck');
         } else if (_obj.deviceStatus && !_obj.isSelected) {
-          sid.removeClass('vl_icon_sxt_uncheck');
-          sid.addClass('vl_icon_sxt');
+          devDom.removeClass('vl_icon_sxt_uncheck');
+          devDom.addClass('vl_icon_sxt');
         } else if (!_obj.deviceStatus && _obj.isSelected) {
-          sid.removeClass('vl_icon_sxt_not_choose');
-          sid.addClass('vl_icon_sxt_uncheck');
+          devDom.removeClass('vl_icon_sxt_not_choose');
+          devDom.addClass('vl_icon_sxt_uncheck');
         } else if (!_obj.deviceStatus && !_obj.isSelected) {
-          sid.removeClass('vl_icon_sxt_uncheck');
-          sid.addClass('vl_icon_sxt_not_choose');
+          devDom.removeClass('vl_icon_sxt_uncheck');
+          devDom.addClass('vl_icon_sxt_not_choose');
         }
       // 卡口
       } else {
         if (_obj.deviceStatus && _obj.isSelected) {
-          sid.removeClass('vl_icon_kk');
-          sid.addClass('vl_icon_kk_uncheck');
+          devDom.removeClass('vl_icon_kk');
+          devDom.addClass('vl_icon_kk_uncheck');
         } else if (_obj.deviceStatus && !_obj.isSelected) {
-          sid.removeClass('vl_icon_kk_uncheck');
-          sid.addClass('vl_icon_kk');
+          devDom.removeClass('vl_icon_kk_uncheck');
+          devDom.addClass('vl_icon_kk');
         } else if (!_obj.deviceStatus) {
           console.log(1111)
         }
@@ -445,7 +475,7 @@ export default {
                 latitude: t .latitude,
                 longitude: t .longitude,
                 radius: t.radius,
-                devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
+                devList: t.devList.filter(f => (f.isSelected === true)).map(m => {
                   return {
                     deviceId: m.uid,
                     deviceName: m.equName//编辑参数
@@ -511,7 +541,7 @@ export default {
                 latitude: t .latitude,
                 longitude: t .longitude,
                 radius: t.radius,
-                devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
+                devList: t.devList.filter(f => (f.isSelected === true)).map(m => {
                   return {
                     deviceId: m.uid,
                     deviceName: m.equName//编辑参数
@@ -570,7 +600,7 @@ export default {
             deviceChara: t.deviceChara,
             groupName: null,//编辑参数
             groupId: t .groupId,
-            bayonetList: t.devList.filter(f => (f.isSelected === true && f.type === 'kk')).map(m => {
+            bayonetList: t.devList.filter(f => (f.isSelected === true)).map(m => {
               return {
                 bayonetId: m.uid
               }
@@ -628,7 +658,7 @@ export default {
             longitude: t .longitude,
             groupName: null,//编辑参数
             groupId: t .groupId,
-            devList: t.devList.filter(f => (f.isSelected === true && f.type === 'sxt')).map(m => {
+            devList: t.devList.filter(f => (f.isSelected === true)).map(m => {
               return {
                 deviceId: m.uid,
                 deviceName: m.equName//编辑参数
@@ -778,27 +808,26 @@ export default {
     mapMark () {
       let _this = this, _hoverWindow = null;
       // 遍历追踪点范围内的设备列表，包括摄像头、卡口
-      for (let i = 0; i < _this.mapData.length; i++) {
+      for (let i = 0; i < _this.allDevData.length; i++) {
         let offSet = [-20.5, -48];
-        let _obj = _this.mapData[i];
-        _obj.sid = _obj.deviceName + '_' + i;
+        let _obj = _this.allDevData[i];
         if (_obj.longitude > 0 && _obj.latitude > 0) {
           let _content = null;
           if (_obj.type === 2 || _obj.type === 3) {
             if (_obj.deviceStatus && _obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
             } else if (_obj.deviceStatus && !_obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             } else if (!_obj.deviceStatus && _obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
             } else if (!_obj.deviceStatus && !_obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             }
           } else {
             if (_obj.deviceStatus && _obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_kk"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_kk"></div>';
             } else if (_obj.deviceStatus && !_obj.isSelected) {
-              _content = '<div id="' + _obj.sid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
+              _content = '<div id="' + _obj.uid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
             } else if (!_obj.deviceStatus) {
               _content = '';
             }
@@ -828,14 +857,14 @@ export default {
             _hoverWindow.open(_this.map, new window.AMap.LngLat(_obj.longitude, _obj.latitude));
             // 判断当前点标记是否在圆形覆盖物之内，只有在范围之内才能点击切换选中状态
             const isClick = _this.trackPointList.some(f => {
-              return f.devList.some(d => d.sid === _obj.sid);
+              return f.devList.some(d => d.uid === _obj.uid);
             })
             if (isClick) {
-              _this.sid = _obj.sid;//点击设备marker,使其在设备列表背景颜色高亮
+              _this.devId = _obj.uid;//点击设备marker,使其在设备列表背景颜色高亮
               // 切换设备列表中设备的选择状态
               _this.trackPointList.forEach(f => {
                 f.devList.forEach(d => {
-                  if (d.sid === _obj.sid) {
+                  if (d.uid === _obj.uid) {
                     d.isSelected = !d.isSelected;
                   }
                 })
@@ -996,7 +1025,7 @@ export default {
     // 获得人员追踪、车辆追踪内的设备列表数据
     getTraceEquList (graphics) {
       let _this = this;
-      let data = objDeepCopy(_this.mapData);
+      let data = objDeepCopy(_this.allDevData);
       console.log(data, 'data')
       let obj = {
         tid: _this.circleIndex, 
@@ -1030,29 +1059,30 @@ export default {
             // 在圆形之中
             setTimeout(() => {
               //在覆盖物内的置为选中-图标
-              const sid = $(`#${this.mapId} #${_obj.sid}`);
+              const devDom = $(`#${this.mapId} #${_obj.uid}`);
               // 摄像头
               _obj.isSelected = false;
               if (_obj.type === 2 || _obj.type === 3) {
                 if (_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_sxt_uncheck');
-                  sid.addClass('vl_icon_sxt');
+                  devDom.removeClass('vl_icon_sxt_uncheck');
+                  devDom.addClass('vl_icon_sxt');
                 } else if (!_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_sxt_uncheck');
-                  sid.addClass('vl_icon_sxt_not_choose');
+                  devDom.removeClass('vl_icon_sxt_uncheck');
+                  devDom.addClass('vl_icon_sxt_not_choose');
                 }
               // 卡口
               } else {
                 if (_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_kk_uncheck');
-                  sid.addClass('vl_icon_kk');
+                  devDom.removeClass('vl_icon_kk_uncheck');
+                  devDom.addClass('vl_icon_kk');
                 } else if (!_obj.deviceStatus) {
                   console.log(11111)
                 }
               }
               // 计算追踪点到设备的距离km
               const p1 = [_obj.longitude, _obj.latitude];
-              const distance = new window.AMap.GeometryUtil.distance(_this.lnglat, p1);
+              const distance = AMap.GeometryUtil.distance(_this.lnglat, p1);
+              console.log(distance, 'distance')
               _obj.distance = (distance / 1000).toFixed(1);
               _obj.isSelected = true;//在覆盖物内的置为选中-多选框
               _this.trackPointList[index].devList.push(_obj);
@@ -1162,7 +1192,7 @@ export default {
     // 获取越界分析、范围分析选取范围内的设备列表数据
     getScopeEquList (graphics, type) {
       let _this = this;
-      let data = objDeepCopy(this.mapData);
+      let data = objDeepCopy(this.allDevData);
       const i = _this.trackPointList.length + 1;
       let obj = {
         tid: i, 
@@ -1186,22 +1216,22 @@ export default {
             // 在圆形之中
             _this.$nextTick(() => {
               //在覆盖物内的置为选中-图标
-              const sid = $(`#${this.mapId} #${_obj.sid}`);
+              const devDom = $(`#${this.mapId} #${_obj.devDom}`);
               // 摄像头
               _obj.isSelected = false;
               if (_obj.type === 2 || _obj.type === 3) {
                 if (_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_sxt_uncheck');
-                  sid.addClass('vl_icon_sxt');
+                  devDom.removeClass('vl_icon_sxt_uncheck');
+                  devDom.addClass('vl_icon_sxt');
                 } else if (!_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_sxt_uncheck');
-                  sid.addClass('vl_icon_sxt_not_choose');
+                  devDom.removeClass('vl_icon_sxt_uncheck');
+                  devDom.addClass('vl_icon_sxt_not_choose');
                 }
               // 卡口
               } else {
                 if (_obj.deviceStatus && !_obj.isSelected) {
-                  sid.removeClass('vl_icon_kk_uncheck');
-                  sid.addClass('vl_icon_kk');
+                  devDom.removeClass('vl_icon_kk_uncheck');
+                  devDom.addClass('vl_icon_kk');
                 } else if (!_obj.deviceStatus) {
                   console.log(1111)
                 }

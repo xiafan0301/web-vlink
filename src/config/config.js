@@ -14,6 +14,7 @@ const oDomains = {
     control: {
         dev: 'http://apidev.aorise.org/vlink-control',
         // dev: 'http://10.116.66.29:8081',//钟赞
+        // dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
@@ -26,8 +27,8 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      // dev: 'http://apidev.aorise.org/vlink-event/api/emi',
-      dev: 'http://10.116.64.134:8082/api/emi',
+      dev: 'http://apidev.aorise.org/vlink-event/api/emi',
+      // dev: 'http://10.116.64.134:8082/api/emi',
       test: 'http://apirel.aorise.org/vlink-event/api/emi',
       prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     },
