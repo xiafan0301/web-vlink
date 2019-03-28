@@ -630,6 +630,23 @@ export default {
       this.charts.chart6 = chart;
     }
 
+  },
+  destroyed () {
+    if (this.charts.chart11) {
+      this.charts.chart11.destroy();
+    }
+    if (this.charts.chart3) {
+      this.charts.chart3.destroy();
+    }
+    if (this.charts.chart4) {
+      this.charts.chart4.destroy();
+    }
+    if (this.charts.chart5) {
+      this.charts.chart5.destroy();
+    }
+    if (this.charts.chart6) {
+      this.charts.chart6.destroy();
+    }
   }
 }
 </script>

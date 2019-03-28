@@ -38,6 +38,9 @@ if (userInfo) {
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
   // console.log('axios request config', config);
+  // 序列化的时候空格变+的问题
+  // config.url = config.url.replace(/\+/g, '%20');
+  // 模式，微服务
   if (config.mode && ajaxCtx[config.mode]) {  
     config.baseURL = ajaxCtx[config.mode];
   }

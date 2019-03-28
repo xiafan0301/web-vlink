@@ -23,6 +23,7 @@
     "node-sass": "^4.10.0",
     "qrcodejs2": "0.0.2",
     "sass-loader": "^7.1.0",
+    "video.js": "^7.4.1",
     "vue": "^2.6.8",
     "vue-qart": "^2.2.0",
     "vue-router": "^3.0.1",

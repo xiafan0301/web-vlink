@@ -210,7 +210,7 @@ export default {
     > span {
       display: block;
       float: right;
-      height: 20px; line-height: 20px; max-width: 150px;
+      height: 20px; line-height: 20px;
       cursor: pointer;
       font-size: 16px; color: #fff;
       margin-top: 45px; padding: 0 10px 0 20px;
