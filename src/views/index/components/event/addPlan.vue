@@ -56,8 +56,8 @@
                 <div class="title">
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
-                <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <div class="plan_form">
+                  <el-form-item label="执行部门:"  label-position="left" :prop="'addPlanForm.taskList.' + index + '.departmentId'" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
                       <el-option
                         v-for="(item, index) in departmentList"
@@ -73,7 +73,7 @@
                   <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
                     <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
                   </el-form-item>
-                </el-form>
+                </div>
               </div>
               <template v-if="addPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
@@ -141,7 +141,7 @@ export default {
     }
   },
   created () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo =  this.$store.state.loginUser;
     this.getPlanTypeList();
     this.getEventLevelList();
     this.getDepartList();

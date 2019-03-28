@@ -136,7 +136,7 @@ export default {
     }
   },
   created () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo =  this.$store.state.loginUser;
     this.getPlanTypeList();
     this.getEventLevelList();
   },

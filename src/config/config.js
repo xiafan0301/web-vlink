@@ -5,23 +5,23 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        // dev: 'http://apidev.aorise.org/vlink-base',
-        dev: 'http://10.116.64.142:8083',
+        dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
     // 事件部分地址
     event: {
-      // dev: 'http://apidev.aorise.org/vlink-event/api/emi',
-      dev: 'http://10.116.64.134:8082/api/emi',
-      test: 'http://apirel.aorise.org/vlink-event/api/emi',
-      prod: 'http://apidev.aorise.org/vlink-event/api/emi'
+      // dev: 'http://apidev.aorise.org/vlink-event/api/vlink',
+      dev: 'http://10.116.64.134:8082/api/vlink',
+      test: 'http://apirel.aorise.org/vlink-event/api/vlink',
+      prod: 'http://apidev.aorise.org/vlink-event/api/vlink'
     },
     // 调度和预案部分地址
     ctc: {
-      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/emi',
-      dev: 'http://10.116.64.134:8081/api/emi',
+      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      dev: 'http://10.116.64.134:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },
@@ -34,16 +34,16 @@ const oDomains = {
     },
     // 用户权限地址
     auth: {
-      dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
-      // dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      // dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
+      dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
     },
     // 视频播放服务
     video: {
-        dev: 'http://apidev.aorise.org/vlink-monitor',
-        test: 'http://apidev.aorise.org/vlink-monitor',
-        prod: 'http://apidev.aorise.org/vlink-monitor',
+      dev: 'http://apidev.aorise.org/vlink-monitor',
+      test: 'http://apidev.aorise.org/vlink-monitor',
+      prod: 'http://apidev.aorise.org/vlink-monitor',
     }
 };
 let ENV_API = process.env.VUE_APP_API;

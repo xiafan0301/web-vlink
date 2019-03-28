@@ -48,7 +48,7 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '15675256052',
+        userMobile: '18216061865',
         userPassword: '123456'
       },
       loginBtnLoading: false,
@@ -78,15 +78,17 @@ export default {
           login(this.loginForm)
             .then(res => {
               if (res) {
-                console.log(res)
-                console.log(JSON.stringify(res.data))
-                localStorage.setItem('userInfo', JSON.stringify(res.data));
+                localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
+                console.log(localStorage.getItem('as_vlink_user_info'))
                 setTimeout(() => {
                   this.loginBtnLoading = false;
                   this.$router.push({name: 'index'});
                 }, 1000);
+              } else {
+                this.loginBtnLoading = false;
               }
             })
+            .catch(() => {this.loginBtnLoading = false;})
           // todo
         } else {
           // 登陆中 登录按钮不可用

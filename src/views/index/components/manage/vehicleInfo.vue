@@ -603,7 +603,7 @@ export default {
     // 显示加入组tankuang
     showGroupDialog () {
       if (this.multipleSelection.length > 0) {
-        this.showGroup = true;
+        this.showGroup = !this.showGroup;
       } else {
         this.showGroup = false;
       }

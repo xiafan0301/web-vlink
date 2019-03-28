@@ -1,5 +1,5 @@
 <template>
-  <header class="vl_header clearfix">
+  <div class="vl_header clearfix">
     <div class="hd_log vl_icon vl_icon_logo">
     </div>
     <div class="hd_user">
@@ -10,7 +10,7 @@
         <ul class="hd_user_pl">
           <li class="user_pl_dis">个人设置</li>
           <li class="user_pl_dis">修改密码</li>
-          <li @click="loginOut">退出登录</li>
+          <li @click="showLoginOutDialog">退出登录</li>
         </ul>
         <span slot="reference">{{ userInfo && userInfo.userRealName}}&nbsp;<i class="el-icon-arrow-down"></i></span>
       </el-popover>
@@ -85,7 +85,22 @@
         </router-link>
       </li>
     </ul>
-  </header>
+    <!--退出登录弹出框-->
+    <el-dialog
+      title="退出登录"
+      :visible.sync="loginoutDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">您确定退出登录吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="loginoutDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="loginOut">确认</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 <script>
 import { logout } from '@/views/index/api/api.js';
@@ -97,57 +112,43 @@ export default {
         events: 212
       },
       userInfo: null,
+      loginoutDialog: false, // 退出登录弹出框
     }
   },
   mounted () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    console.log(this.userInfo)
+    this.userInfo = this.$store.state.loginUser;
   },
   methods: {
+    // 显示退出登录弹出框
+    showLoginOutDialog () {
+      this.loginoutDialog = true;
+    },
+    // 退出登录
     loginOut () {
-      let _this = this;
-      _this.$msgbox({
-        title: '退出提示',
-        message: '确定退出登录吗？',
-        showCancelButton: true,
-        confirmButtonText: '  确定  ',
-        cancelButtonText: '  取消  ',
-        beforeClose: (action, instance, done) => {
-          if (action === 'confirm') {
-            instance.confirmButtonLoading = true;
-            instance.confirmButtonText = '正在退出...';
-            // ajax
-            const params = {
-              userMobile: _this.userInfo.userMobile
-            }
-            logout(params)
-              .then(res => {
-                if (res) {
-                  _this.$router.push({name: 'login'});
-                  instance.confirmButtonLoading = false;
-                  done();
-                } else {
-                  this.$message({
-                    type: 'error',
-                    message: '退出失败',
-                    customClass: 'request_tip'
-                  })
-                  instance.confirmButtonLoading = false;
-                }
-              })
+      const params = {
+        userMobile: this.userInfo.userMobile
+      }
+      logout(params)
+        .then(res => {
+          if (res) {
+            this.loginoutDialog = false;
+            this.$router.push({name: 'login'});
           } else {
-            done();
+            this.$message({
+              type: 'error',
+              message: '退出登录失败',
+              customClass: 'request_tip'
+            })
           }
-        }
-      }).then(() => {
-      });
+        })
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .vl_header {
-  position: absolute; top: 0; left: 0; z-index: 100;
+  position: absolute; top: 0; left: 0;
+  z-index: 100;
   width: 100%; height: 100px; min-width: 1200px;
   background-color: #0C70F8;
   background: -webkit-linear-gradient(to bottom, #0C70F8, #0466DE);

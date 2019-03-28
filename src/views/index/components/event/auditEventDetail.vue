@@ -23,9 +23,9 @@
                 <li>
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
-                    <template v-if="$route.query.status === 'reject'">
+                    <!-- <template v-if="$route.query.status === 'reject'"> -->
                       <span >{{detailInfo.reporterPhone}}</span>
-                    </template>
+                    <!-- </template>
                     <template v-else>
                       <span class="reportUser">{{detailInfo.reporterPhone}}</span>
                       <div class="phone_dialog">
@@ -38,7 +38,7 @@
                           <span>视频通话</span>
                         </div>
                       </div>
-                    </template>
+                    </template> -->
                   </div>
                 </li>
                 <li>

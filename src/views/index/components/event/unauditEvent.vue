@@ -55,7 +55,6 @@
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
                     :before-upload='handleBeforeUpload'
-                    :on-preview="handlePictureCardPreview"
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'
                     :on-exceed="handleImgNumber"
@@ -68,17 +67,17 @@
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
                 </el-form-item>
-                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                <!-- <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in handleUnitList"
                       :key="index"
-                      :label="item.enumValue"
-                      :value="index"
+                      :label="item.organName"
+                      :value="item.uid"
                     >
                     </el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
                     <el-option
@@ -144,12 +143,29 @@
       class="dialog_comp"
       >
       <div class="content-body">
-        <p>请输入驳回的原因。</p>
-        <el-input v-model="rejectReason" type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
+        <p>请选择或输入驳回的原因。</p>
+        <el-form :model="rejectForm" ref="rejectForm">
+          <el-form-item label=" " prop="rejectReason" :rules="{ required: true, message: '请选择驳回原因', trigger: 'blur' }">
+            <el-select v-model="rejectForm.rejectReason" style='width: 90%' @change="changeCloseReason" placeholder="驳回原因">
+              <el-option
+                v-for="(item, index) in rejectReasonList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <template v-if="isShowRejectRemark">
+            <el-form-item label=" " prop="closeRemark" :rules="{ required: true, message: '请简述驳回原因', trigger: 'blur' }">
+              <el-input style="width: 90%" v-model="rejectForm.closeRemark" type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
+            </el-form-item>
+          </template>
+        </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="rejectDialogVisible = false">取 消</el-button>
-        <el-button class="operation_btn function_btn" @click="rejectEvent">确 定</el-button>
+        <el-button @click="cancelReject('rejectForm')">取 消</el-button>
+        <el-button class="operation_btn function_btn" @click="rejectEvent('rejectForm')">确 定</el-button>
       </div>
     </el-dialog>  
   </div>
@@ -157,7 +173,7 @@
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
-import { getEventDetail, updateEvent, getDiciData } from '@/views/index/api/api.js';
+import { getEventDetail, updateEvent, getDiciData, getDepartmentList  } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -181,7 +197,11 @@ export default {
           { required: true, message: '请选择处理单位', trigger: 'blur' }
         ]
       },
-      rejectReason: null, // 驳回理由
+      rejectForm: {
+        rejectReason: null,
+        closeRemark: null
+      },
+      isShowRejectRemark: false, // 是否显示驳回原因备注
       map: null,
       dieNumber: null, // 死亡人数
       isDieError: false,
@@ -189,28 +209,45 @@ export default {
       eventLevelList: [], // 事件等级列表数据
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
+      rejectReasonList: [], // 驳回原因列表数据
+      userInfo: {}
     }
   },
   created () {
+    this.userInfo =  this.$store.state.loginUser;
     this.getEventLevelList();
     this.getHandleUnit();
     this.getEventTypeList();
+    this.getRejectReasonList();
   },
   mounted () {
     this.getDetail();
     this.initMap();
   },
   methods: {
-    // 获取处理单位
-    getHandleUnit () {
-      const handleUnit = dataList.handleUnit;
-      getDiciData(handleUnit)
+    // 获取驳回原因
+    getRejectReasonList () {
+      const reason = dataList.rejectReason;
+      getDiciData(reason)
         .then(res => {
           if (res) {
-            this.handleUnitList = res.data;
+            this.rejectReasonList = res.data;
           }
         })
         .catch(() => {})
+    },
+    // 获取处理单位
+    getHandleUnit () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.handleUnitList = res.data.list;
+          }
+        })
     },
     // 获取事件类型
     getEventTypeList () {
@@ -366,7 +403,6 @@ export default {
     handleBeforeUpload (file) {
       console.log(file)
     },
-    handlePictureCardPreview () {},
     handleRemove () {},
     // 图片上传成功
     handleSuccess (res) {
@@ -391,31 +427,49 @@ export default {
     showRejectDialog () {
       this.rejectDialogVisible = true;
     },
+    // 取消驳回
+    cancelReject (form) {
+      this.$refs[form].resetFields();
+    },
     // 驳回
-    rejectEvent () {
-      const params = {
-        eventId: this.addEventForm.uid,
-        closeRemark: this.rejectReason
-      }
-      updateEvent(params)
-        .then(res => {
-          if (res) {
-            this.$message({
-              type: 'success',
-              message: '驳回成功',
-              customClass: 'request_tip'
-            })
-            this.$router.push({name: 'event_audit'});
-            this.rejectDialogVisible = false;
-          } else {
-            this.$message({
-              type: 'error',
-              message: '驳回失败',
-              customClass: 'request_tip'
-            })
+    rejectEvent (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            uid: this.addEventForm.uid,
+            closeRemark: this.rejectForm.closeRemark,
+            rejectReason: this.rejectForm.rejectReason
           }
-        })
-        .catch(() => {})
+          updateEvent(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '驳回成功',
+                customClass: 'request_tip'
+              })
+              this.$router.push({name: 'event_audit'});
+              this.rejectDialogVisible = false;
+            } else {
+              this.$message({
+                type: 'error',
+                message: '驳回失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+        }
+      })
+    },
+    // 驳回原因change
+    changeCloseReason (val) {
+      this.rejectForm.closeRemark = null;
+      if (val === 49) {
+        this.isShowRejectRemark = true;
+      } else {
+        this.isShowRejectRemark = false;
+      }
     },
     // 处理要提交的数据
     handleFormData () {
@@ -443,6 +497,9 @@ export default {
         }
         this.addEventForm.casualties = this.dieNumber;
       }
+      this.addEventForm.eventSource = dataList.sourceWeb;
+      this.addEventForm.eventStatus = 21;
+      this.addEventForm.acceptFlag  = 25;
     },
     submitData (form) { // 审核通过
       this.$refs[form].validate(valid => {
@@ -665,10 +722,10 @@ export default {
       p {
         color: #999999;
         margin-bottom: 20px;
-        &::before {
-          content: '*';
-          color: #F94539;
-        }
+        // &::before {
+        //   content: '*';
+        //   color: #F94539;
+        // }
       }
     }
   }

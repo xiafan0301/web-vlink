@@ -347,6 +347,11 @@ export default new Router({
                             path: 'deviceAuthorize',
                             name: 'device_authorize',
                             component: () => import('@/views/index/components/manage/deviceAuthorize.vue')
+                          },
+                          {
+                            path: 'markManage',
+                            name: 'mark_manage',
+                            component: () => import('@/views/index/components/manage/markManage.vue')
                           }
                         ]
                       },

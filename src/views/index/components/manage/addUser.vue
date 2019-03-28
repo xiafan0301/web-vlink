@@ -119,7 +119,7 @@ export default {
     }
   },
   mounted () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo =  this.$store.state.loginUser;
     this.addUser.proKey = this.userInfo.proKey;
     this.getDepartList();
   },

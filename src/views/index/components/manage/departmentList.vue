@@ -236,7 +236,7 @@ export default {
     }
   },
   created () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
     this.addDepartment.proKey = this.userInfo.proKey;

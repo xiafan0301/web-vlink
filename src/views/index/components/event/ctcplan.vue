@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="plan-list">
     <div class="search_box">
       <el-form :inline="true" :model="planForm" class="ctc_form" ref="planForm">
@@ -119,6 +120,7 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { dataList } from '@/utils/data.js';

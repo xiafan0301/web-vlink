@@ -44,7 +44,7 @@
             <el-option
               v-for="(item, index) in identityList"
               :key="index"
-              :label="item.enumValue"
+              :label="item.organName"
               :value="item.uid"
             >
             </el-option>
@@ -103,9 +103,14 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="idCard"
+          prop="reporterRole"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
+            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报时间"
@@ -153,28 +158,38 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList } from '@/views/index/api/api.js';
+import { getDiciData, getEventList, openAutoCheck, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       auditForm: {
         reportTime: [], // 日期
-        eventSource: 16, // 事件来源 app端
+        // eventSource: 16, // 事件来源 app端
         eventType: '全部类型', // 事件类型
         eventStatus: '全部状态', // 事件状态
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
-      isOpen: true, // 自动审核政务人员
+      isOpen: false, // 自动审核政务人员
       auditList: [],
       auditStatusList: [], // 审核状态
       eventTypeList: [], // 事件类型
       identityList: [], // 上报者身份
+      autoCheckList: [], // 自动审核政务人员
+      userInfo: {}, // 存储的用户信息
     }
   },
+  created () {
+    this.userInfo =  this.$store.state.loginUser;
+  },
   mounted () {
+    const status = window.localStorage.getItem('iaAutoCheck');
+    if (status !== null) {
+      this.isOpen = status;
+    }
     this.getOneMonth();
+    this.getAutoCheck();
     this.getAuditStatusList();
     this.getEventTypeList();
     this.getIdentityList();
@@ -214,6 +229,17 @@ export default {
         })
         .catch(() => {})
     },
+    // 获取自动审核政务人员
+    getAutoCheck () {
+      const id = dataList.autoCheck;
+      getDiciData(id)
+        .then(res => {
+          if (res) {
+            this.autoCheckList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取审核状态数据
     getAuditStatusList () {
       const status = dataList.auditStatus;
@@ -236,16 +262,18 @@ export default {
         })
         .catch(() => {})
     },
-    // 获取上报者身份
+    // 获取上报者身份---部门列表
     getIdentityList () {
-      const identity = dataList.identity;
-      getDiciData(identity)
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
         .then(res => {
-          if (res) {
-            this.identityList = res.data;
+          if (res && res.data.list) {
+            this.identityList = res.data.list;
           }
         })
-        .catch(() => {})
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
@@ -286,8 +314,25 @@ export default {
     },
     // 自动审核政务人员
     isAutoCheck (val) {
-      console.log(val);
-      
+      window.localStorage.setItem('iaAutoCheck', val); // 记住自动审核的状态
+      let value  = '';
+      if (val) {
+        value = '1';
+      } else {
+        value = '0'
+      }
+      const params = {
+        uid: this.autoCheckList[0].uid,
+        desci: value,
+        typeKey: dataList.autoCheck
+      };
+      openAutoCheck(params)
+        .then(res => {
+          if (res) {
+            this.getAuditData();
+          }
+        })
+        .catch(() => {})
     }
   }
 }

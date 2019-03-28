@@ -12,5 +12,14 @@ import '@/utils/filter.js';
 import '@/utils/method.js';
 // import 自定义shape for AntV/g2
 import '@/utils/antv.shape.js';
+import store from '@/store/store.js'
 // use element-ui
 Vue.use(ElementUI);
+
+const loginInfo = JSON.parse(localStorage.getItem('as_vlink_user_info'));
+
+if (loginInfo) {
+  store.commit('setLoginUser', {
+    loginUser: loginInfo
+  });
+}

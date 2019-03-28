@@ -97,8 +97,13 @@
                 <el-form class="plan-form" label-width="90px" :model="item"  size="middle">
                   <el-form-item label="执行部门:"  :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" placeholder="请选择执行部门">
-                      <el-option label="区域一" value="shanghai"></el-option>
-                      <el-option label="区域二" value="beijing"></el-option>
+                      <el-option
+                        v-for="(item, index) in departmentData"
+                        :key="index"
+                        :label="item.organName"
+                        :value="item.uid"
+                      >
+                      </el-option>
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
@@ -130,7 +135,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail, addTaskInfo, getDepartmentList } from '@/views/index/api/api.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -139,57 +144,7 @@ export default {
         imgIndex: 0, // 点击的图片索引
         isShowImg: false, // 是否放大图片
         imgList1: [],
-        basicInfo: {
-          eventCode: 'XD111111111111111',
-          eventTypeName: '自然灾害',
-          eventLevelName: 'V级',
-          reportTime: '2019-03-12',
-          reporterPhone: '18076543210',
-          eventAddress: '湖南省长沙市天心区创谷产业工业园',
-          casualties: -1,
-          taskList: [
-            {
-              departmentName: '公安部',
-              taskName: '救火',
-              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-              createTime: '2019-03-12 12:12:12',
-              taskStatusName: '未查看'
-            },
-            {
-              departmentName: '消防部',
-              taskName: '救火',
-              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-              createTime: '2019-03-12 12:12:24',
-              taskStatusName: '已查看'
-            },
-            {
-              departmentName: '就业部',
-              taskName: '救火',
-              taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-              createTime: '2019-03-12 19:12:24',
-              taskStatusName: '已完成'
-            }
-          ],
-          imgList: [
-            {
-              uid: '001',
-              src: require('./img/1.jpg')
-            },
-            {
-              uid: '002',
-              src: require('./img/2.jpg')
-            },
-            {
-              uid: '003',
-              src: require('./img/3.jpg')
-            },
-            {
-              uid: '004',
-              src: require('./img/4.jpg')
-            }
-          ],
-          eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-        }, // 事件详情
+        basicInfo: {}, // 事件详情
         taskList: [
           {
             departmentName: null,
@@ -244,13 +199,32 @@ export default {
             planType: '事故灾难',
             eventLevel: 'IV级（一般）、V级（较大）'
           }
-        ] // 表格数据
+        ], // 表格数据
+        userInfo: {},
+        departmentData: [],
     }
   },
+  created () {
+    this.userInfo = this.$store.state.loginUser;
+  },
   mounted () {
+    this.getDepartList();
     this.getDetail();
   },
   methods: {
+    // 获取协同部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.departmentData = res.data.list;
+          }
+        })
+    },
     // 获取事件详情
     getDetail () {
       const eventId = this.$route.query.eventId;
@@ -290,11 +264,31 @@ export default {
     onSubmit () {
       let _this = this;
       _this.judgeData().then(result => {
-        console.log(result);
-        if (result === false) {
-          console.log('未填完')
-        } else {
-          console.log('已填完');
+        if (result === true) {
+          this.taskList.map((item, index) => {
+            this.departmentData.map(itm => {
+              if (item.departmentId === itm.uid) {
+                this.taskList[index].departmentName = itm.organName;
+              }
+            })
+          }) 
+          addTaskInfo(this.taskList, this.$route.query.eventId)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type:'success',
+                  message: '添加任务成功',
+                  customClass: 'request_tip'
+                })
+              } else {
+                this.$message({
+                  type:'error',
+                  message: '添加任务失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
         }
       })
     },
@@ -329,8 +323,6 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
       this.openBigImg(index, this.basicInfo.imgList);
     },
     // 关闭图片放大

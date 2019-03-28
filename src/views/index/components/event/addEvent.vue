@@ -48,8 +48,8 @@
                     <el-option
                       v-for="(item, index) in handleUnitList"
                       :key="index"
-                      :label="item.enumValue"
-                      :value="index"
+                      :label="item.organName"
+                      :value="item.uid"
                     >
                     </el-option>
                   </el-select>
@@ -119,7 +119,7 @@ import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
 import BigImg from './components/bigImg.vue';
-import { addEvent, getDiciData } from '@/views/index/api/api.js';
+import { addEvent, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   components: { BigImg },
   data () {
@@ -132,6 +132,7 @@ export default {
         }
       },
       addEventForm: {
+        eventSource: 17,
         eventFlag: true,
         mutualFlag: false,
         reporterPhone: null, // 报案人  手机号码
@@ -176,9 +177,11 @@ export default {
       eventLevelList: [], // 事件等级列表数据
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
+      userInfo: {}
     }
   },
   created () {
+    this.userInfo =  this.$store.state.loginUser;
     this.getEventLevelList();
     this.getHandleUnit();
     this.getEventTypeList();
@@ -223,14 +226,16 @@ export default {
     },
     // 获取处理单位
     getHandleUnit () {
-      const handleUnit = dataList.handleUnit;
-      getDiciData(handleUnit)
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
         .then(res => {
-          if (res) {
-            this.handleUnitList = res.data;
+          if (res && res.data.list) {
+            this.handleUnitList = res.data.list;
           }
         })
-        .catch(() => {})
     },
     // 获取事件类型
     getEventTypeList () {
