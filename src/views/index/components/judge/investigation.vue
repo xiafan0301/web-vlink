@@ -73,6 +73,7 @@ export default {
   data() {
     return {
       testData: testData,
+      evData: [],
       searchData: {
         eventNo: '',
         time: null
@@ -122,10 +123,11 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.drawMarkers(this.testData.zp);
+    this.drawMarkers(this.evData);
     $(window).bind('resize', () => {
-      this.drawImg(this.testData.zp);
+      this.drawImg(this.evData);
     })
+    this.beginSearch();
   },
   methods: {
     setDTime () {
@@ -154,7 +156,7 @@ export default {
     beginSearch () {
       this.searching = true;
       let params = {
-        eventId: this.curEvent.eventId,
+        eventId: 98,
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
       }
@@ -162,7 +164,10 @@ export default {
         .then(res => {
           if (res) {
             this.searching = false;
-            console.log(res)
+            this.evData = res.data.map(x => {
+              x.checked = false;
+              return x;
+            });
           }
         })
     },
@@ -193,7 +198,8 @@ export default {
           if (obj.checked) {
             _class = 'vl_icon_judge_02';
           }
-          let _content = '<div class="vl_icon ' + _class + '"></div>'
+          let _id = 'vlJigSxt' + i;
+          let _content = '<div id=' + _id + ' class="vl_icon ' + _class + '"></div>'
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
@@ -236,7 +242,7 @@ export default {
       }
     }, // 适应窗口大小变化
     updateImg (obj) {
-      let _i = this.testData.zp.indexOf(obj);
+      let _i = this.evData.indexOf(obj);
       let cWin = document.documentElement.clientWidth;
       let self = this;
       if (obj.longitude > 0 && obj.latitude > 0) {
@@ -262,7 +268,7 @@ export default {
       }
     }, // 更新抓拍人像
     updatePoint (obj) {
-      let _i = this.testData.zp.indexOf(obj);
+      let _i = this.evData.indexOf(obj);
       console.log(obj)
       let _class = 'vl_icon_judge_04';
       if (obj.checked) {
@@ -282,7 +288,7 @@ export default {
         point.on('click', this.showVideo)
         point.on('mouseover', this.pointHover);
         point.on('mouseout', (e) => {
-          let _i = this.testData.zp.indexOf(e.target.C.extData);
+          let _i = this.evData.indexOf(e.target.C.extData);
           if (_i !== this.curVideo.indexNum) {
             e.target.C.extData.checked = false;
             this.updatePoint(obj);
@@ -299,7 +305,7 @@ export default {
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
-        this.testData.zp.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+        this.evData.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
           z.checked = false;
           this.updatePoint(z);
           this.updateImg(z);
@@ -309,58 +315,58 @@ export default {
       }
     },
     showVideo (e) {
-      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.testData.zp.indexOf(e.target.C.extData)) {
+      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
         // 先把所有在播放的视频暂停
-        this.testData.zp[this.curVideo.indexNum].videoList.forEach(d => {
+        this.evData[this.curVideo.indexNum].videoList.forEach(d => {
           d.playing = false;
         })
-        this.testData.zp[this.curVideo.indexNum].checked = false;
-        this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
-        this.updateImg(this.testData.zp[this.curVideo.indexNum]);
+        this.evData[this.curVideo.indexNum].checked = false;
+        this.updatePoint(this.evData[this.curVideo.indexNum]);
+        this.updateImg(this.evData[this.curVideo.indexNum]);
       }
-      this.curVideo.indexNum = this.testData.zp.indexOf(e.target.C.extData);
+      this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
       this.curSXT = e.target.C.extData;
       this.showVideoList = true;
       this.pointHover(e);
     },
     hideVideoList () {
-      this.testData.zp.forEach(x => x.checked = false);
-      // this.testData.zp[this.curVideo.indexNum].checked = false;
-      this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
-      this.updateImg(this.testData.zp[this.curVideo.indexNum]);
+      this.evData.forEach(x => x.checked = false);
+      // this.evData[this.curVideo.indexNum].checked = false;
+      this.updatePoint(this.evData[this.curVideo.indexNum]);
+      this.updateImg(this.evData[this.curVideo.indexNum]);
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     },
     playVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
-      if (this.testData.zp[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.evData[this.curVideo.indexNum].videoList[_i].playing) {
         vDom.pause();
       } else {
         vDom.play();
         vDom.addEventListener('ended', (e) => {
           e.target.currentTime = 0;
           vDom.pause();
-          this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
         })
       }
-      this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = !this.testData.zp[this.curVideo.indexNum].videoList[_i].playing;
+      this.evData[this.curVideo.indexNum].videoList[_i].playing = !this.evData[this.curVideo.indexNum].videoList[_i].playing;
     },
     largeVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.testData.zp[this.curVideo.indexNum].videoList[_i].playing;
+      this.curVideo.playing = this.evData[this.curVideo.indexNum].videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
-      if (this.testData.zp[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.evData[this.curVideo.indexNum].videoList[_i].playing) {
         document.getElementById('vlJigLargeV').play();
         document.getElementById('vlJigLargeV').addEventListener('ended', (e) => {
           e.target.currentTime = 0;
           document.getElementById('vlJigLargeV').pause();
-          this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
           this.showLarge = false;
         })
-        this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+        this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
       }
       document.getElementById('vlJigLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
@@ -371,7 +377,7 @@ export default {
       vDom.currentTime = document.getElementById('vlJigLargeV').currentTime;
       this.showLarge = false;
       if (this.curVideo.playing) {
-        this.testData.zp[this.curVideo.indexNum].videoList[this.curVideo.playNum].playing = true;
+        this.evData[this.curVideo.indexNum].videoList[this.curVideo.playNum].playing = true;
         vDom.play();
       }
     },

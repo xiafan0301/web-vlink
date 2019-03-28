@@ -349,7 +349,7 @@ export default {
               });
             });
             marker.on('mouseout', function () {
-              // if (hoverWindow) { hoverWindow.close(); }
+               if (hoverWindow) { hoverWindow.close(); }
             });
           }
         }

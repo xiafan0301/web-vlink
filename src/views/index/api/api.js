@@ -1068,7 +1068,7 @@ export function getVehicleListByGroup(params) {
  */
 export function JtcPOSTAppendixInfo(data) {
   return request({
-    url: '/appendix-service/appendix-info',
+    url: '/appendixes',
     method: 'post',
     data,
     mode: 'judge'
@@ -1080,7 +1080,7 @@ export function JtcPOSTAppendixInfo(data) {
  */
 export function JtcGETAppendixInfoList(params) {
   return request({
-    url: '/appendix-service/appendix-info-list',
+    url: '/appendixes/page',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1092,21 +1092,9 @@ export function JtcGETAppendixInfoList(params) {
  */
 export function JtcGETTrail(params) {
   return request({
-    url: '/portrait-structured/trail',
+    url: '/structures',
     method: 'get',
     params: params,
-    mode: 'judge'
-  })
-}
-/**
- * JtcDELETETrail 删除布控抓拍结果结果
- * @param {object} params
- */
-export function JtcDELETETrail(data) {
-  return request({
-    url: '/portrait-structured/trail',
-    method: 'delete',
-    data,
     mode: 'judge'
   })
 }
@@ -1116,7 +1104,7 @@ export function JtcDELETETrail(data) {
  */
 export function JigGETEvent(params) {
   return request({
-    url: '/eventServices/events/page',
+    url: '/event-services/events/page',
     method: 'get',
     params: params,
     mode: 'event'
@@ -1128,7 +1116,7 @@ export function JigGETEvent(params) {
  */
 export function JigGETEventAlarm(params) {
   return request({
-    url: '/event/alarm',
+    url: '/events/' + params.eventId + '/alarm-snaps',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1140,7 +1128,7 @@ export function JigGETEventAlarm(params) {
  */
 export function JigGETAlarmSnapList(params) {
   return request({
-    url: '/alarm-snap/by-surveillance-object',
+    url: '/surveillances/' + params.surveillanceId + '/alarm-snaps',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1164,7 +1152,7 @@ export function JfoGETGroup(params) {
  */
 export function JfoGETSurveillanceObject(params) {
   return request({
-    url: '/surveillance-object/alarm',
+    url: '/alarm-snaps/by-group',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1176,7 +1164,7 @@ export function JfoGETSurveillanceObject(params) {
  */
 export function JfoGETEventList(params) {
   return request({
-    url: '/event-services/event/by-surveillance',
+    url: '/events/by-surveillance',
     method: 'get',
     params: params,
     mode: 'event'
@@ -1188,7 +1176,7 @@ export function JfoGETEventList(params) {
  */
 export function JhaGETStatisicByAddress(params) {
   return request({
-    url: '/alarm-snap/statisic/by-address',
+    url: '/alarm-snaps/by-address',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1200,7 +1188,7 @@ export function JhaGETStatisicByAddress(params) {
  */
 export function JhaGETAlarmSnapByAddress(params) {
   return request({
-    url: '/alarm-snap/by-address',
+    url: '/devices/' + params.deviceId + '/alarm-snap',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1214,7 +1202,7 @@ export function JhaGETAlarmSnapByAddress(params) {
  */
 export function ScpGETPortraitInfo(params) {
   return request({
-    url: '/retrieval-service/portrait-info-list',
+    url: '/portrait-structures/page',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1226,7 +1214,7 @@ export function ScpGETPortraitInfo(params) {
  */
 export function ScpGETstrucInfoList(params) {
   return request({
-    url: '/retrieval-service/struc-info-list',
+    url: '/structures/page',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1238,7 +1226,7 @@ export function ScpGETstrucInfoList(params) {
  */
 export function ScpGETbasePortraitInfo(params) {
   return request({
-    url: '/basePortrait-service/base-portrait-info',
+    url: '/portraits/by-idno',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1250,7 +1238,7 @@ export function ScpGETbasePortraitInfo(params) {
  */
 export function ScpGETportraitCmpInfo(params) {
   return request({
-    url: '/retrieval-service/portrait-cmpInfo',
+    url: '/portrait-structures/compare',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1262,7 +1250,7 @@ export function ScpGETportraitCmpInfo(params) {
  */
 export function ScpGETretrievalHisList(params) {
   return request({
-    url: '/retrieval-service/retrieval-history-list',
+    url: '/retrieval-histories/page',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -1274,7 +1262,7 @@ export function ScpGETretrievalHisList(params) {
  */
 export function ScpGETretrievalHisById(params) {
   return request({
-    url: '/retrieval-service/retrieval-history/' + params,
+    url: '/retrieval-histories/' + params,
     method: 'get',
     mode: 'judge'
   })

@@ -370,7 +370,8 @@ export default {
     mapMarkerEvents () {
       let _this = this;
       // 1语音/2视频通话
-      $('body').on('click', '.hover_btn_voice', function () {
+      $('body').on('click', '.hover_btn_voice', function (e) {
+        console.log(e)
         _this.$router.push({name: 'map_communication', params: {
           userId: '001',
           type: 1

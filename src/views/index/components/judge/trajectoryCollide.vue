@@ -472,8 +472,9 @@ export default {
       }
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
+        let _id = 'vlJtcCheckbox' + i;
         let _bContent = '<div class="vl_jtc_mk_check">';
-        _bContent += '<input checked type="checkbox">';
+        _bContent += '<input id=' + _id + ' checked type="checkbox">';
         _bContent += '</div>';
         let cWin = document.documentElement.clientWidth;
         let markerCheckbox = new AMap.Marker({ // 添加自定义点标记
@@ -485,8 +486,15 @@ export default {
           // 自定义点标记覆盖物内容
           content: _bContent
         });
+        let self = this;
+        setTimeout(() => {
+          document.getElementById(_id).addEventListener('click', function () {
+            obj.checked = !obj.checked;
+            self.updateLine(obj)
+          })
+        }, 300)
         this.markerCheck.push(markerCheckbox);
-        markerCheckbox.on('click', this.updateLine);
+        // markerCheckbox.on('click', this.updateLine);
       }
     }, // 复选框单独,适应屏幕大小变化
     drawPlayBtn (data) {
@@ -539,12 +547,12 @@ export default {
         markerBigBtn.on('click', this.largeVideo);
       }
     }, // 放大按钮，适应屏幕大小变化
-    updateLine (e) {
+    updateLine (obj) {
       this.amap.remove(this.markerLine);
-      e.target.C.extData.checked = !e.target.C.extData.checked;
-      let _i = this.mapData.indexOf(e.target.C.extData);
+      // e.target.C.extData.checked = !e.target.C.extData.checked;
+      let _i = this.mapData.indexOf(obj);
       this.mapData.splice(_i, 1);
-      this.mapData.push(e.target.C.extData);
+      this.mapData.push(obj);
       let path = [];
       for (let i = 0; i < this.mapData.length; i++) {
         if (this.mapData[i].checked) {
@@ -553,7 +561,7 @@ export default {
         }
       }
       this.drawLine(path);
-      this.updatePoint(e.target.C.extData)
+      this.updatePoint(obj)
     }, // 更新画线
     playVideo (e) {
       let _i = this.mapData.indexOf(e.target.C.extData);

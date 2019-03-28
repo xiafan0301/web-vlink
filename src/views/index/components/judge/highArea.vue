@@ -307,6 +307,10 @@ export default {
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
+        this.testData.gw.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+          z.checked = false;
+          this.updatePoint(z);
+        })
         this.updatePoint(e.target.C.extData);
       }
     },
