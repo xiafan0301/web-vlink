@@ -9,7 +9,7 @@ import { ajaxCtx } from '@/config/config.js';
 // axios支持跨域cookie
 // axios.defaults.withCredentials = true;er
 // create an axios instance
-const userInfo = localStorage.getItem('userInfo');
+const userInfo = localStorage.getItem('as_vlink_user_info');
 let service;
 if (userInfo) {
   service = axios.create({
@@ -68,7 +68,7 @@ service.interceptors.response.use(function (response) {
       if (_data.viewMsg) {
         msg = _data.viewMsg;
       }
-      ElementUI.Message({ message: msg, type: 'error' });
+      ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
       return null;
     }
   } else {
@@ -81,7 +81,8 @@ service.interceptors.response.use(function (response) {
   ElementUI.Message({
     message: errorMsg,
     dangerouslyUseHTMLString: true,
-    type: 'error'
+    type: 'error',
+    customClass: 'request_tip'
   });
   return Promise.reject(error);
 });

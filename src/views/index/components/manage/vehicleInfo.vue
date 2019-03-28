@@ -28,8 +28,8 @@
           </div>
           <vue-scroll>
             <ul class="group_ul">
-              <li @click="getVeDetailInfo(1)">全部车辆({{allVelGroupNumber}})</li>
-              <li v-for="(item, index) in vehicleGroupList" :key="'item' + index" @click="getVeDetailInfo(item, 1)">
+              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo(1)">全部车辆({{allVelGroupNumber}})</li>
+              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleGroupList" :key="'item' + index" @click="getVeDetailInfo(item, 1)">
                 <span>{{item.name}}({{item.portraitNum}})</span>
                 <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 1, $event)"></i>
               </li>
@@ -41,8 +41,8 @@
         <div class="left_content_box">
           <vue-scroll>
             <ul class="group_ul">
-              <li @click="getVeDetailInfo(2)">全部底库({{allVelBottomNameNumber}})</li>
-              <li v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
+              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo(2)">全部底库({{allVelBottomNameNumber}})</li>
+              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
                 <span>{{item.title}}({{item.portraitNum}})</span>
                 <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
               </li>
@@ -90,7 +90,7 @@
       </div>
       <div class="table_box">
         <div class="add_btn_box">
-          <div class="add_event_btn" @click="showGroup = !showGroup">
+          <div class="add_event_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" @click="showGroupDialog">
             <span>+</span>
             <span>加入组</span>
           </div>
@@ -98,10 +98,20 @@
             <div class="group_info_list">
               <vue-scroll>
                 <ul class="group_info_ul">
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
+                  <template v-if="selectMethod === 1">
+                    <li
+                      v-for="(item, index) in copyGroupInfoList"
+                      :key="'item' + index"
+                      @click="handleCopyGroup(item.id)"
+                    >{{item.name}}</li>
+                  </template>
+                  <template v-else>
+                    <li
+                      v-for="(item, index) in vehicleGroupList"
+                      :key="'item' + index"
+                      @click="handleCopyGroup(item.id)"
+                    >{{item.name}}</li>
+                  </template>
                 </ul>
               </vue-scroll>
             </div>
@@ -114,6 +124,7 @@
         <el-table
           class="event_table"
           :data="vehicleList"
+          @selection-change="handleSelectChange"
           >
           <el-table-column
             type="selection"
@@ -154,12 +165,22 @@
             show-overflow-tooltip
             >
           </el-table-column>
-          <el-table-column
-            label="底库信息"
-            prop="albumList"
-            :show-overflow-tooltip='true'
-          >
-          </el-table-column>
+          <template v-if="selectMethod === 1">
+            <el-table-column
+              label="分组信息"
+              prop="albumList"
+              :show-overflow-tooltip='true'
+            >
+            </el-table-column>
+          </template>
+          <template v-else>
+            <el-table-column
+              label="底库信息"
+              prop="albumList"
+              :show-overflow-tooltip='true'
+            >
+            </el-table-column>
+          </template>
           <el-table-column fixed="right" label="操作" width="100">
             <template slot-scope="scope">
               <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
@@ -272,23 +293,24 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+        <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
+        <el-input placeholder="请输入组名，名字限制在10个" v-model="addCopyGroupName"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addGroupCopyDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupCopyDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="addCopyGroupInfo">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import { getVehicleGroup, getVehicleBottomName, getVehicleDataList, addGroup, getVehicleInfo } from '@/views/index/api/api.js';
+import { getVehicleGroup, getVehicleBottomName, getVehicleDataList, addGroup, getVehicleInfo, copyGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       userGroupName: null, // 新增分组组名
+      addCopyGroupName: null, // 新增复制组名
       searchGroupName: null, // 搜索组
       closeShow: false,
       selectType: [
@@ -301,6 +323,7 @@ export default {
           name: '按底库查看'
         }
       ],
+      activeSelect: -1, // 默认选中的分组
       selectMethod: 1, // 左侧查看方式  1--分组方式查看 2--底库查看
       searchForm: {
         keyWord: null, // 车牌号/车主/型号
@@ -316,8 +339,10 @@ export default {
       allVelGroupNumber: 0, // 所有车辆组数量
       vehicleBottomNameList: [], // 车辆底库数据
       allVelBottomNameNumber: 0, // 所有车辆底库数量
-      // vehicleId: null, // 要查看的车辆id
+      multipleSelection: [], // 表格选中的行
       vehicleDetailInfo: {}, // 车辆详细信息
+      copyGroupInfoList: [], // 可复制的分组
+      currSelectGroupId: null, // 当前选中的组名id
     }
   },
   mounted () {
@@ -357,8 +382,14 @@ export default {
       this.searchForm.groupId = null;
       this.searchForm.albumId = null;
       this.searchForm.keyWord = null;
+      this.activeSelect = obj.id;
       if (type === 1) {
         this.searchForm.groupId = obj.id;
+        this.vehicleGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
+          if (item.id === obj.id) {
+            this.copyGroupInfoList.splice(index, 1);
+          }
+        })
       } else {
         this.searchForm.albumId = obj.id;
       }
@@ -374,6 +405,7 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleGroupList = res.data;
+            this.copyGroupInfoList = JSON.parse(JSON.stringify(res.data));
             this.vehicleGroupList.map(item => {
               this.allVelGroupNumber += item.portraitNum;
             })
@@ -414,7 +446,11 @@ export default {
     },
     // 选择方式的change
     handleChangeVehicle (val) {
+      this.activeSelect = -1;
       this.searchGroupName = null;
+      this.searchForm.groupId = null;
+      this.searchForm.albumId = null;
+      this.searchForm.keyWord = null;
       if (val === 1) {
         this.getVeGroupInfo();
       } else {
@@ -439,14 +475,18 @@ export default {
     },
     // 搜索组
     searchData () {
-      if (this.searchGroupName) {
-        this.closeShow = true;
-        if (this.selectMethod === 1) {
-          this.getVeGroupInfo();
-        } else {
-          this.getVelBottomNameInfo();
-        }
+      // if (this.searchGroupName) {
+      this.closeShow = true;
+      if (this.selectMethod === 1) {
+        this.getVeGroupInfo();
+      } else {
+        this.getVelBottomNameInfo();
       }
+      // }
+    },
+    // 表格多选
+    handleSelectChange (val) {
+      this.multipleSelection = val;
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
@@ -487,6 +527,68 @@ export default {
     showAddGroupCopyDialog () {
       this.addGroupCopyDialog = true;
     },
+    // 处理复制分组
+    handleCopyGroup (id) {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        // groupName: this.addGroupName || null,
+        groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.showGroup = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '复制失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 复制或新增复制到组
+    addCopyGroupInfo () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        groupName: this.addCopyGroupName || null,
+        // groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.getVeGroupInfo();
+            this.addGroupCopyDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '新增失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 显示查看车辆信息弹出框
     showLookDetailInfo (obj) {
       // this.vehicleId = obj.id;
@@ -497,6 +599,14 @@ export default {
     skipAdminVehiclePage (id, val, e) {
       e.stopPropagation();
       this.$router.push({name: 'admin_vehicle_info', query: {type: val, id: id}});
+    },
+    // 显示加入组tankuang
+    showGroupDialog () {
+      if (this.multipleSelection.length > 0) {
+        this.showGroup = !this.showGroup;
+      } else {
+        this.showGroup = false;
+      }
     }
   }
 }
@@ -524,6 +634,7 @@ export default {
       }
     }
     .left_content_box {
+      margin-top: 10px;
       .group_ul {
         >li {
           padding-left: 40px;
@@ -547,9 +658,13 @@ export default {
             }
           }
         }
+        .active_select {
+          background-color: #E0F2FF;
+          color: #0C70F8;
+        }
       }
       .add_btn {
-        padding: 15px;
+        padding: 5px 15px;
         display: flex;
         color: #333333;
         align-items: center;
@@ -608,16 +723,22 @@ export default {
             margin-left: 5px;
           }
         }
+        .disabled_btn {
+          background-color: #D3D3D3;
+          color: #B2B2B2;
+          cursor: default;
+        }
         .group_info {
           z-index: 1;
           position: absolute;
           top: 45px;
+          height: 170px;
           background-color: #ffffff;
           color: #333333;
           border-radius: 4px;
-          box-shadow:5px 5px 8px 5px #949494;
+          box-shadow: 5px 5px 8px 5px #949494;
           .group_info_list {
-            height: 150px;
+            height: calc(170px - 30px);
             .group_info_ul {
               >li {
                 padding: 8px 10px;
@@ -632,10 +753,13 @@ export default {
             cursor: pointer;
             height: 30px;
             line-height: 30px;
-            display: flex;
-            align-items: center;
-            padding-left: 25%;
+            text-align: center;
+            padding: 0 10px;
             border-top: 1px solid #F2F2F2;
+            span, i {
+              display: inline-block;
+              vertical-align: middle;
+            }
           }
         }
       }

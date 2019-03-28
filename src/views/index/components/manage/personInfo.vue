@@ -1,21 +1,23 @@
 <template>
   <div class="basic_info">
     <div class="basic_info_left">
-      <el-select v-model="selectMethod" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
+      <el-select v-model="selectMethod" @change="handleChangePerson" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
         <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
+          v-for="item in selectType"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id">
         </el-option>
       </el-select>
       <div class="search_box">
-        <el-input placeholder="搜索组" size="small">
+        <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @change="changeGroupName">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="handleIconClick">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
       <template v-if="selectMethod === 1">
@@ -26,18 +28,10 @@
           </div>
           <vue-scroll>
             <ul class="group_ul">
-              <li>全部人像(111)</li>
-              <li>
-                <span>分组命名文字限制十字!(101)</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage"></i>
-              </li>
-              <li>
-                <span>分组命名文字限制十字(101)</span>
-                <i class="vl_icon vl_icon_manage_10"></i>
-              </li>
-              <li>
-                <span>分组命名文字限制十字(101)</span>
-                <i class="vl_icon vl_icon_manage_10"></i>
+              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(1)">全部人像({{allPerGroupNumber}})</li>
+              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
+                <span>{{item.name}}({{item.portraitNum}})</span>
+                <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
               </li>
             </ul>
           </vue-scroll>
@@ -47,18 +41,10 @@
         <div class="left_content_box">
           <vue-scroll>
             <ul class="group_ul">
-              <li>全部底库(111)</li>
-              <li>
-                <span>分组命名文字限制十字(101)</span>
-                <i class="vl_icon vl_icon_manage_10"></i>
-              </li>
-              <li>
-                <span>分组命名文字限制十字(101)</span>
-                <i class="vl_icon vl_icon_manage_10"></i>
-              </li>
-              <li>
-                <span>分组命名文字限制十字(101)</span>
-                <i class="vl_icon vl_icon_manage_10"></i>
+              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(2)">全部底库({{allPerBottomNameNumber}})</li>
+              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
+                <span>{{item.title}}({{item.portraitNum}})</span>
+                <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
               </li>
             </ul>
           </vue-scroll>
@@ -67,9 +53,9 @@
     </div>
     <div class="basic_info_right_group">
       <div class="search_right_box">
-        <el-form :inline="true" :model="searchForm" class="event_form">
+        <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
           <el-form-item style="width: 240px;">
-            <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.name" />
+            <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
           </el-form-item>
           <el-form-item>
             <el-select v-model="searchForm.type" style="width: 240px;">
@@ -79,19 +65,37 @@
           </el-form-item>
           <el-form-item>
             <el-select v-model="searchForm.sex" style="width: 240px;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option label="男" :value="1"></el-option>
+              <el-option label="女" :value="2"></el-option>
             </el-select>
           </el-form-item>
+          <template v-if="selectMethod === 1">
+            <el-form-item prop="albumId">
+              <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
+                <el-option
+                  v-for="(item, index) in perBottomBankList"
+                  :key="index"
+                  :label="item.title" 
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
+          <template v-if="selectMethod === 2">
+            <el-form-item prop="groupId">
+              <el-select v-model="searchForm.groupId" style="width: 240px;" placeholder="分组筛选" clearable> <!--分组-->
+                <el-option
+                  v-for="(item, index) in perGroupList"
+                  :key="index"
+                  :label="item.name" 
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
           <el-form-item>
-            <el-select v-model="searchForm.bottomBank" style="width: 240px;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button class="select_btn">查询</el-button>
-            <el-button class="reset_btn">重置</el-button>
+            <el-button class="select_btn" @click="searchPersonData">查询</el-button>
+            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
@@ -276,34 +280,34 @@
   </div>
 </template>
 <script>
+import { getPerBottomBankList, getPerGroupList, getPersonData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       userGroupName: null,
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      value: '',
+      searchGroupName: null, // 搜索组名
+      closeShow: false,
+      activeSelect: -1, // 默认选中的分组
+      allPerBottomNameNumber: 0, // 所有人员底库数量
+      allPerGroupNumber: 0, // 所有人员分组数量
+      selectType: [
+        {
+          id: 1,
+          name: '按分组查看'
+        },
+        {
+          id: 2,
+          name: '按底库查看'
+        }
+      ],
       selectMethod: 1, // 左侧查看方式  1--分组方式查看 2--底库查看
       searchForm: {
-        name: null,
+        idNo: null,
         type: null,
-        sex: '男',
-        bottomBank: null
+        sex: 1,
+        albumId: null,
+        groupId: null
       },
       personGroupList: [
         {
@@ -332,9 +336,114 @@ export default {
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       addGroupCopyDialog: false, // 加入组-新增分组弹出框
+      perGroupList: [], // 分组列表
+      perBottomBankList: [], // 底库列表
     }
   },
+  mounted () {
+    this.getGroupList();
+    this.getBottomBankList();
+    this.getPersonList();
+  },
   methods: {
+    // 获取分组列表
+    getGroupList () {
+      const params = {
+        type: 4, // 4---人像
+        name: this.searchGroupName
+      }
+      getPerGroupList(params)
+        .then(res => {
+          if (res) {
+            this.perGroupList = res.data;
+            this.perGroupList.map(item => {
+              this.allPerGroupNumber += item.portraitNum;
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取底库列表
+    getBottomBankList () {
+      const params = {
+        type: 1, // 1--人像库
+        name: this.searchGroupName
+      }
+      getPerBottomBankList(params)
+        .then(res => {
+          if (res) {
+            this.perBottomBankList = res.data;
+             this.perBottomBankList.map(item => {
+              this.allPerBottomNameNumber += item.portraitNum;
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取人员列表
+    getPersonList () {
+      const params = {
+        // 'where.type': this.selectMethod,
+        'where.keyWord': this.searchForm.keyWord,
+        'where.albumId': this.searchForm.albumId,
+        'where.groupId': this.searchForm.groupId,
+        'where.idNo': this.searchForm.idNo,
+        'where.sex': this.searchForm.sex,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getPersonData(params)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(() => {})
+    },
+    // 根据搜索条件查询人员列表
+    searchPersonData () {
+      this.getPersonList();
+    },
+    // 清空搜索人员列表框
+    resetForm (form) {
+      this.$refs[form].resetFields();
+    },
+    // 搜索框组名change
+    changeGroupName () {},
+    // 清空搜索框
+    onClear () {
+      this.closeShow = false;
+      this.searchGroupName = null;
+      if (this.selectMethod === 1) {
+        this.getGroupList();
+      } else {
+        this.getBottomBankList();
+      }
+    },
+    // 搜索组名
+    searchData () {
+      this.closeShow = true;
+      if (this.selectMethod === 1) {
+        this.getGroupList();
+      } else {
+        this.getBottomBankList();
+      }
+    },
+    // 点击左边分组获取右边人员列表
+    getPerDetailInfo () {
+
+    },
+    // 选择方式的change
+    handleChangePerson (val) {
+      this.activeSelect = -1;
+      this.searchGroupName = null;
+      this.searchForm.groupId = null;
+      this.searchForm.albumId = null;
+      this.searchForm.keyWord = null;
+      if (val === 1) {
+        this.getGroupList();
+      } else {
+        this.getBottomBankList();
+      }
+    },
     handleIconClick () {},
     skipAddGroupPage () {},
     handleSizeChange () {
@@ -406,6 +515,10 @@ export default {
               display: block;
             }
           }
+        }
+        .active_select {
+          background-color: #E0F2FF;
+          color: #0C70F8;
         }
       }
       .add_btn {

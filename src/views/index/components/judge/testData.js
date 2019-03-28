@@ -169,5 +169,104 @@ export const testData = {
         }
       ]
     },
+  ],
+  gw: [
+    {
+      addLongitude: 112.973557,
+      addLatitude: 28.093856,
+      snapNum: 10,
+      checked: false,
+      childList: [
+        [
+          {
+            semblance: 10,
+            snapPhoto: '',
+            snapNum: 2,
+            shotTime: '18-12-23 14:23'
+          },
+          {
+            semblance: 20,
+            snapPhoto: '',
+            snapNum: 4,
+            shotTime: '18-12-23 14:23'
+          },
+          {
+            semblance: 30,
+            snapPhoto: '',
+            snapNum: 4,
+            shotTime: '18-12-23 14:23'
+          }
+        ]
+      ]
+    },
+    {
+      addLongitude: 112.975227,
+      addLatitude: 28.094869,
+      snapNum: 30,
+      checked: false,
+      childList: [
+        {
+          semblance: 10,
+          snapPhoto: '',
+          snapNum: 10,
+          shotTime: '18-12-23 14:23'
+        },
+        {
+          semblance: 20,
+          snapPhoto: '',
+          snapNum: 10,
+          shotTime: '18-12-23 14:23'
+        },
+        {
+          semblance: 30,
+          snapPhoto: '',
+          snapNum: 10,
+          shotTime: '18-12-23 14:23'
+        }
+      ]
+    }
+  ],
+  cameraData: [
+    {
+      id: '1',
+      name: '常用点位',
+      cList: [
+        {name: '舌头1', id: '1-1'},
+        {name: '舌头2', id: '1-2'},
+        {name: '舌头3', id: '1-3'},
+        {name: '舌头4', id: '1-4'},
+        {name: '舌头5', id: '1-5'},
+        {name: '舌头6', id: '1-6'}
+      ]
+    },
+    {
+      id: '2',
+      name: '自定义点位',
+      cList: [
+        {name: '摄像头1', id: '2-1'},
+        {name: '摄像头2', id: '2-2'},
+        {name: '摄像头3', id: '2-3'},
+        {name: '摄像头4', id: '2-4'},
+        {name: '摄像头5', id: '2-5'}
+      ]
+    }
+  ],
+  testList: [
+    {id: 1, structureType: 1, deviceName: '摄像头1',semblance: 432},
+    {id: 5, structureType: 1, deviceName: '摄像头5',semblance: 432},
+    {id: 2, structureType: 1, deviceName: '摄像头2',semblance: 432},
+    {id: 3, structureType: 1, deviceName: '摄像头3',semblance: 432},
+    {id: 4, structureType: 1, deviceName: '摄像头4',semblance: 432},
+    {id: 1, structureType: 1, deviceName: '摄像头1',semblance: 432},
+    {id: 5, structureType: 1, deviceName: '摄像头5',semblance: 432},
+    {id: 2, structureType: 1, deviceName: '摄像头2',semblance: 432},
+    {id: 3, structureType: 1, deviceName: '摄像头3',semblance: 432},
+    {id: 4, structureType: 1, deviceName: '摄像头4',semblance: 432},
+    {id: 1, structureType: 1, deviceName: '摄像头1',semblance: 432},
+    {id: 5, structureType: 1, deviceName: '摄像头5',semblance: 432},
+    {id: 2, structureType: 1, deviceName: '摄像头2',semblance: 432},
+    {id: 3, structureType: 1, deviceName: '摄像头3',semblance: 432},
+    {id: 4, structureType: 1, deviceName: '摄像头4',semblance: 432},
+    {id: 1, structureType: 1, deviceName: '摄像头1',semblance: 432}
   ]
 }

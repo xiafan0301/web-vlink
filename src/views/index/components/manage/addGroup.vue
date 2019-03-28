@@ -11,7 +11,8 @@
     <div class="content_box">
       <div class="content_new_group">
         <span>分组名称:</span>
-        <el-input style="width: 300px;" placeholder="请输入分组名称，例：案件频发区域1"></el-input>
+        <el-input style="width: 300px;" @change="changeGroupName" v-model="groupName" placeholder="请输入分组名称，例：案件频发区域1"></el-input>
+        <p v-show="isShowError" style="color: #F94539;margin-left: 10px;">{{errorText}}</p>
       </div>
       <div class="content_main_box">
         <p>选择方式:</p>
@@ -21,43 +22,56 @@
             <li :class="{'active_li': tabState === 2}" @click="tabState = 2">列表选择</li>
           </ul>
           <div class="search_box">
-            <el-form :inline="true" :model="searchForm" class="search_form">
-              <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.eventType" placeholder="行政区划">
+            <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+              <el-form-item prop="areaId">
+                <el-select  style="width: 240px;" v-model="searchForm.areaId" placeholder="行政区划">
+                  <el-option label="区域一" value="shanghai"></el-option>
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="intelCharac">
+                <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option label="区域一" value="shanghai"></el-option>
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="dutyOrganId">
+                <el-select  style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.eventStatus" placeholder="智能特性">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-select  style="width: 240px;" v-model="searchForm.userName" placeholder="责任部门">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button class="select_btn">查询</el-button>
-                <el-button class="reset_btn">重置</el-button>
+                <el-button class="select_btn" @click="searchData">查询</el-button>
+                <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
               </el-form-item>
             </el-form>
           </div>
           <template v-if="tabState === 1">
-            <mapSelect></mapSelect>
+            <mapSelect
+              :selectDeviceList="allDeviceList" 
+              :selectDeviceNumber="selectDeviceNumber"
+            ></mapSelect>
           </template>
           <template v-if="tabState === 2">
-            <listSelect></listSelect>
+            <listSelect
+              :rightAllChecked="rightAllChecked"
+              :selectDeviceList="allDeviceList" 
+              :selectDeviceNumber="selectDeviceNumber"
+              @emitOpenRightArrow="emitOpenRightArrow"
+              @emitParentChecked="emitParentChecked"
+              @emitChildChecked="emitChildChecked"
+              @emitAllChecked="emitAllChecked"
+              @emitFinalDevice="emitFinalDevice"
+            >
+            </listSelect>
           </template>
         </div>
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">保存</el-button>
-      <el-button class="operation_btn back_btn">取消</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
   </div>
 
@@ -66,20 +80,186 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
+import { getAllDevices, addGroupDevice } from '@/views/index/api/api.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 1, // 地图选择
+      tabState: 2, // 地图选择
+      isShowError: false,
+      errorText: null,
       searchForm: {
-        eventType: null,
-        eventStatus: null,
-        userName: null
+        areaId: null, // 行政区域
+        intelCharac: null, // 智能特性
+        dutyOrganId: null // 责任部门
       },
+      groupName: null, // 新增分组名
+      allDeviceList: [], // 所有设备列表数据
+      selectDeviceNumber: 0, // 可选设备数量
+      currentDeviceList: [], // 已有的设备数据
+      rightAllChecked: false, // 右侧设备全部选中
+      // leftAllChecked: false, // 左侧设备全部选中
     }
   },
+  mounted () {
+    this.getAllDevicesList();
+  },
   methods: {
-    
+    // 打开右侧箭头
+    emitOpenRightArrow (index) {
+      console.log(index)
+      this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    // 右侧---全部选中
+    emitAllChecked (val) {
+      this.rightAllChecked = val;
+      this.allDeviceList.map(item => {
+        item.isChecked = val;
+        item.deviceList.map(itm => {
+          itm.isChildChecked = val;
+        });
+      });
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    // 右侧--父级多选框选中
+    emitParentChecked (index, val) {
+      this.allDeviceList[index].isChecked = val;
+      this.allDeviceList[index].deviceList.map(item => {
+        item.isChildChecked = val;
+      });
+      if (!val) {
+        this.rightAllChecked = false;
+      }
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
+      // 过滤出父级中没有选中
+      let checkedParentArr = this.allDeviceList.filter(itm => {
+        return itm.isChecked === false;
+      });
+      // 如果父级全部选中， 则全选选中
+      if (checkedParentArr.length === 0) {
+        this.rightAllChecked = true;
+      } else {
+        this.rightAllChecked = false;
+      }
+    },
+    // 右侧--子级多选框选中
+    emitChildChecked (index, idx, val) {
+      this.allDeviceList[index].deviceList[idx].isChildChecked = val;
+      // 过滤出子级选中的
+      let checkedArr = this.allDeviceList[index].deviceList.filter((item) => {
+        return item.isChildChecked === true;
+      })
+      if (checkedArr.length === 0) { // 没有选中的
+        this.allDeviceList[index].isChecked = false;
+      }
+      if (checkedArr.length === this.allDeviceList[index].deviceList.length) { // 全选
+        this.allDeviceList[index].isChecked = true;
+      }
+      if (checkedArr.length === 0 || checkedArr.length < this.allDeviceList[index].deviceList.length) {
+        // this.rightAllChecked = false;
+        this.allDeviceList[index].isChecked = false;
+      }
+
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      // 过滤出父级中没有选中
+      let checkedParentArr = this.allDeviceList.filter(itm => {
+        return itm.isChecked === false;
+      });
+      // 如果父级全部选中， 则全选选中
+      if (checkedParentArr.length === 0) {
+        this.rightAllChecked = true;
+      } else {
+        this.rightAllChecked = false;
+      }
+    },
+     // 获取所有可选的设备
+    getAllDevicesList () {
+      getAllDevices(this.searchForm)
+        .then(res => {
+          if (res) {
+            this.allDeviceList = res.data;
+            this.allDeviceList.map(item => {
+              item.isOpenArrow = false; // 设置是否展开
+              item.isChecked = false; // 父级是否选中
+              item.deviceList.map(itm => {
+                itm.isChildChecked = false; // 子级是否选中
+              });
+              this.selectDeviceNumber += item.deviceList.length;
+            });
+          }
+        })
+        .catch(() => {})
+    },
+    // 搜索框
+    searchData () {
+      this.getAllDevicesList();
+    },
+    // 重置搜索框
+    resetForm(form) {
+      this.$refs[form].resetFields();
+      this.getAllDevicesList();
+    },
+    // 接收已有的设备
+    emitFinalDevice (list) {
+      console.log(list);
+      this.currentDeviceList = [];
+      if (list) {
+        this.currentDeviceList = JSON.parse(JSON.stringify(list));
+      }
+    },
+    // change分组名称
+    changeGroupName (val) {
+      console.log(val)
+      if (!val) {
+        console.log('oooo')
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
+      } else {
+        this.errorText = '';
+        this.isShowError = false;
+      }
+    },
+    // 新增分组
+    submitData () {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
+        return;
+      }
+      let arrId = [];
+      this.currentDeviceList.map(item => {
+        item.deviceList.map(itm => {
+          arrId.push(itm.uid);
+        });
+      });
+      const params = {
+        groupName: this.groupName,
+        vehicleIds: arrId
+      };
+      addGroupDevice(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '保存成功',
+              customClass: 'request_tip'
+            })
+            this.$router.push({name: 'custom_group'});
+          } else {
+            this.$message({
+              type: 'error',
+              message: '保存失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 取消添加
+    cancelAdd () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>

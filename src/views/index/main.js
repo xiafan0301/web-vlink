@@ -10,6 +10,11 @@ import '@/config/include.js'
 // 自定义滚动条
 import vuescroll from 'vuescroll/dist/vuescroll-native';
 import 'vuescroll/dist/vuescroll.css';
+
+// include
+// import '@/config/include.js';
+import store from '@/store/store.js';
+
 Vue.use(vuescroll, {
   ops: {
     // 滚动条滚动的地方
@@ -31,6 +36,7 @@ Vue.config.productionTip = false
 new Vue({
     el: '#app',
     router,
+    store,
     components: { App },
     template: '<App/>'
 });

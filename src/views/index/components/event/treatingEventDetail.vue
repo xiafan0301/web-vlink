@@ -455,11 +455,12 @@ export default {
       }, // 事件详情
     }
   },
+  mounted () {
+    this.getDetail();
+  },
   methods: {
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
       this.openBigImg(index, this.basicInfo.imgList);
     },
     // 关闭图片放大
@@ -469,7 +470,7 @@ export default {
     },
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {

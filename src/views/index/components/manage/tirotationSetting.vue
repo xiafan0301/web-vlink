@@ -2,18 +2,20 @@
   <div class="tirotation_setting">
     <div class="search_box">
       <el-form :inline="true" :model="searchForm" class="search_form">
-        <el-form-item style="width: 240px;">
+        <el-form-item>
           <el-date-picker
-            style="width: 240px;"
+            style="width: 260px;"
             v-model="searchForm.dateTime"
-            type="datetimerange"
+            type="daterange"
+            value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item style="width: 120px;">
-          <el-select v-model="searchForm.eventType">
+        <el-form-item>
+          <el-select v-model="searchForm.eventType" style="width: 240px;" placeholder="全部状态">
+            <!-- <option label="全部状态" value="全部状态"></option> -->
             <el-option label="区域一" value="shanghai"></el-option>
             <el-option label="区域二" value="beijing"></el-option>
           </el-select>

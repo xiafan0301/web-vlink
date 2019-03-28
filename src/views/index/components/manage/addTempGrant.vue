@@ -15,13 +15,18 @@
       <div class="content_new_group">
         <el-form :inline="true" :model="addForm" class="search_form">
           <el-form-item label="授权对象:">
-            <el-select  style="width: 500px;" v-model="addForm.eventType" placeholder="行政区划">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+            <el-select  style="width: 500px;" multiple  v-model="addForm.addDevIds" placeholder="授权对象">
+              <el-option
+                v-for="(item, index) in grantList"
+                :key="index"
+                :label="item.name" 
+                :value="item.id"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
            <el-form-item label="授权时间:">
-            <el-date-picker type="date" style='width: 240px;' placeholder="选择日期" v-model="addForm.reportTime" ></el-date-picker>
+            <el-date-picker type="date" style='width: 240px;' placeholder="选择日期" v-model="addForm.selectTime" ></el-date-picker>
           </el-form-item>
         </el-form>
       </div>
@@ -35,25 +40,31 @@
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form">
               <el-form-item>
-                <el-select  style="width: 200px;" v-model="searchForm.eventType" placeholder="行政区划">
+                <el-select  style="width: 200px;"  v-model="searchForm.areaId" placeholder="行政区划">
+                  <!-- <el-option
+                    v-for="(item, index) in userListData"
+                    :key="index"
+                    :label="item.userName" 
+                    :value="item.uid"
+                  >
+                  </el-option> -->
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-select  style="width: 200px;" v-model="searchForm.intelCharacter" placeholder="智能特性">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-select  style="width: 200px;" v-model="searchForm.eventStatus" placeholder="智能特性">
+                <el-select  style="width: 200px;" v-model="searchForm.groupId" placeholder="自定义组">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-select  style="width: 200px;" v-model="searchForm.userName" placeholder="自定义组">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-select  style="width: 200px;" v-model="searchForm.userName" placeholder="责任部门">
+                <el-select  style="width: 200px;" v-model="searchForm.dutyId" placeholder="责任部门">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
@@ -68,7 +79,16 @@
             <mapSelect></mapSelect>
           </template>
           <template v-if="tabState === 2">
-            <listSelect></listSelect>
+            <listSelect
+              :rightAllChecked="rightAllChecked"
+              :selectDeviceList="allDeviceList" 
+              :selectDeviceNumber="selectDeviceNumber"
+              @emitOpenRightArrow="emitOpenRightArrow"
+              @emitParentChecked="emitParentChecked"
+              @emitChildChecked="emitChildChecked"
+              @emitAllChecked="emitAllChecked"
+              @emitFinalDevice="emitFinalDevice"
+            ></listSelect>
           </template>
         </div>
       </div>
@@ -84,25 +104,174 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
+import { getUserList, getDepartmentList, getASelectDevice } from '@/views/index/api/api.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
     return {
       tabState: 1, // 地图选择
       addForm: {
-        eventType: null,
-        eventStatus: null,
-        reportTime: null,
+        userIds: null, // 授权对象
+        selectTime: [], // 授权日期
       },
       searchForm: {
-        eventType: null,
-        eventStatus: null,
-        userName: null
+        organIds: null, // 机构id
+        userIds: null, // 用户id
+        areaId: null, // 区域id
+        intelCharacter: null, // 智能特性
+        groupId: null, // 自定义组id
+        dutyId: null, // 责任部门id
       },
+      grantList: [], // 所有的授权对象
+      userInfo: {}, // 存储的用户信息
+      allDeviceList: [], // 所有设备列表数据
+      selectDeviceNumber: 0, // 可选设备数量
+      currentDeviceList: [], // 已有的设备数据
+      rightAllChecked: false, // 右侧设备全部选中
     }
   },
+  created () {
+    this.userInfo =  this.$store.state.loginUser;
+  },
+  mounted () {
+    this.getDepartList();
+    this.getList();
+    console.log('grantList', this.grantList)
+  },
   methods: {
-    
+    // 获取列表数据
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            res.data.list.map(item => {
+              const params = {
+                id: item.uid,
+                name: item.organName
+              }
+              this.grantList.push(params);
+            })
+          }
+        })
+    },
+    // 获取所有的用户
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            res.data.list.map(item => {
+              const params = {
+                id: item.uid,
+                name: item.userName
+              }
+              this.grantList.push(params);
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 打开右侧箭头
+    emitOpenRightArrow (index) {
+      console.log(index)
+      this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    // 右侧---全部选中
+    emitAllChecked (val) {
+      this.rightAllChecked = val;
+      this.allDeviceList.map(item => {
+        item.isChecked = val;
+        item.deviceList.map(itm => {
+          itm.isChildChecked = val;
+        });
+      });
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    // 右侧--父级多选框选中
+    emitParentChecked (index, val) {
+      this.allDeviceList[index].isChecked = val;
+      this.allDeviceList[index].deviceList.map(item => {
+        item.isChildChecked = val;
+      });
+      if (!val) {
+        this.rightAllChecked = false;
+      }
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
+      // 过滤出父级中没有选中
+      let checkedParentArr = this.allDeviceList.filter(itm => {
+        return itm.isChecked === false;
+      });
+      // 如果父级全部选中， 则全选选中
+      if (checkedParentArr.length === 0) {
+        this.rightAllChecked = true;
+      } else {
+        this.rightAllChecked = false;
+      }
+    },
+    // 右侧--子级多选框选中
+    emitChildChecked (index, idx, val) {
+      this.allDeviceList[index].deviceList[idx].isChildChecked = val;
+      // 过滤出子级选中的
+      let checkedArr = this.allDeviceList[index].deviceList.filter((item) => {
+        return item.isChildChecked === true;
+      })
+      if (checkedArr.length === 0) { // 没有选中的
+        this.allDeviceList[index].isChecked = false;
+      }
+      if (checkedArr.length === this.allDeviceList[index].deviceList.length) { // 全选
+        this.allDeviceList[index].isChecked = true;
+      }
+      if (checkedArr.length === 0 || checkedArr.length < this.allDeviceList[index].deviceList.length) {
+        // this.rightAllChecked = false;
+        this.allDeviceList[index].isChecked = false;
+      }
+
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      // 过滤出父级中没有选中
+      let checkedParentArr = this.allDeviceList.filter(itm => {
+        return itm.isChecked === false;
+      });
+      // 如果父级全部选中， 则全选选中
+      if (checkedParentArr.length === 0) {
+        this.rightAllChecked = true;
+      } else {
+        this.rightAllChecked = false;
+      }
+    },
+     // 获取所有可选的设备
+    getAllDevicesList () {
+      getASelectDevice(this.searchForm)
+        .then(res => {
+          if (res) {
+            this.allDeviceList = res.data;
+            this.allDeviceList.map(item => {
+              item.isOpenArrow = false; // 设置是否展开
+              item.isChecked = false; // 父级是否选中
+              item.deviceList.map(itm => {
+                itm.isChildChecked = false; // 子级是否选中
+              });
+              this.selectDeviceNumber += item.deviceList.length;
+            });
+          }
+        })
+        .catch(() => {})
+    },
+    // 接收已有的设备
+    emitFinalDevice (list) {
+      console.log(list);
+      this.currentDeviceList = [];
+      if (list) {
+        this.currentDeviceList = JSON.parse(JSON.stringify(list));
+      }
+    },
   }
 }
 </script>

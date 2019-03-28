@@ -49,11 +49,36 @@
       </div>
       <div class="multiple-user">
         <p class="title">批量创建</p>
-        <div class="content-body">
+        <div class="multiple-content-body">
           <p>您需要下载模板文件并按要求填写相关信息，上传成功后，点击【批量新增】，批量创建用户账号。</p>
-          <div class="download_box">
-            
-          </div>
+          <ul class="upload_box">
+            <li>
+              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <div class="main_content download_box">
+                <i class="vl_icon_manage_17 vl_icon"></i>
+                <span>下载模板</span>
+              </div>
+            </li>
+            <li>
+              <p class="header">2、上传已填写的用户信息表。</p>
+              <div class="main_content">
+                <el-upload
+                  accept=".xls,.xlsx"
+                  action="https://jsonplaceholder.typicode.com/posts/"
+                  :on-success="handleSuccess"
+                  :limit="1"
+                  >
+                  <el-button size="small" class="upload-btn" icon="vl_icon_manage_18 vl_icon">上传文件</el-button>
+                </el-upload>
+              </div>
+            </li>
+            <li>
+              <div class="main_content">
+                <el-button class="user_btn function_btn">批量新增</el-button>
+                <el-button class="user_btn back_btn">返回</el-button>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -94,7 +119,7 @@ export default {
     }
   },
   mounted () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo =  this.$store.state.loginUser;
     this.addUser.proKey = this.userInfo.proKey;
     this.getDepartList();
   },
@@ -140,7 +165,8 @@ export default {
     resetForm (form) {
       this.$refs[form].resetFields();
       this.$router.back(-1);
-    }
+    },
+    handleSuccess () {}
   }
 }
 </script>
@@ -166,18 +192,60 @@ export default {
         color: #999999;
         margin-bottom: 20px;
       }
-      .user_btn {
-        width: 100px;
-        border-radius: 4px;
-        height: 40px;
+      
+    }
+    .multiple-content-body {
+      padding: 20px;
+      >p {
+        color: #999999;
+        margin-bottom: 20px;
       }
-      .function_btn {
-        background-color: #0C70F8;
-        color: #ffffff;
+      .upload_box {
+        > li {
+          line-height: 40px;
+          .header {
+            color: #333333;
+          }
+          .main_content {
+            width: 250px;
+            margin-left: 30px;
+            .upload-btn {
+              color: #333333;
+              border:1px solid #D3D3D3;
+              display: flex;
+              align-items: center;
+            }
+          }
+          .download_box {
+            cursor: pointer;
+            text-align: center;
+            width: 98px;
+            height: 32px;
+            line-height: 32px;
+            color: #333333;
+            border-radius:4px;
+            border:1px solid #D3D3D3;
+            i {
+              vertical-align: middle;
+            }
+          }
+          &:last-child {
+            margin-top: 20px;
+          }
+        }
       }
-      .back_btn {
-        border:1px solid rgba(211,211,211,1);
-      }
+    }
+    .user_btn {
+      width: 100px;
+      border-radius: 4px;
+      height: 40px;
+    }
+    .function_btn {
+      background-color: #0C70F8;
+      color: #ffffff;
+    }
+    .back_btn {
+      border:1px solid rgba(211,211,211,1);
     }
   }
 }

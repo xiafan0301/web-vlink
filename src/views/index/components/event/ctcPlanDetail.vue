@@ -32,10 +32,10 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <template v-if="planDetail.attachmentName">
+              <template v-if="planDetail.cname">
                 <i class="vl_icon vl_icon_event_5"></i>
-                {{planDetail.attachmentName}}
-                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.url)"></i>
+                {{planDetail.cname}}
+                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.path)"></i>
               </template>
               <template v-else>无</template>
             </span>
@@ -102,33 +102,21 @@ export default {
   data () {
     return {
       delPlanDialog: false, // 删除预案弹出框
-      planDetail: {
-        planName: '预案名称',
-        eventTypeName: '自然灾害',
-        levelNameList: ['IV级', 'V级'],
-        planDetail: '起火了起火了起火了起火了',
-        attachmentName: '公共文档',
-        url: 'http://www.baidu.com',
-        taskList: [
-          {
-            departmentName: '公安部',
-            taskName: '救火',
-            taskContent: '迅速救火'
-          }
-        ],
-        createUserName: '石媛',
-        createTime: '2019-03-12'
-      }, // 预案详情
+      planDetail: {}, // 预案详情
     }
+  },
+  mounted () {
+    this.getPlanDetail();
   },
   methods: {
     // 获取预案详情
     getPlanDetail () {
-      const planId = this.$router.query.planId;
+      const planId = this.$route.query.planId;
       if (planId) {
         getPlanDetail(planId)
          .then(res => {
            if (res) {
+             console.log('res', res.data)
              this.planDetail = res.data;
            }
          })
@@ -140,7 +128,7 @@ export default {
     },
     // 跳至修改预案页面
     skipEditPage () {
-      this.$router.push({name: 'edit_plan'});
+      this.$router.push({name: 'edit_plan', query:{planId: this.$route.query.planId}});
     },
     // 返回
     back () {
@@ -148,7 +136,7 @@ export default {
     },
     // 确认删除预案
     sureDeletePlan () {
-      const delPlanId = this.$router.query.planId;
+      const delPlanId = this.$route.query.planId;
       if (delPlanId) {
         delPlan(delPlanId)
           .then(res => {
@@ -158,6 +146,7 @@ export default {
                 message: '删除成功',
                 customClass: 'request_tip'
               })
+              this.delPlanDialog = false;
               this.$router.push({name: 'event_ctcplan'});
             } else {
               this.$message({
