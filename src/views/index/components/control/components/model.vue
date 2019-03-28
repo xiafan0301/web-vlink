@@ -150,9 +150,9 @@
               </div>
               <!-- 车像 -->
               <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 2">
-                <img :src="item.vehicleImagePath" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
                 <div>
-                  <p style="font-size: 12px;">车牌号码：<span>{{item.vehicleNumber}}</span></p>
+                  <p style="font-size: 12px;">车牌号码：<span>{{item.label}}</span></p>
                 </div>
               </div>
             </el-option>
@@ -189,9 +189,9 @@
               </div>
               <!-- 车像 -->
               <div style="display: flex;line-height: 16px;" v-if="item.objType	=== 2">
-                <img :src="item.vehicleImagePath" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
+                <img :src="item.photoUrl" alt="" style="width: 40px;height: 40px;margin-right: 10px;">
                 <div>
-                  <p style="font-size: 12px;">车牌号码：<span>{{item.vehicleNumber}}</span></p>
+                  <p style="font-size: 12px;">车牌号码：<span>{{item.label}}</span></p>
                 </div>
               </div>
             </el-option>
@@ -386,11 +386,11 @@ export default {
                 value: m.objId,
                 idNo: m.idNo,
                 objType: m.objType,
-                photoUrl: m.photoUrl
+                photoUrl: m.objType === 1 ? m.photoUrl : m.objType === 2 ? m.vehicleImagePath : '',
               }
             });
           }
-          console.log(this.groups)
+          console.log(this.surveillanceObjectDtoList)
         }
       })
     },
