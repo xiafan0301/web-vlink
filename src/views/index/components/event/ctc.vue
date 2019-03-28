@@ -2,7 +2,7 @@
   <div class="ctc-list">
     <div class="search_box">
       <el-form :inline="true" :model="ctcForm" class="ctc_form" ref="ctcForm">
-        <el-form-item>
+        <el-form-item prop="reportTime">
           <el-date-picker
             style="width: 260px;"
             v-model="ctcForm.reportTime"
@@ -13,7 +13,7 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="eventStatus">
           <el-select v-model="ctcForm.eventStatus" style="width: 240px;" placeholder="事件状态">
             <el-option value='全部状态'></el-option>
             <el-option
@@ -55,27 +55,32 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="idCard"
+          prop="reporterRole"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
+            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="类型"
-          prop="eventType"
+          prop="eventTypeName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="状态"
-          prop="eventStatus"
+          prop="eventStatusName"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatus === '待开始' ? 'untreated_event' : scope.row.eventStatus === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
+            <span class="event_status" :class="[scope.row.eventStatusName === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
           </template>
         </el-table-column>
         <el-table-column
           label="调度时间"
-          prop="reportTime"
+          prop="acceptTime"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -87,11 +92,11 @@
         </el-table-column>
         <el-table-column
           label="新反馈数量"
-          prop="reportContent"
+          prop="feedbackNumber"
           align="center"
         >
         <template slot-scope="scope">
-          <span :style="[scope.row.reportContent > 0 ? blueStyle : cusStyle]">{{scope.row.reportContent}}</span>
+          <span :style="[scope.row.feedbackNumber > 0 ? blueStyle : cusStyle]">{{scope.row.feedbackNumber}}</span>
         </template>
         </el-table-column>
         <el-table-column label="操作" width="140">
@@ -102,7 +107,6 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -127,8 +131,8 @@ export default {
         'color': '#666666'
       },
       ctcForm: {
-        eventFlag: true,
-        mutualFlag: false,
+        eventFlag: 1, // 1--true 0--false
+        mutualFlag: 0,
         reportTime: [], // 日期
         eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
@@ -191,6 +195,7 @@ export default {
   mounted () {
     this.getOneMonth();
     this.getCtcStatusList();
+    this.getCtcList();
   },
   methods: {
     // 获取调度事件状态数据
@@ -199,7 +204,11 @@ export default {
       getDiciData(status)
         .then(res => {
           if (res) {
-            this.ctcStatusList = res.data;
+            res.data.map(item => {
+              if (item.uid !== 27) {
+                this.ctcStatusList.push(item);
+              }
+            })
           }
         })
         .catch(() => {})
@@ -208,7 +217,9 @@ export default {
     getCtcList () {
       let eventStatus;
       if (this.ctcForm.eventStatus === '全部状态') {
-        eventStatus = '';
+        eventStatus = null;
+      } else {
+        eventStatus = this.ctcForm.eventStatus;
       }
       const params = {
         'where.eventFlag': this.ctcForm.eventFlag,
@@ -221,19 +232,15 @@ export default {
       getEventList(params)
         .then(res => {
           if(res) {
-            this.ctcList = res.data;
+            this.ctcList = res.data.list;
+            this.pagination.total = res.data.total;
           }
         })
         .catch(() => {})
     },
-    handleSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      // this.getCtcList();
-    },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
-      // this.getCtcList();
+      this.getCtcList();
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
@@ -246,14 +253,13 @@ export default {
     },
     // 根据搜索条件查询
     selectDataList () {
-      // this.getCtcList();
+      this.getCtcList();
     },
     // 重置查询条件
     resetForm (form) {
-      this.ctcForm.reportTime = [];
       this.$refs[form].resetFields();
       this.getOneMonth();
-      // this.getCtcList();
+      this.getCtcList();
     },
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {

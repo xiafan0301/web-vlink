@@ -69,9 +69,10 @@
       <ul class="vid_show_list" :class="'vid_list_st' + showType">
         <li v-for="item in showVideoTotal" :key="'video_list_' + item">
           <div v-if="videoList && videoList[item - 1] && videoList[item - 1].video">
-            <video class="com_trans50_lt" src="../../../../assets/video/video.mp4" autoplay loop controls></video>
+            <div is="rtmpplayer"></div>
           </div>
           <div class="vid_show_empty" v-else>
+            <div is="videoEmpty" @showListEvent="showListEvent"></div>
           </div>
         </li>
       </ul>
@@ -80,7 +81,10 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import videoEmpty from './videoEmpty.vue';
+import rtmpplayer from '@/components/common/rtmpplayer.vue';
 export default {
+  components: {videoEmpty, rtmpplayer},
   data () {
     return {
       videoList: [
@@ -144,6 +148,34 @@ export default {
     videoTree('videoListTree');
   },
   methods: {
+    showListEvent () {
+      this.showMenuActive = true;
+    },
+    searchSubmit () {
+      this.getData();
+    },
+    getData () {
+      this.searchLoading = true;
+      apiVideoDownloadList({
+        pageNum: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize,
+        // orderBy: '',
+        // order: '',
+        'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
+        'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
+        'where.oprUserId': '1',
+        'where.oprDeptId': '1'
+      }).then(res => {
+        if (res && res.data) {
+          this.pagination.total = res.data.total;
+          this.tableData = res.data.list;
+        }
+        this.searchLoading = false;
+      }).catch(error => {
+        this.searchLoading = false;
+        console.log("apiVideoDownloadList error：", error);
+      });
+    }
   },
   destroyed () {
   }

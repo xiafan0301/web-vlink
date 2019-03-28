@@ -22,6 +22,8 @@ const oDomains = {
     message: {
         dev: 'http://apidev.aorise.org/vlink-message',
         // dev: 'http://10.116.64.169:8081',//花艳玲
+        // dev: 'http://10.116.64.142:8083',
+        // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
@@ -34,8 +36,8 @@ const oDomains = {
     },
     // 调度和预案部分地址
     ctc: {
-      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/emi',
-      dev: 'http://10.116.64.134:8082/api/emi',
+      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      dev: 'http://10.116.64.134:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },

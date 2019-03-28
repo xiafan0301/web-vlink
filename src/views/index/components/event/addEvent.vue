@@ -26,12 +26,11 @@
                 </el-form-item>
                 <el-form-item  label-width="85px" class="img-form-item">
                   <el-upload
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
                     :before-upload='handleBeforeUpload'
-                    :on-preview="handlePictureCardPreview"
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'
                     :on-exceed="handleImgNumber"
@@ -49,8 +48,8 @@
                     <el-option
                       v-for="(item, index) in handleUnitList"
                       :key="index"
-                      :label="item.enumValue"
-                      :value="index"
+                      :label="item.organName"
+                      :value="item.uid"
                     >
                     </el-option>
                   </el-select>
@@ -117,20 +116,23 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
+import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
 import BigImg from './components/bigImg.vue';
-import { addEvent, getDiciData } from '@/views/index/api/api.js';
+import { addEvent, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   components: { BigImg },
   data () {
     return {
-      isImgNumber: true, // 是否显示图片超过最大数提示
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
+      isImgNumber: false, // 是否显示图片超过最大数提示
       pickerOptions0: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
         }
       },
       addEventForm: {
+        eventSource: 17,
         eventFlag: true,
         mutualFlag: false,
         reporterPhone: null, // 报案人  手机号码
@@ -175,9 +177,11 @@ export default {
       eventLevelList: [], // 事件等级列表数据
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
+      userInfo: {}
     }
   },
   created () {
+    this.userInfo =  this.$store.state.loginUser;
     this.getEventLevelList();
     this.getHandleUnit();
     this.getEventTypeList();
@@ -192,7 +196,7 @@ export default {
       // _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -222,14 +226,16 @@ export default {
     },
     // 获取处理单位
     getHandleUnit () {
-      const handleUnit = dataList.handleUnit;
-      getDiciData(handleUnit)
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
         .then(res => {
-          if (res) {
-            this.handleUnitList = res.data;
+          if (res && res.data.list) {
+            this.handleUnitList = res.data.list;
           }
         })
-        .catch(() => {})
     },
     // 获取事件类型
     getEventTypeList () {
@@ -340,7 +346,23 @@ export default {
     },
     handlePictureCardPreview () {},
     handleRemove () {},
-    handleSuccess () {},
+    // 图片上传成功
+    handleSuccess (res) {
+      const data = {
+        contentUid: 0,
+        fileType: dataList.imgId,
+        path: res.data.fileFullPath,
+        filePathName: res.data.filePath,
+        cname: res.data.fileName,
+        imgSize: res.data.fileSize,
+        imgWidth: res.data.fileWidth,
+        imgHeight: res.data.fileHeight,
+        thumbnailPath: res.data.thumbnailFileFullPath,
+        // thumbnailWidth: res.data.thumbnailFileWidth,
+        // thumbnailHeight: res.data.thumbnailFileHeight
+      }
+      this.addEventForm.attachmentList.push(data);
+    },
     // 保存提交数据
     submitData (form) {
       this.$refs[form].validate(valid => {

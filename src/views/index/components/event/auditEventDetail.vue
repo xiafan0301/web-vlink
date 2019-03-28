@@ -18,16 +18,16 @@
                 </li>
                 <li>
                   <span>事件编号:</span>
-                  <span>{{detailInfo.eventNumber}}</span>
+                  <span>{{detailInfo.eventCode}}</span>
                 </li>
                 <li>
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
-                    <template v-if="$route.query.status === 'reject'">
-                      <span >{{detailInfo.userName}}</span>
-                    </template>
+                    <!-- <template v-if="$route.query.status === 'reject'"> -->
+                      <span >{{detailInfo.reporterPhone}}</span>
+                    <!-- </template>
                     <template v-else>
-                      <span class="reportUser">{{detailInfo.userName}}</span>
+                      <span class="reportUser">{{detailInfo.reporterPhone}}</span>
                       <div class="phone_dialog">
                         <div>
                           <i class="vl_icon vl_icon_event_14"></i>
@@ -38,12 +38,12 @@
                           <span>视频通话</span>
                         </div>
                       </div>
-                    </template>
+                    </template> -->
                   </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
-                  <span>{{detailInfo.createTime}}</span>
+                  <span>{{detailInfo.reportTime}}</span>
                 </li>
                 <li>
                   <span>事发地点:</span>
@@ -51,12 +51,12 @@
                 </li>
                 <li>
                   <span>事件情况:</span>
-                  <span>{{detailInfo.describe}}</span>
+                  <span>{{detailInfo.eventDetail}}</span>
                   <div class="img_list">
                     <img
-                      v-for="(item, index) in imgList"
+                      v-for="(item, index) in detailInfo.attachmentList"
                       :key="index"
-                      :src="item.src"
+                      :src="item.path"
                       @click="handleBigImg(index)"
                       alt="" 
                     />
@@ -68,15 +68,23 @@
                 </li>
                 <li>
                   <span>事件类型:</span>
-                  <span>{{detailInfo.eventType}}</span>
+                  <span>{{detailInfo.eventTypeName}}</span>
                 </li>
                 <li>
                   <span>事件等级:</span>
-                  <span>{{detailInfo.eventLevel}}</span>
+                  <span>{{detailInfo.eventLevelName}}</span>
                 </li>
                 <li>
                   <span>伤亡人员:</span>
-                  <span>{{detailInfo.casualtiesFlag}}</span>
+                  <template v-if='detailInfo.casualties == -1'>
+                    <span>不确定</span>
+                  </template>
+                  <template v-else-if='detailInfo.casualties == 0'>
+                    <span>无</span>
+                  </template>
+                  <template v-if='detailInfo.casualties > 0'>
+                    <span>{{detailInfo.casualties}}</span>
+                  </template>
                 </li>
                 <li>
                   <span>驳回原因:</span>
@@ -109,6 +117,7 @@
 </template>
 <script>
 import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.js';
 export default {
   components: { BigImg },
   data () {
@@ -139,55 +148,70 @@ export default {
         }
       ],
       detailInfo: {
-        eventNumber: 'X23912831283129038210938', // 事件编号
-        userName: '18077777777', // 报案人  手机号码
-        createTime: '2019-1-12 12:12:12', // 上报时间
-        eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        describe: '啊撒可怜见的昂克赛拉的骄傲啊看来撒娇的啊卢卡斯就的看拉萨角度来看啊卢卡斯就的', // 事件情况
-        eventType: '自然灾害', // 事件类型
-        eventLevel: 'IV级', // 事件等级
-        casualtiesFlag: '无', // 伤亡人员
-        longitude: 112.975828, // 经度
-        latitude: 28.093804, // 纬度
-        handleCompany: '公安部', // 处理单位
-        fileList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          },
-          {
-            uid: '005',
-            src: require('./img/4.jpg')
-          }
-        ], // 图片文件
-        rejectReason: '你猜你猜你猜你猜你猜你猜你猜', // 驳回原因
+        // eventNumber: 'X23912831283129038210938', // 事件编号
+        // userName: '18077777777', // 报案人  手机号码
+        // createTime: '2019-1-12 12:12:12', // 上报时间
+        // eventAddress: '湖南省怀化市溆浦县', // 事发地点
+        // describe: '啊撒可怜见的昂克赛拉的骄傲啊看来撒娇的啊卢卡斯就的看拉萨角度来看啊卢卡斯就的', // 事件情况
+        // eventType: '自然灾害', // 事件类型
+        // eventLevel: 'IV级', // 事件等级
+        // casualtiesFlag: '无', // 伤亡人员
+        // longitude: 112.975828, // 经度
+        // latitude: 28.093804, // 纬度
+        // handleCompany: '公安部', // 处理单位
+        // fileList: [
+        //   {
+        //     uid: '001',
+        //     src: require('./img/1.jpg')
+        //   },
+        //   {
+        //     uid: '002',
+        //     src: require('./img/2.jpg')
+        //   },
+        //   {
+        //     uid: '003',
+        //     src: require('./img/3.jpg')
+        //   },
+        //   {
+        //     uid: '004',
+        //     src: require('./img/4.jpg')
+        //   },
+        //   {
+        //     uid: '005',
+        //     src: require('./img/4.jpg')
+        //   }
+        // ], // 图片文件
+        // rejectReason: '你猜你猜你猜你猜你猜你猜你猜', // 驳回原因
       },
       map: null
     }
   },
   mounted () {
-    let _this = this;
-    let map = new window.AMap.Map('mapBox', {
-      zoom: 16, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    _this.map = map;
-    _this.mapMark(_this.detailInfo);
+    this.initMap();
+    this.getDetail();
   },
   methods: {
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapBox', {
+        zoom: 16, // 级别
+        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      _this.map = map;
+    },
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.eventId;
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.detailInfo = res.data;
+            this.mapMark(this.detailInfo);
+          }
+        })
+        .catch(() => {})
+    },
     resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {

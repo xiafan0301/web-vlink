@@ -69,34 +69,7 @@ export default {
       isShowImg: false, // 是否放大图片
       isImgDisabled: false,
       imgList1: [], // 要放大的图片数据
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
       fileList: [
         {
           fileName: '公共文档.docx'
@@ -129,10 +102,13 @@ export default {
       imgList: [] // 图片列表
     }
   },
+  mounted () {
+    this.getDetail();
+  },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.id;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -147,30 +123,31 @@ export default {
         let type;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
+          console.log(type);
           let data;
           res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
-            data = {
-              attachmentType: dictType.imgId,
-              url: res.data.newFileName,
-              attachmentName: res.data.fileName,
-              attachmentSize: res.data.fileSize,
-              attachmentWidth: res.data.imageWidth,
-              attachmentHeight: res.data.imageHeight,
-              thumbnailUrl: res.data.thumbnailUrl,
-              thumbnailWidth: res.data.thumbImageWidth,
-              thumbnailHeight: res.data.thumbImageHeight
-            }
-            this.imgList2.push(res.data);
-          } else {
-            data = {
-              attachmentType: dictType.fileId,
-              url: res.data.newFileName,
-              attachmentName: res.data.fileName,
-              attachmentSize: res.data.fileSize
-            }
-            this.fileList.push(res.data);
-          }
+          // if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          //   data = {
+          //     attachmentType: dictType.imgId,
+          //     url: res.data.newFileName,
+          //     attachmentName: res.data.fileName,
+          //     attachmentSize: res.data.fileSize,
+          //     attachmentWidth: res.data.imageWidth,
+          //     attachmentHeight: res.data.imageHeight,
+          //     thumbnailUrl: res.data.thumbnailUrl,
+          //     thumbnailWidth: res.data.thumbImageWidth,
+          //     thumbnailHeight: res.data.thumbImageHeight
+          //   }
+          //   this.imgList2.push(res.data);
+          // } else {
+          //   data = {
+          //     attachmentType: dictType.fileId,
+          //     url: res.data.newFileName,
+          //     attachmentName: res.data.fileName,
+          //     attachmentSize: res.data.fileSize
+          //   }
+          //   this.fileList.push(res.data);
+          // }
           this.endForm.attachmentList.push(data);
           this.isImgDisabled = false;
         }

@@ -1,14 +1,17 @@
 <template>
+<vue-scroll>
   <div class="role-manage">
     <div class="header">
       <el-button class="add-btn" icon="el-icon-plus" @click="showAddRole">创建角色</el-button>
       <div class="right-search">
-        <el-input  placeholder="请输入角色名搜索查找" style="width: 240px;">
+        <el-input  placeholder="请输入角色名搜索查找" style="width: 240px;" v-model="roleName">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 20px;"></i>
           <i
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="searchData">
-        </i>
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
         </el-input>
       </div>
     </div>
@@ -41,22 +44,24 @@
           prop="createTime"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createTime | fmTimestamp}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="350">
           <template slot-scope="scope">
-            <span class="operation_btn" @click="showSelectAuthorityDialog(scope)">查看权限</span>
+            <span class="operation_btn" @click="showSelectAuthorityDialog(scope.row)">查看权限</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showEditDialog(scope)">编辑角色</span>
+            <span class="operation_btn" @click="showEditDialog(scope.row)">编辑角色</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showConfigRoleDialog(scope)">配置权限</span>
+            <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置权限</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope)">删除用户</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户</span>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -76,7 +81,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delRoleDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delRoleDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteRole">确认</el-button>
       </div>
     </el-dialog>
     <!--创建角色弹出框-->
@@ -90,8 +95,9 @@
       >
       <div style="margin-top: 15px;">
         <el-form :model="addRole" :rules="rules" ref="addRole" label-width="15px">
-          <el-form-item prop="roleName" label=" ">
+          <el-form-item prop="roleName" label=" " class="role_name">
             <el-input v-model="addRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
             <el-input type="textarea" rows="6" v-model="addRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
@@ -99,8 +105,8 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="createRoleDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="createRoleDialog = false">保存</el-button>
+        <el-button @click="cancelAdd('addRole')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="addUser('addRole')">保存</el-button>
       </div>
     </el-dialog>
     <!--编辑角色弹出框-->
@@ -113,9 +119,10 @@
       class="dialog_comp"
       >
       <div style="margin-top: 15px;">
-        <el-form :model="editRole" :rules="rules" ref="addRole" label-width="15px">
-          <el-form-item prop="roleName" label=" ">
+        <el-form :model="editRole" :rules="rules" ref="editRole" label-width="15px">
+          <el-form-item prop="roleName" label=" " class="role_name">
             <el-input v-model="editRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
             <el-input type="textarea" rows="6" v-model="editRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
@@ -123,8 +130,8 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="editRoleDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editRoleDialog = false">确认</el-button>
+        <el-button @click="cancelEdit('editRole')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="editRoleInfo('editRole')">确认</el-button>
       </div>
     </el-dialog>
     <!--查看权限弹出框-->
@@ -201,11 +208,16 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
+import { getRoleList, createRole, delRole, updateRole, judgeRoleName } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isShowOrganError: false,
+      closeShow: false, //是否显示清空搜索框
+      roleName: null, // 角色名搜索
       data: [{
         label: '一级 1',
         children: [{
@@ -253,10 +265,13 @@ export default {
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       addRole: {
+        proKey: null,
         roleName: null,
         roleDesc: null
       },
       editRole: {
+        proKey: null,
+        uid: null,
         roleName: null,
         roleDesc: null
       },
@@ -265,61 +280,209 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { min: 2, message: '最少输入2个字符' },
           { max: 20, message: '最多输入20个字符' }
+        ],
+        roleDesc: [
+          { max: 50, message: '最多输入50个字符' }
         ]
       },
-      roleListData: [
-        {
-          roleName: '管理员',
-          roleDesc: '这是一段描述内容，显示20字后省略号…',
-          createTime: '2018-12-13 10:00:00'
-        },
-        {
-          roleName: '管理员',
-          roleDesc: '这是一段描述内容，显示20字后省略号…',
-          createTime: '2018-12-13 10:00:00'
-        },
-        {
-          roleName: '管理员',
-          roleDesc: '这是一段描述内容，显示20字后省略号…',
-          createTime: '2018-12-13 10:00:00'
-        },{
-          roleName: '管理员',
-          roleDesc: '这是一段描述内容，显示20字后省略号…',
-          createTime: '2018-12-13 10:00:00'
-        },
-        {
-          roleName: '管理员',
-          roleDesc: '这是一段描述内容，显示20字后省略号…',
-          createTime: '2018-12-13 10:00:00'
-        }
-      ],
+      roleListData: [],
       delRoleDialog: false, // 删除角色弹出框
       createRoleDialog: false, // 创建角色弹出框
       editRoleDialog: false, // 编辑角色弹出框
       selectAuthorityDialog: false, // 查看权限弹出框
       configAuthorityDialog: false, // 配置权限弹出框
+      userInfo: {},
+      deleteRoleId: null, // 要删除的角色id
     }
   },
+  created () {
+    this.userInfo = this.$store.state.loginUser;
+    this.addRole.proKey = this.userInfo.proKey;
+    this.editRole.proKey = this.userInfo.proKey;
+  },
+  mounted () {
+    this.getList();
+  },
   methods: {
-    // 搜索
-    searchData () {},
-    handleNodeClick () {},
-    handleSizeChange () {
+    // 获取角色列表
+    getList () {
+      const params = {
+        'where.roleName': this.roleName,
+        'where.proKey': this.userInfo.proKey,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      }
+      getRoleList(params)
+        .then(res => {
+          if (res) {
+            this.roleListData = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
     },
-    handleCurrentChange () {},
+    // 清空搜索框
+    onClear () {
+      this.roleName = null;
+      this.closeShow = false;
+      this.getList();
+    },
+    // 搜索
+    searchData () {
+      if (this.roleName) {
+        this.closeShow = true;
+        this.getList();
+      }
+    },
+    handleNodeClick () {},
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 显示创建角色弹出框
     showAddRole () {
+      this.isShowOrganError = false;
       this.createRoleDialog = true;
+    },
+    // 创建用户
+    addUser (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            proKey: this.userInfo.proKey,
+            roleName: this.addRole.roleName
+          }
+          judgeRoleName(params)
+            .then(res => {
+              if (res.data) {
+                this.isShowOrganError = true;
+              } else {
+                this.isShowOrganError = false;
+                this.handleAddRole();
+              }
+            })
+            .catch(() => {})
+          
+        }
+      })
+    },
+    handleAddRole () {
+      createRole(this.addRole)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '添加成功',
+              customClass: 'request_tip'
+            })
+            this.createRoleDialog = false;
+            this.getList();
+            // this.$refs[form].resetFields();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '添加失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 取消添加用户
+    cancelAdd (form) {
+      this.$refs[form].resetFields();
+      this.isShowOrganError = false;
+      this.createRoleDialog = false;
     },
     // 显示删除角色弹出框
     showDeleteDialog (obj) {
-      console.log(obj);
+      this.deleteRoleId = obj.uid;
       this.delRoleDialog = true;
+    },
+    // 删除角色
+    deleteRole () {
+      if (this.deleteRoleId) {
+        const data = {
+          uid: this.deleteRoleId,
+          proKey: this.userInfo.proKey
+        };
+        delRole(data)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.delRoleDialog = false;
+              this.getList();
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+      }
     },
     // 显示编辑角色弹出框
     showEditDialog (obj) {
-      console.log(obj);
+      this.isShowOrganError = false;
+      this.editRole.uid = obj.uid;
+      this.editRole.proKey = this.userInfo.proKey;
+      this.editRole.roleName = obj.roleName;
+      this.editRole.roleDesc = obj.roleDesc;
       this.editRoleDialog = true;
+    },
+    // 编辑角色 
+    editRoleInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            proKey: this.userInfo.proKey,
+            roleName: this.editRole.roleName
+          }
+          judgeRoleName(params)
+            .then(res => {
+              if (res.data) {
+                this.isShowOrganError = true;
+              } else {
+                this.isShowOrganError = false;
+                this.handleEditRoleInfo();
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    handleEditRoleInfo () {
+      updateRole(this.editRole)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.editRoleDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '修改失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 取消编辑
+    cancelEdit (form) {
+      this.isShowOrganError = false;
+      this.$refs[form].resetFileds();
+      this.editRoleDialog = false;
     },
     // 显示查看权限弹出框
     showSelectAuthorityDialog (obj) {
@@ -443,6 +606,20 @@ export default {
       /deep/.el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner {
         background-color: #0C70F8;
         border-color: #0C70F8;
+      }
+    }
+  }
+  .dialog_comp {
+    .group_name {
+      position: relative;
+      .group_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }

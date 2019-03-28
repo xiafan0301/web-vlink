@@ -3,41 +3,6 @@
 * {"trigger":"change","max":10,"min":20,"field":"telegrpNo","fullField":"telegrpNo","type":"string", ...}
 *  可自定义属性
 */
-import { judgeDepart, judgeUserGroup } from '@/views/index/api/api.js';
-// 判断部门名称是否重复
-export const isJudgeDepart = (value, callback) => {
-  if (value) {
-    const params = {
-      'where.proKey': '111',
-      organName: value
-    }
-    judgeDepart(params)
-      .then(res => {
-        if (res) {
-          return callback(new Error('部门已存在'))
-        }
-      })
-      .catch(() => {})
-  }
-}
-/**
- * 判断用户组名称是否重复
- */
-export const isJudgeUserGroup = (value, callback) => {
-  if (value) {
-    const params = {
-      'where.proKey': '111',
-      groupName: value
-    }
-    judgeUserGroup(params)
-      .then(res => {
-        if (res) {
-          return callback(new Error('该用户组已存在'))
-        }
-      })
-      .catch(() => {})
-  }
-}
 // 验证手机号
 export const validatePhone = (rule, value, callback) => {
   if (value) {

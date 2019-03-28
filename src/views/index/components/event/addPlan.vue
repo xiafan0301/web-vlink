@@ -18,7 +18,7 @@
               v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumValue"
             >
             </el-option>
           </el-select>
@@ -40,7 +40,7 @@
           <el-form-item label="附件：" label-width="120px">
             <el-upload
               style="width: 500px;"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              :action="uploadUrl"
               accept='.txt.pdf,.doc,.docx,.ppt,.pptx'
               :on-success="handSuccess"
               :before-upload="beforeUpload"
@@ -56,20 +56,24 @@
                 <div class="title">
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
-                <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:" :prop="item.departmentId" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <div class="plan_form">
+                  <el-form-item label="执行部门:"  label-position="left" :prop="'addPlanForm.taskList.' + index + '.departmentId'" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
-                      <el-option label="区域一" value="shanghai"></el-option>
-                      <el-option label="区域二" value="beijing"></el-option>
+                      <el-option
+                        v-for="(item, index) in departmentList"
+                        :key="'item' + index"
+                        :label="item.organName"
+                        :value="item.uid">
+                      </el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="任务名称:" :prop="item.taskName" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                  <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
                     <el-input v-model="item.taskName"></el-input>
                   </el-form-item>
-                  <el-form-item label="任务内容:" :prop="item.taskContent" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                  <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
                     <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
                   </el-form-item>
-                </el-form>
+                </div>
               </div>
               <template v-if="addPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
@@ -90,13 +94,16 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
-import { addPlan, getDiciData } from '@/views/index/api/api.js';
+import { ajaxCtx } from '@/config/config.js';
+import { addPlan, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      uploadUrl: ajaxCtx.base + '/new', // 文件上传地址
       addPlanForm: {
         planName: null, // 预案名称
         eventType: null, // 预案类型
+        eventTypeName: null, // 新添加的预案类型名称
         levelList: [], // 事件等级
         planDetail: null, // 预案正文
         taskList: [
@@ -107,7 +114,9 @@ export default {
             departmentId: null
           }
         ],
-        url: null, // 附件
+        path: null, // 附件
+        attachmentType: null,
+        cname: null // 附件名称
       },
       rules: {
         planName: [
@@ -127,16 +136,20 @@ export default {
       },
       planTypeList: [], // 预案类型
       eventLevelList: [], // 事件等级
+      userInfo: {}, // 存储的用户信息
+      departmentList: [], // 部门列表
     }
   },
   created () {
+    this.userInfo =  this.$store.state.loginUser;
     this.getPlanTypeList();
     this.getEventLevelList();
+    this.getDepartList();
   },
   methods: {
     // 获取预案类型
     getPlanTypeList () {
-      const type = dataList.eventType;
+      const type = dataList.planType;
       getDiciData(type)
         .then(res => {
           if (res) {
@@ -156,8 +169,29 @@ export default {
         })
         .catch(() => {})
     },
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 上传成功
-    handSuccess () {},
+    handSuccess (res) {
+      console.log('res', res)
+      if (res.data) {
+        this.addPlanForm.path = res.data.fileFullPath;
+        this.addPlanForm.cname = res.data.fileName;
+        this.addPlanForm.attachmentType = dataList.fileId;
+      }
+    },
     // 在上传之前
     beforeUpload (file) {
       const isLt = file.size / 1024 / 1024 < 10;
@@ -186,7 +220,22 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(this.addPlanForm);
+          this.planTypeList.map((item) => {
+            if (item.enumValue == this.addPlanForm.eventType) {
+              this.addPlanForm.eventType = item.uid;
+              return;
+            } else {
+              this.addPlanForm.eventType = null;
+              this.addPlanForm.eventTypeName = this.addPlanForm.eventType;
+            }
+          });
+          this.addPlanForm.taskList.map((item, index) => {
+            this.departmentList.map(itm => {
+              if (item.departmentId === itm.uid) {
+                this.addPlanForm.taskList[index].departmentName = itm.organName;
+              }
+            })
+          }) 
           addPlan(this.addPlanForm)
             .then(res => {
               if (res) {
@@ -195,7 +244,7 @@ export default {
                     message: '添加成功',
                     customClass: 'request_tip'
                   })
-                  this.$router.push({name: 'ctc_plan'});
+                  this.$router.push({name: 'event_ctcplan'});
               } else {
                   this.$message({
                     type: 'error',

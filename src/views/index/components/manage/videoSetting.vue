@@ -4,6 +4,7 @@
       <div><router-link :to="{ name: 'custom_group'}" @click.native = "state = 1">自定义组</router-link></div>
       <div><router-link :to="{ name: 'tirotation_setting'}" @click.native = "state = 2">轮巡设置</router-link></div>
       <div><router-link :to="{ name: 'device_authorize'}" @click.native = "state = 3">设备授权</router-link></div>
+      <div><router-link :to="{ name: 'mark_manage'}" @click.native = "state = 4">标记管理</router-link></div>
     </div>
     <div>
       <!-- <transition enter-active-class="fade-in" leave-active-class="leave-immediately"

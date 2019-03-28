@@ -16,28 +16,28 @@
         <div class="basic_info">
           <p>
             <i class="vl_icon vl_icon_event_4"></i>
-            <span>{{departDetailInfo.superiorName}}</span>
+            <span>{{departDetailInfo.organName}}</span>
           </p>
           <ul class="basic_list">
             <li>
               <span>上级部门:</span>
-              <span>{{departDetailInfo.organName}}</span>
+              <span>{{departDetailInfo.parentOrganName}}</span>
             </li>
             <li>
               <span>负责人:</span>
-              <span>{{departDetailInfo.chargeUserName}}</span>
+              <span>{{departDetailInfo.chargeUserNameStr}}</span>
             </li>
             <li>
               <span>联系方式:</span>
-              <span>{{departDetailInfo.chargeUserTelephone}}</span>
+              <span>{{departDetailInfo.chargeUserMobile}}</span>
             </li>
             <li>
               <span>创建时间:</span>
-              <span>{{departDetailInfo.createTime}}</span>
+              <span>{{departDetailInfo.createTime | fmTimestamp}}</span>
             </li>
             <li>
               <span>更新时间:</span>
-              <span>{{departDetailInfo.updateTime}}</span>
+              <span>{{departDetailInfo.updateTime | fmTimestamp}}</span>
             </li>
           </ul>
         </div>
@@ -47,11 +47,11 @@
             <el-button class="add_btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
             <el-button class="del_btn" @click="showDeleteDialog">删除部门</el-button>
           </div>
-          <div class="depart_tree">
+          <div class="depart_tree" v-show="childDepartList.length > 0">
             <el-checkbox>全选</el-checkbox>
             <div class="depart_tree_list">
               <vue-scroll>
-                <el-tree icon-class="el-icon-arrow-right" show-checkbox :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+                <el-tree icon-class="el-icon-arrow-right" show-checkbox :data="childDepartList" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
               </vue-scroll>
             </div>
           </div>
@@ -64,12 +64,14 @@
               <i class="vl_icon vl_icon_manage_2"></i>
               <span>成员管理</span>
             </el-button>
-            <el-input  placeholder="请输入账户名/姓名查找" style="width: 240px;">
+            <el-input  placeholder="请输入账户名/姓名查找" style="width: 240px;" v-model="userName">
+              <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 20px;"></i>
               <i
-              class="search_icon vl_icon vl_icon_manage_1"
-              slot="suffix"
-              @click="handleIconClick">
-            </i>
+                v-show="!closeShow"
+                class="search_icon vl_icon vl_icon_manage_1"
+                slot="suffix"
+                @click="searchMember">
+              </i>
             </el-input>
           </div>
           <div class="table_box">
@@ -101,6 +103,9 @@
                 prop="userSex"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.userSex === 1 ? '男' : scope.row.userSex === 2 ? '女' : '未知'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="邮箱"
@@ -111,11 +116,13 @@
                 label="最后登录时间"
                 prop="lastLoginTime"
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.lastLoginTime | fmTimestamp}}</span>
+                </template>
               </el-table-column>
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
@@ -137,18 +144,18 @@
       >
       <div class="userGroup_body">
         <div class="group_left clearfix">
-          <p class="group_number">当前成员 (50个)</p>
+          <p class="group_number">当前成员 (已选{{checkCurrMember.length > 0 ? checkCurrMember.length : 0}}个/共{{currentMembers.length > 0 ? currentMembers.length : 0}}个)</p>
           <div class="checkbox_box_left">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkCurrMember">
+                <el-checkbox v-for="(item, index) in currentMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left">移除所选组</div>
+          <div class="group_btn group_btn_left" @click="removeMembers">移除所选组</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选成员 (已选1个/共51个)</p>
+          <p class="group_number">可选成员 (已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{selectMembers.length > 0 ? selectMembers.length : 0}}个)</p>
           <el-input placeholder="请输入成员姓名搜索" size="small" style="width: 220px;">
             <i
               class="search_icon vl_icon vl_icon_manage_1"
@@ -158,12 +165,12 @@
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
-              <el-checkbox-group v-model="checkedCities">
-                <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+              <el-checkbox-group v-model="checkSelectMember">
+                <el-checkbox v-for="(item ,index) in selectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right">加入所选组</div>
+          <div class="group_btn group_btn_right" @click="addMembers">加入所选组</div>
         </div>
       </div>
     </el-dialog>
@@ -178,27 +185,37 @@
       >
       <div style="margin-top: 10px;">
         <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
-          <el-form-item label=" " prop="organName">
-            <el-input v-model="addDepartment.organName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+          <el-form-item label=" " prop="organName" class="organ_name">
+            <el-input v-model="addDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+            <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
-              <el-option label="无" value="shanghai"></el-option>
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="(item, index) in departmentData"
+                :key="'item' + index"
+                :label="item.organName"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="chargeUserName">
             <el-select style="width: 95%" filterable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="(item, index) in userList"
+                :key="'item' + index"
+                :label="item.userName"
+                :value="item.uid"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="newDepartmentDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="newDepartmentDialog = false">确认</el-button>
+        <el-button @click="cancelAdd('addDepartment')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="addDepartmentInfo('addDepartment')">确认</el-button>
       </div>
     </el-dialog>
     <!--删除下级部门弹出框-->
@@ -220,101 +237,23 @@
 </vue-scroll>
 </template>
 <script>
+import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember, addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
+      isShowOrganError: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      closeShow: false,
+      userName: null, // 要搜索的内容
       tabState: 1,
-      data: [{
-        label: '一级 1',
-        children: [{
-          label: '二级 1-1',
-          children: [{
-            label: '三级 1-1-1',
-            children: [{
-              label: '四级 1-1-1',
-              children: [{
-                label: '五级 1-1-1'
-              }]
-            }]
-          }]
-        }]
-      }, {
-        label: '一级 2',
-        children: [{
-          label: '二级 2-1',
-          children: [{
-            label: '三级 2-1-1'
-          }]
-        }, {
-          label: '二级 2-2',
-          children: [{
-            label: '三级 2-2-1'
-          }]
-        }]
-      }, {
-        label: '一级 3',
-        children: [{
-          label: '二级 3-1',
-          children: [{
-            label: '三级 3-1-1'
-          }]
-        }, {
-          label: '二级 3-2',
-          children: [{
-            label: '三级 3-2-1'
-          }]
-        }]
-      }],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'name'
       },
-      checkedCities: ['上海', '北京'],
-      cities: ['上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳','上海', '北京', '广州', '深圳'],
-      memberListData: [
-        {
-          userMobile: '17822222222',
-          userName: '张三',
-          userSex: '女',
-          userEmail: '1136386227@qq.com',
-          lastLoginTime: '2018-12-12 12:12:12'
-        },
-        {
-          userMobile: '17822222222',
-          userName: '张三',
-          userSex: '女',
-          userEmail: '1136386227@qq.com',
-          lastLoginTime: '2018-12-12 12:12:12'
-        },
-        {
-          userMobile: '17822222222',
-          userName: '张三',
-          userSex: '女',
-          userEmail: '1136386227@qq.com',
-          lastLoginTime: '2018-12-12 12:12:12'
-        },{
-          userMobile: '17822222222',
-          userName: '张三',
-          userSex: '女',
-          userEmail: '1136386227@qq.com',
-          lastLoginTime: '2018-12-12 12:12:12'
-        },
-        {
-          userMobile: '17822222222',
-          userName: '张三',
-          userSex: '女',
-          userEmail: '1136386227@qq.com',
-          lastLoginTime: '2018-12-12 12:12:12'
-        }
-      ],
-      departDetailInfo: { // 部门详情数据
-        organName: 'assdasdasd',
-        superiorName: '监察部',
-        chargeUserName: '张三',
-        chargeUserTelephone: '18212344321'
-      },
+      memberListData: [],
+      departDetailInfo: {}, // 部门详情数据,
       addDepartment: {
+        proKey: null,
         organName: null,
         organPid: null,
         chargeUserName: null
@@ -325,27 +264,328 @@ export default {
         ],
         organPid: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        chargeUserName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
       deleteArr: [], // 删除部门id集合
       adminMemberDialog: false, // 成员管理弹出框
       newDepartmentDialog: false, // 新建部门弹出框
       delChildDepartmentDialog: false, // 删除部门弹出框
+      userInfo: {}, // 存储的用户信息
+      userList: [], // 所有的用户
+      departmentData: [], // 部门数据
+      currentMembers: [], // 当前成员
+      selectMembers: [], // 可选成员
+      checkSelectMember: [], // 勾选种的可选成员
+      checkCurrMember: [], // 勾选中的当前成员
+      currentGroupId: null, // 当前用户组id
+      childDepartList: [], // 下级部门
     }
   },
+  created () {
+    this.userInfo = this.$store.state.loginUser;
+    this.addDepartment.proKey = this.userInfo.proKey;
+  },
+  mounted () {
+    this.getDetail();
+    // this.getDepartList();
+    this.getAllUserList();
+    this.getUserList();
+  },
   methods: {
-    handleSizeChange () {
+    // 获取列表数据
+    getDepartList () {
+      this.departmentData = [];
+      this.childDepartList = [];
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.$route.query.id,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          console.log('000', res)
+          if (res && res.data.list) {
+            let restArr = [];
+            this.departmentData.push({
+              uid: this.departDetailInfo.uid,
+              organName: this.departDetailInfo.organName
+            });
+            res.data.list.map((item) => {
+              this.departmentData.push({
+                uid: item.uid,
+                organName: item.organName
+              });
+              if (item.organLayer === (this.departDetailInfo.organLayer + 1)) {
+                this.childDepartList.push({
+                  uid: item.uid,
+                  name: item.organName,
+                  isShow: false,
+                  isSelect: false,
+                  children: []
+                });
+              } else {
+                restArr.push(item);
+              }
+              console.log('rest', restArr);
+            });
+            restArr.forEach(a => {
+              this.childDepartList.forEach(b => {
+                if (a.parentOrganName === b.name) {
+                  b.children.push({
+                    uid: a.uid,
+                    name: a.organName,
+                    isSelect: false
+                  })
+                }
+              })
+            })
+          }
+          console.log('childDepartList', this.childDepartList)
+        })
     },
-    handleCurrentChange () {},
+    // 获取部门详情数据
+    getDetail () {
+      const id = this.$route.query.id;
+      if (id) {
+        const params = {
+          uid: id,
+          proKey: this.userInfo.proKey
+        };
+        getDepartDetail(params)
+          .then(res => {
+            if (res) {
+              this.departDetailInfo = res.data;
+              this.getDepartList();
+            }
+          })
+      }
+    },
+    // 获取所有的用户
+    getAllUserList () {
+      const params = {
+        pageSize: 0,
+        'where.proKey': this.userInfo.proKey
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取成员
+    getUserList () {
+      const params = {
+        'where.uid': this.$route.query.id,
+        'where.proKey': this.userInfo.proKey,
+        'where.userName': this.userName,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getUserMember(params)
+        .then(res => {
+          if (res) {
+            this.memberListData = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getUserList();
+    },
+    // 清空搜索框
+    onClear () {
+      this.userName = null;
+      this.closeShow = false;
+      this.getUserList();
+    },
+    // 搜索成员数据
+    searchMember () {
+      if (this.userName) {
+        this.closeShow = true;
+        this.getUserList();
+      }
+    },
     handleNodeClick () {},
-    handleIconClick () {},
-    // 显示成员管理弹出框
-    showAdminMember () {
+    // 显示管理成员弹出框
+    showAdminMember (obj) {
+      this.currentMembers = [];
       this.adminMemberDialog = true;
+      this.currentGroupId = obj.uid;
+      let allMembers; // 所有的用户
+      const data = {
+        'where.uid': this.$route.query.id,
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserMember(data)
+        .then(res => {
+          if (res) {
+            res.data.list.map(item => {
+              this.currentMembers.push({
+                uid: item.uid,
+                userName: item.userName
+              })
+            })
+          }
+        })
+        .catch(() => {})
+      const params = {
+        pageSize: 0,
+        'where.proKey': this.userInfo.proKey
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            allMembers = JSON.parse(JSON.stringify(res.data.list));
+            if (this.currentMembers.length > 0) {
+              this.currentMembers.map(item => {
+                allMembers.map((itm, idx) => {
+                  if (itm.userName === item.userName) {
+                    allMembers.splice(idx, 1);
+                  }
+                });
+              });
+            }
+            this.selectMembers = JSON.parse(JSON.stringify(allMembers));
+          }
+        })
+        .catch(() => {})
+      
+    },
+    // 移出所选成员
+    removeMembers () {
+      if (this.checkCurrMember.length > 0) {
+        let params = {
+          proKey: this.userInfo.proKey,
+          organId: this.$route.query.id,
+          userIds: []
+        };
+        this.checkCurrMember.map(item => {
+          params.userIds.push(item.uid);
+        });
+        params.userIds = params.userIds.join(',');
+        delUserMember(params)
+          .then(res => {
+            if (res) {
+              this.checkCurrMember.map(item => {
+                this.currentMembers.map((itm, idx) => {
+                  if (item.userName === itm.userName) {
+                    this.currentMembers.splice(idx, 1);
+                    this.selectMembers.push({
+                      uid: item.uid,
+                      userName: item.userName
+                    });
+                  }
+                });
+              });
+              this.getUserList();
+              this.checkCurrMember = [];
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 添加所选成员
+    addMembers () {
+      if (this.checkSelectMember.length > 0) {
+        let params = {
+          proKey: this.userInfo.proKey,
+          organId: this.$route.query.id,
+          userIds: []
+        };
+        this.checkSelectMember.map(item => {
+          params.userIds.push(item.uid);
+        });
+        params.userIds = params.userIds.join(',');
+        addUserMember(params)
+          .then(res => {
+            if (res) {
+              this.checkSelectMember.map(item => {
+                this.selectMembers.map((itm, idx) => {
+                  if (item.userName === itm.userName) {
+                    this.selectMembers.splice(idx, 1);
+                    this.currentMembers.push({
+                      uid: item.uid,
+                      userName: item.userName
+                    });
+                  }
+                });
+              });
+              this.getUserList();
+              this.checkSelectMember = [];
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 部门名称change
+    handleChangeOrganName (val) {
+      if (!val) {
+        this.isShowOrganError = false;
+      } 
     },
     // 显示新增部门弹出框
     showNewDepartment () {
+      this.isShowOrganError = false;
+      this.addDepartment.organName = null;
+      this.addDepartment.chargeUserName = null;
+      this.addDepartment.organPid = this.$route.query.id;
       this.newDepartmentDialog = true;
+    },
+    // 添加部门
+    addDepartmentInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            proKey: this.userInfo.proKey,
+            organName: this.addDepartment.organName
+          }
+          judgeDepart(params)
+            .then(res => {
+              if (res.data) {
+                this.isShowOrganError = true;
+              } else {
+                this.isShowOrganError = false;
+                this.handleAddDepartment();
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    handleAddDepartment () {
+      addDepart(this.addDepartment)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '添加成功',
+              customClass: 'request_tip'
+            })
+            this.newDepartmentDialog = false;
+            this.getList();
+          } else {
+            this.$message({
+              type: 'error',
+              message: '添加失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 取消添加
+    cancelAdd (form) {
+      this.isShowOrganError = false;
+      this.$refs[form].resetFields();
+      this.newDepartmentDialog = false;
     },
     // 显示删除部门弹出框
     showDeleteDialog () {
@@ -598,6 +838,20 @@ export default {
         /deep/ .el-checkbox__input {
           float: right;
         }
+      }
+    }
+  }
+  .dialog_comp {
+    .organ_name {
+      position: relative;
+      .organ_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }

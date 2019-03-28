@@ -10,21 +10,25 @@
     <div class="content_box">
       <div class="btn_box">
         <div class="bnt_box_left">
-          <span>自定义组</span>
+          <span>{{groupName}}</span>
           <i class="edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
           <i class="del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
         <div class="bnt_box_right">
-          <el-button class="oper_btn copy_btn" @click="showGroup = !showGroup">复制</el-button>
-          <el-button class="oper_btn move_btn" @click="showMoveoutDialog">移出</el-button>
+          <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
+          <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
           <div class="copy_info" v-show="showGroup">
             <div class="copy_info_list">
               <vue-scroll>
                 <ul class="copy_info_ul">
+                  <li
+                    v-for="(item, index) in copyGroupList"
+                    :key="index"
+                    @click="handleCopyGroup(item.uid)"
+                  >{{item.groupName}}</li>
+                  <!-- <li>分组命名文字限制十字</li>
                   <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
+                  <li>分组命名文字限制十字</li> -->
                 </ul>
               </vue-scroll>
             </div>
@@ -38,31 +42,20 @@
       <div class="divide"></div>
       <div class="table_box">
         <div class="search_box">
-          <el-form :inline="true" :model="searchForm" class="search_form">
-            <el-form-item>
-              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.name" />
-            </el-form-item>
-            <el-form-item >
-              <el-select v-model="searchForm.idType" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
+          <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+            <el-form-item prop="keyWord">
+              <el-input style="width: 240px;" type="text" placeholder="请车牌号或车主或型号" v-model="searchForm.keyWord" />
             </el-form-item>
             <el-form-item>
-              <el-select v-model="searchForm.userSex" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button class="select_btn" type="primary">查询</el-button>
-              <el-button class="reset_btn" type="primary">重置</el-button>
+              <el-button class="select_btn" @click="searchData">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <el-table
           class="event_table"
           :data="vehicleList"
+          @selection-change="handleSelectChange"
           >
           <el-table-column
             type="selection"
@@ -75,54 +68,53 @@
           </el-table-column>
           <el-table-column
             label="车牌号"
-            prop="userName"
+            prop="vehicleNumber"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="车主"
-            prop="userName"
+            prop="ownerName"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="性别"
-            prop="userSex"
+            prop="ownerSex"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="车辆型号"
-            prop="idType"
+            prop="vehicleModel"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="车辆颜色"
-            prop="idCard"
+            prop="vehicleColor"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="备注"
-            prop="groupInfo"
+            prop="albumList"
             :show-overflow-tooltip='true'
           >
           </el-table-column>
           <el-table-column label="操作" width="100">
             <template slot-scope="scope">
-              <span class="operation_btn" @click="showLookDetailInfo(scope)">查看</span>
+              <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
             </template>
           </el-table-column>
         </el-table>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage4"
+          :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :page-size="pagination.pageSize"
           layout="total, prev, pager, next, jumper"
-          :total="400">
+          :total="pagination.total">
         </el-pagination>
       </div>
     </div>
@@ -137,66 +129,60 @@
       >
       <div class="content_body">
         <div class="content_left">
-          <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+          <img :src="vehicleDetailInfo.vehicleImagePath" alt="">
         </div>
         <ul class="content_right">
           <li>
             <span>车牌号：</span>
-            <span>邹洪华</span>
+            <span>{{vehicleDetailInfo.vehicleNumber}}</span>
           </li>
           <li>
             <span>车牌类型：</span>
-            <span>男</span>
+            <span>{{vehicleDetailInfo.numberType}}</span>
           </li>
           <li>
             <span>车牌颜色：</span>
-            <span>汉</span>
+            <span>{{vehicleDetailInfo.numberColor}}</span>
           </li>
           <li>
             <span>车主：</span>
-            <span>汉</span>
+            <span>{{vehicleDetailInfo.ownerName}}</span>
           </li>
           <li>
             <span>证件号码：</span>
-            <span>432501199111110011</span>
+            <span>{{vehicleDetailInfo.ownerIdCard}}</span>
           </li>
           <li>
             <span>车辆类型：</span>
-            <span>432501199111110011</span>
+            <span>{{vehicleDetailInfo.vehicleType}}</span>
           </li>
           <li>
             <span>车辆型号：</span>
-            <span>432501199111110011</span>
+            <span>{{vehicleDetailInfo.vehicleModel}}</span>
           </li>
           <li>
             <span>车辆颜色：</span>
-            <span>432501199111110011</span>
+            <span>{{vehicleDetailInfo.vehicleColor}}</span>
           </li>
           <li>
-            <span>车辆性别：</span>
-            <span>432501199111110011</span>
+            <span>车主性别：</span>
+            <span>{{vehicleDetailInfo.ownerSex}}</span>
           </li>
           <li>
             <span>车主生日：</span>
-            <span>1991.11.11</span>
+            <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
           </li>
           <li>
             <span>底库信息：</span>
-            <span>底库1、底库2</span>
+            <span>{{vehicleDetailInfo.albumList}}</span>
           </li>
           <li>
             <span>分组信息：</span>
-            <span>分组1、分组2</span>
+            <span>{{vehicleDetailInfo.groupList}}</span>
           </li>
           <li>
             <span>备注：</span>
-            <span>
-              任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，
-              段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示。
-            </span>
+            <span>{{vehicleDetailInfo.desci}}</span>
           </li>
         </ul>
       </div>
@@ -211,12 +197,12 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+        <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
+        <el-input placeholder="请输入组名，名字限制在10个" v-model="addGroupName"></el-input>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="addCopyGroupDialog">确认</el-button>
       </div>
     </el-dialog>
     <!--修改组弹出框-->
@@ -233,7 +219,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="editGroupInfo">确认</el-button>
       </div>
     </el-dialog>
     <!--删除组弹出框-->
@@ -248,12 +234,12 @@
       <span style="color: #999999;">删除后该组信息可在系统默认中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="deleteGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--移出组弹出框-->
     <el-dialog
-      title="是否确定将这1条人员数据移出该组?"
+      :title='delTitle'
       :visible.sync="moveoutGroupDialog"
       width="482px"
       :close-on-click-modal="false"
@@ -263,73 +249,289 @@
       <span style="color: #999999;">移除后该条信息可在系统默认中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="moveoutGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="moveoutGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup, copyGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
-      userGroupName: null,
+      delTitle: null,
+      isGroup: true, // 是分组还是底库
+      groupId: null, // 要删除或修改的组id
+      albumId: null, // 要删除或修改的底库id
+      groupName: null, // 组名
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      userGroupName: null, // 编辑组名
+      addGroupName: null, // 新增组名
       showGroup: false,
       searchForm: {
-        name: null,
-        idType: null,
-        userSex: null
+        keyWord: null
       },
-      vehicleList: [
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        }
-      ],
+      vehicleList: [],
       vehicleDetailInfoDialog: false, // 查看车辆信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
       deleteGroupDialog: false, // 删除分组弹出框
       moveoutGroupDialog: false, // 移出组弹出框
+      multipleSelection: [], // 表格选中的行
+      vehicleDetailInfo: {}, // 车辆详情
+      copyGroupList: [], // 可以复制的分组
     }
   },
+  mounted () {
+    this.groupId = parseInt(this.$route.query.id);
+    if (this.$route.query.type == 1) { // 分组查看
+      this.isGroup = true;
+    } else { // 底库查看
+      this.isGroup = false;
+    }
+    this.getList();
+    this.getVeGroupInfo(parseInt(this.$route.query.id));
+  },
   methods: {
-    handleSizeChange () {
+    // 获取所有的车辆分组
+    getVeGroupInfo (uid) {
+      getVehicleGroup()
+        .then(res => {
+          if (res && res.data) {
+            // this.allGroupList = res.data;
+            res.data.map(item => {
+              if (item.id === uid) {
+                this.groupName = item.name;
+              } else {
+                this.copyGroupList.push({
+                  uid: item.id,
+                  groupName: item.name
+                })
+              }
+            });
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 获取车辆列表数据
+    getList () {
+      const params = {
+        'where.type': parseInt(this.$route.query.type),
+        'where.keyWord': this.searchForm.keyWord,
+        'where.groupId': this.groupId,
+        'where.albumId': this.albumId,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      }
+      getAdminVelList(params)
+        .then(res => {
+          if (res) {
+            this.vehicleList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // 搜索列表
+    searchData () {
+      this.getList();
+    },
+    // 清空搜索框
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getList();
+    },
+    handleSelectChange (val) {
+      this.multipleSelection = val;
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
-      console.log(obj);
+      this.getVehicleDetailInfo(obj.uid);
       this.vehicleDetailInfoDialog = true;
+    },
+    // 查看车辆详情
+    getVehicleDetailInfo (id) {
+      if (id) {
+        getVehicleInfo(id)
+          .then(res => {
+            if (res) {
+              this.vehicleDetailInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示编辑弹出框
     showEditDialog () {
+      this.userGroupName = this.groupName;
       this.editGroupDialog = true;
+    },
+    // 编辑组
+    editGroupInfo () {
+      const params = {
+        uid: parseInt(this.groupId),
+        groupName: this.userGroupName,
+        groupType: 1
+      }
+      if (this.isGroup) {
+        editVeGroup(params)
+          .then(res => {
+            if (res) {
+              this.getVeGroupInfo(parseInt(this.groupId));
+              this.$message({
+                type: 'success',
+                message: '修改成功',
+                customClass: 'request_tip'
+              })
+              this.editGroupDialog = false;
+            } else {
+              this.$message({
+                type: 'error',
+                message: '修改失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteGroupDialog = true;
     },
+    // 删除分组
+    deleteGroup () {
+      if (this.groupId) {
+        delVeGroup(this.groupId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.$router.back(-1);
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
     // 显示移出弹出框
     showMoveoutDialog () {
+      const length = this.multipleSelection.length;
+      this.delTitle = '是否确定将这 ' + length + ' 条人员数据移出该组?';
+      // if (length === 0) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '请先选择要移出数据',
+      //     customClass: 'request_tip'
+      //   })
+      // } else {
       this.moveoutGroupDialog = true;
+      // }
+    },
+    // 移出分组
+    moveoutGroupInfo () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      selectArr = selectArr.join(',');
+      const params = {
+        groupId: this.groupId,
+        vehicleIds: selectArr
+      };
+      moveoutGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '移出成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.moveoutGroupDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '移出失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 处理复制分组
+    handleCopyGroup (id) {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        // groupName: this.addGroupName || null,
+        groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.showGroup = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '复制失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 复制或新增复制到组
+    addCopyGroupDialog () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.uid);
+      });
+      const params = {
+        groupName: this.addGroupName || null,
+        // groupId: id || null,
+        vehicleIds: selectArr
+      };
+      copyGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.getList();
+            this.addGroupDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '新增失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
@@ -374,14 +576,16 @@ export default {
         position: relative;
         .copy_info {
           z-index: 1;
+          width: auto;
           position: absolute;
+          height: 170px;
           top: 45px;
           background-color: #ffffff;
           color: #333333;
           border-radius: 4px;
           box-shadow:5px 5px 8px 5px #949494;
           .copy_info_list {
-            height: 150px;
+            height: calc(170px - 30px);
             .copy_info_ul {
               >li {
                 padding: 8px 10px;
@@ -393,13 +597,16 @@ export default {
             }
           }
           .add_btn {
+            padding: 0 10px;
             cursor: pointer;
             height: 30px;
             line-height: 30px;
-            display: flex;
-            align-items: center;
-            padding-left: 25%;
+            text-align: center;
             border-top: 1px solid #F2F2F2;
+            span, i {
+              display: inline-block;
+              vertical-align: middle;
+            }
           }
         }
         .oper_btn {
@@ -409,6 +616,11 @@ export default {
         .copy_btn {
           background-color: #0C70F8;
           color: #ffffff;
+        }
+        .disabled_btn {
+          background-color: #D3D3D3;
+          color: #B2B2B2;
+          cursor: default;
         }
       }
     }

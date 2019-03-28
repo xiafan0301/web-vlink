@@ -1,8 +1,9 @@
 <template>
+<vue-scroll>
   <div class="plan-list">
     <div class="search_box">
       <el-form :inline="true" :model="planForm" class="ctc_form" ref="planForm">
-        <el-form-item>
+        <el-form-item prop="planType">
           <el-select v-model="planForm.planType" style="width: 240px;" placeholder="预案类型">
             <el-option value='全部类型'></el-option>
             <el-option
@@ -14,7 +15,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="planLevel">
           <el-select v-model="planForm.planLevel" style="width: 240px;" placeholder="适用等级">
             <el-option value='全部等级'></el-option>
             <el-option
@@ -26,11 +27,11 @@
               </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item >
+        <el-form-item prop="planName">
           <el-input style="width: 240px;" type="text" placeholder="请输入预案名称" v-model="planForm.planName" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" @click="selectDataList()">查询</el-button>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
           <el-button class="reset_btn" @click="resetForm('planForm')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -68,9 +69,9 @@
           prop="levelNameList"
           show-overflow-tooltip
           >
-          <!-- <template slot-scope="scope">
+          <template slot-scope="scope">
             <span>{{scope.row.levelNameList.join()}}</span>
-          </template> -->
+          </template>
         </el-table-column>
         <el-table-column
           label="创建用户"
@@ -96,7 +97,6 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="onPageChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -120,6 +120,7 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
@@ -129,33 +130,11 @@ export default {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       planForm: {
-        planLevel: null, // 适用等级
-        planType: null, // 预案类型
+        planLevel: '全部等级', // 适用等级
+        planType: '全部类型', // 预案类型
         planName: null // 预案名称
       },
-      planList: [
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-        {
-          scheduleName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-          scheduleType: '事故灾难',
-          applyEventLevel: 'IV级（一般）、V级（较大）',
-          opUserName: 'admin',
-          createTime: '2019-01-21 13:57:33'
-        },
-      ], // 表格数据
+      planList: [], // 表格数据
       delPlanDialog: false, // 删除预案弹出框
       planLevelList: [], // 适用等级
       planTypeList: [], // 预案类型
@@ -165,11 +144,12 @@ export default {
   created () {
     this.getPlanTypeList();
     this.getPlanLevelList();
+    this.getPlanList();
   },
   methods: {
     // 获取预案类型
     getPlanTypeList () {
-      const type = dataList.eventType;
+      const type = dataList.planType;
       getDiciData(type)
         .then(res => {
           if (res) {
@@ -193,12 +173,12 @@ export default {
     getPlanList () {
       let planType, planLevel;
       if (this.planForm.planType === '全部类型') {
-        planType = '';
+        planType = null;
       } else {
         planType = this.planForm.planType;
       }
       if (this.planForm.planLevel === '全部等级') {
-        planLevel = '';
+        planLevel = null;
       } else {
         planLevel = this.planForm.planLevel;
       }
@@ -212,18 +192,14 @@ export default {
         .then(res => {
           if (res) {
             this.planList = res.data.list;
+            this.pagination.total = res.data.total;
           }
         })
         .catch(() => {})
     },
     onPageChange (page) {
       this.pagination.pageNum = page;
-      // this.getPlanList();
-    },
-    handleSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      // this.getPlanList();
+      this.getPlanList();
     },
     skipAddPlanPage () { // 跳到新增预案页面
       this.$router.push({name: 'add_plan'});
@@ -245,12 +221,12 @@ export default {
     // 跳至修改预案页面
     skipEditPage (obj) {
       console.log(obj);
-      this.$router.push({name: 'edit_plan'});
+      this.$router.push({name: 'edit_plan', query:{planId: obj.uid}});
     },
     // 跳至预案详情页面
     skipDetailPage (obj) {
       console.log(obj);
-      this.$router.push({name: 'ctc_plan_detail'});
+      this.$router.push({name: 'ctc_plan_detail', query:{planId: obj.uid}});
     },
     // 确认删除
     deletePlan () {
@@ -263,6 +239,8 @@ export default {
                 message: '删除成功',
                 customClass: 'request_tip'
               })
+              this.getPlanList();
+              this.delPlanDialog = false;
             } else {
               this.$message({
                 type: 'error',

@@ -3,7 +3,7 @@
   <div class="audit">
     <div class="search_box">
       <el-form :inline="true" :model="auditForm" class="event_form" ref="auditForm">
-        <el-form-item>
+        <el-form-item prop="reportTime">
           <el-date-picker
             style="width: 260px;"
             v-model="auditForm.reportTime"
@@ -14,7 +14,7 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="eventStatus">
           <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="审核状态">
             <el-option value='全部状态'></el-option>
             <el-option
@@ -26,7 +26,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="eventType">
           <el-select v-model="auditForm.eventType" style="width: 240px;" placeholder="事件类型">
             <el-option value='全部类型'></el-option>
             <el-option
@@ -38,23 +38,23 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="userName">
           <el-select v-model="auditForm.userName" style="width: 240px;" placeholder="上报者身份">
             <el-option value='全部上报者'></el-option>
             <el-option
               v-for="(item, index) in identityList"
               :key="index"
-              :label="item.enumValue"
+              :label="item.organName"
               :value="item.uid"
             >
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="phoneOrNumber">
           <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号" v-model="auditForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn" @click="selectDataList('auditForm')">查询</el-button>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
           <el-button class="reset_btn" @click="resetForm('auditForm')">重置</el-button>
         </el-form-item>
       </el-form>
@@ -73,25 +73,25 @@
       </div>
       <el-table
         class="audit_table"
-        :data="dataList"
+        :data="auditList"
         >
         <el-table-column
           fixed
           label="审核状态"
-          prop="status"
+          prop="acceptFlagName"
           :show-overflow-tooltip='true'
           >
           <template slot-scope="scope">
             <span class="event_status"
-              :class="[scope.row.status === '待审核' ? 'untreated_event'
-                : scope.row.status === '通过' ? 'treating_event' : 'end_event']">
-                {{scope.row.status}}
+              :class="[scope.row.acceptFlagName === '待审核' ? 'untreated_event'
+                : scope.row.acceptFlagName === '通过' ? 'treating_event' : 'end_event']">
+                {{scope.row.acceptFlagName}}
             </span>
           </template>
         </el-table-column>
         <el-table-column
           label="类型"
-          prop="eventType"
+          prop="eventTypeName"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -103,9 +103,14 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="idCard"
+          prop="reporterRole"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
+            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报时间"
@@ -121,7 +126,7 @@
         </el-table-column>
         <el-table-column
           label="上报内容"
-          prop="content"
+          prop="eventDetail"
           :show-overflow-tooltip='true'
         >
         </el-table-column>
@@ -140,7 +145,6 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -154,83 +158,88 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData } from '@/views/index/api/api.js';
+import { getDiciData, getEventList, openAutoCheck, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       auditForm: {
         reportTime: [], // 日期
+        // eventSource: 16, // 事件来源 app端
         eventType: '全部类型', // 事件类型
         eventStatus: '全部状态', // 事件状态
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
-      isOpen: true, // 自动审核政务人员
-      dataList: [
-        {
-          status: '待审核',
-          eventType: '治安事件',
-          reportUser: '18216061865',
-          idCard: '市民',
-          time: '2019-01-16',
-          eventAddress: '长沙市芙蓉区远大二路208号',
-          content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
-          isPicture: '是'
-        },
-        {
-          status: '通过',
-          eventType: '治安事件',
-          reportUser: '18216061865',
-          idCard: '市民',
-          time: '2019-01-16',
-          eventAddress: '长沙市芙蓉区远大二路208号',
-          content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
-          isPicture: '是'
-        },
-        {
-          status: '驳回',
-          eventType: '治安事件',
-          reportUser: '18216061865',
-          idCard: '市民',
-          time: '2019-01-16',
-          eventAddress: '长沙市芙蓉区远大二路208号',
-          content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
-          isPicture: '是'
-        },
-        {
-          status: '待审核',
-          eventType: '治安事件',
-          reportUser: '18216061865',
-          idCard: '市民',
-          time: '2019-01-16',
-          eventAddress: '长沙市芙蓉区远大二路208号',
-          content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
-          isPicture: '是'
-        },
-        {
-          status: '待审核',
-          eventType: '治安事件',
-          reportUser: '18216061865',
-          idCard: '城管',
-          time: '2019-01-16',
-          eventAddress: '长沙市芙蓉区远大二路208号',
-          content: '创谷工业园门口有人聚众斗殴，这是一段描述，关于上报的描述文字内容…',
-          isPicture: '是'
-        }
-      ],
+      isOpen: false, // 自动审核政务人员
+      auditList: [],
       auditStatusList: [], // 审核状态
       eventTypeList: [], // 事件类型
       identityList: [], // 上报者身份
+      autoCheckList: [], // 自动审核政务人员
+      userInfo: {}, // 存储的用户信息
     }
   },
+  created () {
+    this.userInfo =  this.$store.state.loginUser;
+  },
   mounted () {
+    const status = window.localStorage.getItem('iaAutoCheck');
+    if (status !== null) {
+      this.isOpen = status;
+    }
     this.getOneMonth();
+    this.getAutoCheck();
     this.getAuditStatusList();
     this.getEventTypeList();
     this.getIdentityList();
+    this.getAuditData();
   },
   methods: {
+    // 获取事件列表数据
+    getAuditData () {
+      let eventType, eventStatus;
+      if (this.auditForm.eventType === '全部类型') {
+        eventType = null;
+      } else {
+        eventType = this.auditForm.eventType;
+      }
+      if (this.auditForm.eventStatus === '全部状态') {
+        eventStatus = null;
+      } else {
+        eventStatus = this.auditForm.eventStatus;
+      }
+      const params = {
+        'where.reportTimeStart': this.auditForm.reportTime[0],
+        'where.reportTimeEnd': this.auditForm.reportTime[1],
+        'where.eventStatus': eventStatus,
+        'where.eventType': eventType,
+        'where.otherQuery': this.auditForm.phoneOrNumber,
+        'where.eventSource': this.auditForm.eventSource,
+        pageNum: this.pagination.pageNum,
+        // orderBy: 'create_time',
+        // order: 'desc'
+      }
+      getEventList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.auditList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取自动审核政务人员
+    getAutoCheck () {
+      const id = dataList.autoCheck;
+      getDiciData(id)
+        .then(res => {
+          if (res) {
+            this.autoCheckList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取审核状态数据
     getAuditStatusList () {
       const status = dataList.auditStatus;
@@ -253,33 +262,35 @@ export default {
         })
         .catch(() => {})
     },
-    // 获取上报者身份
+    // 获取上报者身份---部门列表
     getIdentityList () {
-      const identity = dataList.identity;
-      getDiciData(identity)
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
         .then(res => {
-          if (res) {
-            this.identityList = res.data;
+          if (res && res.data.list) {
+            this.identityList = res.data.list;
           }
         })
-        .catch(() => {})
     },
-    handleSizeChange () {
-
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getAuditData();
     },
-    handleCurrentChange () {},
     skipAddEventPage () { // 跳到新增事件页面
       this.$router.push({name: 'add_event'});
     },
     skipDetailPage (obj) { // 跳转至事件审核详情页
-      if (obj.status === '待审核') {
-        this.$router.push({name: 'unaudit_event'});
+      if (obj.acceptFlagName === '待审核') {
+        this.$router.push({name: 'unaudit_event', query: {eventId: obj.eventId}});
       }
-      if (obj.status === '通过') {
-        this.$router.push({name: 'audit_event_detail', query: {status: 'pass'}});
+      if (obj.acceptFlagName === '通过') {
+        this.$router.push({name: 'audit_event_detail', query: {status: 'pass', eventId: obj.eventId}});
       }
-      if (obj.status === '驳回') {
-        this.$router.push({name: 'audit_event_detail', query: {status: 'reject'}});
+      if (obj.acceptFlagName === '驳回') {
+        this.$router.push({name: 'audit_event_detail', query: {status: 'reject', eventId: obj.eventId}});
       }
     },
     getOneMonth () { // 设置默认一个月
@@ -292,23 +303,36 @@ export default {
       this.auditForm.reportTime.push(endDate);
     },
     // 根据搜索条件查询
-    selectDataList (form) {
-      this.$refs[form].validator(valid => {
-        if (valid) {
-          console.log(valid);
-        }
-      })
+    selectDataList () {
+      this.getAuditData();
     },
     // 重置查询条件
     resetForm (form) {
-      this.eventForm.reportTime = [];
       this.$refs[form].resetFields();
       this.getOneMonth();
+      this.getAuditData();
     },
     // 自动审核政务人员
     isAutoCheck (val) {
-      console.log(val);
-      
+      window.localStorage.setItem('iaAutoCheck', val); // 记住自动审核的状态
+      let value  = '';
+      if (val) {
+        value = '1';
+      } else {
+        value = '0'
+      }
+      const params = {
+        uid: this.autoCheckList[0].uid,
+        desci: value,
+        typeKey: dataList.autoCheck
+      };
+      openAutoCheck(params)
+        .then(res => {
+          if (res) {
+            this.getAuditData();
+          }
+        })
+        .catch(() => {})
     }
   }
 }

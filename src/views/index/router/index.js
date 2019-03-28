@@ -347,6 +347,11 @@ export default new Router({
                             path: 'deviceAuthorize',
                             name: 'device_authorize',
                             component: () => import('@/views/index/components/manage/deviceAuthorize.vue')
+                          },
+                          {
+                            path: 'markManage',
+                            name: 'mark_manage',
+                            component: () => import('@/views/index/components/manage/markManage.vue')
                           }
                         ]
                       },
@@ -421,6 +426,11 @@ export default new Router({
             path: '/findPwd',
             name: 'findPwd',
             component: () => import('@/views/index/components/findPwd.vue')
-        }
+        },
+        { 
+          path: '/player',
+          name: 'player',
+          component: () => import('@/components/common/rtmpplayer.vue')
+      }
     ]
 })

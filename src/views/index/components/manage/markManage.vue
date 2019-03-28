@@ -1,0 +1,328 @@
+<template>
+  <div class="mark_manage">
+    <div class="search_box">
+      <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+        <el-form-item prop="reportTime">
+          <el-date-picker
+            style="width: 260px;"
+            v-model="searchForm.reportTime"
+            type="daterange"
+            :picker-options="pickerOptions0"
+            value-format="yyyy-MM-dd"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item prop="departmentName">
+          <el-select  style="width: 240px;" v-model="searchForm.departmentName" placeholder="操作部门">
+            <el-option value='全部操作部门'></el-option>
+            <!-- <el-option
+              v-for="(item, index) in eventTypeList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option> -->
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="operationUser">
+          <el-select style="width: 240px;" v-model="searchForm.operationUser" placeholder="操作用户">
+            <el-option value='全部操作用户'></el-option>
+            <!-- <el-option
+              v-for="(item, index) in eventStatusList"
+              :key="index"
+              :label="item.enumValue"
+              :value="item.uid"
+            >
+            </el-option> -->
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="select_btn" @click="selectDataList">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+        </el-form-item>
+      </el-form>
+      <div class="divide"></div>
+    </div>
+    <div class="table_box">
+      <div class="add_mark_btn" @click="showAddMarkDialog">
+        <span>+</span>
+        <span>新增标记</span>
+      </div>
+      <el-table
+        class="mark_table"
+        :data="dataList"
+        >
+        <el-table-column
+          fixed
+          label="序号"
+          type="index"
+          >
+        </el-table-column>
+        <el-table-column
+          label="标记内容"
+          prop="content"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="操作部门"
+          prop="departmentName"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="操作用户"
+          prop="user"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
+          label="创建时间"
+          width="150"
+          prop="createTime"
+          show-overflow-tooltip
+          align="center"
+          >
+        </el-table-column>
+        <el-table-column label="操作" width="240">
+          <template slot-scope="scope">
+            <span class="operation_btn" @click="showEditDialog(scope.row)">编辑</span>
+            <span style="color: #f2f2f2">|</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <el-pagination
+      @current-change="handleCurrentChange"
+      :current-page="pagination.pageNum"
+      :page-sizes="[100, 200, 300, 400]"
+      :page-size="pagination.pageSize"
+      layout="total, prev, pager, next, jumper"
+      :total="pagination.total">
+    </el-pagination>
+    <!--新增标记弹出框-->
+    <el-dialog
+      title="新增标记"
+      :visible.sync="createMarkDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div style="margin-top: 15px;">
+        <el-form :model="markForm" :rules="rules" ref="markForm" label-width="15px">
+          <el-form-item prop="markName" label=" " class="mark_name">
+            <el-input v-model="markForm.markName" placeholder="请输入标记名称"></el-input>
+            <p class="mark_error_tip" v-show="isShowError">该标记已存在</p>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelAdd('markForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="addMark('markForm')">确定</el-button>
+      </div>
+    </el-dialog>
+    <!--编辑标记弹出框-->
+    <el-dialog
+      title="编辑标记"
+      :visible.sync="editMarkDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div style="margin-top: 15px;">
+        <el-form :model="markForm" :rules="rules" ref="markForm" label-width="15px">
+          <el-form-item prop="markName" label=" " class="mark_name">
+            <el-input v-model="markForm.markName" placeholder="请输入标记名称"></el-input>
+            <p class="mark_error_tip" v-show="isShowError">该标记已存在</p>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelEdit('markForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="editMark('markForm')">确定</el-button>
+      </div>
+    </el-dialog>
+    <!--删除标记弹出框-->
+    <el-dialog
+      title="是否确定删除该标记?"
+      :visible.sync="delMarkDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">删除后数据不可恢复。</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delMarkDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="deleteMark">确认</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      isShowError: false,
+      pickerOptions0: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
+      searchForm: {
+        reportTime: [],
+        departmentName: null,
+        operationUser: null,
+      },
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      dataList: [
+        {
+          content: '特殊情况',
+          departmentName: 'a部门',
+          user: '系统默认',
+          createTime: '2019-12-23 12:12:12'
+        }
+      ],
+      markForm: {
+        markName: null,
+      },
+      rules: {
+        markName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { max: 20, message: '最多输入20个子', trigger: 'blur' }
+        ]
+      },
+      createMarkDialog: false, // 新增标记弹出框
+      editMarkDialog: false, // 编辑标记弹出框
+      delMarkDialog: false, // 删除标记弹出框
+    }
+  },
+  methods: {
+    // 搜索数据
+    selectDataList () {
+
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+    },
+    // 显示新增标记弹出框
+    showAddMarkDialog () {
+      this.createMarkDialog = true;
+    },
+    // 新增标记
+    addMark (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+
+        }
+      })
+    },
+    // 取消新增
+    cancelAdd (form) {
+      this.$refs[form].resetFields();
+    },
+    // 显示编辑弹出框
+    showEditDialog () {
+      this.editMarkDialog = true;
+    },
+    // 编辑标记
+    editMark (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+
+        }
+      })
+    },
+    // 取消编辑
+    cancelEdit (form) {
+      this.$refs[form].resetFields();
+    },
+    // 显示删除标记弹出框
+    showDeleteDialog () {
+      this.delMarkDialog = true;
+    },
+    // 删除标记
+    deleteMark () {}
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.mark_manage {
+  background-color: #ffffff;
+  .search_box {
+    width: 100%;
+    padding: 20px;
+    .search_form {
+      width: 100%;
+      .select_btn, .reset_btn {
+        width: 80px;
+      }
+      .select_btn {
+        background-color: #0C70F8;
+        color: #ffffff;
+      }
+      .reset_btn {
+        background-color: #ffffff;
+        color: #666666;
+        border-color: #DDDDDD;
+      }
+    }
+    .divide {
+      border: 1px dashed #fafafa;
+    }
+  }
+  .table_box {
+    padding: 0 10px;
+    .add_mark_btn {
+      width: 108px;
+      height: 40px;
+      background-color: #0C70F8;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 40px;
+      text-align: center;
+      border-radius: 3px;
+      cursor: pointer;
+      span:nth-child(1) {
+        font-size: 16px;
+      }
+      span:nth-child(2) {
+        margin-left: 5px;
+      }
+    }
+    .mark_table {
+      margin-top: 10px;
+      .operation_btn {
+        color: #0C70F8;
+        cursor: pointer;
+        padding: 0 10px;
+        display: inline-block;
+      }
+    }
+  }
+  .dialog_comp {
+    .mark_name {
+      position: relative;
+      .mark_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
+      }
+    }
+  }
+}
+</style>

@@ -38,13 +38,13 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="phoneOrNumber">
-          <el-select style="width: 240px;" v-model="eventForm.phoneOrNumber" placeholder="上报者身份">
+        <el-form-item prop="userName">
+          <el-select style="width: 240px;" v-model="eventForm.userName" placeholder="上报者身份">
             <el-option value='全部上报者'></el-option>
             <el-option
               v-for="(item, index) in identityList"
               :key="index"
-              :label="item.enumValue"
+              :label="item.organName"
               :value="item.uid"
             >
             </el-option>
@@ -90,9 +90,14 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="idCard"
+          prop="reporterRole"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
+            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-else>-</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报时间"
@@ -132,7 +137,12 @@
           <template slot-scope="scope">
             <span class="operation_btn" @click="skipEventDetailPage(scope.row)">查看</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="skipAddControlPage(scope.row)">布控</span>
+            <template v-if="scope.row.eventStatusName === '已结束'">
+              <span class="default_btn">布控</span>
+            </template>
+            <template v-else>
+              <span class="operation_btn" @click="skipAddControlPage(scope.row)">布控</span>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -152,7 +162,7 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, getDiciData } from '@/views/index/api/api.js';
+import { getEventList, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -160,70 +170,19 @@ export default {
         reportTime: [], // 日期
         eventType: '全部类型', // 事件类型
         eventStatus: '全部状态', // 事件状态
+        userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      eventList: [
-        {
-          eventNumber: 'XP1000000000000',
-          eventType: '治安事件',
-          userName: '17899999999',
-          idCard: '市民',
-          createTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '城管',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '处理中',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '否'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '接警员',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '已结束',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '-'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待处理',
-          reportContent: '创谷工业园门口有人聚众斗殴，这是一段关于斗殴字内容…',
-          isResult: '是'
-        }
-      ], // 表格数据
+      eventList: [], // 表格数据
       eventStatusList: [], // 事件状态数据
       eventTypeList: [], // 事件类型
       identityList: [], // 上报者身份
+      userInfo: {}
     }
+  },
+  created () {
+    this.userInfo =  this.$store.state.loginUser;
   },
   mounted () {
     this.getOneMonth();
@@ -257,14 +216,16 @@ export default {
     },
     // 获取上报者身份
     getIdentityList () {
-      const identity = dataList.identity;
-      getDiciData(identity)
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
         .then(res => {
-          if (res) {
-            this.identityList = res.data;
+          if (res && res.data.list) {
+            this.identityList = res.data.list;
           }
         })
-        .catch(() => {})
     },
     // 获取事件列表数据
     getEventData () {
@@ -285,6 +246,7 @@ export default {
         'where.eventStatus': eventStatus,
         'where.eventType': eventType,
         'where.otherQuery': this.eventForm.phoneOrNumber,
+        'where.acceptFlag': 25, // 审核通过
         pageNum: this.pagination.pageNum,
         // orderBy: 'create_time',
         // order: 'desc'
@@ -339,9 +301,7 @@ export default {
     },
     // 重置查询条件
     resetForm (form) {
-      this.eventForm.reportTime = [];
       this.$refs[form].resetFields();
-      console.log(this.eventForm)
       this.getOneMonth();
       this.getEventData();
     }
@@ -430,6 +390,11 @@ export default {
         cursor: pointer;
         padding: 0 10px;
         display: inline-block;
+      }
+      .default_btn {
+        padding: 0 10px;
+        display: inline-block;
+        color: #B2B2B2;
       }
     }
   }
