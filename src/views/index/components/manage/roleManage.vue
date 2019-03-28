@@ -296,7 +296,7 @@ export default {
     }
   },
   created () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo = this.$store.state.loginUser;
     this.addRole.proKey = this.userInfo.proKey;
     this.editRole.proKey = this.userInfo.proKey;
   },

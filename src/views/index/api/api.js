@@ -25,12 +25,48 @@ export function logout(data) {
   });
 }
 /**
+ * 获取短信验证码
+ * @param {*} data 
+ */
+export function getCode(data) {
+  return request({
+    url: '/user-service/sms/code',
+    data,
+    mode: 'user',
+    method: 'post'
+  });
+}
+/**
+ * 校验短信验证码
+ * @param {*} data 
+ */
+export function checkCode(data) {
+  return request({
+    url: '/user-service/sms/code',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 重置密码
+ * @param {*} data 
+ */
+export function resetPassword(data) {
+  return request({
+    url: '/user-service/forget-pwd',
+    data,
+    mode: 'user',
+    method: 'put'
+  });
+}
+/**
  * 判断用户是否注册
  * @param {*} data
  */
 export function isRegister(data) {
   return request({
-    url: '/user-service/check-user-mobile',
+    url: '/user-service/check-user-mobile/' + data.userMobile,
     params: data,
     mode: 'user',
     method: 'get'
@@ -48,12 +84,23 @@ export function getDiciData(uid) {
 }
 /*=================事件管理模块================== */
 /**
+ * 是否开启自动审核政务人员
+ * @param {*} data 
+ */
+export function openAutoCheck(data) {
+  return request({
+    url: 'dict-service/update',
+    method: 'put',
+    data,
+  });
+}
+/**
  * 获取事件列表数据
  * @param {*} data
  */
 export function getEventList(data) {
   return request({
-    url: 'eventServices/events/page',
+    url: 'event-services/events/page',
     method: 'get',
     params: data,
     mode: 'event'
@@ -64,7 +111,7 @@ export function getEventList(data) {
  */
 export function updateEvent(data) {
   return request({
-    url: 'eventServices/events/update',
+    url: 'event-services/events/update',
     method: 'put',
     data,
     mode: 'event'
@@ -75,7 +122,7 @@ export function updateEvent(data) {
  */
 export function addEvent(data) {
   return request({
-    url: 'eventServices/event',
+    url: 'event-services/event',
     method: 'post',
     data,
     mode: 'event'
@@ -87,7 +134,7 @@ export function addEvent(data) {
  */
 export function getEventDetail(uid) {
   return request({
-    url: 'eventServices/events/' + uid,
+    url: 'event-services/events/' + uid,
     method: 'get',
     mode: 'event'
   });
@@ -98,7 +145,7 @@ export function getEventDetail(uid) {
  */
 export function getCtcList(data) {
   return request({
-    url: 'eventServices/events/page',
+    url: 'event-services/events/page',
     method: 'get',
     params: data,
     mode: 'ctc'
@@ -110,7 +157,7 @@ export function getCtcList(data) {
  */
 export function getPlanData(data) {
   return request({
-    url: 'planServices/plans',
+    url: 'plan-services/plans',
     method: 'get',
     params: data,
     mode: 'ctc'
@@ -122,7 +169,7 @@ export function getPlanData(data) {
  */
 export function getPlanDetail(uid) {
   return request({
-    url: 'planServices/plans/' + uid,
+    url: 'plan-services/plans/' + uid,
     method: 'get',
     mode: 'ctc'
   });
@@ -133,7 +180,7 @@ export function getPlanDetail(uid) {
  */
 export function addPlan(data) {
   return request({
-    url: 'planServices/plan',
+    url: 'plan-services/plan',
     data,
     method: 'post',
     mode: 'ctc'
@@ -145,7 +192,7 @@ export function addPlan(data) {
  */
 export function updatePlan(data) {
   return request({
-    url: 'planServices/plans',
+    url: 'plan-services/plans',
     method: 'put',
     data,
     mode: 'ctc'
@@ -157,7 +204,7 @@ export function updatePlan(data) {
  */
 export function delPlan(uid) {
   return request({
-    url: 'planServices/plans/' + uid,
+    url: 'plan-services/plans/' + uid,
     method: 'delete',
     mode: 'ctc'
   });
@@ -168,7 +215,7 @@ export function delPlan(uid) {
  */
 export function previewPlan(uid) {
   return request({
-    url: 'planServices/plans/' + uid,
+    url: 'plan-services/plans/' + uid,
     method: 'get',
     mode: 'ctc'
   });
@@ -179,7 +226,7 @@ export function previewPlan(uid) {
  */
 export function getCtcData(data) {
   return request({
-    url: 'taskServices/tasks',
+    url: 'task-services/tasks',
     method: 'get',
     params: data,
     mode: 'ctc'
@@ -191,7 +238,7 @@ export function getCtcData(data) {
  */
 export function ctcTasks(data, uid) {
   return request({
-    url: 'taskServices/task/' + uid,
+    url: 'task-services/task/' + uid,
     method: 'post',
     data,
     mode: 'ctc'
@@ -203,9 +250,21 @@ export function ctcTasks(data, uid) {
  */
 export function updateProcess(uid, data) {
   return request({
-    url: 'taskServices/task/process/' + uid,
+    url: 'task-services/task/process/' + uid,
     method: 'put',
-    params: data,
+    data,
+    mode: 'ctc'
+  });
+}
+/**
+ * 添加调度任务
+ * @param {*} data 
+ */
+export function addTaskInfo(data, uid) {
+  return request({
+    url: 'task-services/task/' + uid,
+    method: 'post',
+    data,
     mode: 'ctc'
   });
 }
@@ -216,7 +275,7 @@ export function updateProcess(uid, data) {
  */
 export function getGeneralcondition(data) {
   return request({
-    url: 'eventCountServices/generalCondition',
+    url: 'event-count-services/generalCondition',
     method: 'get',
     params: data,
     mode: 'event'
@@ -228,7 +287,7 @@ export function getGeneralcondition(data) {
  */
 export function getRankAnalysis(data) {
   return request({
-    url: 'eventCountServices/rankAnalysis',
+    url: 'event-count-services/rankAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -240,7 +299,7 @@ export function getRankAnalysis(data) {
  */
 export function getTypeAnalysis(data) {
   return request({
-    url: 'eventCountServices/typeAnalysis',
+    url: 'event-count-services/typeAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -252,7 +311,7 @@ export function getTypeAnalysis(data) {
  */
 export function getQuantitativeTrend(data) {
   return request({
-    url: 'eventCountServices/quantitativeTrend',
+    url: 'event-count-services/quantitativeTrend',
     method: 'get',
     params: data,
     mode: 'event'
@@ -264,7 +323,7 @@ export function getQuantitativeTrend(data) {
  */
 export function getHotLocation(data) {
   return request({
-    url: 'eventCountServices/hotLocation',
+    url: 'event-count-services/hotLocation',
     method: 'get',
     params: data,
     mode: 'event'
@@ -276,7 +335,7 @@ export function getHotLocation(data) {
  */
 export function getSurveillance(data) {
   return request({
-    url: 'eventCountServices/surveillance',
+    url: 'event-count-services/surveillance',
     method: 'get',
     params: data,
     mode: 'event'
@@ -811,7 +870,17 @@ export function getPerGroupList (params) {
     method: 'get'
   });
 }
-
+/**
+ * 获取人员列表
+ * @param {*} data 
+ */
+export function getPersonData (params) {
+  return request({
+    url: '/portrait/page',
+    params,
+    method: 'get'
+  });
+}
 /*** =======================视频设置=========================== */
 /**===== 自定义组 ===== */
 /**

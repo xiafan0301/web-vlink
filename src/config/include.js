@@ -18,5 +18,14 @@ import '@/utils/method.js';
 import '@/utils/antv.shape.js';
 // 混入
 import '@/utils/mixins.js';
+import store from '@/store/store.js'
 // use element-ui
 Vue.use(ElementUI);
+
+const loginInfo = JSON.parse(localStorage.getItem('as_vlink_user_info'));
+
+if (loginInfo) {
+  store.commit('setLoginUser', {
+    loginUser: loginInfo
+  });
+}

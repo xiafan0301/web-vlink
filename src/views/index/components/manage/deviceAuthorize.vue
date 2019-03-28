@@ -232,7 +232,6 @@ export default {
       },
       pickerOptions0: {
         disabledDate (time) {
-          console.log(time.getTime())
           return time.getTime() < (new Date().getTime() - 3600 * 1000 * 24) ||  time.getTime() > (new Date().getTime() + 3600 * 1000 * 24 * 90);
         }
       },
@@ -252,7 +251,7 @@ export default {
     }
   },
   created () {
-    this.userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
     this.getList();

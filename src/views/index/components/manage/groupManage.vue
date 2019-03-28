@@ -305,7 +305,7 @@ export default {
     }
   },
   created () {
-    this.storageInfo = JSON.parse(localStorage.getItem('userInfo'));
+    this.storageInfo = this.$store.state.loginUser;
   },
   mounted () {
     this.getList();

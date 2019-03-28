@@ -10,24 +10,31 @@
     </div>
     <div class="content_box">
       <div class="content_new_group">
-        <el-form :inline="true" :model="addForm" class="add_form" label-width="80px">
-          <el-form-item label="预案名称:" style="width: 49%;">
-            <el-select style="width: 100%;" v-model="addForm.eventType" placeholder="行政区划">
+        <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="100px">
+          <el-form-item label="轮巡名称:" style="width: 49%;" prop="roundName">
+            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称"></el-input>
+          </el-form-item>
+           <el-form-item label="轮巡时间:" style="width: 49%;" prop="dateTime">
+            <!-- <el-date-picker type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions0" style='width: 100%;' placeholder="选择日期" v-model="addForm.dateTime" ></el-date-picker> -->
+            <el-date-picker
+              style="width: 100%;"
+              v-model="addForm.dateTime"
+              type="datetimerange"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              range-separator="-"
+              :picker-options="pickerOptions0"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="轮巡画面:" style="width: 49%;" prop="frameNum">
+            <el-select style="width: 100%;" v-model="addForm.frameNum" placeholder="智能特性">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
             </el-select>
           </el-form-item>
-           <el-form-item label="轮巡时间:" style="width: 49%;">
-            <el-date-picker type="date" style='width: 100%;' placeholder="选择日期" v-model="addForm.reportTime" ></el-date-picker>
-          </el-form-item>
-          <el-form-item label="轮巡画面:" style="width: 49%;">
-            <el-select style="width: 100%;" v-model="addForm.eventStatus" placeholder="智能特性">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="间隔时间:" style="width: 49%;">
-            <el-input style="width: 100%;" v-model="addForm.eventStatus" placeholder="5-120秒"></el-input>
+          <el-form-item label="间隔时间:" style="width: 49%;" prop="roundInterval">
+            <el-input style="width: 100%;" v-model="addForm.roundInterval" placeholder="5-120秒"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -74,8 +81,8 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn">保存</el-button>
-      <el-button class="operation_btn back_btn">取消</el-button>
+      <el-button class="operation_btn function_btn" @click="submitData('addForm')">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelSubmit('addForm')">取消</el-button>
     </div>
   </div>
 </vue-scroll>
@@ -89,9 +96,33 @@ export default {
     return {
       tabState: 1, // 地图选择
       addForm: {
-        eventType: null,
-        eventStatus: null,
-        reportTime: null,
+        roundName: null, // 轮巡名称
+        roundInterval: null, // 间隔时间
+        frameNum: null, // 画面数
+        dateTime: [] // 轮巡时间
+      },
+      pickerOptions0: {
+        disabledDate (time) {
+          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000) ||  time.getTime() > (new Date().getTime() + 1200 * 1000 );
+        }
+      },
+      rules: {
+        roundName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { max: 10, message: '最多输入10个字', trigger: 'blur' }
+        ],
+        dateTime: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+        ],
+        roundInterval: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          // { min: 5, message: '请正确输入5-120之间的整数', trigger: 'blur' },
+          // { max: 150, message: '请正确输入5-120之间的整数', trigger: 'blur' },
+          { type: 'number', message: '请正确输入5-120之间的整数', trigger: 'blur' }
+        ],
+        frameNum: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+        ]
       },
       searchForm: {
         eventType: null,
@@ -101,7 +132,18 @@ export default {
     }
   },
   methods: {
-    
+    // 新增轮巡
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          console.log('111')
+        }
+      })
+    },
+    // 返回
+    cancelSubmit (form) {
+      this.$refs[form].resetFields();
+    }
   }
 }
 </script>

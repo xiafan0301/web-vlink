@@ -1,7 +1,7 @@
 <template>
   <div class="basic_info">
     <div class="basic_info_left">
-      <el-select v-model="selectMethod" @change="handleChangePerosn" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
+      <el-select v-model="selectMethod" @change="handleChangePerson" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
         <el-option
           v-for="item in selectType"
           :key="item.id"
@@ -53,9 +53,9 @@
     </div>
     <div class="basic_info_right_group">
       <div class="search_right_box">
-        <el-form :inline="true" :model="searchForm" class="event_form">
+        <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
           <el-form-item style="width: 240px;">
-            <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.name" />
+            <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
           </el-form-item>
           <el-form-item>
             <el-select v-model="searchForm.type" style="width: 240px;">
@@ -65,19 +65,37 @@
           </el-form-item>
           <el-form-item>
             <el-select v-model="searchForm.sex" style="width: 240px;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option label="男" :value="1"></el-option>
+              <el-option label="女" :value="2"></el-option>
             </el-select>
           </el-form-item>
+          <template v-if="selectMethod === 1">
+            <el-form-item prop="albumId">
+              <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
+                <el-option
+                  v-for="(item, index) in perBottomBankList"
+                  :key="index"
+                  :label="item.title" 
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
+          <template v-if="selectMethod === 2">
+            <el-form-item prop="groupId">
+              <el-select v-model="searchForm.groupId" style="width: 240px;" placeholder="分组筛选" clearable> <!--分组-->
+                <el-option
+                  v-for="(item, index) in perGroupList"
+                  :key="index"
+                  :label="item.name" 
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
           <el-form-item>
-            <el-select v-model="searchForm.bottomBank" style="width: 240px;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button class="select_btn">查询</el-button>
-            <el-button class="reset_btn">重置</el-button>
+            <el-button class="select_btn" @click="searchPersonData">查询</el-button>
+            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
@@ -262,7 +280,7 @@
   </div>
 </template>
 <script>
-import { getPerBottomBankList, getPerGroupList } from '@/views/index/api/api.js';
+import { getPerBottomBankList, getPerGroupList, getPersonData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -285,10 +303,11 @@ export default {
       ],
       selectMethod: 1, // 左侧查看方式  1--分组方式查看 2--底库查看
       searchForm: {
-        name: null,
+        idNo: null,
         type: null,
-        sex: '男',
-        bottomBank: null
+        sex: 1,
+        albumId: null,
+        groupId: null
       },
       personGroupList: [
         {
@@ -323,6 +342,8 @@ export default {
   },
   mounted () {
     this.getGroupList();
+    this.getBottomBankList();
+    this.getPersonList();
   },
   methods: {
     // 获取分组列表
@@ -358,6 +379,32 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    // 获取人员列表
+    getPersonList () {
+      const params = {
+        // 'where.type': this.selectMethod,
+        'where.keyWord': this.searchForm.keyWord,
+        'where.albumId': this.searchForm.albumId,
+        'where.groupId': this.searchForm.groupId,
+        'where.idNo': this.searchForm.idNo,
+        'where.sex': this.searchForm.sex,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getPersonData(params)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(() => {})
+    },
+    // 根据搜索条件查询人员列表
+    searchPersonData () {
+      this.getPersonList();
+    },
+    // 清空搜索人员列表框
+    resetForm (form) {
+      this.$refs[form].resetFields();
     },
     // 搜索框组名change
     changeGroupName () {},
