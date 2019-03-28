@@ -23,14 +23,19 @@
             </div>
             <div class="show_list">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in treeData" :key="'tree_' + index">
+                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
                   <div>
                     <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.name}}
+                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
                     </div>
                   </div>
-                  <ul class="tree_sli" v-if="item.children && item.children.length > 0">
-                    <li class="com_ellipsis" v-for="(sitem, sindex) in item.children" :title="sitem.name" :key="'tree_s_' + sindex">{{sitem.name}}</li>
+                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                    <li class="com_ellipsis"
+                      v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'tree_s_' + sindex"
+                      @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
+                      draggable="true" style="cursor: move;">
+                      {{sitem.deviceName}}
+                    </li>
                   </ul>
                   <ul class="tree_sli" v-else>
                     <li class="tree_sli_empty">暂无</li>
@@ -67,9 +72,10 @@
     </div>
     <div class="vid_content">
       <ul class="vid_show_list" :class="'vid_list_st' + showType">
-        <li v-for="item in showVideoTotal" :key="'video_list_' + item">
-          <div v-if="videoList && videoList[item - 1] && videoList[item - 1].video">
-            <div is="rtmpplayer"></div>
+        <li v-for="(item, index) in videoList" :key="'video_list_' + index"
+          @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
+          <div v-if="item && item.video">
+            <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" @showListEvent="showListEvent"></div>
@@ -83,23 +89,16 @@
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import { apiDeviceList } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, rtmpplayer},
   data () {
     return {
-      videoList: [
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-      ],
+      // 设备列表
+      deviceList: [],
+
+      // {video: {}, title: ''},
+      videoList: [{}, {}, {}, {}],
       showType: 2,
       showVideoTotal: 4,
       showMenuActive: false,
@@ -108,16 +107,21 @@ export default {
       treeData: [
         {
           name: '公安专网',
-          children: [{name: '摄像头001'}, {name: '摄像头002'}, {name: '摄像头003'}]
+          children: [
+            {name: '香港卫视1', video: {url: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1'}},
+            {name: '香港卫视2', video: {url: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1'}},
+            {name: '公司测试1', video: {url: 'rtmp://10.16.1.139/live/livestream'}},
+            {name: '公司测试2', video: {url: 'rtmp://10.16.1.139/live/livestream'}}
+          ]
         }, {
           name: '教育专网',
-          children: [{name: '摄像头011'}, {name: '摄像头012'}, {name: '摄像头013'}]
+          children: []
         }, {
           name: '医疗专网',
           children: []
         }, {
           name: '企业专网',
-          children: [{name: '摄像头031'}, {name: '摄像头032'}, {name: '摄像头033'}]
+          children: []
         }
       ],
       historyData: [
@@ -126,11 +130,12 @@ export default {
         { name: '广发路广发银行-003', time: '2019-01-17 13:28:02' },
         { name: '广发路广发银行-004', time: '2019-01-17 13:28:02' },
         { name: '广发路广发银行-005', time: '2019-01-17 13:28:02' }
-      ]
+      ],
+      dragActiveObj: null
     }
   },
   watch: {
-    showType () {
+    showType (newVal, oldVal) {
       if (this.showType === 1) {
         this.showVideoTotal = 1;
       } else if (this.showType === 2) {
@@ -142,12 +147,129 @@ export default {
       } else if (this.showType === 5) {
         this.showVideoTotal = 16;
       }
+      this.playersHandler(this.showVideoTotal);
     }
+  },
+  created () {
+    // window.localStorage.getItem(name);
+    let sType = window.localStorage.getItem('vlink_video_patrol_type');
+    let sList = window.localStorage.getItem('vlink_video_patrol_list');
+    if (sType && sType.length > 0) {
+      sType = Number(sType);
+      this.showType = sType;
+    } else {
+      // 第一次打开
+      this.showMenuActive = true;
+    }
+    if (sList && sList.length > 0) {
+      this.$nextTick(() => {
+        sList = JSON.parse(sList);
+        this.videoList = sList;
+      });
+    }
+
+    // 监控列表
+    this.getDeviceList();
   },
   mounted () {
     videoTree('videoListTree');
+    $(window).on('unload', this.unloadSave);
   },
   methods: {
+    /* 监控列表 */
+    getDeviceList () {
+      let sui = window.localStorage.getItem('userInfo');
+      if (sui) { sui = JSON.parse(sui); }
+      apiDeviceList({
+        id: sui.uid,
+        likeKey: ''
+      }).then(res => {
+        if (res && res.data) {
+          this.deviceList = res.data;
+        }
+      }).catch(error => {
+        console.log("apiSignContentList error：", error);
+      });
+    },
+
+    playersHandler (sum) {
+      // videoList
+      let na = [], ii = 0;
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (ii < sum) {
+          if (this.videoList[i] && this.videoList[i].video) {
+            na.push(this.videoList[i]);
+            ii++;
+          }
+        } else {
+          break;
+        }
+      }
+      let il = sum - na.length;
+      if (il > 0) {
+        for (let j = 0; j < il; j++) {
+          na.push({});
+        }
+      }
+      this.videoList = na;
+    },
+    // 缓存播放列表
+    saveVideoList () {
+      window.localStorage.setItem('vlink_video_patrol_type', JSON.stringify(this.showType));
+      window.localStorage.setItem('vlink_video_patrol_list', JSON.stringify(this.videoList));
+    },
+    unloadSave () {
+      this.saveVideoList();
+    },
+
+    // 拖拽开始
+    dragStart (ev, item) {
+      // console.log('drag start', item)
+      this.dragActiveObj = item;
+      // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!ev) { ev = window.event; }
+      ev.dataTransfer.setData('name', 'ouyang');
+    },
+    dragOver () {
+      // console.log('drag over')
+    },
+    dragDrop (item, index) {
+      /* console.log('drag drop item', item);
+      console.log('drag drop index', index); */
+      if (this.dragActiveObj) {
+        // this.videoList.splice(index, 1, Object.assign({}, this.dragActive));
+        /* this.videoList[index] = {
+          title: this.dragActiveObj.name,
+          video: {
+            url: Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream'
+          }
+        } */
+        // console.log(Math.random());
+        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+        console.log('deviceSip', deviceSip);
+        this.videoList.splice(index, 1, {
+          title: this.dragActiveObj.deviceName,
+          video: Object.assign({}, this.dragActiveObj, {
+            deviceSip: deviceSip
+          })
+        });
+      }
+    },
+    dragEnd () {
+      // console.log('drag end')
+      this.dragActiveObj = null;
+    },
+    /* 播放器事件 begin */
+    /**
+     * 关闭播放器
+     * @param {string} sid 视频ID
+     */
+    playerClose (iIndex, sid) {
+      console.log('playerClose' + iIndex);
+      this.videoList.splice(iIndex, 1, {});
+    },
+    /* 播放器事件 end */
+
     showListEvent () {
       this.showMenuActive = true;
     },
@@ -178,6 +300,8 @@ export default {
     }
   },
   destroyed () {
+    $(window).off('unload', this.unloadSave);
+    this.saveVideoList();
   }
 }
 </script>
