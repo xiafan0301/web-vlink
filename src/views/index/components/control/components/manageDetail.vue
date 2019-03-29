@@ -211,13 +211,15 @@
           </div>
           <div class="result_content" v-if="controlResList">
             <div>
-              <div class="result_img_box" v-for="item in controlResList.list" :key="item.id">
-                <img :src="item.snapPhoto" alt="" width="395">
-                <div class="result_tool">
-                  <div>{{item.deviceName}}</div>
-                  <div>
-                    <i class="vl_icon vl_icon_control_06"></i>
-                    <i class="vl_icon vl_icon_control_11"></i>
+              <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
+                <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
+                  <video :id='"controlResult" + index' src="../../../../../assets/video/video.mp4" width="100%" @click="showLargeVideo(item)"></video>
+                  <div class="result_tool" v-show="item.curVideoTool">
+                    <div>{{item.deviceName}}</div>
+                    <div>
+                      <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
+                      <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -239,6 +241,24 @@
           </div>
         </div>
       </div>
+    </div>
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="controlResultLarge" src="../../../../../assets/video/video.mp4"></video>
+      <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
+      <div class="control_bottom">
+        <div>{{videoObj.deviceName}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="largeVideoPlay"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span><a download="视频" href="../../../../../assets/video/video.mp4" class="el-icon-download"></a></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+        </div>
+      </div>
+    </div>
+    <div style="width: 0; height: 0;" v-show="showCut"  :class="{vl_j_cutscreen: showCut}">
+      <img :src="demoImg" alt="">
+      <i @click="showCut = false" class="close_btn el-icon-error"></i>
+      <a download="截图" :href="demoImg" id="controlResultCutImg" ></a>
     </div>
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
@@ -335,24 +355,73 @@ export default {
       controlTimeIsKey: null,//布控时间
       devListIsKey: null,//设备列表
       devNameIsKey: null,//设备名称
+
       loading: false,
       controlResList: null,//布控抓拍结果列表
+      showLarge: false,
+      showCut: false,
+      demoImg: null,
+      largeVideoPlay: false,
+      videoObj: {},
+      curVideoUrl: null,
     }
   },
   created () {
     this.$nextTick(() => {
       this.controlState = this.state;
-      // this.trackPointList = conData;
     })
   },
   mounted () {
     this.resetMap();
-    // this.reset();
     this.getControlDetail();
     this.getControlMap();
     this.getAlarmSnap();
   },
   methods: {
+    // 停止播放
+    pauseVideo (item, index) {
+      item.curVideoPlay = false;
+      document.getElementById('controlResult' + index).pause();
+    } ,
+    // 开始播放
+    playVideo (item, index) {
+      item.curVideoPlay = true;
+      document.getElementById('controlResult' + index).play();
+    },
+    // 显示大屏
+    showLargeVideo (item) {
+      this.videoObj = item;
+      this.showLarge = true;
+      this.playLargeVideo();
+    },
+    // 关闭大屏
+    closeLargeVideo () {
+      this.showLarge = false;
+      this.pauseLargeVideo();
+    },
+    // 大屏播放
+    playLargeVideo () {
+      this.largeVideoPlay = true;
+      document.getElementById('controlResultLarge').play();
+    },
+    // 停止大屏播放
+    pauseLargeVideo () {
+      this.largeVideoPlay = false;
+      document.getElementById('controlResultLarge').pause();
+    },
+    // 截屏
+    cutScreen () {
+      this.showCut = true;
+      let _canvas = document.createElement('canvas');
+      _canvas.setAttribute('width', document.documentElement.clientWidth);
+      _canvas.setAttribute('height', document.documentElement.clientHeight);
+      let cxt = _canvas.getContext('2d');
+      cxt.drawImage(document.getElementById('controlResultLarge'), 0, 0, _canvas.width, _canvas.height);
+      this.demoImg = _canvas.toDataURL();
+      setTimeout(() => {
+        document.getElementById('controlResultCutImg').click();
+      }, 200)
+    },
     skip (type) {
       this.$emit('changePageType', type);
     },
@@ -497,6 +566,10 @@ export default {
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
           this.controlResList = res.data;
+          this.controlResList.list.forEach(f => {
+            this.$set(f, 'curVideoPlay', false);
+            this.$set(f, 'curVideoTool', false);
+          })
         }
       })
     },
@@ -688,7 +761,8 @@ export default {
 <style lang="scss" scoped>
 .control_manage_d{
   width: 100%;
-  position: relative;
+  min-height: 100%;
+  position: absolute;
   .manage_d_box{
     width: calc(100% - 40px);
     // min-height: 783px;
@@ -704,7 +778,8 @@ export default {
     }
     .manage_d_content{
       padding-left: 20px;
-      padding-bottom: 80px;
+      padding-bottom: 20px;
+      margin-bottom: 80px;
       border-top: 1px solid #F2F2F2;
       position: relative;
       > ul{
@@ -942,7 +1017,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 58px;
+                bottom: 52px;
                 left: 0;
                 > div{
                   color: #fff;
@@ -953,10 +1028,13 @@ export default {
                   cursor: pointer;
                 }
               }
-              > div:nth-child(3){
+              > div:nth-child(1){
+                cursor: pointer;
+              }
+              > div:nth-child(2){
                 p{
-                  margin-top: 8px;
                   padding-left: 10px;
+                  line-height: 24px;
                   i{
                     vertical-align: middle;
                   }

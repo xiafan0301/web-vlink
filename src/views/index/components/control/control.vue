@@ -295,6 +295,7 @@ export default {
         .list_info{
           margin: 0 0.5%;
           width: 32%;
+          height: 240px;
           padding: 20px;
           margin-bottom: 20px;
           background:rgba(255,255,255,1);
@@ -369,6 +370,92 @@ export default {
             }
           }
         }
+      }
+    }
+    // 布控详情视频公共样式
+    .vl_j_fullscreen {
+      position: fixed;
+      width: 100%!important;
+      height: 100%!important;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background: #000000;
+      z-index: 9999;
+      -webkit-transition: all .4s;
+      -moz-transition: all .4s;
+      -ms-transition: all .4s;
+      -o-transition: all .4s;
+      transition: all .4s;
+      > video {
+        width: 100%;
+        height: 100%;
+      }
+      > .control_bottom {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 48px;
+        background: rgba(0, 0, 0, .65);
+        > div {
+          float: left;
+          width: 50%;
+          height: 100%;
+          line-height: 48px;
+          text-align: right;
+          padding-right: 20px;
+          color: #FFFFFF;
+          &:first-child {
+            text-align: left;
+            padding-left: 20px;
+          }
+          > span {
+            display: inline-block;
+            height: 22px;
+            margin-left: 10px;
+            vertical-align: middle;
+            cursor: pointer;
+            a {
+              font-size: 25px;
+              text-decoration: none;
+              color: #ffffff;
+              vertical-align: top;
+            }
+          }
+        }
+      }
+    }
+    .vl_j_cutscreen {
+      position: fixed;
+      width: 90%!important;
+      height: 90%!important;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background: #FFFFFF;
+      z-index: 9999;
+      -webkit-transition: all .4s;
+      -moz-transition: all .4s;
+      -ms-transition: all .4s;
+      -o-transition: all .4s;
+      transition: all .4s;
+      padding: 20px;
+      margin: auto;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .close_btn {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: .3rem;
+      cursor: pointer;
+      &:hover {
+        color: #409EFF;
       }
     }
   }

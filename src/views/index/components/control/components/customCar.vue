@@ -4,7 +4,7 @@
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">{{gName}}</span><i class="vl_icon vl_icon_control_25" @click="popGroupDialog('2')"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
-        <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
+        <div><el-checkbox v-model="allChecked" @change="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
         <el-button @click="judgeIsSelectedCopy">复制到组</el-button>
@@ -23,7 +23,7 @@
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @click.native="operateRadio()"></el-checkbox>
+            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
             <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
@@ -162,7 +162,7 @@ export default {
     getGroupListIsVehicle () {
       getGroupListIsVehicle().then(res => {
         if (res && res.data) {
-          this.groupListCar = res.data.filter(f => f.uid !== null);
+          this.groupListCar = res.data.filter(f => f.uid !== null && f.uid !== this.groupId);
         }
       })
     },

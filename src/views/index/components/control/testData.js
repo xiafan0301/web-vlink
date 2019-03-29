@@ -81,3 +81,73 @@ export const nationData = [
   {value: 55, label: "珞巴族"},
   {value: 56, label: "基诺族"}
 ]
+
+export const bonDataOne = [
+  {
+    bayonetAddress: "string",
+    bayonetName: "卡口1",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.126192,
+    longitude: 112.923317,
+    opUserId: 1,
+    uid: 1,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+  {
+    bayonetAddress: "string22222",
+    bayonetName: "卡口2",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.128192,
+    longitude: 112.923317,
+    opUserId: 1,
+    uid: 2,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+]
+
+export const bonDataTwo = [
+  {
+    bayonetAddress: "string",
+    bayonetName: "卡口3",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.126192,
+    longitude: 112.926317,
+    opUserId: 1,
+    uid: 3,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+  {
+    bayonetAddress: "string22222",
+    bayonetName: "卡口4",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.128192,
+    longitude: 112.929317,
+    opUserId: 1,
+    uid: 4,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+]

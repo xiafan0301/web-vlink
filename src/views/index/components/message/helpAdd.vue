@@ -295,6 +295,7 @@ export default {
           } else {
             this.addForm.radio = -1;
           }
+          this.markLocation('mapBox', this.addForm.place);
         }
       })
     },

@@ -3,16 +3,16 @@
   <div class="control_create">
     <!-- 面包屑 -->
     <!-- 编辑布控时出现 -->
-    <div class="breadcrumb_heaer" v-if="type === 2">
+    <div class="breadcrumb_heaer" v-if="pageType === 2">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item>布控</el-breadcrumb-item>
         <el-breadcrumb-item  @click.native="skipIsList" class="con_back">布控管理</el-breadcrumb-item>
         <el-breadcrumb-item>编辑布控</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div :class="['create_box', {'editor': type !== 2}]">
+    <div :class="['create_box', {'editor': pageType !== 2}]">
       <!-- 编辑布控时出现 -->
-      <div v-if="type === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
+      <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one">
@@ -85,25 +85,25 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <div class="create_model" v-if="allDevData.length > 0">
+          <div class="create_model">
             <span class="vl_f_666">分析模型：</span>
             <div class="create_model_box">
               <div class="model_checkbox">
                 <el-checkbox-group v-model="checkList">
-                  <el-checkbox label="人员追踪" @click.native="modelType = '1'" :class="{'is_checked': modelType === '1'}"></el-checkbox>
-                  <el-checkbox label="车辆追踪" @click.native="modelType = '2'" :class="{'is_checked': modelType === '2'}"></el-checkbox>
-                  <el-checkbox label="越界分析" @click.native="modelType = '3'" :class="{'is_checked': modelType === '3'}"></el-checkbox>
-                  <el-checkbox label="范围分析" @click.native="modelType = '4'" :class="{'is_checked': modelType === '4'}"></el-checkbox>
+                  <el-checkbox label="人员追踪" @change="modelType = '1'" :class="{'is_checked': modelType === '1'}"></el-checkbox>
+                  <el-checkbox label="车辆追踪" @change="modelType = '2'" :class="{'is_checked': modelType === '2'}"></el-checkbox>
+                  <el-checkbox label="越界分析" @change="modelType = '3'" :class="{'is_checked': modelType === '3'}"></el-checkbox>
+                  <el-checkbox label="范围分析" @change="modelType = '4'" :class="{'is_checked': modelType === '4'}"></el-checkbox>
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" :allDevData="allDevData" mapId="mapOne" :pType="type" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" :allDevData="allDevData" mapId="mapOne" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" :allDevData="allDevData" mapId="mapTwo" :pType="type" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" :allDevData="allDevData" mapId="mapTwo" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :pType="type" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
+              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" :allDevData="allDevData" mapId="mapFour" :pType="type" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" :allDevData="allDevData" mapId="mapFour" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
             </div>
           </div>
         </el-form>
@@ -111,9 +111,9 @@
     </div>
     <div class="create_f_box">
       <!-- 新增布控 -->
-      <el-button v-if=" type !== 2" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <el-button v-if=" pageType !== 2" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
       <!-- 编辑布控 -->
-      <el-button v-if="type === 2" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
+      <el-button v-if="pageType === 2" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
       <el-button  @click="toGiveUpDialog = true">取消</el-button>
     </div>
     <el-dialog
@@ -131,14 +131,14 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getAreas, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
   props: ['createType', 'controlId'],
   data () {
     return {
-      type: null,//页面类型
+      pageType: null,//页面类型
       // 表单参数
       labelPosition: 'top',
       controlTypeList: [
@@ -160,13 +160,14 @@ export default {
         ],
       },
       // 分析模型数据
-      allDevData: [],
+      allDevData: [],//传给分析模型的所有设备点位
       checkList: [],//多选
       modelType: null,//模型类型序号
       modelDataOne: null,// 人员追踪数据
       modelDataTwo: null,// 车辆追踪数据
       modelDataThree: null,// 越界分析数据
       modelDataFour: null,// 范围分析数据
+      areaList: [],//行政区下拉列表
       // 弹出框参数
       toGiveUpDialog: false,
       loadingBtn: false,
@@ -181,10 +182,11 @@ export default {
   created () {
     this.getDiciData();
     this.getAllMonitorList();
+    this.getAreas();
     // 编辑页-2
     if (this.createType) {
-      this.type = this.createType;
-      if (this.type === 2) {
+      this.pageType = this.createType;
+      if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
     // 新增页-1
@@ -194,7 +196,7 @@ export default {
     }
     // 复用页-3
     if (this.$route.query.createType) {
-      this.type = parseInt(this.$route.query.createType);
+      this.pageType = parseInt(this.$route.query.createType);
       this.getControlDetailIsEditor(this.$route.query.controlId);
     }
   },
@@ -207,8 +209,25 @@ export default {
           this.allDevData = res.data;
           this.allDevData.forEach(f => {
             this.$set(f, 'isSelected', false);
+            this.$set(f, 'type', 1);
           });
           console.log(this.allDevData)
+        }
+      })
+    },
+    // 获取所有行政区列表
+    getAreas () {
+      const params = {
+        parentUid: '110000'
+      }
+      getAreas(params).then(res => {
+        if (res && res.data) {
+          this.areaList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.cname
+            }
+          });
         }
       })
     },
@@ -233,7 +252,7 @@ export default {
     },
     skipIsList () {
       // 编辑布控任务时
-      if (this.type === 2) {
+      if (this.pageType === 2) {
         this.$emit('changePageType', 1);
       // 新建、复用布控任务时
       } else {
@@ -332,7 +351,7 @@ export default {
             this.loadingBtn = true;
             addControl(data).then(res => {
               if (res && res.data) {
-                this.$message.success(this.type === 3 ? '复用成功' : '新增成功');
+                this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
                 this.$router.push({ name: 'control_manage' });
               }
             }).finally(() => {
@@ -389,10 +408,10 @@ export default {
       getControlDetailIsEditor(controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
-          this.createForm.controlName = this.type === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
+          this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
           this.createForm.event = this.controlDetail.eventCode;
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = (this.type === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = (this.pageType === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;position: relative;">
     <div class="control_manage" v-if="pageType === 1">
       <!-- 顶部搜索栏 -->
       <div class="control_manage_box">

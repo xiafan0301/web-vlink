@@ -1399,6 +1399,30 @@ export function getAllMonitorList(params) {
     mode: ''
   })
 }
+/**
+ * getAreas 区域列表查询
+ * @param {object} params
+ */
+export function getAreas(params) {
+  return request({
+    url: '/area-service/areas',
+    method: 'get',
+    params,
+    mode: 'user'
+  })
+}
+/**
+ * getAllBayontListByAreaId 通过行政地区id查所有卡口列表
+ * @param {object} params
+ */
+export function getAllBayontListByAreaId(params) {
+  return request({
+    url: '/bayonet-service/areaId',
+    method: 'get',
+    params,
+    mode: ''
+  })
+}
 /* ========== 布控地图 ========== */
 /**
  * getControlMap 根据条件查询布控的所有设备点位【默认查询正在进行的布控的所有设备】
@@ -1430,7 +1454,7 @@ export function getControlMapByDevice(params) {
  */
 export function getAlarmSnap(params) {
   return request({
-    url: '/surveillance/alarm-snap/page',
+    url: '/surveillances/' + params['where.surveillanceId'] + '/alarm-snaps/page',
     method: 'get',
     params,
     mode: 'control'
@@ -1442,7 +1466,7 @@ export function getAlarmSnap(params) {
  */
 export function getAlarmListByDev(params) {
   return request({
-    url: '/alarm-service/alarm-list-by-dev',
+    url: 'alarm-snaps/by-dev',
     method: 'get',
     params,
     mode: 'control'
