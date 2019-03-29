@@ -28,13 +28,13 @@
       <div id="tcMap"></div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <span>{{curSXT.name}}</span>
-          <span>抓拍{{curSXT.times}}次</span>
+          <span>{{curSXT.deviceName}}</span>
+          <span>抓拍{{curSXT.snapNum}}次</span>
         </div>
         <vue-scroll>
-          <div class="vl_jtc_mk" v-for="(item, index) in curSXT.videoList" :key="item.id">
+          <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
             <video :id="'vlJigVideo' + index" src="../../../../assets/video/demo.mp4"></video>
-            <p>{{item.time}}</p>
+            <p>{{item.snapTime}}</p>
             <div class="vl_jig_right_btn">
               <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
               <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
@@ -102,12 +102,16 @@ export default {
         id: '',
         indexNum: null, // 当前展示的摄像头索引
         playNum: null, // 当前摄像头里正在大屏播放的索引
-        playing: false
+        playing: false,
+        videoList: []
       }, // 当前被放大播放的video
       curEvent: null,
       searching: false,
       showVideoList: false,
-      curSXT: {}, // 显示的摄像头数据
+      curSXT: {
+        deviceName: '',
+        snapNum: ''
+      }, // 显示的摄像头数据
       showLarge: false,
       showCut: false,
       curVideoUrl: '',
@@ -115,7 +119,6 @@ export default {
     }
   },
   mounted () {
-    console.log(this)
     this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
@@ -123,11 +126,10 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.drawMarkers(this.evData);
+    // this.drawMarkers(this.evData);
     $(window).bind('resize', () => {
       this.drawImg(this.evData);
     })
-    this.beginSearch();
   },
   methods: {
     setDTime () {
@@ -156,7 +158,7 @@ export default {
     beginSearch () {
       this.searching = true;
       let params = {
-        eventId: 98,
+        eventId: this.curEvent.eventId,
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
       }
@@ -168,6 +170,7 @@ export default {
               x.checked = false;
               return x;
             });
+            this.drawMarkers(this.evData);
           }
         })
     },
@@ -175,17 +178,18 @@ export default {
       let cWin = document.documentElement.clientWidth;
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
+        console.log(obj.deviceName)
+        if (obj.addLongitude > 0 && obj.addLatitude > 0) {
           let _sContent = '';
           if (obj.checked) {
-            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
           } else {
-            _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
+            _sContent = `<div class="vl_jtc_mk_img"><img src="${obj.snapPhoto}"></div>`;
           }
           // 窗体
           let markerWindow = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -202,7 +206,7 @@ export default {
           let _content = '<div id=' + _id + ' class="vl_icon ' + _class + '"></div>'
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -213,6 +217,7 @@ export default {
           this.markerPoint[i] = point;
         }
       }
+      this.amap.setFitView();
     },
     drawImg (data) {
       this.markerImg.forEach(z => {
@@ -221,16 +226,16 @@ export default {
       let cWin = document.documentElement.clientWidth;
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
+        if (obj.addLongitude > 0 && obj.addLatitude > 0) {
           let _sContent = '';
           if (obj.checked) {
-            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
           } else {
             _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
           }
           let markerWindow = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -245,16 +250,16 @@ export default {
       let _i = this.evData.indexOf(obj);
       let cWin = document.documentElement.clientWidth;
       let self = this;
-      if (obj.longitude > 0 && obj.latitude > 0) {
+      if (obj.addLongitude > 0 && obj.addLatitude > 0) {
         let _sContent = '';
         if (obj.checked) {
-          _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+          _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
         } else {
-          _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
+          _sContent = `<div class="vl_jtc_mk_img"><img src="${obj.snapPhoto}"></div>`;
         }
         let markerWindow = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
@@ -275,10 +280,10 @@ export default {
         _class = 'vl_icon_judge_02';
       }
       let _content = '<div class="vl_icon ' + _class + '"></div>'
-      if (obj.longitude > 0 && obj.latitude > 0) {
+      if (obj.addLongitude > 0 && obj.addLatitude > 0) {
         let point = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
@@ -315,18 +320,33 @@ export default {
       }
     },
     showVideo (e) {
-      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
-        // 先把所有在播放的视频暂停
-        this.evData[this.curVideo.indexNum].videoList.forEach(d => {
-          d.playing = false;
-        })
-        this.evData[this.curVideo.indexNum].checked = false;
-        this.updatePoint(this.evData[this.curVideo.indexNum]);
-        this.updateImg(this.evData[this.curVideo.indexNum]);
-      }
+//      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
+//        // 先把所有在播放的视频暂停
+//        this.evData[this.curVideo.indexNum].videoList.forEach(d => {
+//          d.playing = false;
+//        })
+//        this.evData[this.curVideo.indexNum].checked = false;
+//        this.updatePoint(this.evData[this.curVideo.indexNum]);
+//        this.updateImg(this.evData[this.curVideo.indexNum]);
+//      }
       this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
       this.curSXT = e.target.C.extData;
       this.showVideoList = true;
+      const params = {
+        surveillanceId: this.curSXT.surveillanceId,
+        deviceId: this.curSXT.deviceId
+      }
+      this.$_showLoading({target: '.vl_jfo_right'});
+      JigGETAlarmSnapList(params)
+        .then(res => {
+          if (res) {
+            this.curVideo.videoList = res.data.map(x => {
+              x.playing = false;
+              return x;
+            });
+            this.$_hideLoading();
+          }
+        })
       this.pointHover(e);
     },
     hideVideoList () {
@@ -339,34 +359,34 @@ export default {
     },
     playVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
-      if (this.evData[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.curVideo.videoList[_i].playing) {
         vDom.pause();
       } else {
         vDom.play();
         vDom.addEventListener('ended', (e) => {
           e.target.currentTime = 0;
           vDom.pause();
-          this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.curVideo.videoList[_i].playing = false;
         })
       }
-      this.evData[this.curVideo.indexNum].videoList[_i].playing = !this.evData[this.curVideo.indexNum].videoList[_i].playing;
+      this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
     },
     largeVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.evData[this.curVideo.indexNum].videoList[_i].playing;
+      this.curVideo.playing = this.curVideo.videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
-      if (this.evData[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.curVideo.videoList[_i].playing) {
         document.getElementById('vlJigLargeV').play();
         document.getElementById('vlJigLargeV').addEventListener('ended', (e) => {
           e.target.currentTime = 0;
           document.getElementById('vlJigLargeV').pause();
-          this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.curVideo.videoList[_i].playing = false;
           this.showLarge = false;
         })
-        this.evData[this.curVideo.indexNum].videoList[_i].playing = false;
+        this.curVideo.videoList[_i].playing = false;
       }
       document.getElementById('vlJigLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
@@ -377,7 +397,7 @@ export default {
       vDom.currentTime = document.getElementById('vlJigLargeV').currentTime;
       this.showLarge = false;
       if (this.curVideo.playing) {
-        this.evData[this.curVideo.indexNum].videoList[this.curVideo.playNum].playing = true;
+        this.curVideo.videoList[this.curVideo.playNum].playing = true;
         vDom.play();
       }
     },
@@ -433,6 +453,8 @@ export default {
         width: 50%;
         font-size: .14rem;
         color: #333333;
+        white-space: nowrap;
+        overflow: hidden;
         &:last-child {
           text-align: right;
           color: #999999;
@@ -497,6 +519,8 @@ export default {
         font-size: .12rem;
         line-height: .2rem;
         text-indent: .08rem;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
   }

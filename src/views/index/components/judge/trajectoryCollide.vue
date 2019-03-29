@@ -103,11 +103,11 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api';
 export default {
   data() {
     return {
-      uploadAcion: ajaxCtx.upload + '/new',
+      uploadAcion: ajaxCtx.base + '/new',
       testData: testData,
       mapData: [],
       searching: false,
@@ -177,12 +177,11 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    console.log(map)
     $(window).bind('resize', () => {
       if (this.mapData.length) {
         this.drawCheckbox(this.mapData);
         this.drawPlayBtn(this.mapData);
-        this.drawBigBtn(this.mapData);
+        // this.drawBigBtn(this.mapData);
       }
     })
   },
@@ -292,8 +291,10 @@ export default {
     },
     addHisToImg () {
       this.historyPicDialog = false;
+      let _ids = [];
       this.choosedHisPic.forEach(x => {
         this.curImgNum++;
+        _ids.push(x.uid)
         for (let i = 0; i < this.imgList.length; i++) {
           if (!this.imgList[i]) {
             this.imgList.splice(i, 1, x);
@@ -301,6 +302,10 @@ export default {
           }
         }
       })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      JtcPUTAppendixsOrder(_obj);
       this.showCurImg();
     },
     showCurImg () {
@@ -406,7 +411,7 @@ export default {
             // 自定义点标记覆盖物内容
             content: _sContent
           });
-          console.log(markerWindow)
+          markerWindow.on('click', this.largeVideo);
           // markerWindow.on('click', this.largeVideo);
           path.push(_path);
           let _class = 'vl_icon_sxt';
@@ -428,7 +433,7 @@ export default {
       this.amap.setFitView()
       this.drawCheckbox(data);
       this.drawPlayBtn(data);
-      this.drawBigBtn(data);
+      // this.drawBigBtn(data);
       this.drawLine(path);
     }, // 覆盖物（窗体和checkbox
     updatePoint (obj) {
@@ -513,7 +518,8 @@ export default {
         let markerPlayBtn = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
           position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(130 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
+          // offset: new AMap.Pixel(130 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
+          offset: new AMap.Pixel(146 * cWin / 1366, 94 * cWin / 1366 - 84),
           draggable: false, // 是否可拖动
           extData: obj,
           // 自定义点标记覆盖物内容

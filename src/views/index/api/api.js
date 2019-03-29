@@ -1156,6 +1156,18 @@ export function JtcGETAppendixInfoList(params) {
   })
 }
 /**
+ * JtcPUTAppendixsOrder 附件信息更新接口
+ * @param {object} params
+ */
+export function JtcPUTAppendixsOrder(params) {
+  return request({
+    url: '/appendixes',
+    method: 'put',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
  * JtcGETTrail 布控抓拍结果图片检索接口
  * @param {object} params
  */
@@ -1212,7 +1224,7 @@ export function JfoGETGroup(params) {
     url: '/group',
     method: 'get',
     params: params,
-    mode: 'judge'
+    mode: 'base'
   })
 }
 /**
@@ -1233,7 +1245,7 @@ export function JfoGETSurveillanceObject(params) {
  */
 export function JfoGETEventList(params) {
   return request({
-    url: '/events/by-surveillance',
+    url: '/event-services/event/by-surveillance',
     method: 'get',
     params: params,
     mode: 'event'
@@ -1257,7 +1269,7 @@ export function JhaGETStatisicByAddress(params) {
  */
 export function JhaGETAlarmSnapByAddress(params) {
   return request({
-    url: '/devices/' + params.deviceId + '/alarm-snap',
+    url: '/devices/' + params.deviceId + '/alarm-snaps',
     method: 'get',
     params: params,
     mode: 'judge'

@@ -2,7 +2,7 @@
   <div class="vl_judge_tc">
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
-        <el-select v-model="searchData.targetType" @change="chooseType" placeholder="关注类型">
+        <el-select v-model="searchData.type" @change="chooseType" placeholder="关注类型">
           <el-option
             v-for="item in focusType"
             :key="item.value"
@@ -10,52 +10,52 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <div v-if="searchData.targetType !== 1" style="margin-bottom: 0;">
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择车辆组">
+        <div v-if="searchData.type !== 1" style="margin-bottom: 0;">
+          <el-select v-model="searchData.vehicleGroupId" @change="chooseType" placeholder="选择车辆组">
             <el-option
-              v-for="item in focusType"
+              v-for="item in vehicleGroupList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择车辆颜色">
+          <el-select v-model="searchData.vehicleColor" @change="chooseType" placeholder="选择车辆颜色">
             <el-option
-              v-for="item in focusType"
+              v-for="item in vehicleColorList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择号牌种类">
+          <el-select v-model="searchData.plateType" @change="chooseType" placeholder="选择号牌种类">
             <el-option
-              v-for="item in focusType"
+              v-for="item in plateTypeList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
             </el-option>
           </el-select>
         </div>
-        <div v-if="searchData.targetType !== 2" style="margin-bottom: 0;">
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择人员组">
+        <div v-if="searchData.type !== 2" style="margin-bottom: 0;">
+          <el-select v-model="searchData.portraitGroupId" @change="chooseType" placeholder="选择人员组">
             <el-option
-              v-for="item in focusType"
+              v-for="item in portraitGroupList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择性别">
+          <el-select v-model="searchData.sex" @change="chooseType" placeholder="选择性别">
             <el-option
-              v-for="item in focusType"
+              v-for="item in sexList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.targetType" @change="chooseType" placeholder="选择年龄段">
+          <el-select v-model="searchData.ageGroup" @change="chooseType" placeholder="选择年龄段">
             <el-option
-              v-for="item in focusType"
+              v-for="item in ageGroupList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
@@ -73,25 +73,25 @@
           end-placeholder="结束日期">
         </el-date-picker>
         <el-input v-model="searchData.carNum" placeholder="关注范围"></el-input>
-        <el-button style="padding: 0 .22rem;" @click="resetSearch">重置</el-button>
-        <el-button style="padding: 0 .22rem;" type="primary" @click="beginSearch">搜索</el-button>
+        <el-button  @click="resetSearch">重置</el-button>
+        <el-button   :loading="searching" type="primary" @click="beginSearch">搜索</el-button>
       </div>
     </div>
     <div class="vl_j_right">
       <div id="tcMap"></div>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">活动范围</span></div>
-        <div><span :class="{'active': switchType === 1}" @click="switchType = 1">关联事件</span></div>
+        <div><span :class="{'active': switchType === 1}" @click="switchType = 1;">关联事件</span></div>
       </div>
       <div class="vl_jfo_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <span>{{curSXT.name}}</span>
-          <span>抓拍{{curSXT.times}}次</span>
+          <span>{{curSXT.deviceName}}</span>
+          <span>抓拍{{curSXT.snapNum}}次</span>
         </div>
         <vue-scroll>
-          <div class="vl_jtc_mk" v-for="(item, index) in curSXT.videoList" :key="item.id">
+          <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
             <video :id="'vlJigVideo' + index" src="../../../../assets/video/demo.mp4"></video>
-            <p>{{item.time}}</p>
+            <p>{{item.snapTime}}</p>
             <div class="vl_jig_right_btn">
               <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
               <span class="vl_icon vl_icon_control_09" @click="playVideo(index)" v-else></span>
@@ -102,53 +102,78 @@
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
       </div>
       <div class="vl_jig_event" v-show="switchType === 1">
-        <div class="vl_jfo_event_box">
-          <el-table
-            :data="eventList"
-            style="width: 100%">
-            <el-table-column
-              prop="date"
-              label="布控图片"
-              align="center"
-              min-width="120">
-            </el-table-column>
-            <el-table-column
-              prop="name"
-              label="事件编号"
-              align="left"
-              min-width="140">
-            </el-table-column>
-            <el-table-column
-              prop="address"
-              min-width="120"
-              label="事件内容">
-            </el-table-column>
-            <el-table-column
-              prop="date"
-              label="处理单位"
-              min-width="120">
-            </el-table-column>
-            <el-table-column
-              prop="name"
-              label="上报时间"
-              min-width="120">
-            </el-table-column>
-            <el-table-column
-              prop="address"
-              min-width="140"
-              label="发生地点">
-            </el-table-column>
-            <el-table-column
-              prop="date"
-              label="处理状态"
-              min-width="100">
-            </el-table-column>
-            <el-table-column
-              prop="name"
-              label="操作"
-              min-width="100">
-            </el-table-column>
-          </el-table>
+        <div class="vl_jfo_event_box se_hi_box">
+          <vue-scroll>
+            <el-table
+              :data="eventList"
+              style="width: 100%">
+              <el-table-column
+                label="布控图片"
+                align="center"
+                min-width="120">
+                <template slot-scope="scope">
+                  <div class="tt_img">
+                    <img :src="scope.row.surveillancePhoto" alt="" >
+                    <span>{{scope.row.surveillancePhotoNum}}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="eventNumber"
+                label="事件编号"
+                align="left"
+                min-width="140">
+              </el-table-column>
+              <el-table-column
+                min-width="150"
+                label="事件内容">
+                <template slot-scope="scope">
+                  {{scope.row.describe.length > 28 ? (scope.row.describe.slice(0, 28) + '...') : scope.row.describe}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="departmentName"
+                label="处理单位"
+                min-width="80">
+              </el-table-column>
+              <el-table-column
+                label="上报时间"
+                min-width="120">
+                <template slot-scope="scope">
+                  {{scope.row.createTime.split(' ')[0]}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                min-width="150"
+                label="发生地点">
+                <template slot-scope="scope">
+                  {{scope.row.address.length > 28 ? (scope.row.address.slice(0, 28) + '...') : scope.row.address}}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="processStatus"
+                label="处理状态"
+                min-width="100">
+              </el-table-column>
+              <el-table-column
+                label="操作"
+                min-width="100">
+                <template slot-scope="scope">
+                  <el-button type="text">查看</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination
+              v-show="pagination.total > 10"
+              class="se_hi_pa"
+              background
+              layout="prev, pager, next"
+              @current-change="handleCurrentChange"
+              :current-page="pagination.currentPage"
+              :page-size="pagination.pageSize"
+              :total="pagination.total">
+            </el-pagination>
+          </vue-scroll>
         </div>
       </div>
     </div>
@@ -156,7 +181,7 @@
       <video id="vlJigLargeV" src="../../../../assets/video/demo.mp4"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
-        <div>某某摄像头</div>
+        <div>{{curSXT.deviceName}}</div>
         <div>
           <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="curVideo.playing"></span>
           <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
@@ -175,21 +200,77 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
+import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList} from '../../api/api.js';
 export default {
   data() {
     return {
-      testData: testData,
-      searchData: {
-        targetType: null, // 1：人， 2： 车,0 无限
-        name: null, // 目标姓名
-        cardId: null, // 目标身份证号
-        time: null,
-        carNum: null // 车牌号
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
       },
+      testData: testData,
+      evData: [],
+      searchData: {
+        type: null, // 1：人， 2： 车,0 无限
+        portraitGroupId: null,  // 人员组
+        sex: null, // 1男，2女
+        ageGroup: null, // 年龄段
+        vehicleGroupId: null, // 车辆组
+        vehicleColor: null,
+        plateType: null, // 车牌种类
+        time: null
+      },
+      sexList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '男'},
+        {value: 2, label: '女'}
+      ],
+      portraitGroupList: [],
+      vehicleGroupList: [],
       focusType: [
         {value: 0, label: '不限'},
         {value: 1, label: '布控人员'},
         {value: 2, label: '布控车辆'}
+      ],
+      ageGroupList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '0-10'},
+        {value: 2, label: '10-20'},
+        {value: 3, label: '20-30'},
+        {value: 4, label: '30-40'},
+        {value: 5, label: '40-50'},
+        {value: 6, label: '50-70'},
+        {value: 7, label: '70-'}
+      ],
+      vehicleColorList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '白'},
+        {value: 2, label: '灰'},
+        {value: 3, label: '黄'},
+        {value: 4, label: '粉'},
+        {value: 5, label: '红'},
+        {value: 6, label: '紫'},
+        {value: 7, label: '绿'},
+        {value: 8, label: '蓝'},
+        {value: 9, label: '棕'},
+        {value: 10, label: '黑'},
+        {value: 11, label: '其他'}
+      ],
+      plateTypeList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '大型汽车'},
+        {value: 2, label: '小型汽车'},
+        {value: 8, label: '轻便摩托车'},
+        {value: 15, label: '挂车'},
+        {value: 23, label: '警用汽车'},
+        {value: 24, label: '警用摩托'},
+        {value: 25, label: '小型新能源汽车'},
+        {value: 26, label: '大型新能源汽车'},
+        {value: 27, label: '小吨位货车'},
+        {value: 28, label: '大吨位货车'},
+        {value: 29, label: '客车'},
+        {value: 99, label: '其他'}
       ],
       pickerOptions: {
         disabledDate (time) {
@@ -211,19 +292,26 @@ export default {
       switchType: 0, // 0活动范围，1关联事件
       amap: null, // 地图实例
       markerPoint: [], // 地图点集合
+      searching: false,
       markerImg: [], // 地图抓人人像集合
       curVideo: {
         id: '',
         indexNum: null, // 当前展示的摄像头索引
         playNum: null, // 当前摄像头里正在大屏播放的索引
-        playing: false
+        playing: false,
+        videoList: []
       }, // 当前被放大播放的video
       showVideoList: false,
-      curSXT: {}, // 显示的摄像头数据
+      curSXT: {
+        deviceName: '',
+        snapNum: '',
+        snapTime: ''
+      }, // 显示的摄像头数据
       showLarge: false,
       showCut: false,
       curVideoUrl: '',
       demoImg: '',
+      surveillanceIds: [], // 布控ids.
       eventList: []
     }
   },
@@ -235,22 +323,22 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.drawMarkers(this.testData.zp);
     $(window).bind('resize', () => {
-      this.drawImg(this.testData.zp);
+      this.drawImg(this.evData);
     })
-    let tt = [];
-    for (let i = 0; i < 10; i++) {
-      tt.push({
-        name: '22',
-        address: '11',
-        date: '33'
-      })
-    }
-    this.eventList = tt;
   },
   methods: {
-    chooseType () {},
+    chooseType (e) {
+      if (e === 1) {
+        this.searchData.vehicleGroupId = null;
+        this.searchData.plateType = null;
+        this.searchData.vehicleColor = null;
+      } else if (e === 2) {
+        this.searchData.portraitGroupId = null;
+        this.searchData.sex = null;
+        this.searchData.ageScope = null;
+      }
+    },
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
@@ -261,34 +349,60 @@ export default {
     },
     resetSearch () {
       this.searchData = {
-        targetType: 0, // 0：人， 1： 车
-        name: null, // 目标姓名
-        cardId: null, // 目标身份证号
-        carNum: null // 车牌号
+        type: null, // 1：人， 2： 车,0 无限
+        portraitGroupId: '',  // 人员组
+        sex: null, // 1男，2女
+        ageScope: null, // 年龄段
+        vehicleGroupId: '', // 车辆组
+        plateType: null, // 车牌种类
+        time: null
       }
-      this.uploadFileList.splice(0, this.uploadFileList.length);
-      this.imgList = ['', '', ''];
-      this.curImageUrl = '';
-      this.curImgNum = 0;
     },
     beginSearch () {
-      console.log(this.searchData.time)
+      this.searching = true;
+      this.$_showLoading({
+        target: '.se_hi_box'
+      })
+      let params = {
+        dateStart: this.searchData.time[0],
+        dateEnd: this.searchData.time[1]
+      }
+      for (let key in this.searchData) {
+        if (this.searchData[key] && key !== 'time') {
+          params[key] = this.searchData[key];
+        }
+      }
+      JfoGETSurveillanceObject(params)
+        .then(res => {
+          this.searching = false;
+          if (res) {
+            this.surveillanceIds = res.data.list.map(z => {
+              return z.surveillanceId
+            });
+            this.evData = res.data.list.map(x => {
+              x.checked = false;
+              return x;
+            })
+            this.drawMarkers(this.evData);
+            this.showEventList();
+          }
+        })
     },
     drawMarkers (data) {
       let cWin = document.documentElement.clientWidth;
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
+        if (obj.addLongitude > 0 && obj.addLatitude > 0) {
           let _sContent = '';
           if (obj.checked) {
-            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
           } else {
-            _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
+            _sContent = `<div class="vl_jtc_mk_img"><img src="${obj.snapPhoto}"></div>`;
           }
           // 窗体
           let markerWindow = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -304,7 +418,7 @@ export default {
           let _content = '<div class="vl_icon ' + _class + '"></div>'
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -315,6 +429,7 @@ export default {
           this.markerPoint[i] = point;
         }
       }
+      this.amap.setFitView();
     },
     drawImg (data) {
       this.markerImg.forEach(z => {
@@ -323,16 +438,16 @@ export default {
       let cWin = document.documentElement.clientWidth;
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
+        if (obj.addLongitude > 0 && obj.addLatitude > 0) {
           let _sContent = '';
           if (obj.checked) {
-            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
           } else {
-            _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
+            _sContent = `<div class="vl_jtc_mk_img"><img src="${obj.snapPhoto}"></div>`;
           }
           let markerWindow = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -344,19 +459,19 @@ export default {
       }
     }, // 适应窗口大小变化
     updateImg (obj) {
-      let _i = this.testData.zp.indexOf(obj);
+      let _i = this.evData.indexOf(obj);
       let cWin = document.documentElement.clientWidth;
       let self = this;
-      if (obj.longitude > 0 && obj.latitude > 0) {
+      if (obj.addLongitude > 0 && obj.addLatitude > 0) {
         let _sContent = '';
         if (obj.checked) {
-          _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
+          _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
         } else {
-          _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
+          _sContent = `<div class="vl_jtc_mk_img"><img src="${obj.snapPhoto}"></div>`;
         }
         let markerWindow = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
@@ -370,16 +485,16 @@ export default {
       }
     }, // 更新抓拍人像
     updatePoint (obj) {
-      let _i = this.testData.zp.indexOf(obj);
+      let _i = this.evData.indexOf(obj);
       let _class = 'vl_icon_judge_04';
       if (obj.checked) {
         _class = 'vl_icon_judge_02';
       }
       let _content = '<div class="vl_icon ' + _class + '"></div>'
-      if (obj.longitude > 0 && obj.latitude > 0) {
+      if (obj.addLongitude > 0 && obj.addLatitude > 0) {
         let point = new AMap.Marker({ // 添加自定义点标记
           map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           extData: obj,
@@ -389,7 +504,7 @@ export default {
         point.on('click', this.showVideo)
         point.on('mouseover', this.pointHover);
         point.on('mouseout', (e) => {
-          let _i = this.testData.zp.indexOf(e.target.C.extData);
+          let _i = this.evData.indexOf(e.target.C.extData);
           if (_i !== this.curVideo.indexNum) {
             e.target.C.extData.checked = false;
             this.updatePoint(obj);
@@ -406,7 +521,7 @@ export default {
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
-        this.testData.zp.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+        this.evData.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
           z.checked = false;
           this.updatePoint(z);
           this.updateImg(z);
@@ -416,55 +531,70 @@ export default {
       }
     },
     showVideo (e) {
-      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.testData.zp.indexOf(e.target.C.extData)) {
-        // 先把所有在播放的视频暂停
-        this.testData.zp[this.curVideo.indexNum].videoList.forEach(d => {
-          d.playing = false;
-        })
-        this.testData.zp[this.curVideo.indexNum].checked = false;
-        this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
-        this.updateImg(this.testData.zp[this.curVideo.indexNum]);
-      }
-      this.curVideo.indexNum = this.testData.zp.indexOf(e.target.C.extData);
+//      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
+//        // 先把所有在播放的视频暂停
+//        this.evData[this.curVideo.indexNum].videoList.forEach(d => {
+//          d.playing = false;
+//        })
+//        this.evData[this.curVideo.indexNum].checked = false;
+//        this.updatePoint(this.evData[this.curVideo.indexNum]);
+//        this.updateImg(this.evData[this.curVideo.indexNum]);
+//      }
+      this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
       this.curSXT = e.target.C.extData;
       this.showVideoList = true;
+      const params = {
+        surveillanceId: this.curSXT.surveillanceId,
+        deviceId: this.curSXT.deviceId
+      }
+      this.$_showLoading({target: '.vl_jfo_right'});
+      JigGETAlarmSnapList(params)
+        .then(res => {
+          if (res) {
+            this.curVideo.videoList = res.data.map(x => {
+              x.playing = false;
+              return x;
+            });
+            this.$_hideLoading();
+          }
+        })
       this.pointHover(e);
     },
     hideVideoList () {
-      this.testData.zp[this.curVideo.indexNum].checked = false;
-      this.updatePoint(this.testData.zp[this.curVideo.indexNum]);
-      this.updateImg(this.testData.zp[this.curVideo.indexNum]);
+      this.evData[this.curVideo.indexNum].checked = false;
+      this.updatePoint(this.evData[this.curVideo.indexNum]);
+      this.updateImg(this.evData[this.curVideo.indexNum]);
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     },
     playVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
-      if (this.testData.zp[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.curVideo.videoList[_i].playing) {
         vDom.pause();
       } else {
         vDom.play();
         vDom.addEventListener('ended', (e) => {
           e.target.currentTime = 0;
-          this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.curVideo.videoList[_i].playing = false;
         })
       }
-      this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = !this.testData.zp[this.curVideo.indexNum].videoList[_i].playing;
+      this.curVideo.videoList[_i].playing = !this.curVideo.videoList[_i].playing;
     },
     largeVideo (_i) {
       let vDom = document.getElementById('vlJigVideo' + _i);
       vDom.pause();
       this.curVideo.id = 'vlJigVideo' + _i;
-      this.curVideo.playing = this.testData.zp[this.curVideo.indexNum].videoList[_i].playing;
+      this.curVideo.playing = this.curVideo.videoList[_i].playing;
       this.curVideo.playNum = _i;
       this.showLarge = true;
-      if (this.testData.zp[this.curVideo.indexNum].videoList[_i].playing) {
+      if (this.curVideo.videoList[_i].playing) {
         document.getElementById('vlJigLargeV').play();
         document.getElementById('vlJigLargeV').addEventListener('ended', (e) => {
           e.target.currentTime = 0;
-          this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+          this.curVideo.videoList[_i].playing = false;
           this.showLarge = false;
         })
-        this.testData.zp[this.curVideo.indexNum].videoList[_i].playing = false;
+        this.curVideo.videoList[_i].playing = false;
       }
       document.getElementById('vlJigLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
@@ -475,7 +605,7 @@ export default {
       vDom.currentTime = document.getElementById('vlJigLargeV').currentTime;
       this.showLarge = false;
       if (this.curVideo.playing) {
-        this.testData.zp[this.curVideo.indexNum].videoList[this.curVideo.playNum].playing = true;
+        this.curVideo.videoList[this.curVideo.playNum].playing = true;
         vDom.play();
       }
     },
@@ -498,6 +628,23 @@ export default {
       setTimeout(() => {
         document.getElementById('vlJidDownloadImg').click();
       }, 200)
+    },
+    showEventList () {
+      let params = {
+        surveillanceIds: this.surveillanceIds.join(',')
+        // surveillanceIds: '23, 11'
+      }
+      JfoGETEventList(params)
+        .then(res => {
+          this.$_hideLoading();
+          if (res) {
+            this.eventList = res.data;
+          }
+        })
+    },
+    handleCurrentChange (val) {
+      this.pagination.currentPage = val;
+      this.showEventList();
     }
   },
   watch: {}
@@ -590,6 +737,8 @@ export default {
         width: 50%;
         font-size: .14rem;
         color: #333333;
+        white-space: nowrap;
+        overflow: hidden;
         &:last-child {
           text-align: right;
           color: #999999;
@@ -654,7 +803,73 @@ export default {
         font-size: .12rem;
         line-height: .2rem;
         text-indent: .08rem;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
+  }
+</style>
+<style lang="scss" scoped="scoped">
+  .se_hi_box {
+    width: 100%;
+    height: 100%;
+    /deep/.el-table {
+      table {
+        td {
+          padding: 0!important;
+          height: .98rem;
+          line-height: .98rem;
+        }
+        th {
+          padding: 0;
+          height: .98rem;
+          line-height: .98rem;
+        }
+      }
+      table {
+        thead {
+          td {
+            height: .54rem;
+            line-height: .54rem;
+          }
+          th {
+            height: .54rem;
+            line-height: .54rem;
+          }
+        }
+      }
+    }
+    .tt_img {
+      width: .76rem;
+      height: .76rem;
+      position: relative;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      border-radius: 3px;
+      margin: 0 auto;
+      img {
+        width:  100%;
+        height: 100%;
+      }
+      > span {
+        color: #FFFFFF;
+        display: block;
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: rgba(0, 0, 0, .6);
+        width: .20rem;
+        height: .20rem;
+        line-height: .20rem;
+        text-align: center;
+        -webkit-border-radius: .1rem;
+        -moz-border-radius: .1rem;
+        border-radius: .1rem;
+        font-size: .14rem;
+      }
+    }
+  }
+  .se_hi_pa {
+    text-align: center;
   }
 </style>

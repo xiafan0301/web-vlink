@@ -12,13 +12,13 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-select v-model="searchData.personType">
+        <el-select v-model="searchData.personGroupId">
           <el-option v-for="item in personList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
-        <el-select v-model="searchData.deviceType">
+        <el-select v-model="searchData.deviceGroupId">
           <el-option v-for="item in deviceList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
-        <el-select v-model="searchData.CharacType">
+        <el-select v-model="searchData.intelligentCharac">
           <el-option v-for="item in CharacList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
         <el-autocomplete
@@ -28,18 +28,18 @@
           @select="chooseAddress"
           placeholder="输入地址">
         </el-autocomplete>
-        <el-button style="padding: 0 .22rem;" @click="resetSearch">重置</el-button>
-        <el-button style="padding: 0 .22rem;" type="primary" @click="beginSearch">搜索</el-button>
+        <el-button @click="resetSearch">重置</el-button>
+        <el-button :loading="searching" type="primary" @click="beginSearch">搜索</el-button>
       </div>
     </div>
     <div class="vl_j_right">
       <div id="tcMap"></div>
       <div class="vl_jha_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <el-select v-model="rightSex" placeholder="选择性别">
+          <el-select v-model="rightSex" placeholder="选择性别"  @select="getSnapList">
             <el-option v-for="item in sexList" :key="item.value" :value="item.value" :label="item.label"></el-option>
           </el-select>
-          <el-select v-model="rightMinZ" placeholder="选择民族">
+          <el-select v-model="rightMinZ" placeholder="选择民族" @select="getSnapList">
             <el-option v-for="item in minZList" :key="item.value" :value="item.value" :label="item.label"></el-option>
           </el-select>
         </div>
@@ -57,25 +57,27 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
-import {JfoGETGroup} from '../../api/api';
+import {JfoGETGroup, JhaGETStatisicByAddress, JhaGETAlarmSnapByAddress} from '../../api/api';
 export default {
   data() {
     return {
       testData: testData,
+      evData: [],
       searchData: {
         time: null,
-        personType: 0,
-        deviceType: 1,
-        CharacType: 1,
-        latitude: 0,
-        longtitude: 3
+        personType: null,
+        deviceType: null,
+        CharacType: null,
+        latitude: 28.093846,
+        longitude: 112.974691
       },
       searchAdress: '',
       personList: [
-        {value: 0, label: '吸毒人员'},
-        {value: 1, label: '形释解教人员'},
-        {value: 2, label: '重点青少年'},
-        {value: 3, label: '人像库'}
+        {value: 0, label: '不限'},
+        {value: 1, label: '吸毒人员'},
+        {value: 2, label: '形释解教人员'},
+        {value: 3, label: '重点青少年'},
+        {value: 4, label: '人像库'}
       ],
       deviceList: [
         {value: 0, label: '不限'},
@@ -85,11 +87,12 @@ export default {
         {value: 4, label: '重点场所'},
       ],
       CharacList: [
-        {value: 0, label: '红外感应'},
-        {value: 1, label: '人像识别'},
-        {value: 2, label: '车像识别'},
-        {value: 3, label: '热力感应'},
-        {value: 4, label: '移动侦测'}
+        {value: 0, label: '不限'},
+        {value: 1, label: '红外感应'},
+        {value: 2, label: '人像识别'},
+        {value: 3, label: '车像识别'},
+        {value: 4, label: '热力感应'},
+        {value: 5, label: '移动侦测'}
       ],
       pickerOptions: {
         disabledDate (time) {
@@ -112,18 +115,28 @@ export default {
       autoComplete: null,
       markerPoint: [], // 地图点集合
       markerImg: [], // 地图抓人人像集合
+      searching: false,
       curVideo: {
         id: '',
         indexNum: null, // 当前展示的摄像头索引
         playNum: null, // 当前摄像头里正在大屏播放的索引
         playing: false
       }, // 当前被放大播放的video
-      curSXT: {}, // 当前显示摄像头数据
+      curSXT: {
+        childList: []
+      }, // 当前显示摄像头数据
       showVideoList: false,
       rightSex: null,
       rightMinZ: null,
-      sexList: [],
-      minZList: []
+      sexList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '男'},
+        {value: 2, label: '女'}
+      ],
+      minZList: [
+        {value: 0, label: '不限'},
+        {value: 1, label: '汉族'}
+      ]
     }
   },
   mounted () {
@@ -134,7 +147,6 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.drawMarkers(this.testData.gw);
     map.plugin('AMap.Autocomplete', () => {
       let autoOptions = {
         city: '长沙'
@@ -166,7 +178,9 @@ export default {
       }
     },
     chooseAddress (e) {
-      console.log(e);
+      this.searchData.longitude = e.location.lng;
+      this.searchData.latitude = e.location.lat;
+      this.amap.setZoomAndCenter(16, [this.searchData.longitude, this.searchData.latitude]);
     },
     setDTime () {
       let date = new Date();
@@ -177,11 +191,40 @@ export default {
       this.searchData.time = [_s, _e]
     },
     resetSearch () {
+      this.searchData = {
+        time: null,
+        personGroupId: null,
+        deviceGroupId: null,
+        intelligentCharac: null,
+        latitude: null,
+        longitude: null
+      }
     },
     beginSearch () {
-      console.log(this.searchData.time)
+      this.searching = true;
+      let params = {
+        dateStart: this.searchData.time[0],
+        dateEnd: this.searchData.time[1]
+      }
+      for (let key in this.searchData) {
+        if (this.searchData[key] && key !== 'time') {
+          params[key] = this.searchData[key];
+        }
+      }
+      JhaGETStatisicByAddress(params)
+        .then(res => {
+          this.searching = false;
+          if (res) {
+            this.evData = res.data.map(x => {
+              x.checked = false;
+              return x;
+            });
+            this.drawMarkers(this.evData);
+          }
+        })
     },
     drawMarkers (data) {
+      this.amap.clearMap();
       // let cWin = document.documentElement.clientWidth;
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
@@ -230,36 +273,10 @@ export default {
           this.markerPoint[i] = point;
         }
       }
+      this.amap.setFitView();
     },
-    drawImg (data) {
-      this.markerImg.forEach(z => {
-        this.amap.remove(z)
-      })
-      let cWin = document.documentElement.clientWidth;
-      for (let i = 0; i < data.length; i++) {
-        let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
-          let _sContent = '';
-          if (obj.checked) {
-            _sContent = `<div class="vl_jtc_mk_img vl_jtc_mk_img_hover"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"><div><p>${obj.name}</p><p>抓拍${obj.times}次</p></div></div>`;
-          } else {
-            _sContent = `<div class="vl_jtc_mk_img"><img src="${require('../../../../assets/img/temp/vis-eg.png')}"></div>`;
-          }
-          let markerWindow = new AMap.Marker({ // 添加自定义点标记
-            map: this.amap,
-            position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-40 * cWin / 1366 + 4, -90 * cWin / 1366 - 34), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            extData: obj,
-            // 自定义点标记覆盖物内容
-            content: _sContent
-          });
-          this.markerImg.push(markerWindow);
-        }
-      }
-    }, // 适应窗口大小变化
     updatePoint (obj) {
-      let _i = this.testData.gw.indexOf(obj);
+      let _i = this.evData.indexOf(obj);
       console.log(_i, obj)
       let i = 0;
       if (obj.snapNum > 79) {
@@ -291,7 +308,7 @@ export default {
         point.on('click', this.showVideo)
         point.on('mouseover', this.pointHover);
         point.on('mouseout', (e) => {
-          let _i = this.testData.gw.indexOf(e.target.C.extData);
+          let _i = this.evData.indexOf(e.target.C.extData);
           if (_i !== this.curVideo.indexNum) {
             e.target.C.extData.checked = false;
             this.updatePoint(obj);
@@ -307,7 +324,7 @@ export default {
     pointHover (e) {
       if (!e.target.C.extData.checked) {
         e.target.C.extData.checked = true;
-        this.testData.gw.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
+        this.evData.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
           z.checked = false;
           this.updatePoint(z);
         })
@@ -315,18 +332,38 @@ export default {
       }
     },
     showVideo (e) {
-      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.testData.gw.indexOf(e.target.C.extData)) {
-        this.testData.gw[this.curVideo.indexNum].checked = false;
-        this.updatePoint(this.testData.gw[this.curVideo.indexNum]);
+      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
+        this.evData[this.curVideo.indexNum].checked = false;
+        this.updatePoint(this.evData[this.curVideo.indexNum]);
       }
-      this.curVideo.indexNum = this.testData.gw.indexOf(e.target.C.extData);
+      this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
       this.curSXT = e.target.C.extData;
       this.showVideoList = true;
+      this.getSnapList(this.curSXT.deviceId);
       this.pointHover(e);
     },
+    getSnapList (deviceId) {
+      let params = {
+        deviceId: deviceId,
+        dateStart: this.searchData.time[0],
+        dateEnd: this.searchData.time[1]
+      }
+      if (this.rightSex) {
+        params['sex'] = this.rightSex;
+      }
+      if (this.rightMinZ) {
+        params['nation'] = this.rightMinZ;
+      }
+      JhaGETAlarmSnapByAddress(params)
+        .then(res => {
+          if (res) {
+            console.log(res)
+          }
+        })
+    },
     hideVideoList () {
-      this.testData.gw[this.curVideo.indexNum].checked = false;
-      this.updatePoint(this.testData.gw[this.curVideo.indexNum]);
+      this.evData[this.curVideo.indexNum].checked = false;
+      this.updatePoint(this.evData[this.curVideo.indexNum]);
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     }
