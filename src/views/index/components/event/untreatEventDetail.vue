@@ -80,7 +80,7 @@ export default {
   methods: {
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -111,10 +111,10 @@ export default {
         uid: eventId,
         mutualFlag: this.isMutual
       }
-      updateEvent(params)
-        .then(res => {
-          console.log(res)
-        })
+      // updateEvent(params)
+      //   .then(res => {
+      //     console.log(res)
+      //   })
       if (type) {
         if (type === 1) {
           // 跳至新增布控页面
@@ -122,7 +122,7 @@ export default {
         }
         if (type === 2) {
           // 跳至事件管理调度指挥页面
-          this.$router.push({name: 'ctc_operation', query: {eventId: eventId}});
+          this.$router.push({name: 'ctc_operation', query: {eventId: eventId, eventType: this.basicInfo.eventType}});
         }
         if (type === 3) {
           // 跳至呈报上级页面
@@ -143,6 +143,7 @@ export default {
     },
     // 放大图片
     openBigImg (index, data) {
+      console.log('data', data);
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));

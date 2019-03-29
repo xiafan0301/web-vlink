@@ -5,8 +5,8 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'http://apidev.aorise.org/vlink-base',
-        // dev: 'http://10.116.64.142:8083',
+        // dev: 'http://apidev.assorise.org/vlink-base',
+        dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
@@ -14,7 +14,7 @@ const oDomains = {
     // 事件部分地址
     event: {
       // dev: 'http://apidev.aorise.org/vlink-event/api/vlink',
-      dev: 'http://10.116.64.134:8082/api/vlink',
+      dev: 'http://10.116.64.134:8082/',
       test: 'http://apirel.aorise.org/vlink-event/api/vlink',
       prod: 'http://apidev.aorise.org/vlink-event/api/vlink'
     },
@@ -27,8 +27,8 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      dev: 'http://10.116.64.142:8082', // 江先琨
-      // dev: 'http://apidev.aorise.org/vlink-user',
+      // dev: 'http://10.116.64.142:8082', // 江先琨
+      dev: 'http://apidev.aorise.org/vlink-user',
       test: 'http://apidev.aorise.org/vlink-user',
       prod: 'http://apidev.aorise.org/vlink-user'
     },

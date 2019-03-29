@@ -49,7 +49,7 @@ export default {
       dlQRcode: null,
       loginForm: {
         userMobile: '18216061865',
-        userPassword: '123456'
+        userPassword: '111111'
       },
       loginBtnLoading: false,
       isRemember: false, // 是否记住用户名
@@ -79,7 +79,7 @@ export default {
             .then(res => {
               if (res) {
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
-                console.log(localStorage.getItem('as_vlink_user_info'))
+                console.log('item', localStorage.getItem('as_vlink_user_info'))
                 setTimeout(() => {
                   this.loginBtnLoading = false;
                   this.$router.push({name: 'index'});

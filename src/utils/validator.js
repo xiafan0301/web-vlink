@@ -80,4 +80,15 @@ export const checkUserName = (rule, value, callback) => {
   }
   callback()
 }
+/**
+ * 支持中文，英文大小写，数字
+ */
+export const validateName = (rule, value, callback) => {
+  let reg = /^[\u0391-\uFFE5A-Za-z0-9]+$/;
+  if (!reg.test(value)) {
+    callback(new Error('支持中文，英文大小写，数字'));
+  } else {
+    callback();
+  }
+};
 
