@@ -35,11 +35,11 @@ const oDomains = {
       prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     },
     // 上传图片
-    upload: {
-        dev: 'http://apidev.aorise.org/education-user-related',
-        test: 'http://apirel.aorise.org/education-user-related',
-        prod: 'http://apidev.aorise.org/education-user-related'
-    },
+    // upload: {
+    //     dev: 'http://apidev.aorise.org/education-user-related',
+    //     test: 'http://apirel.aorise.org/education-user-related',
+    //     prod: 'http://apidev.aorise.org/education-user-related'
+    // },
     // 研判检索服务
     judge: {
         // dev: 'http://10.116.64.127:8082/',

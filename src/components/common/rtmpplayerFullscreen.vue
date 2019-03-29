@@ -1,17 +1,14 @@
 <template>
-  <div class="vl_rtmpplayer" :class="{'rtmpplayer_fullscreen': fullScreen}">
-    <div class="rtmpplayer_player" :id="rtmpplayerId + '_container'">
+  <div class="vl_rtmpplayer_fs" :id="rtmpplayerId + '_container'">
+    <div class="rtmpplayer_player">
       <!-- poster="videojs/eguidlogo.png" -->
-      <div class="rtmpplayer_player_c" :id="rtmpplayerId + '_c'">
-        <video :id="rtmpplayerId"
-          class="video-js vjs-fluid" style="width: 100%; height: 100%;" autoplay="autoplay" muted type='rtmp/flv'>
-          <!-- <source src='rtmp://10.16.1.139/live/livestream' type='rtmp/flv'/> -->
-          <!-- <source src='rtmp://live.hkstv.hk.lxdns.com/live/hks1' type='rtmp/flv'/> -->
-        </video>
-      </div>
+      <video :id="rtmpplayerId"
+        class="video-js vjs-fluid" style="width: 100%; height: 100%;" autoplay="autoplay" muted type='rtmp/flv'>
+        <!-- <source src='rtmp://10.16.1.139/live/livestream' type='rtmp/flv'/> -->
+        <!-- <source src='rtmp://live.hkstv.hk.lxdns.com/live/hks1' type='rtmp/flv'/> -->
+      </video>
     </div>
-    <span v-if="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
-    <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
+    <span class="vl_icon vl_icon_close" @click="playerClose"></span>
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
     <div class="rtmpplayer_bot">
       <div class="rtmpplayer_bot_t">{{oData.title}}</div>
@@ -28,15 +25,9 @@
         <!-- 截屏 -->
         <span class="vl_icon vl_icon_v26 player_cut" title="截屏"></span>
         <!-- 全屏 -->
-        <span v-show="!fullScreen" class="vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
-        <!-- 局部放大 -->
-        <template v-if="fullScreen">
-          <span v-if="!enlarge" class="vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
-          <span v-else class="vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
-        </template>
+        <span class="vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
         <!-- 更多 -->
         <span class="vl_icon vl_icon_v28" title="更多"></span>
-        <span v-if="fullScreen" class="vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
       </div>
     </div>
     <el-dialog v-if="signAble" title="添加标记" :visible.sync="signDialogVisible" :center="false" width="500px">
@@ -65,9 +56,6 @@ export default {
       playActive: true,
       player: null,
       rtmpplayerId: 'rtmp_' + random14(),
-
-      fullScreen: false,
-      enlarge: false,
 
       signContentList: [],
       signDialogVisible: false,
@@ -122,10 +110,11 @@ export default {
     });
     player.play();
     this.player = player;
+
+    // rtmpplayerId + '_container'
+    drawBorder.init(this.rtmpplayerId + '_container');
   },
   methods: {
-    /***** 视频事件 *****/
-    // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
       if (this.player) {
@@ -136,111 +125,15 @@ export default {
         }
       }
     },
-    // 局部放大
-    playerEnlarge (flag) {
-      // rtmpplayerId + '_container'
-      let nTarget = $('#' + this.rtmpplayerId + '_container');
-      let $c = $('#' + this.rtmpplayerId + '_c');
-      if (flag) {
-        this.enlarge = true;
-        let startX, startY;
-        let boxId = this.rtmpplayerId + '_box';
-        let _this = this;
-        // e.target.offsetLeft
-        nTarget.on('mousedown', function (e) {
-          startX = Math.floor(e.pageX);
-          startY = Math.floor(e.pageY);
-          console.log('startX:', startX);
-          console.log('startY:', startY);
-          // 在页面创建 box
-          let nBox = $('<div>', {
-            id: boxId,
-            class: 'player_box',
-            style: 'left: ' + startX + 'px; top: ' + startY + 'px;'
-          });
-          nTarget.append(nBox);
-          nBox = null;
-        });
-        // 鼠标移动
-        nTarget.on('mousemove', function (e) {
-          // 更新 box 尺寸
-          let box = $('#' + boxId);
-          if(box && box.length > 0) {
-            box.width(Math.floor(e.pageX - startX));
-            box.height(Math.floor(e.pageY - startY));
-          }
-        });
-        // 鼠标抬起
-        nTarget.on('mouseup', function (e) {
-          let box = $('#' + boxId);
-          if(box && box.length > 0) {
-            // 如果长宽均小于 3px，移除 box
-            if(box.width() < 10 || box.height() < 10) {
-                box.remove();
-                // 可以继续
-            } else {
-              /* nTarget.off('mousedown');
-              nTarget.off('mousemove');
-              nTarget.off('mouseup'); */
-
-              let ow = nTarget.width(), oh = nTarget.height();
-              let bw = box.width(), bh = box.height();
-              let cw = $c.width(), ch = $c.height();
-              console.log('ow:' + ow + '--oh:' + oh);
-              console.log('cw:' + ow + '--cw:' + oh);
-              console.log('bw:' + ow + '--bw:' + oh);
-              // 视频分辨率 1920 * 1080
-              if (bw / bh > ow / oh) {
-                bh = Math.floor(bw * oh / ow);
-              } else {
-                bw = Math.floor(ow / oh * bh);
-              }
-              console.log('bw:' + bw + '--bh:' + bh);
-              let inDO = cw / ow; // 之前放大的倍数
-              let inD = ow / bw * (cw / ow); // 放大的倍数
-              console.log('inDO:' + inDO);
-              console.log('inD:' + inD);
-              // if (inD > 4) { inD = 4; } // 最大放大到4倍
-              // startX startY
-              $c.width(Math.floor(ow * inD));
-              $c.height(Math.floor(oh * inD));
-              console.log('$c.width:' + $c.width());
-              let iML = $c.css('margin-left').replace(/px/, '');
-              let iMT = $c.css('margin-top').replace(/px/, '');
-              console.log('iML:', iML);
-              console.log('iMT:', iMT);
-              $c.css({
-                'margin-left': -Math.floor((inD - inDO + 1) * startX - inDO * iML) + 'px',
-                'margin-top': -Math.floor((inD - inDO + 1) * startY - inDO * iMT) + 'px'
-              });
-              console.log('margin-left:', $c.css('margin-left'));
-              console.log('margin-top:', $c.css('margin-top'));
-              box.remove();
-            }
-          }
-        });
-      } else {
-        this.enlarge = false;
-        nTarget.off('mousedown');
-        nTarget.off('mousemove');
-        nTarget.off('mouseup');
-        $c.width('100%');
-        $c.height('100%');
-        $c.css({'margin-left': '0px', 'margin-top': '0px'});
-      }
-    },
-    // 全屏/取消全屏
     playerFullScreen (flag) {
-      this.fullScreen = flag;
-      this.playerEnlarge(false);
-      /* if (this.player) {
+      if (this.player) {
         console.log('this.player', this.player);
         if (flag) {
           this.player.requestFullscreen();
         } else {
           this.player.exitFullscreen();
         }
-      } */
+      }
     },
     // 视频关闭事件
     playerClose () {
@@ -302,24 +195,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 .vl_rtmpplayer {
-  position: relative;
+  position: fixed;
   width: 100%; height: 100%;
-  overflow: hidden;
-  &.rtmpplayer_fullscreen {
-    position: fixed; z-index: 100; top: 0; left: 0;
-  }
   > .rtmpplayer_player {
-    position: relative;
     width: 100%; height: 100%;
-    overflow: hidden;
-    background: #000;
-    > .rtmpplayer_player_c {
-      width: 100%; height: 100%;
-    }
-  }
-  > .player_out_fullscreen {
-    position: absolute; top: 10px; right: 10px; z-index: 10;
-    cursor: pointer;
   }
   > .vl_icon_close {
     position: absolute; top: 10px; right: 10px; z-index: 10;
@@ -331,7 +210,7 @@ export default {
     cursor: pointer;
   }
   > .rtmpplayer_bot {
-    position: absolute; left: 0; bottom: 0px;
+    position: absolute; left: 0; bottom: -48px;
     width: 100%; height: 48px;
     background-color: #000;
     background-color: rgba(34, 34, 34, 0.65);
