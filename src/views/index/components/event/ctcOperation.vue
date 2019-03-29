@@ -60,15 +60,18 @@
                   </el-table-column>
                   <el-table-column
                     label="预案类型"
-                    prop="planType"
+                    prop="eventTypeName"
                     show-overflow-tooltip
                     >
                   </el-table-column>
                   <el-table-column
                     label="适用事件等级"
-                    prop="eventLevel"
+                    prop="levelNameList"
                     show-overflow-tooltip
                     >
+                    <template slot-scope="scope">
+                      <span>{{scope.row.levelNameList.join('、')}}</span>
+                    </template>
                   </el-table-column>
                   <el-table-column label="操作" width="150">
                     <template slot-scope="scope">
@@ -135,7 +138,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, addTaskInfo, getDepartmentList } from '@/views/index/api/api.js';
+import { getEventDetail, addTaskInfo, getDepartmentList, getPlanData } from '@/views/index/api/api.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -156,49 +159,19 @@ export default {
         planList: [
           {
             planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
+            eventTypeName: '事故灾难',
+            levelNameList: ['IV级（一般）','V级（较大）']
           },
           {
             planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
+            eventTypeName: '事故灾难',
+            levelNameList: ['IV级（一般）','V级（较大）']
           },
           {
             planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
+            eventTypeName: '事故灾难',
+            levelNameList: ['IV级（一般）','V级（较大）']
           },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            planType: '事故灾难',
-            eventLevel: 'IV级（一般）、V级（较大）'
-          }
         ], // 表格数据
         userInfo: {},
         departmentData: [],
@@ -212,6 +185,20 @@ export default {
     this.getDetail();
   },
   methods: {
+    getReplanList () { // 获取预案列表
+      console.log(this.$route.query.eventType)
+      const params = {
+        pageNum: -1,
+        'where.planType': this.$route.query.eventType
+      }
+      getPlanData(params)
+        .then((res) => {
+          if (res && res.data.list) {
+            this.planList = res.data.list;
+          }
+        })
+        .catch(() => {});
+    },
     // 获取协同部门
     getDepartList () {
       const params = {
@@ -280,6 +267,7 @@ export default {
                   message: '添加任务成功',
                   customClass: 'request_tip'
                 })
+                this.$router.back(-1);
               } else {
                 this.$message({
                   type:'error',
@@ -305,17 +293,15 @@ export default {
       this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan'});
+      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      console.log(obj);
-      this.$router.push({name: 'plan_detail'});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      console.log(obj);
-      this.$router.push({name: 'enable_plan'});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
     },
     // 返回
     back () {

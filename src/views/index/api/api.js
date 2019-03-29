@@ -73,6 +73,18 @@ export function isRegister(data) {
   });
 }
 /**
+ * 修改密码
+ * @param {*} data 
+ */
+export function updatePwd(data) {
+  return request({
+    url: '/user-service/user-password',
+    data,
+    mode: 'user',
+    method: 'put'
+  });
+}
+/**
  * 字典接口
  * @param {*} data
  */
@@ -100,7 +112,7 @@ export function openAutoCheck(data) {
  */
 export function getEventList(data) {
   return request({
-    url: 'event-services/events/page',
+    url: 'events/page',
     method: 'get',
     params: data,
     mode: 'event'
@@ -111,7 +123,7 @@ export function getEventList(data) {
  */
 export function updateEvent(data) {
   return request({
-    url: 'event-services/events/update',
+    url: 'events/update',
     method: 'put',
     data,
     mode: 'event'
@@ -122,7 +134,7 @@ export function updateEvent(data) {
  */
 export function addEvent(data) {
   return request({
-    url: 'event-services/event',
+    url: 'events',
     method: 'post',
     data,
     mode: 'event'
@@ -134,7 +146,7 @@ export function addEvent(data) {
  */
 export function getEventDetail(uid) {
   return request({
-    url: 'event-services/events/' + uid,
+    url: 'events/' + uid,
     method: 'get',
     mode: 'event'
   });
@@ -145,7 +157,7 @@ export function getEventDetail(uid) {
  */
 export function getCtcList(data) {
   return request({
-    url: 'event-services/events/page',
+    url: 'events/page',
     method: 'get',
     params: data,
     mode: 'ctc'
@@ -266,6 +278,18 @@ export function addTaskInfo(data, uid) {
     method: 'post',
     data,
     mode: 'ctc'
+  });
+}
+/**
+ * 结束调度--结束事件
+ * @param {*} data 
+ */
+export function endEvent(data, uid) {
+  return request({
+    url: 'events/finish/' + uid,
+    method: 'put',
+    data,
+    mode: 'event'
   });
 }
 /** ===== 事件统计分析 ====== */
@@ -778,9 +802,20 @@ export function getVehicleDataList (params) {
  */
 export function addGroup (data) {
   return request({
-    url: '/group',
+    url: '/groups',
     data,
     method: 'post'
+  });
+}
+/**
+ * 判断车辆新增分组组名是否重名
+ * @param {*} data 
+ */
+export function checkVelRename (params) {
+  return request({
+    url: '/vehicle-group/rename',
+    params,
+    method: 'get'
   });
 }
 /**
@@ -789,7 +824,7 @@ export function addGroup (data) {
  */
 export function editVeGroup (data) {
   return request({
-    url: '/group',
+    url: '/groups',
     data,
     method: 'put'
   });

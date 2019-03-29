@@ -243,7 +243,7 @@
           </el-pagination>
         </div>
       </div>
-      <div class="event-process">
+      <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
         <div class="process-header">
           <span>事件进展</span>
         </div>
@@ -252,80 +252,37 @@
           <div class="department">
             <p>参与部门</p>
             <ul>
-              <li>
-                <span>消防部</span>
-                <span>06-25 13:00</span>
-                <span>未处理</span>
-              </li>
-              <li>
-                <span>公安部</span>
-                <span>06-25 13:00</span>
-                <span>处理中</span>
-              </li>
-              <li>
-                <span>应急指挥部</span>
-                <span>06-25 13:00</span>
-                <span>处理完毕</span>
+              <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
+                <span>{{item.departmentName}}</span>
+                <span>{{item.createTime}}</span>
+                <span>{{item.taskStatusName}}</span>
               </li>
             </ul>
           </div>
           <div class="process-list">
             <p>事件过程</p>
             <ul>
-              <li>
-                <div class='circle-left'>
-                  <div class='big-circle'>
-                    <div class='small-circle'></div>
+              <li v-for="(item, index) in basicInfo.processingList" :key="index">
+                  <div class='circle-left'>
+                    <div class='big-circle'>
+                      <div class='small-circle'></div>
+                    </div>
                   </div>
-                </div>
-                <div class='line'></div>
-                <div class="content-right">
-                  <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                  <div class='time'>2019-01-17 11:57</div>
-                  <div style="width:100%;margin-top:10px;">
-                    <img
-                      style="width: 50px;height: 50px;margin-right: 5px;cursor:pointer;border-radius:4px;"
-                      v-for="(item, index) in imgList"
-                      :key="index"
-                      :src="item.src"
-                      @click="openBigImg(index, imgList)"
-                    >
+                  <div class='line'></div>
+                  <div class="content-right">
+                    <div class='content'>{{item.processContent}}（操作人：{{item.opUserName}}）</div>
+                    <div class='time'>{{item.createTime}}</div>
+                    <div style="width:100%;margin-top:10px;">
+                      <img
+                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
+                        v-for="(itm, index) in item.attachmentList"
+                        :key="'item' + index"
+                        :src="itm.src"
+                        @click="openBigImg(index, item.attachmentList)"
+                      >
+                    </div>
                   </div>
-                </div>
-              </li>
-              <li>
-                <div class='circle-left'>
-                  <div class='big-circle'>
-                    <div class='small-circle'></div>
-                  </div>
-                </div>
-                <div class='line'></div>
-                <div class="content-right">
-                  <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                  <div class='time'>2019-01-17 11:57</div>
-                  <div style="width:100%;margin-top:10px;">
-                    <img
-                      style="width: 50px;height: 50px;margin-right: 5px;cursor:pointer;border-radius:4px;"
-                      v-for="(item, index) in imgList"
-                      :key="index"
-                      :src="item.src"
-                      @click="openBigImg(index, imgList)"
-                    >
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class='circle-left'>
-                  <div class='big-circle'>
-                    <div class='small-circle'></div>
-                  </div>
-                </div>
-                <div class='line'></div>
-                <div class="content-right">
-                  <div class='content'>应急指挥中心派单给消防办（操作人：张东）</div>
-                  <div class='time'>2019-01-17 11:57</div>
-                </div>
-              </li>
+                </li>
             </ul>
           </div>
         </div>
@@ -461,7 +418,7 @@ export default {
   methods: {
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -502,7 +459,7 @@ export default {
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
-      this.$router.push({name: 'event_ctc_detail', query: {status: this.$route.query.status}});
+      this.$router.push({name: 'event_ctc_detail', query: {status: this.$route.query.status, eventId: this.$route.query.eventId}});
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {

@@ -173,19 +173,21 @@
         <div class="group_right">
           <p class="group_number">
             <span>可选成员</span>
-            <span>(已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{selectMembers.length > 0 ? selectMembers.length : 0}}个)</span>
+            <span>(已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{searchSelectMembers.length > 0 ? searchSelectMembers.length : 0}}个)</span>
           </p>
-          <el-input placeholder="请输入成员姓名搜索" size="small" style="width: 220px;">
+          <el-input placeholder="请输入成员姓名搜索" v-model="memberName" size="small" style="width: 220px;">
+            <i v-show="closeShowMember" slot="suffix" @click="onClearMember" class="search_icon el-icon-close" style="font-size: 20px;"></i>
             <i
+              v-show="!closeShowMember"
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
-              @click="searchData">
+              @click="searchMember">
             </i>
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
               <el-checkbox-group v-model="checkSelectMember">
-                <el-checkbox v-for="(item ,index) in selectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
+                <el-checkbox v-for="(item ,index) in searchSelectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
@@ -215,18 +217,20 @@
           <div class="group_btn group_btn_left" @click="removeRoles">移除所选角色</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{selectRoles.length > 0 ? selectRoles.length : 0}}个)</p>
-          <el-input placeholder="请输入角色名搜索" size="small" style="width: 220px;">
+          <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
+          <el-input placeholder="请输入角色名搜索" v-model="userRoleName" size="small" style="width: 220px;">
+            <i v-show="closeShowRole" slot="suffix" @click="onClearRole" class="search_icon el-icon-close" style="font-size: 20px;"></i>
             <i
+              v-show="!closeShowRole"
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
-              @click="searchData">
+              @click="searchRole">
             </i>
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
               <el-checkbox-group v-model="checkSelectRoles">
-                <el-checkbox v-for="item in selectRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
+                <el-checkbox v-for="item in searchSelectRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
@@ -270,16 +274,22 @@ export default {
       isShowError: false, // 是否显示错误提示信息
       addTips: null, // 添加用户组的提示语
       closeShow: false,
+      closeShowMember: false, // 清空搜索成员搜索框
+      closeShowRole: false, // 清空搜索角色搜索框
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       currentMembers: [], // 当前成员
-      selectMembers: [], // 可选成员
+      selectMembers: [], // 所有可选成员
+      searchSelectMembers: [], // 搜索出的可选成员
       checkSelectMember: [], // 勾选种的可选成员
       checkCurrMember: [], // 勾选中的当前成员
       currentRoles: [], // 当前角色
       selectRoles: [], // 可选角色
+      searchSelectRoles: [], // 搜索出的可选角色
       checkSelectRoles: [], // 勾选种的可选角色
       checkCurrRoles: [], // 勾选中的当前角色
       currentGroupId: null, // 当前用户组id
+      memberName: null, // 修改所属组名
+      userRoleName: null, // 配置角色名
       currRoleId: null,
       groupListData: [],
       userForm: {
@@ -328,6 +338,44 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    // 搜索角色
+    searchRole () {
+      let reg = new RegExp(this.userRoleName);
+      let arr = [];
+      this.searchSelectRoles.map((item, index) => {
+        let name = item.roleName;
+        if (name.match(reg)) {
+          arr.push(item);
+        }
+      })
+      this.searchSelectRoles = JSON.parse(JSON.stringify(arr));
+      this.closeShowRole = true;
+    },
+    // 清空搜索角色搜索框
+    onClearRole () {
+      this.userRoleName = null;
+      this.searchSelectRoles = JSON.parse(JSON.stringify(this.selectRoles));
+      this.closeShowRole = false;
+    },
+    // 搜索成员
+    searchMember () {
+      let reg = new RegExp(this.memberName);
+      let arr = [];
+      this.searchSelectMembers.map((item, index) => {
+        let name = item.userName;
+        if (name.match(reg)) {
+          arr.push(item);
+        }
+      })
+      this.searchSelectMembers = JSON.parse(JSON.stringify(arr));
+      this.closeShowMember = true;
+    },
+    // 清空搜索成员搜索框
+    onClearMember () {
+      this.memberName = null;
+      this.searchSelectMembers = JSON.parse(JSON.stringify(this.selectMembers));
+      this.closeShowMember = false;
     },
     // 清除搜索框
     onClear () {
@@ -380,10 +428,6 @@ export default {
       })
     },
     handleAddGroup (obj) {
-      // const params = {
-      //   groupName: this.userForm.groupName,
-      //   proKey: this.storageInfo.proKey
-      // }
       createUserGroups(obj)
         .then(res => {
           if (res) {
@@ -412,7 +456,6 @@ export default {
     },
     // 显示删除用户组弹出框
     showDeleteDialog (obj) {
-      console.log(obj);
       this.delGroupId = obj.uid;
       this.delUserGroupDialog = true;
     },
@@ -448,6 +491,8 @@ export default {
     showAdminMember (obj) {
       console.log(obj);
       this.currentMembers = [];
+      let searchSelectMembers = [];
+      let selectMembers = [];
       this.adminMemberDialog = true;
       this.currentGroupId = obj.uid;
       let allMembers; // 所有的用户
@@ -477,6 +522,7 @@ export default {
               });
             }
             this.selectMembers = JSON.parse(JSON.stringify(allMembers));
+            this.searchSelectMembers = JSON.parse(JSON.stringify(allMembers));
           }
         })
         .catch(() => {})
@@ -500,7 +546,7 @@ export default {
                 this.currentMembers.map((itm, idx) => {
                   if (item.userName === itm.userName) {
                     this.currentMembers.splice(idx, 1);
-                    this.selectMembers.push({
+                    this.searchSelectMembers.push({
                       uid: item.uid,
                       userName: item.userName
                     });
@@ -529,9 +575,9 @@ export default {
           .then(res => {
             if (res) {
               this.checkSelectMember.map(item => {
-                this.selectMembers.map((itm, idx) => {
+                this.searchSelectMembers.map((itm, idx) => {
                   if (item.userName === itm.userName) {
-                    this.selectMembers.splice(idx, 1);
+                    this.searchSelectMembers.splice(idx, 1);
                     this.currentMembers.push({
                       uid: item.uid,
                       userName: item.userName
@@ -548,11 +594,11 @@ export default {
     },
     // 显示配置角色弹出框
     showConfigRoleDialog (obj) {
-      console.log(obj);
       this.currRoleId = obj.uid;
       let allRoles = []; // 所有角色
       this.currentRoles = [];
       this.selectRoles = [];
+      this.searchSelectRoles = [];
       this.configRoleDialog = true;
       if (obj.roleList.length > 0) {
         obj.roleList.map(item => {
@@ -580,6 +626,7 @@ export default {
               });
             }
             this.selectRoles = JSON.parse(JSON.stringify(allRoles));
+            this.searchSelectRoles = JSON.parse(JSON.stringify(allRoles));
           }
         });
     },
@@ -598,9 +645,9 @@ export default {
           .then(res => {
             if (res) {
               this.checkSelectRoles.map(item => {
-                this.selectRoles.map((itm, idx) => {
+                this.searchSelectRoles.map((itm, idx) => {
                   if (item.roleName === itm.roleName) {
-                    this.selectRoles.splice(idx, 1);
+                    this.searchSelectRoles.splice(idx, 1);
                     this.currentRoles.push({
                       uid: item.uid,
                       roleName: item.roleName
@@ -633,7 +680,7 @@ export default {
                 this.currentRoles.map((itm, idx) => {
                   if (item.roleName === itm.roleName) {
                     this.currentRoles.splice(idx, 1);
-                    this.selectRoles.push({
+                    this.searchSelectRoles.push({
                       uid: item.uid,
                       roleName: item.roleName
                     });

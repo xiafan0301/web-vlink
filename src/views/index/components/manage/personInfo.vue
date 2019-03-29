@@ -1,286 +1,292 @@
 <template>
-  <div class="basic_info">
-    <div class="basic_info_left">
-      <el-select v-model="selectMethod" @change="handleChangePerson" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
-        <el-option
-          v-for="item in selectType"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id">
-        </el-option>
-      </el-select>
-      <div class="search_box">
-        <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @change="changeGroupName">
-          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
-          <i
-            v-show="!closeShow"
-            class="search_icon vl_icon vl_icon_manage_1"
-            slot="suffix"
-            @click="searchData">
-          </i>
-        </el-input>
-      </div>
-      <template v-if="selectMethod === 1">
-        <div class="left_content_box">
-          <div class="add_btn">
-            <i class="vl_icon vl_icon_manage_4" @click="showAddGroupDialog"></i>
-            <span>新增分组</span>
-          </div>
-          <vue-scroll>
-            <ul class="group_ul">
-              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(1)">全部人像({{allPerGroupNumber}})</li>
-              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
-                <span>{{item.name}}({{item.portraitNum}})</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
-              </li>
-            </ul>
-          </vue-scroll>
+  <vue-scroll>
+    <div class="basic_info">
+      <div class="basic_info_left">
+        <el-select v-model="selectMethod" @change="handleChangePerson" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
+          <el-option
+            v-for="item in selectType"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id">
+          </el-option>
+        </el-select>
+        <div class="search_box">
+          <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @change="changeGroupName">
+            <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
+            <i
+              v-show="!closeShow"
+              class="search_icon vl_icon vl_icon_manage_1"
+              slot="suffix"
+              @click="searchData">
+            </i>
+          </el-input>
         </div>
-      </template>
-      <template v-if="selectMethod === 2">
-        <div class="left_content_box">
-          <vue-scroll>
-            <ul class="group_ul">
-              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(2)">全部底库({{allPerBottomNameNumber}})</li>
-              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
-                <span>{{item.title}}({{item.portraitNum}})</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
-              </li>
-            </ul>
-          </vue-scroll>
-        </div>
-      </template>
-    </div>
-    <div class="basic_info_right_group">
-      <div class="search_right_box">
-        <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-          <el-form-item style="width: 240px;">
-            <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
-          </el-form-item>
-          <el-form-item>
-            <el-select v-model="searchForm.type" style="width: 240px;">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-select v-model="searchForm.sex" style="width: 240px;">
-              <el-option label="男" :value="1"></el-option>
-              <el-option label="女" :value="2"></el-option>
-            </el-select>
-          </el-form-item>
-          <template v-if="selectMethod === 1">
-            <el-form-item prop="albumId">
-              <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
-                <el-option
-                  v-for="(item, index) in perBottomBankList"
-                  :key="index"
-                  :label="item.title" 
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </template>
-          <template v-if="selectMethod === 2">
-            <el-form-item prop="groupId">
-              <el-select v-model="searchForm.groupId" style="width: 240px;" placeholder="分组筛选" clearable> <!--分组-->
-                <el-option
-                  v-for="(item, index) in perGroupList"
-                  :key="index"
-                  :label="item.name" 
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </template>
-          <el-form-item>
-            <el-button class="select_btn" @click="searchPersonData">查询</el-button>
-            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
-          </el-form-item>
-        </el-form>
-        <div class="divide"></div>
-      </div>
-      <div class="table_box">
-        <div class="add_btn_box">
-          <div class="add_event_btn" @click="showGroup = !showGroup">
-            <span>+</span>
-            <span>加入组</span>
-          </div>
-          <div class="group_info" v-show="showGroup">
-            <div class="group_info_list">
-              <vue-scroll>
-                <ul class="group_info_ul">
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                </ul>
-              </vue-scroll>
-            </div>
-            <div class="add_btn" @click="showAddGroupCopyDialog">
-              <i class="vl_icon vl_icon_manage_4" ></i>
+        <template v-if="selectMethod === 1">
+          <div class="left_content_box">
+            <div class="add_btn">
+              <i class="vl_icon vl_icon_manage_4" @click="showAddGroupDialog"></i>
               <span>新增分组</span>
             </div>
+            <vue-scroll>
+              <ul class="group_ul">
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(1)">全部人像({{allPerGroupNumber}})</li>
+                <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
+                  <span>{{item.name}}({{item.portraitNum}})</span>
+                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
+                </li>
+              </ul>
+            </vue-scroll>
           </div>
-        </div>
-        <el-table
-          class="event_table"
-          :data="personGroupList"
-          >
-          <el-table-column
-            type="selection"
-            width="55">
-          </el-table-column>
-          <el-table-column
-            label="序号"
-            type="index"
-            >
-          </el-table-column>
-          <el-table-column
-            label="姓名"
-            prop="userName"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="性别"
-            prop="userSex"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="证件类型"
-            prop="idType"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="证件号码"
-            prop="idCard"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="分组信息"
-            prop="groupInfo"
-            :show-overflow-tooltip='true'
-          >
-          </el-table-column>
-          <el-table-column fixed="right" label="操作" width="100">
-            <template slot-scope="scope">
-              <span class="operation_btn" @click="showLookDetailInfo(scope)">查看</span>
+        </template>
+        <template v-if="selectMethod === 2">
+          <div class="left_content_box">
+            <vue-scroll>
+              <ul class="group_ul">
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(2)">全部底库({{allPerBottomNameNumber}})</li>
+                <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
+                  <span>{{item.title}}({{item.portraitNum}})</span>
+                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
+                </li>
+              </ul>
+            </vue-scroll>
+          </div>
+        </template>
+      </div>
+      <div class="basic_info_right_group">
+        <div class="search_right_box">
+          <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
+            <el-form-item style="width: 240px;">
+              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
+            </el-form-item>
+            <el-form-item>
+              <el-select v-model="searchForm.type" style="width: 240px;">
+                <el-option label="区域一" value="shanghai"></el-option>
+                <el-option label="区域二" value="beijing"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-select v-model="searchForm.sex" style="width: 240px;">
+                <el-option label="男" :value="1"></el-option>
+                <el-option label="女" :value="2"></el-option>
+              </el-select>
+            </el-form-item>
+            <template v-if="selectMethod === 1">
+              <el-form-item prop="albumId">
+                <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
+                  <el-option
+                    v-for="(item, index) in perBottomBankList"
+                    :key="index"
+                    :label="item.title" 
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
             </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="pagination.pageNum"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="pagination.pageSize"
-        layout="total, prev, pager, next, jumper"
-        :total="pagination.total">
-      </el-pagination>
-    </div>
-    <!--查看人员详细信息弹出框-->
-    <el-dialog
-      title="查看人员信息"
-      :visible.sync="perosnDetailInfoDialog"
-      width="722px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp_person"
-      >
-      <div class="content_body">
-        <div class="content_left">
-          <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+            <template v-if="selectMethod === 2">
+              <el-form-item prop="groupId">
+                <el-select v-model="searchForm.groupId" style="width: 240px;" placeholder="分组筛选" clearable> <!--分组-->
+                  <el-option
+                    v-for="(item, index) in perGroupList"
+                    :key="index"
+                    :label="item.name" 
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </template>
+            <el-form-item>
+              <el-button class="select_btn" @click="searchPersonData">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+          <div class="divide"></div>
         </div>
-        <ul class="content_right">
-          <li>
-            <span>姓名：</span>
-            <span>邹洪华</span>
-          </li>
-          <li>
-            <span>性别：</span>
-            <span>男</span>
-          </li>
-          <li>
-            <span>民族：</span>
-            <span>汉</span>
-          </li>
-          <li>
-            <span>证件类型：</span>
-            <span>身份证</span>
-          </li>
-          <li>
-            <span>证件号码：</span>
-            <span>432501199111110011</span>
-          </li>
-          <li>
-            <span>出生日期：</span>
-            <span>1991.11.11</span>
-          </li>
-          <li>
-            <span>底库信息：</span>
-            <span>底库1、底库2</span>
-          </li>
-          <li>
-            <span>分组信息：</span>
-            <span>分组1、分组2</span>
-          </li>
-          <li>
-            <span>备注：</span>
-            <span>
-              任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，
-              段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示。
-            </span>
-          </li>
-        </ul>
+        <div class="table_box">
+          <div class="add_btn_box">
+            <div class="add_event_btn" @click="showGroup = !showGroup">
+              <span>+</span>
+              <span>加入组</span>
+            </div>
+            <div class="group_info" v-show="showGroup">
+              <div class="group_info_list">
+                <vue-scroll>
+                  <ul class="group_info_ul">
+                    <li>分组命名文字限制十字</li>
+                    <li>分组命名文字限制十字</li>
+                    <li>分组命名文字限制十字</li>
+                    <li>分组命名文字限制十字</li>
+                  </ul>
+                </vue-scroll>
+              </div>
+              <div class="add_btn" @click="showAddGroupCopyDialog">
+                <i class="vl_icon vl_icon_manage_4" ></i>
+                <span>新增分组</span>
+              </div>
+            </div>
+          </div>
+          <el-table
+            class="event_table"
+            :data="personGroupList"
+            >
+            <el-table-column
+              type="selection"
+              width="55">
+            </el-table-column>
+            <el-table-column
+              label="序号"
+              type="index"
+              >
+            </el-table-column>
+            <el-table-column
+              label="姓名"
+              prop="userName"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="性别"
+              prop="userSex"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="证件类型"
+              prop="idType"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="证件号码"
+              prop="idCard"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="分组信息"
+              prop="groupInfo"
+              :show-overflow-tooltip='true'
+            >
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" width="100">
+              <template slot-scope="scope">
+                <span class="operation_btn" @click="showLookDetailInfo(scope)">查看</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="pagination.pageNum"
+          :page-sizes="[100, 200, 300, 400]"
+          :page-size="pagination.pageSize"
+          layout="total, prev, pager, next, jumper"
+          :total="pagination.total">
+        </el-pagination>
       </div>
-    </el-dialog>
-    <!--新增组弹出框-->
-    <el-dialog
-      title="新增分组"
-      :visible.sync="addGroupDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <div>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="addGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupDialog = false">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--新增组弹出框-->
-    <el-dialog
-      title="新增分组"
-      :visible.sync="addGroupCopyDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <div class="content_body">
-        <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="addGroupCopyDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupCopyDialog = false">确认</el-button>
-      </div>
-    </el-dialog>
-  </div>
+      <!--查看人员详细信息弹出框-->
+      <el-dialog
+        title="查看人员信息"
+        :visible.sync="perosnDetailInfoDialog"
+        width="722px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp_person"
+        >
+        <div class="content_body">
+          <div class="content_left">
+            <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+          </div>
+          <ul class="content_right">
+            <li>
+              <span>姓名：</span>
+              <span>邹洪华</span>
+            </li>
+            <li>
+              <span>性别：</span>
+              <span>男</span>
+            </li>
+            <li>
+              <span>民族：</span>
+              <span>汉</span>
+            </li>
+            <li>
+              <span>证件类型：</span>
+              <span>身份证</span>
+            </li>
+            <li>
+              <span>证件号码：</span>
+              <span>432501199111110011</span>
+            </li>
+            <li>
+              <span>出生日期：</span>
+              <span>1991.11.11</span>
+            </li>
+            <li>
+              <span>底库信息：</span>
+              <span>底库1、底库2</span>
+            </li>
+            <li>
+              <span>分组信息：</span>
+              <span>分组1、分组2</span>
+            </li>
+            <li>
+              <span>备注：</span>
+              <span>
+                任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
+                这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
+                这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
+                这段文字是样式参考。调度指挥方案任务内容填写，
+                段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示。
+              </span>
+            </li>
+          </ul>
+        </div>
+      </el-dialog>
+      <!--新增组弹出框-->
+      <el-dialog
+        title="新增分组"
+        :visible.sync="addGroupDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
+          <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+            <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="addGroupInfo('addGroupForm')">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--新增组弹出框-->
+      <el-dialog
+        title="新增分组"
+        :visible.sync="addGroupCopyDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <div class="content_body">
+          <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
+          <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="addGroupCopyDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="addGroupCopyDialog = false">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
+  </vue-scroll>
 </template>
 <script>
-import { getPerBottomBankList, getPerGroupList, getPersonData } from '@/views/index/api/api.js';
+import { validateName } from '@/utils/validator.js';
+import { getPerBottomBankList, getPerGroupList, getPersonData, addGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -301,6 +307,16 @@ export default {
           name: '按底库查看'
         }
       ],
+      addGroupForm: {
+        userGroupName: null
+      },
+      rules: {
+        userGroupName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { max: 6, message: '最多输入6个字', trigger: 'blur' },
+          { validator: validateName, trigger: 'blur' }
+        ]
+      },
       selectMethod: 1, // 左侧查看方式  1--分组方式查看 2--底库查看
       searchForm: {
         idNo: null,
@@ -452,6 +468,35 @@ export default {
     // 显示新增分组弹出框
     showAddGroupDialog () {
       this.addGroupDialog = true;
+    },
+    // 新增分组
+    addGroupInfo () {
+      
+    },
+    handleAddGroupInfo () {
+      const params = {
+        groupName: this.addGroupForm.userGroupName,
+        groupType: 1
+      };
+      addGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.getVeGroupInfo();
+            this.addGroupDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '新增失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 显示加入组--新增分组弹出框
     showAddGroupCopyDialog () {
@@ -666,6 +711,18 @@ export default {
         color: #999999;
         margin-bottom: 20px;
         display: inline-block;
+      }
+    }
+    .group_name {
+      position: relative;
+      .group_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }
