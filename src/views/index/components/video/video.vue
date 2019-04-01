@@ -8,8 +8,8 @@
         <router-link :to="{name: 'video_playback'}">录像回放</router-link>
       </li>
       <li>
-        <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a>
-        <!-- <router-link :to="{name: 'video_query'}">智能查看</router-link> -->
+        <!-- <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a> -->
+        <router-link :to="{name: 'video_query'}">智能查看</router-link>
       </li>
       <li>
         <router-link :to="{name: 'video_signList'}">标记列表</router-link>
@@ -190,10 +190,12 @@ export default {
               float: left;
               height: 30px; line-height: 30px;
               cursor: pointer;
+              color: #222;
               > .show_list_pi {
                 display: inline-block;
-                margin-right: 3px;
                 transition: all .3s ease-out;
+                position: relative; top: -1px;
+                margin-right: 5px;
                 &.show_list_pi2 {
                   transform: rotate(90deg);
                 }
@@ -204,13 +206,25 @@ export default {
           > ul {
             display: none;
             > li {
-              padding: 0 10px 0 40px;
-              height: 30px; line-height: 30px;
-              cursor: pointer;
-              &:hover { color: #186DFB; }
-              &.tree_sli_empty {
-                color: #999 !important;
-                cursor: default !important;
+              > div {
+                position: relative;
+                padding: 0 35px 0 40px;
+                height: 30px; line-height: 30px;
+                overflow: hidden;
+                cursor: pointer;
+                color: #444;
+                > .vl_icon_v11 {
+                  position: absolute; top: 5px; right: 15px;
+                }
+                &:hover { color: #186DFB; }
+                &.tree_sli_empty {
+                  color: #999 !important;
+                  cursor: default !important;
+                }
+                &.tree_li_dis {
+                  color: #999 !important;
+                  cursor: default !important;
+                }
               }
             }
           }
