@@ -536,7 +536,7 @@ export default {
       this.isShowOrganError = false;
       this.addDepartment.organName = null;
       this.addDepartment.chargeUserName = null;
-      this.addDepartment.organPid = this.$route.query.id;
+      this.addDepartment.organPid = parseInt(this.$route.query.id);
       this.newDepartmentDialog = true;
     },
     // 添加部门

@@ -12,8 +12,8 @@ const oDomains = {
     },
     // 布控部分地址
     control: {
-        // dev: 'http://apidev.aorise.org/vlink-control',
-        dev: 'http://10.116.66.29:8081',//钟赞
+        dev: 'http://apidev.aorise.org/vlink-control',
+        // dev: 'http://10.116.66.29:8081',//钟赞
         // dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
@@ -34,12 +34,6 @@ const oDomains = {
       test: 'http://apirel.aorise.org/vlink-event/api/emi',
       prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     },
-    // 上传图片
-    // upload: {
-    //     dev: 'http://apidev.aorise.org/education-user-related',
-    //     test: 'http://apirel.aorise.org/education-user-related',
-    //     prod: 'http://apidev.aorise.org/education-user-related'
-    // },
     // 研判检索服务
     judge: {
         // dev: 'http://10.116.64.127:8082/',
@@ -56,8 +50,8 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      dev: 'http://10.116.64.142:8082', // 江先琨
-      // dev: 'http://apidev.aorise.org/vlink-user',
+      // dev: 'http://10.116.64.142:8082', // 江先琨
+      dev: 'http://apidev.aorise.org/vlink-user',
       test: 'http://apidev.aorise.org/vlink-user',
       prod: 'http://apidev.aorise.org/vlink-user'
     },

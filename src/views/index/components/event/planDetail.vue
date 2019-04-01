@@ -130,7 +130,7 @@ export default {
     },
     // 跳至启用预案页面
     skipReplanPage () {
-      this.$router.push({name: 'enable_plan'});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: this.$route.query.planId}});
     },
     // 返回
     back () {

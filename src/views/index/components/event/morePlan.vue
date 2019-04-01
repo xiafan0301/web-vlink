@@ -179,12 +179,12 @@ export default {
     // 跳至查看详情页面
     skipDetailInfo (obj) {
       console.log(obj);
-      this.$router.push({name: 'plan_detail'});
+      this.$router.push({name: 'plan_detail', query: {planId: obj.planId, eventId: this.$route.query.eventId}});
     },
     // 跳至启用预案页面
     skipEnablePlanPage (obj) {
       console.log(obj);
-      this.$router.push({name: 'enable_plan'});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.planId}});
     },
     // 获取列表数据
     getPlanList () {

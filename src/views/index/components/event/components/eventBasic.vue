@@ -87,9 +87,9 @@
       </div>
       <div class='basic-list img-content'>
         <img
-          v-for="(item, index) in basicInfo.imgList"
+          v-for="(item, index) in basicInfo.attachmentList"
           :key="index"
-          :src="item.src"
+          :src="item.path"
           @click="handleBigImg(index)"
         />
       </div>

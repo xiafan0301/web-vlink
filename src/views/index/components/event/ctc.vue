@@ -72,10 +72,10 @@
         </el-table-column>
         <el-table-column
           label="状态"
-          prop="eventStatusName"
+          prop="dispatchStatusName"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatusName === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
+            <span class="event_status" :class="[scope.row.dispatchStatusName === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.dispatchStatusName}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -137,58 +137,7 @@ export default {
         eventStatus: '全部状态', // 事件状态
         phoneOrNumber: null // 手机号或事件编号
       },
-      ctcList: [
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '待开始',
-          reportContent: 0,
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '城管',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '进行中',
-          reportContent: 1
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '接警员',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '已结束',
-          reportContent: 1
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '进行中',
-          reportContent: 1
-        },
-        {
-          eventCode: 'XP1000000000000',
-          eventType: '治安事件',
-          reportUser: '17899999999',
-          idCard: '市民',
-          reportTime: '2018-05-15 18：40',
-          eventAddress: '湖南省长沙市天心区创谷工业园',
-          eventStatus: '进行中',
-          reportContent: 1
-        }
-      ], // 表格数据
+      ctcList: [], // 表格数据
       ctcStatusList: [], // 调度事件状态
     }
   },
@@ -226,7 +175,7 @@ export default {
         'where.mutualFlag': this.ctcForm.mutualFlag,
         'where.reportTimeStart': this.ctcForm.reportTime[0],
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
-        'where.eventStatus': eventStatus,
+        'where.dispatchStatus': eventStatus,
         pageNum: this.pagination.pageNum
       }
       getEventList(params)
@@ -272,11 +221,11 @@ export default {
           .then(res => {console.log(res);})
           .catch(() => {})
       }
-      if (obj.eventStatus === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing'}});
+      if (obj.dispatchStatusName === '进行中') {
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
       }
-      if (obj.eventStatus === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end'}});
+      if (obj.dispatchStatusName === '已结束') {
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
       }
     }
   }

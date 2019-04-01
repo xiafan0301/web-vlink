@@ -127,9 +127,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

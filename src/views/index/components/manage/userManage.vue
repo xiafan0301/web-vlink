@@ -247,9 +247,11 @@
           <div class="group_btn group_btn_left" @click="removeCurrGroup">移除所选组</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选组 (已选{{checkSelectGroups.length > 0 ? checkSelectGroups.length : 0}}个/共{{selectGroups.length > 0 ? selectGroups.length : 0}}个)</p>
-          <el-input placeholder="请输入组名搜索" size="small" style="width: 220px;border-radius: 50%;">
+          <p class="group_number">可选组 (已选{{checkSelectGroups.length > 0 ? checkSelectGroups.length : 0}}个/共{{searchSelectGroups.length > 0 ? searchSelectGroups.length : 0}}个)</p>
+          <el-input placeholder="请输入组名搜索" v-model="userGroupName" size="small" style="width: 220px;border-radius: 50%;">
+            <i v-show="closeShowGroup" slot="suffix" @click="onClearGroup" class="search_icon el-icon-close" style="font-size: 20px;"></i>
             <i
+              v-show="!closeShowGroup"
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
               @click="searchGroup">
@@ -258,7 +260,7 @@
            <div class="checkbox_box_right">
             <vue-scroll>
               <el-checkbox-group v-model="checkSelectGroups">
-                <el-checkbox v-for="item in selectGroups" :label="item" :key="item.uid">{{item.groupName}}</el-checkbox>
+                <el-checkbox v-for="item in searchSelectGroups" :label="item" :key="item.uid">{{item.groupName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
@@ -288,9 +290,11 @@
           <div class="group_btn group_btn_left" @click="removeRolesData">移除所选角色</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{selectRoles.length > 0 ? selectRoles.length : 0}}个)</p>
-          <el-input placeholder="请输入角色名搜索" size="small" style="width: 220px;">
+          <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
+          <el-input placeholder="请输入角色名搜索" size="small" v-model="userRoleName" style="width: 220px;">
+            <i v-show="closeShowRole" slot="suffix" @click="onClearRole" class="search_icon el-icon-close" style="font-size: 20px;"></i>
             <i
+              v-show="!closeShowRole"
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
               @click="searchRole">
@@ -299,7 +303,7 @@
            <div class="checkbox_box_right">
             <vue-scroll>
               <el-checkbox-group v-model="checkSelectRoles">
-                <el-checkbox v-for="item in selectRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
+                <el-checkbox v-for="item in searchSelectRoles" :label="item" :key="item.uid">{{item.roleName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
@@ -326,17 +330,23 @@ export default {
       groupId: null, // 搜索的用户组
       keyWord: null, // 用户名/姓名搜索
       closeShow: false, // 清空搜索框
+      closeShowGroup: false, // 清空搜索组搜索框
+      closeShowRole: false, // 清空搜索角色搜索框
       currentGroups: [], // 当前所属组
-      selectGroups: [], // 可选组
+      selectGroups: [], // 全部可选组
+      searchSelectGroups: [], // 搜索出的可选组
       allGroupList: [], // 所有的用户组
       checkCurrGroups: [], // 勾选上的当前组
       checkSelectGroups: [], // 勾选上的可选组
       currentRoles: [], // 当前角色
-      selectRoles: [], // 可选角色
+      selectRoles: [], // 全部可选角色
+      searchSelectRoles: [], // 搜索出的可选角色
       checkCurrRoles: [], // 勾选中的当前角色
       checkSelectRoles: [], // 勾选中的可选角色
       allRoles: [], // 所有角色
       userListData: [],
+      userGroupName: null, // 修改所属组名
+      userRoleName: null, // 配置角色名
       editUser: {
         uid: null,
         proKey: null,
@@ -417,6 +427,7 @@ export default {
     // 获取用户组
     getAllUserGroup () {
       this.selectGroups = [];
+      this.searchSelectGroups = [];
       this.allGroupList = [];
       const params = {
         'where.proKey': this.userInfo.proKey,
@@ -425,7 +436,6 @@ export default {
       getUserGroups(params)
         .then(res => {
           if (res) {
-            console.log('res', res)
             this.userGroupList = res.data.list;
             this.allGroupList = JSON.parse(JSON.stringify(res.data.list));
             if (this.currentGroups.length > 0) {
@@ -438,6 +448,7 @@ export default {
               })
             }
             this.selectGroups = JSON.parse(JSON.stringify(this.allGroupList));
+            this.searchSelectGroups = JSON.parse(JSON.stringify(this.allGroupList));
           }
         })
     },
@@ -454,13 +465,41 @@ export default {
     },
     // 搜索组
     searchGroup () {
-      // this.closeShow = true;
-      // this.getList();
+      let reg = new RegExp(this.userGroupName);
+      let arr = [];
+      this.searchSelectGroups.map((item, index) => {
+        let name = item.groupName;
+        if (name.match(reg)) {
+          arr.push(item);
+        }
+      })
+      this.searchSelectGroups = JSON.parse(JSON.stringify(arr));
+      this.closeShowGroup = true;
+    },
+    // 清空搜索组搜索框
+    onClearGroup () {
+      this.userGroupName = null;
+      this.searchSelectGroups = JSON.parse(JSON.stringify(this.selectGroups));
+      this.closeShowGroup = false;
     },
     // 搜索角色
     searchRole () {
-      // this.closeShow = true;
-      // this.getList();
+      let reg = new RegExp(this.userRoleName);
+      let arr = [];
+      this.searchSelectRoles.map((item, index) => {
+        let name = item.roleName;
+        if (name.match(reg)) {
+          arr.push(item);
+        }
+      })
+      this.searchSelectRoles = JSON.parse(JSON.stringify(arr));
+      this.closeShowRole = true;
+    },
+    // 清空搜索角色搜索框
+    onClearRole () {
+      this.userRoleName = null;
+      this.searchSelectRoles = JSON.parse(JSON.stringify(this.selectRoles));
+      this.closeShowRole = false;
     },
     // 清空搜索框
     onClear () {
@@ -580,7 +619,6 @@ export default {
     },
     // 显示修改所属组弹出框
     showEditGroupDialog (obj) {
-      console.log(obj.sysUserGroupInfos);
       this.currentGroups = [];
       this.groupUserId = obj.uid;
       this.editUserGroupDialog = true;
@@ -609,7 +647,7 @@ export default {
           .then(res => {
             if (res) {
               this.checkSelectGroups.map(item => {
-                this.selectGroups.map((itm, idx) => {
+                this.searchSelectGroups.map((itm, idx) => {
                   if (item.groupName === itm.groupName) {
                     this.selectGroups.splice(idx, 1);
                     this.currentGroups.push({
@@ -677,6 +715,7 @@ export default {
     getAllRole () {
       this.allRoles = [];
       this.selectRoles = [];
+      this.searchSelectRoles = [];
       const params = {
         'where.proKey': this.userInfo.proKey,
         pageSize: 0,
@@ -695,6 +734,7 @@ export default {
               });
             }
             this.selectRoles = JSON.parse(JSON.stringify(this.allRoles));
+            this.searchSelectRoles = JSON.parse(JSON.stringify(this.allRoles));
           }
         });
     },
@@ -716,7 +756,7 @@ export default {
                 this.currentRoles.map((itm, idx) => {
                   if (item.roleName === itm.roleName) {
                     this.currentRoles.splice(idx, 1);
-                    this.selectRoles.push({
+                    this.searchSelectRoles.push({
                       uid: item.uid,
                       roleName: item.roleName
                     });
@@ -745,9 +785,9 @@ export default {
           .then(res => {
             if (res) {
               this.checkSelectRoles.map(item => {
-                this.selectRoles.map((itm, idx) => {
+                this.searchSelectRoles.map((itm, idx) => {
                   if (item.roleName === itm.roleName) {
-                    this.selectRoles.splice(idx, 1);
+                    this.searchSelectRoles.splice(idx, 1);
                     this.currentRoles.push({
                       uid: item.uid,
                       roleName: item.roleName

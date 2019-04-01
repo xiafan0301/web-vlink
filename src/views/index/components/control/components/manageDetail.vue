@@ -38,7 +38,11 @@
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
           <div>
             <div class="manage_d_c_o_i" v-for="item in controlDetail.objectList" :key="item.id">
-              <img :src="item.photoUrl" alt="">
+              <img :src="item.photoUrl" alt="" v-if="item.photoUrl">
+              <div v-else class="manage_not_img">
+                <i class="vl_icon vl_icon_control_33"></i>
+                <p>暂无相关图片</p>
+              </div>
               <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.name}}</span></p>
               <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
             </div>
@@ -131,13 +135,8 @@
                           <li
                             v-if="item.surveillanceIds"
                             :key="item.uid"
-                            @dragstart="dragstart($event, index)"
-                            @drag="drag"
-                            @dragend="dragend"
-                            @dragenter="dragenter"
-                            @dragleave="dragleave"
+                            @dragstart="dragstart($event, index, item)"
                             @dragover="dragover"
-                            @drop="drop($event, index)"
                             :draggable="true"
                           >
                             <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
@@ -148,24 +147,16 @@
                   </div>
                 <div class="situ_right">
                   <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
-                    @dragstart="dragstart($event, index)"
-                    @drag="drag"
                     @dragend="dragend"
                     @dragenter="dragenter"
                     @dragleave="dragleave"
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
-                    <div class="situ_r_img">
-                      <div></div>
+                    <div class="situ_r_img" v-if="!item.isShowVideo">
+                      <div>从左边点击或拖拽设备播放</div>
                     </div>
-                      <!-- <video src="../../../../assets/video/video.mp4" autoplay loop></video>
-                      <div>
-                        <i class="vl_icon vl_icon_control_06"></i>
-                        <i class="vl_icon vl_icon_control_11"></i>
-                        <i class="vl_icon vl_icon_control_07"></i>
-                      </div>
-                      <i class="vl_icon vl_icon_control_13"></i> -->
+                    <div v-else is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
                   </div>
                 </div>
               </div>
@@ -320,9 +311,10 @@
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
+import rtmpplayer from '@/components/common/rtmpplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
-  components: {delDialog, stopDialog},
+  components: {delDialog, stopDialog, rtmpplayer},
   props: ['state', 'controlId'],
   data () {
     return {
@@ -347,15 +339,22 @@ export default {
       pageNumObjRes: 1,
       // 实时监控设备列表
       situList: [],
-      rightVideoList: [{}, {}, {}, {}],//右边已拖过去的视频,默认展示4个
+      // rVList: [{},{},{},{}],//用于操作的右边视频列表
+      rightVideoList: [
+        {isShowVideo: false}, 
+        {isShowVideo: false}, 
+        {isShowVideo: false}, 
+        {isShowVideo: false}
+      ],//右边已拖过去的视频,默认展示4个
       dragstartIndex: null,//左边列表下标
       eventDetailDialog: false,//事件详情弹窗
       lastIndex: null,
+      dragActiveObj: null,
       // 布控结果筛选参数
       controlTimeIsKey: null,//布控时间
       devListIsKey: null,//设备列表
       devNameIsKey: null,//设备名称
-
+      // 布控结果视频参数
       loading: false,
       controlResList: null,//布控抓拍结果列表
       showLarge: false,
@@ -378,6 +377,7 @@ export default {
     this.getAlarmSnap();
   },
   methods: {
+    /* ************布控结果********* */
     // 停止播放
     pauseVideo (item, index) {
       item.curVideoPlay = false;
@@ -512,7 +512,6 @@ export default {
       this.pageNumObj = page;
       this.getControlObjList();
     },
-   
     // 获取实时监控的布控设备
     getControlMap() {
       const params = {
@@ -583,18 +582,35 @@ export default {
       this.pageNumObjRes = page;
       this.getAlarmSnap();
     },
-    dragstart (e, index) {
+    /* ************运行情况********* */
+    // 关闭播放器
+    playerClose (index, sid) {
+      console.log('sid', sid);
+      this.rightVideoList.splice(index, 1, {isShowVideo: false});
+
+      // let _div = document.createElement('div');
+      // _div.className = 'situ_r_img';
+      // _div.innerHTML = '<div></div>'
+      // e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
+      // let _video = this.rVList.splice(index, 1, {})[0];
+      // let _index = _video.index;
+      // this.situList.splice(_index, 1, _video);
+    },
+    // 拖拽
+    dragstart (e, index, item) {
       // 使其半透明
-      e.target.style.opacity = .5;
+      // e.target.style.opacity = .5;
       this.dragstartIndex = index;
       console.log(this.dragstartIndex, 'dragstartIndex')
+
+      this.dragActiveObj = item;
     },
-    drag (e) {
-      console.log(e);
-    },
+  
     dragend (e) {
       // 重置透明度
       e.target.style.opacity = "";
+
+      this.dragActiveObj = null;
     },
     dragenter (e) {
       // 当可拖动的元素进入可放置的目标高亮目标节点
@@ -616,50 +632,63 @@ export default {
       // 阻止默认动作（如打开一些元素的链接）
       e.preventDefault();
       e.stopPropagation();
-      // 移动拖动的元素到所选择的放置目标节点
-      console.log(e.target)
-      if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
-          e.target.style.background = "";
-          let sid = this.situList[this.dragstartIndex].uid;
-          let div = document.createElement('div');
-          let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
-            <div>
-              <i class="vl_icon vl_icon_control_06"></i>
-              <i class="vl_icon vl_icon_control_11"></i>
-              <i class="vl_icon vl_icon_control_07"></i>
-            </div>
-            <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
-          `;
-          div.innerHTML = video;
-          e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
-          // 从左往右边拖拽逻辑
-          const rightVideoList = [{},{},{},{}]
-          let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
-          delVideo[0]['index'] = this.dragstartIndex;
-          if (rightVideoList[index].uid) {
-            let _video = rightVideoList.splice(index, 1)[0];
-            let _index = _video.index;
-            this.situList.splice(_index, 1 , _video);
-            rightVideoList.splice(index, 1, {});
-          } else {
-            rightVideoList.splice(index, 1, ...delVideo);
-          }
-          console.log(delVideo) 
-          // 防止重复绑定点击事件，先解绑
-          $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
-          // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
-          let _this = this;
-          $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
-            let _div = document.createElement('div');
-            _div.className = 'situ_r_img';
-            _div.innerHTML = '<div></div>'
-            e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-            let _video = rightVideoList.splice(index, 1, {})[0];
-            let _index = _video.index;
-            
-            _this.situList.splice(_index, 1, _video);
+      console.log(this.rightVideoList, 'rightVideoList')
+      if (this.dragActiveObj) {
+        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+        let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
+        console.log('deviceSip', deviceSip);
+        this.rightVideoList.splice(index, 1, {
+          isShowVideo: true,
+          title: this.dragActiveObj.deviceName,
+          video: Object.assign({}, this.dragActiveObj, {
+            deviceSip: deviceSip
           })
+        });
       }
+      // 移动拖动的元素到所选择的放置目标节点
+      // console.log(e.target)
+      // if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
+      //     e.target.style.background = "";
+      //     let sid = this.situList[this.dragstartIndex].uid;
+      //     let div = document.createElement('div');
+      //     let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
+      //       <div>
+      //         <i class="vl_icon vl_icon_control_06"></i>
+      //         <i class="vl_icon vl_icon_control_11"></i>
+      //         <i class="vl_icon vl_icon_control_07"></i>
+      //       </div>
+      //       <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
+      //     `;
+      //     div.innerHTML = video;
+      //     e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
+      //     // 从左往右边拖拽逻辑
+      //     const rVList = [{},{},{},{}]
+      //     let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
+      //     delVideo[0]['index'] = this.dragstartIndex;
+      //     if (rVList[index].uid) {
+      //       let _video = rVList.splice(index, 1)[0];
+      //       let _index = _video.index;
+      //       this.situList.splice(_index, 1 , _video);
+      //       rVList.splice(index, 1, {});
+      //     } else {
+      //       rVList.splice(index, 1, ...delVideo);
+      //     }
+      //     console.log(delVideo) 
+      //     // 防止重复绑定点击事件，先解绑
+      //     $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
+      //     // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
+      //     let _this = this;
+      //     $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
+      //       let _div = document.createElement('div');
+      //       _div.className = 'situ_r_img';
+      //       _div.innerHTML = '<div></div>'
+      //       e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
+      //       let _video = rVList.splice(index, 1, {})[0];
+      //       let _index = _video.index;
+            
+      //       _this.situList.splice(_index, 1, _video);
+      //     })
+      // }
     },
     
     
@@ -829,7 +858,7 @@ export default {
             flex: 0 0 162px;
             margin: 0 0.5%;
             margin-top: 15px;
-            p{
+            > p{
               padding-left: 10px;
               margin-top: 4px;
               i{
@@ -837,9 +866,19 @@ export default {
                 margin-bottom: 2px;
               }
             }
-            img{
+            > img{
               width: 100%;
               height: 160px;
+            }
+            .manage_not_img{
+              width: 100%;
+              height: 160px;
+              padding-top: 50px;
+              border-radius: 4px 4px 0 0;
+              text-align: center;
+              background: #E6E6E6;
+              font-size: 16px;
+              color: #999;
             }
           }
         }
@@ -911,6 +950,7 @@ export default {
             flex-wrap: nowrap;
             .situ_left{
               width: 258px;
+              min-width: 258px;
               border-right: 1px solid #F2F2F2;
               > div{
                 width: 100%;
@@ -929,7 +969,7 @@ export default {
                   justify-content: space-between;
                   padding: 0 15px 0 40px;
                   color: #666666;
-                  cursor: pointer;
+                  cursor: move;
                   i{
                     vertical-align: middle;
                     margin-top: 10px;
@@ -953,7 +993,6 @@ export default {
               padding-top: 20px;
               padding-right: 1%;
               .situ_r_video{
-                width: 100%;
                 flex: 0 0 49%;
                 position: relative;
                 overflow: hidden;
@@ -1104,10 +1143,12 @@ export default {
     .situ_r_video{
       .situ_r_img{
           width: 100%;
-          height: 200px;
+          height: 250px;
         > div{
           width: 100%;
           height: 100%;
+          text-align: center;
+          line-height: 250px;
           background: #e6e6e6;
         }
       }
@@ -1115,31 +1156,6 @@ export default {
         width: 100%;
         video{
           width: 100%;
-        }
-        > div{
-          width: 100%;
-          height: 44px;
-          padding-right: 10px;
-          position: absolute;
-          left: 0;
-          bottom: 4px;
-          background: rgba(0,0,0,.4);
-          opacity: .4;
-          text-align: right;
-          i{
-            margin-right: 15px;
-            margin-top: 10px;
-            cursor: pointer;
-            &:last-child{
-              margin-right: 0;
-            }
-          }
-        }
-        > .vl_icon_control_13{
-          position: absolute;
-          right: 8px;
-          top: 8px;
-          cursor: pointer;
         }
       }
     }
