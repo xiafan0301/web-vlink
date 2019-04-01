@@ -20,7 +20,23 @@
         <span class="vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
         <span class="vl_icon vl_icon_v22" v-show="!playActive" title="播放" @click="playerPlay(true)"></span>
         <!-- 音量 声音大小（0-1之间） myPlayer.volume(0.5); -->
-        <span class="vl_icon vl_icon_v23 player_voice" title="音量"></span>
+        <span class="player_volume">
+          <div>
+            <el-slider
+              v-model="volume"
+              :min="0"
+              :max="1"
+              :step="0.001"
+              vertical
+              height="120px">
+            </el-slider>
+          </div>
+          <span class="vl_icon" :class="{
+              'vl_icon_v23': volumeAble && volume > 0,
+              'vl_icon_v232': !volumeAble || volume <= 0
+            }" title="音量" @click="playerVolumeAble">
+          </span>
+        </span>
         <!-- 标记 -->
         <span v-if="signAble" class="vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
         <!-- 录视频 -->
@@ -44,7 +60,7 @@
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding-left: 30px;">
         <el-form-item prop="content">
           <el-select v-model="signForm.content" placeholder="请选择标记内容">
-            <el-option v-for="(item, index) in signContentList" :label="item" :value="item" :key="'sign_content_list' + index"></el-option>
+            <el-option v-for="(item, index) in signContentList" :label="item.content" :value="item.uid" :key="'sign_content_list' + index"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -56,7 +72,7 @@
   </div>
 </template>
 <script>
-import {random14, drawBorder} from '@/utils/util.js';
+import {random14, formatDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSign } from "@/views/index/api/api.video.js";
 export default {
   props: ['index', 'oData', 'signAble'],
@@ -68,10 +84,13 @@ export default {
 
       fullScreen: false,
       enlarge: false,
+      volume: 0.5,
+      volumeAble: true,
 
       signContentList: [],
       signDialogVisible: false,
       signForm: {
+        signTime: '',
         content: ''
       },
       signFormRules: {
@@ -89,9 +108,20 @@ export default {
         this.player.src(this.oData.video.deviceSip); /*动态设置video.js播放的地址。*/
         this.player.autoplay();
       }
+    },
+    volume () {
+      if (this.volume <= 0) {
+        this.volumeAble = false;
+      } else {
+        this.volumeAble = true;
+      }
+      if (this.player) {
+        this.player.volume(this.volume);
+      }
     }
   },
   mounted () {
+    let _this = this;
     // console.log('this.rtmpplayerId', this.rtmpplayerId);
     // console.log('player oData:', this.oData);
     // flash路径，有一些html播放不了的视频，就需要用到flash播放。这一句话要加在在videojs.js引入之后使用
@@ -104,7 +134,7 @@ export default {
       // height: 400, // 视频播放器显示的高度
       // aspectRatio: '1:1', // 将播放器置于流体模式下，计算播放器动态大小时使用该值。如“16:9”或“4:3”
       loop: false, // 否循环播放:true/false
-      muted: true, // 设置默认播放音频：true/false
+      muted: false, // 设置默认播放音频：true/false
       preload: 'metadata', // 预加载:preload auto即加载视频 metadata只加载视频的元数据
       poster: '', // 视频开始播放前显示的图像的URL。
       // src: this.oData.video.url, // 要嵌入的视频资源url
@@ -119,9 +149,11 @@ export default {
       flash: {
         swf: './static/lib/videojs7.4.1/video-js.swf'
       }
+    }, function () {
+      player.play();
+      player.volume(_this.volume);
+      _this.player = player;
     });
-    player.play();
-    this.player = player;
   },
   methods: {
     /***** 视频事件 *****/
@@ -134,6 +166,20 @@ export default {
         } else {
           this.player.pause();
         }
+      }
+    },
+    playerVolumeAble () {
+      let _vo = 0;
+      if (this.volumeAble && this.volume > 0) {
+        this.volumeAble = false;
+      } else if (!this.volumeAble && this.volume > 0) {
+        this.volumeAble = true;
+        _vo = this.volume;
+      } else if (this.volume <= 0) {
+        this.volumeAble = false;
+      }
+      if (this.player) {
+        this.player.volume(_vo);
       }
     },
     // 局部放大
@@ -254,6 +300,7 @@ export default {
       if (this.$refs.signForm) {
         this.$refs.signForm.resetFields();
       }
+      this.signForm.signTime = new Date().getTime();
       this.signDialogVisible = true;
     },
     getSignContent () {
@@ -270,14 +317,16 @@ export default {
         if (valid) {
           this.signSubmitLoading = true;
           apiVideoSign({
-            content: this.signForm.content,
-            deviceId: '213213',
-            signTime: '',
+            contentId: this.signForm.content,
+            deviceId: this.oData.video.uid,
+            signTime: formatDate(this.signForm.signTime),
           }).then(res => {
-            if (res && res.data) {
-              this.signContentList = res.data;
-            }
             this.signSubmitLoading = false;
+            this.signDialogVisible = false;
+            this.$message({
+              message: '标记成功！',
+              type: 'success'
+            });
           }).catch(error => {
             console.log("apiSignContentList error：", error);
             this.signSubmitLoading = false;
@@ -331,11 +380,10 @@ export default {
     cursor: pointer;
   }
   > .rtmpplayer_bot {
-    position: absolute; left: 0; bottom: 0px;
+    position: absolute; left: 0; bottom: -48px;
     width: 100%; height: 48px;
     background-color: #000;
     background-color: rgba(34, 34, 34, 0.65);
-    overflow: hidden;
     transition: bottom 0.4s ease-out;
     > .rtmpplayer_bot_t {
       float: left;
@@ -350,10 +398,30 @@ export default {
       > span {
         display: inline-block;
         margin: 0 8px;
+        width: 24px; height: 24px;
       }
       > .player_cut { cursor: not-allowed; }
-      > .player_voice { cursor: not-allowed; }
       > .player_tran { cursor: not-allowed; }
+      > .player_volume {
+        position: relative;
+        width: 24px; height: 24px;
+        > div {
+          display: none;
+          position: absolute; left: -7px; bottom: 24px;
+          width: 38px;
+          padding: 20px 0 20px 0;
+          text-align: center;
+          background-color: #000;
+          background-color: rgba(0, 0, 0, .7);
+          border-radius: 4px;
+        }
+        > .vl_icon {
+          transition: none;
+        }
+        &:hover {
+          > div { display: block; }
+        }
+      }
     }
   }
   &:hover {

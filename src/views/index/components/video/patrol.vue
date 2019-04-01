@@ -30,11 +30,18 @@
                     </div>
                   </div>
                   <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                    <li class="com_ellipsis"
-                      v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'tree_s_' + sindex"
-                      @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
-                      draggable="true" style="cursor: move;">
-                      {{sitem.deviceName}}
+                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                      <div class="com_ellipsis"
+                        v-if="!deviceIsPlaying(sitem)"
+                        @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
+                        draggable="true" style="cursor: move;">
+                        {{sitem.deviceName}}
+                        <span class="vl_icon vl_icon_v11"></span>
+                      </div>
+                      <div class="tree_li_dis" v-else>
+                        {{sitem.deviceName}}
+                        <span class="vl_icon vl_icon_v11"></span>
+                      </div>
                     </li>
                   </ul>
                   <ul class="tree_sli" v-else>
@@ -45,14 +52,14 @@
             </div>
           </div>
           <div class="show_content" v-show="showConTitle === 2">
-            <div class="show_his_btn" v-if="historyData && historyData.length > 0">清空记录</div>
+            <!-- <div class="show_his_btn" v-if="historyData && historyData.length > 0">清空记录</div>
             <ul class="show_his">
               <li v-for="(item, index) in historyData" :key="'hty_' + index">
                 <h3 class="com_ellipsis">{{item.name}}</h3>
                 <p>{{item.time}}</p>
                 <i class="el-icon-delete"></i>
               </li>
-            </ul>
+            </ul> -->
           </div>
         </div>
       </div>
@@ -63,7 +70,7 @@
         <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
         <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
         <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
-        <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li>
+       <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
       </ul>
     </div>
     <div class="vid_opes">
@@ -78,7 +85,7 @@
             <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
-            <div is="videoEmpty" @showListEvent="showListEvent"></div>
+            <div is="videoEmpty" @showListEvent="showListEvent" :btn="true"></div>
           </div>
         </li>
       </ul>
@@ -86,10 +93,11 @@
   </div>
 </template>
 <script>
+import { formatDate } from "@/utils/util.js";
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import rtmpplayer from '@/components/common/rtmpplayer.vue';
-import { apiDeviceList } from "@/views/index/api/api.video.js";
+import { apiDeviceList, apiVideoRecord } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, rtmpplayer},
   data () {
@@ -104,33 +112,6 @@ export default {
       showMenuActive: false,
       showConTitle: 1,
       searchVal: '',
-      treeData: [
-        {
-          name: '公安专网',
-          children: [
-            {name: '香港卫视1', video: {url: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1'}},
-            {name: '香港卫视2', video: {url: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1'}},
-            {name: '公司测试1', video: {url: 'rtmp://10.16.1.139/live/livestream'}},
-            {name: '公司测试2', video: {url: 'rtmp://10.16.1.139/live/livestream'}}
-          ]
-        }, {
-          name: '教育专网',
-          children: []
-        }, {
-          name: '医疗专网',
-          children: []
-        }, {
-          name: '企业专网',
-          children: []
-        }
-      ],
-      historyData: [
-        { name: '广发路广发银行-001', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-002', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-003', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-004', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-005', time: '2019-01-17 13:28:02' }
-      ],
       dragActiveObj: null
     }
   },
@@ -191,6 +172,16 @@ export default {
         console.log("apiSignContentList error：", error);
       });
     },
+    deviceIsPlaying (item) {
+      let flag = false;
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (this.videoList[i].video && this.videoList[i].video.uid === item.uid) {
+          flag = true;
+          break;
+        }
+      }
+      return flag;
+    },
 
     playersHandler (sum) {
       // videoList
@@ -244,7 +235,12 @@ export default {
             url: Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream'
           }
         } */
+        // 湖南卫视   rtmp://58.200.131.2:1935/livetv/hunantv
         // console.log(Math.random());
+        // rtmp://10.16.1.139/live/livestream
+        // rtmp://10.16.1.139/live/livestream
+        // rtmp://10.16.1.138/live/livestream
+        // rtmp://live.hkstv.hk.lxdns.com/live/hks1
         let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
         console.log('deviceSip', deviceSip);
         this.videoList.splice(index, 1, {
@@ -300,6 +296,26 @@ export default {
     }
   },
   destroyed () {
+    // 播放记录
+    for (let i = 0; i < this.videoList.length; i++) {
+      let obj = this.videoList[i];
+      console.log('obj', obj);
+      if (obj && obj.video) {
+        apiVideoRecord({
+          deviceId: obj.video.uid, // 设备id
+          // playBackEndTime: '', // 回放结束时间
+          // playBackStartTime: '', // 回放开始时间
+          playTime: formatDate(new Date().getTime()), // 播放结束时间
+          // 播放类型 1:视频巡逻 2:视频回放
+          playType: 1
+        }).then(() => {
+        }).catch(error => {
+          console.log("apiVideoRecord error：", error);
+        });
+      }
+    }
+    
+
     $(window).off('unload', this.unloadSave);
     this.saveVideoList();
   }

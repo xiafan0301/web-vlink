@@ -49,9 +49,33 @@ export const apiVideoList = data => {
  */
 export const apiSignContentList = data => {
   return request({
-    url: '/videoSignService/signContentList',
+    url: '/videoSignContentService/signContentList',
     method: 'get',
     // data,
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 新增视频标记内容接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoSignContent = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContent',
+    method: 'post',
+    data,
+    mode: videoModeName
+  })
+}
+/**
+ * 标记人列表查询接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoSignPeopleList = data => {
+  return request({
+    url: '/videoSignService/signPeopleList',
+    method: 'get',
     params: data,
     mode: videoModeName
   })
@@ -70,7 +94,7 @@ export const apiVideoSign = data => {
 }
 
 /**
- * 新增视频标记接口
+ * 设备列表接口
  * @param {Object} data 接口入参
  */
 export const apiDeviceList = data => {
@@ -79,5 +103,18 @@ export const apiDeviceList = data => {
     method: 'get',
     params: data,
     mode: 'base'
+  })
+}
+
+/**
+ * 新增视频播放记录接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoRecord = data => {
+  return request({
+    url: '/videoPatrolService/videoRecord',
+    method: 'post',
+    data: data,
+    mode: videoModeName
   })
 }
