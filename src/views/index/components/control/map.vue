@@ -96,21 +96,8 @@
         <div class="video_box" :style="{'height': videoHeight + 'px'}">
           <div class="video">
             <div>
-              <video src="../../../../assets/video/video.mp4" autoplay loop controls></video>
-              <div class="toolbar">
-                <div>{{controlObjList.deviceName}}</div>
-                <div>
-                  <i class="vl_icon vl_icon_control_09"></i>
-                  <i class="vl_icon vl_icon_control_10"></i>
-                  <i class="vl_icon vl_icon_control_06"></i>
-                  <i class="vl_icon vl_icon_control_11"></i>
-                  <i class="vl_icon vl_icon_control_07"></i>
-                  <i class="vl_icon vl_icon_control_08"></i>
-                  <i class="vl_icon vl_icon_control_12"></i>
-                </div>
-              </div>
-              <div class="vl_map_state">进行中</div>
-              <div class="vl_icon vl_icon_control_13" @click="isShowFullScreen = !isShowFullScreen"></div>
+              <div is="rtmpplayer" @playerClose="playerClose" :index="0" :oData="videoObj" :signAble="true"></div>
+              <div class="vl_map_state" :class="{'vl_map_state_ab': true}">进行中</div>
             </div>
           </div>
         </div>
@@ -137,11 +124,15 @@
         </div>
       </div>
     </div>
+    <div v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="rtmpplayer" is="rtmpplayer" @playerClose="playerClose" :index="0" :oData="videoObj" :signAble="true"></div>
   </div>
 </template>
 <script>
+import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import {random14} from '@/utils/util.js';
 import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap, getAlarmListByDev} from '@/views/index/api/api.js';
 export default {
+  components: {rtmpplayer},
   data () {
     return {
       // 左侧搜索参数
@@ -171,6 +162,9 @@ export default {
       devicesList: null, // 布控数据列表
       markerAlarmList: [],//告警列表
       timer: null,
+      videoObj: null,
+      isShowVideo: false,
+      isShowV: false,
       // 抓拍列表参数
       snapList: [],
       snapTotal: null,//抓拍总数
@@ -196,6 +190,11 @@ export default {
     this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 关闭播放器
+    playerClose (index, sid) {
+      console.log('sid', sid);
+      this.isShowFullScreen = false;
+    },
     // 获得设备报警列表
     getAlarmListByDev () {
       const params = {
@@ -277,49 +276,68 @@ export default {
         if (res && res.data) {
           let _this = this;
           _this.controlObjList = res.data;
-          let sContent = '', clickWindow;
+          let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '', domId = obj.uid + '_' + random14();
+          if (_this.mapForm.state === 1) {
+            vlMapVideo = `
+              <div class="vl_map_close vl_icon vl_icon_control_04"></div>
+              <div class="vl_map_click_main">
+              <div class="vl_map_img">
+                <div id="${domId}" style="width: 300px;height: 150px;background: #000;"></div>
+                <div class="vl_map_state">进行中</div>
+             
+              </div>`;
+          }
+          if (_this.controlObjList.num === 1) {
+            vlMapObj = `
+              <div class="vl_map_info">
+                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
+                <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
+                <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
+              if (_this.mapForm.state === 3) {
+                vlMapObj += `<div><span>布控结果：</span><span>${_this.controlObjList.list[0].snapNum}张抓拍图片</span></div>`;
+              }
+              vlMapObj += `
+              </div>
+              <div class="vl_map_obj">
+                <div class="vl_map_obj_num">
+                  <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
+                  <div class="vl_map_slide">
+                    <i class="el-icon-arrow-left"></i>
+                    <i class="el-icon-arrow-right"></i>
+                  </div>
+                </div>
+                <div class="vl_map_obj_img">
+                  <div class="vl_map_obj_box">`;
+                  for (let item of _this.controlObjList.objectList) {
+                    vlMapObj += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
+                  }
+                  vlMapObj += `</div>
+                </div>
+              </div>`;
+          }
+          if (_this.controlObjList.num > 1) {
+            for (let item of _this.controlObjList.list) {
+              vlMapObjList += 
+              `<div class="vl_map_info">
+                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
+                <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
+                <div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
+                if (_this.mapForm.state === 3) {
+                  vlMapObjList += `<div><span>布控结果：</span><span>${item.snapNum}张抓拍图片</span></div>`;
+                }
+              vlMapObjList += `</div>`;
+            }
+          }
+
           // 布控进行中
           if (_this.mapForm.state === 1) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
-                <div class="vl_map_click">
-                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
-                  <div class="vl_map_click_main">
-                    <div class="vl_map_img">
-                      <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
-                      <div class="vl_map_state">进行中</div>
-                      <div class="vl_map_operate">
-                        <div>${obj.deviceName}</div>
-                        <div>
-                          <i class="vl_icon vl_icon_control_06"></i>
-                          <i class="vl_icon vl_icon_control_07"></i>
-                          <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="vl_map_info">
-                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
-                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
-                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
-                    </div>
-                    <div class="vl_map_obj">
-                      <div class="vl_map_obj_num">
-                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
-                        <div class="vl_map_slide">
-                          <i class="el-icon-arrow-left"></i>
-                          <i class="el-icon-arrow-right"></i>
-                        </div>
-                      </div>
-                      <div class="vl_map_obj_img">
-                        <div class="vl_map_obj_box">`;
-                        for (let item of _this.controlObjList.objectList) {
-                          sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
-                        }
-                        sContent += `</div>
-                      </div>
-                    </div>
-                    <div class="vl_map_btn">视频回放</div>
+                <div class="vl_map_click">`;
+                  sContent += vlMapVideo;
+                  sContent += vlMapObj;
+                  sContent += `<div class="vl_map_btn">视频回放</div>
                   </div>
                   <div class="vl_map_triangle"></div>
                 </div>
@@ -327,30 +345,9 @@ export default {
             // 一个摄像头有多个布控时
             } else if (_this.controlObjList.num > 1) {
               sContent = 
-                `<div class="vl_map_click">
-                  <div class="vl_map_close vl_icon vl_icon_control_04"></div>
-                  <div class="vl_map_click_main">
-                    <div class="vl_map_img">
-                      <video src="${require('../../../../assets/video/video.mp4')}" autoplay loop controls width="100%"></video>
-                      <div class="vl_map_state">进行中</div>
-                      <div class="vl_map_operate">
-                        <div>${obj.deviceName} </div>
-                        <div>
-                          <i class="vl_icon vl_icon_control_06"></i>
-                          <i class="vl_icon vl_icon_control_07"></i>
-                          <i class="vl_icon vl_icon_control_08 vl_map_full_screen"></i>
-                        </div>
-                      </div>
-                    </div>`
-                    for (let item of _this.controlObjList.list) {
-                      sContent += 
-                      `<div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
-                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
-                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
-                      </div>`
-                    }
-                    
+                `<div class="vl_map_click">`;
+                  sContent += vlMapVideo;
+                  sContent += vlMapObjList;
                 sContent +=  `</div>
                   <div class="vl_map_triangle"></div>
                 </div>`;
@@ -367,29 +364,9 @@ export default {
                     <div class="vl_map_start">
                       <div class="vl_map_state">待开始</div>
                       <span>${obj.deviceName}</span>
-                    </div>
-                    <div class="vl_map_info">
-                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
-                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
-                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
-                    </div>
-                    <div class="vl_map_obj">
-                      <div class="vl_map_obj_num">
-                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
-                        <div class="vl_map_slide">
-                          <i class="el-icon-arrow-left"></i>
-                          <i class="el-icon-arrow-right"></i>
-                        </div>
-                      </div>
-                      <div class="vl_map_obj_img">
-                        <div class="vl_map_obj_box">`;
-                        for (let item of _this.controlObjList.objectList) {
-                          sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
-                        }
-                      sContent += `</div>
-                      </div>
-                    </div>
-                  </div>
+                    </div>`;
+                  sContent += vlMapObj;
+                  sContent += `</div>
                   <div class="vl_map_triangle"></div>
                 </div>
                 `;
@@ -403,14 +380,7 @@ export default {
                       <div class="vl_map_state">待开始</div>
                       <span>${obj.deviceName}</span>
                     </div>`;
-                    for (let item of _this.controlObjList.list) {
-                      sContent += 
-                      `<div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
-                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
-                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
-                      </div>`
-                    }
+                sContent += vlMapObjList;
                 sContent += `</div>
                   <div class="vl_map_triangle"></div>
                 </div>`;
@@ -426,30 +396,10 @@ export default {
                   <div class="vl_map_click_main">
                     <div class="vl_map_start">
                       <div class="vl_map_state" style="background: #999999;">已结束</div>
-                      <span>${_this.controlObjList.deviceName}</span>
-                    </div>
-                    <div class="vl_map_info">
-                      <div class="vl_map_name"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
-                      <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
-                      <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>
-                    </div>
-                    <div class="vl_map_obj">
-                      <div class="vl_map_obj_num">
-                        <div><span>布控对象：</span><span>${_this.controlObjList.objectList.length}</span></div>
-                        <div class="vl_map_slide">
-                          <i class="el-icon-arrow-left"></i>
-                          <i class="el-icon-arrow-right"></i>
-                        </div>
-                      </div>
-                      <div class="vl_map_obj_img">
-                        <div class="vl_map_obj_box">`;
-                          for (let item of _this.controlObjList.objectList) {
-                            sContent += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
-                          }
-                        sContent += `</div>
-                      </div>
-                    </div>
-                  </div>
+                      <span>${obj.deviceName}</span>
+                    </div>`;
+                   sContent += vlMapObj;
+                  sContent += `</div>
                   <div class="vl_map_triangle"></div>
                 </div>
                 `;
@@ -461,16 +411,9 @@ export default {
                   <div class="vl_map_click_main">
                     <div class="vl_map_start">
                       <div class="vl_map_state" style="background: #999999;">已结束</div>
-                      <span>${_this.controlObjList.deviceName}</span>
+                      <span>${obj.deviceName}</span>
                     </div>`;
-                    for (let item of _this.controlObjList.list) {
-                      sContent += 
-                      `<div class="vl_map_info">
-                        <div class="vl_map_name"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
-                        <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
-                        <div><span>事件预览：</span><span>${item.eventDetail}</span></div>
-                      </div>`
-                    }
+                sContent += vlMapObjList;
                 sContent += `</div>
                   <div class="vl_map_triangle"></div>
                 </div>`;
@@ -478,7 +421,7 @@ export default {
           }
           clickWindow = new window.AMap.InfoWindow({
             isCustom: true,
-            closeWhenClickMap: true,
+            closeWhenClickMap: false,
             offset: new window.AMap.Pixel(-2, -60), // 相对于基点的偏移位置
             content: sContent
           });
@@ -489,20 +432,23 @@ export default {
           // 利用事件冒泡,绑定关闭弹框的点击事件
           $('#mapBox').on('click', '.vl_map_close', function () {
             // 关闭弹窗
-            if (clickWindow) { clickWindow.close(); }
+            if (clickWindow) {$('.control_map').append($('#rtmpplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
           })
           // 利用事件冒泡,绑定视频全屏按钮的点击事件
           $('#mapBox').on('click', '.vl_map_full_screen', function () {
             // 关闭弹窗
-            if (clickWindow) { clickWindow.close(); }
+            if (clickWindow) {$('.control_map').append($('#rtmpplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
+
             // 显示视频回放页面
             _this.isShowFullScreen = true;
           })
-          $('#mapBox').on('click', '.vl_map_name > span', function () {
+
+          $('#mapBox').on('click', '.vl_map_name', function (e) {
+            console.log(e.currentTarget.id)
             // 跳转至布控详情页
             const { href } = _this.$router.resolve({
               name: 'control_manage',
-              query: {pageType: 2, state: _this.mapForm.state}
+              query: {pageType: 2, state: _this.mapForm.state, controlId: e.currentTarget.id }
             })
             window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
           })
@@ -548,6 +494,22 @@ export default {
               }, 1000)
             }
           })
+          if (_this.mapForm.state === 1) {
+            // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+            let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
+            obj.title = obj.deviceName;
+            obj.video = {
+              deviceSip: deviceSip
+            }
+            _this.videoObj = obj;
+
+            _this.isShowVideo = true;
+            setTimeout(() => {
+              $('#' + domId).append($('#rtmpplayer'));
+              _this.isShowV = true;
+            }, 100)
+            console.log($('#rtmpplayer'))
+          }
         }
       })
     },
@@ -658,7 +620,7 @@ export default {
       position: absolute;
       left: 20px;
       top: 0;
-      z-index: 999;
+      z-index: 99;
       height: 100%;
       width: 232px;
       background: #fff;
@@ -768,41 +730,7 @@ export default {
               height: 100%;
               position: relative;
               background: #000;
-              video{
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                left: 0;
-                top:0;
-                z-index: 999;
-              }
-              .toolbar{
-                width: 100%;
-                height: 48px;
-                line-height: 48px;
-                display: flex;
-                flex-wrap: nowrap;
-                justify-content: space-between;
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                z-index: 999;
-                padding-left: 15px;
-                background:rgba(34,34,34,0.65);
-                border-radius:0px 0px 3px 3px;
-                > div{
-                  color: #fff;
-                  i{
-                    margin-top: 12px;
-                    cursor: pointer;
-                  }
-                }
-                > div:not(:nth-child(1), :last-child) i{
-                  margin-right: 15px;
-                }
-              }
               .vl_map_state{
-                position: absolute;
                 left: 0;
                 top: 0;
                 z-index: 9999;
@@ -815,12 +743,11 @@ export default {
                 color: #fff;
                 font-size: 12px;
               }
-              .vl_icon_control_13{
+              .vl_map_state_ab{
                 position: absolute;
-                right: 10px;
-                top: 10px;
-                z-index: 9999;
-                cursor: pointer;
+              }
+              .vl_map_state_fi{
+                position: fixed;
               }
             }
           }
@@ -905,6 +832,9 @@ export default {
         }
       }
     }
+    .is_show_video{
+      display: block !important;
+    }
   }
 </style>
 <style lang="scss">
@@ -980,9 +910,7 @@ export default {
             font-size: 16px;
             color: #0567E1;
             line-height:24px;
-            > span{
-              cursor: pointer;
-            }
+            cursor: pointer;
           }
           & > div:not(:nth-child(1)){
             font-size: 12px;

@@ -458,6 +458,20 @@ export default {
         color: #409EFF;
       }
     }
+    // 重置下拉多选列表的样式
+    .el-select{
+      .el-tag{
+        background:rgba(242,242,242,1);
+        border-radius:2px;
+        border:1px solid rgba(217,217,217,1);
+      }
+      .el-tag__close.el-icon-close{
+        margin-bottom: 2px; 
+        background:rgba(242,242,242,1);
+        font-size: 16px;
+        color: #B2B2B2;
+      }
+    }
   }
 }
 </style>

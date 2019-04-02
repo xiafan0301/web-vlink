@@ -201,6 +201,8 @@
     <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
     <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
+
+
 </template>
 <script>
 import manageDetail from './components/manageDetail.vue';
@@ -247,12 +249,13 @@ export default {
   },
   created () {
     this.getDiciData();
-  },
-  mounted () {
     const data = this.$route.query;
-    if (data.pageType && data.state) {
-      this.pageType = parseInt(data.pageType);
-      this.state = data.state;
+    if (data.pageType && data.state && data.controlId) {
+      this.$nextTick(() => {
+        this.pageType = parseInt(data.pageType);
+        this.state = data.state;
+        this.controlId = data.controlId;
+      })
     }
     this.getControlList();
   },

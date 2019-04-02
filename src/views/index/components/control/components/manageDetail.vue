@@ -608,20 +608,20 @@ export default {
   
     dragend (e) {
       // 重置透明度
-      e.target.style.opacity = "";
+      // e.target.style.opacity = "";
 
       this.dragActiveObj = null;
     },
     dragenter (e) {
       // 当可拖动的元素进入可放置的目标高亮目标节点
       if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          e.target.style.background = "purple";
+          // e.target.style.background = "#E0F3FF";
       }
     },
     dragleave (e) {
       // 当拖动元素离开可放置目标节点，重置其背景
       if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          e.target.style.background = "";
+          // e.target.style.background = "";
       }
     },
     dragover (e) {
@@ -951,6 +951,7 @@ export default {
             .situ_left{
               width: 258px;
               min-width: 258px;
+              height: 600px;
               border-right: 1px solid #F2F2F2;
               > div{
                 width: 100%;
@@ -986,7 +987,6 @@ export default {
             }
             .situ_right{
               width: calc(100% - 258px);
-              height: 100%;
               display: flex;
               flex-flow: row wrap;
               align-content: flex-start;
@@ -994,10 +994,19 @@ export default {
               padding-right: 1%;
               .situ_r_video{
                 flex: 0 0 49%;
+                height: 49%;
                 position: relative;
                 overflow: hidden;
                 margin-bottom: 20px;
                 margin-left: 1%;
+                .situ_r_img{
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  background: #e6e6e6;
+                }
               }
             }
           }
@@ -1141,17 +1150,6 @@ export default {
 .control_manage_d{
   .situ_right{
     .situ_r_video{
-      .situ_r_img{
-          width: 100%;
-          height: 250px;
-        > div{
-          width: 100%;
-          height: 100%;
-          text-align: center;
-          line-height: 250px;
-          background: #e6e6e6;
-        }
-      }
       > div {
         width: 100%;
         video{
