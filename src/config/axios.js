@@ -10,8 +10,10 @@ import { ajaxCtx } from '@/config/config.js';
 // axios.defaults.withCredentials = true;er
 // create an axios instance
 const userInfo = localStorage.getItem('as_vlink_user_info');
+console.log('userInfi', userInfo)
 let service;
 if (userInfo) {
+  console.log('进来了')
   service = axios.create({
     baseURL: ajaxCtx.base, // api的base_url
     timeout: 30000, // request timeout

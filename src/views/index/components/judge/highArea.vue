@@ -36,17 +36,41 @@
       <div id="tcMap"></div>
       <div class="vl_jha_right" v-show="showVideoList">
         <div class="vl_jig_right_title">
-          <el-select v-model="rightSex" placeholder="选择性别"  @select="getSnapList">
+          <el-select v-model="rightSex" placeholder="选择性别"  @change="getSnapList(curSXT.deviceId)">
             <el-option v-for="item in sexList" :key="item.value" :value="item.value" :label="item.label"></el-option>
           </el-select>
-          <el-select v-model="rightMinZ" placeholder="选择民族" @select="getSnapList">
+          <el-select v-model="rightMinZ" placeholder="选择民族" @change="getSnapList(curSXT.deviceId)">
             <el-option v-for="item in minZList" :key="item.value" :value="item.value" :label="item.label"></el-option>
           </el-select>
         </div>
         <vue-scroll>
-          <div class="vl_jha_right_item" v-for="(item, index) in curSXT.childList" :key="item.id">
-            <i :class="{'disabeld': index === 0}"></i>
-            <i :class="{'disabeld': index === curSXT.childList.length - 1}"></i>
+          <div class="vl_jha_right_item" v-for="item in curVideo.childList" :key="item.id">
+            <div class="switch_btn">
+              <el-button type="text" @click="item.curIndex--" :disabled="item.curIndex === 0"><i class="el-icon-arrow-left"></i></el-button>
+            </div>
+            <div class="switch_body">
+              <div><img :src="item.list[item.curIndex].snapPhoto ? item.list[item.curIndex].snapPhoto : item.list[item.curIndex].surveillancePhoto" alt=""></div>
+              <div style="width: 22%;">
+                <h2>{{item.list[item.curIndex].semblance}}</h2>
+                <p>相似度</p>
+                <el-select v-model="item.curIndex" >
+                  <el-option v-for="(sItem, sIndex) in item.list" :key="sItem.id" :value="sIndex" :label="sItem.snapTime.slice(3)">
+                  </el-option>
+                </el-select>
+              </div>
+              <div><img :src="item.list[item.curIndex].surveillancePhoto ? item.list[item.curIndex].surveillancePhoto : item.list[item.curIndex].snapPhoto" alt=""></div>
+              <div style="text-align: left;">
+                <h3>{{item.name}}</h3>
+                <p>
+                  <span>{{item.sex === 1 ? '男' : '女'}}</span>
+                  <span>{{item.nation === 1 ? '汉族' : '其他族'}}</span>
+                </p>
+              </div>
+            </div>
+            <div class="switch_btn">
+              <el-button type="text" @click="item.curIndex++" :disabled="item.curIndex === item.list.length - 1"><i class="el-icon-arrow-right"></i></el-button>
+            </div>
+            <span>{{item.snapNum}}次</span>
           </div>
         </vue-scroll>
         <div class="vl_jig_right_close"><i class="el-icon-error" @click="hideVideoList"></i></div>
@@ -120,11 +144,10 @@ export default {
         id: '',
         indexNum: null, // 当前展示的摄像头索引
         playNum: null, // 当前摄像头里正在大屏播放的索引
-        playing: false
-      }, // 当前被放大播放的video
-      curSXT: {
+        playing: false,
         childList: []
-      }, // 当前显示摄像头数据
+      }, // 当前被放大播放的video
+      curSXT: {}, // 当前显示摄像头数据
       showVideoList: false,
       rightSex: null,
       rightMinZ: null,
@@ -343,8 +366,11 @@ export default {
       this.pointHover(e);
     },
     getSnapList (deviceId) {
+      this.$_showLoading({
+        target: '.__vuescroll'
+      })
       let params = {
-        deviceId: deviceId,
+        deviceId: deviceId ? deviceId : '',
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
       }
@@ -356,8 +382,13 @@ export default {
       }
       JhaGETAlarmSnapByAddress(params)
         .then(res => {
+          this.$_hideLoading();
           if (res) {
-            console.log(res)
+            this.curVideo.childList = res.data.map(x => {
+              x['curIndex'] = 0;
+              x['curSnapTime'] = '';
+              return x;
+            });
           }
         })
     },
@@ -380,7 +411,7 @@ export default {
     height: 100%;
     padding: .3rem .2rem .2rem .2rem;
     box-shadow: 0px 10px 12px 0px rgba(4,24,54,0.2);
-    background: #ffffff;
+    background: rgba(255, 255, 255, .8);
     animation: fadeInRight .4s ease-out .4s both;
     &:hover {
       .vl_jig_right_close {
@@ -389,7 +420,8 @@ export default {
     }
     .vl_jig_right_title {
       width: 100%;
-      height: .6rem;
+      height: .4rem;
+      margin-bottom: .2rem;
       .el-select {
         width: 2rem;
         height: .4rem;
@@ -409,15 +441,122 @@ export default {
       }
     }
     .vl_jha_right_item {
-      margin-top: .2rem;
-      .vl_jig_right_btn {
+      padding: .3rem 0;
+      height: 1.34rem;
+      position: relative;
+      display: flex;
+      background: #FFFFFF;
+      -webkit-box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+      -moz-box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+      box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
+      &:before {
+        display: block;
+        content: '';
         position: absolute;
-        bottom: 0;
-        right: 0;
-        height: 28px;
-        padding-top: 2px;
-        span {
-          cursor: pointer;
+        top: -.4rem;
+        right: -.4rem;
+        transform: rotate(-46deg);
+        border: .4rem solid #0c70f8;
+        border-color: transparent transparent transparent #0C70F8;
+      }
+      &:after {
+        display: block;
+        content: '';
+        position: absolute;
+        top: -.2rem;
+        right: -.2rem;
+        transform: rotate(-45deg);
+        border: .2rem solid #FFFFFF;
+        border-color: transparent transparent transparent #FFFFFF;
+      }
+      >span {
+        display: block;
+        position: absolute;
+        top: .06rem;
+        right: .06rem;
+        width: .5rem;
+        height: .5rem;
+        text-align: center;
+        color: #FFFFFF;
+        font-size: .12rem;
+        -webkit-transform: rotate(45deg);
+        -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        -o-transform: rotate(45deg);
+        transform: rotate(45deg);
+        z-index: 99;
+      }
+      >.switch_body {
+        width: 3.68rem;
+        display: flex;
+        justify-content: space-around;
+        >div {
+          width: 26%;
+          text-align: center;
+          color: #333333;
+          position: relative;
+          img {
+            width: .76rem;
+            height: .76rem;
+          }
+          h2 {
+            font-size: .26rem;
+            font-weight: bold;
+            color: #0C70F8;
+          }
+          h3 {
+            font-size: .18rem;
+            font-weight: bold;
+            margin-bottom: .1rem;
+          }
+          p {
+            font-size: 12px;
+            > span {
+              height: .26rem;
+              padding: 0 .08rem;
+              display: inline-block;
+              background: #FAFAFA;
+              &:first-child {
+                background: #F2F2F2;
+                margin-right: .08rem;
+              }
+            }
+          }
+          .el-select {
+            position: absolute;
+            padding: 0;
+            left: calc((0.8rem - 100px) / 2);
+            z-index: 9;
+            input {
+              height: 24px;
+              line-height: 24px;
+              padding-left: 8px;
+              width: 100px;
+              font-size: 10px;
+              padding-right: 20px;
+              border: none;
+              -webkit-border-radius: 12px;
+              -moz-border-radius: 12px;
+              border-radius: 12px;
+              border: 1px solid #D3D3D3;
+            }
+            .el-select__caret {
+              line-height: 24px;
+              width: 12px;
+            }
+          }
+        }
+      }
+      >.switch_btn {
+        width: .34rem;
+        height: 100%;
+        > button {
+          width: 100%;
+          height: 100%;
+          font-size: 26px;
+          i {
+            font-weight: bold;
+          }
         }
       }
     }

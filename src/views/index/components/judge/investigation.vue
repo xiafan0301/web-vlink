@@ -336,7 +336,7 @@ export default {
         surveillanceId: this.curSXT.surveillanceId,
         deviceId: this.curSXT.deviceId
       }
-      this.$_showLoading({target: '.vl_jfo_right'});
+      this.$_showLoading({target: '.__vuescroll'});
       JigGETAlarmSnapList(params)
         .then(res => {
           if (res) {

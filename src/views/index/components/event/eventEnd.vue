@@ -11,28 +11,29 @@
       <div class="content-box">
         <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="end-body">
-          <div class="end-content">
-            <span>事件总结:</span>
-            <el-input type="textarea" rows="7" v-model="eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
-          </div>
-          <div class="error_tip">请填写事件总结</div>
+          <el-form class="end-content" :model="endForm">
+            <el-form-item label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入10000个字', trigger: 'blur'}]">
+              <el-input type="textarea" rows="7" style="width: 50%;" v-model="endForm.eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
+            </el-form-item> 
+          </el-form>
           <div class="end-upload">
             <el-upload
-              action="https://jsonplaceholder.typicode.com/posts/"
-              accept='.png,.jpg,.bmp,.pdf,.doc,.docx,.ppt,.pptx'
+              :action="uploadUrl"
+              accept='.png,.jpg,.bmp,.pdf,.doc,.docx,,.txt'
               :before-upload='handleBeforeUpload'
               :on-success="handleSuccess"
+              :on-exceed="handleImgNumber"
               :disabled="isImgDisabled"
               :title="[isImgDisabled === true ? '禁用' : '']"
               :show-file-list='false'
               >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .jpg…）</div>
+              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
             </el-upload>
             <div class="img_list">
               <div v-for="(item, index) in imgList2" :key="'item' + index">
                 <img
-                  :src="item.src"
+                  :src="item.path"
                   @click="openBigImg(index, imgList2)"
                 >
                 <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
@@ -41,8 +42,8 @@
             <div class="file_list">
               <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
                 <i class="vl_icon vl_icon_event_5"></i>
-                <span>{{item.fileName}}</span>
-                <i class='el-icon-close' @click="deleteFile(item, index)"></i>
+                <span>{{item.cname}}</span>
+                <i class='el-icon-close' @click="deleteFile(index, item)"></i>
               </div>
             </div>
           </div>
@@ -58,51 +59,33 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail, endEvent } from '@/views/index/api/api.js';
 import BigImg from './components/bigImg.vue';
+import { ajaxCtx } from '@/config/config.js';
+import { dataList } from '@/utils/data.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
-      eventSummary: null, // 事件总结
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
+      endForm: {
+        // eventId: null,
+        eventLevel: null,
+        eventSummary: null, // 事件总结
+        attachmentList: []
+      },
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       isImgDisabled: false,
       imgList1: [], // 要放大的图片数据
       basicInfo: {}, // 事件详情
-      fileList: [
-        {
-          fileName: '公共文档.docx'
-        },
-        {
-          fileName: '公共文档.docx'
-        },
-        {
-          fileName: '公共文档.docx'
-        }
-      ], // 要上传的文件列表
-      imgList2: [
-        {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-      ],
+      fileList: [], // 要上传的文件列表
+      imgList2: [],
       imgList: [] // 图片列表
     }
   },
   mounted () {
+    this.endForm.eventId = this.$route.query.id;
     this.getDetail();
   },
   methods: {
@@ -118,66 +101,85 @@ export default {
         .catch(() => {})
     },
     handleSuccess (res, file) {
+      // console.log(res)
       if (res && res.data) {
         const fileName = res.data.fileName;
         let type;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          console.log(type);
           let data;
           res.fileName = file.name;
-          // if (type === '.png' || type === '.jpg' || type === '.bmp') {
-          //   data = {
-          //     attachmentType: dictType.imgId,
-          //     url: res.data.newFileName,
-          //     attachmentName: res.data.fileName,
-          //     attachmentSize: res.data.fileSize,
-          //     attachmentWidth: res.data.imageWidth,
-          //     attachmentHeight: res.data.imageHeight,
-          //     thumbnailUrl: res.data.thumbnailUrl,
-          //     thumbnailWidth: res.data.thumbImageWidth,
-          //     thumbnailHeight: res.data.thumbImageHeight
-          //   }
-          //   this.imgList2.push(res.data);
-          // } else {
-          //   data = {
-          //     attachmentType: dictType.fileId,
-          //     url: res.data.newFileName,
-          //     attachmentName: res.data.fileName,
-          //     attachmentSize: res.data.fileSize
-          //   }
-          //   this.fileList.push(res.data);
-          // }
+          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            data = {
+              contentUid: 0,
+              fileType: dataList.imgId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.imgList2.push(data);
+          } else {
+            data = {
+              contentUid: 0,
+              fileType: dataList.fileId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.fileList.push(data);
+          }
           this.endForm.attachmentList.push(data);
           this.isImgDisabled = false;
         }
       }
     },
     handleBeforeUpload (file) { // 附件上传之前
+      console.log(this.imgList2.length)
       this.isImgDisabled = true;
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
         this.$message.error('上传的附件大小不能超过10M');
         this.isImgDisabled = false;
       }
+      // if (this.imgList2.length > 2 || this.fileList.length > 1) {
+      //   console.log('1111')
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '最多上传3张图片或一个文件',
+      //     customClass: 'request_tip'
+      //   })
+      //   return false;
+      // }
       return isLtTenM;
     },
-    // 删除图片
-    closeImgList (index) {
-      this.imgList2.splice(index, 1);
-      // this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-      //   if (item.url === obj.newFileName) {
-      //     this.endForm.attachmentList.splice(idx, 1);
-      //   }
-      // });
+    // 文件超出个数限制
+    handleImgNumber (files) {
+      console.log(files)
     },
-    deleteFile (obj, index) { // 删除文件
+    // 删除图片
+    closeImgList (index, obj) {
+      this.imgList2.splice(index, 1);
+      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+        if (item.cname === obj.cname) {
+          this.endForm.attachmentList.splice(idx, 1);
+        }
+      });
+    },
+    deleteFile (index, obj) { // 删除文件
       this.fileList.splice(index, 1);
-      // this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-      //   if (item.url === obj.newFileName) {
-      //     this.endForm.attachmentList.splice(idx, 1);
-      //   }
-      // });
+      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+        if (item.cname === obj.cname) {
+          this.endForm.attachmentList.splice(idx, 1);
+        }
+      });
     },
     // 返回
     back () {
@@ -185,7 +187,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -200,7 +202,27 @@ export default {
     },
     // 结束事件
     submitData () {
-
+      this.endForm.eventLevel = this.basicInfo.eventLevel;
+      if (!this.endForm.eventSummary && this.endForm.attachmentList.length === 0) {
+        this.$message({
+          type: 'warning',
+          message: '请先上传或输入事件总结',
+          customClass: 'request_tip'
+        })
+      } else {
+        endEvent(this.endForm, this.endForm.eventId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '结束成功',
+                customClass: 'request_tip'
+              })
+              this.$router.push({name: 'event_manage'});
+            }
+          })
+          .catch(() => {})
+      }
     }
   }
 }
@@ -220,19 +242,19 @@ export default {
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       border-radius:4px;
       .end-content {
-        width: 60%;
-        display:flex;
+        // width: 60%;
+        // display:flex;
         padding: 20px 20px 10px;
-        > span {
-          color: #666666;
-          width: 90px;
-          margin-right: 10px;
-          text-align: right;
-        }
-        > div {
-          width: 100%;
-          margin-top: -10px;
-        }
+        // > span {
+        //   color: #666666;
+        //   width: 90px;
+        //   margin-right: 10px;
+        //   text-align: right;
+        // }
+        // > div {
+        //   width: 100%;
+        //   margin-top: -10px;
+        // }
       }
       .error_tip {
         margin-left: 110px;
@@ -240,7 +262,7 @@ export default {
         color: #F94539;
       }
       .end-upload {
-        margin-left: 110px;
+        margin-left: 100px;
         width: 60%;
         padding-bottom: 20px;
         .upload-btn {

@@ -122,112 +122,115 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-     basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        taskList: [
-          {
-            departmentName: '公安部',
-            taskName: '救火',
-            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-            createTime: '2019-03-12 12:12:12',
-            taskStatusName: '未查看'
-          },
-          {
-            departmentName: '消防部',
-            taskName: '救火',
-            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-            createTime: '2019-03-12 12:12:24',
-            taskStatusName: '已查看'
-          },
-          {
-            departmentName: '就业部',
-            taskName: '救火',
-            taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-            createTime: '2019-03-12 19:12:24',
-            taskStatusName: '已完成'
-          }
-        ],
-        processingList: [
-          {
-            createTime: '2019-03-12 12:12:12',
-            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-            opUserName: '张三',
-            attachmentList: [
-              {
-                uid: '001',
-                src: require('./img/1.jpg')
-              },
-              {
-                uid: '002',
-                src: require('./img/2.jpg')
-              },
-              {
-                uid: '003',
-                src: require('./img/3.jpg')
-              },
-              {
-                uid: '004',
-                src: require('./img/4.jpg')
-              }
-            ]
-          },
-          {
-            createTime: '2019-03-12 12:12:12',
-            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-            opUserName: '张三'
-          },
-          {
-            createTime: '2019-03-12 12:12:12',
-            processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-            opUserName: '张三',
-            attachmentList: [
-              {
-                uid: '001',
-                src: require('./img/1.jpg')
-              },
-              {
-                uid: '002',
-                src: require('./img/2.jpg')
-              },
-              {
-                uid: '003',
-                src: require('./img/3.jpg')
-              },
-              {
-                uid: '004',
-                src: require('./img/4.jpg')
-              }
-            ]
-          }
-        ],
-        eventSummary: '啊杀掉了空间阿斯卡里的时间看来撒就看到了啊数据利空打击爱上了大家爱上了大家卡是垃圾的爱神的箭卡萨拉大家爱上了大家阿拉斯加的看拉萨就对啦洒家扩大撒娇的撒垃圾大安静多了家啊大家爱神的箭爱上了大家安静的拉开觉得觉得安静的爱了就的阿加大家的克拉克大家案例大家啊是多久啊空间', // 事件总结
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
+      basicInfo: {
+        // eventCode: 'XD111111111111111',
+        // eventTypeName: '自然灾害',
+        // eventLevelName: 'V级',
+        // reportTime: '2019-03-12',
+        // reporterPhone: '18076543210',
+        // eventAddress: '湖南省长沙市天心区创谷产业工业园',
+        // casualties: -1,
+        // imgList: [
+        //   {
+        //     uid: '001',
+        //     src: require('./img/1.jpg')
+        //   },
+        //   {
+        //     uid: '002',
+        //     src: require('./img/2.jpg')
+        //   },
+        //   {
+        //     uid: '003',
+        //     src: require('./img/3.jpg')
+        //   },
+        //   {
+        //     uid: '004',
+        //     src: require('./img/4.jpg')
+        //   }
+        // ],
+        // taskList: [
+        //   {
+        //     departmentName: '公安部',
+        //     taskName: '救火',
+        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+        //     createTime: '2019-03-12 12:12:12',
+        //     taskStatusName: '未查看'
+        //   },
+        //   {
+        //     departmentName: '消防部',
+        //     taskName: '救火',
+        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+        //     createTime: '2019-03-12 12:12:24',
+        //     taskStatusName: '已查看'
+        //   },
+        //   {
+        //     departmentName: '就业部',
+        //     taskName: '救火',
+        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
+        //     createTime: '2019-03-12 19:12:24',
+        //     taskStatusName: '已完成'
+        //   }
+        // ],
+        // processingList: [
+        //   {
+        //     createTime: '2019-03-12 12:12:12',
+        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+        //     opUserName: '张三',
+        //     attachmentList: [
+        //       {
+        //         uid: '001',
+        //         src: require('./img/1.jpg')
+        //       },
+        //       {
+        //         uid: '002',
+        //         src: require('./img/2.jpg')
+        //       },
+        //       {
+        //         uid: '003',
+        //         src: require('./img/3.jpg')
+        //       },
+        //       {
+        //         uid: '004',
+        //         src: require('./img/4.jpg')
+        //       }
+        //     ]
+        //   },
+        //   {
+        //     createTime: '2019-03-12 12:12:12',
+        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+        //     opUserName: '张三'
+        //   },
+        //   {
+        //     createTime: '2019-03-12 12:12:12',
+        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
+        //     opUserName: '张三',
+        //     attachmentList: [
+        //       {
+        //         uid: '001',
+        //         src: require('./img/1.jpg')
+        //       },
+        //       {
+        //         uid: '002',
+        //         src: require('./img/2.jpg')
+        //       },
+        //       {
+        //         uid: '003',
+        //         src: require('./img/3.jpg')
+        //       },
+        //       {
+        //         uid: '004',
+        //         src: require('./img/4.jpg')
+        //       }
+        //     ]
+        //   }
+        // ],
+        // eventSummary: '啊杀掉了空间阿斯卡里的时间看来撒就看到了啊数据利空打击爱上了大家爱上了大家卡是垃圾的爱神的箭卡萨拉大家爱上了大家阿拉斯加的看拉萨就对啦洒家扩大撒娇的撒垃圾大安静多了家啊大家爱神的箭爱上了大家安静的拉开觉得觉得安静的爱了就的阿加大家的克拉克大家案例大家啊是多久啊空间', // 事件总结
+        // eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
       }, // 事件详情
     }
+  },
+  mounted () {
+    this.getDetail();
   },
   methods: {
     // 返回
@@ -244,7 +247,7 @@ export default {
     },
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -255,9 +258,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

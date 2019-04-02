@@ -543,11 +543,13 @@ export default {
       this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
       this.curSXT = e.target.C.extData;
       this.showVideoList = true;
+      this.$_showLoading({
+        target: '.__vuescroll'
+      })
       const params = {
         surveillanceId: this.curSXT.surveillanceId,
         deviceId: this.curSXT.deviceId
       }
-      this.$_showLoading({target: '.vl_jfo_right'});
       JigGETAlarmSnapList(params)
         .then(res => {
           if (res) {
@@ -640,7 +642,9 @@ export default {
           if (res) {
             this.eventList = res.data;
           }
-        })
+        }).catch(() => {
+        this.$_hideLoading();
+      })
     },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
