@@ -33,16 +33,15 @@
           <div class="data_list">
             <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
           </div>
-          <div class="data_list">
-            <span>失踪儿童</span>
-            <span>分组2</span>
-            <div class="more">
+          <div class="data_list" v-if="item.groupNames">
+            <template v-for="(gN, index) in item.groupNames.split(',')">
+              <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
+            </template>
+            <div class="more" v-if="item.groupNames.split(',').length >= 3">
               <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
               <template v-if="showMoreId === item.uid">
                 <div>
-                  <span>失踪儿童</span>
-                  <span>拐卖儿童</span>
-                  <span>拐卖儿童</span>
+                  <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
                 </div>
                 <i></i>
               </template>

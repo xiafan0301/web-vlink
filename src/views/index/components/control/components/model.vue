@@ -40,7 +40,16 @@
     </el-form-item>
     <template v-if="modelType === '1' || modelType === '2'">
       <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
-        <el-input v-model="item.point" @keyup.enter.native="markLocation(mapId, item.point, index)"></el-input><i class="vl_icon vl_icon_control_28" @click="removePoint(item)"></i>
+        <el-autocomplete
+          style="width: 490px;"
+          v-model="item.point"
+          :fetch-suggestions="autoAdress"
+          value-key="name"
+          @focus="circleIndex = index"
+          @select="chooseAddress"
+          placeholder="请输入追踪点">
+        </el-autocomplete>
+        <i class="vl_icon vl_icon_control_28" @click="removePoint(item)"></i>
       </el-form-item>
       <el-form-item style="width: calc(50% - 30px);padding-left: 20px;">
         <div class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
@@ -219,11 +228,12 @@ export default {
         licenseNum: [],
         limitation: [],
         points: [
-          {point: '九峰安置小区'}
+          {point: null}
         ],
       },
       circleIndex: null, //圆形覆盖物的下标
       licenseNumList: [],
+      autoComplete: null,
       // 地图数据
       map: null,
       mouseTool: null,
@@ -310,6 +320,22 @@ export default {
     }
   },
   methods: {
+    autoAdress (queryString, cb) {
+      if (queryString === '') {
+        cb([])
+      } else {
+        this.autoComplete.search(queryString, (status, result) => {
+          if (status === 'complete') {
+            cb(result.tips);
+          }
+        })
+      }
+    },
+    chooseAddress (e) {
+      console.log(e);
+      // this.markLocation(e.location.lng, e.location.lat, e.address);
+      this.markLocation(e.location.lng, e.location.lat, e.address, this.circleIndex);
+    },
     // 删除单个受限范围时，同时删除已选卡口列表和点标记
     removeTag (item) {
       this.allBayData = [];
@@ -490,8 +516,24 @@ export default {
       let devDom = null;
       setTimeout(() => {
         if (this.modelType === '3') {
+          // 操作左侧列表其中一个设备，让列表相同id的设备同时联动，选中或未选中
+          this.trackPointList.forEach(f => {
+            f.bayonetList.forEach(d => {
+              if (d.uid === _obj.uid) {
+                d.isSelected = _obj.isSelected
+              }
+            })
+          })
           devDom = $(`#${this.mapId} #${_obj.uid}_kk`);
         } else {
+          // 操作左侧列表其中一个设备，让列表相同id的设备同时联动，选中或未选中
+          this.trackPointList.forEach(f => {
+            f.devList.forEach(d => {
+              if (d.uid === _obj.uid) {
+                d.isSelected = _obj.isSelected
+              }
+            })
+          })
           devDom = $(`#${this.mapId} #${_obj.uid}_sxt`);
         }
         // 摄像头
@@ -861,8 +903,14 @@ export default {
         // viewMode: '3D' // 使用3D视图
       });
       map.setMapStyle('amap://styles/whitesmoke');
+      map.plugin('AMap.Autocomplete', () => {
+        let autoOptions = {
+          city: '长沙'
+        }
+        _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+      })
       _this.map = map;
-      if (this.modelType !== '3') {
+      if (_this.modelType !== '3') {
         // map.on('mouseover', function() {
         //   let   _sContent = `<div class="vl_map_hover">
         //     <div class="vl_map_hover_main">`
@@ -1090,7 +1138,7 @@ export default {
       }
     },
     // 输入追踪点定位圆形覆盖物的中心点
-    markLocation(mapId, address, index) {
+    markLocation(lng, lat, address, index) {
       let _this = this;
       // 清空上一次输入的追踪点产生的marker
       if (_this.circleIndex === index) {
@@ -1098,67 +1146,54 @@ export default {
           _this.map.remove(_this.marker);
         }
       }
-      new window.AMap.plugin('AMap.Geocoder', function() {
-          let geocoder = new window.AMap.Geocoder(); 
-          console.log(address)           
-          geocoder.getLocation(address, function(status, result) {
-            if (status === 'complete' && result.info === 'OK') { 
-              // 经纬度                      
-              let lng = result.geocodes[0].location.lng;
-              let lat = result.geocodes[0].location.lat;
-              // 追踪点标记
-              let offSet = [-20.5, -48], _hoverWindow = null, pointId = index + address;
-              if (lng > 0 && lat > 0) {
-                _this.marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
-                  position: [lng, lat],
-                  offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-                  draggable: false, // 是否可拖动
-                  extData: '',
-                  // 自定义点标记覆盖物内容
-                  content: `<div id="${pointId}" class="vl_icon vl_icon_zzd"></div>`
-                });
-                // hover
-                _this.marker.on('mouseover', function () {
-                  let _sContent = '<div class="vl_map_hover">' +
-                    '<div class="vl_map_hover_main"><ul>' + 
-                      '<li><span>追踪点地址：</span>' + address + '</li>' + 
-                    '</ul></div>';
-                  _hoverWindow = new window.AMap.InfoWindow({
-                    isCustom: true,
-                    closeWhenClickMap: true,
-                    offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                    content: _sContent
-                  });
-                  _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
-                  console.log(_this.trackPointList)
-
-                  _this.devId = null;
-                  $(`#${_this.mapId} .vl_icon_control_36`).removeClass('vl_icon_control_36');
-                  $(`#${_this.mapId} .vl_icon_control_34`).removeClass('vl_icon_control_34');
-                  $(`#${_this.mapId} .vl_icon_control_35`).removeClass('vl_icon_control_35');
-                  $('#' + pointId).addClass('vl_icon_control_37');
-
-                  // 展开追踪点的设备列表
-                  _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
-                  const obj = _this.trackPointList.find(f => f.address === address);
-                  if (obj) {
-                    _this.tid = obj.tid;
-                    obj.isDropdown = true;
-                  }
-                });
-                _this.marker.setMap(_this.map);
-                // 画圆形覆盖物
-                _this.trackPointData.push(_this.marker);
-                _this.lnglat = [lng, lat];
-                _this.mapCircle(index)
-              }
-            } else {
-              console.log('定位失败！');
-              _this.$message.error('定位失败！');
-            }
+      // 追踪点标记
+      let offSet = [-20.5, -48], _hoverWindow = null, pointId = index + address;
+      if (lng > 0 && lat > 0) {
+        _this.marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [lng, lat],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: '',
+          // 自定义点标记覆盖物内容
+          content: `<div id="${pointId}" class="vl_icon vl_icon_zzd"></div>`
+        });
+        // hover
+        _this.marker.on('mouseover', function () {
+          let _sContent = '<div class="vl_map_hover">' +
+            '<div class="vl_map_hover_main"><ul>' + 
+              '<li><span>追踪点地址：</span>' + address + '</li>' + 
+            '</ul></div>';
+          _hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: _sContent
           });
-      });
+          _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+          console.log(_this.trackPointList)
+
+          _this.devId = null;
+          $(`#${_this.mapId} .vl_icon_control_36`).removeClass('vl_icon_control_36');
+          $(`#${_this.mapId} .vl_icon_control_34`).removeClass('vl_icon_control_34');
+          $(`#${_this.mapId} .vl_icon_control_35`).removeClass('vl_icon_control_35');
+          $('#' + pointId).addClass('vl_icon_control_37');
+
+          // 展开追踪点的设备列表
+          _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
+          const obj = _this.trackPointList.find(f => f.address === address);
+          if (obj) {
+            _this.tid = obj.tid;
+            obj.isDropdown = true;
+          }
+        });
+        _this.marker.setMap(_this.map);
+        // 画圆形覆盖物
+        _this.trackPointData.push(_this.marker);
+        _this.lnglat = [lng, lat];
+        _this.map.setCenter([lng, lat]);
+        _this.mapCircle(index)
+      }
     },
     // 标记地图范围，圆形覆盖物
     mapCircle (index) {
@@ -1492,7 +1527,7 @@ export default {
         this.features = this.modelDataOne.pointDtoList[0].deviceChara;
         this.modelDataOne.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
-          this.markLocation(this.mapId, m.address, index)
+          this.markLocation(m.longitude, m.latitude, m.address, index)
         })
       }
     },
@@ -1523,7 +1558,7 @@ export default {
         this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
         this.modelDataTwo.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
-          this.markLocation(this.mapId, m.address, index)
+          this.markLocation(m.longitude, m.latitude, m.address, index)
         })
       }
     },

@@ -22,7 +22,14 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item label="事发地点:" prop="place">
-            <el-input id="searchInput" v-model="addForm.place" placeholder="请输入事发地点" @keyup.enter.native="markLocation('mapBox', addForm.place)"></el-input>
+            <el-autocomplete
+              style="width: 450px;"
+              v-model="addForm.place"
+              :fetch-suggestions="autoAdress"
+              value-key="name"
+              @select="chooseAddress"
+              placeholder="请输入事发地点">
+            </el-autocomplete>
           </el-form-item>
           <el-form-item style="margin-bottom: 0;">
             <div id="searchResults"></div>
@@ -78,6 +85,7 @@
   </div>
 </template>
 <script>
+let AMap = window.AMap;
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
 import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.js';
@@ -123,13 +131,14 @@ export default {
       // 地图参数
       map: null,
       lngLat: null,//经纬度
+      autoComplete: null,
+      _marker: null,
       // 上传参数
       fileList: []
     }
   },
   mounted () {
     this.resetMap();
-    // this.search();
     // 修改，回填数据
     if (this.pageType === 4) {
       this.getMutualHelpDetail();
@@ -159,57 +168,69 @@ export default {
         // viewMode: '3D' // 使用3D视图
       });
       map.setMapStyle('amap://styles/whitesmoke');
+      map.plugin('AMap.Autocomplete', () => {
+        let autoOptions = {
+          city: '长沙'
+        }
+        this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+      })
       _this.map = map;
     },
+    
+    autoAdress (queryString, cb) {
+      if (queryString === '') {
+        cb([])
+      } else {
+        this.autoComplete.search(queryString, (status, result) => {
+          if (status === 'complete') {
+            cb(result.tips);
+          }
+        })
+      }
+    },
+    chooseAddress (e) {
+      console.log(e);
+      this.markLocation(e.location.lng, e.location.lat, e.address);
+    },
     // 输入追踪点定位圆形覆盖物的中心点
-    markLocation(mapId, address) {
+    markLocation(lng, lat, address) {
       let _this = this;
-      new window.AMap.plugin('AMap.Geocoder', function() {
-          let geocoder = new window.AMap.Geocoder(); 
-          console.log(address)           
-          geocoder.getLocation(address, function(status, result) {
-            if (status === 'complete' && result.info === 'OK') { 
-              // 经纬度                      
-              let lng = result.geocodes[0].location.lng;
-              let lat = result.geocodes[0].location.lat;
-              _this.lngLat = [lng, lat];
-              // 追踪点标记
-              let offSet = [-20.5, -48], _hoverWindow = null;
-              if (lng > 0 && lat > 0) {
-                let _marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
-                  position: [lng, lat],
-                  offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-                  draggable: false, // 是否可拖动
-                  extData: '',
-                  // 自定义点标记覆盖物内容
-                  content: '<div class="vl_icon vl_icon_message_7"></div>'
-                });
-                // hover
-                _marker.on('mouseover', function () {
-                  let _sContent = '<div class="vl_map_hover">' +
-                    '<div class="vl_map_hover_main"><ul>' + 
-                      '<li><span>事发地点：</span>' + address + '</li>' + 
-                    '</ul></div>';
-                  _hoverWindow = new window.AMap.InfoWindow({
-                    isCustom: true,
-                    closeWhenClickMap: true,
-                    offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                    content: _sContent
-                  });
-                  _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
-                });
-                _marker.on('mouseout', function () {
-                  if (_hoverWindow) { _hoverWindow.close(); }
-                });
-                _marker.setMap(_this.map);
-              }
-            } else {
-              console.log('定位失败！');
-              _this.$message.error('定位失败！');
-            }
+      if (_this._marker) {
+        _this.map.remove(_this._marker);
+      }
+      _this.lngLat = [lng, lat];
+      // 追踪点标记
+      let offSet = [-20.5, -48], _hoverWindow = null;
+      if (lng > 0 && lat > 0) {
+        _this._marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [lng, lat],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: '',
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_message_7"></div>'
+        });
+        // hover
+        _this._marker.on('mouseover', function () {
+          let _sContent = '<div class="vl_map_hover">' +
+            '<div class="vl_map_hover_main"><ul>' + 
+              '<li><span>事发地点：</span>' + address + '</li>' + 
+            '</ul></div>';
+          _hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: _sContent
           });
-      });
+          _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+        });
+        _this._marker.on('mouseout', function () {
+          if (_hoverWindow) { _hoverWindow.close(); }
+        });
+        _this.map.setCenter([lng, lat]);
+        _this._marker.setMap(_this.map);
+      }
     },
   
     mapZoomSet (val) {
@@ -295,7 +316,7 @@ export default {
           } else {
             this.addForm.radio = -1;
           }
-          this.markLocation('mapBox', this.addForm.place);
+          this.markLocation(detail.longitude, detail.latitude, detail.eventAddress);
         }
       })
     },
@@ -364,44 +385,6 @@ export default {
         }
       });
     },
-    // 搜索事发地点
-    search () {
-      let _this = this;
-        new window.AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
-
-          var poiPicker = new PoiPicker({
-              input: 'searchInput',
-              placeSearchOptions: {
-                  map: _this.map,
-                  pageSize: 10
-              },
-              searchResultsContainer: 'searchResults'
-          });
-
-          poiPicker.on('poiPicked', function(poiResult) {
-                console.log(poiResult)
-                _this.addForm.place = poiResult.item.name;
-              poiPicker.hideSearchResults();
-
-              var source = poiResult.source,
-                  poi = poiResult.item;
-
-              if (source !== 'search') {
-
-                  //suggest来源的，同样调用搜索
-                  poiPicker.searchByKeyword(poi.name);
-
-              } else {
-
-                  //console.log(poi);
-              }
-          });
-
-          poiPicker.onCityReady(function() {
-              poiPicker.searchByKeyword('');
-          });
-      });
-    }
   }
 }
 </script>

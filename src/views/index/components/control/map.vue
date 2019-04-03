@@ -43,7 +43,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="time">
+        <el-form-item prop="time" class="time">
           <el-date-picker
             style="width: 192px;"
             v-model="mapForm.time"
@@ -65,31 +65,35 @@
       <!-- 地图 -->
       <div id="mapBox"></div>
       <!-- 抓拍列表 -->
-      <div class="snap_box" v-if="!isShowFullScreen">
-        <el-card shadow="hover" class="more">
-          <p>今日抓拍</p>
-          <div>{{snapTotal}}</div>
-          <el-button size="small">查看更多</el-button>
-        </el-card>
-        <el-card class="pic" shadow="hover" v-for="item in snapList" :key="item.deviceId">
-          <div class="img">
-            <img :src="item.snapPhoto" alt="" width="130" height="130">
-          </div>
-          <ul>
-            <li>
-              <i class="vl_icon vl_icon_control_26"></i>
-              <span>{{item.featureName}}</span>
-            </li>
-            <li>
-              <i class="vl_icon vl_icon_control_27"></i>
-              <span>{{item.snapTime}}</span>
-            </li>
-            <li>
-              <i class="vl_icon vl_icon_control_05"></i>
-              <span>{{item.deviceName}}</span>
-            </li>
-          </ul>
-        </el-card>
+      <div class="snap_box" v-if="!isShowFullScreen && snapTotal > 0">
+        <div class="snap_box_one">
+          <el-card shadow="hover" class="more">
+            <p>今日抓拍</p>
+            <div>{{snapTotal}}</div>
+            <el-button size="small">查看更多</el-button>
+          </el-card>
+        </div>
+        <div class="snap_box_two" v-for="item in snapList" :key="item.deviceId">
+          <el-card class="pic" shadow="hover">
+            <div class="img">
+              <img :src="item.snapPhoto" alt="" width="130" height="130">
+            </div>
+            <ul>
+              <li>
+                <i class="vl_icon vl_icon_control_26"></i>
+                <span>{{item.featureName}}</span>
+              </li>
+              <li>
+                <i class="vl_icon vl_icon_control_27"></i>
+                <span>{{item.snapTime}}</span>
+              </li>
+              <li>
+                <i class="vl_icon vl_icon_control_05"></i>
+                <span>{{item.deviceName}}</span>
+              </li>
+            </ul>
+          </el-card>
+        </div>
       </div>
       <!-- 布控进行中页面 -->
       <div class="underway_box" v-if="isShowFullScreen">
@@ -129,7 +133,7 @@
 </template>
 <script>
 import rtmpplayer from '@/components/common/rtmpplayer.vue';
-import {random14} from '@/utils/util.js';
+import {formatDate, random14} from '@/utils/util.js';
 import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap, getAlarmListByDev} from '@/views/index/api/api.js';
 export default {
   components: {rtmpplayer},
@@ -284,7 +288,7 @@ export default {
               <div class="vl_map_img">
                 <div id="${domId}" style="width: 300px;height: 150px;background: #000;"></div>
                 <div class="vl_map_state">进行中</div>
-             
+                <i title="大屏" class="vl_icon vl_icon_v27 vl_map_full_screen" style="position: absolute;right: 15px;bottom: 15px;cursor: pointer;"></i>
               </div>`;
           }
           if (_this.controlObjList.num === 1) {
@@ -519,8 +523,8 @@ export default {
         pageNum: 1,
         pageSzie: 10,
         'where.surveillanceId': 11,
-        'where.dateStart': '2019-03-01',//formatDate(new Date(), 'yyyy-MM-dd'),
-        'where.dateEnd': '2019-03-14'//formatDate(new Date(), 'yyyy-MM-dd'),
+        'where.dateStart': formatDate(new Date(), 'yyyy-MM-dd'),
+        'where.dateEnd': formatDate(new Date(), 'yyyy-MM-dd'),
       }
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
@@ -649,7 +653,6 @@ export default {
         width: 100%;
       }
       .snap_box{
-        width: 100%;
         height: 245px;
         overflow: hidden;
         position: absolute;
@@ -657,53 +660,58 @@ export default {
         left: 0;
         display: flex;
         flex-wrap: wrap;
-        padding: 0 20px;
-        .more.el-card{
-          width: 152px;
-          height: 245px;
-          margin-bottom: 20px;
-          margin-right: 1%;
-          text-align: center;
-          padding: 78px 0 87px 0;
-          box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
-          p{
-            line-height: 24px;
-          }
-          div{
-            font-size: 24px;
-            line-height: 24px;
-            margin-bottom: 5px;
-            color: #0769E7;
-          }
-          .el-button{
-            width: 90px;
-            height: 30px;
+        .snap_box_one{
+          width: 166px;
+          height: 265px;
+          padding: 0 0.5% 20px 1%;
+          .more.el-card{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            padding: 78px 0 87px 0;
+            box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            p{
+              line-height: 24px;
+            }
+            div{
+              font-size: 24px;
+              line-height: 24px;
+              margin-bottom: 5px;
+              color: #0769E7;
+            }
+            .el-button{
+              width: 90px;
+              height: 30px;
+            }
           }
         }
-        .pic.el-card{
-          width: 174px;
-          height: 245px;
-          padding: 15px 0;
-          margin-bottom: 20px;
-          margin-right: 1%;
-          box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
-          ul{
-            padding: 16px 0 0 16px;
-            li i{
-              vertical-align: middle;
-              margin-bottom: 2px;
-            }
-            li:nth-child(1) span{
-              color: #333333;
-            }
-            li:not(:nth-child(1)) span{
-              color: #999999;
-              font-size: 12px;
-            }
-          } 
-          .img{
+        .snap_box_two{
+          width: 176px;
+          height: 265px;
+          padding: 0 0.5% 20px 0.5%;
+          .pic.el-card{
             width: 100%;
-            text-align: center;
+            height: 100%;
+            padding: 15px 0;
+            box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
+            ul{
+              padding: 16px 0 0 16px;
+              li i{
+                vertical-align: middle;
+                margin-bottom: 2px;
+              }
+              li:nth-child(1) span{
+                color: #333333;
+              }
+              li:not(:nth-child(1)) span{
+                color: #999999;
+                font-size: 12px;
+              }
+            } 
+            .img{
+              width: 100%;
+              text-align: center;
+            }          
           }          
         }
       }
@@ -842,6 +850,10 @@ export default {
   .map_form{
     .el-form-item{
       margin-bottom: 10px!important;
+    }
+    .time input{
+      width: 70px;
+      font-size: 12px;
     }
   }
   .map_box{

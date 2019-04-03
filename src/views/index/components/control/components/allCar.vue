@@ -32,18 +32,21 @@
             <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
           </div>
           <div class="data_list">
-            <span>{{item.numberColor}}</span>
-            <span>{{item.groupNames}}</span>
-            <div class="more">
-              <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-              <template v-if="showMoreId === item.uid">
-                <div>
-                  <span>失踪儿童</span>
-                  <span>拐卖儿童</span>
-                </div>
-                <i></i>
+            <span :title="item.numberColor">{{item.numberColor}}</span>
+            <template v-if="item.groupNames">
+              <template v-for="(gN, index) in item.groupNames.split(',')">
+                <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
               </template>
-            </div>
+              <div class="more" v-if="item.groupNames.split(',').length > 1">
+                <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
+                <template v-if="showMoreId === item.uid">
+                  <div>
+                    <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                  </div>
+                  <i></i>
+                </template>
+              </div>
+            </template>
           </div>
           <div class="data_list">
             <span>{{item.desci}}</span>

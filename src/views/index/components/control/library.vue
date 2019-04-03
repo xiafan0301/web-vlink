@@ -159,9 +159,19 @@
                 <div class="data_list">
                   <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
                 </div>
-                <div class="data_list">
-                  <span>失踪儿童</span>
-                  <span>分组2</span>
+                <div class="data_list" v-if="item.groupNames">
+                  <template v-for="(gN, index) in item.groupNames.split(',')">
+                    <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
+                  </template>
+                  <div class="more" v-if="item.groupNames.split(',').length >= 3">
+                    <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
+                    <template v-if="showMoreId === item.uid">
+                      <div>
+                        <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                      </div>
+                      <i></i>
+                    </template>
+                  </div>
                 </div>
                 <div class="data_list">
                   <span>{{item.remarks}}</span>
@@ -184,8 +194,21 @@
                   <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
                 </div>
                 <div class="data_list">
-                  <span>{{item.numberColor}}</span>
-                  <span>{{item.groupNames}}</span>
+                  <span :title="item.numberColor">{{item.numberColor}}</span>
+                  <template v-if="item.groupNames">
+                    <template v-for="(gN, index) in item.groupNames.split(',')">
+                      <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
+                    </template>
+                    <div class="more" v-if="item.groupNames.split(',').length > 1">
+                      <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
+                      <template v-if="showMoreId === item.uid">
+                        <div>
+                          <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                        </div>
+                        <i></i>
+                      </template>
+                    </div>
+                  </template>
                 </div>
                 <div class="data_list">
                   <span>{{item.desci}}</span>
@@ -481,6 +504,7 @@ export default {
       // 侧边栏参数
       tabType: '1',
       group: null,//搜索组
+      showMoreId: null,
       // 人像库筛选参数
       libPortraitForm: {
         perTime: null,
