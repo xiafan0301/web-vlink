@@ -1220,7 +1220,7 @@ export function JtcGETTrail(params) {
  */
 export function JigGETEvent(params) {
   return request({
-    url: '/event-services/events/page',
+    url: '/events/page',
     method: 'get',
     params: params,
     mode: 'event'
@@ -1280,7 +1280,7 @@ export function JfoGETSurveillanceObject(params) {
  */
 export function JfoGETEventList(params) {
   return request({
-    url: '/event-services/event/by-surveillance',
+    url: '/events/by-surveillance',
     method: 'get',
     params: params,
     mode: 'event'

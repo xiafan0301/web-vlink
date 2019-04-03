@@ -11,10 +11,10 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      dev: 'http://apidev.aorise.org/vlink-event/api/vlink',
+      dev: 'http://apidev.aorise.org/vlink-event/',
       // dev: 'http://10.116.64.134:8082/api/vlink',
-      test: 'http://apirel.aorise.org/vlink-event/api/vlink',
-      prod: 'http://apidev.aorise.org/vlink-event/api/vlink'
+      test: 'http://apirel.aorise.org/vlink-event/',
+      prod: 'http://apidev.aorise.org/vlink-event/'
     },
     // 上传图片
     upload: {

@@ -54,7 +54,7 @@
                 <h2>{{item.list[item.curIndex].semblance}}</h2>
                 <p>相似度</p>
                 <el-select v-model="item.curIndex" >
-                  <el-option v-for="(sItem, sIndex) in item.list" :key="sItem.id" :value="sIndex" :label="sItem.snapTime.slice(3)">
+                  <el-option v-for="(sItem, sIndex) in item.list" :key="sItem.id" :value="sIndex" :label="sItem.snapTime.slice(3, 14)">
                   </el-option>
                 </el-select>
               </div>
@@ -92,8 +92,8 @@ export default {
         personType: null,
         deviceType: null,
         CharacType: null,
-        latitude: 28.093846,
-        longitude: 112.974691
+        latitude: null,
+        longitude: null
       },
       searchAdress: '',
       personList: [
@@ -138,7 +138,6 @@ export default {
       amap: null, // 地图实例
       autoComplete: null,
       markerPoint: [], // 地图点集合
-      markerImg: [], // 地图抓人人像集合
       searching: false,
       curVideo: {
         id: '',
@@ -191,6 +190,8 @@ export default {
     },
     autoAdress (queryString, cb) {
       if (queryString === '') {
+        this.searchData.longitude = null;
+        this.searchData.latitude = null;
         cb([])
       } else {
         this.autoComplete.search(queryString, (status, result) => {
@@ -201,9 +202,14 @@ export default {
       }
     },
     chooseAddress (e) {
-      this.searchData.longitude = e.location.lng;
-      this.searchData.latitude = e.location.lat;
+      if (e.location) {
+        this.searchData.longitude = e.location.lng;
+        this.searchData.latitude = e.location.lat;
+      } else {
+        return this.$message.error('请选择一个具体地址')
+      }
       this.amap.setZoomAndCenter(16, [this.searchData.longitude, this.searchData.latitude]);
+      this.beginSearch();
     },
     setDTime () {
       let date = new Date();
@@ -224,6 +230,9 @@ export default {
       }
     },
     beginSearch () {
+      if (this.searchData.latitude === null || this.searchData.longitude === null) {
+        return this.$message.error('请设置搜索区域的中心位置')
+      }
       this.searching = true;
       let params = {
         dateStart: this.searchData.time[0],
@@ -242,13 +251,12 @@ export default {
               x.checked = false;
               return x;
             });
+            this.amap.clearMap();
             this.drawMarkers(this.evData);
           }
         })
     },
     drawMarkers (data) {
-      this.amap.clearMap();
-      // let cWin = document.documentElement.clientWidth;
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         if (obj.addLongitude > 0 && obj.addLatitude > 0) {
@@ -265,25 +273,23 @@ export default {
           }
           let _sContent = '<div style="background: ' + colorList[_i] + ';" class="vl_jha_mk_win">' + obj.snapNum + '人次</div>';
           // 窗体
-          let markerWindow = new AMap.Marker({ // 添加自定义点标记
+          new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(26, -40), // 相对于基点的偏移位置
+            offset: new AMap.Pixel(26, -20), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
             // 自定义点标记覆盖物内容
             content: _sContent
           });
-          this.markerImg.push(markerWindow);
           // 摄像头
           let _class = 'vl_icon_judge_0' + (_i + 3);
-          let _circle = '';
+          let _id = 'vlJhaSxt' + i;
           if (obj.checked) {
             _class = 'vl_icon_judge_02';
-            _circle = '<div class="my_circle"></div><div class="my_circle1"></div>';
           }
-          let _content = '<div class="vl_icon vl_jha_sxt ' + _class + '">' + _circle + '</div>'
-          let point = new AMap.Marker({ // 添加自定义点标记
+          let _content = '<div id=' + _id + ' class="vl_icon vl_jha_sxt ' + _class + '"><div class="my_circle"></div><div class="my_circle1"></div></div>'
+          new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
@@ -292,78 +298,47 @@ export default {
             // 自定义点标记覆盖物内容
             content: _content
           });
-          point.on('mouseover', this.pointHover);
-          this.markerPoint[i] = point;
+          setTimeout(() => {
+            this.addListen($('#' + _id), 'mouseover', i);
+            this.addListen($('#' + _id), 'mouseout', i, obj);
+            this.addListen($('#' + _id), 'click', i, obj);
+          }, 300)
         }
       }
       this.amap.setFitView();
     },
-    updatePoint (obj) {
-      let _i = this.evData.indexOf(obj);
-      console.log(_i, obj)
-      let i = 0;
-      if (obj.snapNum > 79) {
-        i = 3;
-      } else if (obj.snapNum > 59) {
-        i = 2;
-      } else if (obj.snapNum > 19) {
-        i = 1;
-      } else {
-        i = 0;
-      }
-      let _class = 'vl_icon_judge_0' + (i + 3);
-      let _circle = '';
-      if (obj.checked) {
-        _class = 'vl_icon_judge_02';
-        _circle = '<div class="my_circle"></div><div class="my_circle my_circle1"></div>';
-      }
-      let _content = '<div class="vl_icon vl_jha_sxt ' + _class + '">' + _circle + '</div>'
-      if (obj.addLongitude > 0 && obj.addLatitude > 0) {
-        let point = new AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: obj,
-          // 自定义点标记覆盖物内容
-          content: _content
-        });
-        point.on('click', this.showVideo)
-        point.on('mouseover', this.pointHover);
-        point.on('mouseout', (e) => {
-          let _i = this.evData.indexOf(e.target.C.extData);
-          if (_i !== this.curVideo.indexNum) {
-            e.target.C.extData.checked = false;
-            this.updatePoint(obj);
-          }
-        })
-        let self = this;
-        setTimeout(() => {
-          self.amap.remove(this.markerPoint[_i]);
-          self.markerPoint[_i] = point;
-        }, 0)
-      }
-    }, // 更新摄像头点
-    pointHover (e) {
-      if (!e.target.C.extData.checked) {
-        e.target.C.extData.checked = true;
-        this.evData.filter((x, index) => index !== this.curVideo.indexNum && x.checked === true && x !== e.target.C.extData).forEach(z => {
-          z.checked = false;
-          this.updatePoint(z);
-        })
-        this.updatePoint(e.target.C.extData);
-      }
+    addListen (el, evType,key ,obj = {}) {
+      let self = this;
+      let _key = self.curVideo.indexNum;
+      el.bind(evType, function () {
+        switch (evType) {
+          case 'mouseover':
+            $('#vlJhaSxt' + key).addClass('vl_icon_judge_02 vl_jha_sxt_hover')
+            break;
+          case 'mouseout':
+            if (!obj.checked) {
+              $('#vlJhaSxt' + key).removeClass('vl_icon_judge_02 vl_jha_sxt_hover')
+            }
+            break;
+          case 'click':
+            self.evData.forEach(z => {
+              z.checked = false;
+            })
+            obj.checked = true;
+            if (_key !== null) {
+              $('#vlJhaSxt' + _key).removeClass('vl_icon_judge_02 vl_jha_sxt_hover')
+            }
+            $('#vlJhaSxt' + key).addClass('vl_icon_judge_02 vl_jha_sxt_hover')
+            self.showVideo(obj);
+            break;
+        }
+      })
     },
-    showVideo (e) {
-      if (this.curVideo.indexNum !== null && this.curVideo.indexNum !== this.evData.indexOf(e.target.C.extData)) {
-        this.evData[this.curVideo.indexNum].checked = false;
-        this.updatePoint(this.evData[this.curVideo.indexNum]);
-      }
-      this.curVideo.indexNum = this.evData.indexOf(e.target.C.extData);
-      this.curSXT = e.target.C.extData;
+    showVideo (data) {
+      this.curVideo.indexNum = this.evData.indexOf(data);
+      this.curSXT = data;
       this.showVideoList = true;
       this.getSnapList(this.curSXT.deviceId);
-      this.pointHover(e);
     },
     getSnapList (deviceId) {
       this.$_showLoading({
@@ -394,7 +369,7 @@ export default {
     },
     hideVideoList () {
       this.evData[this.curVideo.indexNum].checked = false;
-      this.updatePoint(this.evData[this.curVideo.indexNum]);
+      $('#vlJhaSxt' + this.curVideo.indexNum).removeClass('vl_icon_judge_02 vl_jha_sxt_hover')
       this.curVideo.indexNum = null;
       this.showVideoList = false;
     }
@@ -596,7 +571,13 @@ export default {
   }
   .vl_jha_sxt {
     position: relative;
-    .my_circle {
+    -webkit-transition: 0s all;
+    -moz-transition: 0s all;
+    -ms-transition: 0s all;
+    -o-transition: 0s all;
+    transition: 0s all;
+    > div {
+      display: none;
       position: absolute;
       bottom: -46px;
       right: -20px;
@@ -609,6 +590,11 @@ export default {
       -webkit-animation: circleWave 1.4s infinite;
       -o-animation: circleWave 1.4s infinite;
       animation: circleWave 1.4s infinite;
+    }
+  }
+  .vl_jha_sxt_hover {
+    >div {
+      display: block;
     }
     .my_circle1 {
       opacity: 0;
