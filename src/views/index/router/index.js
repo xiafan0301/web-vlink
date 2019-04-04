@@ -32,8 +32,8 @@ export default new Router({
                         }, {
                             path: 'query',
                             name: 'video_query',
-                            // component: () => import('@/views/index/components/video/query.vue')
-                            component: () => import('@/views/index/components/construction.vue')
+                            component: () => import('@/views/index/components/video/query.vue')
+                            // component: () => import('@/views/index/components/construction.vue')
                         }, {
                             path: 'signList',
                             name: 'video_signList',
@@ -43,9 +43,9 @@ export default new Router({
                             name: 'video_download',
                             component: () => import('@/views/index/components/video/download.vue')
                         }, {
-                            path: 'setting',
-                            name: 'video_setting',
-                            component: () => import('@/views/index/components/video/setting.vue')
+                            path: 'videotape',
+                            name: 'video_videotape',
+                            component: () => import('@/views/index/components/video/videotape.vue')
                         }, {
                             path: 'statistics',
                             name: 'video_statistics',
