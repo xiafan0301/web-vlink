@@ -222,17 +222,6 @@ export function delPlan(uid) {
   });
 }
 /**
- * 预览预案
- * @param {*} data
- */
-export function previewPlan(uid) {
-  return request({
-    url: 'plan-services/plans/' + uid,
-    method: 'get',
-    mode: 'ctc'
-  });
-}
-/**
  * 分页获取调度任务
  * @param {*} data
  */
@@ -797,7 +786,7 @@ export function getVehicleDataList (params) {
   });
 }
 /**
- * 车辆--新增分组
+ * 新增分组
  * @param {*} data
  */
 export function addGroup (data) {
@@ -914,6 +903,49 @@ export function getPersonData (params) {
     url: '/portrait/page',
     params,
     method: 'get'
+  });
+}
+/**
+ * 获取人员列表
+ * @param {*} data 
+ */
+export function getPersonDetail (uid) {
+  return request({
+    url: '/user/details/' + uid,
+    method: 'get'
+  });
+}
+/**
+ * 判断人员分组是否重复
+ * @param {*} data 
+ */
+export function judgePerson (params) {
+  return request({
+    url: '/portrait-group/check-name',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 人员---复制到组
+ * @param {*} data 
+ */
+export function copyPersonGroup (data) {
+  return request({
+    url: '/portrait/group/users',
+    data,
+    method: 'post'
+  });
+}
+/**
+ * 人员---新增分组同时将人员添加到组中
+ * @param {*} data 
+ */
+export function addGroupCopyPerson (data) {
+  return request({
+    url: '/portrait-group/copy-group-member',
+    data,
+    method: 'post'
   });
 }
 /*** =======================视频设置=========================== */

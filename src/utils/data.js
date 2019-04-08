@@ -1,5 +1,5 @@
 export const dataList = {
-  eventType: 1, // 事件类型
+  eventType: 20, // 事件类型
   eventLevel: 2, // 事件等级
   handleUnit: 3, // 处理单位
   identity: 4, // 上报者身份

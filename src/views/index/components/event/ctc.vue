@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="ctc-list">
     <div class="search_box">
       <el-form :inline="true" :model="ctcForm" class="ctc_form" ref="ctcForm">
@@ -115,6 +116,7 @@
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';

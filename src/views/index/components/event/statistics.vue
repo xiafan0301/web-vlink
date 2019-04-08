@@ -286,6 +286,20 @@ export default {
     this.searchData();
     this.initMap();
   },
+  destroyed () {
+    if (this.charts.chart1) {
+      this.chart.chart1.destroyed();
+    }
+    if (this.charts.chart2) {
+      this.chart.chart2.destroyed();
+    }
+    if (this.charts.chart3) {
+      this.chart.chart3.destroyed();
+    }
+    if (this.charts.chart4) {
+      this.chart.chart4.destroyed();
+    }
+  },
   methods: {
     // 地图
     initMap () {

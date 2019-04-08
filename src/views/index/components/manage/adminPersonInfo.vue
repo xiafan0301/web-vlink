@@ -10,7 +10,7 @@
     <div class="content_box">
       <div class="btn_box">
         <div class="bnt_box_left">
-          <span>自定义组</span>
+          <span>{{groupName}}</span>
           <i class=" edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
           <i class=" del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
@@ -21,10 +21,11 @@
             <div class="copy_info_list">
               <vue-scroll>
                 <ul class="copy_info_ul">
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
+                   <li
+                    v-for="(item, index) in copyGroupList"
+                    :key="index"
+                    @click="handleCopyGroup(item.id)"
+                  >{{item.name}}</li>
                 </ul>
               </vue-scroll>
             </div>
@@ -40,7 +41,7 @@
         <div class="search_box">
           <el-form :inline="true" :model="searchForm" class="search_form">
             <el-form-item>
-              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.name" />
+              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
             </el-form-item>
             <el-form-item >
               <el-select v-model="searchForm.idType" style="width: 240px;">
@@ -49,14 +50,14 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-select v-model="searchForm.userSex" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+              <el-select v-model="searchForm.sex" style="width: 240px;">
+                <el-option label="男" :value="1"></el-option>
+                <el-option label="女" :value="2"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" type="primary">查询</el-button>
-              <el-button class="reset_btn" type="primary">重置</el-button>
+              <el-button class="select_btn">查询</el-button>
+              <el-button class="reset_btn">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -111,13 +112,12 @@
           </el-table-column>
         </el-table>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage4"
+          :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :page-size="pagination.pageSize"
           layout="total, prev, pager, next, jumper"
-          :total="400">
+          :total="pagination.total">
         </el-pagination>
       </div>
     </div>
@@ -248,10 +248,11 @@
   </div>
 </template>
 <script>
+import { getPerGroupList, getPersonData} from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       userGroupName: null,
       showGroup: false,
       searchForm: {
@@ -287,10 +288,67 @@ export default {
       editGroupDialog: false, // 修改分组弹出框
       deleteGroupDialog: false, // 删除分组弹出框
       moveoutGroupDialog: false, // 移出组弹出框
+      perGroupList: [], // 人员分组列表
+      groupId: null,
+      isGroup: false,
+      groupName: null, // 组名
+      copyGroupList: []
     }
   },
+  mounted () {
+    this.groupId = parseInt(this.$route.query.id);
+    if (this.$route.query.type == 1) { // 分组查看
+      this.isGroup = true;
+    } else { // 底库查看
+      this.isGroup = false;
+    }
+    this.getPersonList();
+    this.getGroupList(parseInt(this.$route.query.id));
+  },
   methods: {
-    handleSizeChange () {
+    // 获取分组列表
+    getGroupList (uid) {
+      const params = {
+        type: 4, // 4---人像
+        name: this.searchGroupName
+      }
+      getPerGroupList(params)
+        .then(res => {
+          if (res) {
+            res.data.groupNumResultDtoList.map(item => {
+              if (item.id === uid) {
+                this.groupName = item.name;
+              } else {
+                this.copyGroupList.push({
+                  uid: item.id,
+                  name: item.name
+                })
+              }
+            });
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取人员列表
+    getPersonList () {
+      const params = {
+        // 'where.type': this.selectMethod,
+        'where.albumId': this.searchForm.albumId,
+        'where.groupId': this.searchForm.groupId,
+        'where.idType': this.searchForm.idType,
+        'where.idNo': this.searchForm.idNo,
+        'where.sex': this.searchForm.sex,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getPersonData(params)
+        .then(res => {
+          if (res) {
+            this.personGroupList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
     handleCurrentChange () {},
     // 显示查看详细信息弹出框

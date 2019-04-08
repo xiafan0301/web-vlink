@@ -154,7 +154,7 @@
 .vl_icon_message_6{width: 30px; height: 30px; background-position: -816px -425px;}
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
 /**事件图标***/
-.vl_icon_event_1{width: 56px; height: 71px; background-position: -580px -428px;}
+.vl_icon_event_1{width: 72px; height: 72px; background-position: -572px -426px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
 .vl_icon_event_3{width: 16px; height: 16px; background-position: -785px -375px;}
 .vl_icon_event_4{width: 28px; height: 28px; background-position: -664px -428px;}
@@ -178,6 +178,7 @@
 .vl_icon_event_22{width: 70px; height: 70px; background-position: -370px -863px;} /*事件---图片切换-不可用-右*/
 .vl_icon_event_23{width: 35px; height: 35px; background-position: -554px -293px;} /*事件---图片放大-关闭*/
 .vl_icon_event_24{width: 20px; height: 20px; background-position: -615px -309px;} /*事件---图片--关闭*/
+.vl_icon_event_25{width: 18px; height: 12px; background-position: -693px -486px;} /*事件---预览文件*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/

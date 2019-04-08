@@ -367,8 +367,30 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(this.addEventForm)
-          this.handleFormData();
+          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
@@ -398,7 +420,49 @@ export default {
     skipHandlePage (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
+          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
+          addEvent(this.addEventForm)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '添加成功',
+                  customClass: 'request_tip'
+                })
+                this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '添加失败',
+                  customClass: 'request_tip'
+                })
+              }
+            })
+            .catch(() => {})
+          // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },

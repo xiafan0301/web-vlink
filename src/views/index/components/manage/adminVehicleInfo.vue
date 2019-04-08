@@ -27,9 +27,6 @@
                       :key="index"
                       @click="handleCopyGroup(item.uid)"
                     >{{item.groupName}}</li>
-                    <!-- <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li> -->
                   </ul>
                 </vue-scroll>
               </div>
