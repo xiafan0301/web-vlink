@@ -38,8 +38,8 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      dev: 'http://10.116.64.142:8082', // 江先琨
-      // dev: 'http://apidev.aorise.org/vlink-user',
+      // dev: 'http://10.116.64.142:8082', // 江先琨
+      dev: 'http://apidev.aorise.org/vlink-user',
       test: 'http://apidev.aorise.org/vlink-user',
       prod: 'http://apidev.aorise.org/vlink-user'
     },
