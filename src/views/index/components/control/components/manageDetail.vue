@@ -63,11 +63,11 @@
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="controlArea">
             <div>布控范围</div>
-            <i class="el-icon-arrow-up" v-show="dpType !== '布控范围'"></i>
-            <i class="el-icon-arrow-down" v-show="dpType === '布控范围'"></i>
+            <i class="el-icon-arrow-up" v-show="dpOne"></i>
+            <i class="el-icon-arrow-down" v-show="!dpOne"></i>
           </div>
           <el-collapse-transition>
-            <div class="manage_d_s_m" v-show="dpType === '布控范围'">
+            <div class="manage_d_s_m" v-show="dpOne">
               <div id="mapBox"></div>
               <div class="manage_d_s_m_l">
                 <div class="manage_b" style="margin-top: 0;">
@@ -120,15 +120,19 @@
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === '1'">
-            <div class="situ_top" @click="dpType = '运行情况'">
+            <div class="situ_top" @click="dpTwo = !dpTwo">
               <div>实时监控</div>
-              <i class="el-icon-arrow-down" v-show="dpType === '运行情况'"></i>
-              <i class="el-icon-arrow-up" v-show="dpType !== '运行情况'"></i>
+              <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
+              <i class="el-icon-arrow-up" v-show="dpTwo"></i>
             </div>
             <el-collapse-transition>
-              <div class="situ_content">
+              <div class="situ_content" v-show="dpTwo">
                   <div class="situ_left">
-                    <div>布控设备（12）</div>
+                    <div style="padding-left: 20px;">布控设备（12）</div>
+                    <div class="equ_m">
+                      <div>摄像头（）</div>
+                      <div>卡口（）</div>
+                    </div>
                     <vue-scroll>
                       <ul style="width: 100%;max-height: 736px;">
                         <template v-for="(item, index) in situList">
@@ -214,7 +218,7 @@
                   </div>
                 </div>
                 <div>
-                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">{{item.featureName}}</span></p>
+                  <p><i class="vl_icon vl_icon_control_26" style="margin-top: -4px;"></i><span class="vl_f_333">{{item.objName}}</span></p>
                   <p><i class="vl_icon vl_icon_control_27" style="margin-top: -4px;"></i><span class="vl_f_999">{{item.snapTime}}</span></p>
                 </div>
               </div>
@@ -330,7 +334,8 @@ export default {
       devList: [], //设备列表
       type: '0',// 设备类型
       devId: null,//设备id
-      dpType: null,//展开类型
+      dpOne: false,//展开布控范围
+      dpTwo: false,//展开实时监控
        // 翻页数据
       currentPage: 1,
       pageSzieObj: 18,
@@ -457,7 +462,7 @@ export default {
     },
     // 获取布控范围
     controlArea () {
-      this.dpType = '布控范围';
+      this.dpOne = !this.dpOne;
       controlArea(this.controlId).then(res => {
         if (res && res.data) {
           this.devNum = res.data.devNum;
@@ -954,10 +959,33 @@ export default {
               height: 600px;
               border-right: 1px solid #F2F2F2;
               > div{
-                width: 100%;
-                padding: 0 10px;
                 height: 50px;
                 line-height: 50px;
+              }
+              .equ_m{
+                margin: 0 20px;
+                height: 28px;
+                line-height: 28px;
+                border-radius:4px;
+                border:1px solid rgba(211,211,211,1);
+                display: flex;
+                overflow: hidden;
+                >div{
+                  width: 50%;
+                  height: 100%;
+                  text-align: center;
+                  background: #fff;
+                  color: #666;
+                  cursor: pointer;
+                  &.active{
+                    background: rgba(235,239,242,1);
+                    color: #0C70F8;
+                  }
+                  &:hover{
+                    background: rgba(235,239,242,1);
+                    color: #0C70F8;
+                  }
+                }
               }
               ul{
                 margin-top: 10px;

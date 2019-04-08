@@ -50,13 +50,11 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item prop="controlObjId">
+            <el-form-item prop="controlObj">
               <el-select
-                v-model="manageForm.controlObjId"
+                v-model="manageForm.controlObj"
                 filterable
                 remote
-                allow-create
-                reserve-keyword
                 value-key="value"
                 placeholder="请输入对象搜索"
                 :remote-method="getControlObject"
@@ -65,7 +63,7 @@
                   v-for="item in controlObjList"
                   :key="item.value"
                   :label="item.label"
-                  :value="item.value">
+                  :value="item">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -74,8 +72,6 @@
                 v-model="manageForm.facilityId"
                 filterable
                 remote
-                allow-create
-                reserve-keyword
                 value-key="value"
                 placeholder="请输入设备名搜索"
                 :remote-method="getControlDevice"
@@ -222,7 +218,7 @@ export default {
         state: null,
         rank: null,
         time: null,
-        controlObjId: null,
+        controlObj: null,
         facilityId: null
       },
       loading: false,
@@ -321,7 +317,8 @@ export default {
           this.controlObjList = res.data.map(m => {
             return {
               value: m.uid,
-              label: m.name
+              label: m.name,
+              type: m.objType
             }
           });
         }
@@ -357,8 +354,8 @@ export default {
         'where.level': this.manageForm.rank,//告警级别
         'where.dateStart': this.manageForm.time && this.manageForm.time[0],//布控开始时间
         'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
-        'where.surveillanceObjectId': this.manageForm.controlObjId,//布控对象id
-        'where.objType': null,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
+        'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.value,//布控对象id
+        'where.objType': this.manageForm.controlObj && this.manageForm.controlObj.type,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
         'where.deviceId': this.manageForm.facilityId//布控设备id
       }
       this.loading = true;

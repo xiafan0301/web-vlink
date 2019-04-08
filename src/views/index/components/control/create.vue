@@ -15,7 +15,7 @@
       <div v-if="pageType === 2" class="create_num"><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
-          <el-form-item class="create_form_one">
+          <el-form-item class="create_form_one" style="margin-bottom: 0;">
             <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
@@ -44,7 +44,7 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}]">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && createForm.controlType === 2}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
@@ -597,7 +597,7 @@ export default {
         }
         .period_time{
           display: flex;
-          margin-top: 40px;
+          margin-top: 20px;
           padding-right: 40px;
           > span{
             margin: 0 9px;
@@ -620,11 +620,14 @@ export default {
         .period_time.top{
           margin-top: 20px!important;
         }
+        .period_time.one{
+          margin-top: 40px!important;
+        }
       }
       .period_time_btn_box{ 
         margin-bottom: 0!important;
         padding-right: 38px!important;
-        padding-top: 40px;
+        padding-top: 20px;
         &.top{
           padding-top: 20px;
         }

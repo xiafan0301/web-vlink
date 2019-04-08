@@ -1167,6 +1167,7 @@ export default {
       .list_info{
         margin: 0 0.5%;
         width: 32%;
+        max-width: 462px;
         height: 240px;
         padding: 20px;
         margin-bottom: 20px;

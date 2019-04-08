@@ -511,7 +511,7 @@ export default {
       })
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
-    changeSelectedStatus (_obj) {
+    changeSelectedStatus (_obj, type) {
       console.log(_obj, '_obj')
       let devDom = null;
       setTimeout(() => {
@@ -542,12 +542,18 @@ export default {
             devDom.removeClass('vl_icon_sxt');
             devDom.addClass('vl_icon_sxt_uncheck');
             devDom.removeClass('vl_icon_control_36');
-            devDom.addClass('vl_icon_control_34');
+            if (type === undefined) {
+              
+              devDom.addClass('vl_icon_control_34');
+            }
           } else if (_obj.deviceStatus && _obj.isSelected) {
             devDom.removeClass('vl_icon_sxt_uncheck');
             devDom.addClass('vl_icon_sxt');
             devDom.removeClass('vl_icon_control_34');
-            devDom.addClass('vl_icon_control_36');
+            if (type === undefined) {
+              
+              devDom.addClass('vl_icon_control_36');
+            }
           } else if (!_obj.deviceStatus && !_obj.isSelected) {
             devDom.removeClass('vl_icon_sxt_not_choose');
             devDom.addClass('vl_icon_sxt_uncheck');
@@ -561,12 +567,18 @@ export default {
             devDom.removeClass('vl_icon_kk_uncheck');
             devDom.addClass('vl_icon_kk');
             devDom.removeClass('vl_icon_control_35');
-            devDom.addClass('vl_icon_control_36');
+            if (type === undefined) {
+              
+              devDom.addClass('vl_icon_control_36');
+            }
           } else {
             devDom.removeClass('vl_icon_kk');
             devDom.addClass('vl_icon_kk_uncheck');
             devDom.removeClass('vl_icon_control_36');
-            devDom.addClass('vl_icon_control_35');
+            if (type === undefined) {
+              
+              devDom.addClass('vl_icon_control_35');
+            }
           }
         }
       }, 50)
@@ -875,7 +887,8 @@ export default {
         // 把覆盖物内的设备置为未选中
         _obj[0].devList.forEach(f => {
           if (f.isSelected) {
-            _this.changeSelectedStatus(f);
+            f.isSelected = !f.isSelected;
+            _this.changeSelectedStatus(f, 1);
           }
         })
       }
@@ -1250,7 +1263,8 @@ export default {
           // 把覆盖物内的设备置为未选中
           _obj[0].devList.forEach(f => {
             if (f.isSelected) {
-              _this.changeSelectedStatus(f);
+              f.isSelected = !f.isSelected;
+              _this.changeSelectedStatus(f, 1);
             }
           })
           // 移除追踪点的点标记
@@ -1311,6 +1325,7 @@ export default {
               // 摄像头
               _obj.isSelected = false;
               if (_obj.deviceStatus && !_obj.isSelected) {
+                devDom.removeClass('vl_icon_control_34');
                 devDom.removeClass('vl_icon_sxt_uncheck');
                 devDom.addClass('vl_icon_sxt');
               } else if (!_obj.deviceStatus && !_obj.isSelected) {
@@ -1357,6 +1372,7 @@ export default {
           //在覆盖物内的置为选中-图标
           const devDom = $(`#${this.mapId} #${_obj.uid}_kk`);
           if (!_obj.isSelected) {
+            devDom.removeClass('vl_icon_control_35');
             devDom.removeClass('vl_icon_kk_uncheck');
             devDom.addClass('vl_icon_kk');
           }
@@ -1411,7 +1427,8 @@ export default {
               // 把覆盖物内的设备置为未选中
               _obj[0].devList.forEach(f => {
                 if (f.isSelected) {
-                  _this.changeSelectedStatus(f);
+                  f.isSelected = !f.isSelected;
+                  _this.changeSelectedStatus(f, 1);
                 }
               })
             })
@@ -1488,10 +1505,11 @@ export default {
             // 在圆形之中
             _this.$nextTick(() => {
               //在覆盖物内的置为选中-图标
-              const devDom = $(`#${this.mapId} #${_obj.devDom}`);
+              const devDom = $(`#${this.mapId} #${_obj.uid}_sxt`);
               // 摄像头
               _obj.isSelected = false;
               if (_obj.deviceStatus && !_obj.isSelected) {
+                devDom.removeClass('vl_icon_control_34');
                 devDom.removeClass('vl_icon_sxt_uncheck');
                 devDom.addClass('vl_icon_sxt');
               } else if (!_obj.deviceStatus && !_obj.isSelected) {

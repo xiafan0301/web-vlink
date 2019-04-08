@@ -35,6 +35,7 @@
         </el-form-item>
         <el-form-item style="width: 192px;" prop="rank">
           <el-select v-model="mapForm.rank" placeholder="告警级别">
+            <el-option label="全部" :value="null"></el-option>
             <el-option
               v-for="item in rankList"
               :key="item.value"
@@ -65,7 +66,7 @@
       <!-- 地图 -->
       <div id="mapBox"></div>
       <!-- 抓拍列表 -->
-      <div class="snap_box" v-if="!isShowFullScreen && snapTotal > 0">
+      <div class="snap_box" v-if="!isShowFullScreen && this.mapForm.state === 1 && snapTotal > 0">
         <div class="snap_box_one">
           <el-card shadow="hover" class="more">
             <p>今日抓拍</p>
@@ -81,7 +82,7 @@
             <ul>
               <li>
                 <i class="vl_icon vl_icon_control_26"></i>
-                <span>{{item.featureName}}</span>
+                <span>{{item.objName}}</span>
               </li>
               <li>
                 <i class="vl_icon vl_icon_control_27"></i>
@@ -134,7 +135,7 @@
 <script>
 import rtmpplayer from '@/components/common/rtmpplayer.vue';
 import {formatDate, random14} from '@/utils/util.js';
-import {getDiciData, getControlMap, getControlMapByDevice, getAlarmSnap, getAlarmListByDev} from '@/views/index/api/api.js';
+import {getDiciData, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.js';
 export default {
   components: {rtmpplayer},
   data () {
@@ -155,6 +156,7 @@ export default {
         {label: '已结束', value: 3}
       ],
       typeList: [
+        {label: '全部', value: null},
         {label: '枪机', value: 1},
         {label: '球机', value: 2},
         {label: '半球机', value: 3},
@@ -183,7 +185,6 @@ export default {
   },
   mounted () {
     this.getControlMap();
-    this.getAlarmSnap();
     let map = new window.AMap.Map('mapBox', {
       zoom: 12, // 级别
       center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
@@ -202,7 +203,8 @@ export default {
     // 获得设备报警列表
     getAlarmListByDev () {
       const params = {
-        deviceIds: this.devicesList.map(m => m.uid).join(',')
+        deviceIds: this.devicesList.map(m => m.uid).join(','),
+        surveillanceIds: this.devicesList.map(m => m.surveillanceIds).join(',')
       }
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
@@ -255,6 +257,11 @@ export default {
       }
       getControlMap(params).then(res => {
         if (res && res.data) {
+          if (res.data.length === 0) {
+            this.devicesList = [];
+            this.$message.error('无设备匹配');
+            return;
+          }
           let data = [];
           res.data.forEach(f => {
             f.devList.forEach(d => {
@@ -264,7 +271,12 @@ export default {
           this.devicesList = data;
         }
       }).then(() => {
+        if (this.devicesList.length === 0) {
+          clearInterval(this.timer);
+          return;
+        }
         this.mapMark();
+        this.getAllAlarmSnapListByDev();
       })
     },
     // 获取设备下布控列表查询接口
@@ -281,7 +293,7 @@ export default {
           let _this = this;
           _this.controlObjList = res.data;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '', domId = obj.uid + '_' + random14();
-          if (_this.mapForm.state === 1) {
+          if (obj.surveillanceStatus === 1) {
             vlMapVideo = `
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
@@ -297,7 +309,7 @@ export default {
                 <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
                 <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
                 <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
-              if (_this.mapForm.state === 3) {
+              if (obj.surveillanceStatus === 3) {
                 vlMapObj += `<div><span>布控结果：</span><span>${_this.controlObjList.list[0].snapNum}张抓拍图片</span></div>`;
               }
               vlMapObj += `
@@ -326,7 +338,7 @@ export default {
                 <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
                 <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
                 <div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
-                if (_this.mapForm.state === 3) {
+                if (obj.surveillanceStatus === 3) {
                   vlMapObjList += `<div><span>布控结果：</span><span>${item.snapNum}张抓拍图片</span></div>`;
                 }
               vlMapObjList += `</div>`;
@@ -334,7 +346,7 @@ export default {
           }
 
           // 布控进行中
-          if (_this.mapForm.state === 1) {
+          if (obj.surveillanceStatus === 1) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -358,7 +370,7 @@ export default {
             }
           }
           // 布控待开始
-          if (_this.mapForm.state === 2) {
+          if (obj.surveillanceStatus === 2) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -391,7 +403,7 @@ export default {
             }
           }
           // 布控已结束
-          if (_this.mapForm.state === 3) {
+          if (obj.surveillanceStatus === 3) {
             // 一个摄像头只有一个布控时
             if (_this.controlObjList.num === 1) {
               sContent = `
@@ -452,7 +464,7 @@ export default {
             // 跳转至布控详情页
             const { href } = _this.$router.resolve({
               name: 'control_manage',
-              query: {pageType: 2, state: _this.mapForm.state, controlId: e.currentTarget.id }
+              query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
             })
             window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
           })
@@ -498,7 +510,7 @@ export default {
               }, 1000)
             }
           })
-          if (_this.mapForm.state === 1) {
+          if (obj.surveillanceStatus === 1) {
             // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
             let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
             obj.title = obj.deviceName;
@@ -518,15 +530,14 @@ export default {
       })
     },
     // 获取布控抓拍结果列表
-    getAlarmSnap () {
+    getAllAlarmSnapListByDev () {
       const params = {
+        pageSize: 10,
         pageNum: 1,
-        pageSzie: 10,
-        'where.surveillanceId': 11,
-        'where.dateStart': formatDate(new Date(), 'yyyy-MM-dd'),
-        'where.dateEnd': formatDate(new Date(), 'yyyy-MM-dd'),
+        'where.deviceIds': this.devicesList.map(m => m.uid).join(','),
+        'where.surveillanceIds': this.devicesList.map(m => m.surveillanceIds).join(',')
       }
-      getAlarmSnap(params).then(res => {
+      getAllAlarmSnapListByDev(params).then(res => {
         if (res && res.data) {
           this.snapList = res.data.list;
           this.snapTotal = res.data.total;

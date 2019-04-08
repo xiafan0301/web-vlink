@@ -6,16 +6,20 @@
       width="482px"
       title="终止布控"
       top="40vh">
-      <el-input
-        placeholder="请补充提前结束布控的原因"
-        maxlength="140"
-        type="textarea"
-        :rows="4"
-        v-model="stopReason">
-      </el-input>
+      <el-form :model="stopForm" ref="stopForm" :rules="ruleStopForm">
+        <el-form-item prop="stopReason">
+          <el-input
+            placeholder="请补充提前结束布控的原因"
+            maxlength="140"
+            type="textarea"
+            :rows="4"
+            v-model="stopForm.stopReason">
+          </el-input>
+        </el-form-item>
+      </el-form>
       <div slot="footer">
-        <el-button @click="controlStop">确定终止</el-button>
-        <el-button :loading="loadingBtn" type="primary" @click="stopManageDialog = false">暂不终止</el-button>
+        <el-button @click="controlStop('stopForm')">确定终止</el-button>
+        <el-button :loading="loadingBtn" type="primary" @click="skipIsList">暂不终止</el-button>
       </div>
     </el-dialog>
   </div>
@@ -27,26 +31,41 @@ export default {
   data () {
     return {
       stopManageDialog: false,
-      stopReason: null, // 终止原因
+      stopForm: {
+        stopReason: null, // 终止原因
+      },
+      ruleStopForm: {
+        stopReason: [{required: true, message: '请输入终止原因', trigger: 'blur'}]
+      },
       loadingBtn: false, // 加载状态
     }
   },
   methods: {
     reset () {
-      this.stopReason = null;
+      this.stopForm.stopReason = null;
       this.stopManageDialog = true;
     },
     // 终止布控
-    controlStop () {
+    controlStop (formName) {
       const data = {
-        terminationReason: this.stopReason,
+        terminationReason: this.stopForm.stopReason,
         uid: this.controlId
       }
-      controlStop(data).then(() => {
-        this.stopManageDialog = false;
-        this.$message.success('终止成功');
-        this.$emit('getControlList');
+      this.$refs[formName].validate((vali) => {
+        if (vali) {
+          controlStop(data).then(() => {
+            this.stopManageDialog = false;
+            this.$message.success('终止成功');
+            this.$emit('getControlList');
+          })
+        } else {
+          return false;
+        }
       })
+    },
+    skipIsList () {
+      this.stopManageDialog = false;
+      this.$emit('getControlList');
     }
   }
 }

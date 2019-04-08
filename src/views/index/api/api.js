@@ -1484,7 +1484,7 @@ export function getControlMapByDevice(params) {
   })
 }
 /**
- * getAlarmSnap 布控抓拍结果分页查询列表
+ * getAlarmSnap 布控详情中的布控抓拍结果分页查询列表
  * @param {object} params
  */
 export function getAlarmSnap(params) {
@@ -1501,7 +1501,19 @@ export function getAlarmSnap(params) {
  */
 export function getAlarmListByDev(params) {
   return request({
-    url: 'alarm-snaps/by-dev',
+    url: 'alarm-snaps/devices',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
+ * getAllAlarmSnapListByDev 获得当前展示在地图上的设备抓拍列表
+ * @param {object} params
+ */
+export function getAllAlarmSnapListByDev(params) {
+  return request({
+    url: 'alarm-snaps/by-dev/page',
     method: 'get',
     params,
     mode: 'control'

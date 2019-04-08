@@ -155,6 +155,8 @@
 .vl_icon_message_5{width: 16px; height: 16px; background-position: -862px -529px;}
 .vl_icon_message_6{width: 30px; height: 30px; background-position: -816px -425px;}
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
+/**告警图标***/
+.vl_icon_alarm_1{width: 114px; height: 32px; background-position: -548px -882px;}
 /**事件图标***/
 .vl_icon_event_1{width: 56px; height: 71px; background-position: -580px -428px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
