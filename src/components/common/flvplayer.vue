@@ -163,11 +163,11 @@ export default {
     // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
-      if (this.video) {
+      if (this.player) {
         if (flag) {
-          this.video.play();
+          this.player.play();
         } else {
-          this.video.pause();
+          this.player.pause();
         }
       }
     },

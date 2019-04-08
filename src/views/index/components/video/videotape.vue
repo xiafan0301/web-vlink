@@ -15,7 +15,17 @@
     <div class="dl_vt_c">
       <ul>
         <li v-for="item in 6" :key="item">
-          a {{item}}
+          <div>
+            <div class="vt_ct">
+              <h3 title="录像时间 2018-12-25 10:25 - 2018-12-25 10:25">录像时间 2018-12-25 10:25 - 2018-12-25 10:25</h3>
+              <div>
+                <span class="vl_icon vl_icon_v31" title="删除"></span>
+                <span class="vl_icon vl_icon_v32" title="下载"></span>
+              </div>
+            </div>
+            <div class="vt_cv"></div>
+            <div class="vt_cb"></div>
+          </div>
         </li>
       </ul>
     </div>
@@ -24,7 +34,6 @@
         style="text-align: center;"
         background
         layout="prev, pager, next"
-        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="pagination.currentPage"
         :page-size="pagination.pageSize"
@@ -34,7 +43,7 @@
   </div>
 </template>
 <script>
-import { apiVideoDownloadList } from "@/views/index/api/api.video.js";
+import { apiVideoRecordList } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   data () {78 
@@ -76,6 +85,7 @@ export default {
       },
       time: [new Date(new Date() - 3600 * 1000 * 24 * 7), new Date()],
       tableData: [],
+      videoRecordList: [],
       pagination: {
         currentPage: 1,
         pageSize: 10,
@@ -88,7 +98,20 @@ export default {
   },
   methods: {
     searchSubmit () {
-      // this.getData();
+      this.getVideoRecordList();
+    },
+    /* 播放记录 */
+    getVideoRecordList () {
+      // 播放类型 1:视频巡逻 2:视频回放 3:录像记录
+      apiVideoRecordList({
+        playType: 3
+      }).then(res => {
+        if (res && res.data) {
+          this.videoRecordList = res.data;
+        }
+      }).catch(error => {
+        console.log("apiVideoRecordList error：", error);
+      });
     },
     getData () {
       apiVideoDownloadList({
@@ -108,13 +131,6 @@ export default {
       }).catch(error => {
         console.log("apiVideoDownloadList error：", error);
       });
-    },
-    tableFnDateTime (row, column, cellValue) {
-      // console.log(cellValue);
-      return formatDate(cellValue);
-    },
-    handleSizeChange (val) {
-      console.log(`每页 ${val} 条`);
     },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
@@ -139,10 +155,35 @@ export default {
     > ul {
       width: 100%; height: 100%;
       overflow: hidden;
-      padding: 0 20px;
+      padding: 0 10px;
       > li {
         float: left;
         width: 33.33%; height: 50%;
+        padding: 10px;
+        > div {
+          position: relative;
+          width: 100%; height: 100%;
+          background-color: #000;
+          > .vt_ct {
+            position: absolute; top: 0; left: 0;
+            width: 100%;
+            overflow: hidden;
+            background-color: #333;
+            background-color: rgba(51, 51, 51, 0.7);
+            > h3 {
+              padding-left: 20px; padding-right: 70px;
+              height: 34px; line-height: 34px;
+              color: #fff;
+            }
+            > div {
+              position: absolute; top: 5px; right: 0;
+              > span { margin-right: 10px; cursor: pointer; }
+            }
+          }
+          > .vt_cv { width: 100%; height: 100%; }
+          > .vt_cb {
+          }
+        }
       }
     }
   }

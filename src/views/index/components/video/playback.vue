@@ -103,7 +103,7 @@
             <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
-            <div is="videoEmpty" @showListEvent="showListEvent" :btn="true"></div>
+            <div is="videoEmpty" @btnEvent="showListEvent" :btn="true"></div>
           </div>
         </li>
       </ul>
