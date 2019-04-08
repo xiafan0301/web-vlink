@@ -31,8 +31,8 @@ const oDomains = {
     },
     // 调度和预案部分地址
     ctc: {
-      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      dev: 'http://10.116.64.134:8081/api/vlink',
+      dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      // dev: 'http://10.116.64.134:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },
@@ -52,8 +52,8 @@ const oDomains = {
     },
     // 视频播放服务
     video: {
-      // dev: 'http://apidev.aorise.org/vlink-monitor',
-      dev: 'http://10.116.64.82:8082',
+      dev: 'http://apidev.aorise.org/vlink-monitor',
+      // dev: 'http://10.116.64.82:8082',
       test: 'http://apidev.aorise.org/vlink-monitor',
       prod: 'http://apidev.aorise.org/vlink-monitor',
     }

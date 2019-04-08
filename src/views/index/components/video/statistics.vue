@@ -632,6 +632,7 @@ export default {
 
   },
   destroyed () {
+    /* 销毁所有的图标对象 */
     if (this.charts.chart11) {
       this.charts.chart11.destroy();
     }
