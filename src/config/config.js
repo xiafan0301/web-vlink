@@ -52,7 +52,8 @@ const oDomains = {
     },
     // 视频播放服务
     video: {
-      dev: 'http://apidev.aorise.org/vlink-monitor',
+      // dev: 'http://apidev.aorise.org/vlink-monitor',
+      dev: 'http://10.116.64.82:8082',
       test: 'http://apidev.aorise.org/vlink-monitor',
       prod: 'http://apidev.aorise.org/vlink-monitor',
     }

@@ -118,3 +118,52 @@ export const apiVideoRecord = data => {
     mode: videoModeName
   })
 }
+/**
+ * 视频播放记录列表查询接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoRecordList = data => {
+  return request({
+    url: '/videoPatrolService/videoRecordList',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 删除视频播放记录接口
+ * @param {Object} data 接口入参
+ */
+export const apiDelVideoRecord = data => {
+  return request({
+    url: '/videoPatrolService/videoRecord',
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 清空视频播放记录接口
+ * @param {Object} data 接口入参
+ */
+export const apiDelVideoRecords = data => {
+  return request({
+    url: '/videoPatrolService/videoRecords',
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 分页查询视频下载记录接口
+ * @param {Object} data 接口入参
+ */
+/* export const apiDelVideoDownloadList = data => {
+  return request({
+    url: '/videoDownloadService/videoDownloadList',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+} */

@@ -3,15 +3,16 @@
     <div class="com_trans50_lt">
       <img src="../../../../assets/img/video/vi_101.png" alt="">
       <p>{{msg}}</p>
-      <div v-if="btn">
-        <el-button size="small" @click="addVideoEvent">{{btnText ? btnText : '添加视频'}}</el-button>
+      <div>
+        <el-button v-if="btn" size="small" @click="btnEvent(1)">{{btnText ? btnText : '添加视频'}}</el-button>
+        <el-button v-if="btn2" size="small" @click="btnEvent(2)">{{btnText2 ? btnText2 : '视频回放'}}</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
 export default {
-  props: ['tipMsg', 'btn', 'btnText'],
+  props: ['tipMsg', 'btn', 'btnText', 'btn2', 'btnText2'],
   data () {
     return {
       msg: '点击或拖拽设备列表图标至此'
@@ -28,8 +29,8 @@ export default {
     }
   },
   methods: {
-    addVideoEvent () {
-      this.$emit('showListEvent');
+    btnEvent (p1) {
+      this.$emit('btnEvent', p1);
     }
   }
 }
