@@ -81,6 +81,9 @@ export default {
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
                 console.log('item', localStorage.getItem('as_vlink_user_info'))
                 setTimeout(() => {
+                  this.$store.commit('setLoginUser', {
+                    loginUser: res.data
+                  });
                   this.loginBtnLoading = false;
                   this.$router.push({name: 'index'});
                 }, 1000);
