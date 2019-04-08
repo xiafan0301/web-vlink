@@ -288,7 +288,7 @@ export function endEvent(data, uid) {
  */
 export function getGeneralcondition(data) {
   return request({
-    url: 'event-count-services/generalCondition',
+    url: 'eventCount/generalCondition',
     method: 'get',
     params: data,
     mode: 'event'
@@ -300,7 +300,7 @@ export function getGeneralcondition(data) {
  */
 export function getRankAnalysis(data) {
   return request({
-    url: 'event-count-services/rankAnalysis',
+    url: 'eventCount/rankAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -312,7 +312,7 @@ export function getRankAnalysis(data) {
  */
 export function getTypeAnalysis(data) {
   return request({
-    url: 'event-count-services/typeAnalysis',
+    url: 'eventCount/typeAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -324,7 +324,7 @@ export function getTypeAnalysis(data) {
  */
 export function getQuantitativeTrend(data) {
   return request({
-    url: 'event-count-services/quantitativeTrend',
+    url: 'eventCount/quantitativeTrend',
     method: 'get',
     params: data,
     mode: 'event'
@@ -336,7 +336,7 @@ export function getQuantitativeTrend(data) {
  */
 export function getHotLocation(data) {
   return request({
-    url: 'event-count-services/hotLocation',
+    url: 'eventCount/hotLocation',
     method: 'get',
     params: data,
     mode: 'event'
@@ -348,7 +348,7 @@ export function getHotLocation(data) {
  */
 export function getSurveillance(data) {
   return request({
-    url: 'event-count-services/surveillance',
+    url: 'eventCount/evtSurvStatistics',
     method: 'get',
     params: data,
     mode: 'event'
@@ -1223,6 +1223,18 @@ export function JtcGETAppendixInfoList(params) {
   })
 }
 /**
+ * JtcPUTAppendixsOrder 附件信息更新接口
+ * @param {object} params
+ */
+export function JtcPUTAppendixsOrder(params) {
+  return request({
+    url: '/appendixes',
+    method: 'put',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
  * JtcGETTrail 布控抓拍结果图片检索接口
  * @param {object} params
  */
@@ -1240,7 +1252,7 @@ export function JtcGETTrail(params) {
  */
 export function JigGETEvent(params) {
   return request({
-    url: '/event-services/events/page',
+    url: '/events/page',
     method: 'get',
     params: params,
     mode: 'event'
@@ -1279,7 +1291,7 @@ export function JfoGETGroup(params) {
     url: '/group',
     method: 'get',
     params: params,
-    mode: 'judge'
+    mode: 'base'
   })
 }
 /**
@@ -1324,7 +1336,7 @@ export function JhaGETStatisicByAddress(params) {
  */
 export function JhaGETAlarmSnapByAddress(params) {
   return request({
-    url: '/devices/' + params.deviceId + '/alarm-snap',
+    url: '/devices/' + params.deviceId + '/alarm-snaps',
     method: 'get',
     params: params,
     mode: 'judge'

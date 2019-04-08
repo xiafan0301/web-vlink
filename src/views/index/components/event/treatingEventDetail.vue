@@ -24,11 +24,11 @@
                   <div class="arrow"></div>
                   <p>
                     <i class="vl_icon vl_icon_manage_17"></i>
-                    <span>下载</span>
+                    <a :href="item.path">下载</a>
                   </p>
                   <p>
                     <i class="vl_icon vl_icon_event_25"></i>
-                    <span>预览</span>
+                    <a>预览</a>
                   </p>
                 </div>
               </li>
@@ -39,7 +39,8 @@
           <p style="margin-top: 5px;">事件总结内容</p>
           <div class="content_detail">
              <p>
-               {{basicInfo.eventSummary}}<span class="look_more" @click="showSummaryDialog('event')">更多...</span>
+               {{basicInfo.eventSummary}}
+               <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
             </p>
           </div>
         </div>
@@ -59,11 +60,11 @@
                   <div class="arrow"></div>
                   <p>
                     <i class="vl_icon vl_icon_manage_17"></i>
-                    <span>下载</span>
+                    <a :href="item.path">下载</a>
                   </p>
                   <p>
                     <i class="vl_icon vl_icon_event_25"></i>
-                    <span>预览</span>
+                    <a>预览</a>
                   </p>
                 </div>
               </li>
@@ -74,7 +75,8 @@
           <p style="margin-top: 5px;">调度总结内容</p>
           <div class="content_detail">
              <p>
-               {{basicInfo.dispatchSummary}}<span class="look_more" @click="showSummaryDialog('event')">更多...</span>
+               {{basicInfo.dispatchSummary}}
+               <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
             </p>
           </div>
         </div>
@@ -390,20 +392,8 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <p class="title">事件总结报告</p>
-        <p class="content">
-           段落示意：事件总结报告，显示主要内容，事件总结报告，显示主要内容，
-           事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，
-           显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，
-           事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，
-           事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，
-           显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，
-           事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，
-           显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，
-           事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，
-           显示主要内容，事件总结报告，
-           显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容，事件总结报告，显示主要内容。
-        </p>
+        <p class="title">{{summaryTitle}}</p>
+        <p class="content">{{summaryContent}}</p>
       </div>
     </el-dialog>
   </div>
@@ -445,6 +435,10 @@ export default {
       ctcImg: [], // 调度总结图片列表
       ctcFile: [], // 调度总结文件列表
       summaryDetailDialog: false, // 查看总结详情弹出框
+      summaryTitle: null, // 总结标题
+      summaryContent: null, // 总结内容
+      eventSummaryLength: 0,
+      dispatchSummaryLength: 0
     }
   },
   mounted () {
@@ -452,8 +446,13 @@ export default {
   },
   methods: {
     // 显示查看总结详情弹出框
-    showSummaryDialog (type) {
-      console.log(type)
+    showSummaryDialog (type, content) {
+      if (type === 'event') {
+        this.summaryTitle = '事件总结报告';
+      } else {
+        this.summaryTitle = '调度总结报告';
+      }
+      this.summaryContent = content;
       this.summaryDetailDialog = true;
     },
     // 图片放大传参
@@ -471,7 +470,6 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            this.basicInfo = res.data;
             if (res.data.closeAttachmentList.length > 0) {
               res.data.closeAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -490,6 +488,9 @@ export default {
                 }
               })
             }
+            this.basicInfo = res.data;
+            this.eventSummaryLength = this.basicInfo.eventSummary.length;
+            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
         })
         .catch(() => {})
@@ -707,7 +708,10 @@ export default {
                   cursor: pointer;
                   display: flex;
                   align-items: center;
-                  span:hover {
+                  a {
+                    text-decoration: none;
+                  }
+                  a:hover {
                     color: #0C70F8;
                   }
                 }

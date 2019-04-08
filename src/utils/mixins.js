@@ -28,4 +28,18 @@ const mixin = {
     }
   }
 }
-Vue.mixin(mixin)
+Vue.mixin(mixin);
+
+/*
+* 定义需要公用插入组件的方法，
+* 使用是直接this.testOne()，即可
+* */
+const testMxin = {
+  methods: {
+    testOne () {
+      console.log('我是测试一下啊')
+    }
+  }
+}
+
+export {testMxin}

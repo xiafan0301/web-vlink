@@ -11,7 +11,16 @@
           </ul>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
-              <div>
+              <div style="margin-left: 8%; width: 84%;">
+                <el-input
+                  placeholder="请输入内容"
+                  size="small"
+                  v-model="searchVal">
+                  <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+                </el-input>
+              </div>
+              
+              <!-- <div>
                 <el-input
                   class="vl_map_lc_dt_inp"
                   size="small"
@@ -19,7 +28,7 @@
                   v-model="searchVal">
                 </el-input>
                 <i class="el-icon-search"></i>
-              </div>
+              </div> -->
             </div>
             <div class="show_list">
               <ul class="show_list_c show_tree" id="videoListTree">
@@ -52,14 +61,17 @@
             </div>
           </div>
           <div class="show_content" v-show="showConTitle === 2">
-            <!-- <div class="show_his_btn" v-if="historyData && historyData.length > 0">清空记录</div>
-            <ul class="show_his">
-              <li v-for="(item, index) in historyData" :key="'hty_' + index">
-                <h3 class="com_ellipsis">{{item.name}}</h3>
-                <p>{{item.time}}</p>
-                <i class="el-icon-delete"></i>
-              </li>
-            </ul> -->
+            <div class="show_his_c">
+              <div class="show_his_btn" @click="delAllVideoRecords" v-if="videoRecordList && videoRecordList.length > 0">清空记录</div>
+              <div class="show_his_empty" v-else>暂无记录</div>
+              <ul class="show_his">
+                <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
+                  <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                  <p>{{item.playTime | fmTimestamp}}</p>
+                  <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -85,7 +97,7 @@
             <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
-            <div is="videoEmpty" @showListEvent="showListEvent" :btn="true"></div>
+            <div is="videoEmpty" @btnEvent="showListEvent" :btn="true"></div>
           </div>
         </li>
       </ul>
@@ -93,11 +105,11 @@
   </div>
 </template>
 <script>
-import { formatDate } from "@/utils/util.js";
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
-import rtmpplayer from '@/components/common/rtmpplayer.vue';
-import { apiDeviceList, apiVideoRecord } from "@/views/index/api/api.video.js";
+import rtmpplayer from '@/components/common/flvplayer.vue';
+// import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, rtmpplayer},
   data () {
@@ -112,11 +124,13 @@ export default {
       showMenuActive: false,
       showConTitle: 1,
       searchVal: '',
-      dragActiveObj: null
+      dragActiveObj: null,
+
+      videoRecordList: []
     }
   },
   watch: {
-    showType (newVal, oldVal) {
+    showType () {
       if (this.showType === 1) {
         this.showVideoTotal = 1;
       } else if (this.showType === 2) {
@@ -129,6 +143,11 @@ export default {
         this.showVideoTotal = 16;
       }
       this.playersHandler(this.showVideoTotal);
+    },
+    showConTitle (newVal) {
+      if (newVal === 2) {
+        this.getVideoRecordList();
+      }
     }
   },
   created () {
@@ -157,13 +176,62 @@ export default {
     $(window).on('unload', this.unloadSave);
   },
   methods: {
+    /* 播放记录 */
+    getVideoRecordList () {
+      // 播放类型 1:视频巡逻 2:视频回放
+      apiVideoRecordList({
+        playType: 1
+      }).then(res => {
+        if (res && res.data) {
+          this.videoRecordList = res.data;
+        }
+      }).catch(error => {
+        console.log("apiVideoRecordList error：", error);
+      });
+    },
+    delVideoRecord (item) {
+      apiDelVideoRecord({id: item.uid}).then(() => {
+        this.getVideoRecordList();
+        this.$message({
+          message: '删除成功！',
+          type: 'success'
+        });
+      }).catch(error => {
+        this.$message.error('删除失败！');
+        console.log("apiDelVideoRecord error：", error);
+      });
+    },
+    delAllVideoRecords () {
+      // apiDelVideoRecords
+      this.$confirm('确定删除所有的播放历史吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        apiDelVideoRecords({playType: 1}).then(() => {
+          this.getVideoRecordList();
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(error => {
+          this.$message.error('删除失败！');
+          console.log("apiDelVideoRecords error：", error);
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
+    },
     /* 监控列表 */
     getDeviceList () {
-      let sui = window.localStorage.getItem('userInfo');
-      if (sui) { sui = JSON.parse(sui); }
+      // let sui = window.localStorage.getItem('userInfo');
+      // if (sui) { sui = JSON.parse(sui); }
       apiDeviceList({
-        id: sui.uid,
-        likeKey: ''
+        // id: sui.uid,
+        likeKey: this.searchVal
       }).then(res => {
         if (res && res.data) {
           this.deviceList = res.data;
@@ -244,6 +312,7 @@ export default {
         let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
         console.log('deviceSip', deviceSip);
         this.videoList.splice(index, 1, {
+          type: 1,
           title: this.dragActiveObj.deviceName,
           video: Object.assign({}, this.dragActiveObj, {
             deviceSip: deviceSip
@@ -260,7 +329,7 @@ export default {
      * 关闭播放器
      * @param {string} sid 视频ID
      */
-    playerClose (iIndex, sid) {
+    playerClose (iIndex) {
       console.log('playerClose' + iIndex);
       this.videoList.splice(iIndex, 1, {});
     },
@@ -268,36 +337,12 @@ export default {
 
     showListEvent () {
       this.showMenuActive = true;
-    },
-    searchSubmit () {
-      this.getData();
-    },
-    getData () {
-      this.searchLoading = true;
-      apiVideoDownloadList({
-        pageNum: this.pagination.currentPage,
-        pageSize: this.pagination.pageSize,
-        // orderBy: '',
-        // order: '',
-        'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
-        'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
-        'where.oprUserId': '1',
-        'where.oprDeptId': '1'
-      }).then(res => {
-        if (res && res.data) {
-          this.pagination.total = res.data.total;
-          this.tableData = res.data.list;
-        }
-        this.searchLoading = false;
-      }).catch(error => {
-        this.searchLoading = false;
-        console.log("apiVideoDownloadList error：", error);
-      });
+      this.showConTitle = 1;
     }
   },
   destroyed () {
     // 播放记录
-    for (let i = 0; i < this.videoList.length; i++) {
+    /* for (let i = 0; i < this.videoList.length; i++) {
       let obj = this.videoList[i];
       console.log('obj', obj);
       if (obj && obj.video) {
@@ -313,8 +358,7 @@ export default {
           console.log("apiVideoRecord error：", error);
         });
       }
-    }
-    
+    } */
 
     $(window).off('unload', this.unloadSave);
     this.saveVideoList();

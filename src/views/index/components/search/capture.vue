@@ -61,6 +61,7 @@
               :data="cameraData"
               class="camera-tree"
               ref="cameraTree"
+              :default-checked-keys="defaultTreeKes"
               @check-change="chooseCamera"
               show-checkbox
               node-key="uid"
@@ -213,7 +214,7 @@
 let AMap = window.AMap;
 import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETstrucInfoList, ScpGETdeviceListById} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
 export default {
   data() {
     return {
@@ -230,7 +231,7 @@ export default {
         },
       },
       pagination: { total: 0, pageSize: 16, pageNum: 1 },
-      uploadAcion: ajaxCtx.upload + '/new',
+      uploadAcion: ajaxCtx.base + '/new',
       testData: testData,
       mapData: [],
       searching: false,
@@ -248,6 +249,7 @@ export default {
         children: 'deviceBasicList',
         label: 'deviceName'
       },
+      defaultTreeKes: [],
       searchData: {
         time: null,
         minSemblance: null, // 最小相似度
@@ -292,14 +294,40 @@ export default {
   },
   mounted () {
     this.setDTime();
-    this.tcDiscuss(true);
+    new Promise((resolve) => {
+      this.getDeviceList(resolve);
+    }).then(() => {
+      if (this.$route.query.hisId) {
+        ScpGETretrievalHisById(this.$route.query.hisId)
+          .then(res => {
+            if (res) {
+              this.showSim = true;
+              this.searchData.time = [res.data.startTime, res.data.endTime];
+              this.searchData.minSemblance = res.data.minSemblance ? res.data.minSemblance : '';
+              this.curImgNum = res.data.retrievalPicList.length;
+              res.data.retrievalPicList.forEach((x, index) => {
+                this.imgList[index] = x;
+                if ((index + 1) === res.data.retrievalPicList.length) {
+                  this.curImageUrl = x.path;
+                }
+              })
+              res.data.retrievalDevList.forEach(x => {
+                this.defaultTreeKes.push(x.uid)
+              })
+              this.defaultTreeKes = [3];
+            }
+            this.tcDiscuss(true);
+          })
+      } else {
+        this.tcDiscuss(true);
+      }
+    })
     let map = new AMap.Map('capMap', {
       center: [112.974691, 28.093846],
       zoom: 16
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    this.getDeviceList();
   },
   methods: {
     drag (ev) {
@@ -335,7 +363,7 @@ export default {
       e.preventDefault();
     },
     // 设备列表
-    getDeviceList () {
+    getDeviceList (cb) {
       let params = {
         id: 1
       }
@@ -347,6 +375,7 @@ export default {
               return x;
             })
           }
+          cb()
         })
     },
     // 上传图片
@@ -454,8 +483,10 @@ export default {
     },
     addHisToImg () {
       this.historyPicDialog = false;
+      let _ids = [];
       this.choosedHisPic.forEach(x => {
         this.curImgNum++;
+        _ids.push(x.uid)
         for (let i = 0; i < this.imgList.length; i++) {
           if (!this.imgList[i]) {
             this.imgList.splice(i, 1, x);
@@ -463,6 +494,10 @@ export default {
           }
         }
       })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      JtcPUTAppendixsOrder(_obj);
       this.showCurImg();
     },
     showCurImg () {

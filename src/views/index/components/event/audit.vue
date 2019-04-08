@@ -186,7 +186,11 @@ export default {
   mounted () {
     const status = window.localStorage.getItem('iaAutoCheck');
     if (status !== null) {
-      this.isOpen = status;
+      if (status) {
+        this.isOpen = true;
+      } else {
+        this.isOpen = false;
+      }
     }
     this.getOneMonth();
     this.getAutoCheck();

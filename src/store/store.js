@@ -7,7 +7,7 @@ import mutations from './mutations';
 Vue.use(Vuex);
 
 const state = {
-  loginUser: {} // 登录用户信息
+  loginUser: null // 登录用户信息
 };
 
 export default new Vuex.Store({

@@ -311,20 +311,30 @@ export default {
       > video {
         width: 100%;
         height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
       }
       > p {
+        width: 100%;
         position: absolute;
         color: #FFFFFF;
         bottom: .08rem;
         font-size: .12rem;
-        padding-left: .06rem;
+        padding: 0 .06rem;
+        line-height: 20px;
+        > i {
+          height: 20px;
+          float: right;
+          vertical-align: middle;
+        }
       }
     }
     .vl_jtc_mk_check {
       > input {
         position: absolute;
-        top: .08rem;
-        right: .08rem;
+        top: 0;
+        right: 0;
         &:after {
           position: absolute;
           width: 14px;
@@ -388,6 +398,45 @@ export default {
           padding: 0;
         }
       }
+    }
+    .vl_jig_mk_img {
+      width: 98px;
+      height: 98px;
+      border: .04rem solid #FFFFFF;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+      p {
+        display: none;
+      }
+    }
+    .vl_jig_mk_img_hover {
+      position: relative;
+      border: .04rem solid #0C70F8;
+      > div {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: .4rem;
+        background: rgba(12, 112, 248, .8);
+        p {
+          display: block;
+          color: #FFFFFF;
+          font-size: .12rem;
+          line-height: .2rem;
+          text-indent: .08rem;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+      }
+    }
+    .vl_jfo_sxt {
+      -webkit-transition: 0s all!important;
+      -moz-transition: 0s all!important;
+      -ms-transition: 0s all!important;
+      -o-transition: 0s all!important;
+      transition: 0s all!important;
     }
   }
 </style>

@@ -103,11 +103,11 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api';
 export default {
   data() {
     return {
-      uploadAcion: ajaxCtx.upload + '/new',
+      uploadAcion: ajaxCtx.base + '/new',
       testData: testData,
       mapData: [],
       searching: false,
@@ -177,14 +177,6 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
-    console.log(map)
-    $(window).bind('resize', () => {
-      if (this.mapData.length) {
-        this.drawCheckbox(this.mapData);
-        this.drawPlayBtn(this.mapData);
-        this.drawBigBtn(this.mapData);
-      }
-    })
   },
   methods: {
     // 上传图片
@@ -204,7 +196,6 @@ export default {
       return isJPG && isLt;
     },
     uploadSucess (response, file, fileList) {
-      this.uploading = false;
       if (response && response.data) {
         if (this.curImgNum >= 3) {
           this.$message.error('最多上传3张，请先删掉再上传');
@@ -231,21 +222,20 @@ export default {
           };
           JtcPOSTAppendixInfo(x).then(jRes => {
             if (jRes) {
+              this.uploading = false;
               x['uid'] = jRes.data;
-              console.log(x);
+              for (let i = 0; i < this.imgList.length; i++) {
+                if (!this.imgList[i]) {
+                  this.imgList.splice(i, 1, x);
+                  break;
+                }
+              }
+              this.showCurImg();
             }
           })
-          for (let i = 0; i < this.imgList.length; i++) {
-            if (!this.imgList[i]) {
-              this.imgList.splice(i, 1, x);
-              break;
-            }
-          }
-          this.showCurImg();
         }
       }
       this.uploadFileList = fileList;
-      console.log(fileList)
     },
     handleError () {
       this.uploading = false;
@@ -292,8 +282,10 @@ export default {
     },
     addHisToImg () {
       this.historyPicDialog = false;
+      let _ids = [];
       this.choosedHisPic.forEach(x => {
         this.curImgNum++;
+        _ids.push(x.uid)
         for (let i = 0; i < this.imgList.length; i++) {
           if (!this.imgList[i]) {
             this.imgList.splice(i, 1, x);
@@ -301,6 +293,10 @@ export default {
           }
         }
       })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      JtcPUTAppendixsOrder(_obj);
       this.showCurImg();
     },
     showCurImg () {
@@ -373,11 +369,13 @@ export default {
         JtcGETTrail(params).then(res => {
           if (res) {
             console.log(res);
-            res.data.forEach(z => {
+            res.data.forEach((z, index) => {
               z['playing'] = false;
               z['checked'] = true;
+              z['_key'] = index;
             })
             this.mapData = res.data;
+            this.amap.clearMap();
             this.drawMapMarker(this.mapData);
             this.searching = false;
           } else {
@@ -394,26 +392,34 @@ export default {
         let obj = data[i];
         let _path = [obj.longitude, obj.latitude];
         if (obj.longitude > 0 && obj.latitude > 0) {
-          let _id = 'vlJtcVideo' + obj.id;
-          let _sContent = `<div class="vl_jtc_mk"><video id="${_id}" src="${require('../../../../assets/video/demo.mp4')}"></video><p>${obj.shotTime}</p></div>`;
+          let _id = 'vlJtcVideo' + obj._key;
+          let _idCheck = 'vlJtcCheckbox' + obj._key;
+          let _idBtn = 'vlJtcPlayBtn' + obj._key;
+          let _idPoint = 'vlJtcPoint' + obj._key;
+          let _sContent = `
+            <div class="vl_jtc_mk" >
+              <video id="${_id}" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+              <p>${obj.shotTime}<i id="${_idBtn}" class="vl_icon vl_icon_control_09"></i></p>
+              <div class="vl_jtc_mk_check">
+                <input id="${_idCheck}" checked type="checkbox">
+              </div>
+            </div>`;
+          setTimeout(() => {
+            this.addListen(_idCheck, 'checkbox', obj);
+            this.addListen(_idBtn, 'playBtn', obj);
+            this.addListen(_id, 'video', obj);
+          }, 300)
           // 窗体
-          let markerWindow = new AMap.Marker({ // 添加自定义点标记
+          new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(20, -50), // 相对于基点的偏移位置
+            offset: new AMap.Pixel(20, -80), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
-            // 自定义点标记覆盖物内容
             content: _sContent
           });
-          console.log(markerWindow)
-          // markerWindow.on('click', this.largeVideo);
           path.push(_path);
-          let _class = 'vl_icon_sxt';
-          if (!obj.checked) {
-            _class = 'vl_icon_sxt_not_choose';
-          }
-          let _content = '<div class="vl_icon ' + _class + '"></div>'
+          let _content = `<div id="${_idPoint}" class="vl_icon vl_icon_sxt"></div>`
           let point = new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
             position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
@@ -426,33 +432,27 @@ export default {
         }
       }
       this.amap.setFitView()
-      this.drawCheckbox(data);
-      this.drawPlayBtn(data);
-      this.drawBigBtn(data);
       this.drawLine(path);
     }, // 覆盖物（窗体和checkbox
-    updatePoint (obj) {
-      let _i = this.mapData.indexOf(obj);
-      this.amap.remove(this.markerPoint[_i]);
-      console.log(obj)
-      let _class = 'vl_icon_sxt';
-      if (!obj.checked) {
-        _class = 'vl_icon_sxt_not_choose';
-      }
-      let _content = '<div class="vl_icon ' + _class + '"></div>'
-      if (obj.longitude > 0 && obj.latitude > 0) {
-        let point = new AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: obj,
-          // 自定义点标记覆盖物内容
-          content: _content
-        });
-        this.markerPoint[_i] = point;
-      }
-    }, // 更新摄像头点
+    addListen (el, type, obj) {
+      let _Dom = document.getElementById(el);
+      let self = this;
+      _Dom.addEventListener('click', function () {
+        switch (type) {
+          case 'checkbox':
+            obj.checked = !obj.checked;
+            self.updateLine(obj)
+            break;
+          case 'video':
+            self.largeVideo(obj);
+            break;
+          case 'playBtn':
+            obj.playing ? $('#' + el).removeClass('vl_icon_judge_01') : $('#' + el).addClass('vl_icon_judge_01')
+            self.playVideo(obj);
+            break;
+        }
+      })
+    },
     drawLine (path) {
       var polyline = new AMap.Polyline({
         path: path,
@@ -463,90 +463,6 @@ export default {
       this.markerLine.push(polyline);
       this.amap.add([polyline]);
     }, // 画线
-    drawCheckbox (data) {
-      if (this.markerCheck.length) {
-        this.markerCheck.forEach(x => {
-          this.amap.remove(x);
-        })
-        this.markerCheck = [];
-      }
-      for (let  i = 0; i < data.length; i++) {
-        let obj = data[i];
-        let _id = 'vlJtcCheckbox' + i;
-        let _bContent = '<div class="vl_jtc_mk_check">';
-        _bContent += '<input id=' + _id + ' checked type="checkbox">';
-        _bContent += '</div>';
-        let cWin = document.documentElement.clientWidth;
-        let markerCheckbox = new AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(170 * cWin / 1366, -50), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: obj,
-          // 自定义点标记覆盖物内容
-          content: _bContent
-        });
-        let self = this;
-        setTimeout(() => {
-          document.getElementById(_id).addEventListener('click', function () {
-            obj.checked = !obj.checked;
-            self.updateLine(obj)
-          })
-        }, 300)
-        this.markerCheck.push(markerCheckbox);
-        // markerCheckbox.on('click', this.updateLine);
-      }
-    }, // 复选框单独,适应屏幕大小变化
-    drawPlayBtn (data) {
-      if (this.markerIconPlay.length) {
-        this.markerIconPlay.forEach(x => {
-          this.amap.remove(x);
-        })
-        this.markerIconPlay = [];
-      }
-      let cWin = document.documentElement.clientWidth;
-      for (let  i = 0; i < data.length; i++) {
-        let obj = data[i];
-        let _bContent = '<div><i class="vl_icon ';
-        _bContent += obj.playing ? 'vl_icon_judge_01' : 'vl_icon_control_09'
-        _bContent += '"></i></div>'    ;
-        let markerPlayBtn = new AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(130 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: obj,
-          // 自定义点标记覆盖物内容
-          content: _bContent
-        });
-        this.markerIconPlay.push(markerPlayBtn);
-        markerPlayBtn.on('click', this.playVideo);
-      }
-    }, // 播放按钮，适应屏幕大小变化
-    drawBigBtn (data) {
-      if (this.markerIconBig.length) {
-        this.markerIconBig.forEach(x => {
-          this.amap.remove(x);
-        })
-        this.markerIconBig = [];
-      }
-      for (let  i = 0; i < data.length; i++) {
-        let obj = data[i];
-        let _bContent = '<div><i class="vl_icon vl_icon_control_08"></i></div>';
-        let cWin = document.documentElement.clientWidth;
-        let markerBigBtn = new AMap.Marker({ // 添加自定义点标记
-          map: this.amap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new AMap.Pixel(146 * cWin / 1366, 94 * cWin / 1366 - 84), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: obj,
-          // 自定义点标记覆盖物内容
-          content: _bContent
-        });
-        this.markerIconBig.push(markerBigBtn);
-        markerBigBtn.on('click', this.largeVideo);
-      }
-    }, // 放大按钮，适应屏幕大小变化
     updateLine (obj) {
       this.amap.remove(this.markerLine);
       // e.target.C.extData.checked = !e.target.C.extData.checked;
@@ -561,44 +477,44 @@ export default {
         }
       }
       this.drawLine(path);
-      this.updatePoint(obj)
+      obj.checked ? $('#vlJtcPoint' + obj._key).removeClass('vl_icon_sxt_not_choose') : $('#vlJtcPoint' + obj._key).addClass('vl_icon_sxt_not_choose')
     }, // 更新画线
-    playVideo (e) {
-      let _i = this.mapData.indexOf(e.target.C.extData);
-      let vDom = document.getElementById('vlJtcVideo' + this.mapData[_i].id);
-      if (e.target.C.extData.playing) {
+    playVideo (data) {
+      let _i = this.mapData.indexOf(data);
+      let vDom = document.getElementById('vlJtcVideo' + this.mapData[_i]._key);
+      if (data.playing) {
         vDom.pause();
       } else {
         vDom.play();
         vDom.addEventListener('ended', (e) => {
           e.target.currentTime = 0;
           this.mapData[_i].playing = false;
-          this.drawPlayBtn(this.mapData);
+          $('#vlJtcPlayBtn' + this.mapData[_i]._key).removeClass('vl_icon_judge_01');
         })
       }
-      e.target.C.extData.playing = !e.target.C.extData.playing;
-      this.drawPlayBtn(this.mapData);
+      data.playing = !data.playing;
     },
-    largeVideo (e) {
-      let _i = this.mapData.indexOf(e.target.C.extData);
-      let vDom = document.getElementById('vlJtcVideo' + this.mapData[_i].id);
+    largeVideo (data) {
+      let _i = this.mapData.indexOf(data);
+      let vDom = document.getElementById('vlJtcVideo' + this.mapData[_i]._key);
+      // 先把小窗口图标变成暂停
+      $('#vlJtcPlayBtn' + this.mapData[_i]._key).removeClass('vl_icon_judge_01');
       vDom.pause();
-      this.curVideo.id = 'vlJtcVideo' + this.mapData[_i].id;
+      this.curVideo.id = 'vlJtcVideo' + this.mapData[_i]._key;
       this.curVideo.playing = this.mapData[_i].playing;
       this.curVideo.indexNum = _i;
       this.showLarge = true;
       if (this.mapData[_i].playing) {
         document.getElementById('vlJtcLargeV').play();
-        document.getElementById('vlJtcLargeV').addEventListener('ended', (e) => {
-          e.target.currentTime = 0;
-          this.mapData[_i].playing = false;
-          this.showLarge = false;
-        })
-        this.mapData[_i].playing = false;
-        this.drawPlayBtn(this.mapData);
       }
       document.getElementById('vlJtcLargeV').currentTime = vDom.currentTime;
       this.curVideoUrl = vDom.src;
+      document.getElementById('vlJtcLargeV').addEventListener('ended', (e) => {
+        e.target.currentTime = 0;
+        vDom.currentTime = 0;
+        this.mapData[_i].playing = false;
+        this.showLarge = false;
+      })
     },
     closeVideo () {
       let vDom = document.getElementById(this.curVideo.id);
@@ -607,7 +523,7 @@ export default {
       this.showLarge = false;
       if (this.curVideo.playing) {
         this.mapData[this.curVideo.indexNum].playing = true;
-        this.drawPlayBtn(this.mapData);
+        $('#vlJtcPlayBtn' + this.mapData[this.curVideo.indexNum]._key).addClass('vl_icon_judge_01');
         vDom.play();
       }
     },
@@ -635,3 +551,12 @@ export default {
   watch: {}
 }
 </script>
+<style lang="scss">
+  .vl_jtc_mk_check {
+    position: absolute;
+    right: .08rem;
+    top: .08rem;
+    width: 14px;
+    height: 14px;
+  }
+</style>
