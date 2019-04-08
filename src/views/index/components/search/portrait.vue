@@ -152,7 +152,7 @@
 <script>
 import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETPortraitInfo} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETPortraitInfo, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
 export default {
   data() {
     return {
@@ -169,7 +169,7 @@ export default {
         },
       },
       pagination: { total: 0, pageSize: 16, pageNum: 1 },
-      uploadAcion: ajaxCtx.upload + '/new',
+      uploadAcion: ajaxCtx.base + '/new',
       testData: testData,
       searching: false,
       curImageUrl: '', // 当前上传的图片
@@ -215,6 +215,24 @@ export default {
   },
   mounted () {
     this.setDTime();
+    if (this.$route.query.hisId) {
+      ScpGETretrievalHisById(this.$route.query.hisId)
+        .then(res => {
+          if (res) {
+            this.showSim = true;
+            this.searchData.time = [res.data.startTime, res.data.endTime];
+            this.searchData.minSemblance = res.data.minSemblance ? res.data.minSemblance : '';
+            this.curImgNum = res.data.retrievalPicList.length;
+            res.data.retrievalPicList.forEach((x, index) => {
+              this.imgList[index] = x;
+              if ((index + 1) === res.data.retrievalPicList.length) {
+                this.curImageUrl = x.path;
+              }
+            })
+          }
+          this.tcDiscuss(true);
+        })
+    }
   },
   methods: {
     drag (ev) {
@@ -354,8 +372,10 @@ export default {
     },
     addHisToImg () {
       this.historyPicDialog = false;
+      let _ids = [];
       this.choosedHisPic.forEach(x => {
         this.curImgNum++;
+        _ids.push(x.uid)
         for (let i = 0; i < this.imgList.length; i++) {
           if (!this.imgList[i]) {
             this.imgList.splice(i, 1, x);
@@ -363,6 +383,10 @@ export default {
           }
         }
       })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      JtcPUTAppendixsOrder(_obj);
       this.showCurImg();
     },
     showCurImg () {
