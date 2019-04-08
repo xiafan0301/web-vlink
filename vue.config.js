@@ -4,18 +4,23 @@
 console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 console.log('process.env.VUE_APP_API', process.env.VUE_APP_API)
 console.log('process.env.VUE_APP_PROJECTNAME', process.env.VUE_APP_PROJECTNAME)
-
 // vue.config.js
 module.exports = {
     // 部署应用包时的基本 URL  Default: '/'
-    baseUrl: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : './',
+    // baseUrl: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : './',
+    baseUrl: './',
     // (build)生产环境构建文件的目录 // 'dist/web-test'
     // outputDir: 'dist',
     // outputDir: 'dist/' + ((process.env && process.env.VUE_APP_PROJECTNAME) ? process.env.VUE_APP_PROJECTNAME : 'web'),
-    outputDir: 'dist/web/' + process.env.VUE_APP_PROJECTNAME,
+    // outputDir: 'dist/web/' + process.env.VUE_APP_PROJECTNAME,
+    outputDir: 'dist/web',
     // (build)放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录  Default: ''
     // dev 模式下不起作用
     assetsDir: 'assets',
+    chainWebpack: config => {
+        // 移除 prefetch 插件 （首次加载无需一次性全部加载所有的chunk）
+        config.plugins.delete('prefetch')
+    },
     // assetsDir: '',
     // 指定生成的 index.html 的输出路径 (相对于 outputDir)。也可以是一个绝对路径。
     indexPath: 'index.html',
