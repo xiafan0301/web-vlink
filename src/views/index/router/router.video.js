@@ -17,12 +17,15 @@ export default {
   }, {
     path: 'query',
     name: 'video_query',
-    // component: () => import('@/views/index/components/video/query.vue')
-    component: () => import('@/views/index/components/construction.vue')
+    component: () => import('@/views/index/components/video/query.vue')
   }, {
     path: 'signList',
     name: 'video_signList',
     component: () => import('@/views/index/components/video/signList.vue')
+  }, {
+    path: 'videotape',
+    name: 'video_videotape',
+    component: () => import('@/views/index/components/video/videotape.vue')
   }, {
     path: 'download',
     name: 'video_download',
