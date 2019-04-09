@@ -5,29 +5,40 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-      // dev: 'http://apidev.aorise.org/vlink-base',
         dev: 'http://apidev.aorise.org/vlink-base',
+        // dev: 'http://10.116.66.29:8082',// 钟赞
+        test: 'http://emi.aorise.org/api/vis/',
+        prod: 'http://emi.aorise.org/api/vis/'
+    },
+    // 视频服务地址
+    video: {
+        dev: 'http://apidev.aorise.org/vlink-monitor',
+        test: 'http://apidev.aorise.org/vlink-monitor',
+        prod: 'http://apidev.aorise.org/vlink-monitor',
+    },
+    // 布控部分地址
+    control: {
+        // dev: 'http://apidev.aorise.org/vlink-control',
+        dev: 'http://10.116.64.98:8081',//钟赞
+        // dev: 'http://10.116.64.127:8081',//龙志海
+        test: 'http://emi.aorise.org/api/vis/',
+        prod: 'http://emi.aorise.org/api/vis/'
+    },
+    // 消息部分地址
+    message: {
+        dev: 'http://apidev.aorise.org/vlink-message',
+        // dev: 'http://10.116.64.169:8081',//花艳玲
+        // dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
-        // dev: 'http://apidev.assorise.org/vlink-base',
-        // dev: 'http://10.116.64.142:8083',
-        // // dev: 'http://10.116.64.92:8081',//钟赞
-        // test: 'http://emi.aorise.org/api/vis/',
-        // prod: 'http://emi.aorise.org/api/vis/'
     },
     // 事件部分地址
     event: {
-      // dev: 'http://apidev.aorise.org/vlink-event/api/vlink',
-      dev: 'http://10.116.64.134:8082/',
-      test: 'http://apirel.aorise.org/vlink-event/api/vlink',
-      prod: 'http://apidev.aorise.org/vlink-event/api/vlink'
-    },
-    // 上传图片
-    upload: {
-        dev: 'http://apidev.aorise.org/education-user-related',
-        test: 'http://apirel.aorise.org/education-user-related',
-        prod: 'http://apidev.aorise.org/education-user-related'
+      dev: 'http://apidev.aorise.org/vlink-event/api/emi',
+      // dev: 'http://10.116.64.134:8082/api/emi',
+      test: 'http://apirel.aorise.org/vlink-event/api/emi',
+      prod: 'http://apidev.aorise.org/vlink-event/api/emi'
     },
     // 研判检索服务
     judge: {
@@ -38,8 +49,8 @@ const oDomains = {
     },
     // 调度和预案部分地址
     ctc: {
-      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      dev: 'http://10.116.64.134:8081/api/vlink',
+      dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      // dev: 'http://10.116.64.134:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },
@@ -57,11 +68,24 @@ const oDomains = {
       test: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apidev.aorise.org/vlink-auth/api/auth/'
     },
-    // 视频播放服务
-    video: {
-      dev: 'http://apidev.aorise.org/vlink-monitor',
-      test: 'http://apidev.aorise.org/vlink-monitor',
-      prod: 'http://apidev.aorise.org/vlink-monitor',
+    // 公共短信服务
+    sms: {
+      // dev: 'http://10.116.64.169:8085',
+      dev: 'http://apidev.aorise.org/smart-city-common/',
+      test: 'http://apidev.aorise.org/smart-city-common/',
+      prod: 'http://apidev.aorise.org/smart-city-common/'
+    },
+    // 应急指挥   : ecc
+    ecc: {
+        dev: 'http://apiemi.aorise.org/api/emi/',
+        test: 'http://apiemi.aorise.org/api/emi/',
+        prod: 'http://apiemi.aorise.org/api/emi/'
+    },
+    // 文件上传
+    upload: {
+        dev: 'http://apidev.aorise.org/vlink-base',
+        test: 'http://apidev.aorise.org/vlink-base',
+        prod: 'http://apidev.aorise.org/vlink-base'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

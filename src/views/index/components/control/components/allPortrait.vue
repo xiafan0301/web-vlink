@@ -4,17 +4,14 @@
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">全部人像</span></div>
-        <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
+        <div><el-checkbox v-model="allChecked" @change="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
         <el-button @click="judgeIsSelectedCopy">复制到组</el-button>
         <el-button @click="judgeIsSelectedRemove">删除人像</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
-            <li @click="copyIsGroup">系统默认</li>
-            <li>重点青少年</li>
-            <li>拐卖妇女</li>
-            <li>失踪儿童</li>
+            <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
             <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
           </ul>
         </el-collapse-transition>
@@ -26,7 +23,7 @@
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @click.native="operateRadio()"></el-checkbox>
+            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
             <span>{{item.name}}</span>
@@ -36,16 +33,15 @@
           <div class="data_list">
             <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
           </div>
-          <div class="data_list">
-            <span>失踪儿童</span>
-            <span>分组2</span>
-            <div class="more">
+          <div class="data_list" v-if="item.groupNames">
+            <template v-for="(gN, index) in item.groupNames.split(',')">
+              <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
+            </template>
+            <div class="more" v-if="item.groupNames.split(',').length >= 3">
               <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
               <template v-if="showMoreId === item.uid">
                 <div>
-                  <span>失踪儿童</span>
-                  <span>拐卖儿童</span>
-                  <span>拐卖儿童</span>
+                  <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
                 </div>
                 <i></i>
               </template>
@@ -70,7 +66,7 @@
       </div>
     </div>
     <!-- 新增组 -->
-    <div is="groupDialog" operateType="1" ref="groupDialog"></div>
+    <div is="groupDialog" :tabType="tabType" operateType="1" ref="groupDialog" @getGroupList="getGroupListIsPortrait"></div>
     <!-- 删除人像 -->
     <div class="del_portrait_dialog">
       <el-dialog
@@ -90,10 +86,10 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delPortrait} from '@/views/index/api/api.js';
+import {delPortrait, copyPortrait, getGroupListIsPortrait} from '@/views/index/api/api.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList'],
+  props: ['protraitMemberList', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -103,6 +99,8 @@ export default {
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
       track: null,
       showMoreId: null,//显示更多组的组id
+      // 人像组列表数据
+      groupListPortrait: [],
       // 弹出框参数
       delPortraitDialog: false,
       loadingBtn: false,
@@ -114,6 +112,7 @@ export default {
       this.memberList.forEach(f => {
         this.$set(f, 'isChecked', false);
       })
+      this.allChecked = false;
     }
   },
   computed: {
@@ -126,6 +125,9 @@ export default {
     this.memberList.forEach(f => {
       this.$set(f, 'isChecked', false);
     })
+  },
+  mounted () {
+    this.getGroupListIsPortrait();
   },
   methods: {
     popGroupDialog () {
@@ -176,21 +178,38 @@ export default {
         this.delPortraitDialog = true;
       }
     },
-    // 复制到自定义组
-    copyIsGroup () {
-      this.isShowGroupCopy = !this.isShowGroupCopy;
+    // 获取人像组列表
+    getGroupListIsPortrait () {
+      getGroupListIsPortrait().then(res => {
+        if (res && res.data) {
+          this.groupListPortrait = res.data.filter(f => f.uid !== null);
+        }
+      })
     },
     // 批量删除人像
     delPortrait () {
       this.loadingBtn = true;
-      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',')
+      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
       const params = {ids: member};
-      delPortrait(params).then(res => {
+      delPortrait(params).then(() => {
         this.delPortraitDialog = false;
         this.$message.success('删除成功！');
         this.$emit('getPortraitList');//重新通知父组件获取人像列表
       }).finally(() => {
         this.loadingBtn = false;
+      })
+    },
+    // 批量复制人像到别的组
+    copyPortrait (groupId) {
+      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
+      const data = {
+        groupId: groupId,
+        ids: member
+      }
+      copyPortrait(data).then(() => {
+        this.isShowGroupCopy = false;
+        this.$message.success('复制成功');
+        this.$emit('getPortraitList');//重新通知父组件获取人像列表
       })
     }
   }

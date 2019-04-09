@@ -5,7 +5,7 @@
       multiple
       accept="image/*"
       :limit="maxSize"
-      action="https://apidev.aorise.org/medical-his/api/network/upload/new"
+      action="http://apidev.aorise.org/vlink-base/appendix"
       :on-exceed="uploadPicExceed"
       :data="{projectType: 2}"
       list-type="picture-card"

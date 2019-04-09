@@ -13,12 +13,10 @@
         <div class="vl_judge_tc_c_item">
           <el-upload
             :class="{'vl_jtc_upload': true}"
-            :limit="1"
             :show-file-list="false"
             accept="image/*"
             :action="uploadAcion"
             list-type="picture-card"
-            :on-exceed="uploadPicExceed"
             :before-upload="beforeAvatarUpload"
             :on-success="uploadSucess"
             :on-error="handleError">
@@ -34,12 +32,10 @@
         <div class="vl_judge_tc_c_item">
           <el-upload
             :class="{'vl_jtc_upload': true}"
-            :limit="1"
             :show-file-list="false"
             accept="image/*"
             :action="uploadAcion"
             list-type="picture-card"
-            :on-exceed="uploadPicExceed2"
             :before-upload="beforeAvatarUpload2"
             :on-success="uploadSucess2"
             :on-error="handleError2">
@@ -92,17 +88,15 @@
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETbasePortraitInfo, ScpGETportraitCmpInfo} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
 export default {
   data () {
     return {
-      uploadAcion: ajaxCtx.upload + '/new',
+      uploadAcion: ajaxCtx.base + '/new',
       curImageUrl: '', // 当前上传的图片
-      curImgNum: 0, // 当前图片数量
       uploading: false, // 是否上传中
       uploadFileList: [],
       curImageUrl2: '', // 当前上传的图片
-      curImgNum2: 0, // 当前图片数量
       uploading2: false, // 是否上传中
       uploadFileList2: [],
       imgData: {
@@ -124,6 +118,20 @@ export default {
   computed: {
     choosedHisPic () {
       return this.historyPicList.filter(x => x.checked)
+    }
+  },
+  mounted () {
+    if (this.$route.query.hisId) {
+      ScpGETretrievalHisById(this.$route.query.hisId)
+        .then(res => {
+          if (res) {
+            this.imgData.imgOne = res.data.retrievalPicList[0];
+            this.curImageUrl = res.data.retrievalPicList[0].path;
+            this.imgData.imgTwo = res.data.retrievalPicList[1];
+            this.curImageUrl2 = res.data.retrievalPicList[1].path;
+          }
+          this.beginComp();
+        })
     }
   },
   methods: {
@@ -157,9 +165,6 @@ export default {
       }
     },
     // 上传图片
-    uploadPicExceed () {
-      this.$message.warning('当前限制选择 1 个文件，请删除后再上传！');
-    },
     beforeAvatarUpload (file) {
       const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
       const isLt = file.size / 1024 / 1024 < 100;
@@ -174,12 +179,9 @@ export default {
     },
     uploadSucess (response, file, fileList) {
       this.uploading = false;
+      this.compSim = '';
+      this.compSimWord = '';
       if (response && response.data) {
-        if (this.curImgNum >= 1) {
-          this.$message.error('最多上传1张，请先删掉再上传');
-          return;
-        }
-        this.curImgNum++;
         let oRes = response.data;
         if (oRes) {
           let x = {
@@ -209,16 +211,12 @@ export default {
         }
       }
       this.uploadFileList = fileList;
-      console.log(fileList)
     },
     handleError () {
       this.uploading = false;
       this.$message.error('上传失败')
     },
     // 上传图片2
-    uploadPicExceed2 () {
-      this.$message.warning('当前限制选择 1 个文件，请删除后再上传！');
-    },
     beforeAvatarUpload2 (file) {
       const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
       const isLt = file.size / 1024 / 1024 < 100;
@@ -233,12 +231,9 @@ export default {
     },
     uploadSucess2 (response, file, fileList) {
       this.uploading2 = false;
+      this.compSim = '';
+      this.compSimWord = '';
       if (response && response.data) {
-        if (this.curImgNum2 >= 1) {
-          this.$message.error('最多上传1张，请先删掉再上传');
-          return;
-        }
-        this.curImgNum2++;
         let oRes = response.data;
         if (oRes) {
           let x = {
@@ -269,7 +264,6 @@ export default {
         }
       }
       this.uploadFileList2 = fileList;
-      console.log(fileList)
     },
     handleError2 () {
       this.uploading2 = false;
@@ -279,12 +273,9 @@ export default {
       this.compSim = '';
       this.compSimWord = '';
       if (index === 1) {
-        this.curImgNum--;
         this.uploadFileList.splice(0, 1);
-        console.log(this.uploadFileList, index);
         this.curImageUrl = '';
       } else {
-        this.curImgNum2--;
         this.uploadFileList2.splice(0, 1);
         this.curImageUrl2 = '';
       }
@@ -315,17 +306,21 @@ export default {
     },
     addHisToImg (index) {
       this.historyPicDialog = false;
+      let _ids = [];
       this.choosedHisPic.forEach(x => {
+        _ids.push(x.uid)
         if (index === 1) {
-          this.curImgNum++;
           this.curImageUrl = x.path;
           this.imgData.imgOne = x;
         } else {
           this.imgData.imgTwo = x;
-          this.curImgNum2++;
           this.curImageUrl2 = x.path;
         }
       })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      JtcPUTAppendixsOrder(_obj);
     },
     beginComp () {
       if (this.curImageUrl && this.curImageUrl2) {
