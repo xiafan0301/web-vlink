@@ -811,7 +811,6 @@ export default new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  console.log('beforeEach');
   // 判断该路由是否不需要登录权限
   if (to.meta && to.meta.unrequireLogin) {
     // 不需要登陆，直接走
@@ -824,7 +823,7 @@ router.beforeEach((to, from, next) => {
     } else {
       next({
         name: 'login',
-        query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
+        // query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
       })
     }
   }
