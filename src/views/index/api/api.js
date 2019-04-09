@@ -808,7 +808,7 @@ export function checkVelRename (params) {
   });
 }
 /**
- * 管理车辆分组---修改车辆分组
+ * 修改分组
  * @param {*} data
  */
 export function editVeGroup (data) {
@@ -906,7 +906,7 @@ export function getPersonData (params) {
   });
 }
 /**
- * 获取人员列表
+ * 获取人员详细信息
  * @param {*} data 
  */
 export function getPersonDetail (uid) {
@@ -946,6 +946,28 @@ export function addGroupCopyPerson (data) {
     url: '/portrait-group/copy-group-member',
     data,
     method: 'post'
+  });
+}
+/**
+ * 人员---将人员移出分组
+ * @param {*} data 
+ */
+export function moveoutPerson (data) {
+  return request({
+    url: '/portrait-group/batch-move',
+    params: data,
+    method: 'delete'
+  });
+}
+/**
+ * 人员---删除分组
+ * @param {*} data 
+ */
+export function deletePersonGroup (uid, data) {
+  return request({
+    url: '/portrait-group/group/' + uid,
+    params: data,
+    method: 'delete'
   });
 }
 /*** =======================视频设置=========================== */

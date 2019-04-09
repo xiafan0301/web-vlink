@@ -182,6 +182,7 @@ import { getQuantitativeTrend, getTypeAnalysis, getRankAnalysis, getGeneralcondi
 getHotLocation, getDepartmentList, getSurveillance } from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
+
 export default {
   data () {
     return {

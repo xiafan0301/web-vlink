@@ -635,7 +635,6 @@ export default {
     },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
-      this.personId = obj.id;
       this.perosnDetailInfoDialog = true;
       if (obj.id) {
         getPersonDetail(obj.id)
