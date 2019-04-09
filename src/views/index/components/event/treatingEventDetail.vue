@@ -402,7 +402,7 @@
 <script>
 import EventBasic from './components/eventBasic';
 import BigImg from './components/bigImg.vue';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail } from '@/views/index/api/api.event.js';
 export default {
   components: { EventBasic, BigImg },
   data () {

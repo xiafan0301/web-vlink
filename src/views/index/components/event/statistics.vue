@@ -179,7 +179,8 @@
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import { getQuantitativeTrend, getTypeAnalysis, getRankAnalysis, getGeneralcondition,
-getHotLocation, getDepartmentList, getSurveillance } from '@/views/index/api/api.js';
+getHotLocation, getSurveillance } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 
@@ -289,16 +290,16 @@ export default {
   },
   destroyed () {
     if (this.charts.chart1) {
-      this.chart.chart1.destroyed();
+      this.charts.chart1.destroyed();
     }
     if (this.charts.chart2) {
-      this.chart.chart2.destroyed();
+      this.charts.chart2.destroyed();
     }
     if (this.charts.chart3) {
-      this.chart.chart3.destroyed();
+      this.charts.chart3.destroyed();
     }
     if (this.charts.chart4) {
-      this.chart.chart4.destroyed();
+      this.charts.chart4.destroyed();
     }
   },
   methods: {
@@ -428,6 +429,7 @@ export default {
         },
         offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
         offsetX: -11 * 12,
+        hoverable: false,
         // itemGap: 20, // 图例项之间的间距
         useHtml: true,
         containerTpl: '<div class="g2-legend e_stat_tb_ld1 as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
@@ -577,6 +579,7 @@ export default {
         },
         offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
         offsetX: -11 * 11,
+        hoverable: false,
         // itemGap: 20, // 图例项之间的间距
         useHtml: true,
         containerTpl: '<div class="g2-legend e_stat_tb_ld4 as-trans50-t" style="position:absolute;top:20px;right:30px;width:auto;left: auto;">' +

@@ -306,7 +306,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getPerBottomBankList, getPerGroupList, getPersonData, addGroup, 
-getPersonDetail, judgePerson, copyPersonGroup, addGroupCopyPerson } from '@/views/index/api/api.js';
+getPersonDetail, judgePerson, copyPersonGroup, addGroupCopyPerson } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

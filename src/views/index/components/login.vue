@@ -40,7 +40,7 @@
 import QRCode from 'qrcodejs2';
 import {validatePhone, validatePwd} from '@/utils/validator.js';
 import vlFooter from '@/components/footer.vue';
-import { login } from '@/views/index/api/api.js';
+import { login } from '@/views/index/api/api.user.js';
 export default {
   components: {QRCode, vlFooter},
   data () {

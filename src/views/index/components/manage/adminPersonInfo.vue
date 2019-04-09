@@ -261,7 +261,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getPerGroupList, getPersonData, getPersonDetail, editVeGroup, copyPersonGroup,
-moveoutPerson, deletePersonGroup } from '@/views/index/api/api.js';
+moveoutPerson, deletePersonGroup } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

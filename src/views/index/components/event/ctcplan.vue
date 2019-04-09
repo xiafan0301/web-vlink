@@ -124,7 +124,8 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
-import { getPlanData, getDiciData, delPlan } from '@/views/index/api/api.js';
+import { getPlanData, delPlan } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {

@@ -138,7 +138,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, addTaskInfo, getDepartmentList, getPlanData } from '@/views/index/api/api.js';
+import { getEventDetail, addTaskInfo, getPlanData } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },

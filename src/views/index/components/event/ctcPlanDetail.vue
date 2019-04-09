@@ -100,7 +100,7 @@
   </vue-scroll>
 </template>
 <script>
-import { getPlanDetail, delPlan } from '@/views/index/api/api.js';
+import { getPlanDetail, delPlan } from '@/views/index/api/api.event.js';
 import { ajaxCtx } from '@/config/config.js';
 export default {
   data () {

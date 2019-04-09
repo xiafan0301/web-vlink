@@ -80,7 +80,7 @@
   </vue-scroll>
 </template>
 <script>
-import { getPlanDetail } from '@/views/index/api/api.js';
+import { getPlanDetail } from '@/views/index/api/api.event.js';
 export default {
   data () {
     return {

@@ -173,7 +173,9 @@
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
-import { getEventDetail, updateEvent, getDiciData, getDepartmentList  } from '@/views/index/api/api.js';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {

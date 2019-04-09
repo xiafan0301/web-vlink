@@ -237,7 +237,8 @@
 </vue-scroll>
 </template>
 <script>
-import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember, addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.js';
+import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember,
+  addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

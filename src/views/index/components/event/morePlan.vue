@@ -100,7 +100,8 @@
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
-import { getPlanData, getDiciData } from '@/views/index/api/api.js';
+import { getPlanData } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {

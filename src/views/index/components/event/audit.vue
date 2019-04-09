@@ -158,7 +158,9 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList, openAutoCheck, getDepartmentList } from '@/views/index/api/api.js';
+import { getEventList, openAutoCheck } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {

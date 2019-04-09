@@ -211,7 +211,7 @@
 </vue-scroll>
 </template>
 <script>
-import { getRoleList, createRole, delRole, updateRole, judgeRoleName } from '@/views/index/api/api.js';
+import { getRoleList, createRole, delRole, updateRole, judgeRoleName } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

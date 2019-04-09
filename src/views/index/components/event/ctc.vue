@@ -121,7 +121,8 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList, updateProcess } from '@/views/index/api/api.js';
+import { getEventList, updateProcess } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {

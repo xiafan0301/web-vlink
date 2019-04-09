@@ -80,7 +80,7 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
-import { getAllDevices, addGroupDevice } from '@/views/index/api/api.js';
+import { getAllDevices, addGroupDevice } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {

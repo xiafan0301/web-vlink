@@ -34,7 +34,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail } from '@/views/index/api/api.event.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },

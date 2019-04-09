@@ -45,13 +45,75 @@
           </div>
         </div>
         <div class="summary" v-show="basicInfo.eventSummary">
-          <div class="header">
-            <p class="ctc-title">调度总结</p>
+          <div class="summary-header">
+            <span>事件总结</span>
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
-            <p>{{basicInfo.eventSummary}}</p>
+            <p>事件总结附件</p>
+            <div class="content-icon">
+              <ul>
+                <li v-for="(item, index) in eventFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">事件总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="summary" v-show="basicInfo.dispatchSummary">
+          <div class="summary-header">
+            <span>调度总结</span>
+          </div>
+          <div class="divide"></div>
+          <div class="summary-content">
+            <p>调度总结附件</p>
+            <div class="content-icon">
+              <ul>
+                <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">调度总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
         <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
@@ -112,7 +174,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
+import { getEventDetail } from '@/views/index/api/api.event.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -122,6 +184,15 @@ export default {
       isShowImg: false, // 是否放大图片
       imgList1: [],
       basicInfo: {}, // 事件详情
+      eventImg: [], // 事件总结图片列表
+      eventFile: [], // 事件总结文件列表
+      ctcImg: [], // 调度总结图片列表
+      ctcFile: [], // 调度总结文件列表
+      summaryDetailDialog: false, // 查看总结详情弹出框
+      summaryTitle: null, // 总结标题
+      summaryContent: null, // 总结内容
+      eventSummaryLength: 0,
+      dispatchSummaryLength: 0
     }
   },
   mounted () {
@@ -142,7 +213,27 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            if (res.data.closeAttachmentList.length > 0) {
+              res.data.closeAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.eventImg.push(item);
+                } else {
+                  this.eventFile.push(item);
+                }
+              })
+            }
+            if (res.data.dispatchAttachmentList.length > 0) {
+              res.data.dispatchAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.ctcImg.push(item);
+                } else {
+                  this.ctcFile.push(item);
+                }
+              })
+            }
             this.basicInfo = res.data;
+            this.eventSummaryLength = this.basicInfo.eventSummary.length;
+            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
         })
         .catch(() => {})

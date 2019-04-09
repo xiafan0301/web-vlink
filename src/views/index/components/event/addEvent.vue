@@ -21,7 +21,8 @@
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
                   <el-input type="text" id="tipinput" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
-                <el-form-item label="事件情况:" prop="eventDetail" label-width="85px">
+                <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
+                  <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <el-form-item  label-width="85px" class="img-form-item">
@@ -119,7 +120,9 @@ import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
 import BigImg from './components/bigImg.vue';
-import { addEvent, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
+import { addEvent } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   components: { BigImg },
   data () {
@@ -545,6 +548,14 @@ export default {
                 color: #666;
                 z-index: 1;
               }
+            }
+          }
+          .limit_parent {
+            position: relative;
+            .limit_number {
+              position: absolute;
+              left: -70px;
+              top: 25px;
             }
           }
         }

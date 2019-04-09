@@ -264,7 +264,8 @@
 </template>
 <script>
 import { validateName } from '@/utils/validator.js';
-import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup, copyGroup, checkVelRename } from '@/views/index/api/api.js';
+import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup,
+  copyGroup, checkVelRename } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
