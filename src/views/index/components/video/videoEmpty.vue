@@ -2,22 +2,35 @@
   <div class="vi_list_empty">
     <div class="com_trans50_lt">
       <img src="../../../../assets/img/video/vi_101.png" alt="">
-      <p>点击或拖拽设备列表图标至此</p>
+      <p>{{msg}}</p>
       <div>
-        <el-button size="small" @click="addVideoEvent">添加视频</el-button>
+        <el-button v-if="btn" size="small" @click="btnEvent(1)">{{btnText ? btnText : '添加视频'}}</el-button>
+        <el-button v-if="btn2" size="small" @click="btnEvent(2)">{{btnText2 ? btnText2 : '视频回放'}}</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
 export default {
+  props: ['tipMsg', 'btn', 'btnText', 'btn2', 'btnText2'],
   data () {
     return {
+      msg: '点击或拖拽设备列表图标至此'
+    }
+  },
+  /* watch: {
+    tipMsg () {
+      this.msg = this.tipMsg;
+    }
+  }, */
+  created () {
+    if (this.tipMsg) {
+      this.msg = this.tipMsg;
     }
   },
   methods: {
-    addVideoEvent () {
-      this.$emit('showListEvent');
+    btnEvent (p1) {
+      this.$emit('btnEvent', p1);
     }
   }
 }
