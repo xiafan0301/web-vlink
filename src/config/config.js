@@ -10,6 +10,12 @@ const oDomains = {
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
+    // 视频服务地址
+    video: {
+        dev: 'http://apidev.aorise.org/vlink-monitor',
+        test: 'http://apidev.aorise.org/vlink-monitor',
+        prod: 'http://apidev.aorise.org/vlink-monitor',
+    },
     // 布控部分地址
     control: {
         // dev: 'http://apidev.aorise.org/vlink-control',
