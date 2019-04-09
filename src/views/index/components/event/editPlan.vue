@@ -183,7 +183,6 @@ export default {
     },
     // 上传成功
     handSuccess (res) {
-      console.log('res', res)
       if (res.data) {
         this.editPlanForm.url = res.data.fileFullPath;
         this.editPlanForm.cname = res.data.fileName;
@@ -253,6 +252,28 @@ export default {
         })
         .catch(() => {})
     },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve) => {
+        let arr = [];
+        _this.editPlanForm.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    },
     // 提交数据----修改预案
     submitData (form) {
       this.$refs[form].validate(valid => {
@@ -260,37 +281,34 @@ export default {
           let filterArr = this.planTypeList.filter(val => {
             return val.enumValue === this.editPlanForm.editEventType;
           });
-          console.log(filterArr)
           if (filterArr.length === 0) {
             this.editPlanForm.eventTypeName = this.editPlanForm.editEventType;
           } else {
             this.editPlanForm.eventType = filterArr[0].uid;
           }
-          this.editPlanForm.taskList.map((item, index) => {
-            this.departmentList.map(itm => {
-              if (item.departmentId === itm.uid) {
-                this.editPlanForm.taskList[index].departmentName = itm.organName;
-              }
-            })
-          }) 
-          updatePlan(this.editPlanForm)
-           .then(res => {
-             if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '修改成功',
-                  customClass: 'request_tip'
+          this.judgeData().then(result => {
+            if (result === true) {
+              this.editPlanForm.taskList.map((item, index) => {
+                this.departmentList.map(itm => {
+                  if (item.departmentId === itm.uid) {
+                    this.editPlanForm.taskList[index].departmentName = itm.organName;
+                  }
                 })
-                this.$router.push({name: 'event_ctcplan'});
-             } else {
-                this.$message({
-                  type: 'error',
-                  message: '修改失败',
-                  customClass: 'request_tip'
+              }) 
+              updatePlan(this.editPlanForm)
+                .then(res => {
+                  if (res) {
+                      this.$message({
+                        type: 'success',
+                        message: '修改成功',
+                        customClass: 'request_tip'
+                      })
+                      this.$router.push({name: 'event_ctcplan'});
+                  }
                 })
-             }
-           })
-           .catch(() => {})
+                .catch(() => {})
+            }
+          })
         }
       })
     }

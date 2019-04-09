@@ -25,12 +25,12 @@
               :on-exceed="handleImgNumber"
               :disabled="isImgDisabled"
               :title="[isImgDisabled === true ? '禁用' : '']"
-              :show-file-list='false'
+              :show-file-list='true'
               >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
             </el-upload>
-            <div class="img_list">
+            <!-- <div class="img_list">
               <div v-for="(item, index) in imgList2" :key="'item' + index">
                 <img
                   :src="item.path"
@@ -45,7 +45,7 @@
                 <span>{{item.cname}}</span>
                 <i class='el-icon-close' @click="deleteFile(index, item)"></i>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

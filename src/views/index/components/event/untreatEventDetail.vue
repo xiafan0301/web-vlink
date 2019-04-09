@@ -58,7 +58,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, updateEvent } from '@/views/index/api/api.js';
+import { getEventDetail } from '@/views/index/api/api.js';
 import BigImg from './components/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -107,10 +107,10 @@ export default {
     skipEachPage () {
       const type = this.handleType;
       const eventId = this.$route.query.eventId;
-      const params = {
-        uid: eventId,
-        mutualFlag: this.isMutual
-      }
+      // const params = {
+      //   uid: eventId,
+      //   mutualFlag: this.isMutual
+      // }
       // updateEvent(params)
       //   .then(res => {
       //     console.log(res)

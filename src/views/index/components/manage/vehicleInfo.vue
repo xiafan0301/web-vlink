@@ -304,7 +304,6 @@
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
           </el-form>
-          <!-- <el-input placeholder="请输入组名，名字限制在10个" v-model="addCopyGroupName"></el-input> -->
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
@@ -571,11 +570,14 @@ export default {
     },
     // 显示加入组--新增分组弹出框
     showAddGroupCopyDialog () {
+      this.isShowError = false;
+      this.addGroupForm.userGroupName = null;
       this.addGroupCopyDialog = true;
     },
     // 显示加入组---取消新增分组
     cancelAddGroupCopy (form) {
       this.isShowError = false;
+      this.addGroupForm.userGroupName = null;
       this.$refs[form].resetFields();
     },
     // 处理复制分组
@@ -636,7 +638,7 @@ export default {
         selectArr.push(item.uid);
       });
       const params = {
-        groupName: this.addCopyGroupName || null,
+        groupName: this.addGroupForm.userGroupName || null,
         // groupId: id || null,
         vehicleIds: selectArr
       };
@@ -648,6 +650,7 @@ export default {
               message: '新增成功',
               customClass: 'request_tip'
             })
+            this.showGroup = false;
             this.getVeGroupInfo();
             this.addGroupCopyDialog = false;
           } else {

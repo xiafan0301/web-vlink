@@ -222,7 +222,7 @@ export default {
     addMark (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
+          console.log(valid)
         }
       })
     },
@@ -238,7 +238,7 @@ export default {
     editMark (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
+           console.log(valid)
         }
       })
     },

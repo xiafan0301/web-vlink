@@ -10,21 +10,22 @@
     <div class="content_box">
       <div class="btn_box">
         <div class="bnt_box_left">
-          <span>自定义组</span>
+          <span>{{groupName}}</span>
           <i class=" edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
           <i class=" del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
         </div>
         <div class="bnt_box_right">
-          <el-button class="oper_btn copy_btn" @click="showGroup = !showGroup">复制</el-button>
-          <el-button class="oper_btn move_btn" @click="showMoveoutDialog">移出</el-button>
+          <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
+          <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
           <div class="copy_info" v-show="showGroup">
             <div class="copy_info_list">
               <vue-scroll>
                 <ul class="copy_info_ul">
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
-                  <li>分组命名文字限制十字</li>
+                   <li
+                    v-for="(item, index) in copyGroupList"
+                    :key="index"
+                    @click="handleCopyGroup(item.uid)"
+                  >{{item.name}}</li>
                 </ul>
               </vue-scroll>
             </div>
@@ -38,31 +39,32 @@
       <div class="divide"></div>
       <div class="table_box">
         <div class="search_box">
-          <el-form :inline="true" :model="searchForm" class="search_form">
-            <el-form-item>
-              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.name" />
+          <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+            <el-form-item prop="idNo">
+              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
             </el-form-item>
-            <el-form-item >
+            <el-form-item prop="idType">
               <el-select v-model="searchForm.idType" style="width: 240px;">
                 <el-option label="区域一" value="shanghai"></el-option>
                 <el-option label="区域二" value="beijing"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-select v-model="searchForm.userSex" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item prop="sex">
+              <el-select v-model="searchForm.sex" style="width: 240px;">
+                <el-option label="男" :value="1"></el-option>
+                <el-option label="女" :value="2"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" type="primary">查询</el-button>
-              <el-button class="reset_btn" type="primary">重置</el-button>
+              <el-button class="select_btn" @click="searchData">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <el-table
           class="event_table"
           :data="personInfoList"
+          @selection-change="handleSelectChange"
           >
           <el-table-column
             type="selection"
@@ -76,15 +78,19 @@
           </el-table-column>
           <el-table-column
             label="姓名"
-            prop="userName"
+            prop="name"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="性别"
-            prop="userSex"
+            prop="sex"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span v-show="scope.row.sex == 1">男</span>
+              <span v-show="scope.row.sex == 2">女</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="证件类型"
@@ -94,30 +100,29 @@
           </el-table-column>
           <el-table-column
             label="证件号码"
-            prop="idCard"
+            prop="idNo"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column
             label="备注信息"
-            prop="remark"
+            prop="remarks"
             show-overflow-tooltip
             >
           </el-table-column>
           <el-table-column label="操作" width="140">
             <template slot-scope="scope">
-              <span class="operation_btn" @click="showLookDetailInfo(scope)">查看</span>
+              <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
             </template>
           </el-table-column>
         </el-table>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage4"
+          :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="100"
+          :page-size="pagination.pageSize"
           layout="total, prev, pager, next, jumper"
-          :total="400">
+          :total="pagination.total">
         </el-pagination>
       </div>
     </div>
@@ -132,50 +137,44 @@
       >
       <div class="content_body">
         <div class="content_left">
-          <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+          <img :src="personDetailInfo.photoUrl">
         </div>
         <ul class="content_right">
           <li>
             <span>姓名：</span>
-            <span>邹洪华</span>
+            <span>{{personDetailInfo.name}}</span>
           </li>
           <li>
             <span>性别：</span>
-            <span>男</span>
+            <span>{{personDetailInfo.sex === 1 ? '男' : '女'}}</span>
           </li>
           <li>
             <span>民族：</span>
-            <span>汉</span>
+            <span>{{personDetailInfo.nation === 1 ? '汉族' : personDetailInfo.nation}}</span>
           </li>
           <li>
             <span>证件类型：</span>
-            <span>身份证</span>
+            <span>{{personDetailInfo.idType}}</span>
           </li>
           <li>
             <span>证件号码：</span>
-            <span>432501199111110011</span>
+            <span>{{personDetailInfo.idNo}}</span>
           </li>
           <li>
             <span>出生日期：</span>
-            <span>1991.11.11</span>
+            <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
           </li>
           <li>
             <span>底库信息：</span>
-            <span>底库1、底库2</span>
+            <span></span>
           </li>
           <li>
             <span>分组信息：</span>
-            <span>分组1、分组2</span>
+            <span></span>
           </li>
           <li>
             <span>备注：</span>
-            <span>
-              任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-              这段文字是样式参考。调度指挥方案任务内容填写，
-              段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示。
-            </span>
+            <span>{{personDetailInfo.remarks}}</span>
           </li>
         </ul>
       </div>
@@ -191,7 +190,13 @@
       >
       <div class="content_body">
         <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+         <el-form :model="groupForm" ref="groupForm" :rules="rules">
+            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+              <el-input placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+              <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+            </el-form-item>
+          </el-form>
+        <!-- <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input> -->
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="addGroupDialog = false">取消</el-button>
@@ -207,12 +212,18 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <div class="content_body">
+      <!-- <div class="content_body">
         <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
-      </div>
+      </div> -->
+      <el-form :model="groupForm" ref="groupForm" :rules="rules">
+        <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+          <el-input placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+          <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="editGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editGroupDialog = false">确认</el-button>
+        <el-button @click="cancelEdit('groupForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="editGroupInfo('groupForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--删除组弹出框-->
@@ -227,12 +238,12 @@
       <span style="color: #999999;">删除后该组信息可在系统默认中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="deleteGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="sureDeleteGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--移出组弹出框-->
     <el-dialog
-      title="是否确定将这1条人员数据移出该组?"
+      :title="delTitle"
       :visible.sync="moveoutGroupDialog"
       width="482px"
       :close-on-click-modal="false"
@@ -242,73 +253,256 @@
       <span style="color: #999999;">移除后该条信息可在系统默认中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="moveoutGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="moveoutGroupDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { validateName } from '@/utils/validator.js';
+import { getPerGroupList, getPersonData, getPersonDetail, editVeGroup, copyPersonGroup,
+moveoutPerson, deletePersonGroup } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
-      userGroupName: null,
+      isShowError: false,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      groupForm: {
+        userGroupName: null
+      },
+      rules: {
+        userGroupName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { max: 6, message: '最多输入6个字', trigger: 'blur' },
+          { validator: validateName, trigger: 'blur' }
+        ]
+      },
       showGroup: false,
       searchForm: {
         name: null,
         idType: null,
-        userSex: null
+        sex: 1
       },
-      personInfoList: [
-        {
-          userName: '张飞',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          remark: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张飞',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          remark: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张飞',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          remark: '显示20字后省略号显示20字后省略号显示…'
-        }
-      ],
+      personInfoList: [],
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
       deleteGroupDialog: false, // 删除分组弹出框
       moveoutGroupDialog: false, // 移出组弹出框
+      perGroupList: [], // 人员分组列表
+      groupId: null, // 分组id
+      albumId: null, // 底库id
+      isGroup: false,
+      groupName: null, // 组名
+      copyGroupList: [],
+      multipleSelection: [], // 表格多选
+      personDetailInfo: {}, // 人员详细信息
+      delTitle: null
     }
   },
+  mounted () {
+    this.groupId = parseInt(this.$route.query.id);
+    if (this.$route.query.type == 1) { // 分组查看
+      this.isGroup = true;
+    } else { // 底库查看
+      this.isGroup = false;
+    }
+    this.getPersonList();
+    this.getGroupList(parseInt(this.$route.query.id));
+  },
   methods: {
-    handleSizeChange () {
+    // 获取分组列表
+    getGroupList (uid) {
+      const params = {
+        type: 4 // 4---人像
+      }
+      getPerGroupList(params)
+        .then(res => {
+          if (res) {
+            res.data.map(item => {
+              if (item.id === uid) {
+                this.groupName = item.name;
+              } else {
+                this.copyGroupList.push({
+                  uid: item.id,
+                  name: item.name
+                })
+              }
+            });
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 获取人员列表
+    getPersonList () {
+      const params = {
+        // 'where.type': this.selectMethod,
+        'where.albumId': this.albumId,
+        'where.groupId': this.groupId,
+        'where.idType': this.searchForm.idType,
+        'where.idNo': this.searchForm.idNo,
+        'where.sex': this.searchForm.sex,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getPersonData(params)
+        .then(res => {
+          if (res) {
+            this.personInfoList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // 搜索条件查询
+    searchData () {
+      this.getPersonList();
+    },
+    // 重置搜索框
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getPersonList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getPersonList();
+    },
+    handleSelectChange (val) {
+      this.multipleSelection = val;
+    },
+    // 将人员复制到选择的组
+    handleCopyGroup (id) {
+      let selectArr = [];
+      console.log(this.multipleSelection)
+      this.multipleSelection.map(item => {
+        selectArr.push(item.id);
+      });
+      const params = {
+        groupId: id || null,
+        portraitIds: selectArr.join()
+      };
+      copyPersonGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              customClass: 'request_tip'
+            })
+            this.getPersonList();
+            this.showGroup = false;
+          }
+        })
+        .catch(() => {})
+    },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
       console.log(obj);
       this.perosnDetailInfoDialog = true;
+      if (obj.id) {
+        getPersonDetail(obj.id)
+          .then(res => {
+            if (res) {
+              this.personDetailInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 显示编辑弹出框
     showEditDialog () {
+      this.isShowError = false;
+      this.groupForm.userGroupName = this.groupName;
       this.editGroupDialog = true;
+    },
+    // 取消编辑
+    cancelEdit (form) {
+      this.$refs[form].resetFields();
+      this.isShowError = false;
+    },
+    // 确认编辑
+    editGroupInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const data = {
+            groupName: this.groupForm.userGroupName,
+            groupType: 4,
+            uid: this.groupId
+          }
+          editVeGroup(data)
+            .then(res => {
+              if (!res) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                })
+                this.editGroupDialog = false;
+                this.getGroupList(parseInt(this.groupId));
+              }
+            })
+            .catch(() => {})
+        }
+      })
     },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteGroupDialog = true;
     },
+    // 确认删除分组
+    sureDeleteGroup () {
+      const params = {
+        id: this.groupId
+      }
+      deletePersonGroup(this.groupId, params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '删除成功',
+              customClass: 'request_tip'
+            });
+            this.$router.push({name: 'person_info'});
+          }
+        })
+        .catch(() => {})
+    },
     // 显示移出弹出框
     showMoveoutDialog () {
+      const length = this.multipleSelection.length;
+      this.delTitle = '是否确定将这 ' + length + ' 条人员数据移出该组?';
       this.moveoutGroupDialog = true;
+    },
+    // 移出分组
+    moveoutGroupInfo () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.id);
+      });
+      selectArr = selectArr.join(',');
+      const params = {
+        groupId: this.groupId,
+        portraitIds: selectArr
+      };
+      moveoutPerson(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '移出成功',
+              customClass: 'request_tip'
+            })
+            this.getPersonList();
+            this.moveoutGroupDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '移出失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
@@ -355,12 +549,13 @@ export default {
           z-index: 1;
           position: absolute;
           top: 45px;
+          height: 170px;
           background-color: #ffffff;
           color: #333333;
           border-radius: 4px;
           box-shadow:5px 5px 8px 5px #949494;
           .copy_info_list {
-            height: 150px;
+            height: calc(170px - 30px);
             .copy_info_ul {
               >li {
                 padding: 8px 10px;
@@ -375,10 +570,15 @@ export default {
             cursor: pointer;
             height: 30px;
             line-height: 30px;
-            display: flex;
-            align-items: center;
-            padding-left: 25%;
+            // display: flex;
+            // align-items: center;
+            text-align: center;
+            padding: 0 10px;
             border-top: 1px solid #F2F2F2;
+            span, i {
+              display: inline-block;
+              vertical-align: middle;
+            }
           }
         }
         .oper_btn {
@@ -388,6 +588,11 @@ export default {
         .copy_btn {
           background-color: #0C70F8;
           color: #ffffff;
+        }
+        .disabled_btn {
+          background-color: #D3D3D3;
+          color: #B2B2B2;
+          cursor: default;
         }
       }
     }
