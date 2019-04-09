@@ -131,6 +131,18 @@ export const apiVideoRecordList = data => {
   })
 }
 /**
+ * 视频播放记录列表分页查询接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoRecordPageList = data => {
+  return request({
+    url: '/videoPatrolService/videoRecordPageList',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
  * 删除视频播放记录接口
  * @param {Object} data 接口入参
  */

@@ -505,7 +505,7 @@ export default {
     },
     // 跳至查看互助页面
     skipCommentPage () {
-      this.$router.push({path: '/message/help'});
+      this.$router.push({path: '/message/help', query: {helpId: this.$route.query.eventId}});
     },
     // 跳至查看布控详情页面
     skipControlPage () {

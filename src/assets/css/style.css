@@ -147,6 +147,11 @@
 .vl_icon_control_30{width: 50px; height: 70px; background-position: -320px -258px;}
 .vl_icon_control_31{width: 20px; height: 20px; background-position: -935px -375px;}
 .vl_icon_control_32{width: 20px; height: 21px; background-position: -369px -376px;}
+.vl_icon_control_33{width: 42px; height: 36px; background-position: -478px -880px;}
+.vl_icon_control_34{width: 48px; height: 70px; background-position: -534px -1158px;}
+.vl_icon_control_35{width: 48px; height: 70px; background-position: -620px -1158px;}
+.vl_icon_control_36{width: 48px; height: 70px; background-position: -704px -1158px;}
+.vl_icon_control_37{width: 48px; height: 70px; background-position: -320px -260px;}
 /**消息图标***/
 .vl_icon_message_1{width: 20px; height: 20px; background-position: -278px -992px;}
 .vl_icon_message_2{width: 20px; height: 20px; background-position: -323px -990px;}
@@ -155,6 +160,8 @@
 .vl_icon_message_5{width: 16px; height: 16px; background-position: -862px -529px;}
 .vl_icon_message_6{width: 30px; height: 30px; background-position: -816px -425px;}
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
+/**告警图标***/
+.vl_icon_alarm_1{width: 114px; height: 32px; background-position: -548px -882px;}
 /**事件图标***/
 .vl_icon_event_1{width: 72px; height: 72px; background-position: -572px -426px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}

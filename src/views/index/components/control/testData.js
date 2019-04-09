@@ -1,161 +1,153 @@
-export const testData = [
-  {
-      name: '摄像头111',
-      addr: '长沙市天心区君逸路', 
-      latitude: 28.100253,
-      longitude: 112.981563,
-      controlList: [
-        {
-          controlName: '布控1',
-          num: '01',
-          controlObj: '张三',
-          controlState: '1',
-          facilityType: '球机',
-          alarmRank: '五级',
-          createTime: '2018-01-01'
-        },
-        {
-          controlName: '布控2',
-          num: '02',
-          controlObj: '张三',
-          controlState: '1',
-          facilityType: '球机',
-          alarmRank: '一级',
-          createTime: '2018-01-01'
-        }
-      ]
-  }, {
-      name: '摄像头222',
-      addr: '天心区雀园路568号', 
-      latitude: 28.099481,
-      longitude: 112.981627,
-      controlList: [
-        {
-          controlName: '布控3',
-          num: '03',
-          controlObj: '李四',
-          controlState: '0',
-          facilityType: '球机',
-          alarmRank: '',
-          createTime: '2018-01-01'
-        },
-        {
-          controlName: '布控4',
-          num: '04',
-          controlObj: '李四',
-          controlState: '0',
-          facilityType: '球机',
-          alarmRank: '',
-          createTime: '2018-01-01'
-        }
-      ]
-  }, {
-      name: '摄像头333',
-      addr: '天心区君逸路九峰安置小区19栋3号门面', 
-      latitude: 28.099711,
-      longitude: 112.979254,
-      controlList: [
-       {
-        controlName: '布控5',
-        num: '05',
-        controlObj: '王五',
-        controlState: '2',
-        facilityType: '枪机',
-        alarmRank: '',
-        createTime: '2018-01-01'
-       },
-       {
-        controlName: '布控6',
-        num: '05',
-        controlObj: '王五',
-        controlState: '1',
-        facilityType: '枪机',
-        alarmRank: '',
-        createTime: '2018-01-01'
-       }
-     ]
-  }, {
-      name: '摄像头444',
-      addr: '天心区雀园路', 
-      latitude: 28.099139,
-      longitude: 112.979826,
-      controlList: [
-        {
-          controlName: '布控7',
-          num: '05',
-          controlObj: '王五',
-          controlState: '2',
-          facilityType: '枪机',
-          alarmRank: '',
-          createTime: '2018-01-01'
-         }
-      ]
-  }
-]
-// export const conData = [
-//   {
-//       name: '摄像头111',
-//       addr: '长沙市天心区君逸路', 
-//       latitude: 28.100253,
-//       longitude: 112.981563
-//   }, {
-//       name: '摄像头222',
-//       addr: '天心区雀园路568号', 
-//       latitude: 28.099481,
-//       longitude: 112.981627
-//   }, {
-//       name: '摄像头333',
-//       addr: '天心区君逸路九峰安置小区19栋3号门面', 
-//       latitude: 28.099711,
-//       longitude: 112.979254
-//   }, {
-//       name: '摄像头444',
-//       addr: '天心区雀园路', 
-//       latitude: 28.099139,
-//       longitude: 112.979826
-//   }
-// ]
-export const conData = 
-  {
-    // tid: '0', trackPointName: '追踪点001:湘府英才小学',
-    // name: '摄像头111',
-    // addr: '湘府英才小学', 
-    // latitude: 28.098630,
-    // longitude: 112.984430,
-    equList: [
-      {type: 'sxt', sid: '0', equName: '摄像头001', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.095324, longitude: 112.975426},
-      {type: 'sxt', sid: '1', equName: '摄像头002', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.096324, longitude: 112.976426},
-      {type: 'sxt', sid: '2', equName: '摄像头003', addr: 'xxx', isNormal: false, latitude: 28.097324, longitude: 112.977426},
-      {type: 'sxt', sid: '3', equName: '摄像头004', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.098324, longitude: 112.978426},
-      {type: 'kk', sid: '01', equName: '卡口005', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.093324, longitude: 112.973426},
-      {type: 'kk', sid: '11', equName: '卡口006', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.092324, longitude: 112.972426},
-      {type: 'kk', sid: '21', equName: '卡口007', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.091324, longitude: 112.971426},
-      {type: 'kk', sid: '31', equName: '卡口008', addr: 'xxx', isNormal: true, latitude: 28.090324, longitude: 112.970426},
-      {type: 'sxt', sid: '8', equName: '摄像头009', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.096290, longitude: 112.966430},
-      {type: 'sxt', sid: '9', equName: '摄像头0010', addr: 'xxx', isNormal: false, latitude: 28.097290, longitude: 112.967430},
-      {type: 'sxt', sid: '10', equName: '摄像头0011', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.098290, longitude: 112.968430},
-      {type: 'sxt', sid: '11', equName: '摄像头0012', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.099290, longitude: 112.969430},
-      {type: 'kk', sid: '81', equName: '卡口0013', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.095290, longitude: 112.965430},
-      {type: 'kk', sid: '91', equName: '卡口0014', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.094290, longitude: 112.964430},
-      {type: 'kk', sid: '101', equName: '卡口0015', addr: 'xxx', isNormal: true, latitude: 28.093290, longitude: 112.963430},
-      {type: 'kk', sid: '111', equName: '卡口0016', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.092290, longitude: 112.962430}
-    ]
-  }
-  // {
-  //   tid: '1', trackPointName: '追踪点002:天心区雀园路568号',
-  //   name: '摄像头222',
-  //   addr: '天心区雀园路568号', 
-  //   latitude: 28.094560,
-  //   longitude: 112.974060,
-  //   equList: [
-  //     {type: 'sxt', sid: '8', equName: '摄像头009', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.096290, longitude: 112.966430},
-  //     {type: 'sxt', sid: '9', equName: '摄像头0010', addr: 'xxx', isNormal: false, latitude: 28.097290, longitude: 112.967430},
-  //     {type: 'sxt', sid: '10', equName: '摄像头0011', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.098290, longitude: 112.968430},
-  //     {type: 'sxt', sid: '11', equName: '摄像头0012', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.099290, longitude: 112.969430},
-  //     {type: 'kk', sid: '81', equName: '卡口0013', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.095290, longitude: 112.965430},
-  //     {type: 'kk', sid: '91', equName: '卡口0014', addr: 'xxx', isNormal: true, isSelected: false, latitude: 28.094290, longitude: 112.964430},
-  //     {type: 'kk', sid: '101', equName: '卡口0015', addr: 'xxx', isNormal: true, latitude: 28.093290, longitude: 112.963430},
-  //     {type: 'kk', sid: '111', equName: '卡口0016', addr: 'xxx', isNormal: true, isSelected: true, latitude: 28.092290, longitude: 112.962430}
-  //   ]
-  // }
+// 布控详情数据模型
+export const conDetail = {
+  alarmLevel: null,
+  alarmList: null,
+  alarmNum: null,
+  createTime: null,
+  duration: null,
+  eventDetail: null,
+  eventId: null,
+  objectList: [],
+  objectNum: null,
+  runningEndTime: null,
+  runningStartTime: null,
+  surveillanceDateEnd: null,
+  surveillanceDateStart: null,
+  surveillanceName: null,
+  surveillanceNo: null,
+  surveillanceStatus: null,
+  terminationReason: null,
+  time: null,
+  type: null,
+  updateTime: null
+}
 
+// 民族
+export const nationData = [
+  {value: 1, label: "汉族"},
+  {value: 2, label: "蒙古族"},
+  {value: 3, label: "回族"},
+  {value: 4, label: "藏族"},
+  {value: 5, label: "维吾尔族"},
+  {value: 6, label: "苗族"},
+  {value: 7, label: "彝族"},
+  {value: 8, label: "壮族"},
+  {value: 9, label: "布依族"},
+  {value: 10, label: "朝鲜族"},
+  {value: 11, label: "满族"},
+  {value: 12, label: "侗族"},
+  {value: 13, label: "瑶族"},
+  {value: 14, label: "白族"},
+  {value: 15, label: "土家族"},
+  {value: 16, label: "哈尼族"},
+  {value: 17, label: "哈萨克族"},
+  {value: 18, label: "傣族"},
+  {value: 19, label: "黎族"},
+  {value: 20, label: "傈僳族"},
+  {value: 21, label: "佤族"},
+  {value: 22, label: "畲族"},
+  {value: 23, label: "高山族"},
+  {value: 24, label: "拉祜族"},
+  {value: 25, label: "水族"},
+  {value: 26, label: "东乡族"},
+  {value: 27, label: "纳西族"},
+  {value: 28, label: "景颇族"},
+  {value: 29, label: "柯尔克孜族"},
+  {value: 30, label: "土族"},
+  {value: 31, label: "达斡尔族"},
+  {value: 32, label: "仫佬族"},
+  {value: 33, label: "羌族"},
+  {value: 34, label: "布朗族"},
+  {value: 35, label: "撒拉族"},
+  {value: 36, label: "毛难族"},
+  {value: 37, label: "仡佬族"},
+  {value: 38, label: "锡伯族"},
+  {value: 39, label: "阿昌族"},
+  {value: 40, label: "普米族"},
+  {value: 41, label: "塔吉克族"},
+  {value: 42, label: "怒族"},
+  {value: 43, label: "乌孜别克族"},
+  {value: 44, label: "俄罗斯族"},
+  {value: 45, label: "鄂温克族"},
+  {value: 46, label: "崩龙族"},
+  {value: 47, label: "保安族"},
+  {value: 48, label: "裕固族"},
+  {value: 49, label: "京族"},
+  {value: 50, label: "塔塔尔族"},
+  {value: 51, label: "独龙族"},
+  {value: 52, label: "鄂伦春族"},
+  {value: 53, label: "赫哲族"},
+  {value: 54, label: "门巴族"},
+  {value: 55, label: "珞巴族"},
+  {value: 56, label: "基诺族"}
+]
+
+export const bonDataOne = [
+  {
+    bayonetAddress: "string",
+    bayonetName: "卡口1",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.126192,
+    longitude: 112.923317,
+    opUserId: 1,
+    uid: 1,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+  {
+    bayonetAddress: "string22222",
+    bayonetName: "卡口2",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.128192,
+    longitude: 112.923317,
+    opUserId: 1,
+    uid: 2,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+]
+
+export const bonDataTwo = [
+  {
+    bayonetAddress: "string",
+    bayonetName: "卡口3",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.126192,
+    longitude: 112.926317,
+    opUserId: 1,
+    uid: 3,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+  {
+    bayonetAddress: "string22222",
+    bayonetName: "卡口4",
+    bayonetNo: "0",
+    bayonetType: 0,
+    createTime: 1553587805000,
+    delFlag: false,
+    desci: "string",
+    isEnabled: false,
+    latitude: 28.128192,
+    longitude: 112.929317,
+    opUserId: 1,
+    uid: 4,
+    updateTime: 1553587805000,
+    updateUserId: 1
+  },
+]
