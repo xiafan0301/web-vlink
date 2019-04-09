@@ -22,7 +22,7 @@
                 录像时间&nbsp;{{item.video.playBackStartTime | fmTimestamp('yyyy-MM-dd HH:mm')}}&nbsp;-&nbsp;{{item.video.playBackEndTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
               </h3>
               <div>
-                <span class="vl_icon vl_icon_v31" title="删除"></span>
+                <span class="vl_icon vl_icon_v31" @click="del(item)" title="删除"></span>
                 <span class="vl_icon vl_icon_v32" title="下载"></span>
               </div>
             </div>
@@ -142,6 +142,23 @@ export default {
         console.log("apiVideoRecordPageList error：", error);
       });
     },
+    del (item) {
+      this.$confirm('是否确定删除该条录像记录？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
+    },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
       this.searchSubmit();
@@ -186,7 +203,12 @@ export default {
             }
             > div {
               position: absolute; top: 5px; right: 0;
-              > span { margin-right: 10px; cursor: pointer; }
+              > span { 
+                margin-right: 10px; cursor: pointer;
+                &.vl_icon_v32 {
+                  cursor: not-allowed;
+                }
+              }
             }
           }
           > .vt_cv { width: 100%; height: 100%; }

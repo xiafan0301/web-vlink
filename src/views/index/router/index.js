@@ -1,5 +1,5 @@
-import Vue from 'vue/dist/vue.js'
-import Router from 'vue-router'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import store from '../../../store/store'
 /* import routers */
 // 视频模块 router
@@ -21,8 +21,8 @@ import routerAlarm from './router.alarm.js'
 // 事件板块 router
 import routerManage from './router.manage.js'
 
-Vue.use(Router)
-const router = new Router({
+Vue.use(VueRouter)
+const router = new VueRouter({
   // mode: 'history',
   base: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : '',
   routes: [{
