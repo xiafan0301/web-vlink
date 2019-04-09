@@ -98,7 +98,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" :tipMsg="tipMsg"></div>
@@ -112,9 +112,9 @@
 import { apiVideoList, apiVideoSignPeopleList, apiSignContentList } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
-import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
 export default {
-  components: {videoEmpty, rtmpplayer},
+  components: {videoEmpty, flvplayer},
   data () {
     return {
       tipMsg: '暂无视频播放，在标记列表选择视频进行查看',
@@ -142,7 +142,7 @@ export default {
      * 关闭播放器
      * @param {string} sid 视频ID
      */
-    playerClose (iIndex, sid) {
+    playerClose (iIndex) {
       this.videoList.splice(iIndex, 1, {});
     },
     deviceIsPlaying (item) {
@@ -203,7 +203,7 @@ export default {
         pageSize: 50
       }).then(res => {
         if (res && res.data) {
-          this.signList = res.data;
+          this.signList = res.data.list;
         }
         this.searchLoading = false;
       }).catch(error => {

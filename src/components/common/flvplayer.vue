@@ -1,18 +1,19 @@
 <template>
-  <div class="vl_rtmpplayer" :class="{'rtmpplayer_fullscreen': fullScreen}">
-    <div class="rtmpplayer_player" :id="rtmpplayerId + '_container'">
+  <div class="vl_flvplayer" :class="{'flvplayer_fullscreen': fullScreen}">
+    <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
-      <div class="rtmpplayer_player_c" :id="rtmpplayerId + '_c'">
-        <video :id="rtmpplayerId" style="width: 100%; height: 100%;" autoplay="autoplay" muted>
+      <div class="flvplayer_player_c" :id="flvplayerId + '_c'">
+        <video :id="flvplayerId" style="width: 100%; height: 100%;" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
     <span v-if="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
-    <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
+    <span v-else-if="config.close" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
+    <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
-    <div class="rtmpplayer_bot">
-      <div class="rtmpplayer_bot_t">{{oData.title}}</div>
-      <div class="rtmpplayer_bot_o">
+    <div class="flvplayer_bot">
+      <div class="flvplayer_bot_t">{{oData.title}}</div>
+      <div class="flvplayer_bot_o">
         <!-- 播放/暂停 -->
         <span class="vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
         <span class="vl_icon vl_icon_v22" v-show="!playActive" title="播放" @click="playerPlay(true)"></span>
@@ -35,7 +36,7 @@
           </span>
         </span>
         <!-- 标记 -->
-        <span v-if="signAble" class="vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
+        <span v-if="config.sign" class="vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
         <!-- 录视频 -->
         <span class="vl_icon vl_icon_v25 player_tran" title="录视频"></span>
         <!-- 截屏 -->
@@ -52,7 +53,7 @@
         <span v-if="fullScreen" class="vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
       </div>
     </div>
-    <el-dialog v-if="signAble" title="添加标记" :visible.sync="signDialogVisible" :center="false" width="500px">
+    <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">当前监控：{{oData.title}}</div>
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding-left: 30px;">
         <el-form-item prop="content">
@@ -72,13 +73,30 @@
 import {random14, formatDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
 export default {
-  props: ['index', 'oData', 'signAble'],
+  /** 
+   * index: 视频序号（在列表页面的位置）
+   * oData：视频信息 object {type: , title: , video: }
+   * oConfig: 播放配置信息
+   *    pause: 开始是否暂停，默认为false
+   *    
+   *    sign: 是否可标记，默认为true
+   *    close: 是否可删除，默认为true
+   *    fullscreen: 是否可全屏，默认为true
+   */
+  props: ['index', 'oData', 'oConfig'],
   data () {
     return {
       playActive: true,
       player: null,
       video: null,
-      rtmpplayerId: 'flv_' + random14(),
+      flvplayerId: 'flv_' + random14(),
+      // 默认播放配置信息
+      config: {
+        pause: false, // 开始是否暂停，默认为false(播放)
+        sign: true, // 是否可标记
+        close: true, // 是否可删除
+        fullscreen: true // 是否可全屏
+      },
 
       startPlayTime: null,
 
@@ -104,20 +122,17 @@ export default {
   watch: {
     oData () {
       if (this.player) {
-        this.player.updateUrl(this.oData.video.deviceSip);
-        this.player.load();
-        this.player.play();
-        this.startPlayTime = new Date().getTime();
-        // this.player.unload();
-        // this.player.destroy();
-        // player.unload();
-        // player.detachMediaElement();
-        // player.destroy();
-        // player = null;
-      } else {
-        this.initPlayer();
+        this.player.unload();
+        this.player.destroy();
+        this.player.detachMediaElement();
+        this.player = null;
       }
-      
+      this.initPlayer();
+    },
+    oConfig () {
+      if (this.oConfig) {
+        this.config = Object.assign({}, this.oConfig);
+      }
     },
     volume () {
       if (this.volume <= 0) {
@@ -131,15 +146,19 @@ export default {
     }
   },
   mounted () {
+    if (this.oConfig) {
+      this.config = Object.assign({}, this.oConfig);
+    }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
   },
   methods: {
     // 视频播放
     initPlayer () {
+      console.log('>>>> init flvplayer');
       // flv.js
       if (window.flvjs.isSupported()) {
-        var videoElement = document.getElementById(this.rtmpplayerId);
+        var videoElement = document.getElementById(this.flvplayerId);
         var flvPlayer = window.flvjs.createPlayer({
           type: 'flv',
           url: 'ws://10.16.1.142:3590/real/sub/b3855adc-69db-4c76-b2d1-4b381a60f750/9dd53418-dbd8-4de1-a1d1-4ae4b3d0553b.flv',
@@ -148,12 +167,12 @@ export default {
           enableWorker: true,
           enableStashBuffer: false,
           stashInitialSize: 128
-        }, function (e) {
-          console.log('>>>>>>>>>>>>>', e);
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
-        flvPlayer.play();
+        if (!this.config.pause) {
+          flvPlayer.play();
+        }
         this.startPlayTime = new Date().getTime();
         this.player = flvPlayer;
         this.video = videoElement;
@@ -187,13 +206,13 @@ export default {
     },
     // 局部放大
     playerEnlarge (flag) {
-      // rtmpplayerId + '_container'
-      let nTarget = $('#' + this.rtmpplayerId + '_container');
-      let $c = $('#' + this.rtmpplayerId + '_c');
+      // flvplayerId + '_container'
+      let nTarget = $('#' + this.flvplayerId + '_container');
+      let $c = $('#' + this.flvplayerId + '_c');
       if (flag) {
         this.enlarge = true;
         let startX, startY;
-        let boxId = this.rtmpplayerId + '_box';
+        let boxId = this.flvplayerId + '_box';
         // e.target.offsetLeft
         nTarget.on('mousedown', function (e) {
           startX = Math.floor(e.pageX);
@@ -331,22 +350,24 @@ export default {
       });
     },
 
-    // 播放记录
+    // 播放记录 只有type=1 / 2 才记录
     saveVideoRecord () {
-      let playBack = {};
-      if (this.oData.type === 2) {
-        playBack.playBackStartTime = formatDate(this.startPlayTime); // 回放开始时间
-        playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+      if (this.oData.type === 2 || this.oData.type === 1) {
+        let playBack = {};
+        if (this.oData.type === 2) {
+          playBack.playBackStartTime = formatDate(this.startPlayTime); // 回放开始时间
+          playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+        }
+        apiVideoRecord(Object.assign({
+          deviceId: this.oData.video.uid, // 设备id
+          playTime: formatDate(new Date().getTime()), // 播放结束时间
+          // 播放类型 1:视频巡逻 2:视频回放
+          playType: this.oData.type
+        }, playBack)).then(() => {
+        }).catch(error => {
+          console.log("apiVideoRecord error：", error);
+        });
       }
-      apiVideoRecord(Object.assign({
-        deviceId: this.oData.video.uid, // 设备id
-        playTime: formatDate(new Date().getTime()), // 播放结束时间
-        // 播放类型 1:视频巡逻 2:视频回放
-        playType: this.oData.type
-      }, playBack)).then(() => {
-      }).catch(error => {
-        console.log("apiVideoRecord error：", error);
-      });
     },
     // 浏览器unload事件
     videoUnloadSave () {
@@ -368,19 +389,19 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.vl_rtmpplayer {
+.vl_flvplayer {
   position: relative;
   width: 100%; height: 100%;
   overflow: hidden;
-  &.rtmpplayer_fullscreen {
+  &.flvplayer_fullscreen {
     position: fixed; z-index: 100; top: 0; left: 0;
   }
-  > .rtmpplayer_player {
+  > .flvplayer_player {
     position: relative;
     width: 100%; height: 100%;
     overflow: hidden;
     background: #000;
-    > .rtmpplayer_player_c {
+    > .flvplayer_player_c {
       width: 100%; height: 100%;
     }
   }
@@ -397,20 +418,20 @@ export default {
     margin: -40px; margin-top: -40px;
     cursor: pointer;
   }
-  > .rtmpplayer_bot {
+  > .flvplayer_bot {
     position: absolute; left: 0; bottom: -48px;
     width: 100%; height: 48px;
     background-color: #000;
     background-color: rgba(34, 34, 34, 0.65);
     transition: bottom 0.4s ease-out;
-    > .rtmpplayer_bot_t {
+    > .flvplayer_bot_t {
       float: left;
       height: 48px; line-height: 48px; max-width: 40%;
       padding-left: 20px;
       color: #fff; font-size: 16px;
       overflow: hidden;
     }
-    > .rtmpplayer_bot_o {
+    > .flvplayer_bot_o {
       float: right;
       padding-top: 12px; padding-right: 20px;
       > span {
@@ -443,7 +464,7 @@ export default {
     }
   }
   &:hover {
-    > .rtmpplayer_bot { bottom: 0; }
+    > .flvplayer_bot { bottom: 0; }
   }
 }
 </style>
