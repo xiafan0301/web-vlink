@@ -97,13 +97,15 @@
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" :allDevData="allDevData" mapId="mapOne" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" :pageType="pageType" :allDevData="allDevData" mapId="mapOne" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" :allDevData="allDevData" mapId="mapTwo" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" :pageType="pageType" :allDevData="allDevData" mapId="mapTwo" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
+              <template v-if="areaList.length > 0">
+                <div is="model" ref="mapThree" v-show="modelType === '3'" :pageType="pageType" mapId="mapThree" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
+              </template>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" :allDevData="allDevData" mapId="mapFour" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" :pageType="pageType" :allDevData="allDevData" mapId="mapFour" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
             </div>
           </div>
         </el-form>

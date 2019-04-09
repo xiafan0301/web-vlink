@@ -221,7 +221,7 @@ import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId', 'allDevData', 'modelType', 'checkList', 'areaList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId', 'pageType', 'allDevData', 'modelType', 'checkList', 'areaList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
   data () {
     return {
       modelForm: {
@@ -278,7 +278,7 @@ export default {
   },
   watch: {
     allDevData (val) {
-      if (val) {
+      if (val && this.pageType === 1) {
         this.resetMap();
       }
     },
@@ -1210,6 +1210,7 @@ export default {
     },
     // 标记地图范围，圆形覆盖物
     mapCircle (index) {
+      console.log(11111)
       let _this = this;
       if (_this.lnglat.length === 0) {
         this.$message.error('请输入追踪点');
@@ -1543,6 +1544,7 @@ export default {
         this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
         // 回填设备特性
         this.features = this.modelDataOne.pointDtoList[0].deviceChara;
+        this.resetMap();
         this.modelDataOne.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
           this.markLocation(m.longitude, m.latitude, m.address, index)
@@ -1574,6 +1576,7 @@ export default {
         this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
         // 回填设备特性
         this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
+        this.resetMap();
         this.modelDataTwo.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
           this.markLocation(m.longitude, m.latitude, m.address, index)
@@ -1606,6 +1609,7 @@ export default {
 
         this.modelForm.limitation.forEach(f => {
           // 回填受限范围
+          console.log(f, 'f')
           this.getAllBayontListByAreaId(f);
         })
         this.lastSelList = this.modelForm.limitation;
@@ -1631,6 +1635,7 @@ export default {
       if (this.modelDataFour.pointDtoList.length > 0) {
         // 回填设备特性
         this.features = this.modelDataFour.pointDtoList[0].deviceChara;
+        this.resetMap();
         let _this = this;
         _this.modelDataFour.pointDtoList.forEach((f) => {
           // 回填范围分析

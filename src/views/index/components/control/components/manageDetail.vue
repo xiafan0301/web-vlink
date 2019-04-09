@@ -80,16 +80,16 @@
                       <el-collapse-transition>
                         <div v-show="trackPoint.isDropdown">
                           <div class="equ_m">
-                            <div @click="getEquList('0', trackPoint)" :class="{'active': devId === trackPoint.uid && type === '0'}">摄像头（{{devNum}}）</div>
-                            <div @click="getEquList('1', trackPoint)" :class="{'active': devId === trackPoint.uid && type === '1'}">卡口（{{bayonetNum}}）</div>
+                            <div @click="getEquList('0', trackPoint)" :class="{'active': devId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{devNum}}）</div>
+                            <div @click="getEquList('1', trackPoint)" :class="{'active': devId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{bayonetNum}}）</div>
                           </div>
                           <vue-scroll>
-                            <ul v-if="type === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
+                            <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
                                 <li :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
-                            <ul v-if="type === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;">
+                            <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.bayonetList">
                                 <li :key="equ.uid"><span>{{equ.bayonetName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
@@ -130,8 +130,8 @@
                   <div class="situ_left">
                     <div style="padding-left: 20px;">布控设备（12）</div>
                     <div class="equ_m">
-                      <div>摄像头（）</div>
-                      <div>卡口（）</div>
+                      <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（12）</div>
+                      <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（12）</div>
                     </div>
                     <vue-scroll>
                       <ul style="width: 100%;max-height: 736px;">
@@ -332,7 +332,8 @@ export default {
       devNum: null,//摄像头数量
       bayonetNum: null,//卡口数量
       devList: [], //设备列表
-      type: '0',// 设备类型
+      tabTypeByScope : '0',// 设备类型-布控范围
+      tabTypeBySituation : '0',// 设备类型-运行情况
       devId: null,//设备id
       dpOne: false,//展开布控范围
       dpTwo: false,//展开实时监控
@@ -478,7 +479,7 @@ export default {
     },
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
-      this.type = type;
+      this.tabTypeByScope = type;
       this.devId = data.uid;
     },
     // 展开或者闭合设备列表
