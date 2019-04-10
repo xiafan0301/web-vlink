@@ -7,8 +7,9 @@
         </video>
       </div>
     </div>
-    <span v-if="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
-    <span v-else-if="config.close" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
+    <span class="player_loading com_trans50_lt" v-show="videoLoading">视频加载中，请稍后...</span>
+    <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+    <span v-if="config.close && !fullScreen" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
     <div class="flvplayer_bot">
@@ -72,6 +73,7 @@
 <script>
 import {random14, formatDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
+import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -86,6 +88,7 @@ export default {
   props: ['index', 'oData', 'oConfig'],
   data () {
     return {
+      videoLoading: true,
       playActive: true,
       player: null,
       video: null,
@@ -131,7 +134,7 @@ export default {
     },
     oConfig () {
       if (this.oConfig) {
-        this.config = Object.assign({}, this.oConfig);
+        this.config = Object.assign(this.config, this.oConfig);
       }
     },
     volume () {
@@ -147,7 +150,7 @@ export default {
   },
   mounted () {
     if (this.oConfig) {
-      this.config = Object.assign({}, this.oConfig);
+      this.config = Object.assign(this.config, this.oConfig);
     }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
@@ -155,28 +158,42 @@ export default {
   methods: {
     // 视频播放
     initPlayer () {
-      console.log('>>>> init flvplayer');
-      // flv.js
-      if (window.flvjs.isSupported()) {
-        var videoElement = document.getElementById(this.flvplayerId);
-        var flvPlayer = window.flvjs.createPlayer({
-          type: 'flv',
-          url: 'ws://10.16.1.142:3590/real/sub/b3855adc-69db-4c76-b2d1-4b381a60f750/9dd53418-dbd8-4de1-a1d1-4ae4b3d0553b.flv',
-          isLive: true
-        }, {
-          enableWorker: true,
-          enableStashBuffer: false,
-          stashInitialSize: 128
-        });
-        flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
-        if (!this.config.pause) {
-          flvPlayer.play();
+      getTestLive().then(res => {
+        if (res && res.data) {
+          console.log('>>>> init flvplayer');
+          let ind = res.data.length - 1;
+          let ird = Math.round(Math.random() * ind);
+          let surl = res.data[ird].liveFlvUrl;
+          // flv.js
+          if (window.flvjs.isSupported()) {
+            this.videoLoading = true;
+            var videoElement = document.getElementById(this.flvplayerId);
+            var flvPlayer = window.flvjs.createPlayer({
+              type: 'flv',
+              url: surl,
+              isLive: true
+            }, {
+              enableWorker: true,
+              enableStashBuffer: false,
+              stashInitialSize: 128
+            });
+            flvPlayer.attachMediaElement(videoElement);
+            flvPlayer.load();
+            flvPlayer.play().then(() => {
+              this.videoLoading = false;
+              if (this.config.pause) {
+                this.playActive = false;
+                flvPlayer.pause();
+              }
+            });
+            this.startPlayTime = new Date().getTime();
+            this.player = flvPlayer;
+            this.video = videoElement;
+          }
         }
-        this.startPlayTime = new Date().getTime();
-        this.player = flvPlayer;
-        this.video = videoElement;
-      }
+      }).catch(error => {
+        console.log("getTestLive error：", error);
+      });
     },
     /***** 视频事件 *****/
     // 播放/暂停
@@ -408,6 +425,10 @@ export default {
   > .player_out_fullscreen {
     position: absolute; top: 10px; right: 10px; z-index: 10;
     cursor: pointer;
+  }
+  > .player_loading {
+    position: absolute; top: 50%; left: 50%; z-index: 10;
+    color: #fff;
   }
   > .vl_icon_close {
     position: absolute; top: 10px; right: 10px; z-index: 10;
