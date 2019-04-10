@@ -49,7 +49,7 @@
           </div>
         </div>
         <div class="sign_content_list">
-          <ul>
+          <ul v-if="signList && signList.length > 0">
             <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
               <!-- 过期 -->
               <div v-if="item.signFlag" class="content_list_dis">
@@ -90,6 +90,9 @@
               </div>
             </li>
           </ul>
+          <div class="sign_content_list_empty" v-else>
+            暂无
+          </div>
         </div>
       </div>
     </div>
@@ -342,5 +345,10 @@ export default {
       }
     }
   }
+}
+.sign_content_list_empty {
+  color: #999;
+  text-align: center;
+  padding: 20px 20px 0 0;
 }
 </style>

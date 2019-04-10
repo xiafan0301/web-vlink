@@ -86,6 +86,12 @@ const oDomains = {
         dev: 'http://apidev.aorise.org/vlink-base',
         test: 'http://apidev.aorise.org/vlink-base',
         prod: 'http://apidev.aorise.org/vlink-base'
+    },
+    // test-video服务
+    live: {
+      dev: 'http://10.116.64.155:8081',
+      test: 'http://10.116.64.155:8081',
+      prod: 'http://10.116.64.155:8081'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
