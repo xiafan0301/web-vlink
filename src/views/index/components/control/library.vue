@@ -239,9 +239,10 @@
           top="20vh"
           :title="tabType === '1' ? `${operationType === '1' ? '新增' : '修改'}人像` : `${operationType === '1' ? '新增' : '修改'}车像`">
           <div class="add_portrait">
-            <div class="portrait_update">
+            <div class="portrait_update" >
               <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
                 <el-upload
+                  :disabled="isAddDisabled"
                   ref="uploadPic"
                   multiple
                   accept="image/*"
@@ -262,21 +263,23 @@
                   <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
                 </div>
               </div>
-              <h1 class="vl_f_999">点击修改{{tabType === '1' ? '人像' : '车像'}}</h1>
-              <p>请上传清晰照片</p>
+              <template v-if="!isAddDisabled">
+                <h1 class="vl_f_999">点击修改{{tabType === '1' ? '人像' : '车像'}}</h1>
+                <p>请上传清晰照片</p>
+              </template>
             </div>
             <div class="portrait_form">
               <!-- 人像 -->
               <el-form class="portrait_form" v-show="tabType === '1'" :model="portraitForm" :rules="portraitRules" ref="portraitForm" label-width="20px" label-position="left">
                 <el-form-item label=" " style="width: 415px;" prop="name">
-                  <el-input v-model="portraitForm.name" placeholder="姓名" maxlength="50"></el-input>
+                  <el-input v-model="portraitForm.name" placeholder="姓名" maxlength="50" :disabled="isAddDisabled"></el-input>
                 </el-form-item>
                 <el-form-item style="width: 415px;" class="portrait_form_sex">
-                  <el-button plain @click.native="portraitForm.sex = 1" :class="{'active': portraitForm.sex === 1}">男</el-button>
-                  <el-button plain @click.native="portraitForm.sex = 2" :class="{'active': portraitForm.sex === 2}">女</el-button>
+                  <el-button plain @click.native="portraitForm.sex = 1" :class="{'active': portraitForm.sex === 1}" :disabled="isAddDisabled">男</el-button>
+                  <el-button plain @click.native="portraitForm.sex = 2" :class="{'active': portraitForm.sex === 2}" :disabled="isAddDisabled">女</el-button>
                 </el-form-item>
                 <el-form-item style="width: 415px;" prop="nation">
-                  <el-select v-model="portraitForm.nation" placeholder="民族" style="width: 100%;">
+                  <el-select v-model="portraitForm.nation" placeholder="民族" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in nationalList"
                       :key="item.value"
@@ -286,7 +289,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="idType">
-                  <el-select v-model="portraitForm.idType" placeholder="证件类型" style="width: 100%;">
+                  <el-select v-model="portraitForm.idType" placeholder="证件类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in cardTypeList"
                       :key="item.value"
@@ -298,34 +301,11 @@
                 <el-form-item label=" " style="width: 415px;" prop="idNo">
                   <el-input v-model="portraitForm.idNo" placeholder="证件号码" @blur="getPortraitByIdNo"></el-input>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="birthDate">
+                <el-form-item style="width: 415px;" prop="birthDate" :disabled="isAddDisabled">
                   <el-input v-model="portraitForm.birthDate" placeholder="出生日期" :disabled="true"></el-input>
                 </el-form-item>
                 <!-- 选择归属组 -->
                 <el-form-item style="width: 415px;position: relative;">
-
-
-
-                  <!-- <div class="group_sel">
-                    <span v-show="!isShowDpList && portraitForm.groupIds.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
-                    <div class="group" v-for="item in portraitForm.groupIds" :key="item.value" @click="delSelGroup(item, 1)">
-                      <span class="vl_f_999">{{item.groupName}}</span>
-                      <i class="el-icon-close"></i>
-                    </div>
-                    <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
-                    <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
-                  </div>
-                  <el-collapse-transition>
-                    <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
-                      <el-checkbox-group v-model="portraitForm.groupIds">
-                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.groupName}}</el-checkbox>
-                      </el-checkbox-group>
-                    </div>
-                  </el-collapse-transition> -->
-
-
-
-
                   <el-select v-model="portraitForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
                     <el-option
                       v-for="item in groupDropdownList"
@@ -338,6 +318,7 @@
                 <el-form-item style="width: 415px;" class="desc" prop="remarks">
                   <div>
                     <el-input
+                      :disabled="isAddDisabled"
                       type="textarea"
                       :rows="4"
                       resize="none"
@@ -604,6 +585,7 @@ export default {
         groupIds: [],
         desci: ''
       },
+      isAddDisabled: false,
       //证件类型列表数据
       cardTypeList: [
         {label: '身份证', value: '1'}
@@ -783,6 +765,7 @@ export default {
       this.portraitForm.sex = '';
       this.isShowDpList = false;
       this.addPortraitDialog = !this.addPortraitDialog;
+      this.isAddDisabled = false;
     },
     // 获取出生日期
     getBirthDate () {
@@ -806,7 +789,37 @@ export default {
         getPortraitByIdNo(params).then(res => {
           if (res && res.data) {
             this.$message.error('证件号已存在');
+            let protraitInfo = res.data;
+            this.fileList = [{url: protraitInfo.photoUrl}];//回填图片
+            protraitInfo.photoUrl = protraitInfo.photoUrl;
+            protraitInfo.birthDate = protraitInfo.birthDate.split('');
+            protraitInfo.birthDate.splice(4, 1, '年');
+            protraitInfo.birthDate.splice(7, 1, '月');
+            protraitInfo.birthDate.splice(10, 0, '日');
+            protraitInfo.birthDate = protraitInfo.birthDate.join('');
+            protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
+            protraitInfo.groupIds = protraitInfo.groupList.map(m => m.uid);
+            this.portraitForm = protraitInfo;
+            this.isAddDisabled = true;
+            if (this.$refs['portraitForm']) {
+              this.$refs['portraitForm'].resetFields();
+            }
+            console.log(this.portraitForm)
           } else {
+            this.fileList = [];
+            this.portraitForm.name = '';
+            this.portraitForm.sex = '';
+            this.portraitForm.nation = null;
+            this.portraitForm.idType = null;
+            this.portraitForm.birthDate = null;
+            this.portraitForm.groupIds = [];
+            this.portraitForm.remarks = '';
+            this.isAddDisabled = false;
+            if (this.$refs['portraitForm']) {
+              this.$nextTick(() => {
+                this.$refs['portraitForm'].clearValidate(['idType']);
+              })
+            }
             this.getBirthDate();
           }
         })
@@ -1296,48 +1309,6 @@ export default {
       .portrait_form{
         width: 480px;
         padding-left: 30px;
-        // .group_sel{
-        //   min-height: 40px;
-        //   border-radius: 4px;
-        //   border: 1px solid #dcdfe6;
-        //   padding-right: 30px;
-        //   padding-bottom: 4px;
-        //   position: relative;
-        //   display: flex;
-        //   flex-wrap: wrap;
-        //   > span{
-        //     width: 100%;
-        //     display: inline-block;
-        //     margin-left: 16px;
-        //     line-height: 34px;
-        //     color: #dcdfe6;
-        //     cursor: pointer;
-        //   }
-        //   .group{
-        //     height:30px;
-        //     line-height: 30px;
-        //     padding: 0 8px;
-        //     margin: 4px 0px 0 2px;
-        //     background:rgba(242,242,242,1);
-        //     border:1px solid rgba(211,211,211,1);
-        //     border-radius:3px;
-        //     cursor: pointer;
-        //     &:hover{
-        //       background:rgba(16,115,248,1);
-        //       border-radius:3px;
-        //       color: #fff;
-        //       > span{
-        //         color: #fff;
-        //       }
-        //     }
-        //   }
-        //   > i{
-        //     position: absolute;
-        //     right: 10px;
-        //     top: 10px;
-        //     cursor: pointer;
-        //   }
-        // }
       }
     }
   }

@@ -20,7 +20,22 @@
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
-              <el-input v-model="createForm.event"></el-input>
+              <!-- <el-input v-model="createForm.event"></el-input> -->
+              <el-select
+                v-model="createForm.event"
+                filterable
+                remote
+                value-key="value"
+                placeholder="请输入关联事件编号"
+                :remote-method="getEventList"
+                :loading="loading">
+                <el-option
+                  v-for="item in eventList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="布控类型:" style="width: 25%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
@@ -52,7 +67,7 @@
                   :picker-options="{
                     start: '00:00:00',
                     step: '00:01:00',
-                    end: '23:00:00'
+                    end: '23:59:59'
                   }">
                 </el-time-picker>
               </el-form-item>
@@ -64,7 +79,7 @@
                   :picker-options="{
                     start: '00:00:00',
                     step: '00:01:00',
-                    end: '23:00:00',
+                    end: '23:59:59',
                     minTime: item.startTime
                   }">
                 </el-time-picker>
@@ -72,7 +87,7 @@
             </div>
             <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
               <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-              <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+              <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
           <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
@@ -96,14 +111,18 @@
                   <el-checkbox label="范围分析" @change="modelType = '4'" :class="{'is_checked': modelType === '4'}"></el-checkbox>
                 </el-checkbox-group>
               </div>
-              <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" :allDevData="allDevData" mapId="mapOne" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
-              <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" :allDevData="allDevData" mapId="mapTwo" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+              <template v-if="allDevData && allDevData.length > 0">
+                <!-- 人员追踪 -->
+                <div is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+                <!-- 车辆追踪 -->
+                <div is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+                <!-- 范围分析 -->
+                <div is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              </template>
+              <template v-if="areaList && areaList.length > 0">
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
-              <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" :allDevData="allDevData" mapId="mapFour" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+                <div is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
+              </template>
             </div>
           </div>
         </el-form>
@@ -131,7 +150,7 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getAreas, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getEventList, getAreas, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -150,15 +169,16 @@ export default {
         controlName: null,
         event: null,
         controlType: null,
-        controlDate: null,
+        controlDate: [],
         controlRank: null,
         periodTime: [
           {
-            startTime: null,
-            endTime: null
+            startTime: '00:00:00',
+            endTime: '23:59:59'
           }
         ],
       },
+      eventList: [],
       // 分析模型数据
       allDevData: [],//传给分析模型的所有设备点位
       checkList: [],//多选
@@ -170,6 +190,7 @@ export default {
       areaList: [],//行政区下拉列表
       // 弹出框参数
       toGiveUpDialog: false,
+      loading: false,
       loadingBtn: false,
       // 布控编辑参数
       controlDetail: {},
@@ -192,8 +213,8 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      this.checkList = ['人员追踪'];
-      this.modelType = '1';
+      // this.checkList = ['人员追踪'];
+      // this.modelType = '1';
     }
     // 复用页-3
     if (this.$route.query.createType) {
@@ -201,7 +222,39 @@ export default {
       this.getControlDetailIsEditor(this.$route.query.controlId);
     }
   },
+  mounted () {
+    this.GetTimeAfter();
+  },
   methods: {
+    // 获取下个月的今天
+    GetTimeAfter() { 
+      var dd = new Date();
+      function checkT(s) {
+          return s < 10 ? '0' + s: s;
+      }
+      dd.setDate(dd.getDate() + 30);//获取AddDayCount天后的日期 
+      var y = dd.getFullYear(); 
+      var m = dd.getMonth()+1;//获取当前月份的日期 
+      var d = dd.getDate();
+      const date = y+"-"+checkT(m)+"-"+checkT(d);
+      this.createForm.controlDate = [formatDate(new Date(), 'yyyy-MM-dd'), date];
+    },
+    // 获取关联事件列表
+    getEventList (query) {
+      const params = {
+        'where.otherQuery': query
+      }
+      getEventList(params).then(res => {
+        if (res && res.data) {
+          this.eventList = res.data.list.map(m => {
+            return {
+              label: m.eventCode,
+              value: m.eventCode
+            }
+          });
+        }
+      })
+    },
     // 获取所有监控设备列表
     getAllMonitorList () {
       const params = {ccode: 431224}
@@ -245,10 +298,6 @@ export default {
     },
     // 删除时间段
     removePeriodTime() {
-      if (this.createForm.periodTime.length === 1) {
-        this.$message.error('至少要有一个布控时间段');
-        return false;
-      }
       this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1);
     },
     skipIsList () {
@@ -341,12 +390,15 @@ export default {
             let data = {
               alarmLevel: this.createForm.controlRank,// 告警级别
               eventId: parseInt(this.createForm.event),// 事件id
-              surveillanceDateStart: this.createForm.controlDate && this.createForm.controlDate[0],// 布控开始时间
-              surveillanceDateEnd: this.createForm.controlDate && this.createForm.controlDate[1],// 布控结束时间
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
               surveillancTimeList: time// 布控时间段
+            }
+            // 为短期布控时才需要传布控日期
+            if (this.createForm.controlType === 1) {
+              data.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
+              data.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
             }
             console.log(JSON.stringify(data) )
             this.loadingBtn = true;
@@ -505,12 +557,18 @@ export default {
             })
             this.controlDetail.alarmLevel = this.createForm.controlRank;
             this.controlDetail.eventId = parseInt(this.createForm.event);
-            this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];
-            this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
             this.controlDetail.modelList = modelList;
             this.controlDetail.surveillancTimeList = time;
+            // 为短期布控时才需要传布控日期
+            if (this.createForm.controlType === 1) {
+              this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
+              this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
+            } else {
+              this.controlDetail.surveillanceDateStart = null;
+              this.controlDetail.surveillanceDateEnd = null;
+            }
             console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
             putControl(this.controlDetail).then(() => {
@@ -555,6 +613,10 @@ export default {
           background:rgba(250,250,250,1);
           border-radius:5px 5px 0px 0px;
           border:1px solid rgba(242,242,242,1);
+        }
+        .model_height{
+          height: 0!important;
+          overflow: hidden;
         }
       }
     }

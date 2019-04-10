@@ -49,7 +49,7 @@
           @select="chooseAddress"
           placeholder="请输入追踪点">
         </el-autocomplete>
-        <i class="vl_icon vl_icon_control_28" @click="removePoint(item)"></i>
+        <i class="vl_icon vl_icon_control_28" @click="removePoint(item)" v-if="modelForm.points.length > 1"></i>
       </el-form-item>
       <el-form-item style="width: calc(50% - 30px);padding-left: 20px;">
         <div class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
@@ -94,6 +94,7 @@
                           </div>
                         </li>
                       </template>
+                      <li v-show="trackPoint.devList.length === 0" style="padding-left: 34px;"><span>范围内无设备</span></li>
                     </ul>
                   </vue-scroll>
                 </div>  
@@ -112,6 +113,7 @@
                           </div>
                         </li>
                       </template>
+                      <li v-show="trackPoint.bayonetList.length === 0" style="padding-left: 34px;"><span>范围内无卡口</span></li>
                     </ul>
                   </vue-scroll>
                 </div>  
@@ -221,7 +223,7 @@ import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId', 'allDevData', 'modelType', 'checkList', 'areaList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'areaList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
   data () {
     return {
       modelForm: {
@@ -256,8 +258,9 @@ export default {
       type: '0',// 设备类型
       tid: null,//追踪点列表id
       devId: null,//设备列表id
-      features: 1,//设备特性
+      features: null,//设备特性
       featuresTypeList: [
+        {label: '不限', value: null},
         {label: '人脸识别', value: 1},
         {label: '车辆识别', value: 2}
       ],//设备特性列表
@@ -277,44 +280,26 @@ export default {
     }
   },
   watch: {
-    allDevData (val) {
+    modelDataOne (val) {
       if (val) {
-        this.resetMap();
-      }
-    },
-    areaList (val) {
-      console.log(val, 'val')
-      if (val && val.length > 0) {
-        this.resetMap();
-      }
-    },
-    modelType () {
-      console.log(this.modelType, 'modelType')
-      if (this.modelDataOne && this.modelType === '1') {
         this.getModelDataOne();
-      } else if (this.modelDataTwo && this.modelType === '2') {
+      }
+    },
+    modelDataTwo (val) {
+      if (val) {
         this.getModelDataTwo();
-      } else if (this.modelDataThree && this.modelType === '3' && this.areaList && this.areaList.length > 0) {
+      }
+    },
+    modelDataThree (val) {
+      if (val) {
         this.getModelDataThree();
-      } else if (this.modelDataFour && this.modelType === '4') {
+      }
+    },
+    modelDataFour (val) {
+      if (val) {
         this.getModelDataFour();
       }
-    },
-    // modelDataTwo () {
-    //   if (this.modelDataTwo && this.modelType === '2') {
-    //     this.getModelDataTwo();
-    //   }
-    // },
-    // modelDataThree () {
-    //   if (this.modelDataThree && this.modelType === '3' && this.areaList.length > 0) {
-    //     this.getModelDataThree();
-    //   }
-    // },
-    // modelDataFour () {
-    //   if (this.modelDataFour && this.modelType === '4') {
-    //     this.getModelDataFour();
-    //   }
-    // }
+    }
   },
   computed: {
     changeObj () {
@@ -328,14 +313,12 @@ export default {
     }
   },
   mounted () {
-    if (this.allDevData) {
+    if (this.modelType !== '3' && this.allDevData && this.allDevData.length > 0) {
       this.resetMap();
     }
-    if (this.areaList && this.areaList.length > 0) {
+    if (this.modelType === '3' && this.areaList && this.areaList.length > 0) {
       this.resetMap();
     }
-    
-    
   },
   methods: {
     autoAdress (queryString, cb) {
@@ -873,10 +856,6 @@ export default {
     // 删除追踪点
     removePoint(item) {
       let _this = this;
-      if (_this.modelForm.points.length === 1) {
-        _this.$message.error('至少要有一个追踪点！');
-        return false;
-      }
       let index = _this.modelForm.points.indexOf(item)
       if (index !== -1) {
         _this.modelForm.points.splice(index, 1)
@@ -1374,9 +1353,7 @@ export default {
               const distance = AMap.GeometryUtil.distance(_this.lnglat, p1);
               _obj.distance = (distance / 1000).toFixed(1);
               _this.trackPointList[index].devList.push(_obj);
-            }, 500)
-           
-           
+            }, 10)
           }
         }
       }
@@ -1425,7 +1402,7 @@ export default {
             }
           }
           _this.trackPointList[index].bayonetList.push(_obj);
-        }, 500)
+        }, 100)
       }
     },
     // 绑定draw
@@ -1501,6 +1478,10 @@ export default {
       //   return false;
       // }
       // this.selAreaRest();
+      if (this.trackPointList.length > 9) {
+        this.$message.error('最多可选取10个范围');
+        return;
+      }
       if (this.map && this.mouseTool) {
         this.selAreaAcitve = true;
         this.mouseTool.close(true);
@@ -1578,7 +1559,7 @@ export default {
                 }
               }
               _this.trackPointList[index].devList.push(_obj);
-            }, 500)
+            }, 10)
           }
         }
       }
@@ -1603,7 +1584,6 @@ export default {
         this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
         // 回填设备特性
         this.features = this.modelDataOne.pointDtoList[0].deviceChara;
-        this.resetMap();
         this.modelDataOne.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
           this.markLocation(m.longitude, m.latitude, m.address, index, m.devList)
@@ -1637,7 +1617,6 @@ export default {
         this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
         // 回填设备特性
         this.features = this.modelDataTwo.pointDtoList[0].deviceChara;
-        this.resetMap();
         this.modelDataTwo.pointDtoList.forEach((m, index) => {
           // 回填追踪点列表
           this.markLocation(m.longitude, m.latitude, m.address, index, m.devList)
@@ -1676,7 +1655,6 @@ export default {
           }
           
         });
-        this.resetMap();
         _data.forEach(f => {
           // 回填受限范围
           console.log(f, 'f')
@@ -1707,7 +1685,6 @@ export default {
       if (this.modelDataFour.pointDtoList.length > 0) {
         // 回填设备特性
         this.features = this.modelDataFour.pointDtoList[0].deviceChara;
-        this.resetMap();
         let _this = this;
         _this.modelDataFour.pointDtoList.forEach((f) => {
           // 回填范围分析
@@ -1755,7 +1732,6 @@ export default {
           }
         })
       }
-     
     },
     // 获得坐标列表公共方法
     getLngLatList (data) {

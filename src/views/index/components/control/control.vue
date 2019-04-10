@@ -125,7 +125,6 @@ export default {
               }
             }
             ul{
-              margin-top: 10px;
               li{
                 width: 100%;
                 padding: 10px 30px;

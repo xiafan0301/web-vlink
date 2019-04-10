@@ -134,19 +134,47 @@
                       <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（12）</div>
                     </div>
                     <vue-scroll>
-                      <ul style="width: 100%;max-height: 736px;">
-                        <template v-for="(item, index) in situList">
-                          <li
-                            v-if="item.surveillanceIds"
-                            :key="item.uid"
-                            @dragstart="dragstart($event, index, item)"
-                            @dragover="dragover"
-                            :draggable="true"
-                          >
-                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                          </li>
-                        </template>
-                      </ul>
+                      <!-- 摄像头 -->
+                      <vue-scroll>
+                        <ul style="width: 100%;max-height: 736px;" v-show="tabTypeBySituation === '0'">
+                          <template v-for="(item, index) in situList">
+                            <li
+                              v-if="item.surveillanceIds"
+                              :key="item.uid"
+                              @dragstart="dragstart($event, index, item)"
+                              @dragover="dragover"
+                              :draggable="true"
+                            >
+                              <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                            </li>
+                          </template>
+                        </ul>
+                      </vue-scroll>
+                      <!-- 卡口 -->
+                      <template v-show="tabTypeBySituation === '1'">
+                        <div class="bayone_name" :class="{'active': null}">
+                          <i class="el-icon-arrow-down" v-show="true"></i><i class="el-icon-arrow-right" v-show="false"></i><span>{{}}</span>
+                        </div>
+                        <el-collapse-transition>
+                          <div>
+                            <vue-scroll>
+                              <ul style="max-height: 346px;">
+                              <template v-for="(item, index) in situList">
+                                <li
+                                  v-if="item.surveillanceIds"
+                                  :key="item.uid"
+                                  @dragstart="dragstart($event, index, item)"
+                                  @dragover="dragover"
+                                  :draggable="true"
+                                >
+                                  <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                </li>
+                              </template>
+                              </ul>
+                            </vue-scroll>
+                          </div>  
+                        </el-collapse-transition>
+                      </template>
                     </vue-scroll>
                   </div>
                 <div class="situ_right">
