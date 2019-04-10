@@ -7,10 +7,12 @@
         </video>
       </div>
     </div>
+    <!-- loading -->
     <span class="player_loading com_trans50_lt" v-show="videoLoading">视频加载中，请稍后...</span>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
     <span v-if="config.close && !fullScreen" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
+    <!-- 暂停按钮 -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
     <div class="flvplayer_bot">
       <div class="flvplayer_bot_t">{{oData.title}}</div>
@@ -130,6 +132,7 @@ export default {
         this.player.detachMediaElement();
         this.player = null;
       }
+      this.playActive = true; // 去掉暂停按钮
       this.initPlayer();
     },
     oConfig () {
