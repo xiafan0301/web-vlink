@@ -82,7 +82,6 @@ export default {
    * oData：视频信息 object {type: , title: , video: }
    * oConfig: 播放配置信息
    *    pause: 开始是否暂停，默认为false
-   *    
    *    sign: 是否可标记，默认为true
    *    close: 是否可删除，默认为true
    *    fullscreen: 是否可全屏，默认为true
@@ -126,12 +125,7 @@ export default {
   },
   watch: {
     oData () {
-      if (this.player) {
-        this.player.unload();
-        this.player.destroy();
-        this.player.detachMediaElement();
-        this.player = null;
-      }
+      this.destroyPlayer();
       this.playActive = true; // 去掉暂停按钮
       this.initPlayer();
     },
@@ -198,13 +192,23 @@ export default {
         console.log("getTestLive error：", error);
       });
     },
+    destroyPlayer () {
+      if (this.player) {
+        this.player.unload();
+        this.player.destroy();
+        this.player.detachMediaElement();
+        this.player = null;
+      }
+    },
     /***** 视频事件 *****/
     // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
       if (this.player) {
         if (flag) {
-          this.player.play();
+          this.destroyPlayer();
+          this.playActive = true; // 去掉暂停按钮
+          this.initPlayer();
         } else {
           this.player.pause();
         }
