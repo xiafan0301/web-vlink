@@ -3,10 +3,7 @@
     <div class="rtmpplayer_player" :id="rtmpplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
       <div class="rtmpplayer_player_c" :id="rtmpplayerId + '_c'">
-        <video :id="rtmpplayerId"
-          class="video-js vjs-fluid" style="width: 100%; height: 100%;" autoplay="autoplay" muted type='rtmp/flv'>
-          <!-- <source src='rtmp://10.16.1.139/live/livestream' type='rtmp/flv'/> -->
-          <!-- <source src='rtmp://live.hkstv.hk.lxdns.com/live/hks1' type='rtmp/flv'/> -->
+        <video :id="rtmpplayerId" style="width: 100%; height: 100%;" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
@@ -73,14 +70,17 @@
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSign } from "@/views/index/api/api.video.js";
+import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
 export default {
   props: ['index', 'oData', 'signAble'],
   data () {
     return {
       playActive: true,
       player: null,
-      rtmpplayerId: 'rtmp_' + random14(),
+      video: null,
+      rtmpplayerId: 'flv_' + random14(),
+
+      startPlayTime: null,
 
       fullScreen: false,
       enlarge: false,
@@ -104,10 +104,20 @@ export default {
   watch: {
     oData () {
       if (this.player) {
-        // console.log('watch oData', this.oData);
-        this.player.src(this.oData.video.deviceSip); /*动态设置video.js播放的地址。*/
-        this.player.autoplay();
+        this.player.updateUrl(this.oData.video.deviceSip);
+        this.player.load();
+        this.player.play();
+        this.startPlayTime = new Date().getTime();
+        // this.player.unload();
+        // this.player.destroy();
+        // player.unload();
+        // player.detachMediaElement();
+        // player.destroy();
+        // player = null;
+      } else {
+        this.initPlayer();
       }
+      
     },
     volume () {
       if (this.volume <= 0) {
@@ -115,47 +125,40 @@ export default {
       } else {
         this.volumeAble = true;
       }
-      if (this.player) {
-        this.player.volume(this.volume);
+      if (this.video) {
+        this.video.volume = this.volume;
       }
     }
   },
   mounted () {
-    let _this = this;
-    // console.log('this.rtmpplayerId', this.rtmpplayerId);
-    // console.log('player oData:', this.oData);
-    // flash路径，有一些html播放不了的视频，就需要用到flash播放。这一句话要加在在videojs.js引入之后使用
-    // window.videojs.options.flash.swf = "/static/lib/videojs7.4.1/video-js.swf";
-    // window.videojs.options.flash.swf = "https://cdn.bootcss.com/videojs-swf/5.4.2/video-js.swf";
-    let player = window.videojs(this.rtmpplayerId, {
-      autoplay: true, // 自动播放：true/false
-      controls: false, // 是否显示底部控制栏：true/false
-      // width: 600, // 视频播放器显示的宽度 例如：200 or "200px"
-      // height: 400, // 视频播放器显示的高度
-      // aspectRatio: '1:1', // 将播放器置于流体模式下，计算播放器动态大小时使用该值。如“16:9”或“4:3”
-      loop: false, // 否循环播放:true/false
-      muted: false, // 设置默认播放音频：true/false
-      preload: 'metadata', // 预加载:preload auto即加载视频 metadata只加载视频的元数据
-      poster: '', // 视频开始播放前显示的图像的URL。
-      // src: this.oData.video.url, // 要嵌入的视频资源url
-      fluid: true, // 是否自适应布局 播放器将会有流体体积。换句话说，它将缩放以适应容器
-                  // 如果<video>标签有“vjs-fluid”样式时，这个选项会自动设置为true
-      inactivityTimeout: 0, // 闲置超时  值为0表示没有
-      live: true,
-      sources: [{
-        src: this.oData.video.deviceSip,
-        type: 'rtmp/flv'
-      }],
-      flash: {
-        swf: './static/lib/videojs7.4.1/video-js.swf'
-      }
-    }, function () {
-      player.play();
-      player.volume(_this.volume);
-      _this.player = player;
-    });
+    this.initPlayer();
+    // $(window).on('unload', this.videoUnloadSave);
   },
   methods: {
+    // 视频播放
+    initPlayer () {
+      // flv.js
+      if (window.flvjs.isSupported()) {
+        var videoElement = document.getElementById(this.rtmpplayerId);
+        var flvPlayer = window.flvjs.createPlayer({
+          type: 'flv',
+          url: 'ws://10.16.1.142:3590/real/sub/b3855adc-69db-4c76-b2d1-4b381a60f750/9dd53418-dbd8-4de1-a1d1-4ae4b3d0553b.flv',
+          isLive: true
+        }, {
+          enableWorker: true,
+          enableStashBuffer: false,
+          stashInitialSize: 128
+        }, function (e) {
+          console.log('>>>>>>>>>>>>>', e);
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play();
+        this.startPlayTime = new Date().getTime();
+        this.player = flvPlayer;
+        this.video = videoElement;
+      }
+    },
     /***** 视频事件 *****/
     // 播放/暂停
     playerPlay (flag) {
@@ -178,8 +181,8 @@ export default {
       } else if (this.volume <= 0) {
         this.volumeAble = false;
       }
-      if (this.player) {
-        this.player.volume(_vo);
+      if (this.video) {
+        this.video.volume = _vo;
       }
     },
     // 局部放大
@@ -191,7 +194,6 @@ export default {
         this.enlarge = true;
         let startX, startY;
         let boxId = this.rtmpplayerId + '_box';
-        let _this = this;
         // e.target.offsetLeft
         nTarget.on('mousedown', function (e) {
           startX = Math.floor(e.pageX);
@@ -217,7 +219,7 @@ export default {
           }
         });
         // 鼠标抬起
-        nTarget.on('mouseup', function (e) {
+        nTarget.on('mouseup', function () {
           let box = $('#' + boxId);
           if(box && box.length > 0) {
             // 如果长宽均小于 3px，移除 box
@@ -231,7 +233,7 @@ export default {
 
               let ow = nTarget.width(), oh = nTarget.height();
               let bw = box.width(), bh = box.height();
-              let cw = $c.width(), ch = $c.height();
+              let cw = $c.width(); // ch = $c.height();
               console.log('ow:' + ow + '--oh:' + oh);
               console.log('cw:' + ow + '--cw:' + oh);
               console.log('bw:' + ow + '--bw:' + oh);
@@ -279,20 +281,11 @@ export default {
     playerFullScreen (flag) {
       this.fullScreen = flag;
       this.playerEnlarge(false);
-      /* if (this.player) {
-        console.log('this.player', this.player);
-        if (flag) {
-          this.player.requestFullscreen();
-        } else {
-          this.player.exitFullscreen();
-        }
-      } */
     },
     // 视频关闭事件
     playerClose () {
       this.$emit('playerClose', this.index, 123123);
     },
-
     /* 标记 */
     addSign () {
       this.getSignContent();
@@ -320,7 +313,7 @@ export default {
             contentId: this.signForm.content,
             deviceId: this.oData.video.uid,
             signTime: formatDate(this.signForm.signTime),
-          }).then(res => {
+          }).then(() => {
             this.signSubmitLoading = false;
             this.signDialogVisible = false;
             this.$message({
@@ -336,16 +329,41 @@ export default {
           return false;
         }
       });
-    }
+    },
+
+    // 播放记录
+    saveVideoRecord () {
+      let playBack = {};
+      if (this.oData.type === 2) {
+        playBack.playBackStartTime = formatDate(this.startPlayTime); // 回放开始时间
+        playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+      }
+      apiVideoRecord(Object.assign({
+        deviceId: this.oData.video.uid, // 设备id
+        playTime: formatDate(new Date().getTime()), // 播放结束时间
+        // 播放类型 1:视频巡逻 2:视频回放
+        playType: this.oData.type
+      }, playBack)).then(() => {
+      }).catch(error => {
+        console.log("apiVideoRecord error：", error);
+      });
+    },
+    // 浏览器unload事件
+    videoUnloadSave () {
+      this.saveVideoRecord();
+    },
   },
   beforeDestroy () {
     if (this.player) {
       // 销毁
-      this.player.dispose();
+      this.player.unload();
+      this.player.detachMediaElement();
+      this.player.destroy();
       this.player = null;
+      this.video = null;
     }
-    $('#' + this.rtmpplayerId).html('&nbsp;');
-    // $('#' + this.rtmpplayerId + '_Flash_api').remove();
+    this.saveVideoRecord();
+    // $(window).off('unload', this.videoUnloadSave);
   }
 }
 </script>

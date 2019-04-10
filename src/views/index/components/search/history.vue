@@ -63,12 +63,13 @@ export default {
   },
   methods: {
     seeRow (row) {
-      console.log('row', row);
       let _router = 'search_capture';
-      if (row.type === '人像检索') {
+      if (row.retrievalType === 2) {
         _router = 'search_portrait';
+      } else if (row.retrievalType === 3) {
+        _router = 'search_contrast';
       }
-      this.$router.push({name: _router});
+      this.$router.push({name: _router, query: {hisId: row.uid}});
     },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
@@ -79,7 +80,7 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        'where.userId': 1,
+        'where.userId': 57024,
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
       }

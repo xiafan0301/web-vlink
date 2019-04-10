@@ -43,8 +43,8 @@ const oDomains = {
     },
     // 调度和预案部分地址
     ctc: {
-      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      dev: 'http://10.116.64.134:8081/api/vlink',
+      dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      // dev: 'http://10.116.64.134:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching',
       prod: 'http://apidev.aorise.org/vlink-dispatching'
     },
