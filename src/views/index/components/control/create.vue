@@ -44,7 +44,7 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && createForm.controlType === 2}]">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
               <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
@@ -97,15 +97,13 @@
                 </el-checkbox-group>
               </div>
               <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" :pageType="pageType" :allDevData="allDevData" mapId="mapOne" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+              <div is="model" ref="mapOne" v-show="modelType === '1'" :allDevData="allDevData" mapId="mapOne" :modelType="modelType" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
               <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" :pageType="pageType" :allDevData="allDevData" mapId="mapTwo" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+              <div is="model" ref="mapTwo" v-show="modelType === '2'" :allDevData="allDevData" mapId="mapTwo" :modelType="modelType" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
               <!-- 越界分析 -->
-              <template v-if="areaList.length > 0">
-                <div is="model" ref="mapThree" v-show="modelType === '3'" :pageType="pageType" mapId="mapThree" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
-              </template>
+              <div is="model" ref="mapThree" v-show="modelType === '3'" mapId="mapThree" :modelType="modelType" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
               <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" :pageType="pageType" :allDevData="allDevData" mapId="mapFour" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              <div is="model" ref="mapFour" v-show="modelType === '4'" :allDevData="allDevData" mapId="mapFour" :modelType="modelType" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
             </div>
           </div>
         </el-form>
@@ -187,12 +185,13 @@ export default {
     this.getAreas();
     // 编辑页-2
     if (this.createType) {
-      this.pageType = this.createType;
+      this.pageType = parseInt(this.createType);
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
     // 新增页-1
     } else {
+      this.pageType = 1;
       this.checkList = ['人员追踪'];
       this.modelType = '1';
     }
