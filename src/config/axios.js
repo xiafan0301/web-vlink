@@ -1,7 +1,7 @@
 /*
  * axios定义
  * */
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 import axios from 'axios';
 import ElementUI from 'element-ui';
 // import store from '@/store/store.js';

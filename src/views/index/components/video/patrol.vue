@@ -94,7 +94,9 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+              :oConfig="{sign: true}">
+            </div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" @btnEvent="showListEvent" :btn="true"></div>
@@ -107,11 +109,11 @@
 <script>
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
-import rtmpplayer from '@/components/common/flvplayer.vue';
-// import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
+// import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
 export default {
-  components: {videoEmpty, rtmpplayer},
+  components: {videoEmpty, flvplayer},
   data () {
     return {
       // 设备列表

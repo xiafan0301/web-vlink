@@ -10,6 +10,12 @@ const oDomains = {
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
     },
+    // 视频服务地址
+    video: {
+        dev: 'http://apidev.aorise.org/vlink-monitor',
+        test: 'http://apidev.aorise.org/vlink-monitor',
+        prod: 'http://apidev.aorise.org/vlink-monitor',
+    },
     // 布控部分地址
     control: {
         dev: 'http://apidev.aorise.org/vlink-control',
@@ -29,10 +35,10 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      dev: 'http://apidev.aorise.org/vlink-event/api/emi',
+      dev: 'http://apidev.aorise.org/vlink-event',
       // dev: 'http://10.116.64.134:8082/api/emi',
-      test: 'http://apirel.aorise.org/vlink-event/api/emi',
-      prod: 'http://apidev.aorise.org/vlink-event/api/emi'
+      test: 'http://apirel.aorise.org/vlink-event',
+      prod: 'http://apidev.aorise.org/vlink-event'
     },
     // 研判检索服务
     judge: {

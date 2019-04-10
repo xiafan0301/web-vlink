@@ -283,8 +283,7 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      console.log(obj);
-      this.$router.push({path: '/control/create'});
+      this.$router.push({path: '/control/create', query: {eventId: obj.eventId}});
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();

@@ -222,17 +222,6 @@ export function delPlan(uid) {
   });
 }
 /**
- * 预览预案
- * @param {*} data
- */
-export function previewPlan(uid) {
-  return request({
-    url: 'plan-services/plans/' + uid,
-    method: 'get',
-    mode: 'ctc'
-  });
-}
-/**
  * 分页获取调度任务
  * @param {*} data
  */
@@ -299,7 +288,7 @@ export function endEvent(data, uid) {
  */
 export function getGeneralcondition(data) {
   return request({
-    url: 'event-count-services/generalCondition',
+    url: 'eventCount/generalCondition',
     method: 'get',
     params: data,
     mode: 'event'
@@ -311,7 +300,7 @@ export function getGeneralcondition(data) {
  */
 export function getRankAnalysis(data) {
   return request({
-    url: 'event-count-services/rankAnalysis',
+    url: 'eventCount/rankAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -323,7 +312,7 @@ export function getRankAnalysis(data) {
  */
 export function getTypeAnalysis(data) {
   return request({
-    url: 'event-count-services/typeAnalysis',
+    url: 'eventCount/typeAnalysis',
     method: 'get',
     params: data,
     mode: 'event'
@@ -335,7 +324,7 @@ export function getTypeAnalysis(data) {
  */
 export function getQuantitativeTrend(data) {
   return request({
-    url: 'event-count-services/quantitativeTrend',
+    url: 'eventCount/quantitativeTrend',
     method: 'get',
     params: data,
     mode: 'event'
@@ -347,7 +336,7 @@ export function getQuantitativeTrend(data) {
  */
 export function getHotLocation(data) {
   return request({
-    url: 'event-count-services/hotLocation',
+    url: 'eventCount/hotLocation',
     method: 'get',
     params: data,
     mode: 'event'
@@ -359,7 +348,7 @@ export function getHotLocation(data) {
  */
 export function getSurveillance(data) {
   return request({
-    url: 'event-count-services/surveillance',
+    url: 'eventCount/evtSurvStatistics',
     method: 'get',
     params: data,
     mode: 'event'
@@ -797,7 +786,7 @@ export function getVehicleDataList (params) {
   });
 }
 /**
- * 车辆--新增分组
+ * 新增分组
  * @param {*} data
  */
 export function addGroup (data) {
@@ -819,7 +808,7 @@ export function checkVelRename (params) {
   });
 }
 /**
- * 管理车辆分组---修改车辆分组
+ * 修改分组
  * @param {*} data
  */
 export function editVeGroup (data) {
@@ -914,6 +903,71 @@ export function getPersonData (params) {
     url: '/portrait/page',
     params,
     method: 'get'
+  });
+}
+/**
+ * 获取人员详细信息
+ * @param {*} data 
+ */
+export function getPersonDetail (uid) {
+  return request({
+    url: '/user/details/' + uid,
+    method: 'get'
+  });
+}
+/**
+ * 判断人员分组是否重复
+ * @param {*} data 
+ */
+export function judgePerson (params) {
+  return request({
+    url: '/portrait-group/check-name',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 人员---复制到组
+ * @param {*} data 
+ */
+export function copyPersonGroup (data) {
+  return request({
+    url: '/portrait/group/users',
+    data,
+    method: 'post'
+  });
+}
+/**
+ * 人员---新增分组同时将人员添加到组中
+ * @param {*} data 
+ */
+export function addGroupCopyPerson (data) {
+  return request({
+    url: '/portrait-group/copy-group-member',
+    data,
+    method: 'post'
+  });
+}
+/**
+ * 人员---将人员移出分组
+ * @param {*} data 
+ */
+export function moveoutPerson (data) {
+  return request({
+    url: '/portrait-group/batch-move',
+    params: data,
+    method: 'delete'
+  });
+}
+/**
+ * 人员---删除分组
+ * @param {*} data 
+ */
+export function deletePersonGroup (uid, data) {
+  return request({
+    url: '/portrait-group/group/' + uid,
+    params: data,
+    method: 'delete'
   });
 }
 /*** =======================视频设置=========================== */

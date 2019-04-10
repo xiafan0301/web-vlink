@@ -9,24 +9,76 @@
     </div>
     <div class="content-box">
       <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
-      <div class="summary">
+      <div class="summary" v-show="basicInfo.eventSummary">
         <div class="summary-header">
           <span>事件总结</span>
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
-          <p>事件总结报告</p>
+          <p>事件总结附件</p>
+          <div class="content-icon">
+            <ul>
+              <li v-for="(item, index) in eventFile" :key="'item' + index">
+                <i class="vl_icon vl_icon_event_1"></i>
+                <div class="operation_btn">
+                  <div class="arrow"></div>
+                  <p>
+                    <i class="vl_icon vl_icon_manage_17"></i>
+                    <a :href="item.path">下载</a>
+                  </p>
+                  <p>
+                    <i class="vl_icon vl_icon_event_25"></i>
+                    <a>预览</a>
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+          </div>
+          <div class="divide"></div>
+          <p style="margin-top: 5px;">事件总结内容</p>
+          <div class="content_detail">
+             <p>
+               {{basicInfo.eventSummary}}
+               <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+            </p>
+          </div>
         </div>
       </div>
-      <div class="summary">
+      <div class="summary" v-show="basicInfo.dispatchSummary">
         <div class="summary-header">
           <span>调度总结</span>
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
-          <p>调度总结报告</p>
+          <p>调度总结附件</p>
+          <div class="content-icon">
+            <ul>
+              <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                <i class="vl_icon vl_icon_event_1"></i>
+                <div class="operation_btn">
+                  <div class="arrow"></div>
+                  <p>
+                    <i class="vl_icon vl_icon_manage_17"></i>
+                    <a :href="item.path">下载</a>
+                  </p>
+                  <p>
+                    <i class="vl_icon vl_icon_event_25"></i>
+                    <a>预览</a>
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+          </div>
+          <div class="divide"></div>
+          <p style="margin-top: 5px;">调度总结内容</p>
+          <div class="content_detail">
+             <p>
+               {{basicInfo.dispatchSummary}}
+               <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+            </p>
+          </div>
         </div>
       </div>
       <div class="control-result">
@@ -233,7 +285,6 @@
             </li>
           </ul>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="onPageChange"
             :current-page="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
@@ -331,6 +382,20 @@
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
+    <!--查看总结详情弹出框-->
+    <el-dialog
+      title=""
+      :visible.sync="summaryDetailDialog"
+      width="794px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div class="content_body">
+        <p class="title">{{summaryTitle}}</p>
+        <p class="content">{{summaryContent}}</p>
+      </div>
+    </el-dialog>
   </div>
 </vue-scroll>
 </template>
@@ -364,58 +429,32 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      imgList: [
-        {
-          uid: '001',
-          src: require('./img/1.jpg')
-        },
-        {
-          uid: '002',
-          src: require('./img/2.jpg')
-        },
-        {
-          uid: '003',
-          src: require('./img/3.jpg')
-        },
-        {
-          uid: '004',
-          src: require('./img/4.jpg')
-        }
-      ],
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
+      eventImg: [], // 事件总结图片列表
+      eventFile: [], // 事件总结文件列表
+      ctcImg: [], // 调度总结图片列表
+      ctcFile: [], // 调度总结文件列表
+      summaryDetailDialog: false, // 查看总结详情弹出框
+      summaryTitle: null, // 总结标题
+      summaryContent: null, // 总结内容
+      eventSummaryLength: 0,
+      dispatchSummaryLength: 0
     }
   },
   mounted () {
     this.getDetail();
   },
   methods: {
+    // 显示查看总结详情弹出框
+    showSummaryDialog (type, content) {
+      if (type === 'event') {
+        this.summaryTitle = '事件总结报告';
+      } else {
+        this.summaryTitle = '调度总结报告';
+      }
+      this.summaryContent = content;
+      this.summaryDetailDialog = true;
+    },
     // 图片放大传参
     emitHandleImg (isShow, index) {
       this.openBigImg(index, this.basicInfo.attachmentList);
@@ -431,7 +470,27 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            if (res.data.closeAttachmentList.length > 0) {
+              res.data.closeAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.eventImg.push(item);
+                } else {
+                  this.eventFile.push(item);
+                }
+              })
+            }
+            if (res.data.dispatchAttachmentList.length > 0) {
+              res.data.dispatchAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.ctcImg.push(item);
+                } else {
+                  this.ctcFile.push(item);
+                }
+              })
+            }
             this.basicInfo = res.data;
+            this.eventSummaryLength = this.basicInfo.eventSummary.length;
+            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
         })
         .catch(() => {})
@@ -440,18 +499,13 @@ export default {
       this.pagination.pageNum = page;
       // this.getCtcDataList();
     },
-    handleSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      // this.getEventData();
-    },
     // 跳至结束事件页面
     skipEventEndPage () {
       this.$router.push({name: 'event_end', query: {status: this.$route.query.status}});
     },
     // 跳至查看互助页面
     skipCommentPage () {
-      this.$router.push({path: '/message/help'});
+      this.$router.push({path: '/message/help', query: {helpId: this.$route.query.eventId}});
     },
     // 跳至查看布控详情页面
     skipControlPage () {
@@ -612,8 +666,79 @@ export default {
       }
       .summary-content {
         padding: 10px 20px;
-        >p:nth-child(2) {
-          color: #000000;
+        >p {
+          color: #333333;
+          font-weight:600;
+          margin-bottom: 5px;
+        }
+        .content-icon {
+          margin: 5px 0;
+          >ul {
+            >li {
+              position: relative;
+              float: left;
+              i {
+                margin: 0 5px;
+                cursor: pointer;
+              }
+              .operation_btn {
+                display: none;
+                background-color: #ffffff;
+                box-shadow:0px 2px 8px 0px rgba(0,0,0,0.15);
+                position: absolute;
+                right: 0;
+                top: -55px;
+                z-index: 1;
+                padding: 3px 5px;
+                color: #333333;
+                font-size: 12px;
+                // position: relative;
+                .arrow {
+                  position: absolute;
+                  bottom: -5px;
+                  left: 40%;
+                  width: 0;
+                  height: 0;
+                  border-left: 6px solid transparent;
+                  border-right: 6px solid transparent;
+                  border-top: 6px solid #ffffff;
+                }
+                > p {
+                  padding: 3px;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  a {
+                    text-decoration: none;
+                  }
+                  a:hover {
+                    color: #0C70F8;
+                  }
+                }
+              }
+              &:hover {
+                .operation_btn {
+                  display: block;
+                }
+              }
+            }
+          }
+          img {
+            width: 72px;
+            height: 72px;
+            border-radius: 4px;
+            margin: 0 5px;
+            cursor: pointer;
+          }
+        }
+        .content_detail {
+          >p{
+            text-indent: 20px;
+            .look_more {
+              color: #0C70F8;
+              cursor: pointer;
+            }
+          }
         }
       }
       .handle-content {
@@ -745,6 +870,24 @@ export default {
       background: #ffffff;
       border: 1px solid #DDDDDD;
       color: #666666;
+    }
+  }
+  .dialog_comp {
+    height: 100%;;
+    /deep/ .el-dialog {
+      height: 100%;
+      .content_body {
+        color: #000000;
+        .title {
+          font-size: 22px;
+          text-align: center;
+          margin: 40px 0;
+        }
+        .content {
+          text-indent: 20px;
+          padding: 0 40px;
+        }
+      }
     }
   }
 }

@@ -75,6 +75,9 @@
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipEditPage">修改</el-button>
+        <a target="_blank" :href="previewUrl.ctc + 'plan-services/plans/preview/' + this.$route.query.planId">
+          <el-button class="operation_btn function_btn">预览</el-button>
+        </a>
         <el-button class="operation_btn delete_btn" @click="showDeleteDialog">删除</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
@@ -98,12 +101,17 @@
 </template>
 <script>
 import { getPlanDetail, delPlan } from '@/views/index/api/api.js';
+import { ajaxCtx } from '@/config/config.js';
 export default {
   data () {
     return {
+      previewUrl: null,
       delPlanDialog: false, // 删除预案弹出框
       planDetail: {}, // 预案详情
     }
+  },
+  created () {
+    this.previewUrl = ajaxCtx;
   },
   mounted () {
     this.getPlanDetail();
@@ -116,7 +124,6 @@ export default {
         getPlanDetail(planId)
          .then(res => {
            if (res) {
-             console.log('res', res.data)
              this.planDetail = res.data;
            }
          })
@@ -164,7 +171,7 @@ export default {
       if (url) {
         window.open(url);
       }
-    },
+    }
   }
 }
 </script>

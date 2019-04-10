@@ -12,8 +12,8 @@
           <el-form-item label="预案名称:" prop="planName" label-width="120px">
             <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
           </el-form-item>
-          <el-form-item label="预案类型:" label-width="120px" prop="eventType">
-          <el-select v-model="addPlanForm.eventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+          <el-form-item label="预案类型:" label-width="120px" prop="editEventType">
+          <el-select v-model="addPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
             <el-option
               v-for="(item, index) in planTypeList"
               :key="index"
@@ -56,8 +56,8 @@
                 <div class="title">
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
-                <div class="plan_form">
-                  <el-form-item label="执行部门:"  label-position="left" :prop="'addPlanForm.taskList.' + index + '.departmentId'" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
+                  <el-form-item label="执行部门:"  label-position="left" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
                     <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
                       <el-option
                         v-for="(item, index) in departmentList"
@@ -73,7 +73,7 @@
                   <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
                     <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
                   </el-form-item>
-                </div>
+                </el-form>
               </div>
               <template v-if="addPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
@@ -102,6 +102,7 @@ export default {
       uploadUrl: ajaxCtx.base + '/new', // 文件上传地址
       addPlanForm: {
         planName: null, // 预案名称
+        editEventType: null, // 预案类型
         eventType: null, // 预案类型
         eventTypeName: null, // 新添加的预案类型名称
         levelList: [], // 事件等级
@@ -123,7 +124,7 @@ export default {
           { required: true, message: '请输入预案名称', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        eventType: [
+        editEventType: [
           { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
@@ -185,7 +186,6 @@ export default {
     },
     // 上传成功
     handSuccess (res) {
-      console.log('res', res)
       if (res.data) {
         this.addPlanForm.path = res.data.fileFullPath;
         this.addPlanForm.cname = res.data.fileName;
@@ -216,44 +216,64 @@ export default {
     deletePlanBox (index) { // 删除调度方法输入框
       this.addPlanForm.taskList.splice(index, 1);
     },
+    // 判断taskList是否都填写完
+    judgeData () {
+      let _this = this;
+      return new Promise((resolve) => {
+        let arr = [];
+        _this.addPlanForm.taskList.map((item, index) => {
+          if (!item.departmentId || !item.taskName || !item.taskContent) {
+            arr.push(index); // 将没有填写完的内容的item存到一个数组中
+            this.$message({
+              type:'warning',
+              message: '请先填写完内容',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        if (arr.length > 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+    },
     // 提交数据
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.planTypeList.map((item) => {
-            if (item.enumValue == this.addPlanForm.eventType) {
-              this.addPlanForm.eventType = item.uid;
-              return;
-            } else {
-              this.addPlanForm.eventType = null;
-              this.addPlanForm.eventTypeName = this.addPlanForm.eventType;
-            }
+          let filterArr = this.planTypeList.filter(val => {
+            return val.enumValue === this.addPlanForm.editEventType;
           });
-          this.addPlanForm.taskList.map((item, index) => {
-            this.departmentList.map(itm => {
-              if (item.departmentId === itm.uid) {
-                this.addPlanForm.taskList[index].departmentName = itm.organName;
-              }
-            })
-          }) 
-          addPlan(this.addPlanForm)
-            .then(res => {
-              if (res) {
-                  this.$message({
-                    type: 'success',
-                    message: '添加成功',
-                    customClass: 'request_tip'
-                  })
-                  this.$router.push({name: 'event_ctcplan'});
-              } else {
-                  this.$message({
-                    type: 'error',
-                    message: '添加失败',
-                    customClass: 'request_tip'
-                  })
-              }
-            })
-            .catch(() => {})
+          if (filterArr.length === 0) {
+            this.addPlanForm.eventTypeName = this.addPlanForm.editEventType;
+          } else {
+            this.addPlanForm.eventType = filterArr[0].uid;
+          }
+          this.judgeData().then(result => {
+            if (result) {
+              this.addPlanForm.taskList.map((item, index) => {
+                this.departmentList.map(itm => {
+                  if (item.departmentId === itm.uid) {
+                    this.addPlanForm.taskList[index].departmentName = itm.organName;
+                  }
+                })
+              }) 
+              addPlan(this.addPlanForm)
+                .then(res => {
+                  if (res) {
+                      this.$message({
+                        type: 'success',
+                        message: '添加成功',
+                        customClass: 'request_tip'
+                      })
+                      this.$router.push({name: 'event_ctcplan'});
+                  }
+                })
+                .catch(() => {})
+            }
+          })
+          
         }
       })
     },

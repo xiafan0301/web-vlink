@@ -33,8 +33,8 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <i class="vl_icon vl_icon_event_5"></i>
               <template v-if="planDetailInfo.attachmentName">
+                <i class="vl_icon vl_icon_event_5"></i>
                 {{planDetailInfo.attachmentName}}
               </template>
               <template v-else>
@@ -84,34 +84,16 @@ import { getPlanDetail } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
-      planDetailInfo: {
-        planName: '救火救火救火救火救火',
-        eventTypeName: '事故灾难',
-        levelNameList: ['V级','IV级'],
-        planDetail: '任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，',
-        attachmentName: '公共区域消防安全应急预案.docx',
-        url: 'http://baidu.com',
-        taskList: [
-          {
-            departmentName: '协同部门',
-            taskName: '灭火',
-            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
-          },
-          {
-            departmentName: '协同部门',
-            taskName: '灭火',
-            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
-          }
-        ],
-        createUserName: '张三',
-        createTime: '2019-03-12'
-      } // 预案详情
+      planDetailInfo: {} // 预案详情
     }
+  },
+  mounted () {
+    this.getPlanDetailInfo();
   },
   methods: {
     // 获取预案详情
     getPlanDetailInfo () {
-      const planId = this.$router.query.planId;
+      const planId = this.$route.query.planId;
       if (planId) {
         getPlanDetail(planId)
           .then(res => {
