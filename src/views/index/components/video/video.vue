@@ -52,6 +52,11 @@ export default {
       cursor: default;
     }
   }
+  &.vid_show_type {
+    > li {
+      cursor: default !important;
+    }
+  }
 }
 .vid_show_menu {
   position: absolute; top: 0; left: 20px; z-index: 20;

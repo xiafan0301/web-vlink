@@ -8,13 +8,19 @@
       </div>
     </div>
     <!-- loading -->
-    <span class="player_loading com_trans50_lt" v-show="videoLoading">视频加载中，请稍后...</span>
+    <div class="player_loading com_trans50_lt" v-show="videoLoading">
+      <div v-if="videoLoadingFailed">
+        <p>视频加载失败</p>
+        <el-button round size="small" @click="relaodPlayer">重新获取</el-button>
+      </div>
+      <div v-else>视频加载中，请稍后...</div>
+    </div>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
     <span v-if="config.close && !fullScreen" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
     <!-- 暂停按钮 -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
-    <div class="flvplayer_bot">
+    <div class="flvplayer_bot" :class="{'flvplayer_bot_dis': videoLoading}">
       <div class="flvplayer_bot_t">{{oData.title}}</div>
       <div class="flvplayer_bot_o">
         <!-- 播放/暂停 -->
@@ -52,11 +58,11 @@
           <span v-else class="vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
         </template>
         <!-- 更多 -->
-        <span class="vl_icon vl_icon_v28" title="更多"></span>
+        <span v-if="!fullScreen" class="vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
         <span v-if="fullScreen" class="vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
       </div>
     </div>
-    <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" width="500px">
+    <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">当前监控：{{oData.title}}</div>
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding-left: 30px;">
         <el-form-item prop="content">
@@ -76,6 +82,7 @@
 import {random14, formatDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
 import { getTestLive } from "@/views/index/api/api.js";
+import { setTimeout } from 'timers';
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -91,6 +98,9 @@ export default {
   data () {
     return {
       videoLoading: true,
+      videoLoadingFailed: false,
+      videoLoadingTimeout: 20 * 1000,
+
       playActive: true,
       player: null,
       video: null,
@@ -127,9 +137,9 @@ export default {
   },
   watch: {
     oData () {
-      this.destroyPlayer();
-      this.playActive = true; // 去掉暂停按钮
-      this.initPlayer();
+      // 去掉暂停按钮
+      this.playActive = true;
+      this.relaodPlayer();
     },
     oConfig () {
       if (this.oConfig) {
@@ -157,6 +167,7 @@ export default {
   methods: {
     // 视频播放
     initPlayer () {
+      this.videoLoadingFailed = false;
       getTestLive().then(res => {
         if (res && res.data) {
           console.log('>>>> init flvplayer');
@@ -180,6 +191,7 @@ export default {
             flvPlayer.load();
             flvPlayer.play().then(() => {
               this.videoLoading = false;
+              this.videoLoadingFailed = false;
               if (this.config.pause) {
                 this.playActive = false;
                 flvPlayer.pause();
@@ -188,6 +200,11 @@ export default {
             this.startPlayTime = new Date().getTime();
             this.player = flvPlayer;
             this.video = videoElement;
+
+            // 加载失败
+            setTimeout(() => {
+              this.videoLoadingFailed = true;
+            }, this.videoLoadingTimeout);
           }
         }
       }).catch(error => {
@@ -201,6 +218,10 @@ export default {
         this.player.detachMediaElement();
         this.player = null;
       }
+    },
+    relaodPlayer () {
+      this.destroyPlayer();
+      this.initPlayer();
     },
     /***** 视频事件 *****/
     // 播放/暂停
@@ -439,6 +460,10 @@ export default {
   > .player_loading {
     position: absolute; top: 50%; left: 50%; z-index: 10;
     color: #fff;
+    text-align: center;
+    > div {
+      > p { padding-bottom: 10px; }
+    }
   }
   > .vl_icon_close {
     position: absolute; top: 10px; right: 10px; z-index: 10;
@@ -455,6 +480,9 @@ export default {
     background-color: #000;
     background-color: rgba(34, 34, 34, 0.65);
     transition: bottom 0.4s ease-out;
+    &.flvplayer_bot_dis {
+      bottom: -48px !important;
+    }
     > .flvplayer_bot_t {
       float: left;
       height: 48px; line-height: 48px; max-width: 40%;
