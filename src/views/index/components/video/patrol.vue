@@ -40,8 +40,16 @@
                   </div>
                   <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                     <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                      <!-- patrolParseDialogVisible -->
+                      <div v-if="patrolActive === 1" class="tree_li_dis" 
+                        @click="dragEndDis"
+                        @dragend="dragEndDis"
+                        draggable="true">
+                        {{sitem.deviceName}}
+                        <span class="vl_icon vl_icon_v11"></span>
+                      </div>
                       <div class="com_ellipsis"
-                        v-if="!deviceIsPlaying(sitem)"
+                        v-else-if="!deviceIsPlaying(sitem)"
                         @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
                         draggable="true" style="cursor: move;">
                         {{sitem.deviceName}}
@@ -77,17 +85,18 @@
       </div>
     </div>
     <div class="vid_title">
-      <ul class="vid_show_type">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="showType = 1"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
+      <ul class="vid_show_type" :class="{'vid_show_type_dis': patrolActive === 1}">
+        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="changeShowType(1)"></li>
+        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="changeShowType(2)"></li>
+        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="changeShowType(3)"></li>
+        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="changeShowType(4)"></li>
        <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
       </ul>
     </div>
     <div class="vid_opes">
-      <el-button type="primary">暂停轮巡</el-button>
-      <el-button>关闭轮巡</el-button>
+      <el-button v-if="patrolActive === 1" @click="patrolParse" type="primary">暂停轮巡</el-button>
+      <el-button v-else-if="patrolActive === 2" @click="patrolContinue" type="primary">继续轮巡</el-button>
+      <el-button v-if="patrolActive === 1 || patrolActive === 2" @click="patrolCloseDialogVisible = true">关闭轮巡</el-button>
     </div>
     <div class="vid_content">
       <ul class="vid_show_list" :class="'vid_list_st' + showType">
@@ -104,6 +113,44 @@
         </li>
       </ul>
     </div>
+    <!-- 轮巡提示 dialog -->
+    <el-dialog :visible.sync="patrolTipDialogVisible" :center="false" :show-close="false" :close-on-click-modal="false" :append-to-body="true" width="400px">
+      <div style="padding: 20px 0 20px 0; text-align: center; color: #666;">
+        <el-progress type="circle" 
+          :width="200" 
+          :stroke-width="16"
+          :percentage="patrolStartPercentage" 
+          color="#1073F8"
+          status="text">
+          <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
+            {{Math.ceil(patrolStartSecond / 10)}}
+          </p>
+          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P>
+        </el-progress>
+      </div>
+      <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
+      <p style="color: #666; text-align: center; font-size: 14px; padding: 0 20px 10px 20px;">打开轮巡后，您可查看固定地方的视频播放画面，还可以关闭轮巡。</p>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 30px 0;">
+        <el-button @click="patrolClose(true)">关闭轮巡</el-button>
+        <el-button type="primary" @click="patrolStart">执行轮巡</el-button>
+      </div>
+    </el-dialog>
+    <!-- 轮巡暂停提示 dialog -->
+    <el-dialog title="是否暂停轮巡？" :visible.sync="patrolParseDialogVisible" :center="false" :append-to-body="true" width="500px">
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，如需要查看其它通路，请先暂停轮巡。</div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="patrolParseDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="patrolParse">确定暂停轮巡</el-button>
+      </div>
+    </el-dialog>
+    <!-- 轮巡关闭提示 dialog -->
+    <el-dialog title="确定关闭轮巡？" :visible.sync="patrolCloseDialogVisible" :center="false" :append-to-body="true" width="500px">
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">关闭轮巡后将不播放该地区的视频。</div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="patrolCloseDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="patrolClose">确定关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -112,10 +159,19 @@ import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 // import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
+import { setTimeout, setInterval } from 'timers';
 export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
+      //0 未进行  1进行中  2暂停
+      patrolActive: 0, // 轮巡状态
+      patrolTipDialogVisible: false,
+      patrolParseDialogVisible: false,
+      patrolCloseDialogVisible: false,
+      patrolStartSecond: 600,
+      patrolStartPercentage: 100,
+      patrolInval: null,
       // 设备列表
       deviceList: [],
 
@@ -132,6 +188,9 @@ export default {
     }
   },
   watch: {
+    patrolStartSecond () {
+      this.patrolStartPercentage = this.patrolStartSecond / 600 * 100;
+    },
     showType () {
       if (this.showType === 1) {
         this.showVideoTotal = 1;
@@ -176,8 +235,70 @@ export default {
   mounted () {
     videoTree('videoListTree');
     $(window).on('unload', this.unloadSave);
+
+    setTimeout(() => {
+      this.patrolTipDialogVisible = true;
+      this.patrolInval = setInterval(() => {
+        if (this.patrolStartSecond <= 0) {
+          if (this.patrolInval) {
+            clearInterval(this.patrolInval);
+          }
+        } else {
+          this.patrolStartSecond = Math.round(this.patrolStartSecond - 1);
+        }
+      }, 100);
+    }, 5 * 1000);
   },
   methods: {
+    /* 轮巡控制事件 */
+    // 暂停轮巡
+    patrolParse () {
+      this.patrolParseDialogVisible = false;
+      this.patrolActive = 2;
+      this.$message('轮巡已暂停。');
+    },
+    // 继续轮巡
+    patrolContinue () {
+      this.patrolActive = 1;
+      this.$message('轮巡已继续。');
+    },
+    // 执行轮巡
+    patrolStart () {
+      this.patrolActive = 1;
+      this.patrolTipDialogVisible = false;
+      if (this.patrolInval) {
+        clearInterval(this.patrolInval);
+      }
+      this.patrolStartSecond = 600;
+    },
+    // 关闭轮巡   flag: true, 轮巡开始提示窗口的事件
+    patrolClose (flag) {
+      this.patrolParseDialogVisible = false;
+      this.patrolCloseDialogVisible = false;
+      this.patrolActive = 0;
+      this.$message('轮巡已关闭。');
+      if (flag) {
+        this.patrolTipDialogVisible = false;
+        if (this.patrolInval) {
+          clearInterval(this.patrolInval);
+        }
+        this.patrolStartSecond = 600;
+      }
+    },
+    dragEndDis () {
+      this.patrolParseDialogVisible = true;
+    },
+
+    changeShowType (type) {
+      if (this.showType != type) {
+        if (this.patrolActive === 1) {
+          this.patrolParseDialogVisible = true;
+        } else {
+          this.showType = type;
+        }
+      }
+    },
+
     /* 播放记录 */
     getVideoRecordList () {
       // 播放类型 1:视频巡逻 2:视频回放
@@ -361,7 +482,9 @@ export default {
         });
       }
     } */
-
+    if (this.patrolInval) {
+      clearInterval(this.patrolInval);
+    }
     $(window).off('unload', this.unloadSave);
     this.saveVideoList();
   }
