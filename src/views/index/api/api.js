@@ -1,4 +1,14 @@
 import request from '@/config/axios';
+/**
+ * 获取视频点播接口
+ */
+export function getTestLive() {
+  return request({
+    url: '/live',
+    mode: 'live',
+    method: 'get'
+  });
+}
 
 /**
  * 用户登录
