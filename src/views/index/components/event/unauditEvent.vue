@@ -167,7 +167,22 @@
         <el-button @click="cancelReject('rejectForm')">取 消</el-button>
         <el-button class="operation_btn function_btn" @click="rejectEvent('rejectForm')">确 定</el-button>
       </div>
-    </el-dialog>  
+    </el-dialog>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -181,6 +196,7 @@ export default {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
+      backDialog: false, // 返回提示弹出框
       isImgNumber: false,
       newMarker: null,
       addEventForm: {},
@@ -225,8 +241,25 @@ export default {
   mounted () {
     this.getDetail();
     this.initMap();
+    setTimeout(() => {
+      this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
+    }, 1000);
   },
   methods: {
+    // 返回
+    back () {
+      const data = JSON.stringify(this.addEventForm);
+      if (this.dataStr === data) {
+        this.$router.back(-1);
+      } else {
+        this.backDialog = true;
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
+      this.$router.back(-1);
+    },
     // 获取驳回原因
     getRejectReasonList () {
       const reason = dataList.rejectReason;
@@ -527,10 +560,6 @@ export default {
             .catch(() => {})
         }
       })
-    },
-    // 返回
-    back () {
-      this.$router.back(-1);
     }
   }
 }

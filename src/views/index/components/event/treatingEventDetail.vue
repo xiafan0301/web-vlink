@@ -40,7 +40,7 @@
           <div class="content_detail">
              <p>
                {{basicInfo.eventSummary}}
-               <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+               <span v-show="eventSummaryLength > 800" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
             </p>
           </div>
         </div>
@@ -76,7 +76,7 @@
           <div class="content_detail">
              <p>
                {{basicInfo.dispatchSummary}}
-               <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+               <span v-show="dispatchSummaryLength > 800" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
             </p>
           </div>
         </div>

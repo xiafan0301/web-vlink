@@ -29,7 +29,7 @@
             </div>
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo(1)">全部车辆({{allVelGroupNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 1)">全部车辆({{allVelGroupNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleGroupList" :key="'item' + index" @click="getVeDetailInfo(item, 1)">
                   <span>{{item.name}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 1, $event)"></i>
@@ -42,7 +42,7 @@
           <div class="left_content_box">
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo(2)">全部底库({{allVelBottomNameNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 2)">全部车辆({{allVelBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
@@ -374,17 +374,25 @@ export default {
   methods: {
     // 列表查询
     selectDataList () {
+      this.pagination.pageNum = 1;
       this.getVehicleInfoList();
     },
     // 清空列表查询
     resetForm (form) {
+      this.pagination.pageNum = 1;
       this.$refs[form].resetFields();
       this.getVehicleInfoList();
     },
     // 获取车辆列表数据
     getVehicleInfoList () {
+      let type;
+      if (this.activeSelect === -1) {
+        type = null;
+      } else {
+        type = this.selectMethod;
+      }
       const params = {
-        'where.type': this.selectMethod,
+        'where.type': type,
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -416,11 +424,15 @@ export default {
       } else {
         this.searchForm.albumId = obj.id;
       }
+      if (!obj) {
+        this.activeSelect = -1;
+      }
       this.getVehicleInfoList();
     },
     // 查询车辆分组
     getVeGroupInfo () {
       this.allVelGroupNumber = 0;
+      this.pagination.pageNum = 1;
       const params = {
         groupName: this.searchGroupName
       }
@@ -428,10 +440,8 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleGroupList = res.data.groupNumResultDtoList;
-            this.copyGroupInfoList = JSON.parse(JSON.stringify(res.data));
-            // this.vehicleGroupList.map(item => {
+            this.copyGroupInfoList = JSON.parse(JSON.stringify(res.data.groupNumResultDtoList));
             this.allVelGroupNumber = res.data.total;
-            // })
             this.getVehicleInfoList();
           }
         })
@@ -440,16 +450,17 @@ export default {
     // 查询车辆底库
     getVelBottomNameInfo () {
       this.allVelBottomNameNumber = 0;
+      this.pagination.pageNum = 1;
       const params = {
         bankName: this.searchGroupName
       }
       getVehicleBottomName(params)
         .then(res => {
           if (res) {
-            this.vehicleBottomNameList = res.data;
-            this.vehicleBottomNameList.map(item => {
-              this.allVelBottomNameNumber += item.portraitNum;
-            })
+            this.vehicleBottomNameList = res.data.albumNumQueryDtoList;
+            // this.vehicleBottomNameList.map(item => {
+              this.allVelBottomNameNumber = res.data.total;
+            // })
             this.getVehicleInfoList();
           }
         })

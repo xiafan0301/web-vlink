@@ -29,7 +29,7 @@
             </div>
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(1)">全部人像({{allPerGroupNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 1)">全部人像({{allPerGroupNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
                   <span>{{item.name}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
@@ -42,7 +42,7 @@
           <div class="left_content_box">
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(2)">全部底库({{allPerBottomNameNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部底库({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
@@ -59,13 +59,13 @@
               <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
             </el-form-item>
             <el-form-item prop="idType">
-              <el-select v-model="searchForm.idType" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+              <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
+                <el-option label="身份证" :value="1"></el-option>
+                <el-option label="护照" :value="2"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item prop="sex">
-              <el-select v-model="searchForm.sex" style="width: 240px;">
+              <el-select v-model="searchForm.sex" style="width: 240px;" placeholder="性别">
                 <el-option label="男" :value="1"></el-option>
                 <el-option label="女" :value="2"></el-option>
               </el-select>
@@ -195,7 +195,6 @@
           </el-table>
         </div>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
@@ -341,7 +340,7 @@ export default {
       searchForm: {
         idNo: null,
         idType: null,
-        sex: 1,
+        sex: null,
         albumId: null,
         groupId: null
       },
@@ -360,7 +359,7 @@ export default {
   },
   mounted () {
     this.getGroupList();
-    this.getBottomBankList();
+    // this.getBottomBankList();
     // this.getPersonList();
   },
   methods: {
@@ -373,9 +372,9 @@ export default {
       getPerGroupList(params)
         .then(res => {
           if (res) {
-            this.perGroupList = res.data;
-            this.copyPerGroupInfoList = JSON.parse(JSON.stringify(res.data));
-            this.allPerGroupNumber = res.data.total;
+            this.perGroupList = res.data.groupNumList;
+            this.copyPerGroupInfoList = JSON.parse(JSON.stringify(res.data.groupNumList));
+            this.allPerGroupNumber = res.data.portraitNum;
             this.getPersonList();
           }
         })
@@ -434,10 +433,12 @@ export default {
     },
     // 根据搜索条件查询人员列表
     searchPersonData () {
+      this.pagination.pageNum = 1;
       this.getPersonList();
     },
     // 清空搜索人员列表框
     resetForm (form) {
+      this.pagination.pageNum = 1;
       this.$refs[form].resetFields();
       this.getPersonList();
     },
@@ -526,6 +527,7 @@ export default {
     },
     // 点击左边分组获取右边人员列表
     getPerDetailInfo (obj, type) {
+      this.pagination.pageNum = 1;
       this.showGroup = false;
       this.searchForm.groupId = null;
       this.searchForm.albumId = null;
@@ -541,12 +543,14 @@ export default {
       } else {
         this.searchForm.albumId = obj.id;
       }
+      if (!obj) {
+        this.activeSelect = -1;
+      }
       this.getPersonList();
     },
     // 将人员复制到选择的组
     handleCopyGroup (id) {
       let selectArr = [];
-      console.log(this.multipleSelection)
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
       });
@@ -562,7 +566,7 @@ export default {
               message: '复制成功',
               customClass: 'request_tip'
             })
-            this.getPersonList();
+            this.getGroupList();
             this.showGroup = false;
           }
         })
@@ -581,9 +585,12 @@ export default {
         this.getBottomBankList();
       }
     },
-    handleSizeChange () {
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      // if (this.selectMethod === 1) {
+        this.getPersonList();
+      // }
     },
-    handleCurrentChange () {},
     // 显示新增分组弹出框
     showAddGroupDialog () {
       this.isShowError = false;

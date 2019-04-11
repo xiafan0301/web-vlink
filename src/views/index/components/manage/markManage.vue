@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="mark_manage">
     <div class="search_box">
       <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
@@ -80,11 +81,13 @@
         </el-table-column>
         <el-table-column
           label="创建时间"
-          width="150"
           prop="createTime"
           show-overflow-tooltip
           align="center"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createTime | fmTimestamp}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
@@ -163,15 +166,17 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
+import { apiVideoSignContent, apiSignContentList } from '@/views/index/api/api.video.js';
 export default {
   data () {
     return {
       isShowError: false,
       pickerOptions0: {
         disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
+          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
         }
       },
       searchForm: {
@@ -180,14 +185,7 @@ export default {
         operationUser: null,
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      dataList: [
-        {
-          content: '特殊情况',
-          departmentName: 'a部门',
-          user: '系统默认',
-          createTime: '2019-12-23 12:12:12'
-        }
-      ],
+      dataList: [],
       markForm: {
         markName: null,
       },
@@ -202,7 +200,21 @@ export default {
       delMarkDialog: false, // 删除标记弹出框
     }
   },
+  mounted () {
+    this.getList();
+  },
   methods: {
+    // 获取标记内容列表
+    getList () {
+      apiSignContentList()
+        .then(res => {
+          if (res) {
+            this.dataList = res.data;
+            
+          }
+        })
+        .catch(() => {})
+    },
     // 搜索数据
     selectDataList () {
 
@@ -216,34 +228,47 @@ export default {
     },
     // 显示新增标记弹出框
     showAddMarkDialog () {
+      this.isShowError = false;
       this.createMarkDialog = true;
     },
     // 新增标记
     addMark (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(valid)
+           const params = {
+            content: this.markForm.markName
+          }
+          apiVideoSignContent(params)
+            .then(res => {
+              if (res) {
+                console.log(res)
+              }
+            })
+            .catch(() => {})
         }
       })
     },
     // 取消新增
     cancelAdd (form) {
+      this.isShowError = false;
       this.$refs[form].resetFields();
     },
     // 显示编辑弹出框
     showEditDialog () {
+      this.isShowError = false;
       this.editMarkDialog = true;
     },
     // 编辑标记
     editMark (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-           console.log(valid)
+         
         }
       })
     },
     // 取消编辑
     cancelEdit (form) {
+      this.isShowError = false;
       this.$refs[form].resetFields();
     },
     // 显示删除标记弹出框

@@ -12,7 +12,7 @@
         <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="end-body">
           <el-form class="end-content" :model="endForm">
-            <el-form-item class="limit_parent" label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入10000个字', trigger: 'blur'}]">
+            <el-form-item class="limit_parent" label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入1000个字', trigger: 'blur'}]">
               <!-- <p class="limit_number">(<span style="color: red">10000</span>/10000)</p> -->
               <!-- <p class="limit_number">(<span style="color: red">{{endForm.eventSummary && endForm.eventSummary.length || 0}}</span>/10000)</p> -->
               <el-input type="textarea" rows="7" style="width: 50%;" v-model="endForm.eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>

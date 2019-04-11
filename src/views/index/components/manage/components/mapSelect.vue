@@ -493,8 +493,8 @@ export default {
     }
     .right-flag {
       position: absolute;
-      right: 60px;
-      bottom: 100px;
+      right: 30px;
+      bottom: 10px;
       transition: right .3s ease-out;
       animation: fadeInRight .4s ease-out .4s both;
       .map-rrt {
