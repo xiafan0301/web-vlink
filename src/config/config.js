@@ -89,9 +89,9 @@ const oDomains = {
     },
     // test-video服务
     live: {
-      dev: 'http://10.116.64.155:8081',
-      test: 'http://10.116.64.155:8081',
-      prod: 'http://10.116.64.155:8081'
+      dev: 'http://apidev.aorise.org/vlink-link',
+      test: 'http://apidev.aorise.org/vlink-link',
+      prod: 'http://apidev.aorise.org/vlink-link',
     }
 };
 let ENV_API = process.env.VUE_APP_API;

@@ -43,7 +43,7 @@
         <!-- 录视频 -->
         <span class="vl_icon vl_icon_v25 player_tran" title="录视频"></span>
         <!-- 截屏 -->
-        <span class="vl_icon vl_icon_v26 player_cut" title="截屏"></span>
+        <span v-if="config.cut" class="vl_icon vl_icon_v26 player_cut" title="截屏"></span>
         <!-- 全屏 -->
         <span v-show="!fullScreen" class="vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
         <!-- 局部放大 -->
@@ -85,6 +85,7 @@ export default {
    *    sign: 是否可标记，默认为true
    *    close: 是否可删除，默认为true
    *    fullscreen: 是否可全屏，默认为true
+   *    cut: 是否可截屏，默认为true
    */
   props: ['index', 'oData', 'oConfig'],
   data () {
@@ -99,7 +100,8 @@ export default {
         pause: false, // 开始是否暂停，默认为false(播放)
         sign: true, // 是否可标记
         close: true, // 是否可删除
-        fullscreen: true // 是否可全屏
+        fullscreen: true, // 是否可全屏
+        cut: true
       },
 
       startPlayTime: null,
@@ -208,6 +210,7 @@ export default {
         if (flag) {
           this.destroyPlayer();
           this.playActive = true; // 去掉暂停按钮
+          this.config.pause = false;
           this.initPlayer();
         } else {
           this.player.pause();
@@ -467,7 +470,7 @@ export default {
         margin: 0 8px;
         width: 24px; height: 24px;
       }
-      > .player_cut { cursor: not-allowed; }
+      > .player_cut { }
       > .player_tran { cursor: not-allowed; }
       > .player_volume {
         position: relative;
