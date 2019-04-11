@@ -61,7 +61,7 @@
         <div :class="['vl_control_state', controlState === '0' ? 'vl_control_s' : controlState === '1' ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
-          <div class="manage_d_s_t" @click="controlArea">
+          <div class="manage_d_s_t" @click="controlArea(1)">
             <div>布控范围</div>
             <i class="el-icon-arrow-up" v-show="dpOne"></i>
             <i class="el-icon-arrow-down" v-show="!dpOne"></i>
@@ -84,15 +84,30 @@
                             <div @click="getEquList('1', trackPoint)" :class="{'active': devId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{bayonetNum}}）</div>
                           </div>
                           <vue-scroll>
+                            <!-- 摄像头 -->
                             <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
                                 <li :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
-                            <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;">
-                              <template v-for="equ in trackPoint.bayonetList">
-                                <li :key="equ.uid"><span>{{equ.bayonetName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
-                              </template>
+                            <!-- 卡口 -->
+                            <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
+                              <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName">
+                                <div class="bayone_name"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown}">
+                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
+                                </div>
+                                <el-collapse-transition>
+                                  <vue-scroll>
+                                    <ul style="max-height: 346px;" v-show="bayonet.isDropdown">
+                                      <template v-for="(equ, index) in bayonet.devList">
+                                        <li :key="equ.uid + equ.deviceName + index">
+                                          <span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                        </li>
+                                      </template>
+                                    </ul>
+                                  </vue-scroll>
+                                </el-collapse-transition>
+                              </li>
                             </ul>
                           </vue-scroll>
                         </div>
@@ -120,7 +135,7 @@
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === '1'">
-            <div class="situ_top" @click="dpTwo = !dpTwo">
+            <div class="situ_top" @click="controlArea(2)">
               <div>实时监控</div>
               <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
               <i class="el-icon-arrow-up" v-show="dpTwo"></i>
@@ -136,45 +151,45 @@
                     <vue-scroll>
                       <!-- 摄像头 -->
                       <vue-scroll>
-                        <ul style="width: 100%;max-height: 736px;" v-show="tabTypeBySituation === '0'">
-                          <template v-for="(item, index) in situList">
-                            <li
-                              v-if="item.surveillanceIds"
-                              :key="item.uid"
-                              @dragstart="dragstart($event, index, item)"
-                              @dragover="dragover"
-                              :draggable="true"
-                            >
-                              <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                            </li>
-                          </template>
-                        </ul>
+                        <el-collapse-transition>
+                          <ul style="width: 100%;max-height: 736px;" v-show="tabTypeBySituation === '0'">
+                            <template v-for="(item, index) in situList">
+                              <li
+                                v-if="item.surveillanceIds"
+                                :key="item.uid"
+                                @dragstart="dragstart($event, index, item)"
+                                @dragover="dragover"
+                                :draggable="true"
+                              >
+                                <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                              </li>
+                            </template>
+                          </ul>
+                        </el-collapse-transition>
                       </vue-scroll>
                       <!-- 卡口 -->
-                      <template v-show="tabTypeBySituation === '1'">
-                        <div class="bayone_name" :class="{'active': null}">
-                          <i class="el-icon-arrow-down" v-show="true"></i><i class="el-icon-arrow-right" v-show="false"></i><span>{{}}</span>
-                        </div>
-                        <el-collapse-transition>
-                          <div>
-                            <vue-scroll>
-                              <ul style="max-height: 346px;">
-                              <template v-for="(item, index) in situList">
-                                <li
-                                  v-if="item.surveillanceIds"
-                                  :key="item.uid"
-                                  @dragstart="dragstart($event, index, item)"
-                                  @dragover="dragover"
-                                  :draggable="true"
-                                >
-                                  <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                                </li>
-                              </template>
-                              </ul>
-                            </vue-scroll>
-                          </div>  
-                        </el-collapse-transition>
-                      </template>
+                        <template v-if="tabTypeBySituation === '1'">
+                          <div class="bayone_name" :class="{'active': null}">
+                            <i class="el-icon-arrow-down" v-show="true"></i><i class="el-icon-arrow-right" v-show="false"></i><span>{{}}</span>
+                          </div>
+                          <el-collapse-transition>
+                              <vue-scroll>
+                                <ul style="max-height: 346px;">
+                                  <template v-for="(item, index) in situList">
+                                    <li
+                                      v-if="item.surveillanceIds"
+                                      :key="item.uid"
+                                      @dragstart="dragstart($event, index, item)"
+                                      @dragover="dragover"
+                                      :draggable="true"
+                                    >
+                                      <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                    </li>
+                                  </template>
+                                </ul>
+                              </vue-scroll>
+                          </el-collapse-transition>
+                        </template>
                     </vue-scroll>
                   </div>
                 <div class="situ_right">
@@ -344,7 +359,7 @@ import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
 import rtmpplayer from '@/components/common/rtmpplayer.vue';
-import {getControlDetail, getControlObjList, controlArea, getControlMap, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
   components: {delDialog, stopDialog, rtmpplayer},
   props: ['state', 'controlId'],
@@ -371,8 +386,9 @@ export default {
       pageNumObj: 1,
       pageSzieRes: 8,
       pageNumObjRes: 1,
-      // 实时监控设备列表
-      situList: [],
+      
+      situList: [],// 实时监控设备列表
+      bayList: [],// 实时监控卡口列表
       // rVList: [{},{},{},{}],//用于操作的右边视频列表
       rightVideoList: [
         {isShowVideo: false}, 
@@ -407,7 +423,7 @@ export default {
   mounted () {
     this.resetMap();
     this.getControlDetail();
-    this.getControlMap();
+    // this.getControlMap();
     this.getAlarmSnap();
   },
   methods: {
@@ -490,20 +506,44 @@ export default {
       })
     },
     // 获取布控范围
-    controlArea () {
-      this.dpOne = !this.dpOne;
-      controlArea(this.controlId).then(res => {
-        if (res && res.data) {
-          this.devNum = res.data.devNum;
-          this.bayonetNum = res.data.bayonetNum;
-          this.trackPointList = res.data.trackingPointList;
-          this.trackPointList && this.trackPointList.map(f => {
-            this.$set(f, 'isDropdown', false);
-          });
-          this.mapMark();
-        }
-        
-      })
+    controlArea (isShowType) {
+      // 展开关闭布控范围
+      if (isShowType === 1) {
+        this.dpOne = !this.dpOne;
+      // 展开关运行情况
+      } else {
+        this.dpTwo = !this.dpTwo;
+      }
+      if (this.dpOne || this.dpTwo) {
+        controlArea(this.controlId).then(res => {
+          if (res && res.data) {
+            this.devNum = res.data.devNum;
+            this.bayonetNum = res.data.bayonetNum;
+            // 布控范围
+            if (isShowType === 1) {
+              this.trackPointList = res.data.trackingPointList;
+              this.trackPointList && this.trackPointList.forEach(f => {
+                this.$set(f, 'isDropdown', false);
+                if (f.bayonetList) {
+                  f.bayonetList.forEach(b => {
+                    this.$set(b, 'isDropdown', false);
+                  })
+                }
+              });
+              this.mapMark();
+            // 运行情况
+            } else {
+              this.situList = res.data.trackingPointList.map(m => {
+                if (m.devList) {
+                  return m.devList;
+                }
+              })
+            }
+           
+          }
+          
+        })
+      }
     },
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
@@ -512,13 +552,27 @@ export default {
     },
     // 展开或者闭合设备列表
     dropdown (data) {
-      this.trackPointList.map(f => {
+      this.trackPointList.forEach(f => {
         if (data.uid === f.uid) {
           f.isDropdown = !f.isDropdown;
         } else {
           f.isDropdown = false;
         }
         this.getEquList('0', data);
+      })
+    },
+    // 展开或者闭合卡口列表
+    dropdownBayonet (parentData, childData) {
+      this.trackPointList.forEach(f => {
+        if (parentData.uid === f.uid) {
+          f.bayonetList.forEach(b => {
+            if (childData.uid === b.uid) {
+              b.isDropdown = !b.isDropdown;
+            } else {
+              b.isDropdown = false;
+            }
+          })
+        }
       })
     },
     // 布控对象列表分页查询
@@ -546,30 +600,30 @@ export default {
       this.pageNumObj = page;
       this.getControlObjList();
     },
-    // 获取实时监控的布控设备
-    getControlMap() {
-      const params = {
-        deviceType: null,//设备类型
-        surveillanceStatus: null,//布控状态
-        alarmLevel: null,//告警级别
-        surveillanceDateStart: null,//布控开始时间
-        surveillanceDateEnd: null,//布控结束时间
-        surveillanceName: null,//布控名称
-        eventId: null,//事件Id
-        surveillanceObjectId: null//布控对象id
-      }
-      getControlMap(params).then(res => {
-        if (res && res.data) {
-          let data = [];
-          res.data.forEach(f => {
-            f.devList.forEach(d => {
-              data.push(d);
-            })
-          })
-          this.situList = data;
-        }
-      })
-    },
+    // // 获取实时监控的布控设备
+    // getControlMap() {
+    //   const params = {
+    //     deviceType: null,//设备类型
+    //     surveillanceStatus: null,//布控状态
+    //     alarmLevel: null,//告警级别
+    //     surveillanceDateStart: null,//布控开始时间
+    //     surveillanceDateEnd: null,//布控结束时间
+    //     surveillanceName: null,//布控名称
+    //     eventId: null,//事件Id
+    //     surveillanceObjectId: null//布控对象id
+    //   }
+    //   getControlMap(params).then(res => {
+    //     if (res && res.data) {
+    //       let data = [];
+    //       res.data.forEach(f => {
+    //         f.devList.forEach(d => {
+    //           data.push(d);
+    //         })
+    //       })
+    //       this.situList = data;
+    //     }
+    //   })
+    // },
     // 获取所有布控设备
     getControlDevice () {
       const params = {
@@ -762,10 +816,10 @@ export default {
             // } else if (!obj.isNormal) {
             //   _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
             // }
-             _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt"></div>';
+             _content = '<div id="' + obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
           } else {
             // if (obj.isNormal && obj.isSelected) {
-              _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk"></div>';
+              _content = '<div id="' + obj.uid + '_kk' + '" class="vl_icon vl_icon_kk"></div>';
             // } else if (obj.isNormal && !obj.isSelected) {
               // _content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_kk_uncheck"></div>';
             // } else if (!obj.isNormal) {
@@ -782,12 +836,22 @@ export default {
             content: _content
           });
           // hover
-          marker.on('click', function () {
-            let sContent = '<div class="vl_map_hover">' +
+          marker.on('mouseover', function () {
+            let sContent = '';
+            // 摄像头
+            if (obj.type === 1) {
+              sContent = '<div class="vl_map_hover">' +
+                '<div class="vl_map_hover_main"><ul>' + 
+                  '<li><span>设备名称：</span>' + obj.deviceName + '</li>' + 
+                  '<li><span>设备地址：</span>' + obj.address + '</li>' + 
+                '</ul></div>';
+            // 卡口
+            } else {
+              sContent = '<div class="vl_map_hover">' +
               '<div class="vl_map_hover_main"><ul>' + 
-                '<li><span>设备名称：</span>' + obj.deviceName + '</li>' + 
-                '<li><span>设备地址：</span>' + obj.address + '</li>' + 
+                '<li><span>卡口名称：</span>' + obj.bayonetName + '</li>' + 
               '</ul></div>';
+            }
             hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
               closeWhenClickMap: true,
@@ -795,6 +859,17 @@ export default {
               content: sContent
             });
             hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+            // 摄像头
+            if (obj.type === 1) {
+              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
+              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
+              $(`#mapBox #${obj.uid}_sxt`).addClass('vl_icon_control_34');
+            // 卡口
+            } else {
+              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
+              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
+              $(`#mapBox #${obj.uid}_kk`).addClass('vl_icon_control_35');
+            }
           });
           marker.setMap(_this.map);
         }

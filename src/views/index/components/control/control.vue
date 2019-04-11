@@ -156,6 +156,24 @@ export default {
                 }
               }
             }
+            .bayonet_list > li{
+              display: block!important;
+              > div{
+                cursor: pointer;
+                > i{
+                  margin-right: 6px;
+                }
+                &.active{
+                  i, span{
+                    color: #0C70F8;
+                  }
+                }
+              }
+              li{
+                margin-left: -8px;
+                cursor: default;
+              }
+            }
           }
         }
       }

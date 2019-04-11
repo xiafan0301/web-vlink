@@ -335,7 +335,7 @@
                   <el-input v-model="carForm.vehicleNumber" placeholder="车牌号码" @blur="getVehicleByIdNo"></el-input>
                 </el-form-item>
                 <el-form-item style="width: 415px;" prop="vehicleColor">
-                  <el-select v-model="carForm.vehicleColor" placeholder="选择车身颜色" style="width: 100%;">
+                  <el-select v-model="carForm.vehicleColor" placeholder="选择车身颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carColorList"
                       :key="item.value"
@@ -345,7 +345,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" prop="vehicleType">
-                  <el-select v-model="carForm.vehicleType" placeholder="选择车辆类型" style="width: 100%;">
+                  <el-select v-model="carForm.vehicleType" placeholder="选择车辆类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carTypeList"
                       :key="item.value"
@@ -355,7 +355,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" prop="numberType">
-                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;">
+                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numTypeList"
                       :key="item.value"
@@ -365,7 +365,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" prop="numberColor">
-                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;">
+                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numColorList"
                       :key="item.value"
@@ -376,41 +376,19 @@
                 </el-form-item>
                 <!-- 归属组 -->
                 <el-form-item style="width: 415px;">
-
-
-
-
-                  <!-- <div class="group_sel">
-                    <span v-show="!isShowDpList && carForm.groupIds.length === 0" @click="isShowDpList = !isShowDpList">选择归属组</span>
-                    <div class="group" v-for="item in carForm.groupIds" :key="item.value" @click="delSelGroup(item, 2)">
-                      <span class="vl_f_999">{{item.groupName}}</span>
-                      <i class="el-icon-close"></i>
-                    </div>
-                    <i class="el-icon-arrow-down" v-show="!isShowDpList" @click="isShowDpList = !isShowDpList"></i>
-                    <i class="el-icon-arrow-up" v-show="isShowDpList" @click="isShowDpList = !isShowDpList"></i>
-                  </div>
-                  <el-collapse-transition>
-                    <div class="group_li" v-show="isShowDpList" @mouseleave="isShowDpList = false;">
-                      <el-checkbox-group v-model="carForm.groupIds">
-                        <el-checkbox v-for="item in groupDropdownList" :label="item" :key="item.value">{{item.groupName}}</el-checkbox>
-                      </el-checkbox-group>
-                    </div>
-                  </el-collapse-transition> -->
-
-
-
-                <el-select v-model="carForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
-                  <el-option
-                    v-for="item in groupDropdownList"
-                    :key="item.uid"
-                    :label="item.groupName"
-                    :value="item.uid">
-                  </el-option>
-                </el-select>
+                  <el-select v-model="carForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
+                    <el-option
+                      v-for="item in groupDropdownList"
+                      :key="item.uid"
+                      :label="item.groupName"
+                      :value="item.uid">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
                 <el-form-item style="width: 415px;" class="desc" prop="desci">
                   <div>
                     <el-input
+                      :disabled="isAddDisabled"
                       type="textarea"
                       :rows="4"
                       resize="none"
@@ -707,15 +685,15 @@ export default {
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
       }
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!');
+      if (!isLt4M) {
+        this.$message.error('上传图片大小不能超过 4MB!');
       }
-      return isJPG && isLt2M;
+      return isJPG && isLt4M;
     },
     // 查询组列表
     getGroupList (type) {
@@ -787,6 +765,7 @@ export default {
       const params = {idNo: idNo}
       if (idNo) {
         getPortraitByIdNo(params).then(res => {
+          // 人像已存在
           if (res && res.data) {
             this.$message.error('证件号已存在');
             let protraitInfo = res.data;
@@ -805,6 +784,7 @@ export default {
               this.$refs['portraitForm'].resetFields();
             }
             console.log(this.portraitForm)
+          // 人像不存在
           } else {
             this.fileList = [];
             this.portraitForm.name = '';
@@ -820,7 +800,7 @@ export default {
                 this.$refs['portraitForm'].clearValidate(['idType']);
               })
             }
-            this.getBirthDate();
+            this.getBirthDate();// 通过证件号获取出生日期
           }
         })
       }
@@ -841,7 +821,11 @@ export default {
           data.birthDate.splice(10, 1);
           data.birthDate = data.birthDate.join('');
           data.groupIds = data.groupIds.join(',');
-          data.origin = 1;
+          if (this.isAddDisabled) {
+            data.origin = 1;//来源底库
+          } else {
+            data.origin = 2;//来源布控库
+          }
           data.photoUrl = this.dialogImageUrl;
           addPortrait(data).then(res => {
             if (res && res.data) {
@@ -867,8 +851,25 @@ export default {
       }
       if (idNo) {
         getVehicleByIdNo(params).then(res => {
+          // 已存在车像
           if (res && res.data && res.data.length > 0) {
             this.$message.error('车牌号已存在');
+            let carInfo = res.data[0];
+            this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+            carInfo.groupIds = carInfo.groupList.map(m => m.uid);
+            this.carForm = carInfo;
+            this.isAddDisabled = true;
+          // 不存在车像
+          } else {
+            this.fileList = []; 
+            this.carForm.vehicleNumber = null;
+            this.carForm.vehicleColor = null;
+            this.carForm.vehicleType = null;
+            this.carForm.numberType = null;
+            this.carForm.numberColor = null;
+            this.carForm.groupIds = [];
+            this.carForm.desci = '';
+            this.isAddDisabled = false;
           }
         })
       }
@@ -884,7 +885,11 @@ export default {
             delete data['groupList'];
           }
           data.groupIds = data.groupIds.join(',');
-          data.origin = 1;
+          if (this.isAddDisabled) {
+            data.origin = 1;//来源底库
+          } else {
+            data.origin = 2;//来源布控库
+          }
           data.vehicleImagePath = this.dialogImageUrl;
           addVehicle(data).then(res => {
             if (res && res.data) {
@@ -907,7 +912,7 @@ export default {
       getPortraitById(uid).then(res => {
         if (res && res.data) {
           let protraitInfo = res.data;
-          this.fileList = [{url: protraitInfo.photoUrl}];//回填图片
+          this.fileList = protraitInfo.photoUrl ? [{url: protraitInfo.photoUrl}] : [];//回填图片
           protraitInfo.birthDate = protraitInfo.birthDate.split('');
           protraitInfo.birthDate.splice(4, 1, '年');
           protraitInfo.birthDate.splice(7, 1, '月');
@@ -932,7 +937,11 @@ export default {
           data.birthDate.splice(10, 1);
           data.birthDate = data.birthDate.join('');
           data.groupIds = data.groupIds.join(',');
-          data.origin = 1;
+          if (this.isAddDisabled) {
+            data.origin = 1;//来源底库
+          } else {
+            data.origin = 2;//来源布控库
+          }
           data.photoUrl = this.dialogImageUrl;
           putPortrait(data).then(res => {
             console.log(res);
@@ -952,7 +961,7 @@ export default {
       getVehicleById(uid).then(res => {
         if (res && res.data) {
           let carInfo = res.data;
-          this.fileList = [{url: carInfo.vehicleImagePath}];//回填图片
+          this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
           carInfo.groupIds = carInfo.groupList.map(m => m.uid);
           this.carForm = carInfo;
           console.log(this.carForm)
@@ -966,7 +975,11 @@ export default {
           this.loadingBtn = true;
           let data = objDeepCopy(this.carForm);
           data.groupIds = data.groupIds.join(',');
-          data.origin = 1;
+          if (this.isAddDisabled) {
+            data.origin = 1;//来源底库
+          } else {
+            data.origin = 2;//来源布控库
+          }
           data.vehicleImagePath = this.dialogImageUrl;
           putVehicle(data).then(res => {
             console.log(res);

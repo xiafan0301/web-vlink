@@ -217,13 +217,13 @@
 </template>
 <script>
 import {objDeepCopy} from '@/utils/util.js';
-import {repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.js';
+import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.js';
 import uploadPic from './uploadPic.vue';
 import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'areaList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
   data () {
     return {
       modelForm: {
@@ -276,29 +276,46 @@ export default {
       loading: false,
       loadingBtn: false,
       // 上传参数
-      fileList: []
+      fileList: [],
+      areaList: []
     }
   },
   watch: {
-    modelDataOne (val) {
-      if (val) {
-        this.getModelDataOne();
-      }
+    modelDataOne: {
+      handler (val) {
+        if (val) {
+          console.log('oneoneoneone')
+          this.getModelDataOne();
+        }
+      },
+      deep: true
     },
-    modelDataTwo (val) {
-      if (val) {
-        this.getModelDataTwo();
-      }
+    modelDataTwo: {
+      handler (val) {
+        if (val) {
+          console.log('twotwotwo')
+          this.getModelDataTwo();
+        }
+      },
+      deep: true
     },
-    modelDataThree (val) {
-      if (val) {
-        this.getModelDataThree();
-      }
+    modelDataThree: {
+      handler (val) {
+        if (val) {
+          console.log('threethreethree')
+          this.getModelDataThree();
+        }
+      },
+      deep: true
     },
-    modelDataFour (val) {
-      if (val) {
-        this.getModelDataFour();
-      }
+    modelDataFour: {
+      handler (val) {
+        if (val) {
+          console.log('fourfourfour')
+          this.getModelDataFour();
+        }
+      },
+      deep: true
     }
   },
   computed: {
@@ -312,15 +329,34 @@ export default {
       }
     }
   },
+  created () {
+    if (this.modelType === '3') {
+      this.getAreas();
+    }
+  },
   mounted () {
     if (this.modelType !== '3' && this.allDevData && this.allDevData.length > 0) {
       this.resetMap();
     }
-    if (this.modelType === '3' && this.areaList && this.areaList.length > 0) {
-      this.resetMap();
-    }
   },
   methods: {
+    // 获取所有行政区列表
+    getAreas () {
+      const params = {
+        parentUid: '110000'
+      }
+      getAreas(params).then(res => {
+        if (res && res.data) {
+          this.areaList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.cname
+            }
+          });
+          this.resetMap();
+        }
+      })
+    },
     autoAdress (queryString, cb) {
       if (queryString === '') {
         cb([])
@@ -1402,7 +1438,7 @@ export default {
             }
           }
           _this.trackPointList[index].bayonetList.push(_obj);
-        }, 100)
+        }, 500)
       }
     },
     // 绑定draw
@@ -1648,20 +1684,25 @@ export default {
         });
         // 回填设备特性
         this.features = this.modelDataThree.pointDtoList[0].deviceChara;
-        const _data = this.modelDataThree.pointDtoList.map(m => {
-          return {
-            area: this.areaList.find(f => f.label === m.address),
-            bayonetList: m.bayonetList
-          }
-          
-        });
-        _data.forEach(f => {
-          // 回填受限范围
-          console.log(f, 'f')
-          this.getAllBayontListByAreaId(f.area, f.bayonetList);
+        let _data = [];
+        new Promise((resolve) => {
+          _data = this.modelDataThree.pointDtoList.map(m => {
+            return {
+              area: this.areaList.find(f => f.label === m.address),
+              bayonetList: m.bayonetList
+            }
+          });
+          resolve();
+        }).then(() => {
+          console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+          _data.forEach(f => {
+            // 回填受限范围
+            console.log(f, 'ffffffffffffffffffff')
+            this.getAllBayontListByAreaId(f.area, f.bayonetList);
+          })
+          this.lastSelList = this.modelForm.limitation;
+          this.lastLimitationNum = this.modelForm.limitation.length;
         })
-        this.lastSelList = this.modelForm.limitation;
-        this.lastLimitationNum = this.modelForm.limitation.length;
       }
     },
     // 回填范围分析数据

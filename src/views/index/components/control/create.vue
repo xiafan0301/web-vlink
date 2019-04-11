@@ -119,10 +119,8 @@
                 <!-- 范围分析 -->
                 <div is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
               </template>
-              <template v-if="areaList && areaList.length > 0">
               <!-- 越界分析 -->
-                <div is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
-              </template>
+              <div is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
             </div>
           </div>
         </el-form>
@@ -150,7 +148,7 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getEventList, getAreas, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getEventList, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -187,7 +185,6 @@ export default {
       modelDataTwo: null,// 车辆追踪数据
       modelDataThree: null,// 越界分析数据
       modelDataFour: null,// 范围分析数据
-      areaList: [],//行政区下拉列表
       // 弹出框参数
       toGiveUpDialog: false,
       loading: false,
@@ -203,7 +200,6 @@ export default {
   created () {
     this.getDiciData();
     this.getAllMonitorList();
-    this.getAreas();
     // 编辑页-2
     if (this.createType) {
       this.pageType = parseInt(this.createType);
@@ -266,22 +262,6 @@ export default {
             this.$set(f, 'type', 1);
           });
           console.log(this.allDevData)
-        }
-      })
-    },
-    // 获取所有行政区列表
-    getAreas () {
-      const params = {
-        parentUid: '110000'
-      }
-      getAreas(params).then(res => {
-        if (res && res.data) {
-          this.areaList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.cname
-            }
-          });
         }
       })
     },
@@ -503,6 +483,7 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
+          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour)
         }
       })
     },
