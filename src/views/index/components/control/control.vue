@@ -125,7 +125,6 @@ export default {
               }
             }
             ul{
-              margin-top: 10px;
               li{
                 width: 100%;
                 padding: 10px 30px;
@@ -155,6 +154,24 @@ export default {
                     bottom: 6px;
                   }
                 }
+              }
+            }
+            .bayonet_list > li{
+              display: block!important;
+              > div{
+                cursor: pointer;
+                > i{
+                  margin-right: 6px;
+                }
+                &.active{
+                  i, span{
+                    color: #0C70F8;
+                  }
+                }
+              }
+              li{
+                margin-left: -8px;
+                cursor: default;
               }
             }
           }

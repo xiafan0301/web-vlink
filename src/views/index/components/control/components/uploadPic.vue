@@ -1,27 +1,29 @@
 <template>
-  <div class="upload_pic_components" :class="{hidden: maxSize === picNum}">
-    <el-upload
-      ref="uploadPic"
-      multiple
-      accept="image/*"
-      :limit="maxSize"
-      action="http://apidev.aorise.org/vlink-base/appendix"
-      :on-exceed="uploadPicExceed"
-      :data="{projectType: 2}"
-      list-type="picture-card"
-      :file-list="fileList"
-      :on-success="uploadPicSucess"
-      :on-preview="handlePictureCardPreview"
-      :on-remove="handleRemove"
-      :on-error="uploadPicError"
-      :before-upload="beforeAvatarUpload">
-      <i class="el-icon-plus"></i>
-      <p>添加</p>
-    </el-upload>
-    <div class="dialog_pic" v-show="dialogVisible" @click="dialogVisible = false">
-      <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
+  <vue-scroll>
+    <div class="upload_pic_components" :class="{hidden: maxSize === picNum}">
+      <el-upload
+        ref="uploadPic"
+        multiple
+        accept="image/*"
+        :limit="maxSize"
+        action="http://apidev.aorise.org/vlink-base/appendix"
+        :on-exceed="uploadPicExceed"
+        :data="{projectType: 2}"
+        list-type="picture-card"
+        :file-list="fileList"
+        :on-success="uploadPicSucess"
+        :on-preview="handlePictureCardPreview"
+        :on-remove="handleRemove"
+        :on-error="uploadPicError"
+        :before-upload="beforeAvatarUpload">
+        <i class="el-icon-plus"></i>
+        <p>添加</p>
+      </el-upload>
+      <div class="dialog_pic" v-show="dialogVisible" @click="dialogVisible = false">
+        <img :src="dialogImageUrl" alt="" :style="{'max-height': picHeight + 'px'}">
+      </div>
     </div>
-  </div>
+  </vue-scroll>
 </template>
 <script>
 export default {
@@ -65,21 +67,22 @@ export default {
     beforeAvatarUpload (file) {
       this.$emit('uploadPicBefore', true);
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
         this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
       }
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!');
+      if (!isLt4M) {
+        this.$message.error('上传图片大小不能超过 4MB!');
       }
-      return isJPG && isLt2M;
+      return isJPG && isLt4M;
     }
   }
 }
 </script>
 <style lang="scss">
   .upload_pic_components{
+    max-height: 218px;
     .el-upload-list__item{
       width:104px !important;
       height:104px !important;
