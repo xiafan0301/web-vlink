@@ -69,7 +69,7 @@
         <el-button type="primary" :loading="signSubmitLoading" @click="signSubmit('signForm')">确 定</el-button>
       </div>
     </el-dialog>
-  </div>
+  </div>        
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';

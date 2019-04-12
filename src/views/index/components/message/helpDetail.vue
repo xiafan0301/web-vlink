@@ -33,8 +33,8 @@
           <img src="//via.placeholder.com/32x32" alt="">
           <ul>
             <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserName}}）</span></li>
-            <li class="con_two"><span class="vl_f_999 vl_f_12">{{item.createTime}}</span><span class="vl_f_999 vl_f_12">来源 {{item.eventSource}}</span></li>
-            <li class="con_three">{{item.participateType}}</li>
+            <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{transcoding(sourceTypeList, item.eventSource)}}</span></li>
+            <li class="con_three">{{transcoding(participateTypeList, item.participateType)}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
             <li class="con_five" v-if="item.sysAppendixInfoList.length > 0">
               <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid">
@@ -84,12 +84,14 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
-import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.js';
+import {getDiciData, getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.js';
 export default {
   components: {emotion},
   props: ['helpId'],
   data () {
     return {
+      participateTypeList: [],
+      sourceTypeList: [],
       helpDetail: null,//民众互助详情
       commentList: [],//评论列表内容
       content: '',//评论内容,
@@ -107,10 +109,32 @@ export default {
     }
   },
   mounted () {
+    this.getParticipateTypeDiciData();
+    this.getSourceTypeDiciData();
     this.getMutualHelpDetail();
     this.getCommentInfoList();
   },
   methods: {
+    // 转码
+    transcoding (data, code) {
+      return data && data.find(f => f.enumField === String(code)).enumValue;
+    },
+    // 获取参与类型字典
+    getParticipateTypeDiciData () {
+      getDiciData(6).then(res => {
+        if (res && res.data) {
+          this.participateTypeList = res.data;
+        }
+      })
+    },
+    // 获取资源来源字典
+    getSourceTypeDiciData () {
+      getDiciData(5).then(res => {
+        if (res && res.data) {
+          this.sourceTypeList = res.data;
+        }
+      })
+    },
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
       getMutualHelpDetail(this.helpId).then(res => {

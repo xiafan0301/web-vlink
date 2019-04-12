@@ -101,7 +101,9 @@
         <div class="video_box" :style="{'height': videoHeight + 'px'}">
           <div class="video">
             <div>
-              <div is="rtmpplayer" @playerClose="playerClose" :index="0" :oData="videoObj" :signAble="true"></div>
+              <div is="flvplayer" @playerClose="playerClose" :oData="videoObj" 
+                :oConfig="{sign: true}">
+              </div>
               <div class="vl_map_state" :class="{'vl_map_state_ab': true}">进行中</div>
             </div>
           </div>
@@ -129,15 +131,17 @@
         </div>
       </div>
     </div>
-    <div v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="rtmpplayer" is="rtmpplayer" @playerClose="playerClose" :index="0" :oData="videoObj" :signAble="true"></div>
+    <div is="flvplayer" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="flvplayer" @playerClose="playerClose" :oData="videoObj" 
+      :oConfig="{sign: true}">
+    </div>
   </div>
 </template>
 <script>
-import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate, random14} from '@/utils/util.js';
 import {getDiciData, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.js';
 export default {
-  components: {rtmpplayer},
+  components: {flvplayer},
   data () {
     return {
       // 左侧搜索参数
@@ -448,12 +452,12 @@ export default {
           // 利用事件冒泡,绑定关闭弹框的点击事件
           $('#mapBox').on('click', '.vl_map_close', function () {
             // 关闭弹窗
-            if (clickWindow) {$('.control_map').append($('#rtmpplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
+            if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
           })
           // 利用事件冒泡,绑定视频全屏按钮的点击事件
           $('#mapBox').on('click', '.vl_map_full_screen', function () {
             // 关闭弹窗
-            if (clickWindow) {$('.control_map').append($('#rtmpplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
+            if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
 
             // 显示视频回放页面
             _this.isShowFullScreen = true;
@@ -521,10 +525,10 @@ export default {
 
             _this.isShowVideo = true;
             setTimeout(() => {
-              $('#' + domId).append($('#rtmpplayer'));
+              $('#' + domId).append($('#flvplayer'));
               _this.isShowV = true;
             }, 100)
-            console.log($('#rtmpplayer'))
+            console.log($('#flvplayer'))
           }
         }
       })
