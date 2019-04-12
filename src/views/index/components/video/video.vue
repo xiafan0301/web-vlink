@@ -52,7 +52,7 @@ export default {
       cursor: default;
     }
   }
-  &.vid_show_type {
+  &.vid_show_type_dis {
     > li {
       cursor: default !important;
     }

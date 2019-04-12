@@ -114,7 +114,7 @@
       </ul>
     </div>
     <!-- 轮巡提示 dialog -->
-    <el-dialog :visible.sync="patrolTipDialogVisible" :center="false" :show-close="false" :close-on-click-modal="false" :append-to-body="true" width="400px">
+    <el-dialog :title="'轮巡预案名称'" :visible.sync="patrolTipDialogVisible" :center="false" :show-close="false" :close-on-click-modal="false" :append-to-body="true" width="400px">
       <div style="padding: 20px 0 20px 0; text-align: center; color: #666;">
         <el-progress type="circle" 
           :width="200" 
@@ -238,16 +238,17 @@ export default {
 
     setTimeout(() => {
       this.patrolTipDialogVisible = true;
-      this.patrolInval = setInterval(() => {
+      this.patrolInval = window.setInterval(() => {
         if (this.patrolStartSecond <= 0) {
           if (this.patrolInval) {
-            clearInterval(this.patrolInval);
+            window.clearInterval(this.patrolInval);
           }
+          this.patrolStart();
         } else {
           this.patrolStartSecond = Math.round(this.patrolStartSecond - 1);
         }
       }, 100);
-    }, 5 * 1000);
+    }, 3 * 1000);
   },
   methods: {
     /* 轮巡控制事件 */
@@ -267,7 +268,7 @@ export default {
       this.patrolActive = 1;
       this.patrolTipDialogVisible = false;
       if (this.patrolInval) {
-        clearInterval(this.patrolInval);
+        window.clearInterval(this.patrolInval);
       }
       this.patrolStartSecond = 600;
     },
@@ -280,7 +281,8 @@ export default {
       if (flag) {
         this.patrolTipDialogVisible = false;
         if (this.patrolInval) {
-          clearInterval(this.patrolInval);
+          console.log('this.patrolInval', this.patrolInval);
+          window.clearInterval(this.patrolInval);
         }
         this.patrolStartSecond = 600;
       }
@@ -483,7 +485,7 @@ export default {
       }
     } */
     if (this.patrolInval) {
-      clearInterval(this.patrolInval);
+      window.clearInterval(this.patrolInval);
     }
     $(window).off('unload', this.unloadSave);
     this.saveVideoList();

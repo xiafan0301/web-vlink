@@ -262,6 +262,7 @@
   text-decoration: none !important;
   border-left: 4px solid #fff;
   transition: all .4s ease-out;
+  cursor: pointer;
 }
 .vl_smenu > li > a.router-link-active {
   color: #0C70F8;
