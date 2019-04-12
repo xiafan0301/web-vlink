@@ -85,7 +85,6 @@
   </div>
 </template>
 <script>
-let AMap = window.AMap;
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
 import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.js';
@@ -139,10 +138,6 @@ export default {
   },
   mounted () {
     this.resetMap();
-    // 修改，回填数据
-    if (this.pageType === 4) {
-      this.getMutualHelpDetail();
-    }
   },
   methods: {
     skip (pageType) {
@@ -175,6 +170,10 @@ export default {
         this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })
       _this.map = map;
+      // 修改，回填数据
+      if (_this.pageType === 4) {
+        _this.getMutualHelpDetail();
+      }
     },
     
     autoAdress (queryString, cb) {
@@ -255,8 +254,8 @@ export default {
             attachmentList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
-            latitude: this.lngLat[0],//事发地点纬度
-            longitude: this.lngLat[1],//事发地点经度
+            latitude: this.lngLat[1],//事发地点纬度
+            longitude: this.lngLat[0],//事发地点经度
             radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
             reportTime: this.addForm.time,//上报时间
             reporterPhone: this.addForm.phone,//上报手机号
@@ -362,8 +361,8 @@ export default {
             }),//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
-            latitude: this.lngLat[0],//事发地点纬度
-            longitude: this.lngLat[1],//事发地点经度
+            latitude: this.lngLat[1],//事发地点纬度
+            longitude: this.lngLat[0],//事发地点经度
             radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio >= 0 ? this.addForm.scope : '',//推送范围
             reportTime: this.addForm.time,//上报时间
             reporterPhone: this.addForm.phone,//上报手机号

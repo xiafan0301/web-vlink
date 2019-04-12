@@ -27,7 +27,7 @@ const oDomains = {
     // 消息部分地址
     message: {
         dev: 'http://apidev.aorise.org/vlink-message',
-        // dev: 'http://10.116.64.169:8081',//花艳玲
+        // dev: 'http://10.116.64.136:8081',//花艳玲
         // dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',

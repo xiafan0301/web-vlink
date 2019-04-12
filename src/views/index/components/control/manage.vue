@@ -141,6 +141,7 @@
               label="关联事件编号"
               prop="eventNo"
               show-overflow-tooltip
+              min-width="100px"
               >
             </el-table-column>
             <el-table-column
@@ -405,8 +406,17 @@ export default {
 </style>
 <style lang="scss">
 .control_manage{
-  .manage_form .el-input__inner{
-    width: 380px;
+  .manage_form .el-form-item{
+    width: 24%;
+    .el-form-item__content{
+      width: 100%;
+      .el-select{
+        width: 100%;
+      }
+      .el-date-editor{
+        width: 100%;
+      }
+    }
   }
 }
 </style>

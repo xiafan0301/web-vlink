@@ -16,10 +16,10 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
-            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
+            <el-form-item label="布控名称:" prop="controlName" style="width: 23%;margin-bottom: 22px;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
-            <el-form-item label="关联事件:" prop="event" style="width: 25%;">
+            <el-form-item label="关联事件:" prop="event" style="width: 23%;">
               <!-- <el-input v-model="createForm.event"></el-input> -->
               <el-select
                 v-model="createForm.event"
@@ -37,7 +37,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="布控类型:" style="width: 25%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
+            <el-form-item label="布控类型:" style="width: 23%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controlTypeList"
@@ -47,7 +47,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
+            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 23%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -59,8 +59,8 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
-              <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 23%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
@@ -72,7 +72,7 @@
                 </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
+              <el-form-item style="margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
@@ -90,7 +90,7 @@
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
               <el-option
                 v-for="item in controlRankList"
@@ -171,8 +171,8 @@ export default {
         controlRank: null,
         periodTime: [
           {
-            startTime: '00:00:00',
-            endTime: '23:59:59'
+            startTime: null,
+            endTime:  null
           }
         ],
       },
@@ -572,7 +572,7 @@ export default {
   width: 100%;
   position: relative;
   .create_box{
-    min-height: 875px;
+    min-height: 738px;
     margin: 0 20px;
     padding: 0 20px 20px;
     background: #fff;
@@ -631,12 +631,15 @@ export default {
         flex-wrap: wrap;
         margin-bottom: 10px;
         .el-form-item{
-          padding-right: 40px;
+          padding-right: 10px;
           .el-input__inner, .el-select{
             width: 100%!important;
           }
           .el-form-item__label{
             padding-bottom: 0!important;
+          }
+          .el-date-editor--time .el-input__inner{
+            width: 140px!important;
           }
         }
         .period_time{

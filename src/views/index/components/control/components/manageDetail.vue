@@ -97,15 +97,13 @@
                                   <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
                                 </div>
                                 <el-collapse-transition>
-                                  <vue-scroll>
-                                    <ul style="max-height: 346px;" v-show="bayonet.isDropdown">
-                                      <template v-for="(equ, index) in bayonet.devList">
-                                        <li :key="equ.uid + equ.deviceName + index">
-                                          <span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                                        </li>
-                                      </template>
-                                    </ul>
-                                  </vue-scroll>
+                                  <ul v-show="bayonet.isDropdown">
+                                    <template v-for="(equ, index) in bayonet.devList">
+                                      <li :key="equ.uid + equ.deviceName + index">
+                                        <span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                      </li>
+                                    </template>
+                                  </ul>
                                 </el-collapse-transition>
                               </li>
                             </ul>
@@ -145,52 +143,50 @@
                   <div class="situ_left">
                     <div style="padding-left: 20px;">布控设备（12）</div>
                     <div class="equ_m">
-                      <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（12）</div>
-                      <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（12）</div>
+                      <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
+                      <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
                     </div>
-                    <vue-scroll>
-                      <!-- 摄像头 -->
-                      <vue-scroll>
-                        <el-collapse-transition>
-                          <ul style="width: 100%;max-height: 736px;" v-show="tabTypeBySituation === '0'">
-                            <template v-for="(item, index) in situList">
-                              <li
-                                v-if="item.surveillanceIds"
-                                :key="item.uid"
-                                @dragstart="dragstart($event, index, item)"
-                                @dragover="dragover"
-                                :draggable="true"
-                              >
-                                <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                              </li>
-                            </template>
-                          </ul>
-                        </el-collapse-transition>
-                      </vue-scroll>
-                      <!-- 卡口 -->
-                        <template v-if="tabTypeBySituation === '1'">
-                          <div class="bayone_name" :class="{'active': null}">
-                            <i class="el-icon-arrow-down" v-show="true"></i><i class="el-icon-arrow-right" v-show="false"></i><span>{{}}</span>
+                    <!-- 摄像头 -->
+                    <el-collapse-transition>
+                      <ul v-if="tabTypeBySituation === '0'">
+                        <vue-scroll>
+                          <li
+                            v-for="(item, index) in situList"
+                            :key="item.uid + index"
+                            @dragstart="dragstart($event, index, item)"
+                            @dragover="dragover"
+                            :draggable="true"
+                          >
+                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                          </li>
+                        </vue-scroll>
+                      </ul>
+                    </el-collapse-transition>
+                    <!-- 卡口 -->
+                    <el-collapse-transition>
+                      <div v-if="tabTypeBySituation === '1'" class="bayone_list">
+                        <vue-scroll>
+                          <div v-for="(bay, index) in bayList" :key="bay.uid + index">
+                            <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
+                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
+                            </div>
+                            <el-collapse-transition>
+                              <ul style="max-height: 346px;" v-show="bay.isDropdown">
+                                <li
+                                  v-for="(dev, index) in bay.devList"
+                                  :key="dev.uid + index"
+                                  @dragstart="dragstart($event, index, dev)"
+                                  @dragover="dragover"
+                                  :draggable="true"
+                                >
+                                  <span>{{dev.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                </li>
+                              </ul>
+                            </el-collapse-transition>
                           </div>
-                          <el-collapse-transition>
-                              <vue-scroll>
-                                <ul style="max-height: 346px;">
-                                  <template v-for="(item, index) in situList">
-                                    <li
-                                      v-if="item.surveillanceIds"
-                                      :key="item.uid"
-                                      @dragstart="dragstart($event, index, item)"
-                                      @dragover="dragover"
-                                      :draggable="true"
-                                    >
-                                      <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
-                                    </li>
-                                  </template>
-                                </ul>
-                              </vue-scroll>
-                          </el-collapse-transition>
-                        </template>
-                    </vue-scroll>
+                        </vue-scroll>
+                      </div>
+                    </el-collapse-transition>
                   </div>
                 <div class="situ_right">
                   <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
@@ -203,7 +199,9 @@
                     <div class="situ_r_img" v-if="!item.isShowVideo">
                       <div>从左边点击或拖拽设备播放</div>
                     </div>
-                    <div v-else is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+                    <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+                      :oConfig="{sign: true}">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -355,13 +353,14 @@
   </div>
 </template>
 <script>
+import {uniq} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
-import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
 export default {
-  components: {delDialog, stopDialog, rtmpplayer},
+  components: {delDialog, stopDialog, flvplayer},
   props: ['state', 'controlId'],
   data () {
     return {
@@ -423,7 +422,6 @@ export default {
   mounted () {
     this.resetMap();
     this.getControlDetail();
-    // this.getControlMap();
     this.getAlarmSnap();
   },
   methods: {
@@ -533,11 +531,27 @@ export default {
               this.mapMark();
             // 运行情况
             } else {
-              this.situList = res.data.trackingPointList.map(m => {
-                if (m.devList) {
-                  return m.devList;
+              // 组装摄像头列表数据
+              let devList = [];
+              res.data.trackingPointList.forEach(f => {
+                if (f.devList) {
+                  devList = devList.concat(f.devList);
                 }
               })
+              this.situList = uniq(devList);
+              console.log(this.situList, 'situList')
+              // 组装卡口列表数据
+              let bayList = [];
+              res.data.trackingPointList.forEach(f => {
+                if (f.bayonetList) {
+                  bayList = bayList.concat(f.bayonetList);
+                }
+              })
+              this.bayList = bayList;
+              this.bayList.forEach(f => {
+                this.$set(f, 'isDropdown', false);
+              })
+              console.log(this.bayList, 'bayList')
             }
            
           }
@@ -575,6 +589,15 @@ export default {
         }
       })
     },
+    dropdownBay (data) {
+      this.bayList.forEach(f => {
+        if (f.uid === data.uid) {
+          f.isDropdown = !f.isDropdown;
+        } else {
+          f.isDropdown = false;
+        }
+      })
+    },
     // 布控对象列表分页查询
     getControlObjList () {
       const params = {
@@ -600,30 +623,6 @@ export default {
       this.pageNumObj = page;
       this.getControlObjList();
     },
-    // // 获取实时监控的布控设备
-    // getControlMap() {
-    //   const params = {
-    //     deviceType: null,//设备类型
-    //     surveillanceStatus: null,//布控状态
-    //     alarmLevel: null,//告警级别
-    //     surveillanceDateStart: null,//布控开始时间
-    //     surveillanceDateEnd: null,//布控结束时间
-    //     surveillanceName: null,//布控名称
-    //     eventId: null,//事件Id
-    //     surveillanceObjectId: null//布控对象id
-    //   }
-    //   getControlMap(params).then(res => {
-    //     if (res && res.data) {
-    //       let data = [];
-    //       res.data.forEach(f => {
-    //         f.devList.forEach(d => {
-    //           data.push(d);
-    //         })
-    //       })
-    //       this.situList = data;
-    //     }
-    //   })
-    // },
     // 获取所有布控设备
     getControlDevice () {
       const params = {
@@ -1092,7 +1091,9 @@ export default {
                 }
               }
               ul{
-                margin-top: 10px;
+                margin-top: 6px;
+                width: 100%;
+                height: calc(100% - 82px);
                 li{
                   width: 100%;
                   height: 36px;
@@ -1103,7 +1104,7 @@ export default {
                   padding: 0 15px 0 40px;
                   color: #666666;
                   cursor: move;
-                  i{
+                  > i{
                     vertical-align: middle;
                     margin-top: 10px;
                   }
@@ -1113,6 +1114,35 @@ export default {
                   &:active{
                     background:rgba(250,250,250,1);
                     color: #666666;
+                  }
+                }
+              }
+              .bayone_list{
+                height: calc(100% - 82px);
+                > li{
+                  display: block!important;
+                  > div{
+                    cursor: pointer;
+                  }
+                }
+                .bayone_name{
+                  line-height: 30px;
+                  padding-left: 22px;
+                  padding-top: 6px;
+                  cursor: pointer;
+                  &.active{
+                    i, span{
+                      color: #0C70F8;
+                    }
+                  }
+                  i{
+                    margin-right: 10px;
+                  }
+                  i, span{
+                    color: #666;
+                  } 
+                  &~ul{
+                   margin-top: 0px; 
                   }
                 }
               }
