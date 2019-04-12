@@ -27,3 +27,88 @@ export function userInfo(data) {
     mode: 'user'
   })
 }
+
+/**
+ * 用户登录
+ * @param {*} data
+ */
+export function login(data) {
+  return request({
+    url: '/user-service/login',
+    data,
+    mode: 'user',
+    method: 'post'
+  });
+}
+/**
+ * 用户退出登录
+ * @param {*} data
+ */
+export function logout(data) {
+  return request({
+    url: '/user-service/logout/' + data.userMobile,
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 获取短信验证码
+ * @param {*} data 
+ */
+export function getCode(data) {
+  return request({
+    url: '/user-service/sms/code',
+    data,
+    mode: 'user',
+    method: 'post'
+  });
+}
+/**
+ * 校验短信验证码
+ * @param {*} data 
+ */
+export function checkCode(data) {
+  return request({
+    url: '/user-service/sms/code',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 重置密码
+ * @param {*} data 
+ */
+export function resetPassword(data) {
+  return request({
+    url: '/user-service/forget-pwd',
+    data,
+    mode: 'user',
+    method: 'put'
+  });
+}
+/**
+ * 判断用户是否注册
+ * @param {*} data
+ */
+export function isRegister(data) {
+  return request({
+    url: '/user-service/check-user-mobile/' + data.userMobile,
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 修改密码
+ * @param {*} data 
+ */
+export function updatePwd(data) {
+  return request({
+    url: '/user-service/user-password',
+    data,
+    mode: 'user',
+    method: 'put'
+  });
+}

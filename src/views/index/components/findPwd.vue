@@ -87,7 +87,7 @@
 <script>
 import headerNormal from '@/components/headerNormal.vue';
 import {validatePhone} from '@/utils/validator.js';
-import { isRegister, getCode, checkCode, resetPassword } from '@/views/index/api/api.js';
+import { isRegister, getCode, checkCode, resetPassword } from '@/views/index/api/api.user.js';
 export default {
   components: {headerNormal},
   data () {

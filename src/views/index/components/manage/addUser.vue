@@ -86,7 +86,7 @@
 </template>
 <script>
 import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
-import { createUser, getDepartmentList } from '@/views/index/api/api.js';
+import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

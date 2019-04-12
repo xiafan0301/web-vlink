@@ -189,7 +189,7 @@
 </vue-scroll>
 </template>
 <script>
-import { judgeDepart, getDepartmentList, updateDepart, delDepart, addDepart, getUserList } from '@/views/index/api/api.js';
+import { judgeDepart, getDepartmentList, updateDepart, delDepart, addDepart, getUserList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

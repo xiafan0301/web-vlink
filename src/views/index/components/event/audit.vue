@@ -16,7 +16,7 @@
         </el-form-item>
         <el-form-item prop="eventStatus">
           <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="审核状态">
-            <el-option value='全部状态'></el-option>
+            <!-- <el-option value='全部状态'></el-option> -->
             <el-option
               v-for="(item, index) in auditStatusList"
               :key="index"
@@ -145,8 +145,9 @@
       </el-table>
     </div>
     <el-pagination
+      @size-change="onSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -158,7 +159,9 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList, openAutoCheck, getDepartmentList } from '@/views/index/api/api.js';
+import { getEventList, openAutoCheck } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -167,7 +170,7 @@ export default {
         reportTime: [], // 日期
         // eventSource: 16, // 事件来源 app端
         eventType: '全部类型', // 事件类型
-        eventStatus: '全部状态', // 事件状态
+        eventStatus: 24, // 事件状态--默认待审核
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
@@ -202,21 +205,21 @@ export default {
   methods: {
     // 获取事件列表数据
     getAuditData () {
-      let eventType, eventStatus;
+      let eventType;
       if (this.auditForm.eventType === '全部类型') {
         eventType = null;
       } else {
         eventType = this.auditForm.eventType;
       }
-      if (this.auditForm.eventStatus === '全部状态') {
-        eventStatus = null;
-      } else {
-        eventStatus = this.auditForm.eventStatus;
-      }
+      // if (this.auditForm.eventStatus === '全部状态') {
+      //   eventStatus = null;
+      // } else {
+      //   eventStatus = this.auditForm.eventStatus;
+      // }
       const params = {
         'where.reportTimeStart': this.auditForm.reportTime[0],
         'where.reportTimeEnd': this.auditForm.reportTime[1],
-        'where.eventStatus': eventStatus,
+        'where.acceptFlag': this.auditForm.eventStatus,
         'where.eventType': eventType,
         'where.otherQuery': this.auditForm.phoneOrNumber,
         'where.eventSource': this.auditForm.eventSource,
@@ -278,6 +281,11 @@ export default {
             this.identityList = res.data.list;
           }
         })
+    },
+    onSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      this.getAuditData();
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;

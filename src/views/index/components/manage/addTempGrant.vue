@@ -104,7 +104,7 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
-import { getUserList, getDepartmentList, getASelectDevice } from '@/views/index/api/api.js';
+import { getUserList, getDepartmentList, getASelectDevice } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {

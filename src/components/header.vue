@@ -155,7 +155,7 @@
   </div>
 </template>
 <script>
-import { logout, updatePwd } from '@/views/index/api/api.js';
+import { logout, updatePwd } from '@/views/index/api/api.user.js';
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
