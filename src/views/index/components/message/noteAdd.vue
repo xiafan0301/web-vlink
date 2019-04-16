@@ -73,7 +73,7 @@
         :close-on-click-modal="false"
         width="482px"
         top="20vh">
-        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选2人/共1000人）</h1>
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选{{selContactNum}}人/共{{contactListTotal ? contactListTotal.length : 0}}人）</h1>
         <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small" @keyup.prevent.enter.native="getOrganUser"></el-input>
         <div class="rec_box">
           <div class="rec_l">
@@ -157,6 +157,12 @@ export default {
       contactList: [],//右边接收人列表数据,单独节点
       contactListTotal: [],//节点总数据
       loadingBtn: false
+    }
+  },
+  computed: {
+    // 获取已选择的人数
+    selContactNum () {
+      return this.contactListTotal.filter(f => f.isChecked).length;
     }
   },
   mounted () {

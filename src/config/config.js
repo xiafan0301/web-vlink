@@ -21,8 +21,8 @@ const oDomains = {
     },
     // 布控部分地址
     control: {
-        // dev: 'http://apidev.aorise.org/vlink-control',
-        dev: 'http://10.116.64.98:8081',//钟赞
+        dev: 'http://apidev.aorise.org/vlink-control',
+        // dev: 'http://10.116.64.98:8081',//钟赞
         // dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://emi.aorise.org/api/vis/',
         prod: 'http://emi.aorise.org/api/vis/'
@@ -30,7 +30,7 @@ const oDomains = {
     // 消息部分地址
     message: {
         dev: 'http://apidev.aorise.org/vlink-message',
-        // dev: 'http://10.116.64.169:8081',//花艳玲
+        // dev: 'http://10.116.64.136:8081',//花艳玲
         // dev: 'http://10.116.64.142:8083',
         // dev: 'http://10.116.64.92:8081',//钟赞
         test: 'http://emi.aorise.org/api/vis/',
@@ -89,6 +89,12 @@ const oDomains = {
         dev: 'http://apidev.aorise.org/vlink-base',
         test: 'http://apidev.aorise.org/vlink-base',
         prod: 'http://apidev.aorise.org/vlink-base'
+    },
+    // test-video服务
+    live: {
+      dev: 'http://apidev.aorise.org/vlink-link',
+      test: 'http://apidev.aorise.org/vlink-link',
+      prod: 'http://apidev.aorise.org/vlink-link',
     }
 };
 let ENV_API = process.env.VUE_APP_API;

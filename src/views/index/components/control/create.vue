@@ -16,13 +16,28 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
-            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
+            <el-form-item label="布控名称:" prop="controlName" style="width: 23%;margin-bottom: 22px;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
-            <el-form-item label="关联事件:" prop="event" style="width: 25%;">
-              <el-input v-model="createForm.event"></el-input>
+            <el-form-item label="关联事件:" prop="event" style="width: 23%;">
+              <!-- <el-input v-model="createForm.event"></el-input> -->
+              <el-select
+                v-model="createForm.event"
+                filterable
+                remote
+                value-key="value"
+                placeholder="请输入关联事件编号"
+                :remote-method="getEventList"
+                :loading="loading">
+                <el-option
+                  v-for="item in eventList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item label="布控类型:" style="width: 25%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
+            <el-form-item label="布控类型:" style="width: 23%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controlTypeList"
@@ -32,7 +47,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
+            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 23%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -44,27 +59,27 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && createForm.controlType === 2}]">
-              <el-form-item :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 23%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
                   :picker-options="{
                     start: '00:00:00',
                     step: '00:01:00',
-                    end: '23:00:00'
+                    end: '23:59:59'
                   }">
                 </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
+              <el-form-item style="margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
                   :picker-options="{
                     start: '00:00:00',
                     step: '00:01:00',
-                    end: '23:00:00',
+                    end: '23:59:59',
                     minTime: item.startTime
                   }">
                 </el-time-picker>
@@ -72,10 +87,10 @@
             </div>
             <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
               <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
-              <div class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
+              <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
             <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
               <el-option
                 v-for="item in controlRankList"
@@ -96,16 +111,16 @@
                   <el-checkbox label="范围分析" @change="modelType = '4'" :class="{'is_checked': modelType === '4'}"></el-checkbox>
                 </el-checkbox-group>
               </div>
-              <!-- 人员追踪 -->
-              <div is="model" ref="mapOne" v-show="modelType === '1'" :pageType="pageType" :allDevData="allDevData" mapId="mapOne" modelType="1" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
-              <!-- 车辆追踪 -->
-              <div is="model" ref="mapTwo" v-show="modelType === '2'" :pageType="pageType" :allDevData="allDevData" mapId="mapTwo" modelType="2" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
-              <!-- 越界分析 -->
-              <template v-if="areaList.length > 0">
-                <div is="model" ref="mapThree" v-show="modelType === '3'" :pageType="pageType" mapId="mapThree" modelType="3" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :areaList="areaList"></div>
+              <template v-if="allDevData && allDevData.length > 0">
+                <!-- 人员追踪 -->
+                <div is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+                <!-- 车辆追踪 -->
+                <div is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+                <!-- 范围分析 -->
+                <div is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
               </template>
-              <!-- 范围分析 -->
-              <div is="model" ref="mapFour" v-show="modelType === '4'" :pageType="pageType" :allDevData="allDevData" mapId="mapFour" modelType="4" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+              <!-- 越界分析 -->
+              <div is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
             </div>
           </div>
         </el-form>
@@ -133,7 +148,7 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getAreas, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getEventList, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -152,15 +167,16 @@ export default {
         controlName: null,
         event: null,
         controlType: null,
-        controlDate: null,
+        controlDate: [],
         controlRank: null,
         periodTime: [
           {
             startTime: null,
-            endTime: null
+            endTime:  null
           }
         ],
       },
+      eventList: [],
       // 分析模型数据
       allDevData: [],//传给分析模型的所有设备点位
       checkList: [],//多选
@@ -169,9 +185,9 @@ export default {
       modelDataTwo: null,// 车辆追踪数据
       modelDataThree: null,// 越界分析数据
       modelDataFour: null,// 范围分析数据
-      areaList: [],//行政区下拉列表
       // 弹出框参数
       toGiveUpDialog: false,
+      loading: false,
       loadingBtn: false,
       // 布控编辑参数
       controlDetail: {},
@@ -184,17 +200,17 @@ export default {
   created () {
     this.getDiciData();
     this.getAllMonitorList();
-    this.getAreas();
     // 编辑页-2
     if (this.createType) {
-      this.pageType = this.createType;
+      this.pageType = parseInt(this.createType);
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
     // 新增页-1
     } else {
-      this.checkList = ['人员追踪'];
-      this.modelType = '1';
+      this.pageType = 1;
+      // this.checkList = ['人员追踪'];
+      // this.modelType = '1';
     }
     // 复用页-3
     if (this.$route.query.createType) {
@@ -202,7 +218,39 @@ export default {
       this.getControlDetailIsEditor(this.$route.query.controlId);
     }
   },
+  mounted () {
+    this.GetTimeAfter();
+  },
   methods: {
+    // 获取下个月的今天
+    GetTimeAfter() { 
+      var dd = new Date();
+      function checkT(s) {
+          return s < 10 ? '0' + s: s;
+      }
+      dd.setDate(dd.getDate() + 30);//获取AddDayCount天后的日期 
+      var y = dd.getFullYear(); 
+      var m = dd.getMonth()+1;//获取当前月份的日期 
+      var d = dd.getDate();
+      const date = y+"-"+checkT(m)+"-"+checkT(d);
+      this.createForm.controlDate = [formatDate(new Date(), 'yyyy-MM-dd'), date];
+    },
+    // 获取关联事件列表
+    getEventList (query) {
+      const params = {
+        'where.otherQuery': query
+      }
+      getEventList(params).then(res => {
+        if (res && res.data) {
+          this.eventList = res.data.list.map(m => {
+            return {
+              label: m.eventCode,
+              value: m.eventCode
+            }
+          });
+        }
+      })
+    },
     // 获取所有监控设备列表
     getAllMonitorList () {
       const params = {ccode: 431224}
@@ -214,22 +262,6 @@ export default {
             this.$set(f, 'type', 1);
           });
           console.log(this.allDevData)
-        }
-      })
-    },
-    // 获取所有行政区列表
-    getAreas () {
-      const params = {
-        parentUid: '110000'
-      }
-      getAreas(params).then(res => {
-        if (res && res.data) {
-          this.areaList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.cname
-            }
-          });
         }
       })
     },
@@ -246,10 +278,6 @@ export default {
     },
     // 删除时间段
     removePeriodTime() {
-      if (this.createForm.periodTime.length === 1) {
-        this.$message.error('至少要有一个布控时间段');
-        return false;
-      }
       this.createForm.periodTime.splice(this.createForm.periodTime.length - 1, 1);
     },
     skipIsList () {
@@ -342,12 +370,15 @@ export default {
             let data = {
               alarmLevel: this.createForm.controlRank,// 告警级别
               eventId: parseInt(this.createForm.event),// 事件id
-              surveillanceDateStart: this.createForm.controlDate && this.createForm.controlDate[0],// 布控开始时间
-              surveillanceDateEnd: this.createForm.controlDate && this.createForm.controlDate[1],// 布控结束时间
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
               surveillancTimeList: time// 布控时间段
+            }
+            // 为短期布控时才需要传布控日期
+            if (this.createForm.controlType === 1) {
+              data.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
+              data.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
             }
             console.log(JSON.stringify(data) )
             this.loadingBtn = true;
@@ -452,6 +483,7 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
+          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour)
         }
       })
     },
@@ -506,12 +538,18 @@ export default {
             })
             this.controlDetail.alarmLevel = this.createForm.controlRank;
             this.controlDetail.eventId = parseInt(this.createForm.event);
-            this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];
-            this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
             this.controlDetail.modelList = modelList;
             this.controlDetail.surveillancTimeList = time;
+            // 为短期布控时才需要传布控日期
+            if (this.createForm.controlType === 1) {
+              this.controlDetail.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
+              this.controlDetail.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
+            } else {
+              this.controlDetail.surveillanceDateStart = null;
+              this.controlDetail.surveillanceDateEnd = null;
+            }
             console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
             putControl(this.controlDetail).then(() => {
@@ -534,7 +572,7 @@ export default {
   width: 100%;
   position: relative;
   .create_box{
-    min-height: 875px;
+    min-height: 738px;
     margin: 0 20px;
     padding: 0 20px 20px;
     background: #fff;
@@ -556,6 +594,10 @@ export default {
           background:rgba(250,250,250,1);
           border-radius:5px 5px 0px 0px;
           border:1px solid rgba(242,242,242,1);
+        }
+        .model_height{
+          height: 0!important;
+          overflow: hidden;
         }
       }
     }
@@ -589,12 +631,15 @@ export default {
         flex-wrap: wrap;
         margin-bottom: 10px;
         .el-form-item{
-          padding-right: 40px;
+          padding-right: 10px;
           .el-input__inner, .el-select{
             width: 100%!important;
           }
           .el-form-item__label{
             padding-bottom: 0!important;
+          }
+          .el-date-editor--time .el-input__inner{
+            width: 140px!important;
           }
         }
         .period_time{

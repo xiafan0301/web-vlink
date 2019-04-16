@@ -52,6 +52,11 @@ export default {
       cursor: default;
     }
   }
+  &.vid_show_type_dis {
+    > li {
+      cursor: default !important;
+    }
+  }
 }
 .vid_show_menu {
   position: absolute; top: 0; left: 20px; z-index: 20;
@@ -275,6 +280,7 @@ export default {
       width: 100%; height: 100%;
       overflow: hidden;
       background-color: #000;
+      box-shadow: 0 0 5px #f1f1f1;
       > video {
         position: absolute;
         display: block;

@@ -8,7 +8,7 @@ console.log('process.env.VUE_APP_PROJECTNAME', process.env.VUE_APP_PROJECTNAME)
 module.exports = {
     // 部署应用包时的基本 URL  Default: '/'
     // baseUrl: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : './',
-    publicPath: './',
+    baseUrl: './',
     // (build)生产环境构建文件的目录 // 'dist/web-test'
     // outputDir: 'dist',
     // outputDir: 'dist/' + ((process.env && process.env.VUE_APP_PROJECTNAME) ? process.env.VUE_APP_PROJECTNAME : 'web'),

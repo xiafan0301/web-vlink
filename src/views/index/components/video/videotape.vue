@@ -27,7 +27,7 @@
               </div>
             </div>
             <div is="flvplayer" :index="index" :oData="item"
-              :oConfig="{close: false}">
+              :oConfig="{close: false, pause: true}">
             </div>
             <div class="vt_cv"></div>
             <div class="vt_cb"></div>

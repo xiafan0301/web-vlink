@@ -207,7 +207,7 @@ export default {
       // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择复制对象!');
+        this.$message.error('请先勾选复制对象!');
       } else {
         this.isShowGroupCopy = !this.isShowGroupCopy;
       }
@@ -215,7 +215,7 @@ export default {
     // 判断是否选择了移出对象
     judgeIsSelectedRemove () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择移出对象!');
+        this.$message.error('请先勾选移出对象!');
       } else {
         this.removeGroupDialog = true;
       }

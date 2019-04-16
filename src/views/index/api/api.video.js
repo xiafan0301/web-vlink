@@ -74,7 +74,7 @@ export const apiVideoList = data => {
  */
 export const apiSignContentList = data => {
   return request({
-    url: '/videoSignContentService/signContentList',
+    url: '/videoSignContentService/contentList',
     method: 'get',
     // data,
     params: data,
