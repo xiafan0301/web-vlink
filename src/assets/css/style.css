@@ -162,6 +162,11 @@
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
 /**告警图标***/
 .vl_icon_alarm_1{width: 114px; height: 32px; background-position: -548px -882px;}
+.vl_icon_alarm_2{width: 26px; height: 25px; background-position: -695px -888px;}
+.vl_icon_alarm_3{width: 26px; height: 25px; background-position: -741px -888px;}
+.vl_icon_alarm_4{width: 26px; height: 25px; background-position: -787px -888px;}
+.vl_icon_alarm_5{width: 26px; height: 25px; background-position: -832px -888px;}
+.vl_icon_alarm_6{width: 26px; height: 25px; background-position: -877px -888px;}
 /**事件图标***/
 .vl_icon_event_1{width: 72px; height: 72px; background-position: -572px -426px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
@@ -675,6 +680,8 @@
   border: 1px solid #F2F2F2;
   background-color: #fff;
   padding: 5px 10px;
+  box-shadow: 0px 1px 12px 0px rgba(114,114,114,0.1);
+  border-radius: 3px;
 }
 .e_stat_tb_ld1 .g2-legend-list-item > div > div {
   font-weight: bold;
