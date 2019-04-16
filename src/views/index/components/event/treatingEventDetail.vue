@@ -17,14 +17,14 @@
         <div class="summary-content">
           <p>事件总结附件</p>
           <div class="content-icon">
-            <ul>
+            <ul class="clearfix" style="clear:both">
               <li v-for="(item, index) in eventFile" :key="'item' + index">
                 <i class="vl_icon vl_icon_event_1"></i>
                 <div class="operation_btn">
                   <div class="arrow"></div>
                   <p>
                     <i class="vl_icon vl_icon_manage_17"></i>
-                    <a :href="item.path">下载</a>
+                    <a :href="item.path" target="_blank">下载</a>
                   </p>
                   <p>
                     <i class="vl_icon vl_icon_event_25"></i>
@@ -53,7 +53,7 @@
         <div class="summary-content">
           <p>调度总结附件</p>
           <div class="content-icon">
-            <ul>
+            <ul class="clearfix" style="clear:both">
               <li v-for="(item, index) in ctcFile" :key="'item' + index">
                 <i class="vl_icon vl_icon_event_1"></i>
                 <div class="operation_btn">

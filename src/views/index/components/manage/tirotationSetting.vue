@@ -1,8 +1,8 @@
 <template>
   <div class="tirotation_setting">
     <div class="search_box">
-      <el-form :inline="true" :model="searchForm" class="search_form">
-        <el-form-item>
+      <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+        <el-form-item prop="dateTime">
           <el-date-picker
             style="width: 260px;"
             v-model="searchForm.dateTime"
@@ -13,16 +13,17 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item>
-          <el-select v-model="searchForm.eventType" style="width: 240px;" placeholder="全部状态">
-            <!-- <option label="全部状态" value="全部状态"></option> -->
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <el-form-item prop="status">
+          <el-select v-model="searchForm.status" style="width: 240px;" placeholder="轮巡状态">
+            <el-option value="全部状态"></el-option>
+            <el-option label="待开始" :value="1"></el-option>
+            <el-option label="进行中" :value="2"></el-option>
+            <el-option label="已结束" :value="3"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button class="select_btn">查询</el-button>
-          <el-button class="reset_btn">重置</el-button>
+          <el-button class="select_btn" @click="searchData">查询</el-button>
+          <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
         </el-form-item>
       </el-form>
       <div class="divide"></div>
@@ -110,13 +111,12 @@
       </el-table>
     </div>
     <el-pagination
-      @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
-      :page-size="100"
+      :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="400">
+      :total="pagination.total">
     </el-pagination>
     <!--关闭轮巡弹出框-->
     <el-dialog
@@ -145,19 +145,21 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delRotationDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delRotationDialog = false">确认</el-button>
+        <el-button class="operation_btn function_btn" @click="delRotationInfo">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { formatDate } from '@/utils/util.js';
+import { apiVideoRoundList, apiDelVideoRoundList } from '@/views/index/api/api.video.js';
 export default {
   data () {
     return {
-      currentPage4: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
-        dateTime: null,
-        eventType: null
+        dateTime: [],
+        status: '全部状态'
       },
       dataList: [
         {
@@ -196,12 +198,49 @@ export default {
       ],
       closeRatationDialog: false, // 关闭轮巡弹出框
       delRotationDialog: false, // 删除轮巡弹出框
+      deleteId: null, // 要删除的轮巡id
     }
   },
+  mounted () {
+    this.getOneMonth();
+    this.getList();
+  },
   methods: {
-    handleSizeChange () {
+    // 获取轮巡列表
+    getList () {
+      let status;
+      if (this.searchForm.status === '全部状态') {
+        status = null;
+      }
+      const params = {
+        'where.startTime': this.searchForm.dateTime[0],
+        'where.endTime': this.searchForm.dateTime[1],
+        'where.status': status,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      apiVideoRoundList(params)
+        .then(res => {
+          if (res) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
-    handleCurrentChange () {},
+    // 根据条件搜索
+    searchData () {
+      this.getList();
+    },
+    // 重置搜索条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 跳至新增轮巡页面
     skipAddRatotionPage () {
       this.$router.push({name: 'add_patrol'});
@@ -214,8 +253,34 @@ export default {
     // 显示删除轮巡弹出框
     showDeleteDialog (obj) {
       console.log(obj);
+      this.deleteId = obj.uid;
       this.delRotationDialog = true;
     },
+    // 删除轮巡数据
+    delRotationInfo () {
+      if (this.deleteId) {
+        apiDelVideoRoundList(this.deleteId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.searchForm.dateTime.push(startDate);
+      this.searchForm.dateTime.push(endDate);
+    }
   }
 }
 </script>

@@ -252,7 +252,8 @@ export default {
                   message: '添加任务成功',
                   customClass: 'request_tip'
                 })
-                this.$router.push({name: 'event_manage'});
+                // this.$router.push({name: 'event_manage'});
+                this.$router.back(-1);
               } else {
                 this.$message({
                   type:'error',
@@ -294,7 +295,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

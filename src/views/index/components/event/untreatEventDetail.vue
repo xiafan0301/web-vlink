@@ -118,7 +118,7 @@ export default {
       if (type) {
         if (type === 1) {
           // 跳至新增布控页面
-          this.$router.push({path: '/control/create'});
+          this.$router.push({path: '/control/create', query: { eventId: eventId }});
         }
         if (type === 2) {
           // 跳至事件管理调度指挥页面
@@ -143,7 +143,6 @@ export default {
     },
     // 放大图片
     openBigImg (index, data) {
-      console.log('data', data);
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));

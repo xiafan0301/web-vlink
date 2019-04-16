@@ -434,13 +434,15 @@ export default {
                 customClass: 'request_tip'
               })
               this.editGroupDialog = false;
-            } else {
-              this.$message({
-                type: 'error',
-                message: '修改失败',
-                customClass: 'request_tip'
-              })
+              this.getVeGroupInfo(parseInt(this.groupId));
             }
+            //  else {
+            //   this.$message({
+            //     type: 'error',
+            //     message: '修改失败',
+            //     customClass: 'request_tip'
+            //   })
+            // }
           })
           .catch(() => {})
       }

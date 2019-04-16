@@ -8,7 +8,7 @@
     <div class="box">
       <el-carousel :autoplay="false" arrow="always" height="100%" :initial-index="imgIndex">
         <el-carousel-item v-for="(item) in imgList" :key="item.uid">
-          <img :src="item.src" alt="">
+          <img :src="item.path" alt="">
         </el-carousel-item>
       </el-carousel>
       <i class="vl_icon vl_icon_event_23 close_icon" @click="closeImgDialog"></i>

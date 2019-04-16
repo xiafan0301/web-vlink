@@ -108,8 +108,8 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
-      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">保存</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddHandleLoading" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addEventForm')">保存</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <BigImg></BigImg>
@@ -142,6 +142,8 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isAddHandleLoading: false,
+      isAddLoading: false,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       isImgNumber: false, // 是否显示图片超过最大数提示
       backDialog: false, // 返回提示弹出框
@@ -353,15 +355,15 @@ export default {
       this.isImgDisabled = true;
       const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
       const isLtTenM = file.size / 1024 / 1024 < 2;
-      // if (!isImg) {
-      //   this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
-      //   this.isImgDisabled = false;
-      // }
-      // if (!isLtTenM) {
-      //   this.$message.error('上传的图片大小不能超过2M');
-      //   this.isImgDisabled = false;
-      // }
-      // return isImg && isLtTenM;
+      if (!isImg) {
+        this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
+        this.isImgDisabled = false;
+      }
+      if (!isLtTenM) {
+        this.$message.error('上传的图片大小不能超过2M');
+        this.isImgDisabled = false;
+      }
+      return isImg && isLtTenM;
     },
     handleImgNumber () { // 图片超出最大个数限制
       this.isImgNumber = true;
@@ -390,6 +392,7 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isAddLoading = true;
           let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
@@ -423,26 +426,25 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_manage'});
+                this.isAddLoading = false;
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '保存失败',
+                  customClass: 'request_tip'
+                })
+                this.isAddLoading = false;
               }
-              //  else {
-              //   this.$message({
-              //     type: 'error',
-              //     message: '保存失败',
-              //     customClass: 'request_tip'
-              //   })
-              // }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },
     // 返回
     back () {
       const data = JSON.stringify(this.addEventForm);
-      console.log(data)
-      console.log(this.dataStr)
       if (this.dataStr === data) {
-        this.$router.back(-1);
+        this.$router.back(-1);  
       } else {
         this.backDialog = true;
       }
@@ -456,6 +458,7 @@ export default {
     skipHandlePage (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isAddHandleLoading = true;
           let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
@@ -483,52 +486,54 @@ export default {
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '添加成功',
-                  customClass: 'request_tip'
-                })
+                // this.$message({
+                //   type: 'success',
+                //   message: '添加成功',
+                //   customClass: 'request_tip'
+                // })
+                this.isAddHandleLoading = false;
                 this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
               } else {
                 this.$message({
                   type: 'error',
-                  message: '添加失败',
+                  message: '保存失败',
                   customClass: 'request_tip'
                 })
+                this.isAddHandleLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddHandleLoading = false;})
           // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },
     // 处理要提交的数据
-    handleFormData () {
-      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-      if (this.addEventForm.casualties === '无') {
-        this.addEventForm.casualties = 0;
-      } else if (this.addEventForm.casualties === '不确定') {
-        this.addEventForm.casualties = -1;
-      } else if (this.addEventForm.casualties === '有') {
-        if (!reg.test(this.dieNumber)) {
-          this.isDieError = true;
-          this.dieTip = '死亡人数只能为正整数';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        if (parseInt(this.dieNumber) > 9999) {
-          this.isDieError = true;
-          this.dieTip = '可输入的最大死亡人数为9999';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        this.addEventForm.casualties = this.dieNumber;
-      }
-    }
+    // handleFormData () {
+    //   let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+    //   if (this.addEventForm.casualties === '无') {
+    //     this.addEventForm.casualties = 0;
+    //   } else if (this.addEventForm.casualties === '不确定') {
+    //     this.addEventForm.casualties = -1;
+    //   } else if (this.addEventForm.casualties === '有') {
+    //     if (!reg.test(this.dieNumber)) {
+    //       this.isDieError = true;
+    //       this.dieTip = '死亡人数只能为正整数';
+    //       return false;
+    //     } else {
+    //       this.isDieError = false;
+    //       this.dieTip = '';
+    //     }
+    //     if (parseInt(this.dieNumber) > 9999) {
+    //       this.isDieError = true;
+    //       this.dieTip = '可输入的最大死亡人数为9999';
+    //       return false;
+    //     } else {
+    //       this.isDieError = false;
+    //       this.dieTip = '';
+    //     }
+    //     this.addEventForm.casualties = this.dieNumber;
+    //   }
+    // }
   }
 }
 </script>
