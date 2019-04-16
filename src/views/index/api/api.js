@@ -2007,3 +2007,31 @@ export function ScpGETdeviceListById(params) {
   })
 }
 /*--------------------------  检索end  ---------------------------------*/
+/*-------------------------- 告警start -------------------------------*/
+/**
+ * getStatistics
+ * 报警统计接口
+ * @param {object} params
+ */
+export function getStatistics(params) {
+  return request({
+    url: '/alarm-snaps/statistics',
+    method: 'get',
+    mode: 'control',
+    params: params
+  })
+}
+/**
+ * getAlarmList
+ * 报警记录列表查询接口
+ * @param {object} params
+ */
+export function getAlarmList(params) {
+  return request({
+    url: '/alarm-snaps/page',
+    method: 'get',
+    mode: 'control',
+    params: params
+  })
+}
+/*-------------------------- 告警end ---------------------------------*/
