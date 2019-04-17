@@ -32,7 +32,7 @@
   </div>
 </template>
 <script>
-import {addMsgNote} from '@/views/index/api/api.js';
+import {addMsgNote} from '@/views/index/api/api.message.js';
 export default {
   data () {
     return {

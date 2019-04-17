@@ -127,7 +127,7 @@ export default {
             ul{
               li{
                 width: 100%;
-                padding: 10px 30px;
+                padding: 10px 34px;
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: space-between;
@@ -170,8 +170,13 @@ export default {
                 }
               }
               li{
-                margin-left: -8px;
                 cursor: default;
+              }
+            }
+            .highlight{
+              cursor: pointer;
+              &:hover, &.active{
+                background: #ebeff2;
               }
             }
           }

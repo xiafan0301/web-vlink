@@ -86,7 +86,7 @@
 </template>
 <script>
 import noteAdd from './noteAdd.vue';
-import {getSmsList, getSmsTemplate} from '@/views/index/api/api.js';
+import {getSmsList, getSmsTemplate} from '@/views/index/api/api.message.js';
 export default {
   components: {noteAdd},
   data () {

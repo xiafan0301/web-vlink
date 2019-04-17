@@ -39,7 +39,7 @@
 </template>
 <script>
 import uploadPic from '../control/components/uploadPic';
-import {addMsgNote, getMsgNoteDetail, putMsgNote} from '@/views/index/api/api.js';
+import {addMsgNote, getMsgNoteDetail, putMsgNote} from '@/views/index/api/api.message.js';
 export default {
   components: {uploadPic},
   props: ['pageType', 'msgNoteId'],

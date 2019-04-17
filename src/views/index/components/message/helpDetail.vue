@@ -84,7 +84,8 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
-import {getDiciData, getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.js';
+import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
+import {getDiciData} from '@/views/index/api/api.js';
 export default {
   components: {emotion},
   props: ['helpId'],
