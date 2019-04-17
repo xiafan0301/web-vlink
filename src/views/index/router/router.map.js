@@ -1,6 +1,6 @@
  /* 地图板块 */
 export default {
-  path: 'map',
+  path: '/map',
   name: 'map',
   component: () => import('@/views/index/components/map/default.vue'),
   redirect: {
