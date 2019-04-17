@@ -128,15 +128,15 @@
     </div>
     <div class="vid_title">
       <ul class="vid_show_type">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="showType = 1"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
+        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="showVideoTotal = 1"></li>
+        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="showVideoTotal = 4"></li>
+        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="showVideoTotal = 5"></li>
+        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="showVideoTotal = 9"></li>
        <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
       </ul>
     </div>
     <div class="vid_content">
-      <ul class="vid_show_list" :class="'vid_list_st' + showType">
+      <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
@@ -166,7 +166,6 @@ export default {
 
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
-      showType: 2,
       showVideoTotal: 4,
       showMenuActive: false,
       showConTitle: 1,
@@ -181,18 +180,7 @@ export default {
     }
   },
   watch: {
-    showType () {
-      if (this.showType === 1) {
-        this.showVideoTotal = 1;
-      } else if (this.showType === 2) {
-        this.showVideoTotal = 4;
-      } else if (this.showType === 3) {
-        this.showVideoTotal = 5;
-      } else if (this.showType === 4) {
-        this.showVideoTotal = 9;
-      } else if (this.showType === 5) {
-        this.showVideoTotal = 16;
-      }
+    showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
     }
   },
@@ -201,7 +189,7 @@ export default {
     let sType = window.localStorage.getItem('vlink_video_patrol_type3');
     if (sType && sType.length > 0) {
       sType = Number(sType);
-      this.showType = sType;
+      this.showVideoTotal = sType;
     } else {
       // 第一次打开
       this.showMenuActive = true;
@@ -269,7 +257,7 @@ export default {
     },
     // 缓存播放列表
     saveVideoList () {
-      window.localStorage.setItem('vlink_video_patrol_type3', JSON.stringify(this.showType));
+      window.localStorage.setItem('vlink_video_patrol_type3', JSON.stringify(this.showVideoTotal));
     },
     unloadSave () {
       this.saveVideoList();
@@ -290,15 +278,20 @@ export default {
     },
     dragDrop (item, index) {
       if (this.dragActiveObj) {
-        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        console.log('deviceSip', deviceSip);
-        this.videoList.splice(index, 1, {
-          type: this.dragActiveObj.ui_type,
+        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+        let type = this.dragActiveObj.ui_type;
+        let obj = {
+          type: type,
           title: this.dragActiveObj.deviceName,
-          video: Object.assign({}, this.dragActiveObj, {
-            deviceSip: deviceSip
-          })
-        });
+          video: Object.assign({}, this.dragActiveObj)
+        }
+        if (type === 2) {
+          Object.assign(obj, {
+            startTime: this.startTime,
+            endTime: this.endTime,
+          });
+        }
+        this.videoList.splice(index, 1, obj);
       }
     },
     dragEnd () {

@@ -62,7 +62,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
               <div v-else-if="deviceIsPlaying(item)">
@@ -75,7 +75,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <i class="el-icon-delete" style="cursor: not-allowed;" title="播放中，无法删除"></i>
               </div>
               <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
                 <h3 :title="item.content" class="com_ellipsis">
@@ -86,7 +86,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
               </div>
             </li>
           </ul>
@@ -112,7 +112,7 @@
   </div>
 </template>
 <script>
-import { apiVideoList, apiVideoSignPeopleList, apiSignContentList } from "@/views/index/api/api.video.js";
+import { apiVideoList, apiVideoSignPeopleList, apiSignContentList, apiVideoSignDel } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
@@ -170,13 +170,12 @@ export default {
     },
     dragDrop (item, index) {
       if (this.dragActiveObj) {
-        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        console.log('deviceSip', deviceSip);
         this.videoList.splice(index, 1, {
+          type: 2, // 标记，暂定为回放
           title: this.dragActiveObj.deviceName,
+          startTime: this.dragActiveObj.signTime,
           video: Object.assign({}, this.dragActiveObj, {
-            uid: this.dragActiveObj.deviceUid,
-            deviceSip: deviceSip
+            uid: this.dragActiveObj.deviceUid
           })
         });
       }
@@ -230,6 +229,40 @@ export default {
         }
       }).catch(error => {
         console.log("apiSignContentList error：", error);
+      });
+    },
+    delSign (item) {
+      this.$msgbox({
+        title: '提示',
+        message: '确定删除该视频标记吗？',
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = '执行中...';
+            apiVideoSignDel(item.id).then(() => {
+              this.searchSubmit();
+              this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+              done();
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            }).catch(error => {
+              console.log("apiVideoSignDel error：", error);
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            });
+          } else {
+            done();
+          }
+        }
+      }).then(action => {
       });
     }
   }
