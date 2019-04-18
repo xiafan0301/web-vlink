@@ -273,7 +273,6 @@ export default {
   },
   methods: {
     typeIconColorFn (index) {
-      let sc = this.typeColors[0];
       let _i = index;
       if (index > (this.typeColors.length - 1)) {
         _i = index % this.typeColors.length;
