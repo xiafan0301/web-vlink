@@ -109,7 +109,7 @@
           </div>
         </div>
         <div class="control_box">
-          <div>
+          <div v-if="controlObjList.objectList && controlObjList.objectList.length > 0" class="control_obj_list">
             <el-card class="more" shadow="hover">
               <p>布控对象</p>
               <div>{{controlObjList.objectList.length}}</div>
@@ -131,7 +131,7 @@
         </div>
       </div>
     </div>
-    <div is="controlVideo" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="flvplayer" @showScreen="showScreen" @playerClose="playerClose" :oData="videoObj" 
+    <div is="controlVideo" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @showScreen="showScreen" @playerClose="playerClose" :oData="videoObj" 
       :oConfig="{sign: true}">
     </div>
   </div>
@@ -205,7 +205,7 @@ export default {
     // 显示大屏
     showScreen () {
       if (this.clickWindow) {
-        $('.control_map').append($('#flvplayer'));
+        $('.control_map').append($('#controlVideo'));
         this.isShowVideo = false;
         this.isShowV = false; 
         this.clickWindow.close();
@@ -465,12 +465,12 @@ export default {
           // 利用事件冒泡,绑定关闭弹框的点击事件
           $('#mapBox').on('click', '.vl_map_close', function () {
             // 关闭弹窗
-            if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
+            if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
           })
           // 利用事件冒泡,绑定视频全屏按钮的点击事件
           // $('#mapBox').on('click', '.vl_map_full_screen', function () {
           //   // 关闭弹窗
-          //   if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
+          //   if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
 
           //   // 显示视频回放页面
           //   _this.isShowFullScreen = true;
@@ -546,10 +546,10 @@ export default {
 
             _this.isShowVideo = true;
             setTimeout(() => {
-              $('#' + domId).append($('#flvplayer'));
+              $('#' + domId).append($('#controlVideo'));
               _this.isShowV = true;
             }, 100)
-            console.log($('#flvplayer'))
+            console.log($('#controlVideo'))
           }
         }
       })
@@ -813,7 +813,7 @@ export default {
           display: flex;
           flex-wrap: nowrap;
           justify-content: space-between;
-          > div:nth-child(1){
+          .control_obj_list{
             width: calc(100% - 344px);
             height: 200px;
             padding-right: 20px;

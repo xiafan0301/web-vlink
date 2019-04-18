@@ -45,6 +45,9 @@
                 prop="createTime"
                 show-overflow-tooltip
                 >
+                <!-- <template slot-scope="scope">
+                  {{scope.row.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template> -->
               </el-table-column>
               <el-table-column
                 label="短信类型"

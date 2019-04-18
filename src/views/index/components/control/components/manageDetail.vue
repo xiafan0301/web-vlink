@@ -90,6 +90,9 @@
                                 <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
+                            <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
+                              <li>范围内无设备</li>
+                            </ul>
                             <!-- 卡口 -->
                             <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
                               <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
@@ -97,15 +100,21 @@
                                   <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
                                 </div>
                                 <el-collapse-transition>
-                                  <ul v-show="bayonet.isDropdown">
+                                  <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
                                     <template v-for="(equ, index) in bayonet.devList">
                                       <li :key="equ.uid + equ.deviceName + index">
                                         <span style="color: #999;">{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05" style="color: #999;"></i>
                                       </li>
                                     </template>
                                   </ul>
+                                  <ul v-if="bayonet.isDropdown && (!bayonet.devList || bayonet.devList.length === 0)">
+                                    <li>范围内无设备</li>
+                                  </ul>
                                 </el-collapse-transition>
                               </li>
+                            </ul>
+                            <ul v-if="tabTypeByScope === '1' && (!trackPoint.bayonetList || trackPoint.bayonetList.length === 0)">
+                              <li>范围内无卡口</li>
                             </ul>
                           </vue-scroll>
                         </div>
@@ -355,7 +364,7 @@
   </div>
 </template>
 <script>
-import {uniq} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
@@ -550,7 +559,7 @@ export default {
                   devList = devList.concat(f.devList);
                 }
               })
-              this.situList = uniq(devList);
+              this.situList = unique(devList);//去重
               console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
