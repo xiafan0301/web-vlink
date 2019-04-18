@@ -76,7 +76,8 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
-            
+              :selectDeviceList="allDeviceList"
+              :selectDeviceNumber="selectDeviceNumber"
             ></mapSelect>
           </template>
           <template v-if="tabState === 2">
@@ -109,7 +110,7 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 2, // 地图选择
+      tabState: 1, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
         roundInterval: null, // 间隔时间
@@ -117,9 +118,9 @@ export default {
         dateTime: [] // 轮巡时间
       },
       pickerOptions0: {
-        // disabledDate (time) {
-        //   return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000) ||  time.getTime() > (new Date().getTime() + 1200 * 1000 );
-        // }
+        disabledDate (time) {
+          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
+        }
       },
       rules: {
         roundName: [
@@ -156,7 +157,6 @@ export default {
   methods: {
     // 接收已有的设备
     emitFinalDevice (list) {
-      console.log(list);
       this.currentDeviceList = [];
       if (list) {
         this.currentDeviceList = JSON.parse(JSON.stringify(list));
@@ -164,7 +164,6 @@ export default {
     },
     // 打开右侧箭头
     emitOpenRightArrow (index) {
-      console.log(index)
       this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
       this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
     },
@@ -244,7 +243,6 @@ export default {
               });
               this.selectDeviceNumber += item.deviceList.length;
             });
-            console.log(this.selectDeviceNumber)
           }
         })
         .catch(() => {})
@@ -278,6 +276,14 @@ export default {
           addVideoRound(params)
             .then(res => {
               console.log('res', res)
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '新增成功',
+                  customClass: 'request_tip'
+                });
+                this.$router.push({name: 'tirotation_setting'});
+              }
             })
             .catch(() => {})
         }

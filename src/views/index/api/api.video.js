@@ -19,12 +19,12 @@ export const apiVideoRoundList = data => {
  * 轮巡列表删除接口
  * @param {Object} data 接口入参
  */
-export const apiDelVideoRoundList = id => {
+export const apiDelVideoRoundList = data => {
   return request({
     // url: '/videoDownloadService/videoDownloadList?' + $.param(data),
-    url: '/round/' + id,
+    url: '/round/' + data.id,
     method: 'delete',
-    // data,
+    params: data,
     mode: videoModeName
   })
 }
@@ -221,7 +221,7 @@ export const updateVideoRecords = data => {
  */
 export const deleteVideoRecords = data => {
   return request({
-    url: '/videoSignContentService/videoSignContent/',
+    url: '/videoSignContentService/videoSignContent/' + data.id,
     method: 'delete',
     params: data,
     mode: videoModeName

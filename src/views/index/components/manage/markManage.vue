@@ -177,7 +177,7 @@ export default {
       isShowError: false,
       pickerOptions0: {
         disabledDate (time) {
-          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
+          return time.getTime() > (new Date().getTime());
         }
       },
       searchForm: {
@@ -239,6 +239,7 @@ export default {
     // 显示新增标记弹出框
     showAddMarkDialog () {
       this.isShowError = false;
+      this.markForm.markName = null;
       this.createMarkDialog = true;
     },
     // 新增标记
@@ -316,7 +317,10 @@ export default {
     // 删除标记
     deleteMark () {
       if (this.markId) {
-        deleteVideoRecords(this.markId)
+        const params = {
+          id: this.markId
+        }
+        deleteVideoRecords(params)
           .then(res => {
             if (res) {
               this.$message({

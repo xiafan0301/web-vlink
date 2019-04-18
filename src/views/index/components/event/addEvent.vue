@@ -134,7 +134,7 @@
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import { addEvent } from '@/views/index/api/api.event.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';

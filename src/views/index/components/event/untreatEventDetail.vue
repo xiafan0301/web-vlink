@@ -59,7 +59,7 @@
 <script>
 import EventBasic from './components/eventBasic';
 import { getEventDetail } from '@/views/index/api/api.event.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {

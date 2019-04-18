@@ -1,154 +1,167 @@
 <template>
-  <div class="tirotation_setting">
-    <div class="search_box">
-      <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-        <el-form-item prop="dateTime">
-          <el-date-picker
-            style="width: 260px;"
-            v-model="searchForm.dateTime"
-            type="daterange"
-            value-format="yyyy-MM-dd"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item prop="status">
-          <el-select v-model="searchForm.status" style="width: 240px;" placeholder="轮巡状态">
-            <el-option value="全部状态"></el-option>
-            <el-option label="待开始" :value="1"></el-option>
-            <el-option label="进行中" :value="2"></el-option>
-            <el-option label="已结束" :value="3"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button class="select_btn" @click="searchData">查询</el-button>
-          <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
-        </el-form-item>
-      </el-form>
-      <div class="divide"></div>
-    </div>
-    <div class="table_box">
-      <div class="add_ratation_btn" @click="skipAddRatotionPage">
-        <span>+</span>
-        <span>新增轮训</span>
+  <vue-scroll>
+    <div class="tirotation_setting">
+      <div class="search_box">
+        <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+          <el-form-item prop="dateTime">
+            <el-date-picker
+              style="width: 260px;"
+              v-model="searchForm.dateTime"
+              type="daterange"
+              value-format="yyyy-MM-dd"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="status">
+            <el-select v-model="searchForm.status" style="width: 240px;" placeholder="轮巡状态">
+              <el-option value="全部状态"></el-option>
+              <el-option label="待开始" :value="1"></el-option>
+              <el-option label="进行中" :value="2"></el-option>
+              <el-option label="已结束" :value="3"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="select_btn" @click="searchData">查询</el-button>
+            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+          </el-form-item>
+        </el-form>
+        <div class="divide"></div>
       </div>
-      <el-table
-        class="ratation_table"
-        :data="dataList"
+      <div class="table_box">
+        <div class="add_ratation_btn" @click="skipAddRatotionPage">
+          <span>+</span>
+          <span>新增轮训</span>
+        </div>
+        <el-table
+          class="ratation_table"
+          :data="dataList"
+          >
+          <el-table-column
+            fixed
+            label="预案编号"
+            prop="roundNo"
+            :show-overflow-tooltip='true'
+            >
+          </el-table-column>
+          <el-table-column
+            label="预案名称"
+            prop="roundName"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="开始时间"
+            prop="startTime"
+            show-overflow-tooltip
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.startTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="结束时间"
+            prop="endTime"
+            show-overflow-tooltip
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.endTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="轮巡状态"
+            prop="roundStatus"
+            >
+            <template slot-scope="scope">
+              <span class="event_status" :class="[scope.row.roundStatus === 1 ? 'untreated_event' 
+                : scope.row.roundStatus === 2 ? 'treating_event' : 'end_event']">
+                {{scope.row.roundStatus === 1 ? '待开始' : scope.row.roundStatus === 2 ? '进行中' : '已结束'}}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="轮巡间隔(秒)"
+            prop="interval"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="画面数"
+            prop="frameNumber"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          
+          <el-table-column
+            label="轮巡设备"
+            prop="deviceNumber"
+            :show-overflow-tooltip='true'
+          >
+          </el-table-column>
+          <el-table-column
+            label="更新时间"
+            prop="updateTime"
+            show-overflow-tooltip
+            align="center"
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.updateTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="240">
+            <template slot-scope="scope">
+              <span class="operation_btn">查看</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn">编辑</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showCloseDialog(scope)">关闭</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-pagination
+        @current-change="handleCurrentChange"
+        :current-page.sync="pagination.pageNum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pagination.pageSize"
+        layout="total, prev, pager, next, jumper"
+        :total="pagination.total">
+      </el-pagination>
+      <!--关闭轮巡弹出框-->
+      <el-dialog
+        title="是否关闭该轮巡任务?"
+        :visible.sync="closeRatationDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
         >
-        <el-table-column
-          fixed
-          label="预案编号"
-          prop="planCode"
-          :show-overflow-tooltip='true'
-          >
-        </el-table-column>
-        <el-table-column
-          label="预案名称"
-          prop="planName"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="开始时间"
-          prop="startTime"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="结束时间"
-          prop="endTime"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="轮巡状态"
-          prop="eventStatus"
-          >
-          <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatus === '待开始' ? 'untreated_event' : scope.row.eventStatus === '进行中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatus}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="轮巡间隔(秒)"
-          prop="duration"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="画面数"
-          prop="number"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        
-        <el-table-column
-          label="轮巡设备"
-          prop="deviceNumber"
-          :show-overflow-tooltip='true'
+        <span style="color: #999999;">关闭后不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="closeRatationDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="closeRatationDialog = false">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--删除弹出框-->
+      <el-dialog
+        title="是否确定删除该轮巡任务?"
+        :visible.sync="delRotationDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
         >
-        </el-table-column>
-        <el-table-column
-          label="更新时间"
-          width="150"
-          prop="updateTime"
-          show-overflow-tooltip
-          align="center"
-          >
-        </el-table-column>
-        <el-table-column label="操作" width="240">
-          <template slot-scope="scope">
-            <span class="operation_btn">查看</span>
-            <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn">编辑</span>
-            <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope)">删除</span>
-            <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showCloseDialog(scope)">关闭</span>
-          </template>
-        </el-table-column>
-      </el-table>
+        <span style="color: #999999;">删除后数据不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="delRotationDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="delRotationInfo">确认</el-button>
+        </div>
+      </el-dialog>
     </div>
-    <el-pagination
-      @current-change="handleCurrentChange"
-      :current-page.sync="pagination.pageNum"
-      :page-sizes="[100, 200, 300, 400]"
-      :page-size="pagination.pageSize"
-      layout="total, prev, pager, next, jumper"
-      :total="pagination.total">
-    </el-pagination>
-    <!--关闭轮巡弹出框-->
-    <el-dialog
-      title="是否关闭该轮巡任务?"
-      :visible.sync="closeRatationDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">关闭后不可恢复。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="closeRatationDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="closeRatationDialog = false">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--删除弹出框-->
-    <el-dialog
-      title="是否确定删除该轮巡任务?"
-      :visible.sync="delRotationDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">删除后数据不可恢复。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="delRotationDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delRotationInfo">确认</el-button>
-      </div>
-    </el-dialog>
-  </div>
+  </vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
@@ -161,44 +174,10 @@ export default {
         dateTime: [],
         status: '全部状态'
       },
-      dataList: [
-        {
-          planCode: '2018110601220181106012',
-          planName: '预案名称1预案名称1',
-          startTime: '2018-12-12 12:12:12',
-          endTime: '2018-12-12 12:12:12',
-          eventStatus: '待开始',
-          duration: 100,
-          number: 12,
-          deviceNumber: 123,
-          updateTime: '2018-12-12 12:12:12'
-        },
-        {
-          planCode: '2018110601220181106012',
-          planName: '预案名称1预案名称1',
-          startTime: '2018-12-12 12:12:12',
-          endTime: '2018-12-12 12:12:12',
-          eventStatus: '进行中',
-          duration: 100,
-          number: 12,
-          deviceNumber: 123,
-          updateTime: '2018-12-12 12:12:12'
-        },
-        {
-          planCode: '2018110601220181106012',
-          planName: '预案名称1预案名称1',
-          startTime: '2018-12-12 12:12:12',
-          endTime: '2018-12-12 12:12:12',
-          eventStatus: '已结束',
-          duration: 100,
-          number: 12,
-          deviceNumber: 123,
-          updateTime: '2018-12-12 12:12:12'
-        }
-      ],
+      dataList: [],
       closeRatationDialog: false, // 关闭轮巡弹出框
       delRotationDialog: false, // 删除轮巡弹出框
-      deleteId: null, // 要删除的轮巡id
+      deleteId: null, // 要删除--关闭的轮巡id
     }
   },
   mounted () {
@@ -211,6 +190,8 @@ export default {
       let status;
       if (this.searchForm.status === '全部状态') {
         status = null;
+      } else {
+        status = this.searchForm.status;
       }
       const params = {
         'where.startTime': this.searchForm.dateTime[0],
@@ -235,6 +216,7 @@ export default {
     // 重置搜索条件
     resetForm (form) {
       this.$refs[form].resetFields();
+      this.getOneMonth();
       this.getList();
     },
     handleCurrentChange (page) {
@@ -247,26 +229,32 @@ export default {
     },
     // 显示关闭轮巡弹出框
     showCloseDialog (obj) {
-      console.log(obj);
+      // console.log(obj);
+      this.deleteId = obj.id;
       this.closeRatationDialog = true;
     },
     // 显示删除轮巡弹出框
     showDeleteDialog (obj) {
-      console.log(obj);
-      this.deleteId = obj.uid;
+      // console.log(obj);
+      this.deleteId = obj.id;
       this.delRotationDialog = true;
     },
     // 删除轮巡数据
     delRotationInfo () {
       if (this.deleteId) {
-        apiDelVideoRoundList(this.deleteId)
+        const params = {
+          id: this.deleteId
+        }
+        apiDelVideoRoundList(params)
           .then(res => {
             if (res) {
               this.$message({
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
+              this.delRotationDialog = false;
+              this.getList();
             }
           })
           .catch(() => {})

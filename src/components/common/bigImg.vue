@@ -34,28 +34,28 @@ export default {
 .big_img_box {
   width: 100%;
   height: 100%;
-  /deep/ .el-dialog {
+  .el-dialog {
     background-color: transparent;
     width: 100%;
     height: 100%;
     margin: 0 !important;
-    /deep/ .el-dialog__header {
+    .el-dialog__header {
       display: none;
     }
-    /deep/.el-dialog__body {
+    .el-dialog__body {
       padding: 0;
       height: 100%;
       .box {
         width: 100%;
         height: 100%;
         position: relative;
-        /deep/ .el-carousel {
+        .el-carousel {
           height: 100%;
           img {
             width: 100%;
             height: 100%;
           }
-          /deep/ .el-carousel__arrow {
+          .el-carousel__arrow {
             width: 64px;
             height: 64px;
             background-color: #0C70F8;
@@ -73,6 +73,9 @@ export default {
         }
       }
     }
+  }
+  .el-carousel__indicators {
+    display: none;
   }
 }
 </style>
