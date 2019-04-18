@@ -102,7 +102,7 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {copyVehicle, removeVehicle, delVehicleGroupById, getGroupListIsVehicle} from '@/views/index/api/api.js';
+import {copyVehicle, removeVehicle, delVehicleGroupById, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
   props: ['carMemberList', 'groupId', 'groupName', 'tabType'],

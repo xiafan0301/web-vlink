@@ -109,7 +109,7 @@
 <script>
 import helpAdd from './helpAdd.vue';
 import helpDetail from './helpDetail.vue';  
-import {getMutualHelpList} from '@/views/index/api/api.js';
+import {getMutualHelpList} from '@/views/index/api/api.message.js';
 export default {
   components: {helpAdd, helpDetail},
   data () {

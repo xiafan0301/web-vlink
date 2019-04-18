@@ -82,7 +82,7 @@ export default {
 </script>
 <style lang="scss">
   .upload_pic_components{
-    max-height: 224px;
+    max-height: 232px;
     .el-upload-list__item{
       width:104px !important;
       height:104px !important;

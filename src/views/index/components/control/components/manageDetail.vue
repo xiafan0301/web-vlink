@@ -23,7 +23,7 @@
           </li>
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
-            <div><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} - {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} - {{controlDetail.surveillanceDateEnd}}</span></div>
           </li>
           <li>
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
@@ -80,32 +80,41 @@
                       <el-collapse-transition>
                         <div v-show="trackPoint.isDropdown">
                           <div class="equ_m">
-                            <div @click="getEquList('0', trackPoint)" :class="{'active': devId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{devNum}}）</div>
-                            <div @click="getEquList('1', trackPoint)" :class="{'active': devId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{bayonetNum}}）</div>
+                            <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{devNum}}）</div>
+                            <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{bayonetNum}}）</div>
                           </div>
                           <vue-scroll>
                             <!-- 摄像头 -->
                             <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
+                            </ul>
+                            <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
+                              <li>范围内无设备</li>
                             </ul>
                             <!-- 卡口 -->
                             <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
-                              <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName">
-                                <div class="bayone_name"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown}">
+                              <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
+                                <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
                                   <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
                                 </div>
                                 <el-collapse-transition>
-                                  <ul v-show="bayonet.isDropdown">
+                                  <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
                                     <template v-for="(equ, index) in bayonet.devList">
                                       <li :key="equ.uid + equ.deviceName + index">
-                                        <span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                        <span style="color: #999;">{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05" style="color: #999;"></i>
                                       </li>
                                     </template>
                                   </ul>
+                                  <ul v-if="bayonet.isDropdown && (!bayonet.devList || bayonet.devList.length === 0)">
+                                    <li>范围内无设备</li>
+                                  </ul>
                                 </el-collapse-transition>
                               </li>
+                            </ul>
+                            <ul v-if="tabTypeByScope === '1' && (!trackPoint.bayonetList || trackPoint.bayonetList.length === 0)">
+                              <li>范围内无卡口</li>
                             </ul>
                           </vue-scroll>
                         </div>
@@ -197,7 +206,7 @@
                     @drop="drop($event, index)"
                     >
                     <div class="situ_r_img" v-if="!item.isShowVideo">
-                      <div>从左边点击或拖拽设备播放</div>
+                      <div>从左边拖拽设备播放</div>
                     </div>
                     <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
                       :oConfig="{sign: true}">
@@ -249,12 +258,14 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <video :id='"controlResult" + index' src="../../../../../assets/video/video.mp4" width="100%" @click="showLargeVideo(item)"></video>
+                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg">
+                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
                     <div>
                       <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="pauseVideo(item, index)"></i>
                       <i class="vl_icon vl_icon_control_09" v-else @click="playVideo(item, index)"></i>
+                      <a download="视频" :href="item.snapVideo" class="el-icon-download download"></a>
                     </div>
                   </div>
                 </div>
@@ -279,14 +290,14 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlResultLarge" src="../../../../../assets/video/video.mp4"></video>
+      <video id="controlResultLarge" :src="videoObj.snapVideo"></video>
       <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{videoObj.deviceName}}</div>
         <div>
           <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="largeVideoPlay"></span>
           <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span><a download="视频" href="../../../../../assets/video/video.mp4" class="el-icon-download"></a></span>
+          <span><a download="视频" :href="videoObj.snapVideo" class="el-icon-download"></a></span>
           <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
         </div>
       </div>
@@ -353,12 +364,13 @@
   </div>
 </template>
 <script>
-import {uniq} from '@/utils/util.js';
+import {unique} from '@/utils/util.js';
 import delDialog from './delDialog.vue';
 import stopDialog from './stopDialog.vue';
 import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap, getEventDetail} from '@/views/index/api/api.js';
+import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
+import {getEventDetail} from '@/views/index/api/api.event.js';
 export default {
   components: {delDialog, stopDialog, flvplayer},
   props: ['state', 'controlId'],
@@ -376,7 +388,8 @@ export default {
       devList: [], //设备列表
       tabTypeByScope : '0',// 设备类型-布控范围
       tabTypeBySituation : '0',// 设备类型-运行情况
-      devId: null,//设备id
+      devIdOrBayId: null,//设备或者卡口id
+      trackPointId: null,//追踪点id
       dpOne: false,//展开布控范围
       dpTwo: false,//展开实时监控
        // 翻页数据
@@ -434,6 +447,12 @@ export default {
     // 开始播放
     playVideo (item, index) {
       item.curVideoPlay = true;
+      for (let f of this.controlResList.list) {
+        if (item.uid === f.uid && !f.isShowCurImg) {
+          f.isShowCurImg = true;
+          break;
+        }
+      }
       document.getElementById('controlResult' + index).play();
     },
     // 显示大屏
@@ -450,7 +469,9 @@ export default {
     // 大屏播放
     playLargeVideo () {
       this.largeVideoPlay = true;
-      document.getElementById('controlResultLarge').play();
+      this.$nextTick(() => {
+        document.getElementById('controlResultLarge').play();
+      })
     },
     // 停止大屏播放
     pauseLargeVideo () {
@@ -538,7 +559,7 @@ export default {
                   devList = devList.concat(f.devList);
                 }
               })
-              this.situList = uniq(devList);
+              this.situList = unique(devList);//去重
               console.log(this.situList, 'situList')
               // 组装卡口列表数据
               let bayList = [];
@@ -562,7 +583,7 @@ export default {
     // 切换设备类型获得设备列表数据
     getEquList (type, data) {
       this.tabTypeByScope = type;
-      this.devId = data.uid;
+      this.trackPointId = data.uid;
     },
     // 展开或者闭合设备列表
     dropdown (data) {
@@ -575,13 +596,51 @@ export default {
         this.getEquList('0', data);
       })
     },
+    // 点击左侧设备列表，地图marker高亮
+    selDev (obj) {
+      let _this = this;
+      _this.devIdOrBayId = obj.uid;
+      $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
+      $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
+      $(`#mapBox #${obj.uid}_sxt`).addClass('vl_icon_control_34');
+      let sContent = null, hoverWindow = null;
+      sContent = `<div class="vl_map_hover">
+        <div class="vl_map_hover_main"><ul>
+          <li><span>设备名称：</span><span>${obj.deviceName}</span></li>
+          <li><span>设备地址：</span><span>${obj.address}</span></li>
+        </ul></div>`;
+      hoverWindow = new window.AMap.InfoWindow({
+        isCustom: true,
+        closeWhenClickMap: true,
+        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+        content: sContent
+      });
+      hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));    
+    },
     // 展开或者闭合卡口列表
     dropdownBayonet (parentData, childData) {
-      this.trackPointList.forEach(f => {
+      this.devIdOrBayId = childData.uid;
+      let _this = this, sContent = null, hoverWindow = null;
+      _this.trackPointList.forEach(f => {
         if (parentData.uid === f.uid) {
           f.bayonetList.forEach(b => {
             if (childData.uid === b.uid) {
               b.isDropdown = !b.isDropdown;
+              // 点击左侧设备列表，地图marker高亮
+              $(`#mapBox .vl_icon_control_35`).removeClass('vl_icon_control_35');
+              $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
+              $(`#mapBox #${childData.uid}_kk`).addClass('vl_icon_control_35');
+              sContent = `<div class="vl_map_hover">
+                <div class="vl_map_hover_main"><ul>
+                  <li><span>卡口名称：</span><span>${childData.bayonetName}</span></li>
+                </ul></div>`;
+              hoverWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+                content: sContent
+              });
+              hoverWindow.open(_this.map, new window.AMap.LngLat(childData.longitude, childData.latitude));
             } else {
               b.isDropdown = false;
             }
@@ -644,7 +703,7 @@ export default {
       const params = {
         pageNum: this.pageNumObjRes,
         pageSzie: this.pageSzieRes,
-        'where.surveillanceId': this.controlId,
+        'where.surveillanceId': 11,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
         'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
         'where.deviceName': this.devNameIsKey
@@ -655,6 +714,7 @@ export default {
           this.controlResList.list.forEach(f => {
             this.$set(f, 'curVideoPlay', false);
             this.$set(f, 'curVideoTool', false);
+            this.$set(f, 'isShowCurImg', false);
           })
         }
       })
@@ -839,17 +899,17 @@ export default {
             let sContent = '';
             // 摄像头
             if (obj.type === 1) {
-              sContent = '<div class="vl_map_hover">' +
-                '<div class="vl_map_hover_main"><ul>' + 
-                  '<li><span>设备名称：</span>' + obj.deviceName + '</li>' + 
-                  '<li><span>设备地址：</span>' + obj.address + '</li>' + 
-                '</ul></div>';
+              sContent = `<div class="vl_map_hover">
+                <div class="vl_map_hover_main"><ul>
+                  <li><span>设备名称：</span><span>${obj.deviceName}</span></li>
+                  <li><span>设备地址：</span><span>${obj.address}</span></li>
+                </ul></div>`;
             // 卡口
             } else {
-              sContent = '<div class="vl_map_hover">' +
-              '<div class="vl_map_hover_main"><ul>' + 
-                '<li><span>卡口名称：</span>' + obj.bayonetName + '</li>' + 
-              '</ul></div>';
+              sContent = `<div class="vl_map_hover">
+              <div class="vl_map_hover_main"><ul>
+                <li><span>卡口名称：</span><span>${obj.bayonetName}</span></li>
+              </ul></div>`;
             }
             hoverWindow = new window.AMap.InfoWindow({
               isCustom: true,
@@ -869,6 +929,7 @@ export default {
               $(`#mapBox .vl_icon_control_34`).removeClass('vl_icon_control_34');
               $(`#mapBox #${obj.uid}_kk`).addClass('vl_icon_control_35');
             }
+            _this.devIdOrBayId = obj.uid;//左侧列表高亮
           });
           marker.setMap(_this.map);
         }
@@ -891,6 +952,11 @@ export default {
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
       _this.mapMark();
+    }
+  },
+  destroyed () {
+    if (this.map) {
+      this.map.destroy();
     }
   }
 }
@@ -1234,8 +1300,16 @@ export default {
                 }
                 i{
                   margin-top: 6px;
-                  margin-right: 10px;
+                  margin-right: 5px;
                   cursor: pointer;
+                }
+                .download{
+                  margin-top: 6px;
+                  margin-right: 10px;
+                  text-decoration: none;
+                  color: #fff;
+                  font-size: 20px;
+                  vertical-align: top;
                 }
               }
               > div:nth-child(1){
@@ -1306,6 +1380,9 @@ export default {
       }
     }
   }
+  .close_btn{
+    font-size: 1.3rem;
+  }
 }
 </style>
 <style lang="scss">
@@ -1318,6 +1395,19 @@ export default {
           width: 100%;
         }
       }
+    }
+  }
+  .vl_map_hover_main{
+    li{
+      display: flex;
+      > span{
+        width: auto;
+        text-align: left;
+        &:nth-child(2){
+          flex: 1;
+        }
+      }
+     
     }
   }
 }

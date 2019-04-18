@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import {delControl} from '@/views/index/api/api.js';
+import {delControl} from '@/views/index/api/api.control.js';
 export default {
   props: ['controlId'],
   data () {

@@ -1,5 +1,5 @@
 <template>
-  <el-form :ref="mapId" :model="modelForm">
+  <el-form :ref="mapId" :model="modelForm" class="control_model">
     <!-- 图片上传 -->
     <el-form-item :label="changeObj" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
       <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList"></div>
@@ -45,7 +45,7 @@
           v-model="item.point"
           :fetch-suggestions="autoAdress"
           value-key="name"
-          @focus="circleIndex = index"
+          @focus="pointIndex = index"
           @select="chooseAddress"
           placeholder="请输入追踪点">
         </el-autocomplete>
@@ -217,7 +217,7 @@
 </template>
 <script>
 import {objDeepCopy} from '@/utils/util.js';
-import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.js';
+import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
 import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
@@ -254,6 +254,7 @@ export default {
       rangingAcitve: false,
       rangingObj: null,
       // 追踪点列表数据
+      pointIndex: null,
       trackPointList: [],
       type: '0',// 设备类型
       tid: null,//追踪点列表id
@@ -303,7 +304,9 @@ export default {
       handler (val) {
         if (val) {
           console.log('threethreethree')
-          this.getModelDataThree();
+          this.getAreas().then(() => {
+            this.getModelDataThree();
+          })  
         }
       },
       deep: true
@@ -330,7 +333,7 @@ export default {
     }
   },
   created () {
-    if (this.modelType === '3') {
+    if (this.modelType === '3' && !this.modelDataThree) {
       this.getAreas();
     }
   },
@@ -342,19 +345,22 @@ export default {
   methods: {
     // 获取所有行政区列表
     getAreas () {
-      const params = {
-        parentUid: '110000'
-      }
-      getAreas(params).then(res => {
-        if (res && res.data) {
-          this.areaList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.cname
-            }
-          });
-          this.resetMap();
+      return new Promise((resolve) => {
+        const params = {
+          parentUid: '431224'
         }
+        getAreas(params).then(res => {
+          if (res && res.data) {
+            this.areaList = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.cname
+              }
+            });
+            resolve();
+            this.resetMap();
+          }
+        })
       })
     },
     autoAdress (queryString, cb) {
@@ -370,7 +376,7 @@ export default {
     },
     chooseAddress (e) {
       console.log(e);
-      this.markLocation(e.location.lng, e.location.lat, e.address, this.circleIndex);
+      this.markLocation(e.location.lng, e.location.lat, e.address, this.pointIndex);
     },
     // 删除单个受限范围时，同时删除已选卡口列表和点标记
     removeTag (item) {
@@ -411,20 +417,20 @@ export default {
       }
       getAllBayontListByAreaId(params).then(res => {
         if (res && res.data) {
-          // this.allBayData = res.data;
-          if (selBayList instanceof Array) {
-            if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
-              this.allBayData = bonDataOne;
-            } else {
-              this.allBayData = bonDataTwo;
-            }
-          } else {
-            if (selBayList.label === '东城区') {
-              this.allBayData = bonDataOne;
-            } else {
-              this.allBayData = bonDataTwo;
-            }
-          }
+          this.allBayData = res.data;
+          // if (selBayList instanceof Array) {
+          //   if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
+          //     this.allBayData = bonDataOne;
+          //   } else {
+          //     this.allBayData = bonDataTwo;
+          //   }
+          // } else {
+          //   if (selBayList.label === '东城区') {
+          //     this.allBayData = bonDataOne;
+          //   } else {
+          //     this.allBayData = bonDataTwo;
+          //   }
+          // }
          
           this.allBayData.forEach(f => {
             this.$set(f, 'isSelected', false);
@@ -772,6 +778,8 @@ export default {
           return {
             address: t.address,
             deviceChara: t.deviceChara,
+            latitude: 0,
+            longitude: 0,
             groupName: null,//编辑参数
             groupId: t.groupId,
             bayonetList: t.bayonetList.filter(f => (f.isSelected === true)).map(m => {
@@ -902,7 +910,7 @@ export default {
       let circle = circleObj ? circleObj._circle : '';
 
       // 移除追踪点的点标记
-      const delMakerList = _this.trackPointData.filter(f => f.C.position.lat === circle.C.center.lat);
+      const delMakerList = _this.trackPointData.filter(f => f.C.position.lat == circle.C.center.lat && f.C.position.lng == circle.C.center.lng);
       if (delMakerList.length > 0) {
         _this.map.remove(delMakerList);
       }
@@ -913,7 +921,7 @@ export default {
       }
      
       // 移除覆盖物内对应的设备
-      const delEquIndex = _this.trackPointList.findIndex(p => p.latitude === circle.C.center.lat);
+      const delEquIndex = _this.trackPointList.findIndex(p => p.latitude == circle.C.center.lat && p.longitude == circle.C.center.lng);
       if (delEquIndex !== -1) {
         const _obj = _this.trackPointList.splice(delEquIndex, 1);
         // 把覆盖物内的设备置为未选中
@@ -924,9 +932,6 @@ export default {
           }
         })
       }
-     
-      
-    
     },
     // 展开或者闭合设备列表
     dropdown (data) {
@@ -956,26 +961,26 @@ export default {
       })
       _this.map = map;
       if (_this.modelType !== '3') {
-        // map.on('mouseover', function() {
-        //   let   _sContent = `<div class="vl_map_hover">
-        //     <div class="vl_map_hover_main">`
-        //     if (_this.modelType === '1' || _this.modelType === '2') {
-        //       _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
-        //     } else if (_this.modelType === '4') {
-        //       _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
-        //     }
-        //     _sContent += `</div></div>`;
-        //   _hoverWindow = new window.AMap.InfoWindow({
-        //     isCustom: true,
-        //     closeWhenClickMap: true,
-        //     offset: new window.AMap.Pixel(40, 40), // 相对于基点的偏移位置
-        //     content: _sContent
-        //   });
-        //   _hoverWindow.open(_this.map, new window.AMap.LngLat(112.97503, 28.09358));
-        // })
-        // map.on('mouseout', function() {
-        //   if (_hoverWindow) { _hoverWindow.close(); }
-        // })
+        map.on('mouseover', function() {
+          let   _sContent = `<div class="vl_map_hover">
+            <div class="vl_map_hover_main">`
+            if (_this.modelType === '1' || _this.modelType === '2') {
+              _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
+            } else if (_this.modelType === '4') {
+              _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
+            }
+            _sContent += `</div></div>`;
+          _hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(40, 40), // 相对于基点的偏移位置
+            content: _sContent
+          });
+          _hoverWindow.open(_this.map, new window.AMap.LngLat(112.97503, 28.09358));
+        })
+        map.on('mouseout', function() {
+          if (_hoverWindow) { _hoverWindow.close(); }
+        })
         _this.mapMark(_this.allDevData);
         _this.trackPointList = [];
       }
@@ -1030,14 +1035,14 @@ export default {
           });
           // mouseover
           _marker.on('mouseover', function () {
-            let _sContent = '<div class="vl_map_hover">' +
-              '<div class="vl_map_hover_main"><ul>';
+            let _sContent = `<div class="vl_map_hover">
+              <div class="vl_map_hover_main"><ul>`;
               if (_obj.type === 1) {
-                _sContent += '<li><span>设备名称：</span>' + _obj.deviceName + '</li>' + 
-                '<li><span>设备地址：</span>' + _obj.address + '</li>';
+                _sContent += `<li><span>设备名称：</span><span>${_obj.deviceName}</span></li>
+                <li><span>设备地址：</span><span>${_obj.address}</span></li>`;
               } else {
-                _sContent += '<li><span>卡口名称：</span>' + _obj.bayonetName + '</li>' + 
-                '<li><span>卡口地址：</span>' + _obj.bayonetAddress + '</li>';
+                _sContent += `<li><span>卡口名称：</span><span>${_obj.bayonetName}</span></li>
+                <li><span>卡口地址：</span><span>${_obj.bayonetAddress}</span></li>`;
               }
               _sContent += '</ul></div>';
             _hoverWindow = new window.AMap.InfoWindow({
@@ -1050,6 +1055,7 @@ export default {
             _this.devId = _obj.uid;
             $(`#${_this.mapId} .vl_icon_control_37`).removeClass('vl_icon_control_37');
             let objIsSel = null;
+            // 卡口
             if (_this.modelType === '3') {
               if ($(`#${_this.mapId} #${_obj.uid}_kk`).hasClass('vl_icon_control_36') || $(`#${_this.mapId} #${_obj.uid}_kk`).hasClass('vl_icon_control_35')) {
                 return;
@@ -1068,6 +1074,7 @@ export default {
               } else {
                 $(`#${_this.mapId} #${_obj.uid}_kk`).addClass('vl_icon_control_35');
               }
+            // 设备
             } else {
               if ($(`#${_this.mapId} #${_obj.uid}_sxt`).hasClass('vl_icon_control_36') || $(`#${_this.mapId} #${_obj.uid}_sxt`).hasClass('vl_icon_control_34')) {
                 return;
@@ -1128,6 +1135,7 @@ export default {
             }
           })
           _marker.setMap(_this.map);
+          _this.map.setFitView();// 自动适配到合适视野范围
           // 卡口
           if (_obj.type === 2) {
             _this.allBayMarker[areaName].push(_marker);
@@ -1140,14 +1148,14 @@ export default {
       let _this = this;
       _this.devId = _obj.uid;
       let _hoverWindow = null;
-      let _sContent = '<div class="vl_map_hover">' +
-      '<div class="vl_map_hover_main"><ul>';
+      let _sContent = `<div class="vl_map_hover">
+      <div class="vl_map_hover_main"><ul>`;
       if (_obj.type === 1) {
-        _sContent += '<li><span>设备名称：</span>' + _obj.deviceName + '</li>' + 
-        '<li><span>设备地址：</span>' + _obj.address + '</li>';
+        _sContent += `<li><span>设备名称：</span><span>${_obj.deviceName}</span></li>
+        <li><span>设备地址：</span><span>${_obj.address}</span></li>`;
       } else {
-        _sContent += '<li><span>卡口名称：</span>' + _obj.bayonetName + '</li>' + 
-        '<li><span>卡口地址：</span>' + _obj.bayonetAddress + '</li>';
+        _sContent += `<li><span>卡口名称：</span><span>${_obj.bayonetName}</span></li>
+        <li><span>卡口地址：</span><span>${_obj.bayonetAddress}</span></li>`;
       }
       _sContent += '</ul></div>';
       _hoverWindow = new window.AMap.InfoWindow({
@@ -1184,6 +1192,7 @@ export default {
     },
     // 输入追踪点定位圆形覆盖物的中心点
     markLocation(lng, lat, address, index, resDevList) {
+      console.log(index, 'index')
       let _this = this;
       // 清空上一次输入的追踪点产生的marker
       if (_this.circleIndex === index) {
@@ -1205,10 +1214,10 @@ export default {
         });
         // hover
         _this.marker.on('mouseover', function () {
-          let _sContent = '<div class="vl_map_hover">' +
-            '<div class="vl_map_hover_main"><ul>' + 
-              '<li><span>追踪点地址：</span>' + address + '</li>' + 
-            '</ul></div>';
+          let _sContent = `<div class="vl_map_hover">
+            <div class="vl_map_hover_main"><ul>
+              <li><span>追踪点地址：</span><span>${address}</span></li>
+            </ul></div>`;
           _hoverWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: true,
@@ -1276,6 +1285,7 @@ export default {
       let offSet = [0, 0], _marker = null;
       _circle.on('mouseover', function(e) {
         console.log(e, 'eee')
+        if (_marker) return;
         _marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [e.lnglat.lng, e.lnglat.lat],
@@ -1290,7 +1300,7 @@ export default {
           _this.map.remove(_circle);
           _this.map.remove(_marker);
           // 移除覆盖物内对应的设备
-          const delObjIndex = _this.trackPointList.findIndex(p => p.latitude === e.target.C.center.lat);
+          const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.target.C.center.lat && p.longitude == e.target.C.center.lng);
           console.log(_this.trackPointList)
           const _obj = _this.trackPointList.splice(delObjIndex, 1);
           // 把覆盖物内的设备置为未选中
@@ -1301,16 +1311,21 @@ export default {
             }
           })
           // 移除追踪点的点标记
-          const delMakerList = _this.trackPointData.filter(f => f.C.position.lat === e.target.C.center.lat);
+          const delMakerList = _this.trackPointData.filter(f => f.C.position.lat == e.target.C.center.lat && f.C.position.lng == e.target.C.center.lng);
           if (delMakerList.length > 0) {
             _this.map.remove(delMakerList);
           }
         })
         _marker.setMap(_this.map);
       })
-      _circle.on('mouseout', function() {
+      _circle.on('mouseout', function(e) {
         setTimeout(() => {
+          if (_circle && _circle.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
+            return;
+          }
+          console.log(e.lnglat.lng, 'e.lnglat.lng')
           _this.map.remove(_marker);//移除删除小图标
+          _marker = null;
         }, 100)
       })
       _this.getTraceEquList(_circle, resDevList);
@@ -1467,6 +1482,7 @@ export default {
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
           polygon.on('mouseover', function(p) {
+            if (_marker) return;
             _marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
               position: [p.lnglat.lng, p.lnglat.lat],
@@ -1481,7 +1497,7 @@ export default {
               _this.map.remove(polygon);
               _this.map.remove(_marker);
               // 移除覆盖物内对应的设备
-              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude === e.obj.getPath()[0].lat);
+              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.obj.getPath()[0].lat && p.longitude == e.obj.getPath()[0].lng);
               console.log(_this.trackPointList)
               const _obj = _this.trackPointList.splice(delObjIndex, 1);
               // 把覆盖物内的设备置为未选中
@@ -1494,9 +1510,13 @@ export default {
             })
             _marker.setMap(_this.map);
           })
-          polygon.on('mouseout', function() {
+          polygon.on('mouseout', function(e) {
+            if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
+              return;
+            }
             setTimeout(() => {
               _this.map.remove(_marker);//移除删除小图标
+              _marker = null;
             }, 100)
           })
           _this.selAreaPolygon = polygon;
@@ -1756,7 +1776,7 @@ export default {
               _this.map.remove(polygon);
               _this.map.remove(_marker);
               // 移除覆盖物内对应的设备
-              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude === f.latitude);
+              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == f.latitude && p.longitude == f.longitude);
               console.log(_this.trackPointList)
               _this.trackPointList.splice(delObjIndex, 1);
             })
@@ -1784,64 +1804,83 @@ export default {
       }
       return arr;
     }
-  }
+  },
+  destroyed () {
+    if (this.map) {
+      console.log('销毁')
+      this.map.destroy();
+    }
+  },
 }
 </script>
 <style lang="scss" scoped>
-.pic_format{
-  line-height: 40px;
-  display: inline-block;
-  & > div{
-    white-space: nowrap;
-  }
-  & > div:nth-child(1){
-    color: #0C70F8;
-    cursor: pointer;
-  }
-}
-.add_point{
-  margin-top: 20px;
-  line-height: 40px;
-  background:rgba(255,255,255,1);
-  border-radius:4px;
-  text-align: center;
-  border:1px dashed rgba(217,217,217,1);
-  color: #0C70F8;
-  cursor: pointer;
-  .vl_icon_control_22{
-    vertical-align: middle;
-    margin-bottom: 5px;
-    margin-right: 5px;
-  }
-}
-.licenseNum{
-  margin-bottom: 0!important;
-}
-</style>
-<style lang="scss">
-.point{
-  margin-bottom: 10px;
-  .el-form-item__content{
-    display: flex;
-    i{
-      margin-top: 10px;
-      margin-left: 10px;
+.control_model{
+  .pic_format{
+    line-height: 40px;
+    display: inline-block;
+    & > div{
+      white-space: nowrap;
+    }
+    & > div:nth-child(1){
+      color: #0C70F8;
       cursor: pointer;
     }
   }
-} 
-.create_model_box{
-  .el-form-item__content{
-    line-height: 0;
+  .add_point{
+    margin-top: 20px;
+    line-height: 40px;
+    background:rgba(255,255,255,1);
+    border-radius:4px;
+    text-align: center;
+    border:1px dashed rgba(217,217,217,1);
+    color: #0C70F8;
+    cursor: pointer;
+    .vl_icon_control_22{
+      vertical-align: middle;
+      margin-bottom: 5px;
+      margin-right: 5px;
+    }
+  }
+  .licenseNum{
+    margin-bottom: 0!important;
   }
 }
-.el-select-dropdown.is-multiple{
-  .el-select-dropdown__item{
-    height: 50px;
-    padding-top: 5px;
-    p{
-      margin-top: 3px;
-      font-size: 12px;
+
+</style>
+<style lang="scss">
+.control_model{
+  .point{
+    margin-bottom: 10px;
+    .el-form-item__content{
+      display: flex;
+      i{
+        margin-top: 10px;
+        margin-left: 10px;
+        cursor: pointer;
+      }
+    }
+  } 
+  .el-select-dropdown.is-multiple{
+    .el-select-dropdown__item{
+      height: 50px;
+      padding-top: 5px;
+      p{
+        margin-top: 3px;
+        font-size: 12px;
+      }
+    }
+  }
+  .vl_map_hover_main{
+    li{
+      display: flex;
+      > span{
+        width: auto;
+        text-align: left;
+        &:nth-child(2){
+          flex: 1;
+        }
+      }
+     
     }
   }
 }

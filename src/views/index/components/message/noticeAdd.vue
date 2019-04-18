@@ -15,10 +15,10 @@
           </el-form-item>
           <el-form-item label="消息内容:" prop="content" style="width: 754px;">
             <el-input
-              maxlength="140"
+              maxlength="200"
               type="textarea"
               :rows="4"
-              placeholder="请对事发情况进行描述，文字限制140字"
+              placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
           </el-form-item>
@@ -29,9 +29,13 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" v-if="pageType === 2" @click="addMsgNote('addForm')">发布</el-button>
-        <el-button type="primary" v-if="pageType === 4" @click="putMsgNote('addForm')">发布</el-button>
-        <el-button>保存</el-button>
+        <!-- 新增 -->
+        <el-button type="primary" v-if="pageType === 2" @click="addMsgNote('addForm', 2)">发布</el-button>
+        <el-button v-if="pageType === 2" @click="addMsgNote('addForm', 1)">保存</el-button>
+        <!-- 修改 -->
+        <el-button type="primary" v-if="pageType === 4" @click="putMsgNote('addForm', 2)">发布</el-button>
+        <el-button v-if="pageType === 4" @click="putMsgNote('addForm', 1)">保存</el-button>
+
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -39,7 +43,7 @@
 </template>
 <script>
 import uploadPic from '../control/components/uploadPic';
-import {addMsgNote, getMsgNoteDetail, putMsgNote} from '@/views/index/api/api.js';
+import {addMsgNote, getMsgNoteDetail, putMsgNote} from '@/views/index/api/api.message.js';
 export default {
   components: {uploadPic},
   props: ['pageType', 'msgNoteId'],
@@ -84,7 +88,7 @@ export default {
       this.fileList = fileList;
     },
     // 新增公告消息
-    addMsgNote (formName) {
+    addMsgNote (formName, type) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.fileList.length === 0) {
@@ -94,6 +98,7 @@ export default {
           console.log('通过验证')
           const data = {
             messageType: 2,
+            publishState: type,
             title: this.addForm.title,
             details: this.addForm.content,
             sysAppendixList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
@@ -142,47 +147,58 @@ export default {
       })
     },
     // 修改公告消息
-    putMsgNote () {
-      const data = {
-        uid: this.detail.uid,
-        title: this.addForm.title,
-        details: this.addForm.content,
-        isTop: this.detail.isTop,
-        sysAppendixList: this.fileList.map(m => {
-          if (m.response) {
-            return m.response.data.sysAppendixInfo;
-          } else {
-            return {
-              cname: m.cname,
-              contentUid: m.contentUid,
-              createTime: m.createTime,
-              delFlag: m.delFlag,
-              desci: m.desci,
-              filePathName: m.filePathName,
-              fileType: m.fileType,
-              imgHeight: m.imgHeight,
-              imgSize: m.imgSize,
-              imgWidth: m.imgWidth,
-              opUserId: m.opUserId,
-              path: m.url,
-              sort: m.sort,
-              thumbnailName: m.thumbnailName,
-              thumbnailPath: m.thumbnailPath,
-              uid: m.uid,
-              updateTime: m.updateTime,
-              updateUserId: m.updateUserId
-            }
+    putMsgNote (formName, type) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.fileList.length === 0) {
+            this.$message.error('请上传图片！');
+            return false;
           }
-        }),//附件信息列表
-      }
-      console.log(JSON.stringify(data))
-      putMsgNote(data).then(res => {
-        if (res && res.data) {
-          this.$message.success('修改成功');
-          this.$emit('getMsgNoteList');
+          const data = {
+            messageType: 2,
+            publishState: type,
+            uid: this.detail.uid,
+            title: this.addForm.title,
+            details: this.addForm.content,
+            isTop: this.detail.isTop,
+            sysAppendixList: this.fileList.map(m => {
+              if (m.response) {
+                return m.response.data.sysAppendixInfo;
+              } else {
+                return {
+                  cname: m.cname,
+                  contentUid: m.contentUid,
+                  createTime: m.createTime,
+                  delFlag: m.delFlag,
+                  desci: m.desci,
+                  filePathName: m.filePathName,
+                  fileType: m.fileType,
+                  imgHeight: m.imgHeight,
+                  imgSize: m.imgSize,
+                  imgWidth: m.imgWidth,
+                  opUserId: m.opUserId,
+                  path: m.url,
+                  sort: m.sort,
+                  thumbnailName: m.thumbnailName,
+                  thumbnailPath: m.thumbnailPath,
+                  uid: m.uid,
+                  updateTime: m.updateTime,
+                  updateUserId: m.updateUserId
+                }
+              }
+            }),//附件信息列表
+          }
+          putMsgNote(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('修改成功');
+              this.$emit('getMsgNoteList');
+            }
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
+        } else {
+          return false;
         }
-      }).finally(() => {
-        this.loadingBtn = false;
       })
     }
   }

@@ -222,23 +222,17 @@ export const objDeepCopy = (source) => {
 }
 
 // 数组去重
-export const uniq = (array) => {
-  let temp = [];
-  let index = [];
-  let l = array.length;
-  for(var i = 0; i < l; i++) {
-      for(let j = i + 1; j < l; j++){
-          if (array[i] === array[j]){
-              i++;
-              j = i;
-          }
-      }
-      temp.push(array[i]);
-      index.push(i);
-  }
-  return temp;
+export const unique = (array) => {
+  let obj = {}, resultArray = [];
+  resultArray = array.reduce((item, next) => {
+    if (!obj[next.uid]) {
+      obj[next.uid] = true;
+      item.push(next);
+    }
+    return item;
+  }, []);
+  return resultArray;
 }
-
 // 数组转树结构方法
 export const translateDataToTree = (data) => {
   let parents = data.filter(value => value.parentId === 'undefined' || value.parentId === null)

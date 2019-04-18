@@ -45,6 +45,9 @@
                 prop="createTime"
                 show-overflow-tooltip
                 >
+                <!-- <template slot-scope="scope">
+                  {{scope.row.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template> -->
               </el-table-column>
               <el-table-column
                 label="短信类型"
@@ -86,7 +89,7 @@
 </template>
 <script>
 import noteAdd from './noteAdd.vue';
-import {getSmsList, getSmsTemplate} from '@/views/index/api/api.js';
+import {getSmsList, getSmsTemplate} from '@/views/index/api/api.message.js';
 export default {
   components: {noteAdd},
   data () {
