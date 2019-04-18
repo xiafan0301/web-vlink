@@ -297,7 +297,7 @@ export default {
         position: 'right-center',
         title: null,
         useHtml: true,
-        reactive: true,
+        hoverable: false,
         containerTpl: '<div class="g2-legend vi_stat11_leg"><div class="g2-legend-list"></div></div>',
         itemTpl: function itemTpl(value, color) {
           var markerDom = '<div class="stat11_leg_marker" style="background-color:' + color + '"></div>';
@@ -324,6 +324,7 @@ export default {
         alignX: 'middle',
         alignY: 'middle'
       });
+      // console.log('1111', chart.intervalStack().position('percent').color());
       chart.intervalStack().position('percent')
         .color('item', ['#0FB1FF', '#0C70F8', '#6262FF', '#0C70F8'])
         .tooltip('item*percent', function(item, percent) {
@@ -629,6 +630,24 @@ export default {
       this.charts.chart6 = chart;
     }
 
+  },
+  destroyed () {
+    /* 销毁所有的图标对象 */
+    if (this.charts.chart11) {
+      this.charts.chart11.destroy();
+    }
+    if (this.charts.chart3) {
+      this.charts.chart3.destroy();
+    }
+    if (this.charts.chart4) {
+      this.charts.chart4.destroy();
+    }
+    if (this.charts.chart5) {
+      this.charts.chart5.destroy();
+    }
+    if (this.charts.chart6) {
+      this.charts.chart6.destroy();
+    }
   }
 }
 </script>
