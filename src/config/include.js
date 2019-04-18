@@ -30,4 +30,7 @@ if (loginInfo) {
   store.commit('setLoginUser', {
     loginUser: JSON.parse(loginInfo)
   });
+  store.commit('setLoginToken', {
+    loginToken: true
+  });
 }
