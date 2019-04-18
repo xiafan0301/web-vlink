@@ -56,6 +56,7 @@ service.interceptors.response.use(function (response) {
       return _data;
     } else if (_data.code === '10060002') {
       // 未登录
+      ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
       let msg = '访问出错';
       if (_data.viewMsg) {

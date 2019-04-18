@@ -13,7 +13,7 @@
         :picker-options="pickerOptions2">
       </el-date-picker>
     </div>
-    <div class="dl_vt_c" v-loading="searchLoading">
+    <div class="dl_vt_c" v-loading="searchLoading" v-if="videoRecordList && videoRecordList.length > 0">
       <ul>
         <li v-for="(item, index) in videoRecordList" :key="'vrl_' + index">
           <div v-if="item">
@@ -35,6 +35,9 @@
         </li>
       </ul>
     </div>
+    <div class="dl_vt_c" v-else>
+      <p style="padding: 0 0 0 20px; color: #999;">暂无录像记录</p>
+    </div>
     <div class="dl_vt_b">
       <el-pagination
         style="text-align: center;"
@@ -50,7 +53,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiVideoRecordPageList } from "@/views/index/api/api.video.js";
+import { apiVideoRecordPageList, apiDelVideoRecord } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   components: {flvplayer},
@@ -124,14 +127,12 @@ export default {
           let objs = [];
           for (let i = 0; i < res.data.list.length; i++) {
             let o = res.data.list[i];
-            let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            console.log('deviceSip', deviceSip);
             objs.push({
               type: 3,
               title: o.deviceName,
-              video: Object.assign({}, o, {
-                deviceSip: deviceSip
-              })
+              startTime: o.playBackStartTime,
+              endTime: o.playBackEndTime,
+              video: Object.assign({}, o)
             });
           }
           this.videoRecordList = objs;
@@ -148,9 +149,15 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        apiDelVideoRecord(item.video.uid).then(() => {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }).catch(error => {
+          this.$message.error('删除失败！');
+          console.log("apiDelVideoRecord error：", error);
         });
       }).catch(() => {
         this.$message({

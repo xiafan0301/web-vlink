@@ -80,7 +80,7 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        'where.userId': 57024,
+        where: 57024,
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
       }

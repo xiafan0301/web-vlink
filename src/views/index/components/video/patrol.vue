@@ -86,10 +86,10 @@
     </div>
     <div class="vid_title">
       <ul class="vid_show_type" :class="{'vid_show_type_dis': patrolActive === 1}">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="changeShowType(1)"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="changeShowType(2)"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="changeShowType(3)"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="changeShowType(4)"></li>
+        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="changeShowType(1)"></li>
+        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="changeShowType(4)"></li>
+        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="changeShowType(5)"></li>
+        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="changeShowType(9)"></li>
        <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
       </ul>
     </div>
@@ -99,7 +99,7 @@
       <el-button v-if="patrolActive === 1 || patrolActive === 2" @click="patrolCloseDialogVisible = true">关闭轮巡</el-button>
     </div>
     <div class="vid_content">
-      <ul class="vid_show_list" :class="'vid_list_st' + showType">
+      <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
@@ -159,7 +159,6 @@ import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 // import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
-import { setTimeout, setInterval } from 'timers';
 export default {
   components: {videoEmpty, flvplayer},
   data () {
@@ -177,32 +176,36 @@ export default {
 
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
-      showType: 2,
       showVideoTotal: 4,
       showMenuActive: false,
       showConTitle: 1,
       searchVal: '',
       dragActiveObj: null,
 
-      videoRecordList: []
+      videoRecordList: [],
+
+      patrolData: {
+        current: {
+          id: '111',
+          name: '轮巡预案名称111',
+          time: 10,
+          sum: 4
+        },
+        next: {
+          id: '222',
+          name: '轮巡预案名称222',
+          startTime: 50,
+          time: 12,
+          sum: 5
+        }
+      }
     }
   },
   watch: {
     patrolStartSecond () {
       this.patrolStartPercentage = this.patrolStartSecond / 600 * 100;
     },
-    showType () {
-      if (this.showType === 1) {
-        this.showVideoTotal = 1;
-      } else if (this.showType === 2) {
-        this.showVideoTotal = 4;
-      } else if (this.showType === 3) {
-        this.showVideoTotal = 5;
-      } else if (this.showType === 4) {
-        this.showVideoTotal = 9;
-      } else if (this.showType === 5) {
-        this.showVideoTotal = 16;
-      }
+    showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
     },
     showConTitle (newVal) {
@@ -216,17 +219,16 @@ export default {
     let sType = window.localStorage.getItem('vlink_video_patrol_type');
     let sList = window.localStorage.getItem('vlink_video_patrol_list');
     if (sType && sType.length > 0) {
-      sType = Number(sType);
-      this.showType = sType;
+      this.showVideoTotal = Number(sType);
+      if (sList && sList.length > 0) {
+        this.$nextTick(() => {
+          sList = JSON.parse(sList);
+          this.videoList = sList;
+        });
+      }
     } else {
       // 第一次打开
       this.showMenuActive = true;
-    }
-    if (sList && sList.length > 0) {
-      this.$nextTick(() => {
-        sList = JSON.parse(sList);
-        this.videoList = sList;
-      });
     }
 
     // 监控列表
@@ -270,7 +272,9 @@ export default {
       if (this.patrolInval) {
         window.clearInterval(this.patrolInval);
       }
-      this.patrolStartSecond = 600;
+      window.setTimeout(() => {
+        this.patrolStartSecond = 600;
+      }, 500);
     },
     // 关闭轮巡   flag: true, 轮巡开始提示窗口的事件
     patrolClose (flag) {
@@ -284,7 +288,9 @@ export default {
           console.log('this.patrolInval', this.patrolInval);
           window.clearInterval(this.patrolInval);
         }
-        this.patrolStartSecond = 600;
+        window.setTimeout(() => {
+          this.patrolStartSecond = 600;
+        }, 500);
       }
     },
     dragEndDis () {
@@ -292,11 +298,11 @@ export default {
     },
 
     changeShowType (type) {
-      if (this.showType != type) {
+      if (this.showVideoTotal != type) {
         if (this.patrolActive === 1) {
           this.patrolParseDialogVisible = true;
         } else {
-          this.showType = type;
+          this.showVideoTotal = type;
         }
       }
     },
@@ -315,7 +321,7 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord({id: item.uid}).then(() => {
+      apiDelVideoRecord(item.uid).then(() => {
         this.getVideoRecordList();
         this.$message({
           message: '删除成功！',
@@ -399,7 +405,7 @@ export default {
     },
     // 缓存播放列表
     saveVideoList () {
-      window.localStorage.setItem('vlink_video_patrol_type', JSON.stringify(this.showType));
+      window.localStorage.setItem('vlink_video_patrol_type', JSON.stringify(this.showVideoTotal));
       window.localStorage.setItem('vlink_video_patrol_list', JSON.stringify(this.videoList));
     },
     unloadSave () {
@@ -434,14 +440,12 @@ export default {
         // rtmp://10.16.1.139/live/livestream
         // rtmp://10.16.1.138/live/livestream
         // rtmp://live.hkstv.hk.lxdns.com/live/hks1
-        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        console.log('deviceSip', deviceSip);
+        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+        // console.log('deviceSip', deviceSip);
         this.videoList.splice(index, 1, {
           type: 1,
           title: this.dragActiveObj.deviceName,
-          video: Object.assign({}, this.dragActiveObj, {
-            deviceSip: deviceSip
-          })
+          video: Object.assign({}, this.dragActiveObj)
         });
       }
     },

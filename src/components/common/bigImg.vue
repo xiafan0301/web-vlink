@@ -8,7 +8,7 @@
     <div class="box">
       <el-carousel :autoplay="false" arrow="always" height="100%" :initial-index="imgIndex">
         <el-carousel-item v-for="(item) in imgList" :key="item.uid">
-          <img :src="item.src" alt="">
+          <img :src="item.path" alt="">
         </el-carousel-item>
       </el-carousel>
       <i class="vl_icon vl_icon_event_23 close_icon" @click="closeImgDialog"></i>
@@ -34,28 +34,28 @@ export default {
 .big_img_box {
   width: 100%;
   height: 100%;
-  /deep/ .el-dialog {
+  .el-dialog {
     background-color: transparent;
     width: 100%;
     height: 100%;
     margin: 0 !important;
-    /deep/ .el-dialog__header {
+    .el-dialog__header {
       display: none;
     }
-    /deep/.el-dialog__body {
+    .el-dialog__body {
       padding: 0;
       height: 100%;
       .box {
         width: 100%;
         height: 100%;
         position: relative;
-        /deep/ .el-carousel {
+        .el-carousel {
           height: 100%;
           img {
             width: 100%;
             height: 100%;
           }
-          /deep/ .el-carousel__arrow {
+          .el-carousel__arrow {
             width: 64px;
             height: 64px;
             background-color: #0C70F8;
@@ -73,6 +73,9 @@ export default {
         }
       }
     }
+  }
+  .el-carousel__indicators {
+    display: none;
   }
 }
 </style>

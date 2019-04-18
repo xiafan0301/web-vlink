@@ -1,6 +1,33 @@
 import request from '@/config/axios';
 let videoModeName = 'video';
 /* ======== 视频播放服务API ======== */
+
+/**
+ * 视频播放接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoPlay = data => {
+  return request({
+    url: '/videoPatrolService/videoPlay',
+    method: 'get',
+    // data,
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 视频播放接口
+ * @param {Object} data 接口入参
+ */
+export const apiVideoPlayBack = data => {
+  return request({
+    url: '/videoPatrolService/videoPlayBack',
+    method: 'get',
+    // data,
+    params: data,
+    mode: videoModeName
+  })
+}
 /**
  * 轮巡列表分页查询接口
  * @param {Object} data 接口入参
@@ -12,6 +39,31 @@ export const apiVideoRoundList = data => {
     method: 'get',
     // data,
     params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 轮巡列表删除接口
+ * @param {Object} data 接口入参
+ */
+export const apiDelVideoRoundList = data => {
+  return request({
+    // url: '/videoDownloadService/videoDownloadList?' + $.param(data),
+    url: '/round/' + data.id,
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 新增轮巡
+ * @param {Object} data 接口入参
+ */
+export const addVideoRound = data => {
+  return request({
+    url: '/round',
+    method: 'post',
+    data,
     mode: videoModeName
   })
 }
@@ -94,6 +146,18 @@ export const apiVideoSign = data => {
 }
 
 /**
+ * 删除视频标记接口
+ * @param {String} data 接口入参
+ */
+export const apiVideoSignDel = data => {
+  return request({
+    url: '/videoSignService/sign/' + data,
+    method: 'delete',
+    mode: videoModeName
+  })
+}
+
+/**
  * 设备列表接口
  * @param {Object} data 接口入参
  */
@@ -148,9 +212,9 @@ export const apiVideoRecordPageList = data => {
  */
 export const apiDelVideoRecord = data => {
   return request({
-    url: '/videoPatrolService/videoRecord',
+    url: '/videoPatrolService/videoRecord/' + data,
     method: 'delete',
-    params: data,
+    // params: data,
     mode: videoModeName
   })
 }
@@ -166,7 +230,42 @@ export const apiDelVideoRecords = data => {
     mode: videoModeName
   })
 }
-
+/**
+ * 获取视频标记接口--分页
+ * @param {Object} data 接口入参
+ */
+export const apiGetVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContentPageList',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 修改视频标记接口
+ * @param {Object} data 接口入参
+ */
+export const updateVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContent',
+    method: 'put',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 删除视频标记接口
+ * @param {Object} data 接口入参
+ */
+export const deleteVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContent/' + data.id,
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
 /**
  * 分页查询视频下载记录接口
  * @param {Object} data 接口入参

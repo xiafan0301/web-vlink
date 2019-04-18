@@ -3,7 +3,7 @@
     <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
       <div class="flvplayer_player_c" :id="flvplayerId + '_c'">
-        <video :id="flvplayerId" style="width: 100%; height: 100%;" autoplay="autoplay" muted>
+        <video :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
@@ -80,13 +80,18 @@
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
-import { getTestLive } from "@/views/index/api/api.js";
-import { setTimeout } from 'timers';
+import { apiSignContentList, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack } from "@/views/index/api/api.video.js";
+// import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
-   * oData：视频信息 object {type: , title: , video: }
+   * oData：视频信息 object {
+   *    type: 1, // 1直播 2回放 3录像
+   *    title: '设备名称',
+   *    startTime: Date 回放开始时间
+   *    endTime: Date 回放结束时间
+   *    video: 设备信息（uid、）
+   *  }
    * oConfig: 播放配置信息
    *    pause: 开始是否暂停，默认为false
    *    sign: 是否可标记，默认为true
@@ -137,6 +142,7 @@ export default {
   },
   watch: {
     oData () {
+      console.log('watch oData', this.oData);
       // 去掉暂停按钮
       this.playActive = true;
       this.relaodPlayer();
@@ -158,6 +164,7 @@ export default {
     }
   },
   mounted () {
+    console.log('mounted oData', this.oData);
     if (this.oConfig) {
       this.config = Object.assign(this.config, this.oConfig);
     }
@@ -168,48 +175,67 @@ export default {
     // 视频播放
     initPlayer () {
       this.videoLoadingFailed = false;
-      getTestLive().then(res => {
-        if (res && res.data) {
-          console.log('>>>> init flvplayer');
-          let ind = res.data.length - 1;
-          let ird = Math.round(Math.random() * ind);
-          let surl = res.data[ird].liveFlvUrl;
-          // flv.js
-          if (window.flvjs.isSupported()) {
-            this.videoLoading = true;
-            var videoElement = document.getElementById(this.flvplayerId);
-            var flvPlayer = window.flvjs.createPlayer({
-              type: 'flv',
-              url: surl,
-              isLive: true
-            }, {
-              enableWorker: true,
-              enableStashBuffer: false,
-              stashInitialSize: 128
-            });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().then(() => {
-              this.videoLoading = false;
-              this.videoLoadingFailed = false;
-              if (this.config.pause) {
-                this.playActive = false;
-                flvPlayer.pause();
-              }
-            });
-            this.startPlayTime = new Date().getTime();
-            this.player = flvPlayer;
-            this.video = videoElement;
-
-            // 加载失败
-            setTimeout(() => {
-              this.videoLoadingFailed = true;
-            }, this.videoLoadingTimeout);
+      let obj = {deviceId: this.oData.video.uid};
+      if (this.oData.type === 1) {
+        apiVideoPlay(obj).then(res => {
+          if (res && res.data) {
+            // let ind = res.data.length - 1;
+            // let ird = Math.round(Math.random() * ind);
+            this.initPlayerDo(res.data.liveFlvUrl);
           }
+        }).catch(error => {
+          console.log("apiVideoPlay error：", error);
+        });
+      } else if (this.oData.type === 2 || this.oData.type === 3) {
+        if (this.oData.startTime) {
+          obj.startTime = formatDate(this.oData.startTime);
         }
-      }).catch(error => {
-        console.log("getTestLive error：", error);
-      });
+        if (this.oData.endTime) {
+          obj.endTime = formatDate(this.oData.endTime);
+        }
+        apiVideoPlayBack(obj).then(res => {
+          if (res && res.data) {
+            this.initPlayerDo(res.data.liveFlvUrl);
+          }
+        }).catch(error => {
+          console.log("apiVideoPlayBack error：", error);
+        });
+      }
+      
+    },
+    initPlayerDo (surl) {
+      if (window.flvjs.isSupported()) {
+        this.videoLoading = true;
+        var videoElement = document.getElementById(this.flvplayerId);
+        var flvPlayer = window.flvjs.createPlayer({
+          type: 'flv',
+          url: surl,
+          isLive: true
+        }, {
+          enableWorker: true,
+          enableStashBuffer: false,
+          stashInitialSize: 128
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play().then(() => {
+          this.videoLoading = false;
+          this.videoLoadingFailed = false;
+          if (this.config.pause) {
+            this.playActive = false;
+            flvPlayer.pause();
+          } else {
+            this.startPlayTime = new Date().getTime();
+          }
+        });
+        this.player = flvPlayer;
+        this.video = videoElement;
+
+        // 加载失败
+        window.setTimeout(() => {
+          this.videoLoadingFailed = true;
+        }, this.videoLoadingTimeout);
+      }
     },
     destroyPlayer () {
       if (this.player) {

@@ -431,7 +431,7 @@ export default {
           }
           editVeGroup(data)
             .then(res => {
-              if (!res) {
+              if (res) {
                 this.$message({
                   type: 'success',
                   message: '修改成功',

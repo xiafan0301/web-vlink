@@ -5,7 +5,7 @@
         <span>已有设备 ({{leftDeviceNumber}})</span>
         <p @click="removeDevice">移除设备</p>
       </div>
-      <template v-if="leftDeviceList.length > 0">
+      <template v-if="leftDeviceList && leftDeviceList.length > 0">
         <div class="detail_list">
           <vue-scroll>
             <ul class="temp_detail_info">
@@ -40,10 +40,10 @@
         <span>可选设备 ({{selectDeviceNumber}})</span>
         <p @click="addDeviceToLeft">添加设备</p>
       </div>
-      <template v-if="selectDeviceList.length > 0">
+      <template v-if="selectDeviceList && selectDeviceList.length > 0">
         <div class="search_box">
           <el-input placeholder="请输入设备名称" size="small">
-            <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
+            <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;"></i>
             <i
               v-show="!closeShow"
               class="search_icon vl_icon vl_icon_manage_1"
@@ -123,7 +123,6 @@ export default {
     },
     // 展开右侧列表
     openRightArrow (index) {
-      console.log('00000')
       this.$emit('emitOpenRightArrow', index);
     },
     // 左侧---子级多选框change
@@ -326,7 +325,7 @@ export default {
                 display: flex;
                 align-items: center;
                 >span {
-                  margin: 0 80px 0 15px;
+                  margin: 0 80px 0 0;
                 }
               }
             }
@@ -365,7 +364,10 @@ export default {
       .search_icon{
         margin-top: 8px;
         cursor: pointer; 
-        margin-right: 35px;
+        // margin-right: 35px;
+      }
+      /deep/ .el-input__suffix {
+        right: 48px;
       }
     }
     .all_select_checkbox {
@@ -449,7 +451,7 @@ export default {
                 display: flex;
                 align-items: center;
                 >span {
-                  margin: 0 80px 0 15px;
+                  margin: 0 80px 0 0;
                 }
               }
             }
@@ -457,6 +459,9 @@ export default {
         }
       }
     }
+  }
+  .el-checkbox {
+    margin-right: 10px;
   }
 }
 </style>

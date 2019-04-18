@@ -1,6 +1,6 @@
  /* 事件板块 */
 export default {
-  path: 'event',
+  path: '/event',
   name: 'event',
   component: () => import('@/views/index/components/event/event.vue'),
   redirect: {
