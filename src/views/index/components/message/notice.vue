@@ -111,7 +111,7 @@
 <script>
 import noticeAdd from './noticeAdd.vue';
 import noticeDetail from './noticeDetail.vue';
-import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.js';
+import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.message.js';
 export default {
   components: {noticeAdd, noticeDetail},
   data () {

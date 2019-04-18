@@ -453,7 +453,7 @@ import allPortrait from './components/allPortrait.vue';
 import customCar from './components/customCar.vue';
 import customPortrait from './components/customPortrait.vue';
 import groupDialog from './components/groupDialog.vue';
-import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.js';
+import {getPortraitByIdNo, addPortrait, getVehicleByIdNo, addVehicle, getPortraitList, getVehicleList, getPortraitById, putPortrait, getVehicleById, putVehicle, getGroupListIsPortrait, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 import {objDeepCopy} from '@/utils/util.js';
 import {nationData} from './testData.js';
 export default {

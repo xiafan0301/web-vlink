@@ -206,7 +206,8 @@ import manageDetail from './components/manageDetail.vue';
 import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getDiciData, getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.js';
+import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
+import {getDiciData} from '@/views/index/api/api.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {

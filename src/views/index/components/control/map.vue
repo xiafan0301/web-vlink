@@ -131,17 +131,19 @@
         </div>
       </div>
     </div>
-    <div is="flvplayer" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="flvplayer" @playerClose="playerClose" :oData="videoObj" 
+    <div is="controlVideo" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="flvplayer" @showScreen="showScreen" @playerClose="playerClose" :oData="videoObj" 
       :oConfig="{sign: true}">
     </div>
   </div>
 </template>
 <script>
+import controlVideo from './components/controlVideo.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate, random14} from '@/utils/util.js';
-import {getDiciData, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.js';
+import {getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
+import {getDiciData} from '@/views/index/api/api.js';
 export default {
-  components: {flvplayer},
+  components: {flvplayer, controlVideo},
   data () {
     return {
       // 左侧搜索参数
@@ -175,6 +177,7 @@ export default {
       videoObj: null,
       isShowVideo: false,
       isShowV: false,
+      clickWindow: null,
       // 抓拍列表参数
       snapList: [],
       snapTotal: null,//抓拍总数
@@ -199,6 +202,16 @@ export default {
     this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 显示大屏
+    showScreen () {
+      if (this.clickWindow) {
+        $('.control_map').append($('#flvplayer'));
+        this.isShowVideo = false;
+        this.isShowV = false; 
+        this.clickWindow.close();
+        this.isShowFullScreen = true;
+      }
+    },
     // 关闭播放器
     playerClose (index, sid) {
       console.log('sid', sid);
@@ -304,13 +317,13 @@ export default {
               <div class="vl_map_img">
                 <div id="${domId}" style="width: 300px;height: 150px;background: #000;"></div>
                 <div class="vl_map_state">进行中</div>
-                <i title="大屏" class="vl_icon vl_icon_v27 vl_map_full_screen" style="position: absolute;right: 15px;bottom: 15px;cursor: pointer;"></i>
+               
               </div>`;
           }
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
               <div class="vl_map_info">
-                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span>${_this.controlObjList.list[0].surveillanceName}</span></div>
+                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>
                 <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
                 <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
               if (obj.surveillanceStatus === 3) {
@@ -339,7 +352,7 @@ export default {
             for (let item of _this.controlObjList.list) {
               vlMapObjList += 
               `<div class="vl_map_info">
-                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span>${item.surveillanceName}</span></div>
+                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>
                 <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
                 <div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
                 if (obj.surveillanceStatus === 3) {
@@ -455,14 +468,14 @@ export default {
             if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
           })
           // 利用事件冒泡,绑定视频全屏按钮的点击事件
-          $('#mapBox').on('click', '.vl_map_full_screen', function () {
-            // 关闭弹窗
-            if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
+          // $('#mapBox').on('click', '.vl_map_full_screen', function () {
+          //   // 关闭弹窗
+          //   if (clickWindow) {$('.control_map').append($('#flvplayer'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
 
-            // 显示视频回放页面
-            _this.isShowFullScreen = true;
-          })
-
+          //   // 显示视频回放页面
+          //   _this.isShowFullScreen = true;
+          // })
+          this.clickWindow = clickWindow;
           $('#mapBox').on('click', '.vl_map_name', function (e) {
             console.log(e.currentTarget.id)
             // 跳转至布控详情页
@@ -514,6 +527,14 @@ export default {
               }, 1000)
             }
           })
+          // 移入显示大屏按钮
+          // $('#mapBox').on('mouseover', '.vl_map_img', function () {
+          //    $('#mapBox .vl_map_full_screen').addClass('show_operate_screen');
+          // })
+          // // 移出大屏按钮消失
+          // $('#mapBox').on('mouseout', '.vl_map_img', function () {
+          //    $('#mapBox .vl_map_full_screen').removeClass('show_operate_screen');
+          // })
           if (obj.surveillanceStatus === 1) {
             // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
             let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
@@ -552,7 +573,9 @@ export default {
     mapMark () {
       let _this = this;
       let data = _this.devicesList;
-      _this.map.clearMap();
+      if (_this.map) {
+        _this.map.clearMap();
+      }
       new Promise((resolve) => { 
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -597,6 +620,7 @@ export default {
             marker.setMap(_this.map);
           }
         }
+        _this.map.setFitView();// 自动适配到合适视野范围
         resolve();
       }).then(() => {
         clearInterval(_this.timer);
@@ -624,6 +648,13 @@ export default {
     // 重置表单
     resetForm () {
       this.$refs['mapForm'].resetFields();
+    }
+  },
+  destroyed () {
+    if (this.map) {
+      console.log(this.map, '1111')
+      this.map.destroy( );
+      console.log(this.map, '2222')
     }
   }
 }
@@ -903,6 +934,15 @@ export default {
             color: #fff;
             font-size: 12px;
           }
+          // > i{
+          //   position: absolute;
+          //   right: 15px;bottom: -22px;
+          //   cursor: pointer;
+          //   transition: bottom 0.4s ease-out!important;
+          // }
+          // > i.show_operate_screen{
+          //   bottom: 15px!important;
+          // }
         }
         .vl_map_operate{
           width: 100%;
@@ -950,6 +990,12 @@ export default {
             > span:nth-child(2){
               flex: 1;
             }
+          }
+          .vl_map_name{
+            width: 60%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis; 
           }
         }
         .vl_map_obj{

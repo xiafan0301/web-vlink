@@ -49,7 +49,7 @@
                 :disabled="true"
                 resize="none"
                 type="textarea"
-                :rows="1"
+                :rows="3"
                 placeholder="此处是已经编辑好的短信内容"
                 v-model="addForm.content">
               </el-input>
@@ -110,7 +110,7 @@
 </template>
 <script>
 import {formatDate,translateDataToTree, objDeepCopy, uniq} from '@/utils/util.js';
-import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.js';
+import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.message.js';
 export default {
   data () {
     return {

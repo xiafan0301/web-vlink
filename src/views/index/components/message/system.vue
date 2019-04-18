@@ -86,7 +86,7 @@
 <script>
 import systemAdd from './systemAdd.vue';
 import systemDetail from './systemDetail.vue';
-import {getMsgNoteList} from '@/views/index/api/api.js';
+import {getMsgNoteList} from '@/views/index/api/api.message.js';
 export default {
   components: {systemAdd, systemDetail},
   data () {

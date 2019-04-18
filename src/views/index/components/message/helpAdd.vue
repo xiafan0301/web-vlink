@@ -87,7 +87,7 @@
 <script>
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
-import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.js';
+import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.message.js';
 export default {
   components: {uploadPic},
   props: ['pageType', 'helpId'],
@@ -212,10 +212,10 @@ export default {
         });
         // hover
         _this._marker.on('mouseover', function () {
-          let _sContent = '<div class="vl_map_hover">' +
-            '<div class="vl_map_hover_main"><ul>' + 
-              '<li><span>事发地点：</span>' + address + '</li>' + 
-            '</ul></div>';
+          let _sContent = `<div class="vl_map_hover">
+            <div class="vl_map_hover_main"><ul>
+              <li><span>事发地点：</span><span>${address}</span></li>
+            </ul></div>`;
           _hoverWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: true,
@@ -384,7 +384,12 @@ export default {
         }
       });
     },
-  }
+  },
+  destroyed () {
+    if (this.map) {
+      this.map.destroy();
+    }
+  },
 }
 </script>
 <style lang="scss" scoped>
@@ -468,6 +473,19 @@ export default {
   #mapBox{
     .vl_icon_control_01, .vl_icon_control_30{
       transition: none!important;
+    }
+  }
+  .vl_map_hover_main{
+    li{
+      display: flex;
+      > span{
+        width: auto;
+        text-align: left;
+        &:nth-child(2){
+          flex: 1;
+        }
+      }
+     
     }
   }
 }

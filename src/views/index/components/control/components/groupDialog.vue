@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-import {addGroup, getGroupsById, putGroup} from '@/views/index/api/api.js';
+import {addGroup, getGroupsById, putGroup} from '@/views/index/api/api.control.js';
 export default {
   props: ['operateType', 'tabType', 'groupId'],
   data () {

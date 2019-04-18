@@ -24,7 +24,7 @@
   </div>
 </template>
 <script>
-import {getMsgNoteDetail} from '@/views/index/api/api.js';
+import {getMsgNoteDetail} from '@/views/index/api/api.message.js';
 export default {
   props: ['msgNoteId'],
   data () {

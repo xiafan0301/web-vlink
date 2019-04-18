@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import {controlStop} from '@/views/index/api/api.js';
+import {controlStop} from '@/views/index/api/api.control.js';
 export default {
   props: ['controlId'],
   data () {

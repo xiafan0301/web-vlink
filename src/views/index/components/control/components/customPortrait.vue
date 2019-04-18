@@ -101,7 +101,7 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {copyPortrait, removePortrait, delPortraitGroupById, getGroupListIsPortrait} from '@/views/index/api/api.js';
+import {copyPortrait, removePortrait, delPortraitGroupById, getGroupListIsPortrait} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
   props: ['protraitMemberList', 'groupId', 'groupName', 'tabType'],
