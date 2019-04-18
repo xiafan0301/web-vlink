@@ -347,7 +347,7 @@ export default {
     getAreas () {
       return new Promise((resolve) => {
         const params = {
-          parentUid: '110000'
+          parentUid: '431224'
         }
         getAreas(params).then(res => {
           if (res && res.data) {
@@ -417,20 +417,20 @@ export default {
       }
       getAllBayontListByAreaId(params).then(res => {
         if (res && res.data) {
-          // this.allBayData = res.data;
-          if (selBayList instanceof Array) {
-            if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
-              this.allBayData = bonDataOne;
-            } else {
-              this.allBayData = bonDataTwo;
-            }
-          } else {
-            if (selBayList.label === '东城区') {
-              this.allBayData = bonDataOne;
-            } else {
-              this.allBayData = bonDataTwo;
-            }
-          }
+          this.allBayData = res.data;
+          // if (selBayList instanceof Array) {
+          //   if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
+          //     this.allBayData = bonDataOne;
+          //   } else {
+          //     this.allBayData = bonDataTwo;
+          //   }
+          // } else {
+          //   if (selBayList.label === '东城区') {
+          //     this.allBayData = bonDataOne;
+          //   } else {
+          //     this.allBayData = bonDataTwo;
+          //   }
+          // }
          
           this.allBayData.forEach(f => {
             this.$set(f, 'isSelected', false);
@@ -922,8 +922,6 @@ export default {
      
       // 移除覆盖物内对应的设备
       const delEquIndex = _this.trackPointList.findIndex(p => p.latitude == circle.C.center.lat && p.longitude == circle.C.center.lng);
-      console.log(delEquIndex, 'delEquIndexdelEquIndex')
-      console.log(_this.trackPointList, '_this.trackPointList')
       if (delEquIndex !== -1) {
         const _obj = _this.trackPointList.splice(delEquIndex, 1);
         // 把覆盖物内的设备置为未选中
@@ -934,9 +932,6 @@ export default {
           }
         })
       }
-     
-      
-    
     },
     // 展开或者闭合设备列表
     dropdown (data) {
@@ -1060,6 +1055,7 @@ export default {
             _this.devId = _obj.uid;
             $(`#${_this.mapId} .vl_icon_control_37`).removeClass('vl_icon_control_37');
             let objIsSel = null;
+            // 卡口
             if (_this.modelType === '3') {
               if ($(`#${_this.mapId} #${_obj.uid}_kk`).hasClass('vl_icon_control_36') || $(`#${_this.mapId} #${_obj.uid}_kk`).hasClass('vl_icon_control_35')) {
                 return;
@@ -1078,6 +1074,7 @@ export default {
               } else {
                 $(`#${_this.mapId} #${_obj.uid}_kk`).addClass('vl_icon_control_35');
               }
+            // 设备
             } else {
               if ($(`#${_this.mapId} #${_obj.uid}_sxt`).hasClass('vl_icon_control_36') || $(`#${_this.mapId} #${_obj.uid}_sxt`).hasClass('vl_icon_control_34')) {
                 return;

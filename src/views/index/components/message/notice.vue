@@ -80,14 +80,21 @@
                 prop="publishTime"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  {{scope.row.publishTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template>
               </el-table-column>
               <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  <template v-if="scope.row.publishState !== 2 && scope.row.messageType !== 1">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                  </template>
+                  <template v-if="scope.row.publishState === 2">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  </template>
                 </template>
               </el-table-column>
             </el-table>
