@@ -136,6 +136,7 @@
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <!-- 驳回弹出框 -->
     <el-dialog
       title="驳回"
       :visible.sync="rejectDialogVisible"
@@ -465,6 +466,7 @@ export default {
     // 取消驳回
     cancelReject (form) {
       this.$refs[form].resetFields();
+      this.rejectDialogVisible = false;
     },
     // 驳回
     rejectEvent (form) {

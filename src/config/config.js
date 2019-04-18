@@ -15,6 +15,7 @@ const oDomains = {
     // 视频服务地址
     video: {
         dev: 'http://apidev.aorise.org/vlink-monitor',
+        // dev: 'http://10.116.64.82:8082',
         test: 'http://apidev.aorise.org/vlink-monitor',
         prod: 'http://apidev.aorise.org/vlink-monitor',
     },
@@ -37,8 +38,8 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      dev: 'http://apidev.aorise.org/vlink-event',
-      // dev: 'http://10.116.64.134:8082/api/emi',
+      // dev: 'http://apidev.aorise.org/vlink-event',
+      dev: 'http://10.116.64.142:8081',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apidev.aorise.org/vlink-event'
     },

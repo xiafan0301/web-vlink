@@ -46,77 +46,77 @@
           </div>
         </div>
         <div class="summary" v-show="basicInfo.eventSummary">
-        <div class="summary-header">
-          <span>事件总结</span>
-        </div>
-        <div class="divide"></div>
-        <div class="summary-content">
-          <p>事件总结附件</p>
-          <div class="content-icon">
-            <ul>
-              <li v-for="(item, index) in eventFile" :key="'item' + index">
-                <i class="vl_icon vl_icon_event_1"></i>
-                <div class="operation_btn">
-                  <div class="arrow"></div>
-                  <p>
-                    <i class="vl_icon vl_icon_manage_17"></i>
-                    <a :href="item.path">下载</a>
-                  </p>
-                  <p>
-                    <i class="vl_icon vl_icon_event_25"></i>
-                    <a>预览</a>
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+          <div class="summary-header">
+            <span>事件总结</span>
           </div>
           <div class="divide"></div>
-          <p style="margin-top: 5px;">事件总结内容</p>
-          <div class="content_detail">
-             <p>
-               {{basicInfo.eventSummary}}
-               <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
-            </p>
+          <div class="summary-content">
+            <p>事件总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in eventFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">事件总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="summary" v-show="basicInfo.dispatchSummary">
-        <div class="summary-header">
-          <span>调度总结</span>
-        </div>
-        <div class="divide"></div>
-        <div class="summary-content">
-          <p>调度总结附件</p>
-          <div class="content-icon">
-            <ul>
-              <li v-for="(item, index) in ctcFile" :key="'item' + index">
-                <i class="vl_icon vl_icon_event_1"></i>
-                <div class="operation_btn">
-                  <div class="arrow"></div>
-                  <p>
-                    <i class="vl_icon vl_icon_manage_17"></i>
-                    <a :href="item.path">下载</a>
-                  </p>
-                  <p>
-                    <i class="vl_icon vl_icon_event_25"></i>
-                    <a>预览</a>
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+        <div class="summary" v-show="basicInfo.dispatchSummary">
+          <div class="summary-header">
+            <span>调度总结</span>
           </div>
           <div class="divide"></div>
-          <p style="margin-top: 5px;">调度总结内容</p>
-          <div class="content_detail">
-             <p>
-               {{basicInfo.dispatchSummary}}
-               <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
-            </p>
+          <div class="summary-content">
+            <p>调度总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">调度总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
         <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
@@ -176,7 +176,7 @@
 <script>
 import EventBasic from './components/eventBasic';
 import { getEventDetail } from '@/views/index/api/api.event.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -274,6 +274,16 @@ export default {
       background-color: #ffffff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       border-radius:4px;
+      .summary-header{
+        > span {
+          display: inline-block;
+          padding: 10px 20px;
+          color: #333333;
+          font-weight: 600;
+          font-size: 16px;
+        }
+        
+      }
       .header {
         padding: 10px 20px 0 20px;
         > p {
@@ -418,8 +428,79 @@ export default {
       }
       .summary-content {
         padding: 10px 20px;
-        >p:nth-child(2) {
-          color: #000000;
+        >p {
+          color: #333333;
+          font-weight:600;
+          margin-bottom: 5px;
+        }
+        .content-icon {
+          margin: 5px 0;
+          >ul {
+            >li {
+              position: relative;
+              float: left;
+              i {
+                margin: 0 5px;
+                cursor: pointer;
+              }
+              .operation_btn {
+                display: none;
+                background-color: #ffffff;
+                box-shadow:0px 2px 8px 0px rgba(0,0,0,0.15);
+                position: absolute;
+                right: 0;
+                top: -55px;
+                z-index: 1;
+                padding: 3px 5px;
+                color: #333333;
+                font-size: 12px;
+                // position: relative;
+                .arrow {
+                  position: absolute;
+                  bottom: -5px;
+                  left: 40%;
+                  width: 0;
+                  height: 0;
+                  border-left: 6px solid transparent;
+                  border-right: 6px solid transparent;
+                  border-top: 6px solid #ffffff;
+                }
+                > p {
+                  padding: 3px;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  a {
+                    text-decoration: none;
+                  }
+                  a:hover {
+                    color: #0C70F8;
+                  }
+                }
+              }
+              &:hover {
+                .operation_btn {
+                  display: block;
+                }
+              }
+            }
+          }
+          img {
+            width: 72px;
+            height: 72px;
+            border-radius: 4px;
+            margin: 0 5px;
+            cursor: pointer;
+          }
+        }
+        .content_detail {
+          >p{
+            text-indent: 20px;
+            .look_more {
+              color: #0C70F8;
+              cursor: pointer;
+            }
+          }
         }
       }
     }

@@ -1,56 +1,60 @@
-export const testData = {
-    sxt: [
-        {
-            name: '摄像头111',
-            addr: '长沙市天心区', 
-            latitude: 28.093856,
-            longitude: 112.974557
-        }, {
-            name: '摄像头222',
-            addr: '创谷广告园', 
-            latitude: 28.093804,
-            longitude: 112.975828
-        }
-    ],
-    kakou: [
-        {
-            name: '卡口111',
-            addr: '长沙市天心区', 
-            latitude: 28.093222,
-            longitude: 112.974718
-        }, {
-            name: '卡口222',
-            addr: '创谷广告园', 
-            latitude: 28.093537,
-            longitude: 112.975628
-        }
-    ],
-    cheliang: [
-        {
-            name: '车辆111',
-            addr: '长沙市天心区', 
-            latitude: 28.094869,
-            longitude: 112.975227
-        }, {
-            name: '车辆222',
-            addr: '创谷广告园', 
-            latitude: 28.093596,
-            longitude: 112.97623
-        }
-
-    ],
-    renyuan: [
-        {
-            name: '人员111',
-            addr: '长沙市天心区', 
-            latitude: 28.09466,
-            longitude: 112.974315
-        }, {
-            name: '人员222',
-            addr: '创谷广告园', 
-            latitude: 28.09335,
-            longitude: 112.974122
-        }
-
+export const testData = [
+  {
+    cname: '底庄镇',
+    uid: 1,
+    isOpenArrow: false,
+    isChecked: false,
+    deviceList: [
+      {
+        uid: 2,
+        deviceName: '天心区芙蓉路',
+        isChildChecked: false,
+        latitude: 27.907956,
+        longitude: 110.595693
+      },
+      {
+        uid: 3,
+        deviceName: '天心区芙蓉路1',
+        isChildChecked: false,
+        latitude: 27.908051,
+        longitude: 110.596669
+      },
+      {
+        uid: 4,
+        deviceName: '天心区芙蓉路2',
+        isChildChecked: false,
+        latitude: 27.907359,
+        longitude: 110.59477
+      }
     ]
-}
+  },
+  {
+    cname: '溆浦镇',
+    uid: 5,
+    isOpenArrow: false,
+    isChecked: false,
+    deviceList: [
+      {
+        uid: 6,
+        deviceName: '溆浦县政府1',
+        isChildChecked: false,
+        latitude: 27.908288,
+        longitude: 110.594288
+      },
+      {
+        uid: 7,
+        deviceName: '溆浦县政府2',
+        isChildChecked: false,
+        latitude: 27.909264,
+        longitude: 110.596122
+      },
+      {
+        uid: 8,
+        deviceName: '溆浦县政府3',
+        isChildChecked: false,
+        latitude: 27.909738,
+        longitude: 110.594856
+      }
+    ]
+  }
+]

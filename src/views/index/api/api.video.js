@@ -43,6 +43,31 @@ export const apiVideoRoundList = data => {
   })
 }
 /**
+ * 轮巡列表删除接口
+ * @param {Object} data 接口入参
+ */
+export const apiDelVideoRoundList = data => {
+  return request({
+    // url: '/videoDownloadService/videoDownloadList?' + $.param(data),
+    url: '/round/' + data.id,
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 新增轮巡
+ * @param {Object} data 接口入参
+ */
+export const addVideoRound = data => {
+  return request({
+    url: '/round',
+    method: 'post',
+    data,
+    mode: videoModeName
+  })
+}
+/**
  * 分页查询视频下载记录接口
  * @param {Object} data 接口入参
  */
@@ -205,7 +230,42 @@ export const apiDelVideoRecords = data => {
     mode: videoModeName
   })
 }
-
+/**
+ * 获取视频标记接口--分页
+ * @param {Object} data 接口入参
+ */
+export const apiGetVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContentPageList',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 修改视频标记接口
+ * @param {Object} data 接口入参
+ */
+export const updateVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContent',
+    method: 'put',
+    params: data,
+    mode: videoModeName
+  })
+}
+/**
+ * 删除视频标记接口
+ * @param {Object} data 接口入参
+ */
+export const deleteVideoRecords = data => {
+  return request({
+    url: '/videoSignContentService/videoSignContent/' + data.id,
+    method: 'delete',
+    params: data,
+    mode: videoModeName
+  })
+}
 /**
  * 分页查询视频下载记录接口
  * @param {Object} data 接口入参

@@ -68,7 +68,7 @@
   </vue-scroll>
 </template>
 <script>
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import EventBasic from './components/eventBasic';
 import { getPlanDetail, ctcTasks, getEventDetail } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';

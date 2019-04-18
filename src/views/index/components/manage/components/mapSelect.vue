@@ -2,104 +2,33 @@
   <div class="select_map_area" :class="{'vl_map_selarea_ctl': selAreaAble}">
     <div class="select_map_left">
       <div class="select_top">
-        <span>已有设备 (12)</span>
+        <span>已有设备 ({{leftDeviceNumber}})</span>
         <p>移除设备</p>
       </div>
       <div class="detail_list">
         <vue-scroll>
           <ul class="temp_detail_info">
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+            <li v-for="(item, index) in leftDeviceList" :key="'item' + index">
+                <div style="display: flex; padding: 0 10px;">
+                  <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleLeftParentChecked(index, item.isChecked)"></el-checkbox>
+                  <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openLeftArrow(index)">
+                    <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                    <span>{{item.cname}}</span>
+                  </div>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+                <div class="child_temp" v-show="item.isOpenArrow === true">
+                  <div class="temp_tab">
+                    <span class="active_span">摄像头</span>
+                    <span>卡口</span>
+                  </div>
+                  <ul class="child_temp_detail">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked)"></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
+              </li>
           </ul>
         </vue-scroll>
       </div>
@@ -107,7 +36,7 @@
     <div class="select_map_right">
       <div class="select_map_right_title">
         <span>可选设备</span>
-        <span>(300)</span>
+        <span>({{selectDeviceNumber}})</span>
       </div>
       <div id="mapMap"></div>
       <div class="right-flag">
@@ -118,7 +47,7 @@
           </li>
         </ul>
         <ul class="map-rrt">
-          <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+          <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
         </ul>
         <ul class="map-rrt map_rrt_u2">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -132,6 +61,7 @@
 import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
+  props: [ 'selectDeviceList', 'selectDeviceNumber' ],
   data () {
     return {
       arrowActiveTemp: false,
@@ -140,71 +70,88 @@ export default {
       selAreaAcitve: false,
       mouseTool: null,
       selAreaAble: false,
-      mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
-      mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
+      mapTypeList: ['sxt', 'kk'],
+      mapTypeListAll: ['sxt', 'kk'],
 
       sxtList: [], // 摄像头
       sxtMapMarkers: [],
       kkList: [], // 卡口
       kkMapMarkers: [],
-      clList: [], // 车辆
-      clMapMarkers: [],
-      ryList: [],  // 人员
-      ryMapMarkers: [],
+
+      leftDeviceList: [], // 选中的已有设备
+      leftDeviceNumber: 0, // 左侧设备数
+      finalDeviceList: [], // 最终选择的设备
     }
   },
   mounted () {
-    let _this = this;
-    let map = new window.AMap.Map('mapMap', {
-      zoom: 18, // 级别
-      center: [110.596015, 27.907662], // 中心点坐标
-      // viewMode: '3D' // 使用3D视图
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    this.map = map;
-    // 在地图中添加MouseTool插件
-    let mouseTool = new window.AMap.MouseTool(map);
-    _this.mouseTool = mouseTool;
-    // 添加事件
-    window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
-      setTimeout(() => {
-        _this.selAreaRest(true);
-        let polygon = new window.AMap.Polygon({ // 构造多边形对象
-          map: map, // 地图对象
-          strokeColor: '#FA453A', // 线条颜色
-          strokeOpacity: 1, // 轮廓线透明度 [0,1]
-          strokeWeight: 1, // 轮廓线宽度
-          fillColor: '#FA453A', //多边形填充颜色
-          fillOpacity: 0.2, // 多边形填充透明度
-          path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
-          zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
-        });
-        _this.selAreaPolygon = polygon;
-        _this.selAreaAble = true;
-        _this.mapMarkHandler();
-      }, 100);
-    });
-
-    _this.getMapData();
+    this.initMap();
+    this.getMapData();
   },
   methods: {
-    mapZoomSet (val) {
-      if (this.map) {
-        this.map.setZoom(this.map.getZoom() + val);
-      }
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapMap', {
+        zoom: 18, // 级别
+        // center: [112.974691, 28.093846], // 中心点坐标
+        center: [110.596015, 27.907662], // 中心点坐标
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      this.map = map;
+      // 在地图中添加MouseTool插件
+      let mouseTool = new window.AMap.MouseTool(map);
+      _this.mouseTool = mouseTool;
+      // 添加事件
+      window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
+        setTimeout(() => {
+          _this.selAreaRest(true);
+          let polygon = new window.AMap.Polygon({ // 构造多边形对象
+            map: map, // 地图对象
+            strokeColor: '#FA453A', // 线条颜色
+            strokeOpacity: 1, // 轮廓线透明度 [0,1]
+            strokeWeight: 1, // 轮廓线宽度
+            fillColor: '#FA453A', //多边形填充颜色
+            fillOpacity: 0.2, // 多边形填充透明度
+            path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
+            zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
+          });
+          _this.selAreaPolygon = polygon;
+          _this.selAreaAble = true;
+          _this.mapMarkHandler();
+        }, 100);
+      });
     },
     // 获取地图数据
     getMapData () {
       setTimeout(() => {
-        this.sxtList = testData.sxt;
-        this.kkList = testData.kakou;
-        this.clList = testData.cheliang;
-        this.ryList = testData.renyuan;
+        if (testData && testData.length > 0) {
+          testData.map(item => {
+            item.deviceList.map(itm => {
+              const param = {
+                parentUid: item.uid,
+                uid: itm.uid,
+                deviceName: itm.deviceName,
+                longitude: itm.longitude,
+                latitude: itm.latitude
+              };
+              this.sxtList.push(param);
+            })
+          })
+        }
+        // if (this.selectDeviceList && this.selectDeviceList.length > 0) {
+        //   this.selectDeviceList.map(item => {
+        //     item.deviceList.map(itm => {
+        //       console.log(itm.longitude + ' ' + itm.latitude)
+        //       this.sxtList.push(itm);
+        //     })
+        //   })
+        // }
         this.mapMarkHandler();
       }, 200);
     },
     // 地图标记处理
     mapMarkHandler () {
+      // console.log(this.sxtList)
       // 摄像头
       this.mapClearMarkers(this.sxtMapMarkers);
       if (this.mapTypeList.indexOf('sxt') >= 0) {
@@ -215,21 +162,13 @@ export default {
       if (this.mapTypeList.indexOf('kk') >= 0) {
         this.mapMark(this.kkList, this.kkMapMarkers, 'kk');
       }
-      // 车辆
-      this.mapClearMarkers(this.clMapMarkers);
-      if (this.mapTypeList.indexOf('cl') >= 0) {
-        this.mapMark(this.clList, this.clMapMarkers, 'cl');
-      }
-      // 人员
-      this.mapClearMarkers(this.ryMapMarkers);
-      if (this.mapTypeList.indexOf('ry') >= 0) {
-        this.mapMark(this.ryList, this.ryMapMarkers, 'ry');
-      }
     },
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
         let hoverWindow = null;
+        let unCheckDevice = []; // 没有在多边形中的设备--没有选中的设备
+        let currDeviceList = [];
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -239,6 +178,7 @@ export default {
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
+              unCheckDevice.push(obj);
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -251,63 +191,49 @@ export default {
               // 自定义点标记覆盖物内容
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
-            console.log('marker', marker);
             // myAMap.hoverMarkerHandler(map, marker, obj);
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
-
-            // 点击地图上的摄像头/卡口播放视频
-            if (keyWord === 'sxt' || keyWord === 'kk') {
-              marker.on('click', function () {
-                _this.testAddSxt();
-              });
-            }
-            // hover
-            marker.on('mouseover', function () {
-              let sContent = '<div class="vl_map_hover">' +
-                '<div class="vl_map_hover_main">' + _this.mapHoverInfo(obj, keyWord) + '</div>';
-              hoverWindow = new window.AMap.InfoWindow({ // 创建一个信息窗体对象
-                isCustom: true, // 是否可以自定义内容
-                closeWhenClickMap: true,
-                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                content: sContent
-              });
-              // aCenter = mEvent.target.F.position
-              hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-              hoverWindow.on('close', function () {
-                // console.log('infoWindow close')
-              });
-            });
-            marker.on('mouseout', function () {
-              // if (hoverWindow) { hoverWindow.close(); }
-            });
           }
+        }
+        if (unCheckDevice.length !== 0) {
+          _this.sxtList.map((item, index) => {
+           unCheckDevice.map(itm => {
+              if (item.uid === itm.uid) {
+                _this.sxtList.splice(index);
+              }
+            })
+          });
+         currDeviceList = JSON.parse(JSON.stringify(_this.sxtList));
+         console.log('currDeviceList', currDeviceList)
+         _this.handleDeviceData(currDeviceList);
         }
       }
     },
-    mapHoverInfo (data, type) {
-      let str = '<ul>';
-      if (type === 'sxt') {
-        str += '<li><span>设备名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'kk') {
-        str += '<li><span>卡口名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'cl') {
-        str += '<li><span>车辆名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'ry') {
-        str += '<li><span>人员名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-        str += '<li style="text-align: center;">' +
-            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
-            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
-          '</li>';
-      } else {
-        str += '<li>未知数据</li>';
+    // 处理多边形中选中的设备数据
+    handleDeviceData (currList) {
+      if (currList && currList.length > 0) {
+        let params;
+        currList.map(itm => {
+          testData.map((item, index) => {
+            if (item.uid === itm.parentUid) {
+              console.log('itm', itm);
+              console.log('item', item);
+              params = {
+                cname: item.cname,
+                uid: item.uid,
+                isOpenArrow: item.isOpenArrow,
+                isChecked: item.isChecked,
+                deviceList: []
+              };
+              params.deviceList.push(itm);
+            }
+          });
+        });
+            this.leftDeviceList.push(params);
+        this.leftDeviceNumber = this.leftDeviceList.length;
       }
-      str += '</ul>';
-      return str;
+      console.log('currentDeviceList', this.leftDeviceList);
     },
     // 清除所有
     resetTools () {
@@ -353,6 +279,58 @@ export default {
         this.selAreaPolygon = null;
         this.selAreaAble = false;
       }
+    },
+     // 重置地图
+    resetMap () {
+      this.initMap();
+    },
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    // 左侧---子级多选框change
+    handleLeftChildChecked (index, idx, val) {
+      this.leftDeviceList[index].deviceList[idx].isChildChecked = val;
+      // 过滤出子级选中的
+      let checkedArr = this.leftDeviceList[index].deviceList.filter((item) => {
+        return item.isChildChecked === true;
+      })
+      if (checkedArr.length === 0) { // 没有选中的
+        this.leftDeviceList[index].isChecked = false;
+      }
+      if (checkedArr.length === this.leftDeviceList[index].deviceList.length) { // 全选
+        this.leftDeviceList[index].isChecked = true;
+      }
+      if (checkedArr.length === 0 || checkedArr.length < this.leftDeviceList[index].deviceList.length) {
+        // this.rightAllChecked = false;
+        this.leftDeviceList[index].isChecked = false;
+      }
+
+      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList));
+      // 过滤出父级中没有选中
+      // let checkedParentArr = this.leftDeviceList.filter(itm => {
+      //   return itm.isChecked === false;
+      // });
+    },
+    // 左侧---展开左侧列表
+    openLeftArrow (index) {
+      console.log('33333')
+      this.leftDeviceList[index].isOpenArrow = !this.leftDeviceList[index].isOpenArrow;
+      console.log(this.selectDeviceList)
+      // this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    // 左侧--父级多选框
+    handleLeftParentChecked (index, val) {
+      this.leftDeviceList[index].isChecked = val;
+      this.leftDeviceList[index].deviceList.map(item => {
+        item.isChildChecked = val;
+      });
+      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
+      // 过滤出父级中没有选中
+      // let checkedParentArr = this.leftDeviceList.filter(itm => {
+      //   return itm.isChecked === false;
+      // });
     },
   }
 }

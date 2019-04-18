@@ -62,7 +62,7 @@
 <script>
 import EventBasic from './components/eventBasic';
 import { getEventDetail, endEvent } from '@/views/index/api/api.event.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { dataList } from '@/utils/data.js';
 export default {

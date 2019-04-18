@@ -52,7 +52,7 @@
           <div class="summary-content">
             <p>事件总结附件</p>
             <div class="content-icon">
-              <ul>
+              <ul class="clearfix" style="clear:both">
                 <li v-for="(item, index) in eventFile" :key="'item' + index">
                   <i class="vl_icon vl_icon_event_1"></i>
                   <div class="operation_btn">
@@ -88,7 +88,7 @@
           <div class="summary-content">
             <p>调度总结附件</p>
             <div class="content-icon">
-              <ul>
+              <ul class="clearfix" style="clear:both">
                 <li v-for="(item, index) in ctcFile" :key="'item' + index">
                   <i class="vl_icon vl_icon_event_1"></i>
                   <div class="operation_btn">
@@ -175,7 +175,7 @@
 <script>
 import EventBasic from './components/eventBasic';
 import { getEventDetail } from '@/views/index/api/api.event.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
