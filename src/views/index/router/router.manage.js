@@ -1,6 +1,6 @@
  /* 管理板块 */
 export default {
-  path: 'manage',
+  path: '/manage',
   name: 'manage',
   redirect: {
     name: 'set_video'

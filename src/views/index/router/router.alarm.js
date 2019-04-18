@@ -1,6 +1,6 @@
  /* 告警板块 */
 export default {
-  path: 'alarm',
+  path: '/alarm',
   name: 'alarm',
   component: () => import('@/views/index/components/alarm/alarm.vue'),
   redirect: {

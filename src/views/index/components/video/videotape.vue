@@ -13,7 +13,7 @@
         :picker-options="pickerOptions2">
       </el-date-picker>
     </div>
-    <div class="dl_vt_c" v-loading="searchLoading">
+    <div class="dl_vt_c" v-loading="searchLoading" v-if="videoRecordList && videoRecordList.length > 0">
       <ul>
         <li v-for="(item, index) in videoRecordList" :key="'vrl_' + index">
           <div v-if="item">
@@ -34,6 +34,9 @@
           </div>
         </li>
       </ul>
+    </div>
+    <div class="dl_vt_c" v-else>
+      <p style="padding: 0 0 0 20px; color: #999;">暂无录像记录</p>
     </div>
     <div class="dl_vt_b">
       <el-pagination
@@ -124,14 +127,12 @@ export default {
           let objs = [];
           for (let i = 0; i < res.data.list.length; i++) {
             let o = res.data.list[i];
-            let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            console.log('deviceSip', deviceSip);
             objs.push({
               type: 3,
               title: o.deviceName,
-              video: Object.assign({}, o, {
-                deviceSip: deviceSip
-              })
+              startTime: o.playBackStartTime,
+              endTime: o.playBackEndTime,
+              video: Object.assign({}, o)
             });
           }
           this.videoRecordList = objs;

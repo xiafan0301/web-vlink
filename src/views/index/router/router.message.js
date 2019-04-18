@@ -1,6 +1,6 @@
  /* 消息板块 */
 export default {
-  path: 'message',
+  path: '/message',
   name: 'message',
   component: () => import('@/views/index/components/message/message.vue'),
   redirect: {

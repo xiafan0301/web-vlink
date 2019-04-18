@@ -296,10 +296,10 @@ export default {
   &.vid_list_st1 > li {
     width: 100%; height: 100%;
   }
-  &.vid_list_st2 > li {
+  &.vid_list_st4 > li {
     width: 50%; height: 50%;
   }
-  &.vid_list_st3 > li {
+  &.vid_list_st5 > li {
     width: 33.33%; height: 40%;
     &:nth-child(1) {
       width: 50%; height: 60%;
@@ -308,10 +308,10 @@ export default {
       width: 50%; height: 60%;
     }
   }
-  &.vid_list_st4 > li {
+  &.vid_list_st9 > li {
     width: 33.33%; height: 33.33%;
   }
-  &.vid_list_st5 > li {
+  &.vid_list_st16 > li {
     width: 25%; height: 25%;
   }
 }
