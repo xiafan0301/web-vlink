@@ -139,7 +139,7 @@
 <script>
 import controlVideo from './components/controlVideo.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {formatDate, random14} from '@/utils/util.js';
+import {random14} from '@/utils/util.js';
 import {getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {getDiciData} from '@/views/index/api/api.js';
 export default {
@@ -537,13 +537,17 @@ export default {
           // })
           if (obj.surveillanceStatus === 1) {
             // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-            obj.title = obj.deviceName;
-            obj.video = {
-              deviceSip: deviceSip
-            }
-            _this.videoObj = obj;
-
+            // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
+            // obj.title = obj.deviceName;
+            // obj.video = {
+            //   deviceSip: deviceSip
+            // }
+            _this.videoObj = {
+              type: 1,
+              title: obj.deviceName,
+              video: Object.assign({}, obj)
+            };
+            console.log(_this.videoObj, '_this.videoObj')
             _this.isShowVideo = true;
             setTimeout(() => {
               $('#' + domId).append($('#controlVideo'));

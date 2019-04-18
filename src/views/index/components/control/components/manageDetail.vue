@@ -208,7 +208,7 @@
                     <div class="situ_r_img" v-if="!item.isShowVideo">
                       <div>从左边拖拽设备播放</div>
                     </div>
-                    <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
                       :oConfig="{sign: true}">
                     </div>
                   </div>
@@ -435,7 +435,9 @@ export default {
   mounted () {
     this.resetMap();
     this.getControlDetail();
-    this.getAlarmSnap();
+    if (this.state !== '0') {
+      this.getAlarmSnap();
+    }
   },
   methods: {
     /* ************布控结果********* */
@@ -703,7 +705,7 @@ export default {
       const params = {
         pageNum: this.pageNumObjRes,
         pageSzie: this.pageSzieRes,
-        'where.surveillanceId': 11,
+        'where.surveillanceId': this.controlId,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
         'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
         'where.deviceName': this.devNameIsKey
@@ -753,7 +755,7 @@ export default {
       this.dragActiveObj = item;
     },
   
-    dragend (e) {
+    dragend () {
       // 重置透明度
       // e.target.style.opacity = "";
 
@@ -782,14 +784,13 @@ export default {
       console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
         // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-        console.log('deviceSip', deviceSip);
+        // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
+        // console.log('deviceSip', deviceSip);
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
+          type: 1,
           title: this.dragActiveObj.deviceName,
-          video: Object.assign({}, this.dragActiveObj, {
-            deviceSip: deviceSip
-          })
+          video: Object.assign({}, this.dragActiveObj)
         });
       }
       // 移动拖动的元素到所选择的放置目标节点
