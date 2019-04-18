@@ -80,9 +80,7 @@
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSign, apiVideoRecord } from "@/views/index/api/api.video.js";
-import { getTestLive } from "@/views/index/api/api.js";
-import { setTimeout } from 'timers';
+import { apiSignContentList, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack } from "@/views/index/api/api.video.js";
 export default {
   /** 
    * index: 视频序号（在列表页面的位置）
@@ -168,48 +166,67 @@ export default {
     // 视频播放
     initPlayer () {
       this.videoLoadingFailed = false;
-      getTestLive().then(res => {
-        if (res && res.data) {
-          console.log('>>>> init flvplayer');
-          let ind = res.data.length - 1;
-          let ird = Math.round(Math.random() * ind);
-          let surl = res.data[ird].liveFlvUrl;
-          // flv.js
-          if (window.flvjs.isSupported()) {
-            this.videoLoading = true;
-            var videoElement = document.getElementById(this.flvplayerId);
-            var flvPlayer = window.flvjs.createPlayer({
-              type: 'flv',
-              url: surl,
-              isLive: true
-            }, {
-              enableWorker: true,
-              enableStashBuffer: false,
-              stashInitialSize: 128
-            });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().then(() => {
-              this.videoLoading = false;
-              this.videoLoadingFailed = false;
-              if (this.config.pause) {
-                this.playActive = false;
-                flvPlayer.pause();
-              }
-            });
-            this.startPlayTime = new Date().getTime();
-            this.player = flvPlayer;
-            this.video = videoElement;
-
-            // 加载失败
-            setTimeout(() => {
-              this.videoLoadingFailed = true;
-            }, this.videoLoadingTimeout);
+      let obj = {deviceId: this.oData.video.uid};
+      if (this.oData.type === 1) {
+        apiVideoPlay(obj).then(res => {
+          if (res && res.data) {
+            // let ind = res.data.length - 1;
+            // let ird = Math.round(Math.random() * ind);
+            this.initPlayerDo(res.data.liveFlvUrl);
           }
+        }).catch(error => {
+          console.log("apiVideoPlay error：", error);
+        });
+      } else if (this.oData.type === 2 || this.oData.type === 3) {
+        if (this.oData.startTime) {
+          obj.startTime = formatDate(this.oData.startTime);
         }
-      }).catch(error => {
-        console.log("getTestLive error：", error);
-      });
+        if (this.oData.endTime) {
+          obj.endTime = formatDate(this.oData.endTime);
+        }
+        apiVideoPlayBack(obj).then(res => {
+          if (res && res.data) {
+            this.initPlayerDo(res.data.liveFlvUrl);
+          }
+        }).catch(error => {
+          console.log("apiVideoPlayBack error：", error);
+        });
+      }
+      
+    },
+    initPlayerDo (surl) {
+      if (window.flvjs.isSupported()) {
+        this.videoLoading = true;
+        var videoElement = document.getElementById(this.flvplayerId);
+        var flvPlayer = window.flvjs.createPlayer({
+          type: 'flv',
+          url: surl,
+          isLive: true
+        }, {
+          enableWorker: true,
+          enableStashBuffer: false,
+          stashInitialSize: 128
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play().then(() => {
+          this.videoLoading = false;
+          this.videoLoadingFailed = false;
+          if (this.config.pause) {
+            this.playActive = false;
+            flvPlayer.pause();
+          } else {
+            this.startPlayTime = new Date().getTime();
+          }
+        });
+        this.player = flvPlayer;
+        this.video = videoElement;
+
+        // 加载失败
+        window.setTimeout(() => {
+          this.videoLoadingFailed = true;
+        }, this.videoLoadingTimeout);
+      }
     },
     destroyPlayer () {
       if (this.player) {
@@ -345,7 +362,7 @@ export default {
     //   }
     // },
     // 全屏/取消全屏
-    playerFullScreen (flag) {
+    playerFullScreen () {
       // this.fullScreen = flag;
       // this.playerEnlarge(false);
       this.$emit('showScreen')

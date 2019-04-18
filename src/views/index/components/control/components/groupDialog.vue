@@ -21,7 +21,8 @@
   </div>
 </template>
 <script>
-import {addGroup, getGroupsById, putGroup} from '@/views/index/api/api.control.js';
+import {getGroupsById, putGroup} from '@/views/index/api/api.control.js';
+import {addGroup} from '@/views/index/api/api.manage.js';
 export default {
   props: ['operateType', 'tabType', 'groupId'],
   data () {
@@ -80,7 +81,7 @@ export default {
     putGroup () {
       const data = this.group;
       this.loadingBtn = true;
-      putGroup(data).then(res => {
+      putGroup(data).then(() => {
         this.groupDialog = false;
         this.$message.success('修改成功');
         this.$emit('sendChildren', this.group.groupName);

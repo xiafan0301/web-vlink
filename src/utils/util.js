@@ -233,6 +233,7 @@ export const unique = (array) => {
   }, []);
   return resultArray;
 }
+
 // 数组转树结构方法
 export const translateDataToTree = (data) => {
   let parents = data.filter(value => value.parentId === 'undefined' || value.parentId === null)
