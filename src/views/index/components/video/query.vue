@@ -78,6 +78,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  :editable="false" :clearable="false"
                   placeholder="选择开始时间">
                 </el-date-picker>
               </div>
@@ -88,6 +89,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  :editable="false" :clearable="false"
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
