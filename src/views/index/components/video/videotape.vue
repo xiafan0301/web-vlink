@@ -53,7 +53,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiVideoRecordPageList } from "@/views/index/api/api.video.js";
+import { apiVideoRecordPageList, apiDelVideoRecord } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   components: {flvplayer},
@@ -149,9 +149,15 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        apiDelVideoRecord(item.video.uid).then(() => {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }).catch(error => {
+          this.$message.error('删除失败！');
+          console.log("apiDelVideoRecord error：", error);
         });
       }).catch(() => {
         this.$message({
