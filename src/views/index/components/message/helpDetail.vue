@@ -118,7 +118,11 @@ export default {
   methods: {
     // 转码
     transcoding (data, code) {
-      return data && data.find(f => f.enumField === String(code)).enumValue;
+      if (code) {
+        return data && data.find(f => f.enumField === String(code)).enumValue;
+      } else {
+        return ''
+      }
     },
     // 获取参与类型字典
     getParticipateTypeDiciData () {
@@ -146,12 +150,13 @@ export default {
     },
     // 获取评论列表数据
     getCommentInfoList () {
-      // const params = {
-      //   eventId: 1//this.helpId
-      // }
-      getCommentInfoList(1).then(res => {
+      const params = {
+        'where.eventId': 1,//this.helpId
+        pageNum: -1
+      }
+      getCommentInfoList(params).then(res => {
         if (res && res.data) {
-          this.commentList = res.data;
+          this.commentList = res.data.list;
         }
       })
     },
@@ -178,6 +183,7 @@ export default {
         this.loadingBtn = false;
       })
     },
+    // 弹出屏蔽弹窗
     popShield (item, index) {
       this.userId = item.replayUserId;//暂时取这个
       this.shieldUserId = item.commentUserId;
