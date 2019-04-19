@@ -1,0 +1,349 @@
+<template>
+  <vue-scroll>
+    <div class="event-end">
+      <div class="breadcrumb_heaer">
+        <el-breadcrumb separator=">">
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item>结束事件</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="content-box">
+        <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
+        <div class="end-body">
+          <el-form class="end-content" :model="endForm">
+            <el-form-item class="limit_parent" label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入1000个字', trigger: 'blur'}]">
+              <!-- <p class="limit_number">(<span style="color: red">10000</span>/10000)</p> -->
+              <!-- <p class="limit_number">(<span style="color: red">{{endForm.eventSummary && endForm.eventSummary.length || 0}}</span>/10000)</p> -->
+              <el-input type="textarea" rows="7" style="width: 50%;" v-model="endForm.eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
+            </el-form-item> 
+          </el-form>
+          <div class="end-upload">
+            <el-upload
+              :action="uploadUrl"
+              accept='.png,.jpg,.bmp,.pdf,.doc,.docx,,.txt'
+              :before-upload='handleBeforeUpload'
+              :on-success="handleSuccess"
+              :on-exceed="handleImgNumber"
+              :disabled="isImgDisabled"
+              :title="[isImgDisabled === true ? '禁用' : '']"
+              :show-file-list='true'
+              >
+              <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
+              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
+            </el-upload>
+            <!-- <div class="img_list">
+              <div v-for="(item, index) in imgList2" :key="'item' + index">
+                <img
+                  :src="item.path"
+                  @click="openBigImg(index, imgList2)"
+                >
+                <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
+              </div>
+            </div>
+            <div class="file_list">
+              <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
+                <i class="vl_icon vl_icon_event_5"></i>
+                <span>{{item.cname}}</span>
+                <i class='el-icon-close' @click="deleteFile(index, item)"></i>
+              </div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+      <div class="operation-footer">
+        <el-button class="operation_btn function_btn" @click="submitData">确定</el-button>
+        <el-button class="operation_btn back_btn" @click="back">返回</el-button>
+      </div>
+      <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
+    </div>
+  </vue-scroll>
+</template>
+<script>
+import EventBasic from './components/eventBasic';
+import { getEventDetail, endEvent } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
+import { ajaxCtx } from '@/config/config.js';
+import { dataList } from '@/utils/data.js';
+export default {
+  components: { EventBasic, BigImg },
+  data () {
+    return {
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
+      endForm: {
+        // eventId: null,
+        eventLevel: null,
+        eventSummary: null, // 事件总结
+        attachmentList: []
+      },
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      isImgDisabled: false,
+      imgList1: [], // 要放大的图片数据
+      basicInfo: {}, // 事件详情
+      fileList: [], // 要上传的文件列表
+      imgList2: [],
+      imgList: [] // 图片列表
+    }
+  },
+  mounted () {
+    this.endForm.eventId = this.$route.query.id;
+    this.getDetail();
+  },
+  methods: {
+    // 获取事件详情
+    getDetail () {
+      const eventId = this.$route.query.id;
+      getEventDetail(eventId)
+        .then(res => {
+          if (res) {
+            this.basicInfo = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    handleSuccess (res, file) {
+      // console.log(res)
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let type;
+        if (fileName) {
+          type = fileName.substring(fileName.lastIndexOf('.'));
+          let data;
+          res.fileName = file.name;
+          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            data = {
+              contentUid: 0,
+              fileType: dataList.imgId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.imgList2.push(data);
+          } else {
+            data = {
+              contentUid: 0,
+              fileType: dataList.fileId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.fileList.push(data);
+          }
+          this.endForm.attachmentList.push(data);
+          this.isImgDisabled = false;
+        }
+      }
+    },
+    handleBeforeUpload (file) { // 附件上传之前
+      console.log(this.imgList2.length)
+      this.isImgDisabled = true;
+      const isLtTenM = file.size / 1024 / 1024 < 10;
+      if (!isLtTenM) {
+        this.$message.error('上传的附件大小不能超过10M');
+        this.isImgDisabled = false;
+      }
+      // if (this.imgList2.length > 2 || this.fileList.length > 1) {
+      //   console.log('1111')
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '最多上传3张图片或一个文件',
+      //     customClass: 'request_tip'
+      //   })
+      //   return false;
+      // }
+      return isLtTenM;
+    },
+    // 文件超出个数限制
+    handleImgNumber (files) {
+      console.log(files)
+    },
+    // 删除图片
+    closeImgList (index, obj) {
+      this.imgList2.splice(index, 1);
+      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+        if (item.cname === obj.cname) {
+          this.endForm.attachmentList.splice(idx, 1);
+        }
+      });
+    },
+    deleteFile (index, obj) { // 删除文件
+      this.fileList.splice(index, 1);
+      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+        if (item.cname === obj.cname) {
+          this.endForm.attachmentList.splice(idx, 1);
+        }
+      });
+    },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    },
+    // 图片放大传参
+    emitHandleImg (isShow, index) {
+      this.openBigImg(index, this.basicInfo.attachmentList);
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(data){
+      this.imgList1 = [];
+      this.isShowImg = data;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
+    // 结束事件
+    submitData () {
+      this.endForm.eventLevel = this.basicInfo.eventLevel;
+      if (!this.endForm.eventSummary && this.endForm.attachmentList.length === 0) {
+        this.$message({
+          type: 'warning',
+          message: '请先上传或输入事件总结',
+          customClass: 'request_tip'
+        })
+      } else {
+        endEvent(this.endForm, this.endForm.eventId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '结束成功',
+                customClass: 'request_tip'
+              })
+              this.$router.push({name: 'event_manage'});
+            }
+          })
+          .catch(() => {})
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.event-end {
+  width: 100%;
+  .content-box {
+    width: 100%;
+    padding: 0 20px;
+    margin-bottom: 100px;
+    .end-body {
+      width: 100%;
+      margin-bottom: 20px;
+      background-color: #ffffff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+      .end-content {
+        padding: 20px 20px 10px;
+        .limit_parent {
+          position: relative;
+          .limit_number {
+            position: absolute;
+            left: -70px;
+            top: 25px;
+          }
+        }
+      }
+      .error_tip {
+        margin-left: 110px;
+        margin-bottom: 10px;
+        color: #F94539;
+      }
+      .end-upload {
+        margin-left: 100px;
+        width: 60%;
+        padding-bottom: 20px;
+        .upload-btn {
+          border: 1px solid #D3D3D3;
+          background-color: #ffffff;
+          color: #333333;
+        }
+        .end-upload-tip {
+          color: #999999;
+          margin: 10px 0;
+          font-size: 14px;
+        }
+        /deep/ .el-upload-list__item {
+          width: 40%;
+        }
+        .img_list {
+          display: flex;
+          >div {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 5px 5px 0;
+            cursor: pointer;
+            img {
+              border-radius: 4px;
+              margin-right: 5px;
+              width: 100%;
+              height:100%;
+            }
+            .close_btn {
+              position: absolute;
+              right: 0;
+              top: 0;
+              cursor: pointer;
+            }
+          }
+        }
+        .file_list {
+          .show-file-div-list {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            span {
+              // color: #0785FD;
+              font-size: 14px;
+              margin: 0 5px;
+            }
+            i {
+              font-size: 18px;
+              color: #5D5D5D;
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+  }
+  .operation-footer {
+    border-left: 1px solid #F2F2F2;
+    width: 100%;
+    height: 65px;
+    line-height: 65px;
+    position: fixed;
+    bottom: 0;
+    background: #ffffff;
+    padding-left: 20px;
+    .operation_btn {
+      padding: 0;
+      width: 100px;
+      height: 40px;
+      text-align: center;
+    }
+    .function_btn {
+      background: #0C70F8;
+      color: #ffffff;
+    }
+    .back_btn {
+      background: #ffffff;
+      border: 1px solid #DDDDDD;
+      color: #666666;
+    }
+  }
+}
+</style>
+

@@ -1,0 +1,355 @@
+<template>
+  <vue-scroll>
+    <div class="tirotation_setting">
+      <div class="search_box">
+        <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+          <el-form-item prop="dateTime">
+            <el-date-picker
+              style="width: 260px;"
+              v-model="searchForm.dateTime"
+              type="daterange"
+              value-format="yyyy-MM-dd"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="status">
+            <el-select v-model="searchForm.status" style="width: 240px;" placeholder="轮巡状态">
+              <el-option value="全部状态"></el-option>
+              <el-option label="待开始" :value="1"></el-option>
+              <el-option label="进行中" :value="2"></el-option>
+              <el-option label="已结束" :value="3"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="select_btn" @click="searchData">查询</el-button>
+            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+          </el-form-item>
+        </el-form>
+        <div class="divide"></div>
+      </div>
+      <div class="table_box">
+        <div class="add_ratation_btn" @click="skipAddRatotionPage">
+          <span>+</span>
+          <span>新增轮训</span>
+        </div>
+        <el-table
+          class="ratation_table"
+          :data="dataList"
+          >
+          <el-table-column
+            fixed
+            label="预案编号"
+            prop="roundNo"
+            :show-overflow-tooltip='true'
+            >
+          </el-table-column>
+          <el-table-column
+            label="预案名称"
+            prop="roundName"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="开始时间"
+            prop="startTime"
+            show-overflow-tooltip
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.startTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="结束时间"
+            prop="endTime"
+            show-overflow-tooltip
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.endTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="轮巡状态"
+            prop="roundStatus"
+            >
+            <template slot-scope="scope">
+              <span class="event_status" :class="[scope.row.roundStatus === 1 ? 'untreated_event' 
+                : scope.row.roundStatus === 2 ? 'treating_event' : 'end_event']">
+                {{scope.row.roundStatus === 1 ? '待开始' : scope.row.roundStatus === 2 ? '进行中' : '已结束'}}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="轮巡间隔(秒)"
+            prop="interval"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="画面数"
+            prop="frameNumber"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          
+          <el-table-column
+            label="轮巡设备"
+            prop="deviceNumber"
+            :show-overflow-tooltip='true'
+          >
+          </el-table-column>
+          <el-table-column
+            label="更新时间"
+            prop="updateTime"
+            show-overflow-tooltip
+            align="center"
+            >
+            <template slot-scope="scope">
+              <span>{{scope.row.updateTime | fmTimestamp}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="240">
+            <template slot-scope="scope">
+              <span class="operation_btn">查看</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn">编辑</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showCloseDialog(scope)">关闭</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-pagination
+        @current-change="handleCurrentChange"
+        :current-page.sync="pagination.pageNum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pagination.pageSize"
+        layout="total, prev, pager, next, jumper"
+        :total="pagination.total">
+      </el-pagination>
+      <!--关闭轮巡弹出框-->
+      <el-dialog
+        title="是否关闭该轮巡任务?"
+        :visible.sync="closeRatationDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">关闭后不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="closeRatationDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="closeRatationDialog = false">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--删除弹出框-->
+      <el-dialog
+        title="是否确定删除该轮巡任务?"
+        :visible.sync="delRotationDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">删除后数据不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="delRotationDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="delRotationInfo">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
+  </vue-scroll>
+</template>
+<script>
+import { formatDate } from '@/utils/util.js';
+import { apiVideoRoundList, apiDelVideoRoundList } from '@/views/index/api/api.video.js';
+export default {
+  data () {
+    return {
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      searchForm: {
+        dateTime: [],
+        status: '全部状态'
+      },
+      dataList: [],
+      closeRatationDialog: false, // 关闭轮巡弹出框
+      delRotationDialog: false, // 删除轮巡弹出框
+      deleteId: null, // 要删除--关闭的轮巡id
+    }
+  },
+  mounted () {
+    this.getOneMonth();
+    this.getList();
+  },
+  methods: {
+    // 获取轮巡列表
+    getList () {
+      let status;
+      if (this.searchForm.status === '全部状态') {
+        status = null;
+      } else {
+        status = this.searchForm.status;
+      }
+      const params = {
+        'where.startTime': this.searchForm.dateTime[0],
+        'where.endTime': this.searchForm.dateTime[1],
+        'where.status': status,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      apiVideoRoundList(params)
+        .then(res => {
+          if (res) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // 根据条件搜索
+    searchData () {
+      this.getList();
+    },
+    // 重置搜索条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getOneMonth();
+      this.getList();
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
+    // 跳至新增轮巡页面
+    skipAddRatotionPage () {
+      this.$router.push({name: 'add_patrol'});
+    },
+    // 显示关闭轮巡弹出框
+    showCloseDialog (obj) {
+      // console.log(obj);
+      this.deleteId = obj.id;
+      this.closeRatationDialog = true;
+    },
+    // 显示删除轮巡弹出框
+    showDeleteDialog (obj) {
+      // console.log(obj);
+      this.deleteId = obj.id;
+      this.delRotationDialog = true;
+    },
+    // 删除轮巡数据
+    delRotationInfo () {
+      if (this.deleteId) {
+        const params = {
+          id: this.deleteId
+        }
+        apiDelVideoRoundList(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.delRotationDialog = false;
+              this.getList();
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    getOneMonth () { // 设置默认一个月
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
+      this.searchForm.dateTime.push(startDate);
+      this.searchForm.dateTime.push(endDate);
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.tirotation_setting {
+  background-color: #ffffff;
+  padding: 20px;
+  .search_box {
+    width: 100%;
+    .search_form {
+      width: 100%;
+      .select_btn, .reset_btn {
+        width: 80px;
+      }
+      .select_btn {
+        background-color: #0C70F8;
+        color: #ffffff;
+      }
+      .reset_btn {
+        background-color: #ffffff;
+        color: #666666;
+        border-color: #DDDDDD;
+      }
+    }
+    .divide {
+      border: 1px dashed #fafafa;
+    }
+  }
+  .table_box {
+    padding: 10px 0;
+    .add_ratation_btn {
+      width: 108px;
+      height: 40px;
+      background-color: #0C70F8;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 40px;
+      text-align: center;
+      border-radius: 3px;
+      cursor: pointer;
+      span:nth-child(1) {
+        font-size: 16px;
+      }
+      span:nth-child(2) {
+        margin-left: 5px;
+      }
+    }
+    .ratation_table {
+      margin-top: 8px;
+      .event_status {
+        &:before {
+          content: '.';
+          font-size: 30px;
+          position: absolute;
+          left: 0;
+          top: 3px;
+        }
+      }
+      .untreated_event {
+        &:before {
+          color: #0C70F8;
+        }
+      }
+      .treating_event {
+        &:before {
+          color: #63C751;
+        }
+      }
+      .end_event {
+        &:before {
+          color: #B8B8B8;
+        }
+      }
+      .operation_btn {
+        color: #0C70F8;
+        cursor: pointer;
+        padding: 0 10px;
+        display: inline-block;
+      }
+    }
+  }
+}
+</style>
+

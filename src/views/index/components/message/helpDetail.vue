@@ -1,0 +1,393 @@
+<template>
+  <div class="mes_help_det">
+    <!-- 面包屑 -->
+    <div class="breadcrumb_heaer">
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">民众互助</el-breadcrumb-item>
+        <el-breadcrumb-item>查看互助</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <div class="help_det_box">
+      <div class="det_info" v-if="helpDetail">
+        <div style="padding-left: 14px;margin-bottom: 12px;">
+          <span>上报人：</span>
+          <el-popover
+            placement="top-start"
+            width="150"
+            trigger="click"
+            >
+            <div class="det_info_com"><i class="vl_icon vl_icon_message_1"></i><span>语音通话</span></div>
+            <div class="det_info_com"><i class="vl_icon vl_icon_message_2"></i><span>视频通话</span></div>
+            <span class="det_info_click" slot="reference">{{helpDetail.reporterPhone}}</span>
+          </el-popover>
+        </div>
+        <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">{{helpDetail.reportTime}}</span></div>
+        <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{helpDetail.eventDetail}}</span></div>
+        <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
+      </div>
+      <div class="det_list" v-if="commentList.length > 0">
+        <div class="list_title">
+          <span>{{commentList && commentList.length}}</span><span>条信息</span>
+        </div>
+        <div class="list_content" v-for="(item, index) in commentList" :key="item.uid">
+          <img src="//via.placeholder.com/32x32" alt="">
+          <ul>
+            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserName}}）</span></li>
+            <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{transcoding(sourceTypeList, item.eventSource)}}</span></li>
+            <li class="con_three">{{transcoding(participateTypeList, item.participateType)}}</li>
+            <li class="con_four vl_f_333">{{item.content}}</li>
+            <li class="con_five" v-if="item.sysAppendixInfoList.length > 0">
+              <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid">
+            </li>
+            <li class="con_six" v-if="!item.replayContent">
+              <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
+              <div><i class="vl_icon vl_icon_message_4"></i><span class="vl_f_666" @click="popShield(item, index)">屏蔽该评论</span></div>
+            </li>
+            <el-collapse-transition>
+              <li class="con_seven" v-if="commentId === item.uid && !isConfirmation">
+                <el-input v-model="content" placeholder="请对事发情况进行描述，文字限制140字"></el-input>
+                <div class="con_btn">
+                  <i class="vl_icon vl_icon_message_6" @click="isShowEmoji = !isShowEmoji"></i>
+                  <el-button type="primary" :loading="loadingBtn" @click="replyComment">回复评论</el-button>
+                  <el-button @click="commentId = null;isShowEmoji = false;">取消评论</el-button>
+                </div>
+                <!-- emoji表情选择框 -->
+                <div class="emoji_box" v-if="commentId === item.uid && isShowEmoji">
+                  <emotion @emotion="handleEmotion" :height="200"></emotion>
+                </div>
+              </li>
+            </el-collapse-transition>
+            <li class="reply_content" v-if="item.replayContent || (commentId === item.uid && isConfirmation)">
+              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
+              <p>回复内容：</p>
+              <p v-html="item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion)" class="vl_f_333"></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="shield_dialog">
+      <el-dialog
+        :visible.sync="shieldDialog"
+        :close-on-click-modal="false"
+        width="482px"
+        top="40vh">
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定屏蔽该评论？</h1>
+        <el-checkbox v-model="shieldChecked">并将该用户加入黑名单</el-checkbox>
+        <div slot="footer">
+          <el-button @click="shieldDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="shieldComment">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
+  </div>
+</template>
+<script>
+import emotion from './emotion/index.vue';
+import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
+import {getDiciData} from '@/views/index/api/api.js';
+export default {
+  components: {emotion},
+  props: ['helpId'],
+  data () {
+    return {
+      participateTypeList: [],
+      sourceTypeList: [],
+      helpDetail: null,//民众互助详情
+      commentList: [],//评论列表内容
+      content: '',//评论内容,
+      isShowEmoji: false,//是否显示表情选择框
+      isConfirmation: false,//是否确认回复评论
+      commentId: null,//评论id
+      shieldId: null,//屏蔽id
+      shieldUserId: null,//被屏蔽用户id
+      userId: null,//用户id
+      commentIndex: null,//评论下标
+      // 屏蔽弹窗参数
+      shieldDialog: null,
+      shieldChecked: false,
+      loadingBtn: false
+    }
+  },
+  mounted () {
+    this.getParticipateTypeDiciData();
+    this.getSourceTypeDiciData();
+    this.getMutualHelpDetail();
+    this.getCommentInfoList();
+  },
+  methods: {
+    // 转码
+    transcoding (data, code) {
+      return data && data.find(f => f.enumField === String(code)).enumValue;
+    },
+    // 获取参与类型字典
+    getParticipateTypeDiciData () {
+      getDiciData(6).then(res => {
+        if (res && res.data) {
+          this.participateTypeList = res.data;
+        }
+      })
+    },
+    // 获取资源来源字典
+    getSourceTypeDiciData () {
+      getDiciData(5).then(res => {
+        if (res && res.data) {
+          this.sourceTypeList = res.data;
+        }
+      })
+    },
+    // 根据id获取民众互助详情
+    getMutualHelpDetail () {
+      getMutualHelpDetail(this.helpId).then(res => {
+        if (res && res.data) {
+          this.helpDetail = res.data;
+        }
+      })
+    },
+    // 获取评论列表数据
+    getCommentInfoList () {
+      // const params = {
+      //   eventId: 1//this.helpId
+      // }
+      getCommentInfoList(1).then(res => {
+        if (res && res.data) {
+          this.commentList = res.data;
+        }
+      })
+    },
+    // 回复评论
+    replyComment () {
+      const data = {
+        replyContent: this.content,
+        uid: this.commentId
+      }
+      this.loadingBtn = true;
+      replyComment(data).then(res => {
+        if (res && res.data) {
+          this.$message.success('评论成功');
+          this.isConfirmation = !this.isConfirmation;
+          this.isShowEmoji = false;
+          this.commentList.forEach(f => {
+            if (this.commentId === f.uid) {
+              f.replayContent = this.content;
+            }
+          })
+          this.content = null;
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
+    },
+    popShield (item, index) {
+      this.userId = item.replayUserId;//暂时取这个
+      this.shieldUserId = item.commentUserId;
+      this.isConfirmation = true;
+      this.shieldId = item.uid;
+      this.commentIndex = index;
+      this.shieldDialog = true;
+    },
+    // 屏蔽评论
+    shieldComment () {
+      const data = {
+        userId: this.userId,//操作的用户id
+        shieldId: this.shieldChecked ? this.shieldUserId : this.shieldId,
+        opType: this.shieldChecked ? 2 : 1,//屏蔽操作类型
+        shieldType: 1
+      }
+      this.loadingBtn = true;
+      shieldComment(data).then(res => {
+        if (res && res.data) {
+          this.$message.success('屏蔽成功');
+          this.shieldDialog = false;
+          // 未勾选加入黑名单
+          if (!this.shieldChecked) {
+          this.commentList.splice(this.commentIndex, 1);
+          // 勾选加入黑名单
+          } else {
+            this.commentList = this.commentList.filter(f => f.commentUserId !== this.shieldUserId);
+          }
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
+    },
+    skip (pageType) {
+      this.$emit('changePage', pageType)
+    },
+    handleEmotion (i) {
+      this.content += i
+    },
+    // 将匹配结果替换表情图片
+    emotion (res) {
+      let word = res.replace(/#|;/gi,'')
+      const list = ['微笑', '撇嘴', '色', '发呆', '得意', '流泪', '害羞', '闭嘴', '睡', '大哭', '尴尬', '发怒', '调皮', '呲牙', '惊讶', '难过', '酷', '冷汗', '抓狂', '吐', '偷笑', '可爱', '白眼', '傲慢', '饥饿', '困', '惊恐', '流汗', '憨笑', '大兵', '奋斗', '咒骂', '疑问', '嘘', '晕', '折磨', '衰', '骷髅', '敲打', '再见', '擦汗', '抠鼻', '鼓掌', '糗大了', '坏笑', '左哼哼', '右哼哼', '哈欠', '鄙视', '委屈', '快哭了', '阴险', '亲亲', '吓', '可怜', '菜刀', '西瓜', '啤酒', '篮球', '乒乓', '咖啡', '饭', '猪头', '玫瑰', '凋谢', '示爱', '爱心', '心碎', '蛋糕', '闪电', '炸弹', '刀', '足球', '瓢虫', '便便', '月亮', '太阳', '礼物', '拥抱', '强', '弱', '握手', '胜利', '抱拳', '勾引', '拳头', '差劲', '爱你', 'NO', 'OK', '爱情', '飞吻', '跳跳', '发抖', '怄火', '转圈', '磕头', '回头', '跳绳', '挥手', '激动', '街舞', '献吻', '左太极', '右太极']
+      let index = list.indexOf(word)
+      return `<img src="https://res.wx.qq.com/mpres/htmledition/images/icon/emotion/${index}.gif" align="top">`   
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.mes_help_det{
+  width: 100%;
+  position: relative;
+  .help_det_box{
+    margin: 0 20px 20px 20px;
+    .det_info, .det_list{
+      background: #fff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+    }
+    .det_info{
+      margin-bottom: 20px;
+      padding: 16px 45px;
+      .det_info_click{
+        &:hover{
+          color: #0C70F8;
+          cursor: pointer;
+        }
+      }
+      > div{
+        display: flex;
+        line-height: 20px;
+        > span:nth-child(2){
+          flex: 1;
+        }
+      }
+    }
+    .det_list{
+      .list_title{
+        padding: 0 20px;
+        height: 58px;
+        line-height: 58px;
+        border-bottom: 1px solid #F2F2F2;
+        > span{
+          color: #333;
+          font-size: 16px;
+          font-weight: bold;
+        }
+      }
+      .list_content{
+        display: flex;
+        padding: 12px 20px;
+        border-bottom: 1px solid #F2F2F2;
+        > img{
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+        > ul{
+          .con_one{
+            margin-bottom: 10px;
+            > span:nth-child(1){
+              color: #333;
+              font-weight: bold;
+            }
+          }
+          .con_two{
+            margin-bottom: 10px;
+          }
+          .con_four{
+            line-height: 20px;
+          }
+          .con_three{
+            width: 100px;
+            height: 22px;
+            line-height: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            background:rgba(245,245,245,1);
+            border-radius:4px;
+            border:1px solid rgba(211,211,211,1);
+          }
+          .con_five{
+            padding: 20px 0;
+            > img{
+              width:117px;
+              height:117px;
+              margin-right: 20px;
+              border-radius:4px;
+              border:1px solid rgba(211,211,211,1);
+            }
+          }
+          .con_six{
+            display: flex;
+            margin-bottom: 20px;
+            > div{
+              margin-right: 30px;
+              > span:nth-child(2){
+                margin-left: 6px;
+              }
+              > span:nth-child(2):hover{
+                cursor: pointer;
+                color: #0C70F8;
+              }
+              .vl_icon{
+                vertical-align: top;
+              }
+            }
+          }
+          .con_seven{
+            width:710px;
+            height:110px;
+            padding: 10px;
+            background:rgba(250,250,250,1);
+            border-radius:2px;
+            .con_btn{
+              width: 100%;
+              padding-top: 10px;
+              text-align: right;
+              .vl_icon_message_6{
+                float: left;
+                margin-top: 10px;
+                cursor: pointer;
+                transition: none;
+                &:hover{
+                  background-position: -766px -425px;
+                }
+              }
+            }
+            .emoji_box{
+              width: 400px;
+              margin-top: 20px;
+            }
+          }
+          .reply_content{
+            width: 710px;
+            padding: 20px 10px;
+            background:rgba(250,250,250,1);
+            border-radius:2px;
+            img{
+              vertical-align: text-bottom;
+            }
+          }
+        }
+      }
+    }
+  }
+ 
+}
+</style>
+<style lang="scss">
+  .mes_help_det .shield_dialog{
+    .el-checkbox__label{
+      color: #999;
+    }
+    .el-checkbox__input.is-checked+.el-checkbox__label{
+      color: #409EFF;
+    }
+  }
+  .el-popover{
+    .det_info_com{
+      > span{
+        margin-left: 6px;
+        cursor: pointer;
+        &:hover{
+          color: #0C70F8;
+        }
+      }
+    }
+  }
+</style>
+

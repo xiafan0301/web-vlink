@@ -1,0 +1,551 @@
+<template>
+  <div class="alarm_today">
+    <!-- 侧边栏搜索框 -->
+    <div class="search_box">
+      <div class="search_tab">
+        <div class="tab_lt">
+          <ul>
+            <li :class="{'tab_lt_ul_sed': tabType === '1'}" @click="changeTab('1')">监控列表</li>
+            <li :class="{'tab_lt_ul_sed': tabType === '2'}" @click="changeTab('2')">布防库</li>
+          </ul>
+          <div :style="{'left': tabType === '1' ? 0 : '50%'}"></div>
+        </div>
+      </div>
+      <!-- 监控列表 -->
+      <template v-if="tabType === '1'">
+      <div class="group_input">
+        <el-input v-model="groupName" size="small" placeholder="请输入设备名称查找">
+          <i slot="suffix" class="el-input__icon el-icon-search"></i>
+        </el-input>
+      </div>
+      <vue-scroll>
+        <div class="add_group">
+          <el-tree
+            icon-class="el-icon-arrow-right"
+            :data="deviceList"
+            show-checkbox
+            node-key="id"
+            :default-expanded-keys="[]"
+            :default-checked-keys="[]"
+            :props="defaultProps"
+            ref="tree"
+            :filter-node-method="filterNode">
+          </el-tree>
+        </div>
+      </vue-scroll>
+      </template>
+      <!-- 布防库 -->
+      <template v-if="tabType === '2'">
+      <div class="group_input">
+        <el-input v-model="groupName" size="small" placeholder="请输入组名查找">
+          <i slot="suffix" class="el-input__icon el-icon-search"></i>
+        </el-input>
+      </div>
+      <vue-scroll>
+        <div class="add_group">
+          <el-tree
+            icon-class="el-icon-arrow-right"
+            :data="deviceList"
+            show-checkbox
+            node-key="id"
+            :default-expanded-keys="[]"
+            :default-checked-keys="[]"
+            :props="defaultProps"
+            ref="tree"
+            :filter-node-method="filterNode">
+          </el-tree>
+        </div>
+      </vue-scroll>
+      </template>
+      <!-- 组合搜索 -->
+      <el-form :model="todayAlarmForm" class="lib_form" ref="todayAlarmForm">
+        <el-form-item style="width: 192px;" prop="name">
+          <el-input v-model="todayAlarmForm.name" placeholder="输入姓名" clearable></el-input>
+        </el-form-item>
+        <el-form-item style="width: 192px;" prop="sex">
+          <el-select v-model="todayAlarmForm.sex" placeholder="选择性别" clearable >
+            <el-option
+              v-for="item in sexList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item style="width: 192px;" prop="age">
+          <el-select v-model="todayAlarmForm.age" placeholder="选择年龄" clearable >
+            <el-option
+              v-for="item in ageList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item style="width: 192px;">
+          <el-button style="width: 192px;" type="primary" @click="getCheckedKeys">确定</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="alarm_list">
+      <div class="list_top">今日告警<span>(23)</span></div>
+      <div class="alarm_grade">
+        <div class="alarm_grade_info" v-if="isSeen">
+          <i class="vl_icon vl_icon_alarm_2"></i>
+          <i class="vl_icon vl_icon_alarm_3"></i>
+          <i class="vl_icon vl_icon_alarm_4"></i>
+          <i class="vl_icon vl_icon_alarm_5"></i>
+          <i class="vl_icon vl_icon_alarm_6"></i>
+        </div>
+      </div>
+      <div class="list_content">
+        <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
+          <div class="list_img">
+            <img :src="item.snapPhoto" alt="抓拍照片">
+            <img :src="item.surveillancePhoto" alt="布防照片">
+            <div class="list_sim">
+              <i class="vl_icon vl_icon_alarm_1"></i>
+              <div>
+                相似<strong>{{item.semblance}}</strong><span>%</span>
+              </div>
+            </div>
+          </div>
+          <div class="list_con_info">
+            <div>{{item.surveillanceName}}</div>
+            <div>
+              <span>{{item.devName}}</span>
+              <span>{{item.snapTime}}</span>
+            </div>
+          </div>
+          <div v-if="item.isSeen">
+            <div class="hover_info">
+              <p class="name_info" v-if="item.objType == 1">
+                <span>{{item.name}}</span>
+                <span>{{item.sex === 1 ? '男' : item.sex === 2 ? '女' : ''}}</span>
+                <span>{{item.nation}}</span>
+              </p>
+              <p class="name_info" v-if="item.objType == 2">
+                <span>{{item.vehicleNumber}}</span>
+                <span>{{item.numberColor}}</span>
+                <span>{{item.vehicleType}}</span>
+              </p>
+              <p class="name_info" v-if="item.objType == 3 || item.objType == 4">
+                
+              </p>
+              <p class="correlated_info" v-if="item.eventCode">
+                <span>{{item.eventCode}}</span>
+                <span>关联事件</span>
+              </p>
+              <p class="correlated_info">
+                <span>{{item.addressDesc}}</span>
+                <span>抓拍地址</span>
+              </p>
+              <p class="correlated_info">
+                <span>{{item.cname}}</span>
+                <span>区域名称</span>
+              </p>
+              <p class="box_grade_info"> 
+                <i class="vl_icon vl_icon_alarm_2" v-if="item.alarmLevel == 1"></i>
+                <i class="vl_icon vl_icon_alarm_3" v-if="item.alarmLevel == 2"></i>
+                <i class="vl_icon vl_icon_alarm_4" v-if="item.alarmLevel == 3"></i>
+                <i class="vl_icon vl_icon_alarm_5" v-if="item.alarmLevel == 4"></i>
+                <i class="vl_icon vl_icon_alarm_6" v-if="item.alarmLevel == 5"></i>
+              </p>
+            </div>
+            <div class="sanjiao"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import {getAlarmList} from '@/views/index/api/api'
+import { apiDeviceList } from "@/views/index/api/api.video.js";
+export default {
+  data () {
+    return {
+      tabType: '1',
+      groupName: '',
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
+      deviceList: [],
+      todayAlarmForm: {
+        name: null,
+        sex: null,
+        age: null
+      },
+      sexList: [{
+        label: '男',
+        value: 1
+      },{
+        label: '女',
+        value: 2
+      }],
+      ageList: [{
+        label: '0-10',
+        value: 1
+      },{
+        label: '10-20',
+        value: 2
+      },{
+        label: '20-30',
+        value: 3
+      },{
+        label: '30-40',
+        value: 4
+      },{
+        label: '40-50',
+        value: 5
+      },{
+        label: '50-70',
+        value: 6
+      },{
+        label: '70以上',
+        value: 7
+      }],
+      isSeen: false,     //是否展示信息
+      alarmList: null,    //今日告警数据
+      selectDevice: [],    //选中的监控数据
+    }
+  },
+  watch: {
+    groupName(val) {
+      this.$refs.tree.filter(val)
+      console.log("----------",this.$refs.tree)
+    }
+  },
+  mounted () {
+    this.getDeviceList()
+    this.getAlarm();
+  },
+  methods: {
+    filterNode(value, data) {
+      if (!value) return true;
+      return data.label.indexOf(value) !== -1;
+    },
+    changeTab (type) {
+      this.tabType = type;
+    },
+    getCheckedKeys() {
+      this.selectDevice = this.$refs.tree.getCheckedKeys(true);
+      this.getAlarm()
+    },
+    onMouseOver (data) {
+      this.isSeen = true
+      data['isSeen'] = true
+    },
+    onMouseOut (data) {
+      this.isSeen = false
+      data['isSeen'] = false
+    },
+    //获取监控列表
+    getDeviceList() {
+      apiDeviceList().then( res => {
+        if(res.data && res.data.length > 0) {
+          this.deviceList = this.getTreeList(res.data)
+        }
+      }).catch(() => {})
+    },
+    getTreeList(data) {
+      for(let item of data) {
+        item['id'] = item.uid
+        item['label'] = item.groupName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+          }
+        }
+      }
+      return data;
+    },
+    //今日告警
+    getAlarm() {
+      this.alarmList = [];
+      let params = {
+        "where.startTime": '2019-04-01',
+        "where.endTime": '2019-04-01'
+      };
+      (this.selectDevice && this.selectDevice.length > 0) && (params['where.areaIds'] = this.selectDevice.join());
+      this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
+      this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
+      this.todayAlarmForm.age && (params['where.ageGroup'] = this.todayAlarmForm.age);
+      console.log("---------3333---------",params);
+      getAlarmList(params).then( res => {
+        if(res.data.list && res.data.list.length > 0) {
+          this.alarmList = [...res.data.list]
+          for(let item of this.alarmList) {
+            item['semblance'] = (item.semblance).toFixed(2)
+            item['isSeen'] = false
+          }
+        }
+      })
+    }
+  },
+}
+</script>
+<style lang="scss" scoped>
+.alarm_today{
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  .search_box{
+    position: absolute;
+    left: 20px;
+    top: 0;
+    z-index: 999;
+    width: 232px;
+    background: #fff;
+    box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
+    animation: fadeInLeft .4s ease-out .3s both;
+    .search_tab{
+      position: relative;
+      width: 100%; height: 50px;
+      box-shadow:4px 0px 10px 0px #838383;
+      box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
+      background-color: #fff;
+      .tab_lt{
+        position: absolute; top: 0; left: 0;
+        width: 100%;
+        border-bottom: 1px solid #F2F2F2;
+        > ul {
+          overflow: hidden;
+          > li {
+            float: left;
+            width: 50%; height: 50px; line-height: 50px;
+            text-align: center;
+            font-size: 14px; color: #666666;
+            cursor: pointer;
+            transition: color .4s ease-out;
+            &.tab_lt_ul_sed {
+              cursor: default;
+              color: #0C70F8;
+            }
+          }
+        }
+        > div {
+          position: absolute; left: 0; bottom: 0;
+          width: 50%; height: 2px;
+          background-color: #0C70F8;
+          transition: left .3s ease-out;
+        }
+      }
+    }
+    .add_group{
+      padding: 0 10px 10px;
+      max-height: 400px;
+    }
+    .lib_form{
+      margin-top: 30px;
+      padding: 40px 20px 0;
+      border-top: 1px dotted rgba(211,211,211,1);
+    }
+  }
+  .alarm_list{
+    height: 100%;
+    width: calc(100% - 252px);
+    margin-left: 252px;
+    position: relative;
+    padding: 20px;
+    .list_top{
+      color: #333;
+      > span{
+        color: #666;
+      }
+    }
+    .alarm_grade {
+      height: 30px;
+      .alarm_grade_info {
+        text-align: center;
+        i {
+          margin-right: 8px;
+        }
+      }
+    }
+    .list_content{
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      .list_box{
+        margin: 0 0.5%;
+        max-width: 342px;
+        width: 32%;
+        height: 240px;
+        padding: 30px 20px 0;
+        margin-bottom: 20px;
+        background:rgba(255,255,255,1);
+        box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+        overflow: hidden;
+        position: relative;
+        .list_img{
+          width: 100%;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          position: relative;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #F2F2F2;
+          img {
+            width: 140px;
+            height: 140px;
+          }
+          .list_sim{
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            margin-left: -57px;
+            > div{
+              position: absolute;
+              left: 50%;
+              bottom: 8px;
+              margin-left: -43px;
+              color: #fff;
+              font-size:10px;
+              font-family:MicrosoftYaHei;
+              font-weight:400;
+              > strong{
+                font-size:18px;
+                font-family:AuroraBT-BoldCondensed;
+                font-weight:bold;
+                color:rgba(255,255,255,1);
+              }
+              > span{
+                font-size:16px;
+                font-family:AuroraBT-BoldCondensed;
+                font-weight:bold;
+                color:rgba(255,255,255,1);
+              }
+            }
+          }
+        }
+        .list_con_info{
+          display: flex;
+          justify-content: space-between;
+          line-height: 50px;
+          > div:nth-child(1){
+            color: #333;
+          }
+          > div:nth-child(2) > span{
+            color: #999;
+            font-size: 12px;
+          }
+        }
+      }
+      .hover_info {
+        width: 88%;
+        height: 176px;
+        box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
+        background-color: #fff;
+        position: absolute;
+        top:15px;
+        left: 0;
+        padding: 24px 20px;
+        p {
+          font-size: 12px;
+          color: #666;
+          &.name_info {
+            span {
+              border: 1px solid #F2F2F2;
+              border-radius: 3px;
+              background-color: #FAFAFA;
+              margin: 0 8px 8px 0;
+              display: inline-block;
+              height: 26px;
+              line-height: 26px;
+              padding-left: 8px;
+              padding-right: 8px;
+              &:nth-child(1) {
+                padding-left: 12px;
+                padding-right: 12px;
+              }
+            }
+          }
+          &.correlated_info {
+            border: 1px solid #F2F2F2;
+            border-radius: 3px;
+            background-color: #FAFAFA;
+            margin: 0 8px 8px 0;
+            display: inline-block;
+            height: 26px;
+            line-height: 26px;
+            padding-left: 12px;
+            padding-right: 12px;
+            span:nth-child(1) {
+              padding-right: 12px;
+              border-right: 1px solid#F2F2F2;
+            }
+            span:nth-child(2) {
+              padding-left: 12px;
+            }
+          }
+        }
+        &:before, &:after {
+          width: 0;
+          height: 0;
+          content: "";
+          position: absolute;
+          border: solid transparent;
+          top: 100%;
+        }
+        &:before {
+          border-width: 0;
+          border-top-color: #F2F2F2;
+          left: 20px;
+        }
+        &:after {
+          border-width: 8px;
+          border-top-color: #fff;
+          left: 22px;
+        }
+        .box_grade_info {
+          display: inline-block;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+        }
+      }
+      .sanjiao {
+        width: 0;
+        height: 0;
+        border: 50px solid transparent;
+        border-top-color: #fff;
+      }
+    }
+  }
+}
+@media (max-width: 1400px) {
+  .alarm_today .list_content .list_box{
+    width: 49%!important;
+  }
+}
+</style>
+<style lang="scss">
+.alarm_today{
+  .search_box{
+    .group_input{
+      padding: 20px 10px;
+      .el-input__inner{
+        width: 212px;
+        border-radius: 15px!important;
+        background:rgba(242,242,242,1)!important;
+        border: none;
+      }
+    }
+    .lib_form .el-form-item{
+      margin-bottom: 10px!important;
+      .el-range-input{
+        width: 62px;
+      }
+    }
+  }
+}
+
+</style>

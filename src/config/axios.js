@@ -1,23 +1,31 @@
 /*
  * axios定义
  * */
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 import axios from 'axios';
 import ElementUI from 'element-ui';
 // import store from '@/store/store.js';
 import { ajaxCtx } from '@/config/config.js';
+import store from '@/store/store.js'
 // axios支持跨域cookie
 // axios.defaults.withCredentials = true;
 // create an axios instance
-const service = axios.create({
-	baseURL: ajaxCtx.base, // api的base_url
-	timeout: 30000, // request timeout
+let service = axios.create({
+  baseURL: ajaxCtx.base, // api的base_url
+  timeout: 30000, // request timeout
   withCredentials: true
 })
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
-  // console.log('axios request config', config);
-  if (config.mode && ajaxCtx[config.mode]) {
+  // 用户信息
+  const userInfo = localStorage.getItem('as_vlink_user_info');
+  if (userInfo) {
+    config.headers['Auth-Session-Id'] = JSON.parse(userInfo).sessionId;
+  }
+  // 序列化的时候空格变+的问题
+  // config.url = config.url.replace(/\+/g, '%20');
+  // 模式，微服务
+  if (config.mode && ajaxCtx[config.mode]) {  
     config.baseURL = ajaxCtx[config.mode];
   }
   let r = '_r=' + new Date().getTime();
@@ -34,17 +42,23 @@ service.interceptors.request.use((config) => {
 });
 // axios添加一个响应拦截器
 service.interceptors.response.use(function (response) {
-  console.log('response', response)
+  // console.log('response', response)
   if (response && response.data) {
     let _data = response.data;
     if (_data.code === '00000000') {
       return _data;
+    } else if (_data.code === '10060002') {
+      store.commit('setLoginToken', {
+        loginToken: false
+      });
+      // 未登录
+      // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
       let msg = '访问出错';
       if (_data.viewMsg) {
         msg = _data.viewMsg;
       }
-      ElementUI.Message({ message: msg, type: 'error' });
+      ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
       return null;
     }
   } else {
@@ -57,7 +71,8 @@ service.interceptors.response.use(function (response) {
   ElementUI.Message({
     message: errorMsg,
     dangerouslyUseHTMLString: true,
-    type: 'error'
+    type: 'error',
+    customClass: 'request_tip'
   });
   return Promise.reject(error);
 });

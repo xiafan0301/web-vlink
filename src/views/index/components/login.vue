@@ -10,17 +10,17 @@
                 <i class="vl_icon vl_icon_lg_01"></i>
               </el-form-item>
               <el-form-item prop="userPassword" class="login_form_item">
-                <el-input v-model="loginForm.userPassword" :type="pwdShow ? 'text' : 'password'" placeholder="请输入密码"></el-input>
+                <el-input v-model="loginForm.userPassword" :type="pwdShow ? 'text' : 'password'" placeholder="密码由6-16位字母、数字组成，区分大小写"></el-input>
                 <i class="vl_icon vl_icon_lg_02"></i>
-                <i class="vl_icon vl_icon_lg_03" @click="pwdShow = !pwdShow"></i>
+                <i class="vl_icon vl_icon_lg_03" @click="pwdShow = !pwdShow" :class="{'vl_icon_sed': !pwdShow}"></i>
               </el-form-item>
             </el-form>
             <div class="lg_info">
               <router-link :to="{name: 'findPwd'}">忘记密码</router-link>
-                <span>没有账号？<router-link :to="{name: 'register'}">注册账号&gt;</router-link></span>
+                <!-- <span>没有账号？<router-link :to="{name: 'register'}">注册账号&gt;</router-link></span> -->
             </div>
             <div class="lg_btn">
-              <el-button @click="loginSubmit('loginForm')" :loading="loginBtnLoading" :disabled="!loginForm.userMobile || !loginForm.userPassword" style="width: 100%;" type="primary">登&nbsp;&nbsp;录</el-button>
+              <el-button :class="[!loginForm.userMobile || !loginForm.userPassword ? 'disabled_btn' : 'default_btn']" @click="loginSubmit('loginForm')" :loading="loginBtnLoading" :disabled="!loginForm.userMobile || !loginForm.userPassword" >登&nbsp;&nbsp;录</el-button>
             </div>
           </div>
           <div class="lg_vc" @click="downloadHandler = !downloadHandler">
@@ -40,6 +40,7 @@
 import QRCode from 'qrcodejs2';
 import {validatePhone, validatePwd} from '@/utils/validator.js';
 import vlFooter from '@/components/footer.vue';
+import { login } from '@/views/index/api/api.user.js';
 export default {
   components: {QRCode, vlFooter},
   data () {
@@ -47,8 +48,8 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '',
-        userPassword: ''
+        userMobile: '18216061865',
+        userPassword: '111111'
       },
       loginBtnLoading: false,
       isRemember: false, // 是否记住用户名
@@ -74,19 +75,40 @@ export default {
         if (valid) {
           // 登陆中 登录按钮不可用
           this.loginBtnLoading = true;
+          login(this.loginForm)
+            .then(res => {
+              if (res) {
+                localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
+                console.log('item', localStorage.getItem('as_vlink_user_info'))
+                setTimeout(() => {
+                  this.$store.commit('setLoginUser', {
+                    loginUser: res.data
+                  });
+                  this.$store.commit('setLoginToken', {
+                    loginToken: true
+                  });
+                  this.loginBtnLoading = false;
+                  this.$router.push({name: 'index'});
+                }, 1000);
+              } else {
+                this.loginBtnLoading = false;
+              }
+            })
+            .catch(() => {this.loginBtnLoading = false;})
           // todo
-          setTimeout(() => {
-            this.loginBtnLoading = false;
-            this.$router.push({name: 'index'});
-          }, 1000);
         } else {
           // 登陆中 登录按钮不可用
           this.loginBtnLoading = true;
           // todo
           setTimeout(() => {
             this.loginBtnLoading = false;
-            this.$router.push({name: 'index'});
-          }, 2000);
+            this.$message({
+              type: 'error',
+              message: '登录失败',
+              customClass: 'request_tip'
+            })
+            // this.$router.push({name: 'index'});
+          }, 1000);
           // return false;
         }
       });
@@ -129,7 +151,7 @@ export default {
         box-shadow: 0 0 5px #ddd;
         animation: fadeIn .6s ease-out both;
         .lg_logo {
-          margin: 45px 0 35px 0;
+          margin: 45px 0 35px 10px;
           animation: fadeIn .6s ease-out .2s both;
         }
         .lg_form {
@@ -150,6 +172,19 @@ export default {
         }
         .lg_btn {
           text-align: center;
+          .default_btn {
+            width: 100%;
+            background-color: #0C70F8;
+            color: #fff;
+            &:hover {
+              opacity:0.85;
+            }
+          }
+          .disabled_btn {
+            width: 100%;
+            background-color: #F2F2F2;
+            color: #B2B2B2;
+          }
         }
       }
       > .lg_vc {
