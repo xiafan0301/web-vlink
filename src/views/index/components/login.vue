@@ -84,6 +84,9 @@ export default {
                   this.$store.commit('setLoginUser', {
                     loginUser: res.data
                   });
+                  this.$store.commit('setLoginToken', {
+                    loginToken: true
+                  });
                   this.loginBtnLoading = false;
                   this.$router.push({name: 'index'});
                 }, 1000);

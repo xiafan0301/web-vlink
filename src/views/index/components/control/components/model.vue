@@ -43,6 +43,7 @@
         <el-autocomplete
           style="width: 490px;"
           v-model="item.point"
+          :trigger-on-focus="false"
           :fetch-suggestions="autoAdress"
           value-key="name"
           @focus="pointIndex = index"
@@ -1135,7 +1136,7 @@ export default {
             }
           })
           _marker.setMap(_this.map);
-          _this.map.setFitView();// 自动适配到合适视野范围
+          // _this.map.setFitView();// 自动适配到合适视野范围
           // 卡口
           if (_obj.type === 2) {
             _this.allBayMarker[areaName].push(_marker);
@@ -1705,15 +1706,15 @@ export default {
         // 回填设备特性
         this.features = this.modelDataThree.pointDtoList[0].deviceChara;
         let _data = [];
-        new Promise((resolve) => {
+        // new Promise((resolve) => {
           _data = this.modelDataThree.pointDtoList.map(m => {
             return {
               area: this.areaList.find(f => f.label === m.address),
               bayonetList: m.bayonetList
             }
           });
-          resolve();
-        }).then(() => {
+          // resolve();
+        // }).then(() => {
           console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
           _data.forEach(f => {
             // 回填受限范围
@@ -1722,7 +1723,7 @@ export default {
           })
           this.lastSelList = this.modelForm.limitation;
           this.lastLimitationNum = this.modelForm.limitation.length;
-        })
+        // })
       }
     },
     // 回填范围分析数据
@@ -1805,12 +1806,12 @@ export default {
       return arr;
     }
   },
-  destroyed () {
-    if (this.map) {
-      console.log('销毁')
-      this.map.destroy();
-    }
-  },
+  // destroyed () {
+  //   if (this.map) {
+  //     console.log('销毁')
+  //     this.map.destroy();
+  //   }
+  // },
 }
 </script>
 <style lang="scss" scoped>

@@ -244,10 +244,9 @@
                 <el-upload
                   :disabled="isAddDisabled"
                   ref="uploadPic"
-                  multiple
                   accept="image/*"
                   :limit="1"
-                  action="http://apidev.aorise.org/vlink-base/appendix"
+                  :action="uploadUrl"
                   :on-exceed="uploadPicExceed"
                   :data="{projectType: 2}"
                   list-type="picture-card"
@@ -447,6 +446,7 @@
   </div>
 </template>
 <script>
+import { ajaxCtx } from '@/config/config.js';
 import {checkIdCard, checkName, checkPlateNumber} from '@/utils/validator.js';
 import allCar from './components/allCar.vue';
 import allPortrait from './components/allPortrait.vue';
@@ -460,6 +460,7 @@ export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
     return {
+      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
       // 侧边栏参数
       tabType: '1',
       group: null,//搜索组
@@ -1201,7 +1202,6 @@ export default {
         box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
         display: flex;
         justify-content: space-between;
-        overflow: hidden;
         .list_img{
           width: 50%;
           padding-right: 20px;

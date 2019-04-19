@@ -76,11 +76,12 @@ export function getMutualHelpList(params) {
  * getCommentInfoList 事件评论列表分页查询接口
  * @param {object} params
  */
-export function getCommentInfoList(uid) {
+export function getCommentInfoList(params) {
   return request({
-    url: '/event-service/comment-info-list/' + uid,
+    url: '/events/comments/page',
     method: 'get',
-    mode: 'message'
+    params,
+    mode: 'event'
   })
 }
 /**
