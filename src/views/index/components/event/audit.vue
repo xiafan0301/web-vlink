@@ -21,7 +21,7 @@
               v-for="(item, index) in auditStatusList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -33,7 +33,7 @@
               v-for="(item, index) in eventTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -97,7 +97,7 @@
         </el-table-column>
         <el-table-column
           label="上报者"
-          prop="reportUser"
+          prop="reporterPhone"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -114,7 +114,7 @@
         </el-table-column>
         <el-table-column
           label="上报时间"
-          prop="time"
+          prop="reportTime"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -133,9 +133,12 @@
         <el-table-column
           label="是否有图或视频"
           width="150"
-          prop="isPicture"
+          prop="hasImageOrVideo"
           align="center"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.hasImageOrVideo ? '是' : '否'}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="140">
           <template slot-scope="scope">
@@ -170,7 +173,7 @@ export default {
         reportTime: [], // 日期
         // eventSource: 16, // 事件来源 app端
         eventType: '全部类型', // 事件类型
-        eventStatus: 24, // 事件状态--默认待审核
+        eventStatus: '1', // 事件状态--默认待审核
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
@@ -221,11 +224,11 @@ export default {
         'where.reportTimeEnd': this.auditForm.reportTime[1],
         'where.acceptFlag': this.auditForm.eventStatus,
         'where.eventType': eventType,
-        'where.otherQuery': this.auditForm.phoneOrNumber,
+        'where.keyword': this.auditForm.phoneOrNumber,
         'where.eventSource': this.auditForm.eventSource,
         pageNum: this.pagination.pageNum,
-        // orderBy: 'create_time',
-        // order: 'desc'
+        orderBy: 'create_time',
+        order: 'desc'
       }
       getEventList(params)
         .then(res => {
@@ -296,13 +299,13 @@ export default {
     },
     skipDetailPage (obj) { // 跳转至事件审核详情页
       if (obj.acceptFlagName === '待审核') {
-        this.$router.push({name: 'unaudit_event', query: {eventId: obj.eventId}});
+        this.$router.push({name: 'unaudit_event', query: {eventId: obj.uid}});
       }
       if (obj.acceptFlagName === '通过') {
-        this.$router.push({name: 'audit_event_detail', query: {status: 'pass', eventId: obj.eventId}});
+        this.$router.push({name: 'audit_event_detail', query: {status: 'pass', eventId: obj.uid}});
       }
       if (obj.acceptFlagName === '驳回') {
-        this.$router.push({name: 'audit_event_detail', query: {status: 'reject', eventId: obj.eventId}});
+        this.$router.push({name: 'audit_event_detail', query: {status: 'reject', eventId: obj.uid}});
       }
     },
     getOneMonth () { // 设置默认一个月

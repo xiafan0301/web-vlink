@@ -21,7 +21,7 @@
               v-for="(item, index) in ctcStatusList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -180,7 +180,9 @@ export default {
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
         'where.otherQuery': this.ctcForm.phoneOrNumber,
         'where.dispatchStatus': eventStatus,
-        pageNum: this.pagination.pageNum
+        pageNum: this.pagination.pageNum,
+        orderBy: 'create_time',
+        order: 'desc'
       }
       getEventList(params)
         .then(res => {

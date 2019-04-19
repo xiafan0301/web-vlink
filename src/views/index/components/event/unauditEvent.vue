@@ -54,6 +54,7 @@
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
+                    :file-list="fileList"
                     :before-upload='handleBeforeUpload'
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'
@@ -84,7 +85,7 @@
                       v-for="(item, index) in eventTypeList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -95,7 +96,7 @@
                       v-for="(item, index) in eventLevelList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -152,7 +153,7 @@
                 v-for="(item, index) in rejectReasonList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
@@ -200,7 +201,26 @@ export default {
       backDialog: false, // 返回提示弹出框
       isImgNumber: false,
       newMarker: null,
-      addEventForm: {},
+      addEventForm: {
+        // eventSource: '1',
+        // eventFlag: true,
+        // mutualFlag: false,
+        uid: '',
+        type: 1, // 1-事件审核 2-事件处理 3-转到其他单位 4-结束事件
+        reporterPhone: '', // 报案人  手机号码
+        reportTime: '', // 上报时间
+        eventAddress: '', // 事发地点
+        eventDetail: '', // 事件情况
+        eventType: '', // 事件类型
+        eventLevel: '', // 事件等级
+        casualties: '', // 伤亡人员
+        longitude: '', // 经度
+        latitude: '', // 纬度
+        acceptFlag: 1, // 证明是通过
+        // dealOrgId: '', // 处理单位
+        // radius: -1, // 是否推送
+        appendixInfoList: [], // 图片文件
+      },
       rules: {
         eventAddress: [
           { required: true, message: '请输入或选择事发地址', trigger: 'blur' }
@@ -229,7 +249,8 @@ export default {
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
       rejectReasonList: [], // 驳回原因列表数据
-      userInfo: {}
+      userInfo: {},
+      fileList: []
     }
   },
   created () {
@@ -313,16 +334,42 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            console.log(res);
-            this.addEventForm = JSON.parse(JSON.stringify(res.data));
+            // console.log(res);
+            let eventType = res.data.eventType;
+            let eventLevel = res.data.eventLevel;
+            this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
+            this.addEventForm.eventLevel = eventLevel.toString();
             if (res.data.casualties === -1) {
-                this.addEventForm.casualties = '不确定';
-              } else if (res.data.casualties === 0) {
-                this.addEventForm.casualties = '无';
-              } else if (res.data.casualties > 0) {
-                this.addEventForm.casualties = '有';
-                this.dieNumber = res.data.casualties;
-              }
+              this.addEventForm.casualties = '不确定';
+            } else if (res.data.casualties === 0) {
+              this.addEventForm.casualties = '无';
+            } else if (res.data.casualties > 0) {
+              this.addEventForm.casualties = '有';
+              this.dieNumber = res.data.casualties;
+            }
+            this.addEventForm.uid = res.data.uid;
+            this.addEventForm.eventCode = res.data.eventCode;
+            this.addEventForm.eventDetail = res.data.eventDetail;
+            this.addEventForm.longitude = res.data.longitude;
+            this.addEventForm.latitude = res.data.latitude;
+            this.addEventForm.reporterPhone = res.data.reporterPhone;
+            this.addEventForm.reportTime = res.data.reportTime;
+            this.addEventForm.eventAddress = res.data.eventAddress;
+            // this.addEventForm.appendixInfoList = JSON.parse(JSON.stringify(res.data.attachmentList));
+            // console.log(this.addEventForm.appendixInfoList);
+            
+            if (res.data.attachmentList && res.data.attachmentList.length > 0) {
+              res.data.attachmentList.map(item => {
+                const data = {
+                  fileName: item.cname,
+                  url: item.path
+                };
+                this.fileList.push(data);
+                this.addEventForm.appendixInfoList.push(item);
+              })
+            }
+            console.log(this.addEventForm.appendixInfoList)
+            console.log('fileList', this.fileList)
             this.mapMark(this.addEventForm);
           }
         })
@@ -437,9 +484,29 @@ export default {
     },
     // 在图片上传之前
     handleBeforeUpload (file) {
-      console.log(file)
+      const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isLtTenM = file.size / 1024 / 1024 < 2;
+      if (!isImg) {
+        this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
+        // this.isImgDisabled = false;
+      }
+      if (!isLtTenM) {
+        this.$message.error('上传的图片大小不能超过2M');
+        // this.isImgDisabled = false;
+      }
+      return isImg && isLtTenM;
     },
-    handleRemove () {},
+    handleRemove (file) {
+      console.log('file', file)
+      console.log(this.addEventForm.appendixInfoList)
+      this.addEventForm.appendixInfoList.map((item, index) => {
+        if (item.cname == file.fileName || item.cname == file.response.data.fileName) {
+          console.log('2222')
+          this.addEventForm.appendixInfoList.splice(index, 1);
+        }
+      });
+      console.log('remove', this.addEventForm.appendixInfoList)
+    },
     // 图片上传成功
     handleSuccess (res) {
       const data = {
@@ -453,7 +520,7 @@ export default {
         imgHeight: res.data.fileHeight,
         thumbnailPath: res.data.thumbnailFileFullPath
       }
-      this.addEventForm.attachmentList.push(data);
+      this.addEventForm.appendixInfoList.push(data);
     },
     // 图片数量超出最大值限制
     handleImgNumber () {
@@ -474,6 +541,8 @@ export default {
         if (valid) {
           const params = {
             uid: this.addEventForm.uid,
+            acceptFlag: 2, // 证明是驳回
+            type: 1, // 1--事件审核
             closeRemark: this.rejectForm.closeRemark,
             rejectReason: this.rejectForm.rejectReason
           }
@@ -502,7 +571,7 @@ export default {
     // 驳回原因change
     changeCloseReason (val) {
       this.rejectForm.closeRemark = null;
-      if (val === 49) {
+      if (val ===   '4') {
         this.isShowRejectRemark = true;
       } else {
         this.isShowRejectRemark = false;
@@ -534,9 +603,9 @@ export default {
         }
         this.addEventForm.casualties = this.dieNumber;
       }
-      this.addEventForm.eventSource = dataList.sourceWeb;
-      this.addEventForm.eventStatus = 21;
-      this.addEventForm.acceptFlag  = 25;
+      // this.addEventForm.eventSource = dataList.sourceWeb;
+      // this.addEventForm.eventStatus = 21;
+      // this.addEventForm.acceptFlag  = 25;
     },
     submitData (form) { // 审核通过
       this.$refs[form].validate(valid => {

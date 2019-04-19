@@ -56,7 +56,7 @@
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置权限</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除角色</span>
           </template>
         </el-table-column>
       </el-table>

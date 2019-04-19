@@ -61,7 +61,7 @@
                       v-for="(item, index) in eventTypeList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -72,7 +72,7 @@
                       v-for="(item, index) in eventLevelList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -153,7 +153,7 @@ export default {
         }
       },
       addEventForm: {
-        eventSource: 17,
+        eventSource: '1',
         eventFlag: true,
         mutualFlag: false,
         reporterPhone: '', // 报案人  手机号码
@@ -167,7 +167,7 @@ export default {
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
         radius: -1, // 是否推送
-        attachmentList: [], // 图片文件
+        appendixInfoList: [], // 图片文件
       },
       rules: {
         reporterPhone:[
@@ -368,11 +368,10 @@ export default {
     handleImgNumber () { // 图片超出最大个数限制
       this.isImgNumber = true;
     },
-    handlePictureCardPreview () {},
+    // handlePictureCardPreview () {},
     handleRemove () {},
     // 图片上传成功
     handleSuccess (res) {
-      console.log('res', res)
       const data = {
         contentUid: 0,
         fileType: dataList.imgId,
@@ -382,11 +381,9 @@ export default {
         imgSize: res.data.fileSize,
         imgWidth: res.data.fileWidth,
         imgHeight: res.data.fileHeight,
-        thumbnailPath: res.data.thumbnailFileFullPath,
-        // thumbnailWidth: res.data.thumbnailFileWidth,
-        // thumbnailHeight: res.data.thumbnailFileHeight
+        thumbnailPath: res.data.thumbnailFileFullPath
       }
-      this.addEventForm.attachmentList.push(data);
+      this.addEventForm.appendixInfoList.push(data);
     },
     // 保存提交数据
     submitData (form) {
@@ -425,7 +422,7 @@ export default {
                   message: '保存成功',
                   customClass: 'request_tip'
                 })
-                this.$router.push({name: 'event_manage'});
+                this.$router.push({name: 'event_audit'});
                 this.isAddLoading = false;
               } else {
                 this.$message({
