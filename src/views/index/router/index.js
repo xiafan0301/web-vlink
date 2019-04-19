@@ -72,9 +72,9 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/player',
-      name: 'player',
-      component: () => import('@/components/common/rtmpplayer.vue')
+      path: '/webrtc',
+      name: 'webrtc',
+      component: () => import('@/components/common/webrtc.vue')
     }
   ]
 })
