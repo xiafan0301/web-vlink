@@ -288,6 +288,7 @@ export default {
           this.devicesList = data;
         }
       }).then(() => {
+        // 没有获取到布控设备时，清除之前保存的定时器，并return
         if (this.devicesList.length === 0) {
           clearInterval(this.timer);
           return;
@@ -580,7 +581,7 @@ export default {
       if (_this.map) {
         _this.map.clearMap();
       }
-      new Promise((resolve) => { 
+      // new Promise((resolve) => { 
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
           let content = '';
@@ -624,9 +625,11 @@ export default {
             marker.setMap(_this.map);
           }
         }
-        _this.map.setFitView();// 自动适配到合适视野范围
-        resolve();
-      }).then(() => {
+        // resolve();
+      // }).then(() => {
+        // _this.map.setFitView();// 自动适配到合适视野范围
+
+        // 当布控状态不是进行中时，清除之前保存的定时器，并return
         clearInterval(_this.timer);
         if (this.mapForm.state !== 1) {
           return;
@@ -640,7 +643,7 @@ export default {
         _this.$once('hook:beforeDestroy', () => {
           clearInterval(_this.timer);
         })
-      })
+      // })
     },
     // 跳转至视频回放页面
     skipIsVideo () {
@@ -654,13 +657,13 @@ export default {
       this.$refs['mapForm'].resetFields();
     }
   },
-  destroyed () {
-    if (this.map) {
-      console.log(this.map, '1111')
-      this.map.destroy( );
-      console.log(this.map, '2222')
-    }
-  }
+  // destroyed () {
+  //   if (this.map) {
+  //     console.log(this.map, '1111')
+  //     this.map.destroy( );
+  //     console.log(this.map, '2222')
+  //   }
+  // }
 }
 </script>
 <style lang="scss" scoped>
