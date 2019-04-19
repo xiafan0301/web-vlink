@@ -25,6 +25,7 @@
             <el-autocomplete
               style="width: 450px;"
               v-model="addForm.place"
+              :trigger-on-focus="false"
               :fetch-suggestions="autoAdress"
               value-key="name"
               @select="chooseAddress"

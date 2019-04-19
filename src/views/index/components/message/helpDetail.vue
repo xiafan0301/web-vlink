@@ -64,6 +64,9 @@
             </li>
           </ul>
         </div>
+        <div class="list_more">
+          <el-button @click="getCommentInfoList">加载更多...</el-button>
+        </div>
       </div>
     </div>
     <div class="shield_dialog">
@@ -91,6 +94,9 @@ export default {
   props: ['helpId'],
   data () {
     return {
+      pageNum: 0,
+      pageSize: 5,
+      total: 0,
       participateTypeList: [],
       sourceTypeList: [],
       helpDetail: null,//民众互助详情
@@ -150,13 +156,20 @@ export default {
     },
     // 获取评论列表数据
     getCommentInfoList () {
+      this.pageNum += 1;
+      if (this.pageNum > Math.ceil(this.total/5) && this.pageNum > 1) {
+        this.$message.warning('没有更多数据了');
+        return;
+      }
       const params = {
         'where.eventId': 1,//this.helpId
-        pageNum: -1
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
       }
       getCommentInfoList(params).then(res => {
         if (res && res.data) {
-          this.commentList = res.data.list;
+          this.total = res.data.total;
+          this.commentList = this.commentList.concat(res.data.list);
         }
       })
     },
@@ -368,6 +381,18 @@ export default {
               vertical-align: text-bottom;
             }
           }
+        }
+      }
+      .list_more{
+        width: 100%;
+        height: 72px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        >button{
+          width: 166px;
+          height: 32px;
+          line-height: 6px;
         }
       }
     }

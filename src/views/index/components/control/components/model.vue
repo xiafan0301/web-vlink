@@ -43,6 +43,7 @@
         <el-autocomplete
           style="width: 490px;"
           v-model="item.point"
+          :trigger-on-focus="false"
           :fetch-suggestions="autoAdress"
           value-key="name"
           @focus="pointIndex = index"
