@@ -3,10 +3,10 @@
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
         <el-autocomplete
-          v-model="searchData.eventNo"
+          v-model="searchData.uid"
           :fetch-suggestions="autoEvent"
           @select="showChoose"
-          value-key="eventDetail"
+          value-key="eventCode"
           placeholder="关联事件编号搜索">
         </el-autocomplete>
         <el-date-picker
@@ -117,7 +117,6 @@ export default {
     }
   },
   mounted () {
-    this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -127,12 +126,16 @@ export default {
   },
   methods: {
     setDTime () {
-      let date = new Date();
+      let date = new Date(this.curEvent.createTime);
       let curDate = date.getTime();
-      let curS = 15 * 24 * 3600 * 1000;
-      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+      let curS = 15 * 24 * 3600 * 1000;let _s;
+      if (new Date().getTime() > new Date(curDate + curS)) {
+        _s = new Date(curDate + curS).getFullYear() + '-' + (new Date(curDate + curS).getMonth() + 1) + '-' + new Date(curDate + curS).getDate();
+      } else {
+        _s = new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate();
+      }
       let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-      this.searchData.time = [_s, _e]
+      this.searchData.time = [_e, _s]
     },
     resetSearch () {
       this.searchData.eventNo = '';
@@ -148,11 +151,12 @@ export default {
     },
     showChoose (e) {
       this.curEvent = e;
+      this.setDTime();
     },
     beginSearch () {
       this.searching = true;
       let params = {
-        eventId: this.curEvent.eventId,
+        eventId: this.curEvent.uid,
         // eventId: 103,
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]

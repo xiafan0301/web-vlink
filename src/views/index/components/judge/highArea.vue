@@ -228,6 +228,7 @@ export default {
         latitude: null,
         longitude: null
       }
+      this.searchAdress = '';
     },
     beginSearch () {
       if (this.searchData.latitude === null || this.searchData.longitude === null) {
