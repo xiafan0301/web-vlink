@@ -208,22 +208,23 @@ export default {
   methods: {
     // 获取事件列表数据
     getAuditData () {
-      let eventType;
+      let eventType, userName;
       if (this.auditForm.eventType === '全部类型') {
         eventType = null;
       } else {
         eventType = this.auditForm.eventType;
       }
-      // if (this.auditForm.eventStatus === '全部状态') {
-      //   eventStatus = null;
-      // } else {
-      //   eventStatus = this.auditForm.eventStatus;
-      // }
+      if (this.auditForm.userName === '全部上报者') {
+        userName = null;
+      } else {
+        userName = this.auditForm.userName;
+      }
       const params = {
         'where.reportTimeStart': this.auditForm.reportTime[0],
         'where.reportTimeEnd': this.auditForm.reportTime[1],
         'where.acceptFlag': this.auditForm.eventStatus,
         'where.eventType': eventType,
+        'where.reporterUserRole': this.auditForm.userName,
         'where.keyword': this.auditForm.phoneOrNumber,
         'where.eventSource': this.auditForm.eventSource,
         pageNum: this.pagination.pageNum,

@@ -234,7 +234,7 @@ export default {
     },
     // 获取事件列表数据
     getEventData () {
-      let eventType, eventStatus;
+      let eventType, eventStatus, userName;
       if (this.eventForm.eventType === '全部类型') {
         eventType = null;
       } else {
@@ -245,11 +245,17 @@ export default {
       } else {
         eventStatus = this.eventForm.eventStatus;
       }
+      if (this.eventForm.userName === '全部上报者') {
+        userName = null;
+      } else {
+        userName = this.auditForm.userName;
+      }
       const params = {
         'where.reportTimeStart': this.eventForm.reportTime[0],
         'where.reportTimeEnd': this.eventForm.reportTime[1],
         'where.eventStatus': eventStatus,
         'where.eventType': eventType,
+        'where.reporterUserRole': this.eventForm.userName,
         'where.keyword': this.eventForm.phoneOrNumber,
         // 'where.acceptFlag': 25, // 审核通过
         pageNum: this.pagination.pageNum,

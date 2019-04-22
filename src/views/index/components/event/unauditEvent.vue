@@ -68,7 +68,7 @@
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
                 </el-form-item>
-                <!-- <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in handleUnitList"
@@ -78,7 +78,7 @@
                     >
                     </el-option>
                   </el-select>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
                     <el-option
@@ -216,7 +216,7 @@ export default {
         casualties: '', // 伤亡人员
         longitude: '', // 经度
         latitude: '', // 纬度
-        acceptFlag: 1, // 证明是通过
+        acceptFlag: 2, // 证明是通过
         // dealOrgId: '', // 处理单位
         // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
@@ -541,7 +541,7 @@ export default {
         if (valid) {
           const params = {
             uid: this.addEventForm.uid,
-            acceptFlag: 2, // 证明是驳回
+            acceptFlag: 3, // 证明是驳回
             type: 1, // 1--事件审核
             closeRemark: this.rejectForm.closeRemark,
             rejectReason: this.rejectForm.rejectReason

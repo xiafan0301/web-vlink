@@ -64,7 +64,7 @@
                 </li>
                 <li>
                   <span>处理单位:</span>
-                  <span>{{detailInfo.handleCompany}}</span>
+                  <span>{{detailInfo.dealOrgName}}</span>
                 </li>
                 <li>
                   <span>事件类型:</span>
@@ -86,7 +86,7 @@
                     <span>{{detailInfo.casualties}}</span>
                   </template>
                 </li>
-                <li>
+                <li v-show="detailInfo.rejectReason">
                   <span>驳回原因:</span>
                   <span>{{detailInfo.rejectReason}}</span>
                 </li>
