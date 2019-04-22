@@ -40,7 +40,7 @@
 import QRCode from 'qrcodejs2';
 import {validatePhone, validatePwd} from '@/utils/validator.js';
 import vlFooter from '@/components/footer.vue';
-import { login } from '@/views/index/api/api.js';
+import { login } from '@/views/index/api/api.user.js';
 export default {
   components: {QRCode, vlFooter},
   data () {
@@ -81,6 +81,12 @@ export default {
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
                 console.log('item', localStorage.getItem('as_vlink_user_info'))
                 setTimeout(() => {
+                  this.$store.commit('setLoginUser', {
+                    loginUser: res.data
+                  });
+                  this.$store.commit('setLoginToken', {
+                    loginToken: true
+                  });
                   this.loginBtnLoading = false;
                   this.$router.push({name: 'index'});
                 }, 1000);

@@ -58,8 +58,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, updateEvent } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -107,10 +107,10 @@ export default {
     skipEachPage () {
       const type = this.handleType;
       const eventId = this.$route.query.eventId;
-      const params = {
-        uid: eventId,
-        mutualFlag: this.isMutual
-      }
+      // const params = {
+      //   uid: eventId,
+      //   mutualFlag: this.isMutual
+      // }
       // updateEvent(params)
       //   .then(res => {
       //     console.log(res)
@@ -118,7 +118,7 @@ export default {
       if (type) {
         if (type === 1) {
           // 跳至新增布控页面
-          this.$router.push({path: '/control/create'});
+          this.$router.push({path: '/control/create', query: { eventId: eventId }});
         }
         if (type === 2) {
           // 跳至事件管理调度指挥页面
@@ -143,7 +143,6 @@ export default {
     },
     // 放大图片
     openBigImg (index, data) {
-      console.log('data', data);
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));

@@ -68,7 +68,7 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
-import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api';
+import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api.judge.js';
 export default {
   data() {
     return {

@@ -7,16 +7,17 @@
         <el-breadcrumb-item>查看详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="notice_det_box">
-      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">这是一个消息标题，文字限制20字</span></div>
+    <div class="notice_det_box" v-if="detail">
+      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">{{detail.title}}</span></div>
       <div>
         <div class="vl_f_666">消息内容：</div>
         <div>
-          <div class="vl_f_333">任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字限制200字。</div>
-          <div class="det_pic_box">
-            <div class="img" v-for="item in '123456789'" :key="item.id">
-              <img src="//via.placeholder.com/117x117" alt="">
-            </div>
+          <div class="vl_f_333">{{detail.details}}</div>
+          <div class="det_pic_box" id="imgs">
+            <!-- <div class="img" v-for="item in detail.sysAppendixList" :key="item.id">
+              <img :src="item.path" alt="" width="117" height="117">
+            </div> -->
+            <!-- <div ></div> -->
           </div>
         </div>
       </div>
@@ -24,18 +25,66 @@
   </div>
 </template>
 <script>
+import {getMsgNoteDetail} from '@/views/index/api/api.message.js';
 export default {
+  props: ['msgNoteId'],
   data () {
     return {
-    
+      detail: null
     }
   },
   mounted () {
-   
+    this.getMsgNoteDetail();
   },
   methods: {
+    // 获取公告消息详情
+    getMsgNoteDetail () {
+      getMsgNoteDetail(this.msgNoteId).then(res => {
+        if (res && res.data) {
+          this.detail = res.data;
+          if (this.detail.sysAppendixList && this.detail.sysAppendixList.length > 0) {
+            this.previewPictures();
+          }
+        }
+      })
+    },
     skip (pageType) {
       this.$emit('changePage', pageType)
+    },
+    // 预览图片
+    previewPictures () {
+      setTimeout(() => {
+        let imgs = this.detail.sysAppendixList.map(m => m.path);
+        // 图片数组2
+        let imgs2 = []
+        // 获取图片列表容器
+        let $el = document.getElementById('imgs');
+        let html = '';
+        // 创建img dom
+        imgs.forEach(function (src) {
+          // 拼接html结构
+          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;"></div>';
+          // 生成imgs2数组
+          imgs2.push({
+            url: src,
+            angle: 0
+          })
+        })
+        // 将图片添加至图片容器中
+        $el.innerHTML = html;
+        // 使用方法
+        let ziv = new ZxImageView(null, imgs2);
+        // console.log(ziv);
+        // 查看第几张
+        let $images = $el.querySelectorAll('.item');
+        for (let i = 0; i < $images.length; i++) {
+          (function (index) {
+            $images[i].addEventListener('click', function () {
+              ziv.view(index);
+            })
+          }(i))
+        }
+      }, 50)
     }
   }
 }
@@ -65,13 +114,12 @@ export default {
         padding-top: 20px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
-        .img{
-          width: 33%;
-          height: 137px;
-          padding-right: 20px;
-          padding-bottom: 20px;
-        }
+        // .img{
+        //   width: 33%;
+        //   height: 137px;
+        //   padding-right: 20px;
+        //   padding-bottom: 20px;
+        // }
       }
     }
   }

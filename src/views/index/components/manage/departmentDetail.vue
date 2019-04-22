@@ -237,7 +237,8 @@
 </vue-scroll>
 </template>
 <script>
-import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember, addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.js';
+import { judgeDepart, getDepartDetail, getUserMember, getUserList, delUserMember,
+  addUserMember, getDepartmentList, addDepart } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -318,33 +319,45 @@ export default {
                 uid: item.uid,
                 organName: item.organName
               });
-              if (item.organLayer === (this.departDetailInfo.organLayer + 1)) {
-                this.childDepartList.push({
-                  uid: item.uid,
-                  name: item.organName,
-                  isShow: false,
-                  isSelect: false,
-                  children: []
-                });
-              } else {
-                restArr.push(item);
-              }
+              // if (item.organLayer === (this.departDetailInfo.organLayer + 1)) {
+              //   this.childDepartList.push({
+              //     uid: item.uid,
+              //     name: item.organName,
+              //     isShow: false,
+              //     isSelect: false,
+              //     children: []
+              //   });
+              // } else {
+              //   restArr.push(item);
+              // }
               console.log('rest', restArr);
             });
-            restArr.forEach(a => {
-              this.childDepartList.forEach(b => {
-                if (a.parentOrganName === b.name) {
-                  b.children.push({
-                    uid: a.uid,
-                    name: a.organName,
-                    isSelect: false
-                  })
-                }
-              })
-            })
+            // restArr.forEach(a => {
+            //   this.childDepartList.forEach(b => {
+            //     if (a.parentOrganName === b.name) {
+            //       b.children.push({
+            //         uid: a.uid,
+            //         name: a.organName,
+            //         isSelect: false
+            //       })
+            //     }
+            //   })
+            // })
           }
           console.log('childDepartList', this.childDepartList)
         })
+    },
+    handleTreeList (arr, obj, finalArr) {
+      arr.map(item => {
+        if (item.organLayer === (obj.organLayer + 1)) {
+          const params = {
+            uid: item.uid,
+            name: item.organName,
+            children: []
+          }
+          finalArr.push(params);
+        }
+      })
     },
     // 获取部门详情数据
     getDetail () {

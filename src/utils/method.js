@@ -1,7 +1,7 @@
 /*
  * vue全局方法
  */
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 /*
  * 获取字符串长度
  * @param {string} str 字符串
@@ -51,4 +51,18 @@ Vue.prototype.strCutWithLen = function (str, len, clen, siff) {
     }
   }
   return srtn;
+};
+/**
+ * 去掉字符前后中间所有空格
+ */
+Vue.prototype.Trim = function (str, isGlobal) {
+  if (str === null) {
+    return false;
+  }
+  let result;
+  result = str.replace(/(^\s+)|(\s+$)/g, '');
+  if (isGlobal.toLowerCase() === 'g') {
+    result = result.replace(/\s/g, '');
+  }
+  return result;
 };

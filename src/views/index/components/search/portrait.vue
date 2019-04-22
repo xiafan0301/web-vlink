@@ -152,7 +152,8 @@
 <script>
 import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETPortraitInfo, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
+import {ScpGETPortraitInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js';
 export default {
   data() {
     return {

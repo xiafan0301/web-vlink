@@ -65,7 +65,7 @@
   </div>
 </template>
 <script>
-import { getCusGroup, delGroupDevice } from '@/views/index/api/api.js';
+import { getCusGroup, delGroupDevice } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

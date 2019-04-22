@@ -29,7 +29,7 @@
             </div>
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(1)">全部人像({{allPerGroupNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 1)">全部人像({{allPerGroupNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
                   <span>{{item.name}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
@@ -42,7 +42,7 @@
           <div class="left_content_box">
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo(2)">全部底库({{allPerBottomNameNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部底库({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
@@ -55,17 +55,17 @@
       <div class="basic_info_right_group">
         <div class="search_right_box">
           <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-            <el-form-item style="width: 240px;">
+            <el-form-item style="width: 240px;" prop="idNo">
               <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
             </el-form-item>
-            <el-form-item>
-              <el-select v-model="searchForm.type" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item prop="idType">
+              <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
+                <el-option label="身份证" :value="1"></el-option>
+                <el-option label="护照" :value="2"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-select v-model="searchForm.sex" style="width: 240px;">
+            <el-form-item prop="sex">
+              <el-select v-model="searchForm.sex" style="width: 240px;" placeholder="性别">
                 <el-option label="男" :value="1"></el-option>
                 <el-option label="女" :value="2"></el-option>
               </el-select>
@@ -103,7 +103,7 @@
         </div>
         <div class="table_box">
           <div class="add_btn_box">
-            <div class="add_event_btn" @click="showGroup = !showGroup">
+            <div class="add_event_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" @click="showGroupDialog">
               <span>+</span>
               <span>加入组</span>
             </div>
@@ -111,10 +111,20 @@
               <div class="group_info_list">
                 <vue-scroll>
                   <ul class="group_info_ul">
-                    <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li>
+                    <template v-if="selectMethod === 1">
+                      <li
+                        v-for="(item, index) in copyPerGroupInfoList"
+                        :key="'item' + index"
+                        @click="handleCopyGroup(item.id)"
+                      >{{item.name}}</li>
+                    </template>
+                    <template v-else>
+                      <li
+                        v-for="(item, index) in perGroupList"
+                        :key="'item' + index"
+                        @click="handleCopyGroup(item.id)"
+                      >{{item.name}}</li>
+                    </template>
                   </ul>
                 </vue-scroll>
               </div>
@@ -127,6 +137,7 @@
           <el-table
             class="event_table"
             :data="personGroupList"
+            @selection-change="handleSelectChange"
             >
             <el-table-column
               type="selection"
@@ -139,15 +150,19 @@
             </el-table-column>
             <el-table-column
               label="姓名"
-              prop="userName"
+              prop="name"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="性别"
-              prop="userSex"
+              prop="sex"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span v-show="scope.row.sex == 1">男</span>
+                <span v-show="scope.row.sex == 2">女</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="证件类型"
@@ -157,25 +172,29 @@
             </el-table-column>
             <el-table-column
               label="证件号码"
-              prop="idCard"
+              prop="idNo"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="分组信息"
-              prop="groupInfo"
+              prop="groupList"
               :show-overflow-tooltip='true'
             >
+              <template slot-scope="scope">
+               <span v-for="(item, index) in scope.row.groupList" :key="index">
+                 {{item.name + ' '}}
+               </span>
+              </template>
             </el-table-column>
             <el-table-column fixed="right" label="操作" width="100">
               <template slot-scope="scope">
-                <span class="operation_btn" @click="showLookDetailInfo(scope)">查看</span>
+                <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
               </template>
             </el-table-column>
           </el-table>
         </div>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
@@ -195,50 +214,44 @@
         >
         <div class="content_body">
           <div class="content_left">
-            <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+            <img :src="personDetailInfo.photoUrl">
           </div>
           <ul class="content_right">
             <li>
               <span>姓名：</span>
-              <span>邹洪华</span>
+              <span>{{personDetailInfo.name}}</span>
             </li>
             <li>
               <span>性别：</span>
-              <span>男</span>
+              <span>{{personDetailInfo.sex === 1 ? '男' : '女'}}</span>
             </li>
             <li>
               <span>民族：</span>
-              <span>汉</span>
+              <span>{{personDetailInfo.nation === 1 ? '汉族' : personDetailInfo.nation}}</span>
             </li>
             <li>
               <span>证件类型：</span>
-              <span>身份证</span>
+              <span>{{personDetailInfo.idType}}</span>
             </li>
             <li>
               <span>证件号码：</span>
-              <span>432501199111110011</span>
+              <span>{{personDetailInfo.idNo}}</span>
             </li>
             <li>
               <span>出生日期：</span>
-              <span>1991.11.11</span>
+              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
             </li>
             <li>
               <span>底库信息：</span>
-              <span>底库1、底库2</span>
+              <span></span>
             </li>
             <li>
               <span>分组信息：</span>
-              <span>分组1、分组2</span>
+              <span></span>
             </li>
             <li>
               <span>备注：</span>
-              <span>
-                任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，
-                这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-                这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，
-                这段文字是样式参考。调度指挥方案任务内容填写，
-                段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示。
-              </span>
+              <span>{{personDetailInfo.remarks}}</span>
             </li>
           </ul>
         </div>
@@ -273,12 +286,17 @@
         class="dialog_comp"
         >
         <div class="content_body">
-          <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-          <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
+          <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
+          <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
+            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+              <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+              <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+            </el-form-item>
+          </el-form>
         </div>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="addGroupCopyDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addGroupCopyDialog = false">确认</el-button>
+          <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -286,7 +304,8 @@
 </template>
 <script>
 import { validateName } from '@/utils/validator.js';
-import { getPerBottomBankList, getPerGroupList, getPersonData, addGroup } from '@/views/index/api/api.js';
+import { getPerBottomBankList, getPerGroupList, getPersonData, addGroup, 
+getPersonDetail, judgePerson, copyPersonGroup, addGroupCopyPerson } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -320,46 +339,28 @@ export default {
       selectMethod: 1, // 左侧查看方式  1--分组方式查看 2--底库查看
       searchForm: {
         idNo: null,
-        type: null,
-        sex: 1,
+        idType: null,
+        sex: null,
         albumId: null,
         groupId: null
       },
-      personGroupList: [
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        },
-        {
-          userName: '张三',
-          userSex: '男',
-          idType: '身份证',
-          idCard: '432501199912190029',
-          groupInfo: '显示20字后省略号显示20字后省略号显示…'
-        }
-      ],
+      personGroupList: [],
+      isShowError: false,
       showGroup: false,
+      personDetailInfo: {}, // 人员详细信息
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       addGroupCopyDialog: false, // 加入组-新增分组弹出框
       perGroupList: [], // 分组列表
       perBottomBankList: [], // 底库列表
+      copyPerGroupInfoList: [],
+      multipleSelection: [], // 表格多选
     }
   },
   mounted () {
     this.getGroupList();
-    this.getBottomBankList();
-    this.getPersonList();
+    // this.getBottomBankList();
+    // this.getPersonList();
   },
   methods: {
     // 获取分组列表
@@ -371,10 +372,10 @@ export default {
       getPerGroupList(params)
         .then(res => {
           if (res) {
-            this.perGroupList = res.data;
-            this.perGroupList.map(item => {
-              this.allPerGroupNumber += item.portraitNum;
-            })
+            this.perGroupList = res.data.groupNumList;
+            this.copyPerGroupInfoList = JSON.parse(JSON.stringify(res.data.groupNumList));
+            this.allPerGroupNumber = res.data.portraitNum;
+            this.getPersonList();
           }
         })
         .catch(() => {})
@@ -403,6 +404,7 @@ export default {
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
+        'where.idType': this.searchForm.idType,
         'where.idNo': this.searchForm.idNo,
         'where.sex': this.searchForm.sex,
         pageNum: this.pagination.pageNum,
@@ -410,20 +412,42 @@ export default {
       };
       getPersonData(params)
         .then(res => {
-          console.log(res)
+          if (res) {
+            this.personGroupList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
         })
         .catch(() => {})
     },
+    // 表格多选
+    handleSelectChange (val) {
+      this.multipleSelection = val;
+    },
+    // 显示加入组tankuang
+    showGroupDialog () {
+      if (this.multipleSelection.length > 0) {
+        this.showGroup = !this.showGroup;
+      } else {
+        this.showGroup = false;
+      }
+    },
     // 根据搜索条件查询人员列表
     searchPersonData () {
+      this.pagination.pageNum = 1;
       this.getPersonList();
     },
     // 清空搜索人员列表框
     resetForm (form) {
+      this.pagination.pageNum = 1;
       this.$refs[form].resetFields();
+      this.getPersonList();
     },
     // 搜索框组名change
-    changeGroupName () {},
+    changeGroupName (val) {
+      if (!val) {
+        this.closeShow = false;
+      }
+    },
     // 清空搜索框
     onClear () {
       this.closeShow = false;
@@ -443,9 +467,110 @@ export default {
         this.getBottomBankList();
       }
     },
+    // 显示加入组---取消新增分组
+    cancelAddGroupCopy (form) {
+      this.isShowError = false;
+      this.addGroupForm.userGroupName = null;
+      this.$refs[form].resetFields();
+    },
+    // 复制或新增复制到组 --判断组名是否重复
+    addCopyGroupInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            name: this.addGroupForm.userGroupName
+          };
+          judgePerson(params)
+            .then(res => {
+              if (res.data) {
+                this.isShowError = true;
+              } else {
+                this.isShowError= false;
+                this.handleAddCopyGroupInfo();
+              }
+            })
+            .catch(() => {})
+        }
+      })
+    },
+    // 复制或新增复制到组
+    handleAddCopyGroupInfo () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.id);
+      });
+      const params = {
+        newGroupName: this.addGroupForm.userGroupName || null,
+        // groupId: id || null,
+        memberIds: selectArr
+      };
+      addGroupCopyPerson(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.showGroup = false;
+            this.getGroupList();
+            this.addGroupCopyDialog = false;
+          } else {
+            this.$message({
+              type: 'error',
+              message: '新增失败',
+              customClass: 'request_tip'
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 点击左边分组获取右边人员列表
-    getPerDetailInfo () {
-
+    getPerDetailInfo (obj, type) {
+      this.pagination.pageNum = 1;
+      this.showGroup = false;
+      this.searchForm.groupId = null;
+      this.searchForm.albumId = null;
+      this.searchForm.keyWord = null;
+      this.activeSelect = obj.id;
+      if (type === 1) {
+        this.searchForm.groupId = obj.id;
+        this.perGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
+          if (item.id === obj.id) {
+            this.copyPerGroupInfoList.splice(index, 1);
+          }
+        })
+      } else {
+        this.searchForm.albumId = obj.id;
+      }
+      if (!obj) {
+        this.activeSelect = -1;
+      }
+      this.getPersonList();
+    },
+    // 将人员复制到选择的组
+    handleCopyGroup (id) {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.id);
+      });
+      const params = {
+        groupId: id || null,
+        portraitIds: selectArr.join()
+      };
+      copyPersonGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              customClass: 'request_tip'
+            })
+            this.getGroupList();
+            this.showGroup = false;
+          }
+        })
+        .catch(() => {})
     },
     // 选择方式的change
     handleChangePerson (val) {
@@ -460,23 +585,42 @@ export default {
         this.getBottomBankList();
       }
     },
-    handleIconClick () {},
-    skipAddGroupPage () {},
-    handleSizeChange () {
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      // if (this.selectMethod === 1) {
+        this.getPersonList();
+      // }
     },
-    handleCurrentChange () {},
     // 显示新增分组弹出框
     showAddGroupDialog () {
+      this.isShowError = false;
+      this.addGroupForm.userGroupName = null;
       this.addGroupDialog = true;
     },
     // 新增分组
-    addGroupInfo () {
-      
+    addGroupInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const params = {
+            name: this.addGroupForm.userGroupName
+          };
+          judgePerson(params)
+            .then(res => {
+              if (res.data) {
+                this.isShowError = true;
+              } else {
+                this.isShowError= false;
+                this.handleAddGroupInfo();
+              }
+            })
+            .catch(() => {})
+        }
+      })
     },
     handleAddGroupInfo () {
       const params = {
         groupName: this.addGroupForm.userGroupName,
-        groupType: 1
+        groupType: 4
       };
       addGroup(params)
         .then(res => {
@@ -486,14 +630,8 @@ export default {
               message: '新增成功',
               customClass: 'request_tip'
             })
-            this.getVeGroupInfo();
+            this.getGroupList();
             this.addGroupDialog = false;
-          } else {
-            this.$message({
-              type: 'error',
-              message: '新增失败',
-              customClass: 'request_tip'
-            })
           }
         })
         .catch(() => {})
@@ -504,13 +642,22 @@ export default {
     },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
-      console.log(obj);
       this.perosnDetailInfoDialog = true;
+      if (obj.id) {
+        getPersonDetail(obj.id)
+          .then(res => {
+            if (res) {
+              this.personDetailInfo = res.data;
+            }
+          })
+          .catch(() => {})
+      }
     },
     // 跳至管理人员组信息页面
-    skipAdminPersonPage () {
-      console.log('111')
-      this.$router.push({name: 'admin_person_info'});
+    skipAdminPersonPage (id, val, e) {
+      // console.log('111')
+      e.stopPropagation();
+      this.$router.push({name: 'admin_person_info', query: {type: val, id: id}});
     }
   }
 }
@@ -525,7 +672,7 @@ export default {
     height: 100%;
     border-right: 1px solid #f2f2f2;
     .search_box {
-      padding: 0 18px;
+      padding: 0 18px 10px;
       /deep/ .el-input--small .el-input__inner {
         width: 220px;
         border-radius: 40px;
@@ -626,16 +773,22 @@ export default {
             margin-left: 5px;
           }
         }
+        .disabled_btn {
+          background-color: #D3D3D3;
+          color: #B2B2B2;
+          cursor: default;
+        } 
         .group_info {
           z-index: 1;
           position: absolute;
           top: 45px;
           background-color: #ffffff;
           color: #333333;
+          height: 170px;
           border-radius: 4px;
           box-shadow:5px 5px 8px 5px #949494;
           .group_info_list {
-            height: 150px;
+            height: calc(170px - 30px);
             .group_info_ul {
               >li {
                 padding: 8px 10px;
@@ -650,10 +803,13 @@ export default {
             cursor: pointer;
             height: 30px;
             line-height: 30px;
-            display: flex;
-            align-items: center;
-            padding-left: 25%;
+            text-align: center;
+            padding: 0 10px;
             border-top: 1px solid #F2F2F2;
+            span, i {
+              display: inline-block;
+              vertical-align: middle;
+            }
           }
         }
       }

@@ -4,17 +4,14 @@
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">全部车辆</span></div>
-        <div><el-checkbox v-model="allChecked" @click.native="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
+        <div><el-checkbox v-model="allChecked" @change="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
         <el-button @click="judgeIsSelectedCopy">复制到组</el-button>
         <el-button @click="judgeIsSelectedRemove">删除车像</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
-            <li @click="copyIsGroup">系统默认</li>
-            <li>重点青少年</li>
-            <li>拐卖妇女</li>
-            <li>失踪儿童</li>
+            <li @click="copyVehicle(item.uid)" v-for="item in groupListCar" :key="item.uid">{{item.groupName}}</li>
             <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
           </ul>
         </el-collapse-transition>
@@ -26,7 +23,7 @@
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
-            <el-checkbox v-model="item.isChecked" @click.native="operateRadio()"></el-checkbox>
+            <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
             <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
@@ -35,18 +32,21 @@
             <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
           </div>
           <div class="data_list">
-            <span>{{item.numberColor}}</span>
-            <span>{{item.groupNames}}</span>
-            <div class="more">
-              <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-              <template v-if="showMoreId === item.uid">
-                <div>
-                  <span>失踪儿童</span>
-                  <span>拐卖儿童</span>
-                </div>
-                <i></i>
+            <span :title="item.numberColor">{{item.numberColor}}</span>
+            <template v-if="item.groupNames">
+              <template v-for="(gN, index) in item.groupNames.split(',')">
+                <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
               </template>
-            </div>
+              <div class="more" v-if="item.groupNames.split(',').length > 1">
+                <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
+                <template v-if="showMoreId === item.uid">
+                  <div>
+                    <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                  </div>
+                  <i></i>
+                </template>
+              </div>
+            </template>
           </div>
           <div class="data_list">
             <span>{{item.desci}}</span>
@@ -67,7 +67,7 @@
       </div>
     </div>
     <!-- 新增组 -->
-    <div is="groupDialog" operateType="1" ref="groupDialog"></div>
+    <div is="groupDialog" :tabType="tabType" operateType="1" ref="groupDialog" @getGroupList="getGroupListIsVehicle"></div>
     <!-- 删除车像 -->
     <div class="del_car_dialog">
       <el-dialog
@@ -87,10 +87,10 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delVehicle} from '@/views/index/api/api.js';
+import {delVehicle, copyVehicle, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
-  props: ['carMemberList'],
+  props: ['carMemberList', 'tabType'],
   data () {
     return {
       // 翻页数据
@@ -100,6 +100,8 @@ export default {
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
       track: null,
       showMoreId: null,//显示更多组的组id
+      // 车像组列表数据
+      groupListCar: [],
       // 弹出框参数
       delCarDialog: false,
       loadingBtn: false,
@@ -111,6 +113,7 @@ export default {
       this.memberList.forEach(f => {
         this.$set(f, 'isChecked', false);
       })
+      this.allChecked = false;
     }
   },
   computed: {
@@ -123,6 +126,9 @@ export default {
     this.memberList.forEach(f => {
       this.$set(f, 'isChecked', false);
     })
+  },
+  mounted () {
+    this.getGroupListIsVehicle();
   },
   methods: {
     popGroupDialog () {
@@ -160,7 +166,7 @@ export default {
     // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择复制对象!');
+        this.$message.error('请先勾选复制对象!');
       } else {
         this.isShowGroupCopy = !this.isShowGroupCopy;
       }
@@ -168,7 +174,7 @@ export default {
     // 判断是否选择了移出对象
     judgeIsSelectedRemove () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择删除对象!');
+        this.$message.error('请先勾选删除对象!');
       } else {
         this.delCarDialog = true;
       }
@@ -177,17 +183,38 @@ export default {
     copyIsGroup () {
       this.isShowGroupCopy = !this.isShowGroupCopy;
     },
+    // 获取车像组列表
+    getGroupListIsVehicle () {
+      getGroupListIsVehicle().then(res => {
+        if (res && res.data) {
+          this.groupListCar = res.data.filter(f => f.uid !== null);
+        }
+      })
+    },
     // 批量删除车像
     delVehicle () {
       this.loadingBtn = true;
       const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',')
       const params = {ids: member};
-      delVehicle(params).then(res => {
+      delVehicle(params).then(() => {
         this.delCarDialog = false;
         this.$message.success('删除成功！');
         this.$emit('getVehicleList');//重新通知父组件获取车像列表
       }).finally(() => {
         this.loadingBtn = false;
+      })
+    },
+    // 批量复制车像到别的组
+    copyVehicle (groupId) {
+      const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
+      const data = {
+        groupId: groupId,
+        ids: member
+      }
+      copyVehicle(data).then(() => {
+        this.isShowGroupCopy = false;
+        this.$message.success('复制成功');
+        this.$emit('getVehicleList');//重新通知父组件获取车像列表
       })
     }
   }

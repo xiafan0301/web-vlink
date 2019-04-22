@@ -9,13 +9,15 @@
       <p>删除后该组将找不到。</p>
       <div slot="footer">
         <el-button @click="delManageDialog = false">取消</el-button>
-        <el-button :loading="loadingBtn" type="primary" @click="delManageDialog = false">确认</el-button>
+        <el-button :loading="loadingBtn" type="primary" @click="delControl">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import {delControl} from '@/views/index/api/api.control.js';
 export default {
+  props: ['controlId'],
   data () {
     return {
       delManageDialog: false,
@@ -25,6 +27,14 @@ export default {
   methods: {
     reset () {
       this.delManageDialog = true;
+    },
+    // 删除布控
+    delControl () {
+      delControl(this.controlId).then(() => {
+        this.delManageDialog = false;
+        this.$message.success('删除成功');
+        this.$emit('getControlList');
+      })
     }
   }
 }

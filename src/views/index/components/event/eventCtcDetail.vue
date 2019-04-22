@@ -46,13 +46,75 @@
           </div>
         </div>
         <div class="summary" v-show="basicInfo.eventSummary">
-          <div class="header">
-            <p class="ctc-title">事件总结</p>
+          <div class="summary-header">
+            <span>事件总结</span>
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <p class="content-icon"><i class="vl_icon vl_icon_event_1"></i></p>
-            <p>{{basicInfo.eventSummary}}</p>
+            <p>事件总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in eventFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">事件总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="summary" v-show="basicInfo.dispatchSummary">
+          <div class="summary-header">
+            <span>调度总结</span>
+          </div>
+          <div class="divide"></div>
+          <div class="summary-content">
+            <p>调度总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">调度总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
         <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
@@ -113,8 +175,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -122,111 +184,16 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      basicInfo: {
-        // eventCode: 'XD111111111111111',
-        // eventTypeName: '自然灾害',
-        // eventLevelName: 'V级',
-        // reportTime: '2019-03-12',
-        // reporterPhone: '18076543210',
-        // eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        // casualties: -1,
-        // imgList: [
-        //   {
-        //     uid: '001',
-        //     src: require('./img/1.jpg')
-        //   },
-        //   {
-        //     uid: '002',
-        //     src: require('./img/2.jpg')
-        //   },
-        //   {
-        //     uid: '003',
-        //     src: require('./img/3.jpg')
-        //   },
-        //   {
-        //     uid: '004',
-        //     src: require('./img/4.jpg')
-        //   }
-        // ],
-        // taskList: [
-        //   {
-        //     departmentName: '公安部',
-        //     taskName: '救火',
-        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-        //     createTime: '2019-03-12 12:12:12',
-        //     taskStatusName: '未查看'
-        //   },
-        //   {
-        //     departmentName: '消防部',
-        //     taskName: '救火',
-        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-        //     createTime: '2019-03-12 12:12:24',
-        //     taskStatusName: '已查看'
-        //   },
-        //   {
-        //     departmentName: '就业部',
-        //     taskName: '救火',
-        //     taskContent: '起火了起火了了啦啦啦啦啦啦啦',
-        //     createTime: '2019-03-12 19:12:24',
-        //     taskStatusName: '已完成'
-        //   }
-        // ],
-        // processingList: [
-        //   {
-        //     createTime: '2019-03-12 12:12:12',
-        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-        //     opUserName: '张三',
-        //     attachmentList: [
-        //       {
-        //         uid: '001',
-        //         src: require('./img/1.jpg')
-        //       },
-        //       {
-        //         uid: '002',
-        //         src: require('./img/2.jpg')
-        //       },
-        //       {
-        //         uid: '003',
-        //         src: require('./img/3.jpg')
-        //       },
-        //       {
-        //         uid: '004',
-        //         src: require('./img/4.jpg')
-        //       }
-        //     ]
-        //   },
-        //   {
-        //     createTime: '2019-03-12 12:12:12',
-        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-        //     opUserName: '张三'
-        //   },
-        //   {
-        //     createTime: '2019-03-12 12:12:12',
-        //     processContent: '阿三打撒看大家爱上了大家啊是了看静安寺大撒可怜见的',
-        //     opUserName: '张三',
-        //     attachmentList: [
-        //       {
-        //         uid: '001',
-        //         src: require('./img/1.jpg')
-        //       },
-        //       {
-        //         uid: '002',
-        //         src: require('./img/2.jpg')
-        //       },
-        //       {
-        //         uid: '003',
-        //         src: require('./img/3.jpg')
-        //       },
-        //       {
-        //         uid: '004',
-        //         src: require('./img/4.jpg')
-        //       }
-        //     ]
-        //   }
-        // ],
-        // eventSummary: '啊杀掉了空间阿斯卡里的时间看来撒就看到了啊数据利空打击爱上了大家爱上了大家卡是垃圾的爱神的箭卡萨拉大家爱上了大家阿拉斯加的看拉萨就对啦洒家扩大撒娇的撒垃圾大安静多了家啊大家爱神的箭爱上了大家安静的拉开觉得觉得安静的爱了就的阿加大家的克拉克大家案例大家啊是多久啊空间', // 事件总结
-        // eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
+      eventImg: [], // 事件总结图片列表
+      eventFile: [], // 事件总结文件列表
+      ctcImg: [], // 调度总结图片列表
+      ctcFile: [], // 调度总结文件列表
+      summaryDetailDialog: false, // 查看总结详情弹出框
+      summaryTitle: null, // 总结标题
+      summaryContent: null, // 总结内容
+      eventSummaryLength: 0,
+      dispatchSummaryLength: 0
     }
   },
   mounted () {
@@ -239,11 +206,11 @@ export default {
     },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end'});
+      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation'});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType }});
     },
     // 获取事件详情
     getDetail () {
@@ -251,7 +218,27 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            if (res.data.closeAttachmentList.length > 0) {
+              res.data.closeAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.eventImg.push(item);
+                } else {
+                  this.eventFile.push(item);
+                }
+              })
+            }
+            if (res.data.dispatchAttachmentList.length > 0) {
+              res.data.dispatchAttachmentList.map(item => {
+                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  this.ctcImg.push(item);
+                } else {
+                  this.ctcFile.push(item);
+                }
+              })
+            }
             this.basicInfo = res.data;
+            this.eventSummaryLength = this.basicInfo.eventSummary.length;
+            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
         })
         .catch(() => {})
@@ -287,6 +274,16 @@ export default {
       background-color: #ffffff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       border-radius:4px;
+      .summary-header{
+        > span {
+          display: inline-block;
+          padding: 10px 20px;
+          color: #333333;
+          font-weight: 600;
+          font-size: 16px;
+        }
+        
+      }
       .header {
         padding: 10px 20px 0 20px;
         > p {
@@ -431,8 +428,79 @@ export default {
       }
       .summary-content {
         padding: 10px 20px;
-        >p:nth-child(2) {
-          color: #000000;
+        >p {
+          color: #333333;
+          font-weight:600;
+          margin-bottom: 5px;
+        }
+        .content-icon {
+          margin: 5px 0;
+          >ul {
+            >li {
+              position: relative;
+              float: left;
+              i {
+                margin: 0 5px;
+                cursor: pointer;
+              }
+              .operation_btn {
+                display: none;
+                background-color: #ffffff;
+                box-shadow:0px 2px 8px 0px rgba(0,0,0,0.15);
+                position: absolute;
+                right: 0;
+                top: -55px;
+                z-index: 1;
+                padding: 3px 5px;
+                color: #333333;
+                font-size: 12px;
+                // position: relative;
+                .arrow {
+                  position: absolute;
+                  bottom: -5px;
+                  left: 40%;
+                  width: 0;
+                  height: 0;
+                  border-left: 6px solid transparent;
+                  border-right: 6px solid transparent;
+                  border-top: 6px solid #ffffff;
+                }
+                > p {
+                  padding: 3px;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  a {
+                    text-decoration: none;
+                  }
+                  a:hover {
+                    color: #0C70F8;
+                  }
+                }
+              }
+              &:hover {
+                .operation_btn {
+                  display: block;
+                }
+              }
+            }
+          }
+          img {
+            width: 72px;
+            height: 72px;
+            border-radius: 4px;
+            margin: 0 5px;
+            cursor: pointer;
+          }
+        }
+        .content_detail {
+          >p{
+            text-indent: 20px;
+            .look_more {
+              color: #0C70F8;
+              cursor: pointer;
+            }
+          }
         }
       }
     }

@@ -22,7 +22,15 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item label="事发地点:" prop="place">
-            <el-input id="searchInput" v-model="addForm.place" placeholder="请输入事发地点" @keyup.enter.native="markLocation('mapBox', addForm.place)"></el-input>
+            <el-autocomplete
+              style="width: 450px;"
+              v-model="addForm.place"
+              :trigger-on-focus="false"
+              :fetch-suggestions="autoAdress"
+              value-key="name"
+              @select="chooseAddress"
+              placeholder="请输入事发地点">
+            </el-autocomplete>
           </el-form-item>
           <el-form-item style="margin-bottom: 0;">
             <div id="searchResults"></div>
@@ -37,17 +45,17 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <div is="uploadPic" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</p>
+            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
+            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
             <el-radio-group v-model="addForm.radio">
-              <el-radio :label="1">不推送</el-radio>
-              <el-radio :label="2">推送</el-radio>
+              <el-radio :label="-1">不推送</el-radio>
+              <el-radio :label="0">推送</el-radio>
             </el-radio-group>
             <p class="vl_f_999">(APP是否推送消息?）</p>
           </el-form-item>
-          <el-form-item label="接收范围:">
+          <el-form-item label="接收范围:" v-if="addForm.radio === 0">
             <el-select value-key="uid" v-model="addForm.scope" filterable placeholder="请选择">
               <el-option
                 v-for="item in scopeList"
@@ -70,7 +78,8 @@
         </div>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="release('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 2" type="primary" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 4" type="primary" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -79,9 +88,10 @@
 <script>
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
+import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.message.js';
 export default {
   components: {uploadPic},
-  props: ['pageType'],
+  props: ['pageType', 'helpId'],
   data () {
     return {
       type: null,//页面类型
@@ -91,7 +101,7 @@ export default {
         time: null,
         place: null,
         situation: null,
-        radio: 1,
+        radio: -1,
         scope: null
       },
       addRules: {
@@ -109,16 +119,26 @@ export default {
           {required: true, message: '请输入事件情况', trigger: 'blur'}
         ]
       },
-      scopeList: [],
+      scopeList: [
+        {value: 0, label: '全部推送'},
+        {value: 10, label: '10公里以内的'},
+        {value: 20, label: '20公里以内的'},
+        {value: 30, label: '30公里以内的'},
+        {value: 40, label: '40公里以内的'}
+      ],
+      loadingBtn: false,
+      hId: null,//民众互助id，用于修改
       // 地图参数
       map: null,
+      lngLat: null,//经纬度
+      autoComplete: null,
+      _marker: null,
       // 上传参数
       fileList: []
     }
   },
   mounted () {
     this.resetMap();
-    this.search();
   },
   methods: {
     skip (pageType) {
@@ -130,6 +150,11 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
+      console.log(fileList)
+    },
+    uploadPicDel (fileList) {
+      this.fileList = fileList;
+      console.log(fileList)
     },
     resetMap () {
       let _this = this;
@@ -139,56 +164,73 @@ export default {
         // viewMode: '3D' // 使用3D视图
       });
       map.setMapStyle('amap://styles/whitesmoke');
+      map.plugin('AMap.Autocomplete', () => {
+        let autoOptions = {
+          city: '长沙'
+        }
+        this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+      })
       _this.map = map;
+      // 修改，回填数据
+      if (_this.pageType === 4) {
+        _this.getMutualHelpDetail();
+      }
+    },
+    
+    autoAdress (queryString, cb) {
+      if (queryString === '') {
+        cb([])
+      } else {
+        this.autoComplete.search(queryString, (status, result) => {
+          if (status === 'complete') {
+            cb(result.tips);
+          }
+        })
+      }
+    },
+    chooseAddress (e) {
+      console.log(e);
+      this.markLocation(e.location.lng, e.location.lat, e.address);
     },
     // 输入追踪点定位圆形覆盖物的中心点
-    markLocation(mapId, address) {
+    markLocation(lng, lat, address) {
       let _this = this;
-      new window.AMap.plugin('AMap.Geocoder', function() {
-          let geocoder = new window.AMap.Geocoder(); 
-          console.log(address)           
-          geocoder.getLocation(address, function(status, result) {
-            if (status === 'complete' && result.info === 'OK') { 
-              // 经纬度                      
-              let lng = result.geocodes[0].location.lng;
-              let lat = result.geocodes[0].location.lat;
-              // 追踪点标记
-              let offSet = [-20.5, -48], _hoverWindow = null;
-              if (lng > 0 && lat > 0) {
-                let _marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
-                  position: [lng, lat],
-                  offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-                  draggable: false, // 是否可拖动
-                  extData: '',
-                  // 自定义点标记覆盖物内容
-                  content: '<div class="vl_icon vl_icon_message_7"></div>'
-                });
-                // hover
-                _marker.on('mouseover', function () {
-                  let _sContent = '<div class="vl_map_hover">' +
-                    '<div class="vl_map_hover_main"><ul>' + 
-                      '<li><span>事发地点：</span>' + address + '</li>' + 
-                    '</ul></div>';
-                  _hoverWindow = new window.AMap.InfoWindow({
-                    isCustom: true,
-                    closeWhenClickMap: true,
-                    offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                    content: _sContent
-                  });
-                  _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
-                });
-                _marker.on('mouseout', function () {
-                  if (_hoverWindow) { _hoverWindow.close(); }
-                });
-                _marker.setMap(_this.map);
-              }
-            } else {
-              console.log('定位失败！');
-              _this.$message.error('定位失败！');
-            }
+      if (_this._marker) {
+        _this.map.remove(_this._marker);
+      }
+      _this.lngLat = [lng, lat];
+      // 追踪点标记
+      let offSet = [-20.5, -48], _hoverWindow = null;
+      if (lng > 0 && lat > 0) {
+        _this._marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [lng, lat],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: '',
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_message_7"></div>'
+        });
+        // hover
+        _this._marker.on('mouseover', function () {
+          let _sContent = `<div class="vl_map_hover">
+            <div class="vl_map_hover_main"><ul>
+              <li><span>事发地点：</span><span>${address}</span></li>
+            </ul></div>`;
+          _hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: _sContent
           });
-      });
+          _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+        });
+        _this._marker.on('mouseout', function () {
+          if (_hoverWindow) { _hoverWindow.close(); }
+        });
+        _this.map.setCenter([lng, lat]);
+        _this._marker.setMap(_this.map);
+      }
     },
   
     mapZoomSet (val) {
@@ -196,8 +238,8 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
-    // 确定发布
-    release (formName) {
+     // 新增民众互助
+    addMutualHelp (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.addForm.time.getTime() < new Date().getTime()) {
@@ -209,51 +251,146 @@ export default {
             return false;
           }
           console.log('通过验证')
+          const data = {
+            attachmentList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
+            eventAddress: this.addForm.place,//事发地点
+            eventDetail: this.addForm.situation,//事件详情
+            latitude: this.lngLat[1],//事发地点纬度
+            longitude: this.lngLat[0],//事发地点经度
+            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
+            reportTime: this.addForm.time,//上报时间
+            reporterPhone: this.addForm.phone,//上报手机号
+            reporterUserId: 123//上报人标识
+          }
+          console.log(JSON.stringify(data) )
+          this.loadingBtn = true;
+          addMutualHelp(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('发布成功');
+              this.$emit('getMutualHelpList'); 
+            }
+          }).finally(() => {
+              this.loadingBtn = false;
+            })
         } else {
-          console.log(this.addForm.time.getTime())
           return false;
         }
       });
     },
-    // 搜索事发地点
-    search () {
-      let _this = this;
-        new Window.AMapUI.loadUI(['misc/PoiPicker'], function(PoiPicker) {
-
-          var poiPicker = new PoiPicker({
-              input: 'searchInput',
-              placeSearchOptions: {
-                  map: _this.map,
-                  pageSize: 10
-              },
-              searchResultsContainer: 'searchResults'
-          });
-
-          poiPicker.on('poiPicked', function(poiResult) {
-                console.log(poiResult)
-                _this.addForm.place = poiResult.item.name;
-              poiPicker.hideSearchResults();
-
-              var source = poiResult.source,
-                  poi = poiResult.item;
-
-              if (source !== 'search') {
-
-                  //suggest来源的，同样调用搜索
-                  poiPicker.searchByKeyword(poi.name);
-
+    // 根据id获取民众互助详情,用于回填数据
+    getMutualHelpDetail () {
+      getMutualHelpDetail(this.helpId).then(res => {
+        if (res && res.data) {
+          const detail = res.data;
+          this.addForm.phone = detail.reporterPhone;
+          this.addForm.time = detail.reportTime;
+          this.addForm.place = detail.eventAddress;
+          this.addForm.situation = detail.eventDetail;
+          this.lngLat = [detail.longitude, detail.latitude];
+          this.hId = detail.uid;
+          this.fileList = detail.attachmentList.map(m => {
+            return {
+              cname: m.cname,
+              contentUid: m.contentUid,
+              createTime: m.createTime,
+              delFlag: m.delFlag,
+              desci: m.desci,
+              filePathName: m.filePathName,
+              fileType: m.fileType,
+              imgHeight: m.imgHeight,
+              imgSize: m.imgSize,
+              imgWidth: m.imgWidth,
+              opUserId: m.opUserId,
+              url: m.path,
+              sort: m.sort,
+              thumbnailName: m.thumbnailName,
+              thumbnailPath: m.thumbnailPath,
+              uid: m.uid,
+              updateTime: m.updateTime,
+              updateUserId: m.updateUserId
+            }
+          })
+          if (detail.radius >= 0) {
+            this.addForm.radio = 0;
+            this.addForm.scope = detail.radius;
+          } else {
+            this.addForm.radio = -1;
+          }
+          this.markLocation(detail.longitude, detail.latitude, detail.eventAddress);
+        }
+      })
+    },
+    // 修改民众互助
+    putMutualHelp (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          // if (this.addForm.time.getTime() < new Date().getTime()) {
+          //   this.$message.error('事发时间不能晚于当前系统时间！');
+          //   return false;
+          // }
+          if (this.fileList.length === 0) {
+            this.$message.error('请上传图片！');
+            return false;
+          }
+          console.log('通过验证')
+          const data = {
+            attachmentList: this.fileList.map(m => {
+              if (m.response) {
+                return m.response.data.sysAppendixInfo;
               } else {
-
-                  //console.log(poi);
+                return {
+                  cname: m.cname,
+                  contentUid: m.contentUid,
+                  createTime: m.createTime,
+                  delFlag: m.delFlag,
+                  desci: m.desci,
+                  filePathName: m.filePathName,
+                  fileType: m.fileType,
+                  imgHeight: m.imgHeight,
+                  imgSize: m.imgSize,
+                  imgWidth: m.imgWidth,
+                  opUserId: m.opUserId,
+                  path: m.url,
+                  sort: m.sort,
+                  thumbnailName: m.thumbnailName,
+                  thumbnailPath: m.thumbnailPath,
+                  uid: m.uid,
+                  updateTime: m.updateTime,
+                  updateUserId: m.updateUserId
+                }
               }
-          });
-
-          poiPicker.onCityReady(function() {
-              poiPicker.searchByKeyword('');
-          });
+            }),//附件信息列表
+            eventAddress: this.addForm.place,//事发地点
+            eventDetail: this.addForm.situation,//事件详情
+            latitude: this.lngLat[1],//事发地点纬度
+            longitude: this.lngLat[0],//事发地点经度
+            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio >= 0 ? this.addForm.scope : '',//推送范围
+            reportTime: this.addForm.time,//上报时间
+            reporterPhone: this.addForm.phone,//上报手机号
+            reporterUserId: 123,//上报人标识
+            uid: this.hId
+          }
+          this.loadingBtn = true;
+          console.log(data)
+          putMutualHelp(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('修改成功');
+              this.$emit('getMutualHelpList'); 
+            }
+          }).finally(() => {
+              this.loadingBtn = false;
+            })
+        } else {
+          return false;
+        }
       });
+    },
+  },
+  destroyed () {
+    if (this.map) {
+      this.map.destroy();
     }
-  }
+  },
 }
 </script>
 <style lang="scss" scoped>
@@ -337,6 +474,19 @@ export default {
   #mapBox{
     .vl_icon_control_01, .vl_icon_control_30{
       transition: none!important;
+    }
+  }
+  .vl_map_hover_main{
+    li{
+      display: flex;
+      > span{
+        width: auto;
+        text-align: left;
+        &:nth-child(2){
+          flex: 1;
+        }
+      }
+     
     }
   }
 }

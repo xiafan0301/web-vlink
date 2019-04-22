@@ -111,7 +111,7 @@
 <script>
 import {testData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
-import {MapGETmonitorList} from '../../api/api.js';
+import {MapGETmonitorList} from '../../api/api.map.js';
 export default {
   data () {
     return {

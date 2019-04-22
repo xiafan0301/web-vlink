@@ -25,13 +25,14 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="release('addForm')">发布</el-button>
+        <el-button type="primary" @click="addMsgNote('addForm')">发布</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
+import {addMsgNote} from '@/views/index/api/api.message.js';
 export default {
   data () {
     return {
@@ -47,6 +48,7 @@ export default {
           {required: true, message: '请输入消息内容', trigger: 'blur'}
         ]
       },
+      loadingBtn: false,
     }
   },
   mounted () {
@@ -56,11 +58,24 @@ export default {
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
-    // 确定发布
-    release (formName) {
+    // 新增系统消息
+    addMsgNote (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log('通过验证')
+          const data = {
+            messageType: 1,
+            title: this.addForm.title,
+            details: this.addForm.content
+          }
+          addMsgNote(data).then(res => {
+            if (res && res.data) {
+              this.$message.success('发布成功');
+              this.$emit('getMsgNoteList');
+            }
+          }).finally(() => {
+            this.loadingBtn = false;
+          })
         } else {
           return false;
         }

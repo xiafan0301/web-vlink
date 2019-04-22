@@ -19,16 +19,17 @@
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" id="tipinput" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
+                  <el-input type="text" id="address" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
-                <el-form-item label="事件情况:" prop="eventDetail" label-width="85px">
+                <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
+                  <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <el-form-item  label-width="85px" class="img-form-item">
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
-                    accept=".png,.jpg,.jpeg"
+                    accept=".png,.jpg,.jpeg,.mp4"
                     :limit='9'
                     :before-upload='handleBeforeUpload'
                     :on-remove="handleRemove"
@@ -107,25 +108,45 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
-      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">保存</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddHandleLoading" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addEventForm')">保存</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <BigImg></BigImg>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
-import BigImg from './components/bigImg.vue';
-import { addEvent, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
+import BigImg from '@/components/common/bigImg.vue';
+import { addEvent } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   components: { BigImg },
   data () {
     return {
+      isAddHandleLoading: false,
+      isAddLoading: false,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       isImgNumber: false, // 是否显示图片超过最大数提示
+      backDialog: false, // 返回提示弹出框
       pickerOptions0: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
@@ -135,16 +156,16 @@ export default {
         eventSource: 17,
         eventFlag: true,
         mutualFlag: false,
-        reporterPhone: null, // 报案人  手机号码
+        reporterPhone: '', // 报案人  手机号码
         reportTime: '', // 上报时间
-        eventAddress: null, // 事发地点
-        eventDetail: null, // 事件情况
-        eventType: null, // 事件类型
-        eventLevel: null, // 事件等级
-        casualties: null, // 伤亡人员
-        longitude: null, // 经度
-        latitude: null, // 纬度
-        dealOrgId: null, // 处理单位
+        eventAddress: '', // 事发地点
+        eventDetail: '', // 事件情况
+        eventType: '', // 事件类型
+        eventLevel: '', // 事件等级
+        casualties: '', // 伤亡人员
+        longitude: '', // 经度
+        latitude: '', // 纬度
+        dealOrgId: '', // 处理单位
         radius: -1, // 是否推送
         attachmentList: [], // 图片文件
       },
@@ -187,6 +208,7 @@ export default {
     this.getEventTypeList();
   },
   mounted () {
+    this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
     this.initMap();
   },
   methods: {
@@ -303,11 +325,13 @@ export default {
     },
     // 事件地址change
     changeAddress () {
+      console.log('aaa')
       let _this = this;
       let autoInput = new window.AMap.Autocomplete({
         input: 'address'
       })
       window.AMap.event.addListener(autoInput, 'select', function (e) {
+        console.log('e', e)
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
@@ -348,6 +372,7 @@ export default {
     handleRemove () {},
     // 图片上传成功
     handleSuccess (res) {
+      console.log('res', res)
       const data = {
         contentUid: 0,
         fileType: dataList.imgId,
@@ -367,68 +392,148 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          console.log(this.addEventForm)
-          this.handleFormData();
+          this.isAddLoading = true;
+          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
                 this.$message({
                   type: 'success',
-                  message: '添加成功',
+                  message: '保存成功',
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_manage'});
+                this.isAddLoading = false;
               } else {
                 this.$message({
                   type: 'error',
-                  message: '添加失败',
+                  message: '保存失败',
                   customClass: 'request_tip'
                 })
+                this.isAddLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },
     // 返回
     back () {
+      const data = JSON.stringify(this.addEventForm);
+      if (this.dataStr === data) {
+        this.$router.back(-1);  
+      } else {
+        this.backDialog = true;
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
       this.$router.back(-1);
     },
     // 保存并处理
     skipHandlePage (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
+          this.isAddHandleLoading = true;
+          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
+          addEvent(this.addEventForm)
+            .then(res => {
+              if (res) {
+                // this.$message({
+                //   type: 'success',
+                //   message: '添加成功',
+                //   customClass: 'request_tip'
+                // })
+                this.isAddHandleLoading = false;
+                this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '保存失败',
+                  customClass: 'request_tip'
+                })
+                this.isAddHandleLoading = false;
+              }
+            })
+            .catch(() => {this.isAddHandleLoading = false;})
+          // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },
     // 处理要提交的数据
-    handleFormData () {
-      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-      if (this.addEventForm.casualties === '无') {
-        this.addEventForm.casualties = 0;
-      } else if (this.addEventForm.casualties === '不确定') {
-        this.addEventForm.casualties = -1;
-      } else if (this.addEventForm.casualties === '有') {
-        if (!reg.test(this.dieNumber)) {
-          this.isDieError = true;
-          this.dieTip = '死亡人数只能为正整数';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        if (parseInt(this.dieNumber) > 9999) {
-          this.isDieError = true;
-          this.dieTip = '可输入的最大死亡人数为9999';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        this.addEventForm.casualties = this.dieNumber;
-      }
-    }
+    // handleFormData () {
+    //   let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+    //   if (this.addEventForm.casualties === '无') {
+    //     this.addEventForm.casualties = 0;
+    //   } else if (this.addEventForm.casualties === '不确定') {
+    //     this.addEventForm.casualties = -1;
+    //   } else if (this.addEventForm.casualties === '有') {
+    //     if (!reg.test(this.dieNumber)) {
+    //       this.isDieError = true;
+    //       this.dieTip = '死亡人数只能为正整数';
+    //       return false;
+    //     } else {
+    //       this.isDieError = false;
+    //       this.dieTip = '';
+    //     }
+    //     if (parseInt(this.dieNumber) > 9999) {
+    //       this.isDieError = true;
+    //       this.dieTip = '可输入的最大死亡人数为9999';
+    //       return false;
+    //     } else {
+    //       this.isDieError = false;
+    //       this.dieTip = '';
+    //     }
+    //     this.addEventForm.casualties = this.dieNumber;
+    //   }
+    // }
   }
 }
 </script>
@@ -481,6 +586,14 @@ export default {
                 color: #666;
                 z-index: 1;
               }
+            }
+          }
+          .limit_parent {
+            position: relative;
+            .limit_number {
+              position: absolute;
+              left: -70px;
+              top: 25px;
             }
           }
         }

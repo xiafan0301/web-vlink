@@ -15,13 +15,14 @@
             <el-form-item label="接收者:" label-width="100px" prop="reportUser" class="report_user">
               <el-select
                 style="width: 100%;"
-                v-model="value9"
+                v-model="reportForm.reportUser"
                 multiple
                 filterable
                 remote
                 allow-create
                 reserve-keyword
-                placeholder="请输入关键词"
+                :multiple-limit="50"
+                placeholder="请输入或选择接收者"
                 :remote-method="remoteMethod"
                 :loading="loading">
                 <el-option
@@ -64,14 +65,13 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
       options4: [],
-      value9: [],
       list: [],
       loading: false,
       states: ["Alabama", "Alaska", "Arizona",
@@ -98,7 +98,7 @@ export default {
       isMatchUser: false, // 输入接收者是否有匹配
       dialogVisible: false, // 提示弹出框
       reportForm: {
-        reportUser: null, // 接收者
+        reportUser: [], // 接收者
         explain: null // 情况说明
       },
       rules: {
@@ -120,50 +120,14 @@ export default {
         { userName: '李敏' },
       ],
       reportUserList: [], // 所有的接收者
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
     }
   },
-  // watch: {
-  //   'reportForm.reportUser': function () {
-  //     if (this.reportForm.reportUser) {
-  //       let reportUser = this.reportForm.reportUser;
-  //       $('.hidden_box').text(reportUser);
-  //       let width = $('.hidden_box').width();
-  //       $('.add_text').css('width', width + 'px');
-  //     }
-  //   }
-  // },
   mounted () {
     this.list = this.states.map(item => {
       return { value: item, label: item };
     });
+    this.getDetail();
   },
   methods: {
     remoteMethod(query) {
@@ -182,7 +146,7 @@ export default {
     },
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -195,36 +159,12 @@ export default {
     submitData () {
       this.dialogVisible = true;
     },
-    // 获取选中的用户姓名, 并添加到输入框中
-    getUserName (name) {
-      if (name) {
-        this.reportUserList.push(name);
-        this.reportForm.reportUser = null;
-        this.isMatchUser = false;
-      }
-    },
-    // 删除已选的接收者
-    closeUser (index) {
-      this.reportUserList.splice(index, 1);
-    },
-    // 输入框选择change
-    selectUser () {
-      if (this.reportForm.reportUser) {
-        let reportUser = this.reportForm.reportUser;
-        $('.hidden_box').text(reportUser); // 
-        let width = $('.hidden_box').width();
-        $('.add_text').css('width', width + 'px'); // 设置输入框的宽度
-        this.isMatchUser = true;
-      }
-    },
     // 返回
     back () {
       this.$router.back(-1);
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
       this.openBigImg(index, this.basicInfo.imgList);
     },
     // 关闭图片放大

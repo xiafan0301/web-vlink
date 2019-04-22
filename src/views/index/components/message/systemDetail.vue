@@ -7,26 +7,36 @@
         <el-breadcrumb-item>查看详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="system_det_box">
-      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">这是一个消息标题，文字限制20字</span></div>
-      <div><span class="vl_f_666">消息内容：</span><span class="vl_f_333">一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十</span></div>
+    <div class="system_det_box" v-if="detail">
+      <div><span class="vl_f_666">消息标题：</span><span class="vl_f_333">{{detail.title}}</span></div>
+      <div><span class="vl_f_666">消息内容：</span><span class="vl_f_333">{{detail.details}}</span></div>
     </div>
   </div>
 </template>
 <script>
+import {getMsgNoteDetail} from '@/views/index/api/api.message.js';
 export default {
+  props: ['systemId'],
   data () {
     return {
-    
+      detail: null,
     }
   },
   mounted () {
-   
+    this.getMsgNoteDetail();
   },
   methods: {
     skip (pageType) {
       this.$emit('changePage', pageType)
-    }
+    },
+    // 获取系统消息详情
+    getMsgNoteDetail () {
+      getMsgNoteDetail(this.systemId).then(res => {
+        if (res && res.data) {
+          this.detail = res.data;
+        }
+      })
+    },
   }
 }
 </script>

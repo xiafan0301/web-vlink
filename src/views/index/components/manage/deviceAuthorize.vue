@@ -221,7 +221,7 @@
   </div>
 </template>
 <script>
-import { getUserList, getDepartmentList, getUserMember, getTempDeviceList, stopOneTerminate } from '@/views/index/api/api.js';
+import { getUserList, getDepartmentList, getUserMember, getTempDeviceList, stopOneTerminate } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {

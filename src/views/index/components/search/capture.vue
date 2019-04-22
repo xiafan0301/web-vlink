@@ -214,7 +214,8 @@
 let AMap = window.AMap;
 import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
+import {ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
+import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
 export default {
   data() {
     return {

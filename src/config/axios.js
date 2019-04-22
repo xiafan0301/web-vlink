@@ -1,45 +1,27 @@
 /*
  * axios定义
  * */
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 import axios from 'axios';
 import ElementUI from 'element-ui';
 // import store from '@/store/store.js';
 import { ajaxCtx } from '@/config/config.js';
+import store from '@/store/store.js'
 // axios支持跨域cookie
-// axios.defaults.withCredentials = true;er
+// axios.defaults.withCredentials = true;
 // create an axios instance
-const userInfo = localStorage.getItem('as_vlink_user_info');
-console.log('userInfi', userInfo)
-let service;
-if (userInfo) {
-  console.log('进来了')
-  service = axios.create({
-    baseURL: ajaxCtx.base, // api的base_url
-    timeout: 30000, // request timeout
-    withCredentials: true,
-    headers: {
-      'Auth-Session-Id': JSON.parse(userInfo).sessionId
-    },
-  })
-} else {
-  service = axios.create({
-    baseURL: ajaxCtx.base, // api的base_url
-    timeout: 30000, // request timeout
-    withCredentials: true
-  })
-}
-// const service = axios.create({
-// 	baseURL: ajaxCtx.base, // api的base_url
-// 	timeout: 30000, // request timeout
-//   withCredentials: true,
-//   headers: {
-//     'Auth-Session-Id': userInfo.sessionId && userInfo.sessionId
-//   },
-// })
+let service = axios.create({
+  baseURL: ajaxCtx.base, // api的base_url
+  timeout: 30000, // request timeout
+  withCredentials: true
+})
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
-  // console.log('axios request config', config);
+  // 用户信息
+  const userInfo = localStorage.getItem('as_vlink_user_info');
+  if (userInfo) {
+    config.headers['Auth-Session-Id'] = JSON.parse(userInfo).sessionId;
+  }
   // 序列化的时候空格变+的问题
   // config.url = config.url.replace(/\+/g, '%20');
   // 模式，微服务
@@ -65,6 +47,12 @@ service.interceptors.response.use(function (response) {
     let _data = response.data;
     if (_data.code === '00000000') {
       return _data;
+    } else if (_data.code === '10060002') {
+      store.commit('setLoginToken', {
+        loginToken: false
+      });
+      // 未登录
+      // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
       let msg = '访问出错';
       if (_data.viewMsg) {

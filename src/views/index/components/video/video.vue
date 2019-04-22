@@ -12,14 +12,14 @@
         <router-link :to="{name: 'video_query'}">智能查看</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'video_signList'}">标记列表</router-link>
+        <router-link :to="{name: 'video_signList'}">查看标记</router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'video_videotape'}">录像记录</router-link>
       </li>
       <li>
         <router-link :to="{name: 'video_download'}">下载记录</router-link>
       </li>
-      <!-- <li>
-        <router-link :to="{name: 'video_setting'}">视频设置</router-link>
-      </li> -->
       <li>
         <router-link :to="{name: 'video_statistics'}">设备概览</router-link>
       </li>
@@ -50,6 +50,11 @@ export default {
     cursor: pointer;
     &.vl_icon_sed {
       cursor: default;
+    }
+  }
+  &.vid_show_type_dis {
+    > li {
+      cursor: default !important;
     }
   }
 }
@@ -112,12 +117,13 @@ export default {
         position: relative;
         padding-top: 48px;
         height: 100%;
+        overflow: auto;
         animation: fadeIn .4s ease-out both;
         > .show_search {
           position: absolute; top: 48px; left: 0;
           width: 100%;  height: 66px;
           padding-top: 15px;
-          > div {
+          /* > div {
             position: relative;
             width: 100%; height: 36px;
             padding: 2px 15px;
@@ -128,54 +134,62 @@ export default {
               cursor: pointer;
               font-size: 14px;
             }
-          }
+          } */
           > .show_search_se { margin-bottom: 10px; }
           > .show_search_ti {
             position: relative;
             padding-left: 36px;
             margin-bottom: 10px;
             > span {
-              position: absolute; top: 2px; left: 17px;
+              position: absolute; top: 0px; left: 17px;
               width: 18px;
               color: #666; font-size: 12px;
             }
           }
         }
         > .show_list {
-          padding-top: 60px;
+          padding-top: 62px;
           height: 100%;
           > .show_list_c {
             height: 100%;
             overflow: auto;
+            padding-bottom: 10px;
           }
         }
-        > .show_his_btn {
-          height: 60px; line-height: 60px;
-          color: #666;
-          text-align: center;
-          cursor: pointer;
-          &:hover { color: #186DFB; }
-        }
-        > .show_his {
-          > li {
-            position: relative;
-            padding-right: 40px;
-            padding: 15px 40px 15px 20px;
-            border-bottom: 1px dotted #ddd;
-            &:hover { 
-              color: #186DFB;
-              background-color: #E0F3FF;
-            }
-            > h3 {
-              cursor: pointer;
-              height: 20px; line-height: 20px;
-            }
-            > p { }
-            > i {
-              position: absolute; top: 50%; right: 25px;
-              font-size: 16px;
-              margin: -8px;
-              cursor: pointer;
+        > .show_his_c {
+          height: 100%;
+          overflow: auto;
+          > .show_his_btn {
+            height: 40px; line-height: 40px;
+            color: #999;
+            text-align: center;
+            cursor: pointer;
+            &:hover { color: #186DFB; }
+          }
+          > .show_his_empty {
+            padding: 20px 0;
+            text-align: center;
+            color: #999;
+          }
+          > .show_his {
+            > li {
+              position: relative;
+              padding-right: 40px;
+              padding: 10px 40px 10px 20px;
+              border-bottom: 1px dotted #ddd;
+              cursor: default;
+              &:hover { 
+                color: #186DFB;
+                background-color: #E0F3FF;
+              }
+              > h3 { height: 20px; line-height: 20px; }
+              > p { color: #999; height: 20px; line-height: 20px; }
+              > i {
+                position: absolute; top: 50%; right: 25px;
+                font-size: 16px;
+                margin: -8px;
+                cursor: pointer;
+              }
             }
           }
         }
@@ -217,14 +231,14 @@ export default {
                   position: absolute; top: 5px; right: 15px;
                 }
                 &:hover { color: #186DFB; }
-                &.tree_sli_empty {
-                  color: #999 !important;
-                  cursor: default !important;
-                }
                 &.tree_li_dis {
                   color: #999 !important;
                   cursor: default !important;
                 }
+              }
+              &.tree_sli_empty {
+                color: #999;
+                padding-left: 35px;
               }
             }
           }
@@ -266,6 +280,7 @@ export default {
       width: 100%; height: 100%;
       overflow: hidden;
       background-color: #000;
+      box-shadow: 0 0 5px #f1f1f1;
       > video {
         position: absolute;
         display: block;
@@ -281,10 +296,10 @@ export default {
   &.vid_list_st1 > li {
     width: 100%; height: 100%;
   }
-  &.vid_list_st2 > li {
+  &.vid_list_st4 > li {
     width: 50%; height: 50%;
   }
-  &.vid_list_st3 > li {
+  &.vid_list_st5 > li {
     width: 33.33%; height: 40%;
     &:nth-child(1) {
       width: 50%; height: 60%;
@@ -293,10 +308,10 @@ export default {
       width: 50%; height: 60%;
     }
   }
-  &.vid_list_st4 > li {
+  &.vid_list_st9 > li {
     width: 33.33%; height: 33.33%;
   }
-  &.vid_list_st5 > li {
+  &.vid_list_st16 > li {
     width: 25%; height: 25%;
   }
 }

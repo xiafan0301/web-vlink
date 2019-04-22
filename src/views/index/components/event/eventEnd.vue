@@ -12,7 +12,9 @@
         <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="end-body">
           <el-form class="end-content" :model="endForm">
-            <el-form-item label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入10000个字', trigger: 'blur'}]">
+            <el-form-item class="limit_parent" label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入1000个字', trigger: 'blur'}]">
+              <!-- <p class="limit_number">(<span style="color: red">10000</span>/10000)</p> -->
+              <!-- <p class="limit_number">(<span style="color: red">{{endForm.eventSummary && endForm.eventSummary.length || 0}}</span>/10000)</p> -->
               <el-input type="textarea" rows="7" style="width: 50%;" v-model="endForm.eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
             </el-form-item> 
           </el-form>
@@ -25,12 +27,12 @@
               :on-exceed="handleImgNumber"
               :disabled="isImgDisabled"
               :title="[isImgDisabled === true ? '禁用' : '']"
-              :show-file-list='false'
+              :show-file-list='true'
               >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
             </el-upload>
-            <div class="img_list">
+            <!-- <div class="img_list">
               <div v-for="(item, index) in imgList2" :key="'item' + index">
                 <img
                   :src="item.path"
@@ -45,7 +47,7 @@
                 <span>{{item.cname}}</span>
                 <i class='el-icon-close' @click="deleteFile(index, item)"></i>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -59,8 +61,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, endEvent } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, endEvent } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -242,19 +244,15 @@ export default {
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       border-radius:4px;
       .end-content {
-        // width: 60%;
-        // display:flex;
         padding: 20px 20px 10px;
-        // > span {
-        //   color: #666666;
-        //   width: 90px;
-        //   margin-right: 10px;
-        //   text-align: right;
-        // }
-        // > div {
-        //   width: 100%;
-        //   margin-top: -10px;
-        // }
+        .limit_parent {
+          position: relative;
+          .limit_number {
+            position: absolute;
+            left: -70px;
+            top: 25px;
+          }
+        }
       }
       .error_tip {
         margin-left: 110px;

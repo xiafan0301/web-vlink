@@ -50,7 +50,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="phoneOrNumber">
           <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
@@ -150,7 +150,7 @@
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="onPageChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -162,7 +162,9 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
+import { getEventList } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -283,8 +285,7 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      console.log(obj);
-      this.$router.push({path: '/control/create'});
+      this.$router.push({path: '/control/create', query: {eventId: obj.eventId}});
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();

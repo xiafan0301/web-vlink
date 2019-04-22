@@ -27,9 +27,6 @@
                       :key="index"
                       @click="handleCopyGroup(item.uid)"
                     >{{item.groupName}}</li>
-                    <!-- <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li>
-                    <li>分组命名文字限制十字</li> -->
                   </ul>
                 </vue-scroll>
               </div>
@@ -200,7 +197,7 @@
         <div class="content_body">
           <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
-          <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
               <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
@@ -267,7 +264,8 @@
 </template>
 <script>
 import { validateName } from '@/utils/validator.js';
-import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup, copyGroup, checkVelRename } from '@/views/index/api/api.js';
+import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup,
+  copyGroup, checkVelRename } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -436,13 +434,15 @@ export default {
                 customClass: 'request_tip'
               })
               this.editGroupDialog = false;
-            } else {
-              this.$message({
-                type: 'error',
-                message: '修改失败',
-                customClass: 'request_tip'
-              })
+              this.getVeGroupInfo(parseInt(this.groupId));
             }
+            //  else {
+            //   this.$message({
+            //     type: 'error',
+            //     message: '修改失败',
+            //     customClass: 'request_tip'
+            //   })
+            // }
           })
           .catch(() => {})
       }

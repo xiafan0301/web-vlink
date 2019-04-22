@@ -48,47 +48,52 @@
             <el-button type="primary" :loading="searchLoading" size="small" @click="searchSubmit">搜索</el-button>
           </div>
         </div>
-        <ul class="sign_content_list">
-          <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
-            <!-- 过期 -->
-            <div v-if="item.signFlag" class="content_list_dis">
-              <h3 :title="item.content" class="com_ellipsis">
-                <span>已过期</span>
-                {{item.content}}
-              </h3>
-              <p :title="item.deviceName" class="com_ellipsis">
-                <span class="vl_icon vl_icon_v11"></span>
-                {{item.deviceName}}
-              </p>
-              <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-              <i class="el-icon-delete"></i>
-            </div>
-            <!-- 播放中 -->
-            <div v-else-if="deviceIsPlaying(item)">
-              <h3 :title="item.content" class="com_ellipsis">
-                <span>播放中</span>
-                {{item.content}}
-              </h3>
-              <p :title="item.deviceName" class="com_ellipsis">
-                <span class="vl_icon vl_icon_v11"></span>
-                {{item.deviceName}}
-              </p>
-              <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-              <i class="el-icon-delete"></i>
-            </div>
-            <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
-              <h3 :title="item.content" class="com_ellipsis">
-                {{item.content}}
-              </h3>
-              <p :title="item.deviceName" class="com_ellipsis">
-                <span class="vl_icon vl_icon_v11"></span>
-                {{item.deviceName}}
-              </p>
-              <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-              <i class="el-icon-delete"></i>
-            </div>
-          </li>
-        </ul>
+        <div class="sign_content_list">
+          <ul v-if="signList && signList.length > 0">
+            <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
+              <!-- 过期 -->
+              <div v-if="item.signFlag" class="content_list_dis">
+                <h3 :title="item.content" class="com_ellipsis">
+                  <span>已过期</span>
+                  {{item.content}}
+                </h3>
+                <p :title="item.deviceName" class="com_ellipsis">
+                  <span class="vl_icon vl_icon_v11"></span>
+                  {{item.deviceName}}
+                </p>
+                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
+              </div>
+              <!-- 播放中 -->
+              <div v-else-if="deviceIsPlaying(item)">
+                <h3 :title="item.content" class="com_ellipsis">
+                  <span>播放中</span>
+                  {{item.content}}
+                </h3>
+                <p :title="item.deviceName" class="com_ellipsis">
+                  <span class="vl_icon vl_icon_v11"></span>
+                  {{item.deviceName}}
+                </p>
+                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
+                <i class="el-icon-delete" style="cursor: not-allowed;" title="播放中，无法删除"></i>
+              </div>
+              <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
+                <h3 :title="item.content" class="com_ellipsis">
+                  {{item.content}}
+                </h3>
+                <p :title="item.deviceName" class="com_ellipsis">
+                  <span class="vl_icon vl_icon_v11"></span>
+                  {{item.deviceName}}
+                </p>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
+              </div>
+            </li>
+          </ul>
+          <div class="sign_content_list_empty" v-else>
+            暂无
+          </div>
+        </div>
       </div>
     </div>
     <div class="vid_content">
@@ -96,7 +101,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="rtmpplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" :tipMsg="tipMsg"></div>
@@ -107,12 +112,12 @@
   </div>
 </template>
 <script>
-import { apiVideoList, apiVideoSignPeopleList, apiSignContentList } from "@/views/index/api/api.video.js";
+import { apiVideoList, apiVideoSignPeopleList, apiSignContentList, apiVideoSignDel } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
-import rtmpplayer from '@/components/common/rtmpplayer.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
 export default {
-  components: {videoEmpty, rtmpplayer},
+  components: {videoEmpty, flvplayer},
   data () {
     return {
       tipMsg: '暂无视频播放，在标记列表选择视频进行查看',
@@ -140,7 +145,7 @@ export default {
      * 关闭播放器
      * @param {string} sid 视频ID
      */
-    playerClose (iIndex, sid) {
+    playerClose (iIndex) {
       this.videoList.splice(iIndex, 1, {});
     },
     deviceIsPlaying (item) {
@@ -165,13 +170,12 @@ export default {
     },
     dragDrop (item, index) {
       if (this.dragActiveObj) {
-        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/jiankong';
-        console.log('deviceSip', deviceSip);
         this.videoList.splice(index, 1, {
+          type: 2, // 标记，暂定为回放
           title: this.dragActiveObj.deviceName,
+          startTime: this.dragActiveObj.signTime,
           video: Object.assign({}, this.dragActiveObj, {
-            uid: this.dragActiveObj.deviceUid,
-            deviceSip: deviceSip
+            uid: this.dragActiveObj.deviceUid
           })
         });
       }
@@ -201,7 +205,7 @@ export default {
         pageSize: 50
       }).then(res => {
         if (res && res.data) {
-          this.signList = res.data;
+          this.signList = res.data.list;
         }
         this.searchLoading = false;
       }).catch(error => {
@@ -225,6 +229,40 @@ export default {
         }
       }).catch(error => {
         console.log("apiSignContentList error：", error);
+      });
+    },
+    delSign (item) {
+      this.$msgbox({
+        title: '提示',
+        message: '确定删除该视频标记吗？',
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = '执行中...';
+            apiVideoSignDel(item.id).then(() => {
+              this.searchSubmit();
+              this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+              done();
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            }).catch(error => {
+              console.log("apiVideoSignDel error：", error);
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            });
+          } else {
+            done();
+          }
+        }
+      }).then(action => {
       });
     }
   }
@@ -281,60 +319,69 @@ export default {
 }
 .sign_content_list {
   height: 100%; padding-top: 240px;
-  > li {
-    padding: 10px 10px 10px 15px;
-    border-bottom: 1px dotted #ddd;
-    > div {
-      position: relative;
-      > .el-icon-delete {
-        position: absolute; top: 50%; right: 10px;
-        margin-top: -10px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      > h3 {
-        height: 24px; line-height: 24px;
-        margin-right: 20px;
-        > span {
-          display: inline-block;
-          font-style: normal; font-size: 12px; color: #186DFB;
-          border: 1px solid #186DFB;
-          line-height: normal;
-          padding: 0 2px;
-          border-radius: 2px;
-        }
-      }
-      > p {
-        position: relative;
-        height: 22px; line-height: 22px;
-        margin-right: 20px; padding-left: 20px;
-        color: #999; font-size: 12px;
-        > span {
-          position: absolute; top: 0px; left: 0;
-        }
-      }
+  > ul {
+    height: 100%;
+    overflow: auto;
+    > li {
+      padding: 10px 10px 10px 15px;
+      border-bottom: 1px dotted #ddd;
       > div {
-        color: #999; font-size: 12px;
-        overflow: hidden;
-        > span { float: right; padding-right: 10px; }
-      }
-      &.sigin_list_dis {
-        color: #999;
-        > p > i { border-color: #999; color: #999; }
-      }
-      &:hover {
-        color: #186DFB;
-      }
-      &.content_list_dis {
+        position: relative;
+        > .el-icon-delete {
+          position: absolute; top: 50%; right: 10px;
+          margin-top: -10px;
+          font-size: 16px;
+          cursor: pointer;
+        }
         > h3 {
-          color: #999;
+          height: 24px; line-height: 24px;
+          margin-right: 20px;
           > span {
+            display: inline-block;
+            font-style: normal; font-size: 12px; color: #186DFB;
+            border: 1px solid #186DFB;
+            line-height: normal;
+            padding: 0 2px;
+            border-radius: 2px;
+          }
+        }
+        > p {
+          position: relative;
+          height: 22px; line-height: 22px;
+          margin-right: 20px; padding-left: 20px;
+          color: #999; font-size: 12px;
+          > span {
+            position: absolute; top: 0px; left: 0;
+          }
+        }
+        > div {
+          color: #999; font-size: 12px;
+          overflow: hidden;
+          > span { float: right; padding-right: 10px; }
+        }
+        &.sigin_list_dis {
+          color: #999;
+          > p > i { border-color: #999; color: #999; }
+        }
+        &:hover {
+          color: #186DFB;
+        }
+        &.content_list_dis {
+          > h3 {
             color: #999;
-            border: 1px solid #999;
+            > span {
+              color: #999;
+              border: 1px solid #999;
+            }
           }
         }
       }
     }
   }
+}
+.sign_content_list_empty {
+  color: #999;
+  text-align: center;
+  padding: 20px 20px 0 0;
 }
 </style>

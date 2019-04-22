@@ -21,9 +21,41 @@
           </el-badge>
         </li>
         <li>
-          <el-badge :value="sums.events" class="item" :max="99">
-            <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
-          </el-badge>
+          <el-popover
+            ref="popover"
+            placement="bottom"
+            width="397"
+            trigger="click">
+            <div class="vl_hd_alarm" v-for="item in '123'" :key="item">
+              <div class="hd_alarm_t">
+                <div>
+                  <h1>布控人员</h1>
+                  <p>摄像头0011</p>
+                  <p>11:12</p>
+                </div>
+                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+                <div>
+                  <span>70</span>
+                  <p>匹配度</p>
+                  <el-progress :percentage="70" color="#0C70F8"></el-progress>
+                </div>
+                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+              </div>
+              <div class="hd_alarm_b">
+                <div class="alarm_b_list">李某某</div>
+                <div class="alarm_b_list">女</div>
+                <div class="alarm_b_list">汉族</div>
+                <div class="alarm_b_list">430903199009256265</div>
+                <div class="alarm_b_list">失联事件</div>
+              </div>
+            </div>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
+            </div>
+            <el-badge :value="sums.events" class="item" :max="99" slot="reference">
+              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
+            </el-badge>
+          </el-popover>
         </li>
       </ul>
     </div>
@@ -123,7 +155,7 @@
   </div>
 </template>
 <script>
-import { logout, updatePwd } from '@/views/index/api/api.js';
+import { logout, updatePwd } from '@/views/index/api/api.user.js';
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
@@ -347,3 +379,70 @@ export default {
   }
 }
 </style>
+<style lang="scss">
+.vl_hd_alarm{
+  padding: 10px;
+  border-bottom: 1px solid #F2F2F2;
+  .hd_alarm_t{
+    display: flex;
+    justify-content: space-between;
+    > div{
+      flex: 0 0 25%;
+    }
+    > div:nth-child(1){
+      > div{
+        margin-bottom: 10px;
+        color: #333333;
+        font-size: 16px;
+      }
+      > p{
+        font-size: 12px;
+        color: #999999;
+      }
+    }
+    > div:nth-child(3){
+      text-align: center;
+      padding-top: 15px;
+      > span{
+        color: #0C70F8;
+        font-size: 24px;
+        font-weight:bold;
+      }
+      > p{
+        color: #333333;
+        font-size: 12px;
+      }
+      .el-progress{
+        text-align: left;
+        .el-progress-bar{
+          padding-right: 5px!important;
+          padding-left: 5px;
+        }
+        .el-progress__text{
+          display: none;
+        }
+      }
+    }
+    > div:nth-child(2), > div:nth-child(4){
+      text-align: center;
+      > img{
+        width: 70px;
+      }
+    }
+  }
+  .hd_alarm_b{
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    > div{
+      padding: 5px;
+      font-size: 12px;
+      background:rgba(250,250,250,1);
+      border:1px solid rgba(242,242,242,1);
+      border-radius:3px;
+      color: #666;
+    }
+  }
+}
+</style>
+

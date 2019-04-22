@@ -179,9 +179,11 @@
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import { getQuantitativeTrend, getTypeAnalysis, getRankAnalysis, getGeneralcondition,
-getHotLocation, getDepartmentList, getSurveillance } from '@/views/index/api/api.js';
+getHotLocation, getSurveillance } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
+
 export default {
   data () {
     return {
@@ -245,7 +247,7 @@ export default {
       chart3Data: [],
       chart4Data: [],
       colors: [
-        ['#0D9DF4', '#6262FF', '#8949F3', '#115BFA', '#0C70F8'],
+        ['#115BFA', '#0C70F8', '#0D9DF4', '#6262FF', '#8949F3'],
         [
           [17, 91, 250],
           [12, 112, 248],
@@ -285,6 +287,20 @@ export default {
     this.intitReportSize();
     this.searchData();
     this.initMap();
+  },
+  destroyed () {
+    if (this.charts.chart1) {
+      this.charts.chart1.destroyed();
+    }
+    if (this.charts.chart2) {
+      this.charts.chart2.destroyed();
+    }
+    if (this.charts.chart3) {
+      this.charts.chart3.destroyed();
+    }
+    if (this.charts.chart4) {
+      this.charts.chart4.destroyed();
+    }
   },
   methods: {
     // 地图
@@ -413,6 +429,7 @@ export default {
         },
         offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
         offsetX: -11 * 12,
+        hoverable: false,
         // itemGap: 20, // 图例项之间的间距
         useHtml: true,
         containerTpl: '<div class="g2-legend e_stat_tb_ld1 as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
@@ -471,36 +488,6 @@ export default {
           height: G2.DomUtil.getHeight(temp),
         });
       }
-      const Shape = G2.Shape;
-      /*  圆柱（圆角柱状图） */
-      Shape.registerShape('interval', 'cylinder', {
-        draw (cfg, group) {
-          let points = cfg.points;
-          // const points = this.parsePoints(cfg.points); // 将0-1空间的坐标转换为画布坐标
-          let path = [];
-          path.push(['M', points[0].x, points[0].y]);
-          path.push(['L', points[1].x, points[1].y]);
-          path.push(['L', points[2].x, points[2].y]);
-          path.push(['L', points[3].x, points[3].y]);
-          path.push('Z');
-          path = this.parsePath(path); // 将 0 - 1 转化为画布坐标
-          let iRadius = (path[2][1] - path[1][1]) / 2;
-          let iY = (path[0][2] - path[1][2]) / 2;
-          if (iRadius > iY) { iRadius = iY }
-          return group.addShape('rect', {
-            attrs: {
-              x: path[1][1], // 矩形起始点为左上角
-              y: path[1][2],
-              width: path[2][1] - path[1][1],
-              height: path[0][2] - path[1][2],
-              fill: cfg.color,
-              radius: iRadius
-            }
-          });
-        }
-      });
-      // let _this = this;
-      // let temp = document.getElementById('stat_2');
       chart.source(data);
       chart.scale('sales', {
         range: [ 0, 1 ],
@@ -513,7 +500,7 @@ export default {
       chart.interval()
         .position('year*sales')
         .size(20)
-        .color('year', [ 'l(90) 0:#0C70F8 1:#0D9DF4' ])
+        .color('year', ['l(90) 0:#0D9DF4 1:#0C70F8'])
         .shape('cylinder');
       chart.render();
       this.charts.chart2 = chart;
@@ -592,6 +579,7 @@ export default {
         },
         offsetY: 0, // -G2.DomUtil.getHeight(temp005) / 2 + 4 * intRem,
         offsetX: -11 * 11,
+        hoverable: false,
         // itemGap: 20, // 图例项之间的间距
         useHtml: true,
         containerTpl: '<div class="g2-legend e_stat_tb_ld4 as-trans50-t" style="position:absolute;top:20px;right:30px;width:auto;left: auto;">' +

@@ -103,7 +103,7 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api.judge.js';
 export default {
   data() {
     return {

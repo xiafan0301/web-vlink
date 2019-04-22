@@ -263,7 +263,7 @@
 <script>
 // import { checkUserName } from '@/utils/validator.js';
 import { getUserGroups, createUserGroups, updateUserGroups, delUserGroup, getUserList, getRoleList,
- addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles, judgeUserGroup } from '@/views/index/api/api.js';
+ addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles, judgeUserGroup } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -343,7 +343,7 @@ export default {
     searchRole () {
       let reg = new RegExp(this.userRoleName);
       let arr = [];
-      this.searchSelectRoles.map((item, index) => {
+      this.searchSelectRoles.map((item) => {
         let name = item.roleName;
         if (name.match(reg)) {
           arr.push(item);
@@ -362,7 +362,7 @@ export default {
     searchMember () {
       let reg = new RegExp(this.memberName);
       let arr = [];
-      this.searchSelectMembers.map((item, index) => {
+      this.searchSelectMembers.map((item) => {
         let name = item.userName;
         if (name.match(reg)) {
           arr.push(item);
@@ -491,8 +491,8 @@ export default {
     showAdminMember (obj) {
       console.log(obj);
       this.currentMembers = [];
-      let searchSelectMembers = [];
-      let selectMembers = [];
+      this.searchSelectMembers = [];
+      this.selectMembers = [];
       this.adminMemberDialog = true;
       this.currentGroupId = obj.uid;
       let allMembers; // 所有的用户
@@ -874,6 +874,9 @@ export default {
           padding-right: 20px;
           height: 25px;
         }
+        /deep/ .el-checkbox:last-child {
+          margin-right: 30px;
+        }
         /deep/ .el-checkbox+.el-checkbox {
           margin-left: 0;
         }
@@ -930,3 +933,4 @@ export default {
   }
 }
 </style>
+

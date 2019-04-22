@@ -1,62 +1,88 @@
 <template>
   <div class="vi_stat">
-    <ul>
-      <li>
-        <div class="vi_stat_li vi_stat_lih1 clearfix">
-          <!-- 设备只能化 -->
-          <div class="vi_stat_lis vi_stat_lil">
-            <div class="stat_bd_style" id="charContainer11">
-            </div>
-          </div>
-          <!-- 设备总数 -->
-          <div class="vi_stat_lis vi_stat_lir">
-            <div class="stat_bd_style">
-              <ul class="stat_sbzs">
-                <li>
-                  <div>
-                    <div class="stat_sbzs_t">
-                      <div>
-                        <h2>{{(videoSum.gq + videoSum.bq) | fmTenThousand}}</h2>
-                        <p>设备总数</p>
-                      </div>
-                      <i></i>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="stat_sbzs_li">
-                    <ul>
-                      <li></li>
-                      <li :style="{'height': setChar12Heigt(videoSum.gq) + 'px'}"><span>{{videoSum.gq | fnPercent(videoSum.gq + videoSum.bq)}}</span></li>
-                      <li></li>
-                    </ul>
-                    <div>
-                      <div>高清</div>
-                      <p>{{videoSum.gq | fmTenThousand}}</p>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="stat_sbzs_li">
-                    <ul>
-                      <li class="stat_sbzs_sf2"></li>
-                      <li :style="{'height': setChar12Heigt(videoSum.bq) + 'px'}" class="stat_sbzs_sf2"><span>{{videoSum.bq | fnPercent(videoSum.gq + videoSum.bq)}}</span></li>
-                      <li class="stat_sbzs_sf2"></li>
-                    </ul>
-                    <div>
-                      <div>标清</div>
-                      <p>{{videoSum.bq | fmTenThousand}}</p>
-                    </div>
-                  </div>
-                </li>
-              </ul>
+    <div class="vi_stat_ul vi_stat_ul1">
+      <div>
+        <!-- 设备智能化 -->
+        <div class="stat_bd_style">
+          <div class="vi_stat_ul_t">设备智能化</div>
+          <div class="vi_stat_ul_c">
+            <div class="stat_bd_size" id="charContainer11">
             </div>
           </div>
         </div>
-      </li>
+      </div>
+      <div>
+        <!-- 设备总数 -->
+        <div class="stat_bd_style">
+          <div class="vi_stat_ul_t">设备总数</div>
+          <div class="vi_stat_ul_c">
+            <ul class="stat_sbzs">
+              <li>
+                <div>
+                  <div class="stat_sbzs_t">
+                    <div>
+                      <h2>{{(videoSum.gq + videoSum.bq) | fmTenThousand}}</h2>
+                      <p>设备总数</p>
+                    </div>
+                    <i></i>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="stat_sbzs_li">
+                  <ul>
+                    <li></li>
+                    <li :style="{'height': setChar12Heigt(videoSum.gq) + 'px'}"><span>{{videoSum.gq | fnPercent(videoSum.gq + videoSum.bq)}}</span></li>
+                    <li></li>
+                  </ul>
+                  <div>
+                    <div>高清</div>
+                    <p>{{videoSum.gq | fmTenThousand}}</p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="stat_sbzs_li">
+                  <ul>
+                    <li class="stat_sbzs_sf2"></li>
+                    <li :style="{'height': setChar12Heigt(videoSum.bq) + 'px'}" class="stat_sbzs_sf2"><span>{{videoSum.bq | fnPercent(videoSum.gq + videoSum.bq)}}</span></li>
+                    <li class="stat_sbzs_sf2"></li>
+                  </ul>
+                  <div>
+                    <div>标清</div>
+                    <p>{{videoSum.bq | fmTenThousand}}</p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div>
+        <!-- 设备类型 -->
+        <div class="stat_bd_style">
+          <div class="vi_stat_ul_t">设备类型</div>
+          <div class="vi_stat_ul_c">
+            <div style="width: 100%; height: 100%; position: relative;">
+              <div class="stat_bd_size" id="charContainer13">
+              </div>
+              <div class="stat_13_legend">
+                <div><span>{{typeTotal}}</span>设备（个）</div>
+                <ul>
+                  <li v-for="(item, index) in typeData" :key="'wf_' + index">
+                    <i :style="typeIconColorFn(index)"></i>{{item.amount}}<span>{{item.item}}(个)</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul>
       <!-- 运行状况（实时） -->
       <li>
-        <div class="vi_stat_li vi_stat_lih1 stat_bd_style">
+        <div class="vi_stat_li vi_stat_lih2 stat_bd_style">
           <div class="stat_li_t stat_li_t2">
             <h2>运行状况（实时）</h2>
           </div>
@@ -193,14 +219,19 @@
 <script>
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import { apiDeviceTotalList } from "@/views/index/api/api.base.js";
 export default {
   data () {
     return {
       contentHeight1: 200,
       videoSum: {
-        gq: 123310,
-        bq: 30420
+        gq: 0,
+        bq: 0
       },
+      typeData: [],
+      typeTotal: 0,
+      typeColors: ['#0FB1FF', '#088BFD', '#6363FE', '#8949F3'],
+
       runingStates: [0, 0, 0],
       searchForm3: {
         area: '',
@@ -220,6 +251,7 @@ export default {
       // 图标集合
       charts: {
         chart11: null,
+        chart13: null,
         chart3: null,
         chart4: null,
         chart5: null,
@@ -228,15 +260,27 @@ export default {
     }
   },
   mounted () {
+    this.getDeviceTotalList();
+
     this.initContentSize();
-    this.getChar11Data();
-    this.getChar2Data();
+    // this.getChar11Data(); // 设备智能化
+    // this.getChar13Data(); // 设备类型
+    this.getChar2Data(); // 运行状况
     this.searchForm3Submit();
     this.searchForm4Submit();
     this.searchForm5Submit();
     this.searchForm6Submit();
   },
   methods: {
+    typeIconColorFn (index) {
+      let _i = index;
+      if (index > (this.typeColors.length - 1)) {
+        _i = index % this.typeColors.length;
+      }
+      return {
+        'background-color': this.typeColors.concat([]).reverse()[_i]
+      }
+    },
     // 
     initContentSize () {
       let itemW = ($(window).width() - 200 - 20 * 3) / 2;
@@ -244,6 +288,33 @@ export default {
       this.contentHeight1 = _contentHeight1;
       $('.vi_stat_lih1').height(_contentHeight1);
       $('.vi_stat_lih2').height(itemW * 468 / 830);
+    },
+    
+    getDeviceTotalList () {
+      apiDeviceTotalList().then(res => {
+        if (res && res.data) {
+          let d = res.data;
+          // 设备总数
+          this.videoSum.gq = d.deviceHDCount;
+          this.videoSum.bq = d.deviceSDCount;
+          // 设备智能化
+          this.getChar11Data([
+            { item: '人脸识别', count: d.deviceFaceRecognitionCount },
+            { item: '结构分析', count: d.deviceStructuralAnalysisCount },
+            { item: '智能监控', count: d.deviceCyberMonitorCount },
+            { item: '车辆识别', count: d.deviceVehicleRecognitionCount }
+          ], d.deviceTotalCount);
+          // 设备类型
+          this.getChar13Data([
+            { item: '其它', amount: d.deviceOtherCount},
+            { item: '半球机', amount: d.deviceDomeCameraCount},
+            { item: '枪机', amount: d.deviceGunCount},
+            { item: '球机', amount: d.deviceDomeCount}
+          ], d.deviceTotalCount);
+        }
+      }).catch(error => {
+        console.log("apiDeviceTotalList error：", error);
+      });
     },
 
     setChar12Heigt (val) {
@@ -254,16 +325,16 @@ export default {
       return _th;
     },
 
-    getChar11Data () {
-      const data = [
+    getChar11Data (data, total) {
+      /* const data = [
         { item: '人脸识别', count: 275 },
         { item: '结构分析', count: 115 },
         { item: '智能监控', count: 120 },
         { item: '结构分析2', count: 350 }
-      ];
-      this.statistics11(data);
+      ]; */
+      this.statistics11(data, total);
     },
-    statistics11 (data) {
+    statistics11 (data, total) {
       let chart = null;
       if (this.charts.chart11) {
         this.charts.chart11.clear();
@@ -273,7 +344,7 @@ export default {
         chart = new G2.Chart({
           container: 'charContainer11',
           forceFit: true,
-          padding: [ 12, 120, 12, 6 ],
+          padding: [ 0, 120, 0, 0 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -299,10 +370,10 @@ export default {
         useHtml: true,
         hoverable: false,
         containerTpl: '<div class="g2-legend vi_stat11_leg"><div class="g2-legend-list"></div></div>',
-        itemTpl: function itemTpl(value, color) {
+        itemTpl: function itemTpl(value, color, checked, index) {
           var markerDom = '<div class="stat11_leg_marker" style="background-color:' + color + '"></div>';
           var markerDom2 = '<i class="stat11_leg_marker2" style="background-color:' + color + '"></i>';
-          var percentDom = '<div class="stat11_leg_percent">30%</div>';
+          var percentDom = '<div class="stat11_leg_percent">' + (dv.rows[index].percent * 100).toFixed(0) + '%' + '</div>';
           var nameDom = '<div class="stat11_leg_name com_keepall">' + value + '</div>';
           return '<div class="g2-legend-list-item">' + markerDom + markerDom2 + percentDom + nameDom + '</div>';
         }
@@ -319,7 +390,7 @@ export default {
       chart.guide().html({
         position: ['50%', '50%'],
         html: '<div style="color:#0C70F8;text-align: center;width: 10em;">' +
-          '<div style="font-size: 20px;font-weight: bold;">' + 123123 + '</div>' +
+          '<div style="font-size: 20px;font-weight: bold;">' + total + '</div>' +
           '<div style="font-size: 14px;">设备智能化</div></div>',
         alignX: 'middle',
         alignY: 'middle'
@@ -353,6 +424,134 @@ export default {
       chart.render();
 
       this.charts.chart11 = chart;
+    },
+    getChar13Data (data, total) {
+      /* let data = [
+        { item: '其它', amount: 1000, percent: 0.15, percent2: 1},
+        { item: '半球机', amount: 1500, percent: 0.25, percent2: 1},
+        { item: '枪机', amount: 3000, percent: 0.3, percent2: 1},
+        { item: '球机', amount: 5000, percent: 0.5, percent2: 1}
+      ];
+      this.typeData = data.concat([]).reverse(); */
+      this.statistics13(data, total);
+    },
+    statistics13 (data, total) {
+      let chart = null;
+      if (this.charts.chart13) {
+        this.charts.chart13.clear();
+        chart = this.charts.chart13;
+      } else {
+        let temp = document.getElementById('charContainer13');
+        chart = new G2.Chart({
+          container: 'charContainer13',
+          forceFit: true,
+          padding: [ 24, 200, 24, 24 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
+
+      let dv = new View().source(data);
+      // 百分比
+      dv.transform({
+        type: 'percent',
+        field: 'amount',
+        dimension: 'item',
+        as: 'percent'
+      });
+      // 排序依据，和原生js的排序callback一致
+      /* dv.transform({
+        type: 'sort',
+        callback(a, b) {
+          return a.percent - b.percent;
+        }
+      }); */
+      dv.transform({
+        type: 'sort-by',
+        fields: [ 'percent' ], // 根据指定的字段集进行排序，与lodash的sortBy行为一致
+        order: 'ASC'        // 默认为 ASC，DESC 则为逆序
+      });
+      // impute 补全列/补全字段
+      dv.transform({
+        type: 'impute',
+        field: 'percent2',       // 待补全字段
+        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
+        method: 'value',  // 补全常量
+        value: 1     // 补全字段值时执行的规则
+      });
+
+      /* dv.transform({
+        type: 'aggregate', // 别名summary
+        fields: ['amount'],        // 统计字段集
+        operations: ['count'],    // 统计操作集
+        as: ['total'],            // 存储字段集
+        groupBy: []        // 分组字段集
+      }) */
+      // console.log('13 dv:', dv);
+      this.typeData = dv.rows.concat([]).reverse();
+      total = 0;
+      for (let i = 0; i < this.typeData.length; i++) {
+        total += this.typeData[i].amount;
+      }
+      this.typeTotal = total;
+
+      let view2 = chart.view();
+      view2.source(dv, {
+        'percent2': {
+          min: 0,
+          max: 1
+        }
+      });
+      view2.tooltip(false);
+      // view2.legend(false);
+      view2.axis(false);
+      view2.coord('polar', {
+        innerRadius: 0.1
+      }).transpose();
+      view2.interval().position('item*percent2').color('percent2', '#F2F2F2');
+
+      chart.source(dv, {
+        'percent': {
+          min: 0,
+          max: 1
+        }
+      });
+      chart.tooltip({
+        title: 'item'
+      });
+      chart.legend(false);
+      chart.coord('polar', {
+        innerRadius: 0.1
+      }).transpose();
+      chart.interval().position('item*percent')
+        .color('percent', this.typeColors)
+        .tooltip('percent', function(val) {
+          return {
+            name: '占比',
+            value: (val * 100).toFixed(0) + '%'
+          };
+        }).label('percent', {
+          offset: -5,
+          formatter: (text) => {
+            return (text * 100).toFixed(0) + '%';
+          },
+          textStyle: {
+            rotate: 0,
+            fill: '#ffffff'
+          }
+        });
+      data.map(function(obj) {
+        chart.guide().text({
+          position: [obj.item, 0],
+          content: obj.item + ' ',
+          style: {
+            textAlign: 'right',
+            stroke: '#666666'
+          }
+        });
+      });
+      chart.render();
+      this.charts.chart13 = chart;
     },
 
     getChar2Data () {
@@ -632,20 +831,11 @@ export default {
 
   },
   destroyed () {
-    if (this.charts.chart11) {
-      this.charts.chart11.destroy();
-    }
-    if (this.charts.chart3) {
-      this.charts.chart3.destroy();
-    }
-    if (this.charts.chart4) {
-      this.charts.chart4.destroy();
-    }
-    if (this.charts.chart5) {
-      this.charts.chart5.destroy();
-    }
-    if (this.charts.chart6) {
-      this.charts.chart6.destroy();
+    /* 销毁所有的图标对象 */
+    for (let i in this.charts) {
+      if (this.charts[i]) {
+        this.charts[i].destroy();
+      }
     }
   }
 }
@@ -699,114 +889,6 @@ export default {
           > .vi_stat_lil { padding-right: 10px; }
           > .vi_stat_lir { 
             padding-left: 10px;
-            .stat_sbzs {
-              overflow: hidden;
-              width: 100%; height: 100%;
-              padding: 30px 20px;
-              > li {
-                position: relative;
-                float: left;
-                width: 30%; height: 100%;
-                padding: 0 10px;
-                &:first-child {
-                  width: 40%;
-                }
-                > div {
-                  position: relative;
-                  width: 100%; height: 100%;
-                }
-                > .stat_sbzs_li {
-                  position: absolute; left: 50%; bottom: 0;
-                  width: 56px; height: 100%;
-                  margin-left: -28px;
-                  > ul {
-                    position: absolute; bottom: 50px; left: 0;
-                    width: 100%;
-                    overflow: hidden;
-                    > li {
-                      width: 100%;
-                      &:nth-child(1) {
-                        height: 16px;
-                        background: url(../../../../assets/img/video/vi_023.png) center center no-repeat;
-                        background-size: 100% 100%;
-                        &.stat_sbzs_sf2 {
-                          background: url(../../../../assets/img/video/vi_033.png) center center no-repeat;
-                          background-size: 100% 100%;
-                        }
-                      }
-                      &:nth-child(2) {
-                        position: relative;
-                        background: url(../../../../assets/img/video/vi_022.png) center center repeat-y;
-                        background-size: 100% auto;
-                        transition: height .4s ease-out .2s;
-                        > span {
-                          display: block;
-                          text-align: center;
-                          color: #fff; font-size: 14px; font-weight: bold;
-                          width: 100%; height: 20px; line-height: 20px;
-                          position: absolute; top: 50%; left: 0; z-index: 2;
-                          margin-top: -5px;
-                        }
-                        &.stat_sbzs_sf2 {
-                          background: url(../../../../assets/img/video/vi_032.png) center center repeat-y;
-                          background-size: 100% auto;
-                        }
-                      }
-                      &:nth-child(3) {
-                        height: 50px;
-                        background: url(../../../../assets/img/video/vi_021.png) center center no-repeat;
-                        background-size: 100% 100%;
-                        &.stat_sbzs_sf2 {
-                          background: url(../../../../assets/img/video/vi_031.png) center center no-repeat;
-                        background-size: 100% 100%;
-                        }
-                      }
-                    }
-                  }
-                  > div {
-                    position: absolute; bottom: 0; left: -12px;
-                    width: 80px;
-                    text-align: center;
-                    > div {
-                      color: #666; font-size: 12px;
-                      padding-bottom: 5px;
-                    }
-                    > p {
-                      color: #333; font-weight: bold; font-size: 16px;
-                    }
-                  }
-                }
-              }
-              .stat_sbzs_t {
-                position: relative;
-                width: 100%; height: 100%;
-                background:rgba(255,255,255,1);
-                box-shadow: 2px 1px 20px 0px rgba(29,168,249,0.12);
-                border-radius: 3px;
-                > div {
-                  position: absolute; top: 20%; left: 0;
-                  text-align: center;
-                  color: #0C70F8; 
-                  width: 100%;
-                  > h2 {
-                    font-weight: bold; font-size: 22px;
-                    padding-bottom: 5px;
-                  }
-                  > p {
-                    font-size: 14px;
-                  }
-                }
-                > i {
-                  display: block;
-                  position: absolute; left: 50%; bottom: 20%;
-                  width: 64px; height: 30px;
-                  margin-left: -32px;
-                  background: url(../../../../assets/img/video/vi_011.png) center center no-repeat;
-                  background-size: 100% 100%;
-                  animation: fadeIn .6s ease-out .2s both;
-                }
-              }
-            }
           }
           > .stat_li_t {
             position: absolute; top: 0; left: 0;
@@ -843,12 +925,185 @@ export default {
       }
     }
   }
+  .vi_stat_ul.vi_stat_ul1 {
+    padding: 0;
+    overflow: hidden;
+    > div {
+      width: 33.33%;
+      float: left;
+      padding: 10px;
+      > div {
+        position: relative;
+        width: 100%; height: 360px;
+        > .vi_stat_ul_t {
+          position: absolute; top: 10px; left: 0;
+          padding-left: 20px;
+          width: 100%; height: 40px; line-height: 40px;
+          font-size: 16px; color: #333; font-weight: bold;
+        }
+        > .vi_stat_ul_c {
+          padding-top: 50px;
+          width: 100%; height: 100%;
+          position: relative;
+        }
+      }
+    }
+  }
+  .stat_13_legend {
+    position: absolute; top: 20px; right: 10px;
+    min-width: 180px;
+    > div {
+      background-color: #fff;
+      box-shadow:2px 1px 20px 0px rgba(29,168,249,0.12);
+      border-radius:3px;
+      padding: 10px 10px;
+      color: #1E92FC;
+      font-size: 12px;
+      > span {
+        display: inline-block;
+        padding-right: 10px;
+        font-size: 20px; font-weight: bold;
+      }
+    }
+    > ul {
+      padding: 0 10px 0 10px;
+      overflow: hidden;
+      > li {
+        position: relative;
+        height: 40px; line-height: 40px;
+        padding-left: 20px;
+        font-size: 18px; font-weight: bold; color: #333;
+        overflow: hidden;
+        > i {
+          position: absolute; top: 12px; left: 10px;
+          width: 3px; height: 16px;
+          background-color: #000;
+        }
+        > span {
+          float: right;
+          font-size: 12px; font-weight: normal; color: #666;
+        }
+      }
+    }
+  }
+  .stat_sbzs {
+    overflow: hidden;
+    width: 100%; height: 100%;
+    padding: 10px 20px 30px 20px;
+    > li {
+      position: relative;
+      float: left;
+      width: 30%; height: 100%;
+      padding: 0 10px;
+      &:first-child {
+        width: 40%;
+      }
+      > div {
+        position: relative;
+        width: 100%; height: 100%;
+      }
+      > .stat_sbzs_li {
+        position: absolute; left: 50%; bottom: 0;
+        width: 56px; height: 100%;
+        margin-left: -28px;
+        > ul {
+          position: absolute; bottom: 50px; left: 0;
+          width: 100%;
+          overflow: hidden;
+          > li {
+            width: 100%;
+            &:nth-child(1) {
+              height: 16px;
+              background: url(../../../../assets/img/video/vi_023.png) center center no-repeat;
+              background-size: 100% 100%;
+              &.stat_sbzs_sf2 {
+                background: url(../../../../assets/img/video/vi_033.png) center center no-repeat;
+                background-size: 100% 100%;
+              }
+            }
+            &:nth-child(2) {
+              position: relative;
+              background: url(../../../../assets/img/video/vi_022.png) center center repeat-y;
+              background-size: 100% auto;
+              transition: height .4s ease-out .2s;
+              > span {
+                display: block;
+                text-align: center;
+                color: #fff; font-size: 14px; font-weight: bold;
+                width: 100%; height: 20px; line-height: 20px;
+                position: absolute; top: 50%; left: 0; z-index: 2;
+                margin-top: -5px;
+              }
+              &.stat_sbzs_sf2 {
+                background: url(../../../../assets/img/video/vi_032.png) center center repeat-y;
+                background-size: 100% auto;
+              }
+            }
+            &:nth-child(3) {
+              height: 50px;
+              background: url(../../../../assets/img/video/vi_021.png) center center no-repeat;
+              background-size: 100% 100%;
+              &.stat_sbzs_sf2 {
+                background: url(../../../../assets/img/video/vi_031.png) center center no-repeat;
+              background-size: 100% 100%;
+              }
+            }
+          }
+        }
+        > div {
+          position: absolute; bottom: 0; left: -12px;
+          width: 80px;
+          text-align: center;
+          > div {
+            color: #666; font-size: 12px;
+            padding-bottom: 5px;
+          }
+          > p {
+            color: #333; font-weight: bold; font-size: 16px;
+          }
+        }
+      }
+    }
+    .stat_sbzs_t {
+      position: relative;
+      width: 100%; height: 100%;
+      background:rgba(255,255,255,1);
+      box-shadow: 2px 1px 20px 0px rgba(29,168,249,0.12);
+      border-radius: 3px;
+      > div {
+        position: absolute; top: 20%; left: 0;
+        text-align: center;
+        color: #0C70F8; 
+        width: 100%;
+        > h2 {
+          font-weight: bold; font-size: 22px;
+          padding-bottom: 5px;
+        }
+        > p {
+          font-size: 14px;
+        }
+      }
+      > i {
+        display: block;
+        position: absolute; left: 50%; bottom: 20%;
+        width: 64px; height: 30px;
+        margin-left: -32px;
+        background: url(../../../../assets/img/video/vi_011.png) center center no-repeat;
+        background-size: 100% 100%;
+        animation: fadeIn .6s ease-out .2s both;
+      }
+    }
+  }
+
   .stat_sel_w {
     width: 130px;
   }
   .stat_bd_style {
     background-color: #fff;
     box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+  }
+  .stat_bd_size {
+    width: 100%; height: 100%;
   }
 
   .stat_c2 {

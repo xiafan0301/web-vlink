@@ -116,8 +116,8 @@
   </div>
 </template>
 <script>
-import BigImg from './components/bigImg.vue';
-import { getEventDetail } from '@/views/index/api/api.js';
+import BigImg from '@/components/common/bigImg.vue';
+import { getEventDetail } from '@/views/index/api/api.event.js';
 export default {
   components: { BigImg },
   data () {

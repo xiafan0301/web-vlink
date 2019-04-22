@@ -144,7 +144,7 @@
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -319,7 +319,7 @@ import { getUserList, delUser, isForceUser, updateUser,
   getDepartmentList, getUserGroups, addUserBatchGroups,
   delUserBatchGroups, getRoleList, addUserBatchRoles, delUserBatchRoles,
   resetPwd
-} from '@/views/index/api/api.js';
+} from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -467,7 +467,7 @@ export default {
     searchGroup () {
       let reg = new RegExp(this.userGroupName);
       let arr = [];
-      this.searchSelectGroups.map((item, index) => {
+      this.searchSelectGroups.map((item) => {
         let name = item.groupName;
         if (name.match(reg)) {
           arr.push(item);
@@ -486,7 +486,7 @@ export default {
     searchRole () {
       let reg = new RegExp(this.userRoleName);
       let arr = [];
-      this.searchSelectRoles.map((item, index) => {
+      this.searchSelectRoles.map((item) => {
         let name = item.roleName;
         if (name.match(reg)) {
           arr.push(item);
@@ -999,6 +999,9 @@ export default {
         }
         /deep/ .el-checkbox+.el-checkbox {
           margin-left: 0;
+        }
+        /deep/ .el-checkbox:last-child {
+          margin-right: 30px;
         }
         /deep/ .el-checkbox__label {
           float: left;

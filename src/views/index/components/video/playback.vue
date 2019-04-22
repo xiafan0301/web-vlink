@@ -11,14 +11,13 @@
           </ul>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
-              <div class="show_search_se">
+              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
                 <el-input
-                  class="vl_map_lc_dt_inp"
-                  size="small"
                   placeholder="请输入内容"
+                  size="small"
                   v-model="searchVal">
+                  <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
                 </el-input>
-                <i class="el-icon-search"></i>
               </div>
               <div class="show_search_ti">
                 <span>开始</span>
@@ -27,6 +26,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  :editable="false" :clearable="false"
                   placeholder="选择开始时间">
                 </el-date-picker>
               </div>
@@ -35,22 +35,35 @@
                 <el-date-picker
                   style="width: 175px"
                   size="small"
-                  v-model="startTime"
+                  v-model="endTime"
                   type="datetime"
+                  :editable="false" :clearable="false"
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
             </div>
-            <div class="show_list">
+            <div class="show_list" style="padding-top: 152px;">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in treeData" :key="'tree_' + index">
+                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
                   <div>
                     <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.name}}
+                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
                     </div>
                   </div>
-                  <ul class="tree_sli" v-if="item.children && item.children.length > 0">
-                    <li class="com_ellipsis" v-for="(sitem, sindex) in item.children" :title="sitem.name" :key="'tree_s_' + sindex">{{sitem.name}}</li>
+                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                      <div class="com_ellipsis"
+                        v-if="!deviceIsPlaying(sitem)"
+                        @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
+                        draggable="true" style="cursor: move;">
+                        {{sitem.deviceName}}
+                        <span class="vl_icon vl_icon_v11"></span>
+                      </div>
+                      <div class="tree_li_dis" v-else>
+                        {{sitem.deviceName}}
+                        <span class="vl_icon vl_icon_v11"></span>
+                      </div>
+                    </li>
                   </ul>
                   <ul class="tree_sli" v-else>
                     <li class="tree_sli_empty">暂无</li>
@@ -60,38 +73,39 @@
             </div>
           </div>
           <div class="show_content" v-show="showConTitle === 2">
-            <div class="show_his_btn" v-if="historyData && historyData.length > 0">清空记录</div>
-            <ul class="show_his">
-              <li v-for="(item, index) in historyData" :key="'hty_' + index">
-                <h3 class="com_ellipsis">{{item.name}}</h3>
-                <p>{{item.time}}</p>
-                <i class="el-icon-delete"></i>
-              </li>
-            </ul>
+            <div class="show_his_c">
+              <div class="show_his_btn" @click="delAllVideoRecords" v-if="videoRecordList && videoRecordList.length > 0">清空记录</div>
+              <div class="show_his_empty" v-else>暂无记录</div>
+              <ul class="show_his">
+                <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
+                  <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                  <p>{{item.playTime | fmTimestamp}}</p>
+                  <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="vid_title">
       <ul class="vid_show_type">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showType === 1}" @click="showType = 1"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showType === 2}" @click="showType = 2"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showType === 3}" @click="showType = 3"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showType === 4}" @click="showType = 4"></li>
-        <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li>
+        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="showVideoTotal = 1"></li>
+        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="showVideoTotal = 4"></li>
+        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="showVideoTotal = 5"></li>
+        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="showVideoTotal = 9"></li>
+       <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
       </ul>
     </div>
-    <div class="vid_opes">
-      <el-button type="primary">暂停轮巡</el-button>
-      <el-button>关闭轮巡</el-button>
-    </div>
     <div class="vid_content">
-      <ul class="vid_show_list" :class="'vid_list_st' + showType">
-        <li v-for="item in showVideoTotal" :key="'video_list_' + item">
-          <div v-if="videoList && videoList[item - 1] && videoList[item - 1].video">
-            <video class="com_trans50_lt" src="../../../../assets/video/video.mp4" autoplay loop controls></video>
+      <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
+        <li v-for="(item, index) in videoList" :key="'video_list_' + index"
+          @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
+          <div v-if="item && item.video">
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
           </div>
           <div class="vid_show_empty" v-else>
+            <div is="videoEmpty" @btnEvent="showListEvent" :btn="true"></div>
           </div>
         </li>
       </ul>
@@ -100,82 +114,227 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import videoEmpty from './videoEmpty.vue';
+import flvplayer from '@/components/common/flvplayer.vue';
+import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
 export default {
+  components: {videoEmpty, flvplayer},
   data () {
     return {
-      videoList: [
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-        {video: {}, title: ''},
-      ],
-      showType: 2,
+      // 设备列表
+      deviceList: [],
+
+      // {video: {}, title: ''},
+      videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
       showMenuActive: false,
       showConTitle: 1,
       searchVal: '',
-      startTime: '',
-      endTime: '',
-      treeData: [
-        {
-          name: '公安专网',
-          children: [{name: '摄像头001'}, {name: '摄像头002'}, {name: '摄像头003'}]
-        }, {
-          name: '教育专网',
-          children: [{name: '摄像头011'}, {name: '摄像头012'}, {name: '摄像头013'}]
-        }, {
-          name: '医疗专网',
-          children: []
-        }, {
-          name: '企业专网',
-          children: [{name: '摄像头031'}, {name: '摄像头032'}, {name: '摄像头033'}]
-        }
-      ],
-      historyData: [
-        { name: '广发路广发银行-001', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-002', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-003', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-004', time: '2019-01-17 13:28:02' },
-        { name: '广发路广发银行-005', time: '2019-01-17 13:28:02' }
-      ]
+      dragActiveObj: null,
+
+      videoRecordList: [],
+
+      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
+      endTime: new Date(),
     }
   },
   watch: {
-    showType () {
-      if (this.showType === 1) {
-        this.showVideoTotal = 1;
-      } else if (this.showType === 2) {
-        this.showVideoTotal = 4;
-      } else if (this.showType === 3) {
-        this.showVideoTotal = 5;
-      } else if (this.showType === 4) {
-        this.showVideoTotal = 9;
-      } else if (this.showType === 5) {
-        this.showVideoTotal = 16;
+    showVideoTotal () {
+      this.playersHandler(this.showVideoTotal);
+    },
+    showConTitle (newVal) {
+      if (newVal === 2) {
+        this.getVideoRecordList();
       }
     }
   },
+  created () {
+    // window.localStorage.getItem(name);
+    let sType = window.localStorage.getItem('vlink_video_patrol_type2');
+    if (sType && sType.length > 0) {
+      sType = Number(sType);
+      this.showVideoTotal = sType;
+    } else {
+      // 第一次打开
+      this.showMenuActive = true;
+    }
+
+    // 监控列表
+    this.getDeviceList();
+  },
   mounted () {
     videoTree('videoListTree');
+    $(window).on('unload', this.unloadSave);
   },
   methods: {
+    /* 播放记录 */
+    getVideoRecordList () {
+      // 播放类型 1:视频巡逻 2:视频回放
+      apiVideoRecordList({
+        playType: 2
+      }).then(res => {
+        if (res && res.data) {
+          this.videoRecordList = res.data;
+        }
+      }).catch(error => {
+        console.log("apiVideoRecordList error：", error);
+      });
+    },
+    delVideoRecord (item) {
+      apiDelVideoRecord(item.uid).then(() => {
+        this.getVideoRecordList();
+        this.$message({
+          message: '删除成功！',
+          type: 'success'
+        });
+      }).catch(error => {
+        this.$message.error('删除失败！');
+        console.log("apiDelVideoRecord error：", error);
+      });
+    },
+    delAllVideoRecords () {
+      // apiDelVideoRecords
+      this.$confirm('确定删除所有的播放历史吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        apiDelVideoRecords({playType: 2}).then(() => {
+          this.getVideoRecordList();
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(error => {
+          this.$message.error('删除失败！');
+          console.log("apiDelVideoRecords error：", error);
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      });
+    },
+    /* 监控列表 */
+    getDeviceList () {
+      // let sui = window.localStorage.getItem('userInfo');
+      // if (sui) { sui = JSON.parse(sui); }
+      apiDeviceList({
+        // id: sui.uid,
+        likeKey: this.searchVal
+      }).then(res => {
+        if (res && res.data) {
+          this.deviceList = res.data;
+        }
+      }).catch(error => {
+        console.log("apiSignContentList error：", error);
+      });
+    },
+    deviceIsPlaying (item) {
+      let flag = false;
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (this.videoList[i].video && this.videoList[i].video.uid === item.uid) {
+          flag = true;
+          break;
+        }
+      }
+      return flag;
+    },
+
+    playersHandler (sum) {
+      // videoList
+      let na = [], ii = 0;
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (ii < sum) {
+          if (this.videoList[i] && this.videoList[i].video) {
+            na.push(this.videoList[i]);
+            ii++;
+          }
+        } else {
+          break;
+        }
+      }
+      let il = sum - na.length;
+      if (il > 0) {
+        for (let j = 0; j < il; j++) {
+          na.push({});
+        }
+      }
+      this.videoList = na;
+    },
+    // 缓存播放列表
+    saveVideoList () {
+      window.localStorage.setItem('vlink_video_patrol_type2', JSON.stringify(this.showVideoTotal));
+    },
+    unloadSave () {
+      this.saveVideoList();
+    },
+
+    // 拖拽开始
+    dragStart (ev, item) {
+      // console.log('drag start', item)
+      this.dragActiveObj = item;
+      // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!ev) { ev = window.event; }
+      ev.dataTransfer.setData('name', 'ouyang');
+    },
+    dragOver () {
+      // console.log('drag over')
+    },
+    dragDrop (item, index) {
+      /* console.log('drag drop item', item);
+      console.log('drag drop index', index); */
+      if (this.dragActiveObj) {
+        // this.videoList.splice(index, 1, Object.assign({}, this.dragActive));
+        /* this.videoList[index] = {
+          title: this.dragActiveObj.name,
+          video: {
+            url: Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream'
+          }
+        } */
+        // 湖南卫视   rtmp://58.200.131.2:1935/livetv/hunantv
+        // console.log(Math.random());
+        // rtmp://10.16.1.139/live/livestream
+        // rtmp://10.16.1.139/live/livestream
+        // rtmp://10.16.1.138/live/livestream
+        // rtmp://live.hkstv.hk.lxdns.com/live/hks1
+        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
+        // console.log('deviceSip', deviceSip);
+        this.videoList.splice(index, 1, {
+          type: 2,
+          title: this.dragActiveObj.deviceName,
+          startTime: this.startTime,
+          endTime: this.endTime,
+          video: Object.assign({}, this.dragActiveObj)
+        });
+      }
+    },
+    dragEnd () {
+      // console.log('drag end')
+      this.dragActiveObj = null;
+    },
+    /* 播放器事件 begin */
+    /**
+     * 关闭播放器
+     * @param {string} sid 视频ID
+     */
+    playerClose (iIndex) {
+      console.log('playerClose' + iIndex);
+      this.videoList.splice(iIndex, 1, {});
+    },
+    /* 播放器事件 end */
+
+    showListEvent () {
+      this.showMenuActive = true;
+    }
   },
   destroyed () {
+    $(window).off('unload', this.unloadSave);
+    this.saveVideoList();
   }
 }
 </script>
-<style>
-  .show_search_ti .el-input--suffix .el-input__inner {
-    padding-right: 0;
-  }
-</style>
 <style lang="scss" scoped>
 .vl_vid {
   height: 100%;
@@ -195,8 +354,5 @@ export default {
     padding-top: 60px;
     overflow: hidden;
   }
-}
-.show_list {
-  padding-top: 160px !important;
 }
 </style>

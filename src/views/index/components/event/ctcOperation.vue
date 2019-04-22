@@ -138,8 +138,9 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, addTaskInfo, getDepartmentList, getPlanData } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, addTaskInfo, getPlanData } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -156,23 +157,7 @@ export default {
             departmentId: null
           }
         ],
-        planList: [
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-        ], // 表格数据
+        planList: [], // 表格数据
         userInfo: {},
         departmentData: [],
     }
@@ -183,10 +168,10 @@ export default {
   mounted () {
     this.getDepartList();
     this.getDetail();
+    this.getReplanList();
   },
   methods: {
     getReplanList () { // 获取预案列表
-      console.log(this.$route.query.eventType)
       const params = {
         pageNum: -1,
         'where.planType': this.$route.query.eventType
@@ -267,6 +252,7 @@ export default {
                   message: '添加任务成功',
                   customClass: 'request_tip'
                 })
+                // this.$router.push({name: 'event_manage'});
                 this.$router.back(-1);
               } else {
                 this.$message({
@@ -297,11 +283,11 @@ export default {
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
     },
     // 返回
     back () {
@@ -309,7 +295,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

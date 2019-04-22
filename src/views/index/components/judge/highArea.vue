@@ -81,7 +81,7 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
-import {JfoGETGroup, JhaGETStatisicByAddress, JhaGETAlarmSnapByAddress} from '../../api/api';
+import {JfoGETGroup, JhaGETStatisicByAddress, JhaGETAlarmSnapByAddress} from '../../api/api.judge.js';
 export default {
   data() {
     return {

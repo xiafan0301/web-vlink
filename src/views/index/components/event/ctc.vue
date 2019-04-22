@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="ctc-list">
     <div class="search_box">
       <el-form :inline="true" :model="ctcForm" class="ctc_form" ref="ctcForm">
@@ -25,7 +26,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item >
+        <el-form-item prop="phoneOrNumber">
           <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
@@ -108,18 +109,20 @@
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList, updateProcess } from '@/views/index/api/api.js';
+import { getEventList, updateProcess } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -134,7 +137,7 @@ export default {
         eventFlag: 1, // 1--true 0--false
         mutualFlag: 0,
         reportTime: [], // 日期
-        eventStatus: '全部状态', // 事件状态
+        eventStatus: 28, // 事件状态--默认进行中
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [], // 表格数据
@@ -175,6 +178,7 @@ export default {
         'where.mutualFlag': this.ctcForm.mutualFlag,
         'where.reportTimeStart': this.ctcForm.reportTime[0],
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
+        'where.otherQuery': this.ctcForm.phoneOrNumber,
         'where.dispatchStatus': eventStatus,
         pageNum: this.pagination.pageNum
       }
