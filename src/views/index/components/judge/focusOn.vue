@@ -426,7 +426,7 @@ export default {
     },
     addListen (el, evType,key ,obj = {}) {
       let self = this;
-      let _key = self.curVideo.indexNum;
+      let _key;
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
@@ -440,6 +440,7 @@ export default {
             }
             break;
           case 'click':
+            _key  = self.curVideo.indexNum;
             self.evData.forEach(z => {
               z.checked = false;
             })

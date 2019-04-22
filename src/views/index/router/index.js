@@ -64,7 +64,7 @@ export default new Router({
                             name: 'map_map',
                             component: () => import('@/views/index/components/map/map.vue')
                         }, {
-                            path: 'communication/:userId/:type',
+                            path: 'communication',
                             name: 'map_communication',
                             component: () => import('@/views/index/components/map/communication.vue')
                         }

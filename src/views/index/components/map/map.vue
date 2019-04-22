@@ -15,17 +15,33 @@
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
                 <el-input
-                  class="vl_map_lc_dt_inp"
                   size="small"
-                  placeholder="请输入内容"
+                  placeholder="搜索"
                   v-model="mapInfoVal">
                 </el-input>
-                <i class="el-icon-search"></i>
             </div>
             <div class="map_lc_dc">
-              <div>
-                <el-tree :data="mapTreeData" :props="mapTreeProps"></el-tree>
-              </div>
+              <vue-scroll>
+                <el-tree
+                  ref="mapLeftTree"
+                  :data="mapTreeData"
+                  :render-after-expand="false"
+                  node-key="infoName"
+                  :filter-node-method="filterNode"
+                  :props="mapTreeProps">
+                  <span class="custom-tree-node" slot-scope="{ node, data }">
+                    <span>{{ node.label }}</span>
+                    <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_001 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_002': Math.random() > 0.5}"></span>
+                    <span class="change_node_pos" v-else-if="!data.infoList"></span>
+                    <div class="map_tree_tab" v-if="data['isFirst']">
+                      <span @click.stop="switchTab(node, 0)">{{constCamera}}</span>
+                      <span @click.stop="switchTab(node, 1)">{{constCard}}</span>
+                      <span @click.stop="switchTab(node, 2)">{{constCar}}</span>
+                      <span @click.stop="switchTab(node, 3)">{{constPerson}}</span>
+                    </div>
+                  </span>
+                </el-tree>
+              </vue-scroll>
             </div>
           </div>
           <!-- 标注历史 -->
@@ -42,10 +58,10 @@
         <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
           <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(sxtList.length + kkList.length + clList.length + ryList.length) | fmTenThousand}}</span></el-checkbox>
         <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
-          <el-checkbox label="sxt">摄像头<span class="map_rt_ck_num">&nbsp;{{sxtList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="kk">卡口<span class="map_rt_ck_num">&nbsp;{{kkList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="cl">车辆<span class="map_rt_ck_num">&nbsp;{{clList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="ry">人员<span class="map_rt_ck_num">&nbsp;{{ryList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="sxt">{{constCamera}}<span class="map_rt_ck_num">&nbsp;{{sxtList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="kk">{{constCard}}<span class="map_rt_ck_num">&nbsp;{{kkList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="cl">{{constCar}}<span class="map_rt_ck_num">&nbsp;{{clList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="ry">{{constPerson}}<span class="map_rt_ck_num">&nbsp;{{ryList.length | fmTenThousand}}</span></el-checkbox>
         </el-checkbox-group>
       </div>
       <!-- 右侧工具栏 -->
@@ -95,11 +111,16 @@
 <script>
 import {testData} from './testData.js';
 import {random14} from '../../../../utils/util.js';
+import {MapGETmonitorList} from '../../api/api.js';
 export default {
   data () {
     return {
+      constCar: '车辆',
+      constCard: '卡口',
+      constPerson: '人员',
+      constCamera: '摄像头',
       map: null, // 地图对象
-      sxtList: [], // 摄像头
+      sxtList: [],
       sxtMapMarkers: [],
       kkList: [], // 卡口
       kkMapMarkers: [],
@@ -107,16 +128,13 @@ export default {
       clMapMarkers: [],
       ryList: [],  // 人员
       ryMapMarkers: [],
-
       rightSxtList: [], // 右侧摄像头列表
       rightSxtLimit: 4, // 右侧摄像头数量限制
-
       // 选择区域
       mouseTool: null,
       selAreaAcitve: false,
       selAreaAble: false,
       selAreaPolygon: null,
-
       // 标注
       marksList: [],
       marksMarkers: [],
@@ -124,65 +142,27 @@ export default {
       markAcitve: false,
       markEditMarker: null,
       markEditWindow: null,
-
       // 测距
       rangingAcitve: false,
       rangingObj: null,
-
       isIndeterminate: false,
       mapTypeCheckAll: true,
       mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
       mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
-
       tabType: 1, // 1地图信息 2标注历史
       mapInfoVal: '', // 地图信息查询值
-      mapTreeData: [
-        {
-          label: '溆浦县',
-          children: [{
-            label: '桥江镇',
-          }, {
-            label: '小江口乡',
-          }, {
-            label: '新田乡',
-          }, {
-            label: '观音阁镇',
-          }]
-        }, {
-          label: '一级 2',
-          children: [{
-            label: '二级 2-1',
-            children: [{
-              label: '三级 2-1-1'
-            }]
-          }, {
-            label: '二级 2-2',
-            children: [{
-              label: '三级 2-2-1'
-            }]
-          }]
-        }, {
-          label: '一级 3',
-          children: [{
-            label: '二级 3-1',
-            children: [{
-              label: '三级 3-1-1'
-            }]
-          }, {
-            label: '二级 3-2',
-            children: [{
-              label: '三级 3-2-1'
-            }]
-          }]
-        }
-      ],
+      mapTreeData: [],
       mapTreeProps: {
-        children: 'children',
-        label: 'label'
+        children: 'infoList',
+        label: 'infoName'
       }
     }
   },
   watch: {
+    mapInfoVal (val) {
+      console.log('111', val)
+      this.$refs.mapLeftTree.filter(val);
+    },
     mapTypeList () {
       if (this.mapTypeList.length === 0) {
         this.mapTypeCheckAll = false;
@@ -231,24 +211,196 @@ export default {
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
-        /* for (let j = 0; j < _this.sxtList.length; j++) {
-          let _o = _this.sxtList[j];
-          if (_o.longitude > 0 && _o.latitude > 0) {
-            if (polygon.contains(new window.AMap.LngLat(_o.longitude, _o.latitude))) {
-              console.log('============' + _o.sid);
-            }
-
-          }
-        } */
       }, 100);
     });
-
-    _this.getMapData();
-
+    // _this.getMapData();
+    this.getMonitorList();
     // 地图标记事件
     _this.mapMarkerEvents();
   },
   methods: {
+    //获取地图信息列表
+    getMonitorList () {
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params)
+        .then(res => {
+          if (res) {
+            this.mapTreeData = this.switchData(res.data);
+            this.updateDom();
+            this.moveDom();
+          }
+        })
+    },
+    // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
+    switchData(data) {
+      // 假的卡口，人物，车辆
+      let carList, cardList;
+      carList = [
+        {
+          name: '车辆111',
+          addr: '长沙市天心区',
+          latitude: 28.094869,
+          longitude: 112.975227
+        }, {
+          name: '车辆222',
+          addr: '创谷广告园',
+          latitude: 28.093596,
+          longitude: 112.97623
+        }
+      ];
+      cardList = [
+        {
+          name: '卡口111',
+          addr: '长沙市天心区',
+          latitude: 28.093222,
+          longitude: 112.974718
+        }, {
+          name: '卡口222',
+          addr: '创谷广告园',
+          latitude: 28.093537,
+          longitude: 112.975628
+        }
+      ]
+
+      data['infoList'] = data.areaTreeList;
+      data['infoName'] = data.areaName;
+      console.log(data)
+      data['infoList'].map(x => {
+        x['infoName'] = x.areaName;
+        // dataType = 0 摄像头，1车辆，2卡口，3人员
+        x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0});
+        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2});
+        x['cardList'] = this.objSetItem(cardList, {infoName: 'name', areaType: '5', dataType: 1});
+        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3});
+        x['infoList'] = [...x['deviceBasicList'], ...x['carList'], ...x['cardList'], ...x['sysUserExtendList']]
+        // 给第一个元素加识别号
+        if (x['infoList'][0]) x['infoList'][0]['isFirst'] = true;
+        // 设置一个数组，判断当前map_tree_tab点了哪几个
+        x['tabActiveList'] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
+        return x;
+      })
+      console.log(data);
+      return [data];
+    },
+    objSetItem (list, obj) {
+      list.map(z => {
+        for (let key in obj) {
+          z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
+        }
+        return z;
+      })
+      return list;
+    },
+    filterNode(value, data, node) {
+      if (!value) return true;
+      if (data.infoName.indexOf(value) !== -1) {
+        return true;
+      } else {
+        if (node.parent.data.infoName) {
+          return node.parent.data.infoName.indexOf(value) !== -1;
+        } else {
+          return false;
+        }
+      }
+    },
+    updateDom () {
+      this.$nextTick(() => {
+        let ss = document.getElementsByClassName('change_node_pos');
+        ss = Array.from(ss);
+        ss.forEach(x => {
+          $(x).parent().siblings().css('display', 'none');
+          $(x).parent().parent().css('padding-left', '26px');
+        })
+      })
+    },
+    // 移动节点
+    moveDom () {
+      this.$nextTick(() => {
+        let tabDom = document.getElementsByClassName('map_tree_tab');
+        tabDom = Array.from(tabDom);
+        tabDom.forEach(dom => {
+          let parent = dom.parentNode.parentNode.parentNode.parentNode;
+          parent.insertBefore(dom, parent.childNodes[0])
+        })
+      })
+    },
+    switchTab (node, dataType) {
+      // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
+      console.log(node)
+      let key;
+      // 找到父级的数据;
+      switch (dataType) {
+        case 0:
+          key = 'deviceBasicList'
+          break;
+        case 1:
+          key = 'cardList'
+          break;
+        case 2:
+          key = 'carList'
+          break;
+        case 3:
+          key = 'sysUserExtendList'
+          break;
+      }
+      let curData = this.findParentData(node, 'deviceBasicList');
+      console.log(curData)
+      if (curData.tabActiveList.includes(dataType)) {
+        console.log('delete')
+        curData.tabActiveList.splice(curData.tabActiveList.indexOf(dataType), 1);
+        if (curData.tabActiveList.length) {
+          curData[key].forEach(x => {
+            curData.infoList.splice(curData.infoList.indexOf(x), 1)
+          })
+        } else {
+          console.log('重置')
+          this.$set(curData, 'infoList', [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']])
+        }
+      } else {
+        console.log('add')
+        curData.tabActiveList.push(dataType);
+        if (curData.tabActiveList.length === 1) {
+          console.log('第一次')
+          curData.infoList = Object.assign(curData[key], []);
+          curData['deviceBasicList'].find(k => k['isFirst']).isFirst = false;
+        } else {
+          console.log('已经有了再添加')
+          curData[key].forEach(m => {
+            let _obj = {}
+            for (let _key in m) {
+              _obj[_key] = m[_key]
+            }
+            curData.infoList.push(_obj)
+          })
+        }
+      }
+      console.log(curData)
+      this.updateDom();
+    },
+    findParentData (node, _key) {
+      let _i = this.getSourceIndex(node.data, _key);
+      let obj;
+      this.mapTreeData[_i].infoList.map(item => {
+        if (item[_key].includes(node.data)) {
+          return obj = item;
+        }
+      })
+      return obj;
+    },
+    // 获取县城的索引
+    getSourceIndex (data, _key) {
+      let _i;
+      this.mapTreeData.forEach((x, index) => {
+        x.infoList.map(y => {
+          if (y[_key].includes(data)) {
+            return _i = index;
+          }
+        })
+      })
+      return _i;
+    },
     // 获取地图数据
     getMapData () {
       setTimeout(() => {
@@ -336,7 +488,7 @@ export default {
               });
             });
             marker.on('mouseout', function () {
-              // if (hoverWindow) { hoverWindow.close(); }
+               // if (hoverWindow) { hoverWindow.close(); }
             });
           }
         }
@@ -357,8 +509,8 @@ export default {
         str += '<li><span>人员名称：</span>' + data.name + '</li>';
         str += '<li><span>设备地址：</span>' + data.addr + '</li>';
         str += '<li style="text-align: center;">' +
-            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
-            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
+            `<i dataId="${data.name}" dataType="${data.addr}" class="vl_map_hover_btn hover_btn_voice">语音通话</i>` +
+            `<i dataId="${data.name}" dataType="${data.addr}" class="vl_map_hover_btn hover_btn_video">视频通话</i>` +
           '</li>';
       } else {
         str += '<li>未知数据</li>';
@@ -370,18 +522,16 @@ export default {
     mapMarkerEvents () {
       let _this = this;
       // 1语音/2视频通话
-      $('body').on('click', '.hover_btn_voice', function (e) {
-        console.log(e)
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 1
-        }});
-      }).on('click', '.hover_btn_video', function () {
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 2
-        }});
-      });
+      $('body').on('click', '.vl_map_hover_btn', function (e) {
+        let url = _this.$router.resolve({
+          name: 'map_communication',
+          query: {
+            userId: e.target.getAttribute('dataId'),
+            type: e.target.getAttribute('dataType')
+          }
+        })
+        window.open(url.href, '_blank')
+      })
     },
     // 清除地图标记
     mapClearMarkers (aMarkers) {
@@ -390,14 +540,12 @@ export default {
         aMarkers = [];
       }
     },
-
     // 清除所有
     resetTools () {
       this.selAreaRest();
       this.markRest();
       this.rangingRest();
     },
-
     // 选择区域
     selArea () {
       if (this.selAreaAcitve) {
@@ -430,7 +578,6 @@ export default {
         this.selAreaAble = false;
       }
     },
-
     // 标注
     mark () {
       if (this.markAcitve) {
@@ -538,7 +685,6 @@ export default {
         this.markEditWindow = null;
       }
     },
-
     // 测距
     ranging () {
       if (this.rangingAcitve) {
@@ -582,13 +728,11 @@ export default {
         this.rangingObj.turnOff();
       }
     },
-
     // 视频操作
     videoRemove (_index) {
       // rightSxtList
       this.rightSxtList.splice(_index, 1);
     },
-
     testAddSxt () {
       if ( this.rightSxtList.length < this.rightSxtLimit) {
         this.rightSxtList.push(new Date().getTime());
@@ -599,13 +743,13 @@ export default {
         });
       }
     },
-
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
     mapTypeCheckAllChange (val) {
+      console.log(val)
       this.isIndeterminate = false;
       if (val) {
         this.mapTypeList = this.mapTypeListAll;
@@ -622,4 +766,21 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+  .change_node_pos {
+    vertical-align: middle;
+  }
+  .custom-tree-node {
+    font-size: .14rem;
+    width: 100%;
+    >span {
+      &:first-child {
+        width: calc(100% - .4rem);
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+  }
+</style>
+<style lang="scss">
 </style>
