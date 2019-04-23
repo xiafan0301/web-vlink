@@ -127,14 +127,28 @@ export default {
         if (testData && testData.length > 0) {
           testData.map(item => {
             item.deviceList.map(itm => {
-              const param = {
-                parentUid: item.uid,
-                uid: itm.uid,
-                deviceName: itm.deviceName,
-                longitude: itm.longitude,
-                latitude: itm.latitude
-              };
-              this.sxtList.push(param);
+              let param;
+              if (itm.type === 1) {
+                param = {
+                  parentUid: item.uid,
+                  type: itm.type,
+                  uid: itm.uid,
+                  deviceName: itm.deviceName,
+                  longitude: itm.longitude,
+                  latitude: itm.latitude
+                };
+                this.sxtList.push(param);
+              } else {
+                param = {
+                  parentUid: item.uid,
+                  uid: itm.uid,
+                  type: itm.type,
+                  deviceName: itm.deviceName,
+                  longitude: itm.longitude,
+                  latitude: itm.latitude
+                };
+                this.kkList.push(param);
+              }
             })
           })
         }
@@ -178,7 +192,7 @@ export default {
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
-              unCheckDevice.push(obj);
+              unCheckDevice.push(obj); // 没有选中的设备
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -196,44 +210,55 @@ export default {
             aMarkers.push(marker);
           }
         }
-        if (unCheckDevice.length !== 0) {
-          _this.sxtList.map((item, index) => {
-           unCheckDevice.map(itm => {
-              if (item.uid === itm.uid) {
-                _this.sxtList.splice(index);
-              }
-            })
-          });
-         currDeviceList = JSON.parse(JSON.stringify(_this.sxtList));
-         console.log('currDeviceList', currDeviceList)
-         _this.handleDeviceData(currDeviceList);
-        }
+        _this.handleDeviceData(unCheckDevice);
       }
     },
     // 处理多边形中选中的设备数据
-    handleDeviceData (currList) {
-      if (currList && currList.length > 0) {
-        let params;
-        currList.map(itm => {
-          testData.map((item, index) => {
-            if (item.uid === itm.parentUid) {
-              console.log('itm', itm);
-              console.log('item', item);
-              params = {
-                cname: item.cname,
-                uid: item.uid,
-                isOpenArrow: item.isOpenArrow,
-                isChecked: item.isChecked,
-                deviceList: []
-              };
-              params.deviceList.push(itm);
+    handleDeviceData (unCheckList) {
+      // console.log(this.sxtList)
+      let _this = this;
+      let checkKkList = [], checkSxtList = [];
+      // console.log('currrent', unCheckList)
+      unCheckList && unCheckList.map((item, index) => {
+        if (item.type === 1) {
+          _this.sxtList.map(itm => {
+            if (item.uid !== itm.uid) {
+              checkSxtList.push(itm);
             }
           });
-        });
-            this.leftDeviceList.push(params);
-        this.leftDeviceNumber = this.leftDeviceList.length;
-      }
-      console.log('currentDeviceList', this.leftDeviceList);
+        } else {
+          _this.kkList.map(itm => {
+            if (item.uid !== itm.uid) {
+              checkKkList.push(itm);
+            }
+          });
+        }
+      });
+      
+      console.log('checkSxtList', checkSxtList)
+      console.log('checkKkList', checkKkList)
+      // if (currList && currList.length > 0) {
+      //   let params;
+      //   currList.map(itm => {
+      //     testData.map((item, index) => {
+      //       if (item.uid === itm.parentUid) {
+      //         console.log('itm', itm);
+      //         console.log('item', item);
+      //         params = {
+      //           cname: item.cname,
+      //           uid: item.uid,
+      //           isOpenArrow: item.isOpenArrow,
+      //           isChecked: item.isChecked,
+      //           deviceList: []
+      //         };
+      //         params.deviceList.push(itm);
+      //       }
+      //     });
+      //   });
+      //   this.leftDeviceList.push(params);
+      //   this.leftDeviceNumber = this.leftDeviceList.length;
+      // }
+      // console.log('currentDeviceList', this.leftDeviceList);
     },
     // 清除所有
     resetTools () {

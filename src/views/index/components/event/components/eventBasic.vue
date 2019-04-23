@@ -104,6 +104,7 @@ export default {
     }
   },
   mounted () {
+    console.log(this.basicInfo)
   },
   methods: {
     // 图片放大

@@ -270,6 +270,7 @@ export default {
     cancelAdd (form) {
       this.isShowError = false;
       this.markForm.markName = null;
+      this.createMarkDialog = false;
       this.$refs[form].resetFields();
     },
     // 显示编辑弹出框
@@ -307,6 +308,7 @@ export default {
     cancelEdit (form) {
       this.isShowError = false;
       this.markForm.markName = null;
+      this.editMarkDialog = false;
       this.$refs[form].resetFields();
     },
     // 显示删除标记弹出框
