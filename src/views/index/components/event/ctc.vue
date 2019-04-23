@@ -88,6 +88,7 @@
         <el-table-column
           label="事件地点"
           prop="eventAddress"
+          width="250"
           :show-overflow-tooltip='true'
           >
         </el-table-column>

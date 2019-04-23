@@ -108,6 +108,7 @@
         <el-table-column
           label="事件地点"
           prop="eventAddress"
+          width="250"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -122,6 +123,7 @@
         <el-table-column
           label="上报内容"
           prop="eventDetail"
+          width="250"
           :show-overflow-tooltip='true'
         >
         </el-table-column>

@@ -31,6 +31,7 @@
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg,.mp4"
                     :limit='9'
+                    multiple
                     :before-upload='handleBeforeUpload'
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'

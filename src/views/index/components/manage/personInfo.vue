@@ -260,67 +260,6 @@
               </el-table-column>
             </el-table>
           </template>
-          <el-table
-            class="event_table"
-            :data="personGroupList"
-            @selection-change="handleSelectChange"
-            >
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="序号"
-              type="index"
-              >
-            </el-table-column>
-            <el-table-column
-              label="姓名"
-              prop="name"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="性别"
-              prop="sex"
-              show-overflow-tooltip
-              >
-              <template slot-scope="scope">
-                <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="证件类型"
-              prop="idType"
-              show-overflow-tooltip
-              >
-              <template slot-scope="scope">
-                <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="证件号码"
-              prop="idNo"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="分组信息"
-              prop="groupList"
-              :show-overflow-tooltip='true'
-            >
-              <template slot-scope="scope">
-               <span v-for="(item, index) in scope.row.groupList" :key="index">
-                 {{item.name + ' '}}
-               </span>
-              </template>
-            </el-table-column>
-            <el-table-column fixed="right" label="操作" width="100">
-              <template slot-scope="scope">
-                <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
-              </template>
-            </el-table-column>
-          </el-table>
         </div>
         <el-pagination
           @current-change="handleCurrentChange"

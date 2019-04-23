@@ -481,7 +481,7 @@ export default {
     // 取消编辑
     cancelEdit (form) {
       this.isShowOrganError = false;
-      this.$refs[form].resetFileds();
+      this.$refs[form].resetFields();
       this.editRoleDialog = false;
     },
     // 显示查看权限弹出框

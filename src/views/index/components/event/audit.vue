@@ -120,12 +120,14 @@
         </el-table-column>
         <el-table-column
           label="事件地点"
+          width="250"
           prop="eventAddress"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="上报内容"
+          width="250"
           prop="eventDetail"
           :show-overflow-tooltip='true'
         >
