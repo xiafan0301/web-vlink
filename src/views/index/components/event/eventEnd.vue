@@ -21,6 +21,7 @@
           <div class="end-upload">
             <el-upload
               :action="uploadUrl"
+              multiple
               accept='.png,.jpg,.bmp,.pdf,.doc,.docx,,.txt'
               :before-upload='handleBeforeUpload'
               :on-success="handleSuccess"

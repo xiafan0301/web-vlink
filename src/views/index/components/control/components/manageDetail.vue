@@ -531,7 +531,7 @@ export default {
       // 展开关闭布控范围
       if (isShowType === 1) {
         this.dpOne = !this.dpOne;
-      // 展开关运行情况
+      // 展开关闭运行情况
       } else {
         this.dpTwo = !this.dpTwo;
       }
@@ -837,9 +837,7 @@ export default {
       //       _this.situList.splice(_index, 1, _video);
       //     })
       // }
-    },
-    
-    
+    }, 
     mapMark () {
       let _this = this, hoverWindow = null, data = null;
       if (!_this.trackPointList) {

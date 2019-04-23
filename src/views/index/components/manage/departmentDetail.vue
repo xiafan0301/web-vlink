@@ -70,7 +70,7 @@
                 v-show="!closeShow"
                 class="search_icon vl_icon vl_icon_manage_1"
                 slot="suffix"
-                @click="searchMember">
+                @click="searchData">
               </i>
             </el-input>
           </div>
@@ -155,18 +155,20 @@
           <div class="group_btn group_btn_left" @click="removeMembers">移除所选组</div>
         </div>
         <div class="group_right">
-          <p class="group_number">可选成员 (已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{selectMembers.length > 0 ? selectMembers.length : 0}}个)</p>
-          <el-input placeholder="请输入成员姓名搜索" size="small" style="width: 220px;">
+          <p class="group_number">可选成员 (已选{{checkSelectMember.length > 0 ? checkSelectMember.length : 0}}个/共{{searchSelectMembers.length > 0 ? searchSelectMembers.length : 0}}个)</p>
+          <el-input placeholder="请输入成员姓名搜索" size="small" style="width: 220px;" v-model="searchMemberName">
+            <i v-show="closeShowMember" slot="suffix" @click="onClearMember" class="search_icon el-icon-close" style="font-size: 20px;"></i>
             <i
+              v-show="!closeShowMember"
               class="search_icon vl_icon vl_icon_manage_1"
               slot="suffix"
-              @click="searchData">
+              @click="searchMember">
             </i>
           </el-input>
            <div class="checkbox_box_right">
             <vue-scroll>
               <el-checkbox-group v-model="checkSelectMember">
-                <el-checkbox v-for="(item ,index) in selectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
+                <el-checkbox v-for="(item ,index) in searchSelectMembers" :label="item" :key="index">{{item.userName}}</el-checkbox>
               </el-checkbox-group>
             </vue-scroll>
           </div>
@@ -245,7 +247,9 @@ export default {
       isShowOrganError: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       closeShow: false,
+      closeShowMember: false,
       userName: null, // 要搜索的内容
+      searchMemberName: null, // 要搜索的可选成员
       tabState: 1,
       defaultProps: {
         children: 'children',
@@ -279,6 +283,7 @@ export default {
       departmentData: [], // 部门数据
       currentMembers: [], // 当前成员
       selectMembers: [], // 可选成员
+      searchSelectMembers: [], // 搜索出的可选成员
       checkSelectMember: [], // 勾选种的可选成员
       checkCurrMember: [], // 勾选中的当前成员
       currentGroupId: null, // 当前用户组id
@@ -419,7 +424,7 @@ export default {
       this.getUserList();
     },
     // 搜索成员数据
-    searchMember () {
+    searchData () {
       if (this.userName) {
         this.closeShow = true;
         this.getUserList();
@@ -429,6 +434,7 @@ export default {
     // 显示管理成员弹出框
     showAdminMember (obj) {
       this.currentMembers = [];
+      this.searchSelectMembers = [];
       this.adminMemberDialog = true;
       this.currentGroupId = obj.uid;
       let allMembers; // 所有的用户
@@ -467,6 +473,7 @@ export default {
               });
             }
             this.selectMembers = JSON.parse(JSON.stringify(allMembers));
+            this.searchSelectMembers = JSON.parse(JSON.stringify(allMembers));
           }
         })
         .catch(() => {})
@@ -491,7 +498,7 @@ export default {
                 this.currentMembers.map((itm, idx) => {
                   if (item.userName === itm.userName) {
                     this.currentMembers.splice(idx, 1);
-                    this.selectMembers.push({
+                    this.searchSelectMembers.push({
                       uid: item.uid,
                       userName: item.userName
                     });
@@ -521,9 +528,9 @@ export default {
           .then(res => {
             if (res) {
               this.checkSelectMember.map(item => {
-                this.selectMembers.map((itm, idx) => {
+                this.searchSelectMembers.map((itm, idx) => {
                   if (item.userName === itm.userName) {
-                    this.selectMembers.splice(idx, 1);
+                    this.searchSelectMembers.splice(idx, 1);
                     this.currentMembers.push({
                       uid: item.uid,
                       userName: item.userName
@@ -612,7 +619,27 @@ export default {
         this.delChildDepartmentDialog = true;
       }
     },
-    searchData () {}
+    // 搜索可选成员
+    searchMember () {
+      // if (this.searchMemberName) {
+        let reg = new RegExp(this.searchMemberName);
+        let arr = [];
+        this.searchSelectMembers.map((item) => {
+          let name = item.userName;
+          if (name.match(reg)) {
+            arr.push(item);
+          }
+        })
+        this.searchSelectMembers = JSON.parse(JSON.stringify(arr));
+        this.closeShowMember = true;
+      // }
+    },
+    // 清除搜索可选成员输入框
+    onClearMember () {
+      this.searchMemberName = null;
+      this.searchSelectMembers = JSON.parse(JSON.stringify(this.selectMembers));
+      this.closeShowMember = false;
+    }
   }
 }
 </script>
@@ -837,6 +864,9 @@ export default {
         }
         /deep/ .el-checkbox+.el-checkbox {
           margin-left: 0;
+        }
+         /deep/ .el-checkbox:last-child {
+          margin-right: 30px;
         }
         /deep/ .el-checkbox__label {
           float: left;

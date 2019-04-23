@@ -88,7 +88,8 @@
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
+import {ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js'
 export default {
   data () {
     return {
