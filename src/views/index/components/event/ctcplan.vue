@@ -10,7 +10,7 @@
               v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -22,7 +22,7 @@
                 v-for="(item, index) in planLevelList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
           </el-select>

@@ -11,7 +11,7 @@
           </el-option>
         </el-select>
         <div class="search_box">
-          <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @change="changeGroupName">
+          <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @input="changeGroupName">
             <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
             <i
               v-show="!closeShow"
@@ -134,65 +134,132 @@
               </div>
             </div>
           </div>
-          <el-table
-            class="event_table"
-            :data="personGroupList"
-            @selection-change="handleSelectChange"
-            >
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="序号"
-              type="index"
+          <template v-if="selectMethod === 1">
+            <el-table
+              class="event_table"
+              :data="personGroupList"
+              @selection-change="handleSelectChange"
               >
-            </el-table-column>
-            <el-table-column
-              label="姓名"
-              prop="name"
-              show-overflow-tooltip
+              <el-table-column
+                type="selection"
+                width="55">
+              </el-table-column>
+              <el-table-column
+                label="序号"
+                type="index"
+                >
+              </el-table-column>
+              <el-table-column
+                label="姓名"
+                prop="name"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="性别"
+                prop="sex"
+                show-overflow-tooltip
+                >
+                <template slot-scope="scope">
+                  <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="证件类型"
+                prop="idType"
+                show-overflow-tooltip
+                >
+                <template slot-scope="scope">
+                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="证件号码"
+                prop="idNo"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="底库信息"
+                prop="albumList"
+                :show-overflow-tooltip='true'
               >
-            </el-table-column>
-            <el-table-column
-              label="性别"
-              prop="sex"
-              show-overflow-tooltip
+                <template slot-scope="scope">
+                <span v-for="(item, index) in scope.row.albumList" :key="index">
+                  {{item.name + ' '}}
+                </span>
+                </template>
+              </el-table-column>
+              <el-table-column fixed="right" label="操作" width="100">
+                <template slot-scope="scope">
+                  <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
+          <template v-else>
+            <el-table
+              class="event_table"
+              :data="personGroupList"
+              @selection-change="handleSelectChange"
               >
-              <template slot-scope="scope">
-                <span v-show="scope.row.sex == 1">男</span>
-                <span v-show="scope.row.sex == 2">女</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="证件类型"
-              prop="idType"
-              show-overflow-tooltip
+              <el-table-column
+                type="selection"
+                width="55">
+              </el-table-column>
+              <el-table-column
+                label="序号"
+                type="index"
+                >
+              </el-table-column>
+              <el-table-column
+                label="姓名"
+                prop="name"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="性别"
+                prop="sex"
+                show-overflow-tooltip
+                >
+                <template slot-scope="scope">
+                  <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="证件类型"
+                prop="idType"
+                show-overflow-tooltip
+                >
+                <template slot-scope="scope">
+                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="证件号码"
+                prop="idNo"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="分组信息"
+                prop="groupList"
+                :show-overflow-tooltip='true'
               >
-            </el-table-column>
-            <el-table-column
-              label="证件号码"
-              prop="idNo"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="分组信息"
-              prop="groupList"
-              :show-overflow-tooltip='true'
-            >
-              <template slot-scope="scope">
-               <span v-for="(item, index) in scope.row.groupList" :key="index">
-                 {{item.name + ' '}}
-               </span>
-              </template>
-            </el-table-column>
-            <el-table-column fixed="right" label="操作" width="100">
-              <template slot-scope="scope">
-                <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
-              </template>
-            </el-table-column>
-          </el-table>
+                <template slot-scope="scope">
+                <span v-for="(item, index) in scope.row.groupList" :key="index">
+                  {{item.name + ' '}}
+                </span>
+                </template>
+              </el-table-column>
+              <el-table-column fixed="right" label="操作" width="100">
+                <template slot-scope="scope">
+                  <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
         </div>
         <el-pagination
           @current-change="handleCurrentChange"
@@ -231,7 +298,7 @@
             </li>
             <li>
               <span>证件类型：</span>
-              <span>{{personDetailInfo.idType}}</span>
+              <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
             </li>
             <li>
               <span>证件号码：</span>
@@ -446,6 +513,11 @@ export default {
     changeGroupName (val) {
       if (!val) {
         this.closeShow = false;
+        if (this.selectMethod === 1) {
+          this.getGroupList();
+        } else {
+          this.getBottomBankList();
+        }
       }
     },
     // 清空搜索框
@@ -460,15 +532,24 @@ export default {
     },
     // 搜索组名
     searchData () {
-      this.closeShow = true;
-      if (this.selectMethod === 1) {
-        this.getGroupList();
-      } else {
-        this.getBottomBankList();
+      if (this.searchGroupName) {
+        this.closeShow = true;
+        if (this.selectMethod === 1) {
+          this.getGroupList();
+        } else {
+          this.getBottomBankList();
+        }
       }
+    },
+    cancelAddGroup (form) {
+      this.addGroupDialog = false;
+      this.$refs[form].resetFields();
+      this.isShowError = false;
+      this.addGroupForm.userGroupName = null;
     },
     // 显示加入组---取消新增分组
     cancelAddGroupCopy (form) {
+      this.addGroupCopyDialog = false;
       this.isShowError = false;
       this.addGroupForm.userGroupName = null;
       this.$refs[form].resetFields();
@@ -586,6 +667,7 @@ export default {
       }
     },
     handleCurrentChange (page) {
+      this.showGroup = false;
       this.pagination.pageNum = page;
       // if (this.selectMethod === 1) {
         this.getPersonList();

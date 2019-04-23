@@ -36,6 +36,7 @@
         <div class="end-upload">
           <el-upload
             :action="uploadUrl"
+            multiple
             accept=".doc,.docx,.pdf,.txt, .png, .jpg, .jpeg"
             :show-file-list='true'
             :before-upload='handleBeforeUpload'
