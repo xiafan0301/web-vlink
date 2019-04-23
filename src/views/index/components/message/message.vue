@@ -2,7 +2,7 @@
   <div class="vl_message clearfix">
     <ul class="vl_smenu">
       <li>
-        <router-link :to="{name: 'message_help'}">民众互动</router-link>
+        <router-link :to="{name: 'message_help'}">民众互助</router-link>
       </li>
       <li>
         <router-link :to="{name: 'message_notice'}">公告管理</router-link>

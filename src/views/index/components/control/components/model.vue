@@ -73,7 +73,7 @@
         </div>
         <div class="manage_b" style="height: 617px;">
           <div class="vl_f_333 top">
-            <span>已选设备({{trackPointList.length}})</span>
+            <span>已选{{modelType !== '3' ? '设备' : '卡口'}}({{selDevOrBayNum}})</span>
           </div>
           <div class="dp_box">
             <div v-for="trackPoint in trackPointList" :key="trackPoint.tid">
@@ -330,6 +330,30 @@ export default {
         return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
       } else {
         return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+      }
+    },
+    // 计算已选设备数量
+    selDevOrBayNum () {
+      if (this.modelType !== '3') {
+        let devList = [];
+        this.trackPointList.forEach(t => {
+          t.devList.forEach(f => {
+            if (f.isSelected) {
+              devList.push(f);
+            }
+          })
+        })
+        return devList.length;
+      } else {
+        let bayList = [];
+        this.trackPointList.forEach(t => {
+          t.bayonetList.forEach(f => {
+            if (f.isSelected) {
+              bayList.push(f);
+            }
+          })
+        })
+        return bayList.length;
       }
     }
   },
@@ -1266,12 +1290,23 @@ export default {
         return false;
       }
       _this.circleIndex = index;
-      // 移除重复添加的追踪点
+      // 移除重复添加的圆形覆盖物
       let circleObj = _this.selAreaCircle.find(f => f.index === index);
       let circle = circleObj ? circleObj._circle : '';
+      console.log(circle, 'circle')
       if (circle) {
         _this.map.remove(circle);
         _this.selAreaCircle = _this.selAreaCircle.filter(f => f.index !== index);
+
+        const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == circle.C.center.lat && p.longitude == circle.C.center.lng);
+        const _obj = _this.trackPointList.splice(delObjIndex, 1);
+        // 把覆盖物内的设备置为未选中
+        _obj[0].devList.forEach(f => {
+          if (f.isSelected) {
+            f.isSelected = !f.isSelected;
+            _this.changeSelectedStatus(f, 1);
+          }
+        })
       }
       let _circle = new window.AMap.Circle({
         center: new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]), // 圆心位置
@@ -1286,6 +1321,7 @@ export default {
       let offSet = [0, 0], _marker = null;
       _circle.on('mouseover', function(e) {
         console.log(e, 'eee')
+        if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
         if (_marker) return;
         _marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
@@ -1304,6 +1340,9 @@ export default {
           const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.target.C.center.lat && p.longitude == e.target.C.center.lng);
           console.log(_this.trackPointList)
           const _obj = _this.trackPointList.splice(delObjIndex, 1);
+
+          _this.modelForm.points.splice(_this.selAreaCircle.find(f => f._circle === _circle).index, 1);//删除对应的追踪点input
+
           // 把覆盖物内的设备置为未选中
           _obj[0].devList.forEach(f => {
             if (f.isSelected) {
@@ -1320,6 +1359,7 @@ export default {
         _marker.setMap(_this.map);
       })
       _circle.on('mouseout', function(e) {
+        if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
         setTimeout(() => {
           if (_circle && _circle.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
             return;
@@ -1330,7 +1370,7 @@ export default {
         }, 100)
       })
       _this.getTraceEquList(_circle, resDevList);
-      _this.selAreaCircle.push({_circle, index});
+      _this.selAreaCircle.splice(index, 0, {_circle, index});
       _circle.setMap(_this.map)
     },
     // 获得人员追踪、车辆追踪内的设备列表数据

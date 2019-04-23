@@ -11,10 +11,12 @@
                 type="daterange"
                 range-separator="-"
                 start-placeholder="开始日期"
-                end-placeholder="结束日期">
+                end-placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item prop="content">
+            <el-form-item prop="titleOrPublisher">
               <el-input v-model="systemForm.titleOrPublisher" placeholder="输入标题或发布者"></el-input>
             </el-form-item>
             <el-form-item style="width: 25%;">
@@ -68,7 +70,6 @@
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -119,6 +120,7 @@ export default {
         pageNum: this.pageNum,
         orderBy: null,
         order: null,
+        'where.messageType': 1,
         'where.startDateStr': this.systemForm.systemDate && this.systemForm.systemDate[0],
         'where.endDateStr': this.systemForm.systemDate && this.systemForm.systemDate[1],
         'where.titleOrPublisher': this.systemForm.titleOrPublisher,
@@ -135,10 +137,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMsgNoteList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -150,6 +148,7 @@ export default {
     },
     resetForm () {
       this.$refs['systemForm'].resetFields();
+      this.getMsgNoteList();
     }
   }
 }

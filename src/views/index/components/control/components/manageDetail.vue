@@ -23,14 +23,14 @@
           </li>
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
-            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} - {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
           </li>
           <li>
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
             <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
-        <div class="manage_d_c_e">
+        <div class="manage_d_c_e" v-if="controlDetail.eventId !== null">
           <div class="vl_f_666">事件内容：</div>
           <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
@@ -49,7 +49,6 @@
           </div>
           <el-pagination
             style="align-self: flex-start;"
-            @size-change="handleSizeChangeObj"
             @current-change="handleCurrentChangeObj"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -58,7 +57,7 @@
             :total="controlDetail.objectNum">
           </el-pagination>
         </div>
-        <div :class="['vl_control_state', controlState === '0' ? 'vl_control_s' : controlState === '1' ? 'vl_control_o' : 'vl_control_e']"></div>
+        <div :class="['vl_control_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="controlArea(1)">
@@ -71,7 +70,7 @@
               <div id="mapBox"></div>
               <div class="manage_d_s_m_l">
                 <div class="manage_b" style="margin-top: 0;">
-                  <div class="vl_f_333 top">布控设备（12）</div>
+                  <div class="vl_f_333 top">布控设备</div>
                   <div class="dp_box">
                     <div v-for="trackPoint in trackPointList" :key="trackPoint.uid">
                       <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
@@ -80,8 +79,8 @@
                       <el-collapse-transition>
                         <div v-show="trackPoint.isDropdown">
                           <div class="equ_m">
-                            <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{devNum}}）</div>
-                            <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{bayonetNum}}）</div>
+                            <div @click="getEquList('0', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '0'}">摄像头（{{trackPoint.devList ? trackPoint.devList.length : 0}}）</div>
+                            <div @click="getEquList('1', trackPoint)" :class="{'active': trackPointId === trackPoint.uid && tabTypeByScope === '1'}">卡口（{{trackPoint.bayonetList ? trackPoint.bayonetList.length : 0}}）</div>
                           </div>
                           <vue-scroll>
                             <!-- 摄像头 -->
@@ -134,14 +133,14 @@
           </el-collapse-transition>
         </div>
         <!-- 运行情况 -->
-        <div class="manage_d_c_situ" v-if="controlState !== '0'">
+        <div class="manage_d_c_situ" v-if="controlState !== 2">
           <div class="situ_title">运行情况</div>
           <div class="situ_time">
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
-            <div v-if="controlState === '2'"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
+            <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
           </div>
-          <div class="situ_box" v-if="controlState === '1'">
+          <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
               <div>实时监控</div>
               <i class="el-icon-arrow-down" v-show="!dpTwo"></i>
@@ -218,7 +217,7 @@
           </div>
         </div>
         <!-- 布控结果 -->
-        <div class="manage_d_c_result" v-if="controlState !== '0'">
+        <div class="manage_d_c_result" v-if="controlState !== 2 ">
           <div class="result_title">
             <div>布控结果（{{controlResList && controlResList.list && controlResList.list.length}}个）</div>
             <div>
@@ -236,12 +235,14 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
               <el-select
+                value-key="value"
                 v-model="devNameIsKey"
                 filterable
                 remote
                 reserve-keyword
                 placeholder="请输入设备名搜索"
                 size="small"
+                clearable
                 @change="getAlarmSnap"
                 :remote-method="getControlDevice"
                 :loading="loading">
@@ -277,7 +278,6 @@
             </div>
             <el-pagination
               style="align-self: flex-start;"
-              @size-change="handleSizeChangeRes"
               @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
               :page-sizes="[100, 200, 300, 400]"
@@ -309,16 +309,16 @@
     </div>
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
-    <div class="manage_f_box" v-if="controlState === '0'">
+    <div class="manage_f_box" v-if="controlState === 2">
       <el-button type="primary" @click="skip(3)">编辑</el-button>
       <el-button @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
-    <div class="manage_f_box" v-if="controlState === '1'">
+    <div class="manage_f_box" v-if="controlState === 1">
       <el-button type="primary" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
-    <div class="manage_f_box" v-if="controlState === '2'">
+    <div class="manage_f_box" v-if="controlState === 3">
       <el-button type="primary" @click="skipIsCreate">复用</el-button>
       <el-button @click="showDialog('delDialog')">删除</el-button>
     </div>
@@ -435,7 +435,7 @@ export default {
   mounted () {
     this.resetMap();
     this.getControlDetail();
-    if (this.state !== '0') {
+    if (this.state !== 2) {
       this.getAlarmSnap();
     }
   },
@@ -675,19 +675,14 @@ export default {
       })
     },
     // 布控对象列表分页
-    handleSizeChangeObj (size) {
-      this.pageSzieObj = size;
-      this.getControlObjList();
-    },
-    // 布控对象列表分页
     handleCurrentChangeObj (page) {
       this.pageNumObj = page;
       this.getControlObjList();
     },
     // 获取所有布控设备
-    getControlDevice () {
+    getControlDevice (query) {
       const params = {
-        name: this.devNameIsKey
+        name: query
       }
       getControlDevice(params).then(res => {
         if (res && res.data) {
@@ -720,11 +715,6 @@ export default {
           })
         }
       })
-    },
-    // 布控结果列表分页
-    handleSizeChangeRes (size) {
-      this.pageSzieRes = size;
-      this.getAlarmSnap();
     },
     // 布控结果列表分页
     handleCurrentChangeRes (page) {
@@ -943,7 +933,7 @@ export default {
     // 初始化地图
     resetMap () {
       let _this = this;
-      _this.controlState = _this.$route.query.state;
+      console.log(_this.controlState)
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
