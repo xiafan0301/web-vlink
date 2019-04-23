@@ -152,7 +152,7 @@ export default {
             ScpGETbasePortraitInfo({idNo: this.numberValidateForm.idCard})
                 .then(res => {
                   if (res.data) {
-                    this.curImageUrl2 = res.data;
+                    this.curImageUrl2 = res.data.photoUrl;
                   } else {
                     this.$message({
                       message: '您所查询的人员不在信息库中',
