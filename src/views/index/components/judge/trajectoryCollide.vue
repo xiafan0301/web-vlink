@@ -80,7 +80,7 @@
       </div>
     </el-dialog>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" src="../../../../assets/video/demo.mp4"></video>
+      <video id="vlJtcLargeV" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{mapData[curVideo.indexNum] ? mapData[curVideo.indexNum].deviceName : ''}}</div>
@@ -103,7 +103,7 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api.judge.js';
 export default {
   data() {
     return {

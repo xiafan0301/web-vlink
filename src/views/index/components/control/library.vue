@@ -145,7 +145,7 @@
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
             <div class="list_info" v-for="item in protraitMemberList.list" :key="item.uid">
-              <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;"></div>
+              <div class="list_img"><img :src="item.photoUrl" alt=""></div>
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
@@ -181,7 +181,7 @@
           </template>
           <template v-else>
             <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
-              <div class="list_img"><img :src="item.vehicleImagePath" alt="" style="width: 100%;"></div>
+              <div class="list_img"><img :src="item.vehicleImagePath" alt=""></div>
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
@@ -216,16 +216,26 @@
               </div>
             </div>
           </template>
-          <div style="width: 100%;">
+          <div style="width: 100%;" v-show="tabType === '1'">
             <el-pagination
               style="text-align: center;"
-              @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
               :current-page="currentPage"
               :page-sizes="[100, 200, 300, 400]"
-              :page-size="tabType === '1' ? protraitMemberList.pageSize : carMemberList.pageSize"
+              :page-size="protraitMemberList.pageSize"
               layout="total, prev, pager, next, jumper"
-              :total="tabType === '1' ? protraitMemberList.total : carMemberList.total">
+              :total="protraitMemberList.total">
+            </el-pagination>
+          </div>
+          <div style="width: 100%;" v-show="tabType === '2'">
+            <el-pagination
+              style="text-align: center;"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="carMemberList.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="carMemberList.total">
             </el-pagination>
           </div>
         </div>
@@ -244,10 +254,9 @@
                 <el-upload
                   :disabled="isAddDisabled"
                   ref="uploadPic"
-                  multiple
                   accept="image/*"
                   :limit="1"
-                  action="http://apidev.aorise.org/vlink-base/appendix"
+                  :action="uploadUrl"
                   :on-exceed="uploadPicExceed"
                   :data="{projectType: 2}"
                   list-type="picture-card"
@@ -320,7 +329,8 @@
                     <el-input
                       :disabled="isAddDisabled"
                       type="textarea"
-                      :rows="4"
+                      :rows="2"
+                      :maxlength="100"
                       resize="none"
                       placeholder="描述"
                       v-model="portraitForm.remarks">
@@ -390,7 +400,8 @@
                     <el-input
                       :disabled="isAddDisabled"
                       type="textarea"
-                      :rows="4"
+                      :rows="2"
+                      :maxlength="100"
                       resize="none"
                       placeholder="描述"
                       v-model="carForm.desci">
@@ -433,20 +444,21 @@
     <template v-else>
       <template v-if="tabType === '1'">
         <!-- 全部人像列表 -->
-        <div is="allPortrait" v-if="groupId === null" :tabType="tabType" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)"></div>
+        <div is="allPortrait" v-if="groupId === null" :tabType="tabType" :protraitMemberList="protraitMemberList" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
         <!-- 自定义人像列表 -->
-        <div is="customPortrait" v-else :tabType="tabType" :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="getPortraitList(groupId, groupIndex)" @changePage="changePage"></div>
+        <div is="customPortrait" v-else :tabType="tabType" :protraitMemberList="protraitMemberList" :groupId="groupId" :groupName="groupName" @getPortraitList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
       </template>
       <template v-else>
         <!-- 全部车像列表 -->
-        <div is="allCar" v-if="groupId === null" :tabType="tabType" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)"></div>
+        <div is="allCar" v-if="groupId === null" :tabType="tabType" :carMemberList="carMemberList" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
         <!-- 自定义车像列表 -->
-        <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="getVehicleList(groupId, groupIndex)" @changePage="changePage"></div>
+        <div is="customCar" v-else :tabType="tabType" :carMemberList="carMemberList" :groupId="groupId" :groupName="groupName" @getVehicleList="handleCurrentChange" :currentPage="currentPage" @changePage="changePage"></div>
       </template>
     </template>
   </div>
 </template>
 <script>
+import { ajaxCtx } from '@/config/config.js';
 import {checkIdCard, checkName, checkPlateNumber} from '@/utils/validator.js';
 import allCar from './components/allCar.vue';
 import allPortrait from './components/allPortrait.vue';
@@ -460,6 +472,7 @@ export default {
   components: {allCar, allPortrait, customCar, customPortrait, groupDialog},
   data () {
     return {
+      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
       // 侧边栏参数
       tabType: '1',
       group: null,//搜索组
@@ -486,6 +499,7 @@ export default {
       groupListCar: [],
       pageType: '1',//页面类型，默认为组成员页，1-组成员页，2-组设置页
       groupId: null,//分组id
+      lastGroupId: null,//用于记录之前的分组id
       sexList: [
         {label: '未知', value: 0},
         {label: '男', value: 1},
@@ -627,16 +641,9 @@ export default {
         this.getVehicleList(null, 0);
       }
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      if (this.tabType === '1') {
-        this.getPortraitList(this.groupId, this.groupIndex);
-      } else {
-        this.getVehicleList(this.groupId, this.groupIndex);
-      }
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
+      this.currentPage = page;
       if (this.tabType === '1') {
         this.getPortraitList(this.groupId, this.groupIndex);
       } else {
@@ -786,14 +793,14 @@ export default {
             console.log(this.portraitForm)
           // 人像不存在
           } else {
-            this.fileList = [];
-            this.portraitForm.name = '';
-            this.portraitForm.sex = '';
-            this.portraitForm.nation = null;
-            this.portraitForm.idType = null;
-            this.portraitForm.birthDate = null;
-            this.portraitForm.groupIds = [];
-            this.portraitForm.remarks = '';
+            // this.fileList = [];
+            // this.portraitForm.name = '';
+            // this.portraitForm.sex = '';
+            // this.portraitForm.nation = null;
+            // this.portraitForm.idType = null;
+            // this.portraitForm.birthDate = null;
+            // this.portraitForm.groupIds = [];
+            // this.portraitForm.remarks = '';
             this.isAddDisabled = false;
             if (this.$refs['portraitForm']) {
               this.$nextTick(() => {
@@ -861,14 +868,14 @@ export default {
             this.isAddDisabled = true;
           // 不存在车像
           } else {
-            this.fileList = []; 
-            this.carForm.vehicleNumber = null;
-            this.carForm.vehicleColor = null;
-            this.carForm.vehicleType = null;
-            this.carForm.numberType = null;
-            this.carForm.numberColor = null;
-            this.carForm.groupIds = [];
-            this.carForm.desci = '';
+            // this.fileList = []; 
+            // this.carForm.vehicleNumber = null;
+            // this.carForm.vehicleColor = null;
+            // this.carForm.vehicleType = null;
+            // this.carForm.numberType = null;
+            // this.carForm.numberColor = null;
+            // this.carForm.groupIds = [];
+            // this.carForm.desci = '';
             this.isAddDisabled = false;
           }
         })
@@ -996,10 +1003,14 @@ export default {
     },
     // 获取全部人像列表，或者根据组id获取人像列表
     getPortraitList (groupId, index, pageType, groupName) {
-      this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
       this.groupName = groupName;
+      if (this.groupId !== this.lastGroupId) {
+        this.currentPage = 1;
+        this.pageNum = 1;
+      }
+      this.lastGroupId = this.groupId;
       let params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
@@ -1020,6 +1031,7 @@ export default {
           if (pageType === '2') {
             this.pageType = pageType;
           }
+          console.log(this.currentPage, 'currentPage')
         }
       }).finally(() => {
         this.loading = false;
@@ -1027,11 +1039,14 @@ export default {
     },
     //  获取全部车像列表，或者根据组id获取车像列表
     getVehicleList (groupId, index, pageType, groupName) {
-      this.currentPage = 1;
       this.groupIndex = index;
       this.groupId = groupId;
       this.groupName = groupName;
-      console.log(this.groupName)
+      if (this.groupId !== this.lastGroupId) {
+        this.currentPage = 1;
+        this.pageNum = 1;
+      }
+      this.lastGroupId = this.groupId;
       let params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
@@ -1053,6 +1068,7 @@ export default {
           if (pageType === '2') {
             this.pageType = pageType;
           }
+          console.log(this.currentPage, 'currentPage')
         }
       }).finally(() => {
         this.loading = false;
@@ -1201,10 +1217,13 @@ export default {
         box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
         display: flex;
         justify-content: space-between;
-        overflow: hidden;
         .list_img{
           width: 50%;
           padding-right: 20px;
+          > img{
+            width: 100%;
+            height: 100%;
+          }
         }
         .list_data{
           width: 50%;
@@ -1397,33 +1416,18 @@ export default {
           text-align: right;
         }
       }
-      // .group_li{
-      //   width: 100%;
-      //   position: absolute;
-      //   left: 0;
-      //   z-index: 999;
-      //   margin-top: 4px;
-      //   background:rgba(255,255,255,1);
-      //   border:1px solid rgba(211,211,211,1);
-      //   border-radius:4px;
-      //   .el-checkbox{
-      //     display: block;
-      //     height: 30px;
-      //     line-height: 30px;
-      //     margin-left: 0px;
-      //     padding-left: 20px;
-      //     &:hover{
-      //       background:rgba(237,249,255,1);
-      //       border-radius: 4px;
-      //     }
-      //   }
-      // }
+      .el-form-item{
+        margin-bottom: 10px;
+      }
       .el-button.active{
         background: #fff;
         border-color: #409EFF;
         color: #409EFF;
       }
     }
+  }
+  .el-dialog__wrapper .el-dialog__body{
+    padding: 0px 30px;
   }
 }
 </style>

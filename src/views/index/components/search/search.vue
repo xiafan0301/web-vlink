@@ -198,8 +198,8 @@
           /*border-color: #0C70F8!important;*/
           /*color: #FFFFFF;*/
           /*&:hover {*/
-            /*background-color: #409EFF!important;*/
-            /*border-color: #409EFF!important;*/
+          /*background-color: #409EFF!important;*/
+          /*border-color: #409EFF!important;*/
           /*}*/
         }
         .el-select {
@@ -279,7 +279,7 @@
             .vl_jfo_box_item {
               float: left;
               cursor: pointer;
-              width: 3.42rem;
+              width: 3.28rem;
               height: 1.8rem;
               padding: .2rem;
               margin-right: .2rem;

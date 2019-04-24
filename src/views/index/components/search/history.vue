@@ -46,7 +46,7 @@
   </div>
 </template>
 <script>
-import {ScpGETretrievalHisList} from '../../api/api.js';
+import {ScpGETretrievalHisList} from '../../api/api.search.js';
 export default {
   data () {
     return {

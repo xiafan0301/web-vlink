@@ -7,6 +7,7 @@ export const testData = [
     deviceList: [
       {
         uid: 2,
+        type: 1, // 1-摄像头 2-卡口
         deviceName: '天心区芙蓉路',
         isChildChecked: false,
         latitude: 27.907956,
@@ -14,6 +15,7 @@ export const testData = [
       },
       {
         uid: 3,
+        type: 1, // 1-摄像头 2-卡口
         deviceName: '天心区芙蓉路1',
         isChildChecked: false,
         latitude: 27.908051,
@@ -21,6 +23,7 @@ export const testData = [
       },
       {
         uid: 4,
+        type: 2, // 1-摄像头 2-卡口
         deviceName: '天心区芙蓉路2',
         isChildChecked: false,
         latitude: 27.907359,
@@ -36,6 +39,7 @@ export const testData = [
     deviceList: [
       {
         uid: 6,
+        type: 2, // 1-摄像头 2-卡口
         deviceName: '溆浦县政府1',
         isChildChecked: false,
         latitude: 27.908288,
@@ -43,6 +47,7 @@ export const testData = [
       },
       {
         uid: 7,
+        type: 2, // 1-摄像头 2-卡口
         deviceName: '溆浦县政府2',
         isChildChecked: false,
         latitude: 27.909264,
@@ -50,6 +55,7 @@ export const testData = [
       },
       {
         uid: 8,
+        type: 1, // 1-摄像头 2-卡口
         deviceName: '溆浦县政府3',
         isChildChecked: false,
         latitude: 27.909738,
