@@ -22,22 +22,26 @@
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="startTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="startTimeOptions"
                   placeholder="选择开始时间">
                 </el-date-picker>
               </div>
               <div class="show_search_ti">
                 <span>结束</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="endTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="endTimeOptions"
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
@@ -114,6 +118,7 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import {dateOrigin} from '@/utils/util.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
@@ -134,8 +139,27 @@ export default {
 
       videoRecordList: [],
 
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      startTime: new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6),
+      endTime: dateOrigin(true),
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d > this.endTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d < this.startTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   watch: {
@@ -158,6 +182,27 @@ export default {
       // 第一次打开
       this.showMenuActive = true;
     }
+
+    // /:uid/:deviceName
+    let _uid = this.$route.query.uid;
+    if (_uid) {
+      let _name = this.$route.query.deviceName;
+      if (!_name) { _name = ''; }
+      // 看的是之前的24小时
+      let _nd = new Date();
+      this.endTime = _nd;
+      this.startTime = new Date(_nd.getTime() - 3600 * 1000 * 24);
+      this.videoList.splice(0, 1, {
+        type: 2,
+        title: _name,
+        startTime: this.startTime,
+        endTime: this.endTime,
+        video: {
+          uid: _uid
+        }
+      });
+    }
+    console.log(_uid);
 
     // 监控列表
     this.getDeviceList();

@@ -74,6 +74,7 @@
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="startTime"
@@ -85,6 +86,7 @@
               <div class="show_search_ti">
                 <span>结束</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="endTime"
@@ -154,6 +156,7 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import { dateOrigin } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList } from "@/views/index/api/api.video.js";
@@ -177,8 +180,8 @@ export default {
 
       videoRecordList: [],
 
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      startTime: new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6),
+      endTime: dateOrigin(true)
     }
   },
   watch: {
