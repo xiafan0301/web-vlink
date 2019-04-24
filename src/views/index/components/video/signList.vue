@@ -6,20 +6,26 @@
           <div class="show_search_ti">
             <span>开始</span>
             <el-date-picker
+              class="vl_vid_sdater"
               style="width: 175px"
               size="small"
               v-model="startTime"
               type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="startTimeOptions"
               placeholder="选择开始时间">
             </el-date-picker>
           </div>
           <div class="show_search_ti">
             <span>结束</span>
             <el-date-picker
+              class="vl_vid_sdater"
               style="width: 175px"
               size="small"
               v-model="endTime"
               type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="endTimeOptions"
               placeholder="选择结束时间">
             </el-date-picker>
           </div>
@@ -101,7 +107,8 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item"
+              :oConfig="{signEmit: true}" @signEmit="signEmit"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" :tipMsg="tipMsg"></div>
@@ -113,7 +120,7 @@
 </template>
 <script>
 import { apiVideoList, apiVideoSignPeopleList, apiSignContentList, apiVideoSignDel } from "@/views/index/api/api.video.js";
-import { formatDate } from "@/utils/util.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
@@ -127,12 +134,32 @@ export default {
       searchLoading: false,
       signList: [],
       searchVal: '',
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      startTime: new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6),
+      endTime: dateOrigin(true),
       signPeople: '',
       signContent: '',
       signPeopleList: [],
-      signContentList: []
+      signContentList: [],
+
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d > this.endTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d < this.startTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   mounted () {
@@ -186,8 +213,8 @@ export default {
     },
 
     searchReset () {
-      this.startTime = new Date(new Date() - 3600 * 1000 * 24 * 7);
-      this.endTime = new Date();
+      this.startTime = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6);
+      this.endTime = dateOrigin(true);
       this.signPeople = '';
       this.signContent = '';
     },
@@ -264,6 +291,10 @@ export default {
         }
       }).then(action => {
       });
+    },
+    signEmit () {
+      console.log('标记成功');
+      this.searchSubmit();
     }
   }
 }
