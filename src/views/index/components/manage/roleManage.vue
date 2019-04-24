@@ -56,7 +56,7 @@
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置权限</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除角色</span>
           </template>
         </el-table-column>
       </el-table>
@@ -481,7 +481,7 @@ export default {
     // 取消编辑
     cancelEdit (form) {
       this.isShowOrganError = false;
-      this.$refs[form].resetFileds();
+      this.$refs[form].resetFields();
       this.editRoleDialog = false;
     },
     // 显示查看权限弹出框

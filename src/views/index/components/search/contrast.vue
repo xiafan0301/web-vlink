@@ -88,7 +88,8 @@
 </template>
 <script>
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById, JtcPUTAppendixsOrder} from '../../api/api';
+import {ScpGETbasePortraitInfo, ScpGETportraitCmpInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js'
 export default {
   data () {
     return {
@@ -151,7 +152,7 @@ export default {
             ScpGETbasePortraitInfo({idNo: this.numberValidateForm.idCard})
                 .then(res => {
                   if (res.data) {
-                    this.curImageUrl2 = res.data;
+                    this.curImageUrl2 = res.data.photoUrl;
                   } else {
                     this.$message({
                       message: '您所查询的人员不在信息库中',

@@ -68,6 +68,18 @@ export const addVideoRound = data => {
   })
 }
 /**
+ * 关闭轮巡
+ * @param {Object} data 接口入参
+ */
+export const closeVideoRound = data => {
+  return request({
+    url: '/round/' + data.id,
+    method: 'put',
+    data,
+    mode: videoModeName
+  })
+}
+/**
  * 分页查询视频下载记录接口
  * @param {Object} data 接口入参
  */

@@ -3,7 +3,7 @@ export const dataList = {
   eventLevel: 2, // 事件等级
   handleUnit: 3, // 处理单位
   identity: 4, // 上报者身份
-  eventSource: 5, // 事件来源  中心端--17 app端--16
+  eventSource: 5, // 事件来源  中心端--1 app端--2
   participateType: 6, // 参与类型
   sourceWeb: 17, // 来源中心端
   eventStatus: 7, // 事件状态
@@ -12,7 +12,7 @@ export const dataList = {
   ctcStatus: 9, // 调度事件状态
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
-  imgId: 14, // 图片id
-  videoId: 15, // 视频id
-  fileId: 37, // 文件id
+  imgId: 1, // 图片id
+  videoId: 2, // 视频id
+  fileId: 3, // 文件id
 }

@@ -113,11 +113,11 @@
             <template slot-scope="scope">
               <span class="operation_btn">查看</span>
               <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn">编辑</span>
+              <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
               <span style="color: #f2f2f2">|</span>
               <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
               <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn" @click="showCloseDialog(scope)">关闭</span>
+              <span class="operation_btn" @click="showCloseDialog(scope.row)">关闭</span>
             </template>
           </el-table-column>
         </el-table>
@@ -142,7 +142,7 @@
         <span style="color: #999999;">关闭后不可恢复。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="closeRatationDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="closeRatationDialog = false">确认</el-button>
+          <el-button class="operation_btn function_btn" @click="sureCloseRatation">确认</el-button>
         </div>
       </el-dialog>
       <!--删除弹出框-->
@@ -165,7 +165,7 @@
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
-import { apiVideoRoundList, apiDelVideoRoundList } from '@/views/index/api/api.video.js';
+import { apiVideoRoundList, apiDelVideoRoundList, closeVideoRound } from '@/views/index/api/api.video.js';
 export default {
   data () {
     return {
@@ -224,18 +224,40 @@ export default {
       this.getList();
     },
     // 跳至新增轮巡页面
-    skipAddRatotionPage () {
-      this.$router.push({name: 'add_patrol'});
+    skipAddRatotionPage (obj) {
+      let patrolId;
+      if (obj) {
+        patrolId = obj.id;
+      }
+      this.$router.push({name: 'add_patrol', query: { id: patrolId}});
     },
     // 显示关闭轮巡弹出框
     showCloseDialog (obj) {
-      // console.log(obj);
       this.deleteId = obj.id;
       this.closeRatationDialog = true;
     },
+    // 关闭轮巡
+    sureCloseRatation () {
+      const params = {
+        id: this.deleteId,
+        status: 3 // 0-待开始 1-进行中 2-已结束
+      }
+      closeVideoRound(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '关闭成功',
+              customClass: 'request_tip'
+            });
+            this.closeRatationDialog = false;
+            this.getList();
+          }
+        })
+        .catch(() => {})
+    },
     // 显示删除轮巡弹出框
     showDeleteDialog (obj) {
-      // console.log(obj);
       this.deleteId = obj.id;
       this.delRotationDialog = true;
     },

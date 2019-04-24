@@ -21,7 +21,9 @@
                 <el-radio :label="false">不发布</el-radio>
                 <el-radio :label="true">发布</el-radio>
               </el-radio-group>
-              
+              <div>
+                
+              </div>
             </div>
             <div class="handle-type">
               <p class="title">请选择处理方式:</p>
