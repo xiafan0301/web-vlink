@@ -253,7 +253,7 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         justify-content: space-between;
-        padding: 10px 20px;
+        padding: 10px 20px 0 20px;
         line-height: 40px;
         > div:nth-child(1){
           display: flex;
@@ -390,6 +390,21 @@ export default {
                 }
               }
             }
+          }
+        }
+      }
+      .bread_crumbs{
+        margin: 20px 20px 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(221,221,221,1);
+        > span:nth-child(5){
+          color: #666;
+        }
+        > span:not(:nth-child(5)){
+          color: #999;
+          cursor: pointer;
+          &:hover{
+            color: #666;
           }
         }
       }

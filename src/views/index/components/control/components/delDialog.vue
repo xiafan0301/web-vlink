@@ -30,10 +30,12 @@ export default {
     },
     // 删除布控
     delControl () {
-      delControl(this.controlId).then(() => {
-        this.delManageDialog = false;
-        this.$message.success('删除成功');
-        this.$emit('getControlList');
+      delControl(this.controlId).then((res) => {
+        if (res) {
+          this.delManageDialog = false;
+          this.$message.success('删除成功');
+          this.$emit('getControlList');
+        }
       })
     }
   }

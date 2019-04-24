@@ -91,7 +91,6 @@
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -167,10 +166,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMutualHelpList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -182,6 +177,7 @@ export default {
     },
     resetForm () {
       this.$refs['helpForm'].resetFields();
+      this.getMutualHelpList();
     }
   }
 }
