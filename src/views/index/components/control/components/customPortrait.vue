@@ -1,6 +1,9 @@
 <template>
 <!-- 自定义人像列表 -->
   <div class="set_list">
+    <div class="bread_crumbs">
+      <span @click="skipIsList">布控库</span><i class="el-icon-arrow-right"></i><span @click="skipIsList">人像库</span><i class="el-icon-arrow-right"></i><span>组设置</span>
+    </div>
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">{{gName}}</span><i class="vl_icon vl_icon_control_25" @click="popGroupDialog('2')"></i><i class="vl_icon vl_icon_control_24" @click="delGroupDialog = true;"></i></div>
@@ -19,7 +22,7 @@
     </div>
     <div class="list_box">
       <div class="list_info" v-for="item in memberList" :key="item.uid">
-        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;"></div>
+        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
@@ -55,7 +58,6 @@
       <div style="width: 100%;">
         <el-pagination
           style="text-align: center;"
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
@@ -104,13 +106,9 @@ import groupDialog from './groupDialog.vue';
 import {copyPortrait, removePortrait, delPortraitGroupById, getGroupListIsPortrait} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList', 'groupId', 'groupName', 'tabType'],
+  props: ['protraitMemberList', 'groupId', 'groupName', 'tabType', 'currentPage'],
   data () {
     return {
-      // 翻页数据
-      currentPage: 1,
-      pageSzie: 10,
-      pageNum: 1,
       allChecked: false,
       memberList: [],//成员列表数据
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
@@ -152,12 +150,17 @@ export default {
      console.log(this.gName)
   },
   methods: {
+    skipIsList () {
+      this.$emit('changePage');
+    },
     // 删除分组
     delPortraitGroupById () {
-      delPortraitGroupById(this.groupId).then(() => {
-        this.delGroupDialog = false;
-        this.$message.success('删除成功');
-        this.$emit('changePage');
+      delPortraitGroupById(this.groupId).then((res) => {
+        if (res) {
+          this.delGroupDialog = false;
+          this.$message.success('删除成功');
+          this.$emit('changePage');
+        }
       })
     },
     // 获取人像组列表
@@ -198,11 +201,8 @@ export default {
         }
       })
     },
-    handleSizeChange () {
-
-    },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.$emit('getPortraitList', page);//重新通知父组件获取人像列表
     },
       // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
@@ -227,10 +227,12 @@ export default {
         groupId: groupId,
         ids: member
       }
-      copyPortrait(data).then(() => {
-        this.isShowGroupCopy = false;
-        this.$message.success('复制成功');
-        this.$emit('getPortraitList');//重新通知父组件获取人像列表
+      copyPortrait(data).then((res) => {
+        if (res) {
+          this.isShowGroupCopy = false;
+          this.$message.success('复制成功');
+          this.$emit('getPortraitList', this.currentPage);//重新通知父组件获取人像列表
+        }
       })
     },
     // 批量移出人像到别的组
@@ -241,10 +243,12 @@ export default {
         groupId: this.groupId,
         ids: member
       }
-      removePortrait(data).then(() => {
-        this.removeGroupDialog = false;
-        this.$message.success('移出成功');
-        this.$emit('getPortraitList');//重新通知父组件获取人像列表
+      removePortrait(data).then((res) => {
+        if (res) {
+          this.removeGroupDialog = false;
+          this.$message.success('移出成功');
+          this.$emit('getPortraitList', this.currentPage);//重新通知父组件获取人像列表
+        }
       }).finally(() => {
         this.loadingBtn = false;
       })

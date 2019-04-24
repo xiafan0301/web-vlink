@@ -5,6 +5,8 @@
         <router-link :to="{name: 'video_patrol'}">视频巡逻</router-link>
       </li>
       <li>
+        <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
+        <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
         <router-link :to="{name: 'video_playback'}">录像回放</router-link>
       </li>
       <li>

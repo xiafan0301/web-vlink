@@ -115,10 +115,11 @@ export default {
     getVideoRecordList () {
       this.searchLoading = true;
       // 播放类型 1:视频巡逻 2:视频回放 3:录像记录
+      console.log('this.time', this.time);
       apiVideoRecordPageList({
         'where.playType': 3,
-        'where.startDate': formatDate(this.time[0], 'yyyy-MM-dd 00:00:00'),
-        'where.endDate': formatDate(this.time[1], 'yyyy-MM-dd 23:59:59'),
+        'where.startDate': (this.time && this.time[0]) ? formatDate(this.time[0], 'yyyy-MM-dd 00:00:00') : '',
+        'where.endDate': (this.time && this.time[1]) ? formatDate(this.time[1], 'yyyy-MM-dd 23:59:59') : '',
         'pageNum': this.pagination.currentPage,
         'pageSize': this.pagination.pageSize
       }).then(res => {

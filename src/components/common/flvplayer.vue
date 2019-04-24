@@ -21,54 +21,67 @@
     <!-- 暂停按钮 -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
     <div class="flvplayer_bot" :class="{'flvplayer_bot_dis': videoLoading}">
-      <div class="flvplayer_bot_t">{{oData.title}}</div>
+      <div class="flvplayer_bot_t com_ellipsis">{{oData.title}}</div>
       <div class="flvplayer_bot_o">
-        <!-- 播放/暂停 -->
-        <span class="vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
-        <span class="vl_icon vl_icon_v22" v-show="!playActive" title="播放" @click="playerPlay(true)"></span>
-        <!-- 音量 声音大小（0-1之间） myPlayer.volume(0.5); -->
-        <span class="player_volume">
-          <div>
-            <el-slider
-              v-model="volume"
-              :min="0"
-              :max="1"
-              :step="0.001"
-              vertical
-              height="120px">
-            </el-slider>
-          </div>
-          <span class="vl_icon" :class="{
-              'vl_icon_v23': volumeAble && volume > 0,
-              'vl_icon_v232': !volumeAble || volume <= 0
-            }" title="音量" @click="playerVolumeAble">
+        <span>
+          <!-- 播放/暂停 -->
+          <span class="flvplayer_opt vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
+          <span class="flvplayer_opt vl_icon vl_icon_v22" v-show="!playActive" title="播放" @click="playerPlay(true)"></span>
+          <!-- 音量 声音大小（0-1之间） myPlayer.volume(0.5); -->
+          <span class="flvplayer_opt player_volume">
+            <div>
+              <el-slider
+                v-model="volume"
+                :min="0"
+                :max="1"
+                :step="0.001"
+                vertical
+                height="120px">
+              </el-slider>
+            </div>
+            <span class="vl_icon" :class="{
+                'vl_icon_v23': volumeAble && volume > 0,
+                'vl_icon_v232': !volumeAble || volume <= 0
+              }" title="音量" @click="playerVolumeAble">
+            </span>
           </span>
         </span>
-        <!-- 标记 -->
-        <span v-if="config.sign" class="vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
-        <!-- 录视频 -->
-        <span class="vl_icon vl_icon_v25 player_tran" title="录视频"></span>
-        <!-- 截屏 -->
-        <span v-if="config.cut" class="vl_icon vl_icon_v26 player_cut" title="截屏"></span>
-        <!-- 全屏 -->
-        <span v-show="!fullScreen" class="vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
-        <!-- 局部放大 -->
-        <template v-if="fullScreen">
-          <span v-if="!enlarge" class="vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
-          <span v-else class="vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
-        </template>
-        <!-- 更多 -->
-        <span v-if="!fullScreen" class="vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
-        <span v-if="fullScreen" class="vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+        <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini}">
+          <span class="flvplayer_bot_omh">
+            <!-- 标记 -->
+            <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
+            <!-- 录视频 -->
+            <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
+            <!-- 截屏 -->
+            <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
+            <!-- 全屏 -->
+            <span v-show="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
+            <!-- 局部放大 -->
+            <template v-if="fullScreen">
+              <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
+              <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
+              <!-- 退出全屏 -->
+              <span v-if="fullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+            </template>
+          </span>
+          <!-- 更多 -->
+          <span v-if="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
+        </span>
       </div>
     </div>
     <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
-      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">当前监控：{{oData.title}}</div>
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666; font-size: 15px;">当前监控：{{oData.title}}</div>
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding-left: 30px;">
         <el-form-item prop="content">
-          <el-select v-model="signForm.content" placeholder="请选择标记内容">
+          <el-select v-model="signForm.content" placeholder="请选择标记内容" style="width: 200px;">
             <el-option v-for="(item, index) in signContentList" :label="item.content" :value="item.uid" :key="'sign_content_list' + index"></el-option>
           </el-select>
+          <a href="javascript: void(0);" @click="signForm.addSign = true" class="player_add_sign"><span class="el-icon-plus"></span>新建标记内容</a>
+        </el-form-item>
+        <el-form-item prop="addSignContent" v-show="signForm.addSign">
+          <el-input :clearable="true" v-model="signForm.addSignContent" placeholder="新建标记内容" style="width: 200px;"></el-input>
+          <el-button type="primary" :disabled="addSignSubmitAble" @click="addSignSubmit('signForm')" size="mini" style="margin-left: 15px;">确定</el-button>
+          <el-button size="mini" @click="signForm.addSign = false">取消</el-button>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
@@ -80,7 +93,7 @@
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack } from "@/views/index/api/api.video.js";
+import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -95,13 +108,17 @@ export default {
    * oConfig: 播放配置信息
    *    pause: 开始是否暂停，默认为false
    *    sign: 是否可标记，默认为true
+   *    signEmit: 标记成功后是否需要emit，默认为false
    *    close: 是否可删除，默认为true
    *    fullscreen: 是否可全屏，默认为true
    *    cut: 是否可截屏，默认为true
+   * bResize: 播放容器尺寸变化
    */
-  props: ['index', 'oData', 'oConfig'],
+  props: ['index', 'oData', 'oConfig', 'bResize'],
   data () {
     return {
+      mini: false, // 主要控制播放器操作栏显示方式
+
       videoLoading: true,
       videoLoadingFailed: false,
       videoLoadingTimeout: 20 * 1000,
@@ -114,6 +131,7 @@ export default {
       config: {
         pause: false, // 开始是否暂停，默认为false(播放)
         sign: true, // 是否可标记
+        signEmit: false, // 标记成功后是否需要emit
         close: true, // 是否可删除
         fullscreen: true, // 是否可全屏
         cut: true
@@ -130,11 +148,16 @@ export default {
       signDialogVisible: false,
       signForm: {
         signTime: '',
-        content: ''
+        content: '',
+        addSign: false,
+        addSignContent: ''
       },
       signFormRules: {
         content: [
           { required: true, message: '请选择标记内容', trigger: 'change' }
+        ],
+        addSignContent: [
+          { required: true, message: '请填写标记内容', trigger: 'change' }
         ]
       },
       signSubmitLoading: false
@@ -161,6 +184,27 @@ export default {
       if (this.video) {
         this.video.volume = this.volume;
       }
+    },
+    bResize () {
+      window.setTimeout(() => {
+        this.sizeHandler();
+      }, 500);
+    }
+  },
+  computed: {
+    // 标记内容是否重复控制
+    addSignSubmitAble: function () {
+      let flag = true;
+      if (this.signForm.addSignContent) {
+        flag = false;
+        for (let i = 0; i < this.signContentList.length; i++) {
+          if (this.signContentList[i].content === this.signForm.addSignContent) {
+            flag = true;
+            break;
+          }
+        }
+      }
+      return flag;
     }
   },
   mounted () {
@@ -170,8 +214,19 @@ export default {
     }
     this.initPlayer();
     // $(window).on('unload', this.videoUnloadSave);
+    this.sizeHandler();
   },
   methods: {
+    // sizeHandler
+    sizeHandler () {
+      // console.log('miniHandler_' + this.index + '_' + $('#' + this.flvplayerId + '_container').width());
+      if ($('#' + this.flvplayerId + '_container').width() < 500) {
+        this.mini = true;
+      } else {
+        this.mini = false;
+      }
+    },
+
     // 视频播放
     initPlayer () {
       this.videoLoadingFailed = false;
@@ -179,9 +234,11 @@ export default {
       if (this.oData.type === 1) {
         apiVideoPlay(obj).then(res => {
           if (res && res.data) {
-            // let ind = res.data.length - 1;
-            // let ird = Math.round(Math.random() * ind);
             this.initPlayerDo(res.data.liveFlvUrl);
+          } else {
+            // 未获取到视频
+            console.log('未获取到视频');
+            this.videoLoadingFailed = true;
           }
         }).catch(error => {
           console.log("apiVideoPlay error：", error);
@@ -196,6 +253,10 @@ export default {
         apiVideoPlayBack(obj).then(res => {
           if (res && res.data) {
             this.initPlayerDo(res.data.liveFlvUrl);
+          } else {
+            // 未获取到视频
+            console.log('未获取到视频');
+            this.videoLoadingFailed = true;
           }
         }).catch(error => {
           console.log("apiVideoPlayBack error：", error);
@@ -399,23 +460,63 @@ export default {
       });
     },
     signSubmit (formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
+      this.$refs[formName].validateField("content", (errorMessage) => {
+        // errorMessage 为空就是验证成功了
+        if (!errorMessage) {
           this.signSubmitLoading = true;
           apiVideoSign({
             contentId: this.signForm.content,
             deviceId: this.oData.video.uid,
-            signTime: formatDate(this.signForm.signTime),
-          }).then(() => {
-            this.signSubmitLoading = false;
-            this.signDialogVisible = false;
-            this.$message({
-              message: '标记成功！',
-              type: 'success'
-            });
+            signTime: formatDate(this.signForm.signTime - 1000 * 60 * 60 * 24),
+          }).then((data) => {
+            if (data) {
+              this.signSubmitLoading = false;
+              this.signDialogVisible = false;
+              this.$message({
+                message: '标记成功！',
+                type: 'success'
+              });
+              if (this.config.signEmit) {
+                this.$emit('signEmit');
+              }
+            }
           }).catch(error => {
             console.log("apiSignContentList error：", error);
             this.signSubmitLoading = false;
+          });
+        } else {
+          // console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    /* addSignSubmitAble () {
+      let flag = false;
+      if (!this.signForm.addSignContent) {
+
+      }
+      return flag;
+    }, */
+    addSignSubmit (formName) {
+      this.$refs[formName].validateField("addSignContent", (errorMessage) => {
+        // errorMessage 为空就是验证成功了
+        if (!errorMessage) {
+          // this.signSubmitLoading = true;
+          apiVideoSignContent({
+            content: this.signForm.addSignContent,
+            uid: '0'
+          }).then((data) => {
+            if (data) {
+              this.getSignContent();
+              this.$message({
+                message: '新建标记内容成功！',
+                type: 'success'
+              });
+              this.signForm.addSignContent = '';
+            }
+          }).catch(error => {
+            console.log("apiSignContentList error：", error);
+            // this.signSubmitLoading = false;
           });
         } else {
           // console.log('error submit!!');
@@ -519,37 +620,70 @@ export default {
     > .flvplayer_bot_o {
       float: right;
       padding-top: 12px; padding-right: 20px;
-      > span {
-        display: inline-block;
-        margin: 0 8px;
-        width: 24px; height: 24px;
-      }
-      > .player_cut { }
-      > .player_tran { cursor: not-allowed; }
-      > .player_volume {
-        position: relative;
-        width: 24px; height: 24px;
-        > div {
-          display: none;
-          position: absolute; left: -7px; bottom: 24px;
-          width: 38px;
-          padding: 20px 0 20px 0;
-          text-align: center;
-          background-color: #000;
-          background-color: rgba(0, 0, 0, .7);
-          border-radius: 4px;
-        }
-        > .vl_icon {
-          transition: none;
-        }
-        &:hover {
-          > div { display: block; }
-        }
-      }
     }
   }
   &:hover {
     > .flvplayer_bot { bottom: 0; }
+  }
+}
+.flvplayer_bot_o {
+  > span {
+    display: inline-block;
+    > .player_volume {
+      position: relative;
+      width: 24px; height: 24px;
+      > div {
+        display: none;
+        position: absolute; left: -7px; bottom: 24px;
+        width: 38px;
+        padding: 20px 0 20px 0;
+        text-align: center;
+        background-color: #000;
+        background-color: rgba(0, 0, 0, .7);
+        border-radius: 4px;
+      }
+      > .vl_icon {
+        transition: none;
+      }
+      &:hover {
+        > div { display: block; }
+      }
+    }
+  }
+}
+.flvplayer_opt {
+  display: inline-block;
+  margin: 0 8px;
+  width: 24px; height: 24px;
+}
+.flvplayer_bot_om {
+  position: relative;
+}
+.flvplayer_bot_omh {
+  display: inline-block;
+}
+.flvplayer_bot_om.flvplayer_bot_om_h .flvplayer_bot_omh {
+  display: none;
+  position: absolute; left: -10px; bottom: 100%;
+  background-color: #000;
+  background-color: rgba(0, 0, 0, .7);
+  padding: 10px 10px;
+  border-radius: 4px;
+  .flvplayer_opt {
+    margin: 5px 8px;
+  }
+}
+.flvplayer_bot_om_h:hover .flvplayer_bot_omh{
+  display: block;
+}
+.player_cut { cursor: not-allowed; }
+.player_tran { cursor: not-allowed; }
+.player_add_sign {
+  display: inline-block;
+  position: relative; bottom: -3px; left: 10px;
+  cursor: pointer;
+  &:hover {
+    text-decoration: none;
   }
 }
 </style>

@@ -14,10 +14,6 @@
         <div>
           <div class="vl_f_333">{{detail.details}}</div>
           <div class="det_pic_box" id="imgs">
-            <!-- <div class="img" v-for="item in detail.sysAppendixList" :key="item.id">
-              <img :src="item.path" alt="" width="117" height="117">
-            </div> -->
-            <!-- <div ></div> -->
           </div>
         </div>
       </div>
@@ -63,7 +59,7 @@ export default {
         // 创建img dom
         imgs.forEach(function (src) {
           // 拼接html结构
-          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;"></div>';
+          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;border-radius:4px;"></div>';
           // 生成imgs2数组
           imgs2.push({
             url: src,

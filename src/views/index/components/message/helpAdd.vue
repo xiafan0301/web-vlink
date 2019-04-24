@@ -11,13 +11,15 @@
       <div class="add_form">
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
           <el-form-item label="联系电话:" prop="phone">
-            <el-input value-key="uid" v-model="addForm.phone" filterable placeholder="请选择"></el-input>
+            <el-input value-key="uid" v-model="addForm.phone" filterable placeholder="请输入联系电话号码"></el-input>
           </el-form-item>
           <el-form-item label="事发时间:" prop="time" class="time">
             <el-date-picker
               placeholder="选择日期时间"
               v-model="addForm.time"
               type="datetime"
+              :picker-options="pickerOptions"
+              value-format="yyyy-MM-dd HH:mm:ss"
              >
             </el-date-picker>
           </el-form-item>
@@ -104,13 +106,18 @@ export default {
         radio: -1,
         scope: null
       },
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() > Date.now();
+        }
+      },
       addRules: {
         phone: [
           {required: true, message: '请输入手机号', trigger: 'blur'},
           { validator: validatePhone, trigger: 'blur' }
         ],
         time: [
-          {required: true, message: '请选择上报时间', trigger: 'blur'}
+          {required: true, message: '请选择事发时间', trigger: 'blur'}
         ],
         place: [
           {required: true, message: '请输入事发地点', trigger: 'blur'}
@@ -132,7 +139,7 @@ export default {
       map: null,
       lngLat: null,//经纬度
       autoComplete: null,
-      _marker: null,
+      marker: null,
       // 上传参数
       fileList: []
     }
@@ -168,7 +175,31 @@ export default {
         let autoOptions = {
           city: '长沙'
         }
-        this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+        _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
+      })
+      map.on('click', function (e) {
+        console.log(e, 'eeee')
+        new window.AMap.service('AMap.Geocoder',function(){//回调函数
+            let geocoder = null;
+            //实例化Geocoder
+            geocoder = new window.AMap.Geocoder({
+                city: ""//城市，默认：“全国”
+            });
+            var lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
+            geocoder.getAddress(lnglatXY, function(status, result) {
+                if (status === 'complete' && result.info === 'OK') {
+                    //获得了有效的地址信息:
+                    //即，result.regeocode.formattedAddress
+                    _this.addForm.place = result.regeocode.formattedAddress;
+                    _this.markLocation(e.lnglat.getLng(), e.lnglat.getLat(), _this.addForm.place);
+
+                }else{
+                    //获取地址失败
+                    _this.$message.error('没有获取到地址');
+                }
+            });
+        })
+
       })
       _this.map = map;
       // 修改，回填数据
@@ -176,7 +207,6 @@ export default {
         _this.getMutualHelpDetail();
       }
     },
-    
     autoAdress (queryString, cb) {
       if (queryString === '') {
         cb([])
@@ -195,14 +225,14 @@ export default {
     // 输入追踪点定位圆形覆盖物的中心点
     markLocation(lng, lat, address) {
       let _this = this;
-      if (_this._marker) {
-        _this.map.remove(_this._marker);
+      if (_this.marker) {
+        _this.map.remove(_this.marker);
       }
       _this.lngLat = [lng, lat];
       // 追踪点标记
       let offSet = [-20.5, -48], _hoverWindow = null;
       if (lng > 0 && lat > 0) {
-        _this._marker = new window.AMap.Marker({ // 添加自定义点标记
+        _this.marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [lng, lat],
           offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
@@ -212,7 +242,7 @@ export default {
           content: '<div class="vl_icon vl_icon_message_7"></div>'
         });
         // hover
-        _this._marker.on('mouseover', function () {
+        _this.marker.on('mouseover', function () {
           let _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main"><ul>
               <li><span>事发地点：</span><span>${address}</span></li>
@@ -225,11 +255,11 @@ export default {
           });
           _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
         });
-        _this._marker.on('mouseout', function () {
+        _this.marker.on('mouseout', function () {
           if (_hoverWindow) { _hoverWindow.close(); }
         });
         _this.map.setCenter([lng, lat]);
-        _this._marker.setMap(_this.map);
+        _this.marker.setMap(_this.map);
       }
     },
   
@@ -242,14 +272,6 @@ export default {
     addMutualHelp (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (this.addForm.time.getTime() < new Date().getTime()) {
-            this.$message.error('事发时间不能晚于当前系统时间！');
-            return false;
-          }
-          if (this.fileList.length === 0) {
-            this.$message.error('请上传图片！');
-            return false;
-          }
           console.log('通过验证')
           const data = {
             attachmentList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
@@ -324,14 +346,6 @@ export default {
     putMutualHelp (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // if (this.addForm.time.getTime() < new Date().getTime()) {
-          //   this.$message.error('事发时间不能晚于当前系统时间！');
-          //   return false;
-          // }
-          if (this.fileList.length === 0) {
-            this.$message.error('请上传图片！');
-            return false;
-          }
           console.log('通过验证')
           const data = {
             attachmentList: this.fileList.map(m => {
