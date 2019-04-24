@@ -219,7 +219,7 @@
         <!-- 布控结果 -->
         <div class="manage_d_c_result" v-if="controlState !== 2 ">
           <div class="result_title">
-            <div>布控结果（{{controlResList && controlResList.list && controlResList.list.length}}个）</div>
+            <div>布控结果（{{controlResList && controlResList.total}}个）</div>
             <div>
               <el-date-picker
                 style="width: 230px;margin: 6px 10px 0 0;"
@@ -520,7 +520,7 @@ export default {
     // 获取事件详情
     getEventDetail () {
       this.eventDetailDialog = true;
-      getEventDetail(1).then(res => {
+      getEventDetail(this.controlDetail.eventId).then(res => {
         if (res && res.data) {
           this.eventDetail = res.data;
         }
