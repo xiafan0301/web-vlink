@@ -1295,6 +1295,7 @@ export default {
       let circle = circleObj ? circleObj._circle : '';
       console.log(circle, 'circle')
       if (circle) {
+        console.log('aaaaaaaaaaaaaa')
         _this.map.remove(circle);
         _this.selAreaCircle = _this.selAreaCircle.filter(f => f.index !== index);
 
@@ -1439,17 +1440,21 @@ export default {
                   devDom.addClass('vl_icon_sxt_not_choose');
                 }
               }
-              
               // 计算追踪点到设备的距离km
               const p1 = [_obj.longitude, _obj.latitude];
               const distance = AMap.GeometryUtil.distance(_this.lnglat, p1);
-              _obj.distance = (distance / 1000).toFixed(1);
+              _obj.distance = parseFloat((distance / 1000).toFixed(1));
               _this.trackPointList[index].devList.push(_obj);
             }, 10)
           }
         }
       }
-      console.log( _this.trackPointList, 'trackPointList')
+      // 左边设备列表从近到远排序
+      setTimeout(() => {
+        _this.trackPointList[index].devList.sort((x, y) => {
+          return x.distance - y.distance;
+        })
+      }, 10)
     },
     // 获得越界分析卡口列表数据
     getBoundaryBayonetList (selBayList, resBayList) {

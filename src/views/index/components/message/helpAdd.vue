@@ -108,7 +108,7 @@ export default {
       },
       pickerOptions: {
         disabledDate (time) {
-          return time.getTime() > Date.now() - 8.64e6;
+          return time.getTime() > Date.now();
         }
       },
       addRules: {

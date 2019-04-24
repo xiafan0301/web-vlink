@@ -242,7 +242,8 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.otherQuery': query
+        'where.keyword': query,
+        pageSize: 1000000
       }
       getEventList(params).then(res => {
         if (res && res.data) {
@@ -430,7 +431,7 @@ export default {
                 <div class="vl_map_obj_img">
                   <div class="vl_map_obj_box">`;
                   for (let item of _this.controlObjList.objectList) {
-                    vlMapObj += `<div><img src="${item.photoUrl}"><p>${item.name}</p></div>`;
+                    vlMapObj += `<div><img src="${item.photoUrl}"><p title="${item.name}">${item.name}</p></div>`;
                   }
                   vlMapObj += `</div>
                 </div>
@@ -1134,11 +1135,15 @@ export default {
                   height: 60px;
                 }
                 > p{
+                  width: 60px;
                   line-height: 30px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
                 }
                 > p:hover{
-                  cursor: pointer;
-                  color: #0567E1;
+                  // cursor: pointer;
+                  // color: #0567E1;
                 }
               }
             }
