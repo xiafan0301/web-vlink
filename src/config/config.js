@@ -78,17 +78,17 @@ const oDomains = {
       test: 'http://apirel.aorise.org/smart-city-common/',
       prod: 'http://apidev.aorise.org/smart-city-common/'
     },
-    // 文件上传
-    upload: {
-        dev: 'http://apidev.aorise.org/vlink-base',
-        test: 'http://apirel.aorise.org/vlink-base',
-        prod: 'http://apirel.aorise.org/vlink-base'
-    },
     // test-video服务
     live: {
       dev: 'http://apidev.aorise.org/vlink-link',
       test: 'http://apidev.aorise.org/vlink-link',
       prod: 'http://apidev.aorise.org/vlink-link'
+    },
+    // 视频播放服务
+    gis: {
+      dev: 'http://apidev.aorise.org/vlink-gis',
+      test: 'http://apidev.aorise.org/vlink-gis',
+      prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
