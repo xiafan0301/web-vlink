@@ -103,7 +103,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
               :oConfig="{sign: true}">
             </div>
           </div>
@@ -177,6 +177,7 @@ export default {
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
+      bResize: {},
       showMenuActive: false,
       showConTitle: 1,
       searchVal: '',
@@ -207,6 +208,7 @@ export default {
     },
     showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
+      this.bResize = {};
     },
     showConTitle (newVal) {
       if (newVal === 2) {

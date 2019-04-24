@@ -4,8 +4,20 @@ export const km2 = (m) => {
   return (m / 1000).fixed(2);
 };
 /**
+ * 零点的时间戳
+ * @param {boolean} flag true: 结束，false：开始
+ * @param {date} date 时间
+ * */
+export const dateOrigin = (flag, date) => {
+  if (!date) { date = new Date(); }
+  date.setHours(flag ? 23 : 0);
+  date.setMinutes(flag ? 59 : 0);
+  date.setSeconds(flag ? 59 : 0);
+  date.setMilliseconds(flag ? 999 : 0);
+  return date;
+};
+/**
  * 随机数，10位时间戳 连接4位随机整数 e.g. 1428910956 + "" +3482
- * @example $.zUtils.random14(newTime);
  * */
 export const random14 = () => {
   return Math.round(new Date().getTime() / 1000) + '' + Math.floor(Math.random() * 9000 + 1000);
