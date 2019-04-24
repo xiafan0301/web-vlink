@@ -7,11 +7,41 @@
         <el-form-item style="width: 192px;" prop="name">
           <el-input v-model="mapForm.name" placeholder="请输入布控名称"></el-input>
         </el-form-item>
-        <el-form-item style="width: 192px;" prop="num">
-          <el-input v-model="mapForm.num" placeholder="请输入事件编号"></el-input>
+        <el-form-item style="width: 192px;" prop="event">
+          <el-select
+            v-model="mapForm.event"
+            filterable
+            remote
+            clearable
+            value-key="value"
+            placeholder="请输入事件编号"
+            :remote-method="getEventList"
+            :loading="loading">
+            <el-option
+              v-for="item in eventList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="obj">
-          <el-input v-model="mapForm.obj" placeholder="请输入布控对象"></el-input>
+          <el-select
+            v-model="mapForm.obj"
+            filterable
+            remote
+            clearable
+            value-key="value"
+            placeholder="请输入布控对象"
+            :remote-method="getControlObject"
+            :loading="loading">
+            <el-option
+              v-for="item in controlObjDropdownList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="state">
           <el-select v-model="mapForm.state" placeholder="布控状态">
@@ -58,7 +88,7 @@
         </el-form-item>
         <el-form-item style="width: 192px;">
           <el-button class="reset_btn" type="primary" plain @click="resetForm()">重置</el-button>
-          <el-button class="select_btn" type="primary" @click="getControlMap">搜索</el-button>
+          <el-button class="select_btn" type="primary" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -66,12 +96,12 @@
       <!-- 地图 -->
       <div id="mapBox"></div>
       <!-- 抓拍列表 -->
-      <div class="snap_box" v-if="!isShowFullScreen && this.mapForm.state === 1 && snapTotal > 0">
+      <div class="snap_box" v-if="!isShowFullScreen && isShowSnapList && snapTotal > 0">
         <div class="snap_box_one">
           <el-card shadow="hover" class="more">
             <p>今日抓拍</p>
             <div>{{snapTotal}}</div>
-            <el-button size="small">查看更多</el-button>
+            <el-button size="small" @click="sikpISalarmToday">查看更多</el-button>
           </el-card>
         </div>
         <div class="snap_box_two" v-for="item in snapList" :key="item.deviceId">
@@ -123,10 +153,10 @@
           <div class="control_info">
             <div class="control_info_list">
               <div><span>布控名称：</span><span>{{controlObjList.list[0].surveillanceName}}</span></div>
-              <div><span>布控日期：</span><span>{{controlObjList.list[0].surveillanceDateStart}}-{{controlObjList.list[0].surveillanceDateEnd}}</span></div>
-              <div><span>事件预览：</span><span>{{controlObjList.list[0].eventDetail}}</span></div>
+              <div v-if="controlObjList.list[0].surveillanceType === 1"><span>布控日期：</span><span>{{controlObjList.list[0].surveillanceDateStart}}至{{controlObjList.list[0].surveillanceDateEnd}}</span></div>
+              <div v-if="controlObjList.list[0].eventDetail"><span>事件预览：</span><span>{{controlObjList.list[0].eventDetail}}</span></div>
             </div>
-            <el-button type="primary" size="small" @click="skipIsVideo">视频回放</el-button>
+            <el-button type="primary" size="small" @click="skipIsVideo(videoObj.video.uid, videoObj.video.deviceName)">视频回放</el-button>
           </div>
         </div>
       </div>
@@ -140,22 +170,27 @@
 import controlVideo from './components/controlVideo.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {random14} from '@/utils/util.js';
-import {getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
+import {getControlObject, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {getDiciData} from '@/views/index/api/api.js';
+import {getEventList} from '@/views/index/api/api.event.js';
 export default {
   components: {flvplayer, controlVideo},
   data () {
     return {
+      loading: false,
+      loadingBtn: false,
       // 左侧搜索参数
       mapForm: {
         name: null,
-        num: null,
+        event: null,
         obj: null,
         state: 1,
         type: null,
         rank: null,
         time: null
       },
+      eventList: [],
+      controlObjDropdownList: [],
       stateList: [
         {label: '待开始', value: 2},
         {label: '进行中', value: 1},
@@ -178,7 +213,9 @@ export default {
       isShowVideo: false,
       isShowV: false,
       clickWindow: null,
+      markerList: [],
       // 抓拍列表参数
+      isShowSnapList: true,
       snapList: [],
       snapTotal: null,//抓拍总数
       // 布控对象列表参数
@@ -202,6 +239,41 @@ export default {
     this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
+    // 获取关联事件列表
+    getEventList (query) {
+      const params = {
+        'where.otherQuery': query
+      }
+      getEventList(params).then(res => {
+        if (res && res.data) {
+          this.eventList = res.data.list.map(m => {
+            return {
+              label: m.eventCode,
+              value: m.uid
+            }
+          });
+        }
+      })
+    },
+    // 获取所有布控对象
+    getControlObject (query) {
+      const params = {
+        name: query
+      }
+      getControlObject(params).then(res => {
+        if (res && res.data) {
+          this.controlObjDropdownList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.name
+            }
+          });
+        }
+      })
+    },
+    sikpISalarmToday () {
+      this.$router.push({ name: 'today_alarm' });
+    },
     // 显示大屏
     showScreen () {
       if (this.clickWindow) {
@@ -227,7 +299,7 @@ export default {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           this.markerAlarmList.forEach(dev => {
-            if (res.timestamp - dev.snapTime > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
+            if (res.timestamp - new Date(dev.snapTime).getTime() > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
             this.$nextTick(() => {
@@ -262,6 +334,11 @@ export default {
     },
     // 获取实时监控的布控设备
     getControlMap () {
+      if (this.mapForm.state !== 1) {
+        this.isShowSnapList = false;
+      } else {
+        this.isShowSnapList = true;
+      }
       const params = {
         deviceType: this.mapForm.type,//设备类型
         surveillanceStatus: this.mapForm.state,//布控状态
@@ -269,13 +346,17 @@ export default {
         surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
         surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
-        eventId: this.mapForm.num,//事件Id
+        eventId: this.mapForm.event,//事件Id
         surveillanceObjectId: this.mapForm.obj//布控对象id
       }
+      this.loadingBtn = true;
       getControlMap(params).then(res => {
         if (res && res.data) {
           if (res.data.length === 0) {
             this.devicesList = [];
+            if (this.map) {
+              this.map.remove(this.markerList);
+            }
             this.$message.error('无设备匹配');
             return;
           }
@@ -295,9 +376,11 @@ export default {
         }
         this.mapMark();
         this.getAllAlarmSnapListByDev();
+      }).finally(() => {
+        this.loadingBtn = false;
       })
     },
-    // 获取设备下布控列表查询接口
+    // 获取设备下布控列表
     getControlMapByDevice (obj) {
       console.log(obj, 'obj')
       const params = {
@@ -324,9 +407,13 @@ export default {
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
               <div class="vl_map_info">
-                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>
-                <div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}-${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>
-                <div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
+                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>`;
+              if (_this.controlObjList.list[0].surveillanceType === 1) {
+                vlMapObj += `<div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}至${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>`;
+              }
+              if (_this.controlObjList.list[0].eventDetail) {
+                vlMapObj += `<div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
+              }
               if (obj.surveillanceStatus === 3) {
                 vlMapObj += `<div><span>布控结果：</span><span>${_this.controlObjList.list[0].snapNum}张抓拍图片</span></div>`;
               }
@@ -353,9 +440,13 @@ export default {
             for (let item of _this.controlObjList.list) {
               vlMapObjList += 
               `<div class="vl_map_info">
-                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>
-                <div><span>布控日期：</span><span>${item.surveillanceDateStart}-${item.surveillanceDateEnd}</span></div>
-                <div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
+                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>`;
+                if (item.surveillanceType === 1) {
+                  vlMapObjList += `<div><span>布控日期：</span><span>${item.surveillanceDateStart}至${item.surveillanceDateEnd}</span></div>`;
+                }
+                if (item.eventDetail) {
+                  vlMapObjList += `<div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
+                }
                 if (obj.surveillanceStatus === 3) {
                   vlMapObjList += `<div><span>布控结果：</span><span>${item.snapNum}张抓拍图片</span></div>`;
                 }
@@ -468,27 +559,19 @@ export default {
             // 关闭弹窗
             if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close(); }
           })
-          // 利用事件冒泡,绑定视频全屏按钮的点击事件
-          // $('#mapBox').on('click', '.vl_map_full_screen', function () {
-          //   // 关闭弹窗
-          //   if (clickWindow) {$('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false; clickWindow.close();}
-
-          //   // 显示视频回放页面
-          //   _this.isShowFullScreen = true;
-          // })
           this.clickWindow = clickWindow;
+          // 跳转至布控详情页
           $('#mapBox').on('click', '.vl_map_name', function (e) {
-            console.log(e.currentTarget.id)
-            // 跳转至布控详情页
+            console.log(e)
             const { href } = _this.$router.resolve({
               name: 'control_manage',
               query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
             })
             window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
           })
+          // 跳转至视频回放页面
           $('#mapBox').on('click', '.vl_map_btn', function () {
-            // 跳转至视频回放页面
-            _this.skipIsVideo();
+            _this.skipIsVideo(obj.uid, obj.deviceName);
           })
           // 向右滑动
           let offbtnStatusLfet = false;
@@ -528,14 +611,6 @@ export default {
               }, 1000)
             }
           })
-          // 移入显示大屏按钮
-          // $('#mapBox').on('mouseover', '.vl_map_img', function () {
-          //    $('#mapBox .vl_map_full_screen').addClass('show_operate_screen');
-          // })
-          // // 移出大屏按钮消失
-          // $('#mapBox').on('mouseout', '.vl_map_img', function () {
-          //    $('#mapBox .vl_map_full_screen').removeClass('show_operate_screen');
-          // })
           if (obj.surveillanceStatus === 1) {
             // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
             // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
@@ -623,6 +698,7 @@ export default {
               _this.getControlMapByDevice(e.target.C.extData);
             })
             marker.setMap(_this.map);
+            _this.markerList.push(marker);
           }
         }
         // resolve();
@@ -646,9 +722,10 @@ export default {
       // })
     },
     // 跳转至视频回放页面
-    skipIsVideo () {
+    skipIsVideo (uid, deviceName) {
       const { href } = this.$router.resolve({
-        name: 'video_playback'
+        name: 'video_playback',
+        query: {uid, deviceName}
       })
       window.open(href, '_blank', 'toolbar=no,location=no,width=1300,height=900')
     },

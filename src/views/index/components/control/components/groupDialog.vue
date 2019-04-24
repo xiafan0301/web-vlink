@@ -81,10 +81,12 @@ export default {
     putGroup () {
       const data = this.group;
       this.loadingBtn = true;
-      putGroup(data).then(() => {
-        this.groupDialog = false;
-        this.$message.success('修改成功');
-        this.$emit('sendChildren', this.group.groupName);
+      putGroup(data).then((res) => {
+        if (res) {
+          this.groupDialog = false;
+          this.$message.success('修改成功');
+          this.$emit('sendChildren', this.group.groupName);
+        }
       }).finally(() => {
         this.loadingBtn = false;
       })

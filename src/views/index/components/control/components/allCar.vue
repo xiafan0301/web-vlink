@@ -1,6 +1,9 @@
 <template>
 <!-- 全部车像列表 -->
   <div class="set_list">
+    <div class="bread_crumbs">
+      <span @click="skipIsList">布控库</span><i class="el-icon-arrow-right"></i><span @click="skipIsList">车像库</span><i class="el-icon-arrow-right"></i><span>组设置</span>
+    </div>
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">全部车辆</span></div>
@@ -19,7 +22,7 @@
     </div>
     <div class="list_box">
       <div class="list_info" v-for="item in memberList" :key="item.uid">
-        <div class="list_img"><img :src="item.vehicleImagePath" alt="" style="width: 100%;"></div>
+        <div class="list_img"><img :src="item.vehicleImagePath" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
@@ -56,7 +59,6 @@
       <div style="width: 100%;">
         <el-pagination
           style="text-align: center;"
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
@@ -90,11 +92,9 @@ import groupDialog from './groupDialog.vue';
 import {delVehicle, copyVehicle, getGroupListIsVehicle} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
-  props: ['carMemberList', 'tabType'],
+  props: ['carMemberList', 'tabType', 'currentPage'],
   data () {
     return {
-      // 翻页数据
-      currentPage: 1,
       allChecked: false,
       memberList: [],//成员列表数据
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
@@ -131,6 +131,9 @@ export default {
     this.getGroupListIsVehicle();
   },
   methods: {
+    skipIsList () {
+      this.$emit('changePage');
+    },
     popGroupDialog () {
       this.$refs['groupDialog'].reset();
     },
@@ -157,11 +160,8 @@ export default {
         }
       })
     },
-    handleSizeChange () {
-
-    },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.$emit('getVehicleList', page);//重新通知父组件获取车像列表
     },
     // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
@@ -196,10 +196,12 @@ export default {
       this.loadingBtn = true;
       const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',')
       const params = {ids: member};
-      delVehicle(params).then(() => {
-        this.delCarDialog = false;
-        this.$message.success('删除成功！');
-        this.$emit('getVehicleList');//重新通知父组件获取车像列表
+      delVehicle(params).then((res) => {
+        if (res) {
+          this.delCarDialog = false;
+          this.$message.success('删除成功！');
+          this.$emit('getVehicleList', this.currentPage);//重新通知父组件获取车像列表
+        }
       }).finally(() => {
         this.loadingBtn = false;
       })
@@ -211,10 +213,12 @@ export default {
         groupId: groupId,
         ids: member
       }
-      copyVehicle(data).then(() => {
-        this.isShowGroupCopy = false;
-        this.$message.success('复制成功');
-        this.$emit('getVehicleList');//重新通知父组件获取车像列表
+      copyVehicle(data).then((res) => {
+        if (res) {
+          this.isShowGroupCopy = false;
+          this.$message.success('复制成功');
+          this.$emit('getVehicleList', this.currentPage);//重新通知父组件获取车像列表
+        }
       })
     }
   }

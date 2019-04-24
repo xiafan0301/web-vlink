@@ -30,14 +30,14 @@
                   :filter-node-method="filterNode"
                   :props="mapTreeProps">
                   <span class="custom-tree-node" slot-scope="{ node, data }">
-                    <span>{{ node.label }}</span>
+                    <span>{{ node.label }}{{data['isFirst']}}</span>
                     <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_001 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_002': Math.random() > 0.5}"></span>
                     <span class="change_node_pos" v-else-if="!data.infoList"></span>
                     <div class="map_tree_tab" v-if="data['isFirst']">
-                      <span @click.stop="switchTab(node, 0)">{{constCamera}}</span>
-                      <span @click.stop="switchTab(node, 1)">{{constCard}}</span>
-                      <span @click.stop="switchTab(node, 2)">{{constCar}}</span>
-                      <span @click.stop="switchTab(node, 3)">{{constPerson}}</span>
+                      <span @click.stop="switchTab(data, 0, $event)">{{constCamera}}</span>
+                      <span @click.stop="switchTab(data, 1, $event)">{{constCard}}</span>
+                      <span @click.stop="switchTab(data, 2, $event)">{{constCar}}</span>
+                      <span @click.stop="switchTab(data, 3, $event)">{{constPerson}}</span>
                     </div>
                   </span>
                 </el-tree>
@@ -110,7 +110,7 @@
 </template>
 <script>
 import {testData} from './testData.js';
-import {random14} from '../../../../utils/util.js';
+import {random14, objDeepCopy} from '../../../../utils/util.js';
 import {MapGETmonitorList} from '../../api/api.map.js';
 export default {
   data () {
@@ -160,7 +160,6 @@ export default {
   },
   watch: {
     mapInfoVal (val) {
-      console.log('111', val)
       this.$refs.mapLeftTree.filter(val);
     },
     mapTypeList () {
@@ -235,48 +234,49 @@ export default {
     },
     // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
     switchData(data) {
-      // 假的卡口，人物，车辆
-      let carList, cardList;
-      carList = [
-        {
-          name: '车辆111',
-          addr: '长沙市天心区',
-          latitude: 28.094869,
-          longitude: 112.975227
-        }, {
-          name: '车辆222',
-          addr: '创谷广告园',
-          latitude: 28.093596,
-          longitude: 112.97623
-        }
-      ];
-      cardList = [
-        {
-          name: '卡口111',
-          addr: '长沙市天心区',
-          latitude: 28.093222,
-          longitude: 112.974718
-        }, {
-          name: '卡口222',
-          addr: '创谷广告园',
-          latitude: 28.093537,
-          longitude: 112.975628
-        }
-      ]
-
       data['infoList'] = data.areaTreeList;
       data['infoName'] = data.areaName;
-      console.log(data)
       data['infoList'].map(x => {
+        // 假的卡口，车辆
+        let carList, cardList;
+        carList = [
+          {
+            name: '车辆111',
+            addr: '长沙市天心区',
+            latitude: 28.094869,
+            longitude: 112.975227
+          }, {
+            name: '车辆222',
+            addr: '创谷广告园',
+            latitude: 28.093596,
+            longitude: 112.97623
+          }
+        ];
+        cardList = [
+          {
+            name: '卡口111',
+            addr: '长沙市天心区',
+            latitude: 28.093222,
+            longitude: 112.974718
+          }, {
+            name: '卡口222',
+            addr: '创谷广告园',
+            latitude: 28.093537,
+            longitude: 112.975628
+          }
+        ]
         x['infoName'] = x.areaName;
-        // dataType = 0 摄像头，1车辆，2卡口，3人员
+        // dataType = 0 摄像头，1车辆，2卡口，3人员,
         x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0});
-        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2});
-        x['cardList'] = this.objSetItem(cardList, {infoName: 'name', areaType: '5', dataType: 1});
-        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3});
-        x['infoList'] = [...x['deviceBasicList'], ...x['carList'], ...x['cardList'], ...x['sysUserExtendList']]
+        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId});
+        x['cardList'] = this.objSetItem(cardList, {infoName: 'name', areaType: '5', dataType: 1, areaUid: x.areaId});
+        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId});
+        let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['cardList'], ...x['sysUserExtendList']];
+        let newArr = [];
+        this.copyObject(oldArr, newArr)
+        x['infoList'] = newArr;
         // 给第一个元素加识别号
-        if (x['infoList'][0]) x['infoList'][0]['isFirst'] = true;
+        this.setFirst(x['infoList'])
         // 设置一个数组，判断当前map_tree_tab点了哪几个
         x['tabActiveList'] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
         return x;
@@ -326,9 +326,13 @@ export default {
         })
       })
     },
-    switchTab (node, dataType) {
+    switchTab (node, dataType, event) {
+      if (event.target.classList.contains('active')) {
+       event.target.classList.remove('active')
+      } else {
+        event.target.classList.add('active')
+      }
       // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
-      console.log(node)
       let key;
       // 找到父级的数据;
       switch (dataType) {
@@ -345,7 +349,8 @@ export default {
           key = 'sysUserExtendList'
           break;
       }
-      let curData = this.findParentData(node, 'deviceBasicList');
+      let curData = {};
+      curData = this.findParentData(node)
       console.log(curData)
       if (curData.tabActiveList.includes(dataType)) {
         console.log('delete')
@@ -356,50 +361,93 @@ export default {
           })
         } else {
           console.log('重置')
-          this.$set(curData, 'infoList', [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']])
+          let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']];
+          let ss = [];
+          this.copyObject(oldArr, ss);
+          curData.infoList = ss;
+          this.setFirst(curData.infoList);
         }
       } else {
         console.log('add')
         curData.tabActiveList.push(dataType);
         if (curData.tabActiveList.length === 1) {
           console.log('第一次')
-          curData.infoList = Object.assign(curData[key], []);
-          curData['deviceBasicList'].find(k => k['isFirst']).isFirst = false;
+          let _ar = [];
+          if (curData[key].length) {
+            this.copyObject(curData[key], _ar)
+          } else {
+            _ar.push({infoName: '无相关数据'})
+          }
+          curData.infoList = [..._ar]
+          // this.setFirst(curData.infoList);
         } else {
           console.log('已经有了再添加')
-          curData[key].forEach(m => {
-            let _obj = {}
-            for (let _key in m) {
-              _obj[_key] = m[_key]
+          let _arr3 = [];
+          // 判断目前显示的是不是 无相关数据
+          if (curData.infoList[0].infoName === '无相关数据') {
+            if (curData[key].length) {
+              curData.infoList = [];
+              this.copyObject(curData[key], _arr3);
+              _arr3.forEach(m => {
+                curData.infoList.unshift(m)
+              })
             }
-            curData.infoList.push(_obj)
-          })
+          } else {
+            this.copyObject(curData[key], _arr3);
+            _arr3.forEach(m => {
+              curData.infoList.unshift(m)
+            })
+          }
         }
       }
       console.log(curData)
       this.updateDom();
     },
-    findParentData (node, _key) {
-      let _i = this.getSourceIndex(node.data, _key);
+    findParentData (node) {
       let obj;
-      this.mapTreeData[_i].infoList.map(item => {
-        if (item[_key].includes(node.data)) {
-          return obj = item;
-        }
-      })
-      return obj;
-    },
-    // 获取县城的索引
-    getSourceIndex (data, _key) {
-      let _i;
-      this.mapTreeData.forEach((x, index) => {
-        x.infoList.map(y => {
-          if (y[_key].includes(data)) {
-            return _i = index;
+      this.mapTreeData.forEach(item => {
+        item.infoList.forEach(x => {
+          if (x.areaId === node.areaUid) {
+            obj = x;
           }
         })
       })
-      return _i;
+      return obj;
+    },
+    setFirst (arr) {
+      if (arr.length) {
+        arr[0]['isFirst'] = true;
+      }
+    },
+    copyObject (obj, newObj) {
+      if (typeof obj === 'object' && obj) {
+        if (Object.prototype.toString.call(obj).slice(8, 14) === 'Object') {
+          for (let key in obj) {
+            if (typeof obj[key] === 'object') {
+              newObj[key] = {};
+              this.copyObject(obj[key], newObj[key])
+            } else {
+              newObj[key] = obj[key];
+            }
+          }
+        } else {
+          for (let i = 0; i < obj.length; i ++) {
+            if (typeof obj[i] === 'object') {
+              if (Object.prototype.toString.call(obj[i]).slice(8, 14) === 'Object') {
+                newObj[i] = {}
+                this.copyObject(obj[i], newObj[i])
+              } else {
+                newObj[i] = [];
+                this.copyObject(obj[i], newObj[i])
+              }
+            } else {
+              newObj[i] = obj[i]
+            }
+          }
+        }
+      } else {
+        return obj;
+      }
     },
     // 获取地图数据
     getMapData () {
