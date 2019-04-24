@@ -146,7 +146,7 @@
             </el-table-column>
             <el-table-column
               label="关联事件编号"
-              prop="eventNo"
+              prop="eventCode"
               show-overflow-tooltip
               min-width="100px"
               >

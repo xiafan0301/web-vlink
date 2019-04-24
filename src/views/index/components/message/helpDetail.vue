@@ -119,7 +119,6 @@ export default {
     }
   },
   mounted () {
-    console.log(zx)
     this.getParticipateTypeDiciData();
     this.getSourceTypeDiciData();
     this.getMutualHelpDetail();

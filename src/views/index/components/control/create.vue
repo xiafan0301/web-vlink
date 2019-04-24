@@ -255,7 +255,8 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.otherQuery': query
+        'where.keyword': query,
+        pageSize: 1000000
       }
       getEventList(params).then(res => {
         if (res && res.data) {
@@ -461,7 +462,7 @@ export default {
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
           this.createForm.event = this.controlDetail.eventCode;
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = (this.pageType === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {

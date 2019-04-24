@@ -205,8 +205,8 @@ export default {
     },
     // 切换短信模板
     changeTemplate () {
-      this.addForm.content = this.addForm.template.tempContent;
-      this.addForm.content = this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
+      this.addForm.content = this.addForm.template && this.addForm.template.tempContent;
+      this.addForm.content = this.addForm.content && this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
       console.log(this.addForm.content)
     },  
     // 获取组织机构
