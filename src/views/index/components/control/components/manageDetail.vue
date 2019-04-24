@@ -394,9 +394,9 @@ export default {
       dpTwo: false,//展开实时监控
        // 翻页数据
       currentPage: 1,
-      pageSzieObj: 18,
+      pageSizeObj: 18,
       pageNumObj: 1,
-      pageSzieRes: 8,
+      pageSizeRes: 8,
       pageNumObjRes: 1,
       
       situList: [],// 实时监控设备列表
@@ -663,12 +663,11 @@ export default {
     getControlObjList () {
       const params = {
         pageNum: this.pageNumObj,
-        pageSzie: this.pageSzieObj,
+        pageSize: this.pageSizeObj,
         orderBy: null,
-        order: null,
-        'where.surveillanceId': this.controlId
+        order: null
       }
-      getControlObjList(params).then(res => {
+      getControlObjList(params, this.controlId).then(res => {
         if (res && res.data) {
           this.controlDetail.objectList = res.data.list;
         }
@@ -699,7 +698,7 @@ export default {
     getAlarmSnap () {
       const params = {
         pageNum: this.pageNumObjRes,
-        pageSzie: this.pageSzieRes,
+        pageSize: this.pageSizeRes,
         'where.surveillanceId': this.controlId,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
         'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],

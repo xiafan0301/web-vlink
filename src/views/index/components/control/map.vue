@@ -300,7 +300,9 @@ export default {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           this.markerAlarmList.forEach(dev => {
+            console.log(res.timestamp - new Date(dev.snapTime).getTime(), 'aaaaa')
             if (res.timestamp - new Date(dev.snapTime).getTime() > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
+            
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
             this.$nextTick(() => {

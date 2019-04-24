@@ -149,7 +149,10 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20" @click="clearForm('portraitForm', '2', item.uid)"></i>
+                  <i v-if="item.origin !== '1'" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('portraitForm', '2', item.uid)"></i>
+                  <el-tooltip v-else class="item" effect="dark" content="底库数据不可编辑" placement="top">
+                    <i class="vl_icon vl_icon_control_20"></i>
+                  </el-tooltip>
                 </div>
                 <div class="data_list">
                   <span>{{item.name}}</span>
@@ -185,7 +188,10 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i class="vl_icon vl_icon_control_20" @click="clearForm('carForm', '2', item.uid)"></i>
+                  <i v-if="item.origin !== '1'" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('carForm', '2', item.uid)"></i>
+                  <el-tooltip v-else class="item" effect="dark" content="底库数据不可编辑" placement="top">
+                    <i class="vl_icon vl_icon_control_20"></i>
+                  </el-tooltip>
                 </div>
                 <div class="data_list">
                   <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
@@ -283,11 +289,11 @@
                 <el-form-item label=" " style="width: 415px;" prop="name">
                   <el-input v-model="portraitForm.name" placeholder="姓名" maxlength="50" :disabled="isAddDisabled"></el-input>
                 </el-form-item>
-                <el-form-item style="width: 415px;" class="portrait_form_sex">
-                  <el-button plain @click.native="portraitForm.sex = 1" :class="{'active': portraitForm.sex === 1}" :disabled="isAddDisabled">男</el-button>
-                  <el-button plain @click.native="portraitForm.sex = 2" :class="{'active': portraitForm.sex === 2}" :disabled="isAddDisabled">女</el-button>
+                <el-form-item label=" " style="width: 415px;" class="portrait_form_sex" prop="sex">
+                  <el-button plain @click.native="selSex(1)" :class="{'active': portraitForm.sex === 1}" :disabled="isAddDisabled">男</el-button>
+                  <el-button plain @click.native="selSex(2)" :class="{'active': portraitForm.sex === 2}" :disabled="isAddDisabled">女</el-button>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="nation">
+                <el-form-item label=" " style="width: 415px;" prop="nation">
                   <el-select v-model="portraitForm.nation" placeholder="民族" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in nationalList"
@@ -310,12 +316,12 @@
                 <el-form-item label=" " style="width: 415px;" prop="idNo">
                   <el-input v-model="portraitForm.idNo" placeholder="证件号码" @blur="getPortraitByIdNo"></el-input>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="birthDate" :disabled="isAddDisabled">
+                <el-form-item label=" " style="width: 415px;" prop="birthDate" :disabled="isAddDisabled">
                   <el-input v-model="portraitForm.birthDate" placeholder="出生日期" :disabled="true"></el-input>
                 </el-form-item>
                 <!-- 选择归属组 -->
                 <el-form-item style="width: 415px;position: relative;">
-                  <el-select v-model="portraitForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
+                  <el-select v-model="portraitForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择归属组" style="width: 100%;">
                     <el-option
                       v-for="item in groupDropdownList"
                       :key="item.uid"
@@ -344,7 +350,7 @@
                 <el-form-item label=" " style="width: 415px;" prop="vehicleNumber">
                   <el-input v-model="carForm.vehicleNumber" placeholder="车牌号码" @blur="getVehicleByIdNo"></el-input>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="vehicleColor">
+                <el-form-item label=" " style="width: 415px;" prop="vehicleColor">
                   <el-select v-model="carForm.vehicleColor" placeholder="选择车身颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carColorList"
@@ -354,7 +360,7 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="vehicleType">
+                <el-form-item label=" " style="width: 415px;" prop="vehicleType">
                   <el-select v-model="carForm.vehicleType" placeholder="选择车辆类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in carTypeList"
@@ -364,7 +370,7 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="numberType">
+                <el-form-item label=" " style="width: 415px;" prop="numberType">
                   <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numTypeList"
@@ -374,7 +380,7 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item style="width: 415px;" prop="numberColor">
+                <el-form-item label=" " style="width: 415px;" prop="numberColor">
                   <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numColorList"
@@ -386,7 +392,7 @@
                 </el-form-item>
                 <!-- 归属组 -->
                 <el-form-item style="width: 415px;">
-                  <el-select v-model="carForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择" style="width: 100%;">
+                  <el-select v-model="carForm.groupIds" multiple filterable allow-create default-first-option placeholder="请选择归属组" style="width: 100%;">
                     <el-option
                       v-for="item in groupDropdownList"
                       :key="item.uid"
@@ -592,7 +598,10 @@ export default {
           {required: true, message: '请填写姓名', trigger: 'blur'},
           {validator: checkName, trigger: 'blur'}
         ],
+        sex: [{required: true, message: '请选择性别类型', trigger: 'change'}],
+        nation: [{required: true, message: '请选择民族类型', trigger: 'change'}],
         idType: [{required: true, message: '请选择证件类型', trigger: 'change'}],
+        birthDate: [{required: true, message: '请填写出生日期', trigger: 'change'}],
         idNo: [
           {required: true, message: '请填写证件号码', trigger: 'blur'},
           {validator: checkIdCard, trigger: 'blur'}
@@ -602,7 +611,11 @@ export default {
         vehicleNumber: [
           {required: true, message: '请填写车牌号码', trigger: 'blur'},
           {validator: checkPlateNumber, trigger: 'blur'}
-        ]
+        ],
+        vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
+        vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
+        numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
+        numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
       },
       // 上传人像参数
       dialogImageUrl: null,
@@ -630,6 +643,10 @@ export default {
     this.picHeight = window.screenHeight + 180;
   },
   methods: {
+    selSex (type) {
+      this.portraitForm.sex = type;
+      this.$refs['portraitForm'].clearValidate(['sex']);
+    },
     // 删除完组后重新获取组列表和组成员
     changePage () {
       this.pageType = '1';
@@ -816,6 +833,10 @@ export default {
     savePortrait (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message.error('请上传人像');
+            return;
+          }
           this.loadingBtn = true;
           let data = objDeepCopy(this.portraitForm);
           if (data.uid !== undefined) {
@@ -885,6 +906,10 @@ export default {
     saveCar (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message.error('请上传车像');
+            return;
+          }
           this.loadingBtn = true;
           let data = objDeepCopy(this.carForm);
           if (data.uid !== undefined) {
@@ -920,6 +945,7 @@ export default {
         if (res && res.data) {
           let protraitInfo = res.data;
           this.fileList = protraitInfo.photoUrl ? [{url: protraitInfo.photoUrl}] : [];//回填图片
+          this.dialogImageUrl = protraitInfo.photoUrl;
           protraitInfo.birthDate = protraitInfo.birthDate.split('');
           protraitInfo.birthDate.splice(4, 1, '年');
           protraitInfo.birthDate.splice(7, 1, '月');
@@ -936,6 +962,10 @@ export default {
     putPortrait (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message.error('请上传人像');
+            return;
+          }
           this.loadingBtn = true;
           let data = objDeepCopy(this.portraitForm);
           data.birthDate = data.birthDate.split('');
@@ -951,10 +981,12 @@ export default {
           }
           data.photoUrl = this.dialogImageUrl;
           putPortrait(data).then(res => {
-            console.log(res);
-            this.addPortraitDialog = false;
-            this.$message.success('修改成功！');
-            this.getPortraitList(this.groupId, this.groupIndex);
+            if (res) {
+              console.log(res);
+              this.addPortraitDialog = false;
+              this.$message.success('修改成功！');
+              this.getPortraitList(this.groupId, this.groupIndex);
+            }
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -969,6 +1001,7 @@ export default {
         if (res && res.data) {
           let carInfo = res.data;
           this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+          this.dialogImageUrl = carInfo.vehicleImagePath;
           carInfo.groupIds = carInfo.groupList.map(m => m.uid);
           this.carForm = carInfo;
           console.log(this.carForm)
@@ -979,6 +1012,10 @@ export default {
     putCar (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message.error('请上传车像');
+            return;
+          }
           this.loadingBtn = true;
           let data = objDeepCopy(this.carForm);
           data.groupIds = data.groupIds.join(',');
@@ -990,9 +1027,11 @@ export default {
           data.vehicleImagePath = this.dialogImageUrl;
           putVehicle(data).then(res => {
             console.log(res);
-            this.addPortraitDialog = false;
-            this.$message.success('修改成功！');
-            this.getVehicleList(this.groupId, this.groupIndex);
+            if (res) {
+              this.addPortraitDialog = false;
+              this.$message.success('修改成功！');
+              this.getVehicleList(this.groupId, this.groupIndex);
+            }
           }).finally(() => {
             this.loadingBtn = false;
           })
@@ -1230,7 +1269,7 @@ export default {
           .data_title{
             display: flex;
             justify-content: space-between;
-            i{
+            i.can_click{
               cursor: pointer;
               &:hover{
                 background-position: -584px -347px!important;

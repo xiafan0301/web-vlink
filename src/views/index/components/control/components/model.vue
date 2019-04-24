@@ -143,7 +143,7 @@
         width="482px"
         top="40vh"
         title="选择目标">
-        <el-select v-model="targetObj" value-key="value" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" placeholder="请输入车牌号、姓名、证件号码、自定义组名搜索" style="width: 100%;margin-top: 20px;">
+        <el-select v-model="targetObj" value-key="value" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" :placeholder="changeRepertorySel" style="width: 100%;margin-top: 20px;">
           <!-- 只有成员对象类型 -->
           <template v-if="surveillanceObjectDtoList.length > 0 && groups.length === 0">
             <el-option
@@ -330,6 +330,15 @@ export default {
         return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
       } else {
         return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+      }
+    },
+    changeRepertorySel () {
+      if (this.modelType === '1') {
+        return '请输入姓名、证件号码、自定义组名搜索，可多选';
+      } else if (this.modelType === '2') {
+        return '请输入车牌号码、自定义组名搜索，可多选';
+      } else {
+        return '请输入车牌号、姓名、证件号码、自定义组名搜索，可多选';
       }
     },
     // 计算已选设备数量

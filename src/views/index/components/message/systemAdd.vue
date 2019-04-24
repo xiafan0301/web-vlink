@@ -25,7 +25,7 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="addMsgNote('addForm')">发布</el-button>
+        <el-button :loading="loadingBtn" type="primary" @click="addMsgNote('addForm')">发布</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
@@ -68,6 +68,7 @@ export default {
             title: this.addForm.title,
             details: this.addForm.content
           }
+          this.loadingBtn = true;
           addMsgNote(data).then(res => {
             if (res && res.data) {
               this.$message.success('发布成功');
