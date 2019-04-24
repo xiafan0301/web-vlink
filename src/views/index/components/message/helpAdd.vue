@@ -139,7 +139,7 @@ export default {
       map: null,
       lngLat: null,//经纬度
       autoComplete: null,
-      _marker: null,
+      marker: null,
       // 上传参数
       fileList: []
     }
@@ -225,14 +225,14 @@ export default {
     // 输入追踪点定位圆形覆盖物的中心点
     markLocation(lng, lat, address) {
       let _this = this;
-      if (_this._marker) {
-        _this.map.remove(_this._marker);
+      if (_this.marker) {
+        _this.map.remove(_this.marker);
       }
       _this.lngLat = [lng, lat];
       // 追踪点标记
       let offSet = [-20.5, -48], _hoverWindow = null;
       if (lng > 0 && lat > 0) {
-        _this._marker = new window.AMap.Marker({ // 添加自定义点标记
+        _this.marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [lng, lat],
           offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
@@ -242,7 +242,7 @@ export default {
           content: '<div class="vl_icon vl_icon_message_7"></div>'
         });
         // hover
-        _this._marker.on('mouseover', function () {
+        _this.marker.on('mouseover', function () {
           let _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main"><ul>
               <li><span>事发地点：</span><span>${address}</span></li>
@@ -255,11 +255,11 @@ export default {
           });
           _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
         });
-        _this._marker.on('mouseout', function () {
+        _this.marker.on('mouseout', function () {
           if (_hoverWindow) { _hoverWindow.close(); }
         });
         _this.map.setCenter([lng, lat]);
-        _this._marker.setMap(_this.map);
+        _this.marker.setMap(_this.map);
       }
     },
   

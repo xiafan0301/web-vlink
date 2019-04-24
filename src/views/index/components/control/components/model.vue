@@ -220,7 +220,7 @@
 import {objDeepCopy} from '@/utils/util.js';
 import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
-import {bonDataTwo, bonDataOne} from '../testData.js';
+// import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
   components: {uploadPic},
   name: 'model',
