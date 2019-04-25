@@ -66,7 +66,6 @@
         :data="eventList"
         >
         <el-table-column
-          fixed
           label="事件编号"
           prop="eventCode"
           :show-overflow-tooltip='true'
@@ -108,7 +107,7 @@
         <el-table-column
           label="事件地点"
           prop="eventAddress"
-          width="250"
+          width="200"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -123,13 +122,12 @@
         <el-table-column
           label="上报内容"
           prop="eventDetail"
-          width="250"
+          width="200"
           :show-overflow-tooltip='true'
         >
         </el-table-column>
         <el-table-column
           label="是否有布控结果"
-          width="150"
           prop="surveillanceResult"
           show-overflow-tooltip
           align="center"
@@ -138,7 +136,7 @@
             <span>{{scope.row.surveillanceResult ? '是' : '否'}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140">
+        <el-table-column label="操作" width="140" fixed="right">
           <template slot-scope="scope">
             <span class="operation_btn" @click="skipEventDetailPage(scope.row)">查看</span>
             <span style="color: #f2f2f2">|</span>
@@ -250,19 +248,20 @@ export default {
       if (this.eventForm.userName === '全部上报者') {
         userName = null;
       } else {
-        userName = this.auditForm.userName;
+        userName = this.eventForm.userName;
       }
       const params = {
         'where.reportTimeStart': this.eventForm.reportTime[0],
         'where.reportTimeEnd': this.eventForm.reportTime[1],
         'where.eventStatus': eventStatus,
+        'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
-        'where.reporterUserRole': this.eventForm.userName,
+        'where.reporterUserRole': userName,
         'where.keyword': this.eventForm.phoneOrNumber,
-        // 'where.acceptFlag': 25, // 审核通过
+        'where.acceptFlag': 2, // 审核通过
         pageNum: this.pagination.pageNum,
-        orderBy: 'create_time',
-        order: 'desc'
+        orderBy: 'report_time',
+        order: 'asc'
       }
       getEventList(params)
         .then(res => {

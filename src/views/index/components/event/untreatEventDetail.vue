@@ -21,8 +21,17 @@
                 <el-radio :label="false">不发布</el-radio>
                 <el-radio :label="true">发布</el-radio>
               </el-radio-group>
-              <div>
-                
+              <div v-show="isMutual">
+                <span>是否推送消息给附近的用户：</span>
+                <el-select  placeholder="请选择推送距离" size="mini" style='width: 200px' v-model="radiusNumber">
+                  <!-- <el-option
+                    v-for="item in distanceList"
+                    :key="item.dictId"
+                    :label="item.dictContent"
+                    :value="item.dictCode"
+                  >
+                  </el-option> -->
+                </el-select>
               </div>
             </div>
             <div class="handle-type">
@@ -50,7 +59,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="skipEachPage">确定</el-button>
+        <el-button class="operation_btn function_btn" :disabled="isDisabled" @click="skipEachPage">确定</el-button>
         <el-button class="operation_btn function_btn" @click="skipEventEndPage">结束事件</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
@@ -68,12 +77,29 @@ export default {
     return {
       status: null, // 
       isMutual: false, // 是否发布民众互助
-      handleType: 1, // 选择处理的方式
+      handleType: null, // 选择处理的方式
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
       basicInfo: {}, // 事件详情
-      // detailInfo: {}, // 事件详情
+      radiusNumber: null, // 推送距离
+      isDisabled: true, 
+    }
+  },
+  watch: {
+    handleType (val) {
+      if (!val && !this.isMutual) {
+        this.isDisabled = true;
+      } else {
+        this.isDisabled = false;
+      }
+    },
+    isMutual (val) {
+      if (!val && !this.handleType) {
+        this.isDisabled = true;
+      } else {
+        this.isDisabled = false;
+      }
     }
   },
   mounted () {
@@ -95,7 +121,6 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            console.log(res);
             this.basicInfo = res.data;
           }
         })

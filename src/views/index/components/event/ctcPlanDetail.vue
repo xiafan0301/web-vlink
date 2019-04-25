@@ -93,7 +93,7 @@
         <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="delPlanDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="sureDeletePlan">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeletePlan">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -108,6 +108,7 @@ export default {
       previewUrl: null,
       delPlanDialog: false, // 删除预案弹出框
       planDetail: {}, // 预案详情
+      isDeleteLoading: false, // 删除加载中
     }
   },
   created () {
@@ -145,6 +146,7 @@ export default {
     sureDeletePlan () {
       const delPlanId = this.$route.query.planId;
       if (delPlanId) {
+        this.isDeleteLoading = true;
         delPlan(delPlanId)
           .then(res => {
             if (res) {
@@ -155,15 +157,17 @@ export default {
               })
               this.delPlanDialog = false;
               this.$router.push({name: 'event_ctcplan'});
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
-          }
+              });
+              this.isDeleteLoading = false;
+            }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
      // 下载文件

@@ -7,7 +7,7 @@
     >
     <div class="box">
       <el-carousel :autoplay="false" arrow="always" height="100%" :initial-index="imgIndex">
-        <el-carousel-item v-for="(item) in imgList" :key="item.uid">
+        <el-carousel-item v-for="(item, index) in imgList" :key="index">
           <img :src="item.path" alt="">
         </el-carousel-item>
       </el-carousel>

@@ -76,7 +76,6 @@
         :data="auditList"
         >
         <el-table-column
-          fixed
           label="审核状态"
           prop="acceptFlagName"
           :show-overflow-tooltip='true'
@@ -134,7 +133,6 @@
         </el-table-column>
         <el-table-column
           label="是否有图或视频"
-          width="150"
           prop="hasImageOrVideo"
           align="center"
           >
@@ -142,7 +140,7 @@
             <span>{{scope.row.hasImageOrVideo ? '是' : '否'}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140">
+        <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
             <span class="operation_btn" @click="skipDetailPage(scope.row)">查看</span>
           </template>
@@ -225,13 +223,14 @@ export default {
         'where.reportTimeStart': this.auditForm.reportTime[0],
         'where.reportTimeEnd': this.auditForm.reportTime[1],
         'where.acceptFlag': this.auditForm.eventStatus,
+        'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
-        'where.reporterUserRole': this.auditForm.userName,
+        'where.reporterUserRole': userName,
         'where.keyword': this.auditForm.phoneOrNumber,
         'where.eventSource': this.auditForm.eventSource,
         pageNum: this.pagination.pageNum,
-        orderBy: 'create_time',
-        order: 'desc'
+        orderBy: 'report_time',
+        order: 'asc'
       }
       getEventList(params)
         .then(res => {

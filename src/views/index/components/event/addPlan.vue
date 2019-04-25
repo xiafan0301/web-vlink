@@ -86,7 +86,7 @@
         </el-form>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData('addPlanForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addPlanForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
@@ -141,6 +141,7 @@ export default {
       eventLevelList: [], // 事件等级
       userInfo: {}, // 存储的用户信息
       departmentList: [], // 部门列表
+      isAddLoading: false,
     }
   },
   created () {
@@ -259,20 +260,22 @@ export default {
                   if (item.departmentId === itm.uid) {
                     this.addPlanForm.taskList[index].departmentName = itm.organName;
                   }
-                })
-              }) 
+                });
+              });
+              this.isAddLoading = true;
               addPlan(this.addPlanForm)
                 .then(res => {
                   if (res) {
-                      this.$message({
-                        type: 'success',
-                        message: '添加成功',
-                        customClass: 'request_tip'
-                      })
-                      this.$router.push({name: 'event_ctcplan'});
+                    this.$message({
+                      type: 'success',
+                      message: '添加成功',
+                      customClass: 'request_tip'
+                    })
+                    this.$router.push({name: 'event_ctcplan'});
+                    this.isAddLoading = false;
                   }
                 })
-                .catch(() => {})
+                .catch(() => {this.isAddLoading = false;})
             }
           })
           

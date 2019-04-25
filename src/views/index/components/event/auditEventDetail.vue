@@ -86,9 +86,9 @@
                     <span>{{detailInfo.casualties}}</span>
                   </template>
                 </li>
-                <li v-show="detailInfo.rejectReason">
+                <li v-show="detailInfo.rejectReasonName">
                   <span>驳回原因:</span>
-                  <span>{{detailInfo.rejectReason}}</span>
+                  <span>{{detailInfo.rejectReasonName}}</span>
                 </li>
               </ul>
             </div>

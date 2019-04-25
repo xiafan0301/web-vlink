@@ -300,7 +300,7 @@ export default {
     },
     // 返回
     cancelSubmit (form) {
-      // this.$refs[form].resetFields();
+      this.$refs[form].resetFields();
       this.$router.back(-1);
     }
   }
