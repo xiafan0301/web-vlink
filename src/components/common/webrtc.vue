@@ -2,8 +2,32 @@
   <div class="wr_main">
     <ul>
       <li v-for="(item, index) in aWRData" :key="'wr_list_' + index">
-        <div>
-          <video src="" :id="videoIdPre + item.remoteId" style="object-fit: fill;"></video>
+        <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId">
+          <video :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
+          <span class="vl_icon vl_icon_vc_011 wr_video_scale"></span>
+          <div class="wr_video_user">
+            <img src="../../assets/img/wr_photo.png" alt="">
+            <div>
+              <h3>{{item.remoteName ? item.remoteName : item.remoteId}}</h3>
+              <p class="wr_dl_user_msg">正在打开摄像头...</p>
+            </div>
+          </div>
+          <div class="wr_video_opts">
+            <div class="wr_video_opts_l">
+              <span>
+                <span class="vl_icon vl_icon_vc_023"></span>
+                <p>切换语音</p>
+              </span>
+              <span>
+                <span class="vl_icon vl_icon_vc_021"></span>
+                <p>取消</p>
+              </span>
+              <span>
+                <span class="vl_icon vl_icon_vc_022"></span>
+                <p>静音</p>
+              </span>
+            </div>
+          </div>
         </div>
       </li>
     </ul>
@@ -14,7 +38,6 @@ import {webrtcConfig} from '@/config/config.js';
 import {random14} from '@/utils/util.js';
 export default {
   /** 
-   *  index: 视频序号（在列表页面的位置）
    *  // 初始化的时候webrt对象
    *  aInit: [webrtcObj, ...],
    *  // 需要新增webrtc对象
@@ -38,7 +61,7 @@ export default {
   data () {
     return {
       localId: 'aorise',
-      aWRData: [{remoteId: 'a111'}, {remoteId: 'a222'}],
+      aWRData: [],
       max: 4, // 同时通话的最大数量
       config: {
       },
@@ -60,7 +83,17 @@ export default {
         mediaStream: null,
         candidateList: {}, // 候选集合
       },
+      videoContainerIdPre: 'remoteContainer_',
       videoIdPre: 'remoteVideo_'
+    }
+  },
+  watch: {
+    oAdd () {
+      console.log('watch oAdd:', this.oAdd);
+      this.wrAdd(Object.assign({}, this.oAdd));
+    },
+    oDel () {
+      console.log('watch oDel:', this.oDel);
     }
   },
   created () {
@@ -138,7 +171,9 @@ export default {
      * @param {object} message
      */
     wsMessageCallback (message) {
-      this.wrWsMessageHandler(message);
+      if (message.body) {
+        this.wrWsMessageHandler(message.body);
+      }
     },
     wsPingCallback () {
     },
@@ -164,10 +199,142 @@ export default {
     },
     /* =========== webrtc函数 =========== */
     /**
+     * 添加WR
+     * @param {object} obj webrtcObj
+     */
+    wrAdd (obj) {
+      if (obj && obj.remoteId) {
+        if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
+          this.$message({
+            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人就行通话！',
+            type: 'warning'
+          });
+          return;
+        }
+        let flag = false; // 是否已经在通话中
+        for (let i = 0; i < this.aWRData.length; i++) {
+          if (this.aWRData[i].remoteId === obj.remoteId) {
+            flag = true;
+            break;
+          }
+        }
+        if (flag) {
+          this.$message({
+            message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
+            type: 'warning'
+          });
+          return;
+        }
+        this.aWRData.push(obj);
+        this.$nextTick(() => {
+          this.wrMediaStream(obj.type, {
+            remoteId: obj.remoteId,
+            remoteName: obj.remoteName
+          });
+        });
+      } else {
+        console.log('wrAdd >>> remoteId为空！');
+      }
+    },
+    /**
      * 接收到ws的消息后wr处理器
      * @param {object} message
      */
     wrWsMessageHandler (message) {
+      let _this = this;
+      let oMsg = JSON.parse(message);
+      if (oMsg.type === 'CANDIDATE') {
+        // 收到 CANDIDATE 候选
+        let oData = JSON.parse(oMsg.data);
+        if (_this.wrObj.pcs && _this.wrObj.pcs[oMsg.sender]) {
+          // 已有PC，说明是主动呼叫，则向本机PC添加候选
+          try {
+            _this.wrObj.pcs[oMsg.sender].addIceCandidate(new RTCIceCandidate(oData)).catch(e => console.log('**', e));
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          // 无PC，则先将候选保存起来
+          if (!_this.wrObj.candidateList[oMsg.sender]) {
+            _this.wrObj.candidateList[oMsg.sender] = [];
+          }
+          _this.wrObj.candidateList[oMsg.sender].push(oData);
+        }
+      } else if (oMsg.type === 'OFFERED') {
+        // 收到OFFER
+        /* if (window.confirm('收到' + _o.sender + '的视频请求，确定接收吗？')) {
+          AS_WEBRTC.wrRecipient(true, _o);
+        } else {
+          AS_WEBRTC.wrRecipient(false, _o);
+        } */
+        _this.$confirm('收到' + oMsg.sender + '的视频请求，确定接收吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          _this.$message({
+            type: 'success',
+            message: '接收成功!'
+          });
+        }).catch(() => {
+          _this.$message({
+            type: 'info',
+            message: '已取消接收'
+          });          
+        });
+      } else if (oMsg.type === 'ADD_OFFERED') {
+        // 收到OFFER
+      } else if (oMsg.type === 'ANSWERED') {
+        // 收到应答 正常PC都是已经有了的
+        if (_this.wrObj.pcs && _this.wrObj.pcs[oMsg.sender]) {
+          let oData = null;
+          try {
+            oData = JSON.parse(oMsg.data);
+          } catch (e) {}
+          if (oData) {
+            // 设置对方的Description
+            _this.wrObj.pcs[oMsg.sender].setRemoteDescription(new RTCSessionDescription(oData));
+            // 如果候选列表存在，则发送候选
+            if (_this.wrObj.candidateList && _this.wrObj.candidateList[oMsg.sender] && _this.wrObj.candidateList[oMsg.sender].length > 0) {
+              for (let i = 0; i < _this.wrObj.candidateList[oMsg.sender].length; i++) {
+                _this.wsSend(webrtcConfig.apis.candidate, {
+                  type: 'CANDIDATE',
+                  data: _this.wrObj.candidateList[oMsg.sender][i],
+                  recipient: oMsg.sender,
+                  recipientName: oMsg.senderName
+                });
+              }
+              delete _this.wrObj.candidateList[oMsg.sender];
+            }
+          }
+        }
+      } else if (oMsg.type === 'REFUSED') {
+        // (房主)拒绝视频请求refuse信令
+        console.log('wr >>>> REFUSED');
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'REMOVED') {
+        // 房主移除成员remove信令
+        console.log('wr >>>> REMOVED');
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'MEMBER_REFUSED') {
+        // 成员拒绝视频请求
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'MEMBER_LEAVED') {
+        // 频通信者离开房间信令 -> 成员离开聊天室
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'ROOM_DISSOLVED') {
+        // 聊天室解散
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'ADD_MEMBER_REFUSED') {
+        // 拒绝视频加入房间请求addrefuse信令  -> 房主拒绝成员加入?
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'DUPLICATE_CONNECTION') {
+        // 账号已经在其它地方登录
+        _this.wrOff(oMsg);
+      } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
+        // 房间已满
+        _this.wrOff(oMsg);
+      }
     },
     /*
      * 唤起音视频设备，成功则发送/接收通讯
@@ -187,9 +354,15 @@ export default {
           'video': true
         }, function (stream) {
           console.log('getUserMedia success');
+          // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
-          // _this.vedioHandler(_this.videoIdPre + obj.remoteId, stream); // 本机视频
+          // localVideo
+          _this.vedioHandler('localVideo', stream); // 本机视频
           _this.wrCreatConnection(type, obj, desc);
+          _this.wrMsgHandler({
+            remoteId: obj.remoteId,
+            dlUserMsg: '等待对方接听...'
+          });
         }, function (error) {
           // 处理媒体流创建失败错误
           console.log('getUserMedia error: ' + error);
@@ -198,6 +371,10 @@ export default {
       } else {
         // 设备已经被唤醒
         _this.wrCreatConnection(type, obj, desc);
+        _this.wrMsgHandler({
+          remoteId: obj.remoteId,
+          dlUserMsg: '等待对方接听...'
+        });
       }
     },
     /*
@@ -239,7 +416,7 @@ export default {
         if (event.candidate) {
           if (_pc.remoteDescription) {
             // 已经存在remote信息，则直接发送候选 （接收）
-            AS_WEBRTC.wsSend(AS_WEBRTC.options.apis.candidate, {
+            AS_WEBRTC.wsSend(webrtcConfig.apis.candidate, {
               type: 'CANDIDATE',
               data: JSON.stringify(event.candidate),
               recipient: obj.remoteId,
@@ -336,6 +513,56 @@ export default {
       let pc = new PeerConnection(iceServer);
       return pc;
     },
+    /*
+     * 通讯断开连接
+     * */
+    wrOff (oMsg) {
+      // 关闭媒体设备
+      /* if (this.wrObj.mediaStream) {
+        let mediaStreamTracks = this.wrObj.mediaStream.getTracks();
+        if (mediaStreamTracks) {
+          for (let i = 0; i < mediaStreamTracks.length; i++) {
+            mediaStreamTracks[i].stop();
+          }
+        }
+        this.wrObj.mediaStream = null;
+      } */
+      if (this.wrObj.pcs && this.wrObj.pcs[oMsg.sender]) {
+        this.wrObj.pcs[oMsg.sender].close();
+        this.wrObj.pcs[oMsg.sender] = null;
+        /* if (AS_WEBRTC.callType === 1) {
+          AS_WEBRTC.wsSend(webrtcConfig.apis.remove, {
+            type: 'REMOVED',
+            data: '',
+            recipient: this.localId,
+            recipientName: this.localId
+          });
+        } */
+        // MEMBER_LEAVED
+        this.wsSend(webrtcConfig.apis.leave, {
+          type: 'MEMBER_LEAVED',
+          data: '',
+          recipient: this.localId,
+          recipientName: this.localId
+        });
+      }
+      if (oMsg && oMsg.data) {
+        this.$message(oMsg.data);
+      }
+    },
+    /**
+     * vedio处理器
+     * @param {object} oMsg 消息体
+     *  {
+     *    remoteId: '', // 通讯方ID
+     *    dlUserMsg: '', // 通话窗口用户信息提示
+     *  }
+     */
+    wrMsgHandler (oMsg) {
+      let $container = $('#' + this.videoContainerIdPre + oMsg.remoteId);
+      // 通话窗口用户信息提示
+      $container.find('.wr_dl_user_msg').text(oMsg.dlUserMsg);
+    },
     /**
      * vedio处理器
      * @param {string} nid vedio的ID
@@ -369,7 +596,8 @@ export default {
     > li {
       float: left;
       padding: 10px;
-      > div {
+      > div.wr_video_container {
+        position: relative;
         width: 254px; height: 400px;
         background-color: #000;
         color: #fff;
@@ -377,5 +605,41 @@ export default {
       }
     }
   }
+}
+.wr_video_scale {
+  display: none;
+  position: absolute; top: 15px; right: 8px; z-index: 2;
+  cursor: not-allowed;
+  animation: fadeIn .4s ease-out;
+}
+.wr_video_user {
+  position: absolute; top: 15px; left: 10px; z-index: 2;
+  > img {
+    position: absolute; top: 4px; left: 0;
+    width: 46px; height: 46px;
+  }
+  > div {
+    padding-left: 52px;
+    > h3 { font-size: 22px; color: #fff; }
+    > p { padding-top: 5px; font-size: 12px; color: #f6f6f6; }
+  }
+}
+.wr_video_opts {
+  position: absolute; bottom: 15px; left: 0; z-index: 2;
+  width: 100%;
+  text-align: center;
+  > .wr_video_opts_l {
+    > span {
+      display: inline-block;
+      margin: 0 10px;
+      > p {
+        color: #fff;
+        font-size: 12px;
+      }
+    }
+  }
+}
+.wr_video_container:hover {
+  .wr_video_scale { display: block; }
 }
 </style>
