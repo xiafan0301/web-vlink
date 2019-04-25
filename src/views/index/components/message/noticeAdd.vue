@@ -91,10 +91,6 @@ export default {
     addMsgNote (formName, type) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (this.fileList.length === 0) {
-            this.$message.error('请上传图片！');
-            return false;
-          }
           console.log('通过验证')
           const data = {
             messageType: 2,
@@ -105,7 +101,7 @@ export default {
           }
           addMsgNote(data).then(res => {
             if (res && res.data) {
-              this.$message.success('发布成功');
+              this.$message.success(type === 1 ? '保存成功' : '发布成功');
               this.$emit('getMsgNoteList');
             }
           })
@@ -150,17 +146,12 @@ export default {
     putMsgNote (formName, type) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (this.fileList.length === 0) {
-            this.$message.error('请上传图片！');
-            return false;
-          }
           const data = {
             messageType: 2,
             publishState: type,
             uid: this.detail.uid,
             title: this.addForm.title,
             details: this.addForm.content,
-            isTop: this.detail.isTop,
             sysAppendixList: this.fileList.map(m => {
               if (m.response) {
                 return m.response.data.sysAppendixInfo;
@@ -190,7 +181,7 @@ export default {
           }
           putMsgNote(data).then(res => {
             if (res && res.data) {
-              this.$message.success('修改成功');
+              this.$message.success(type === 1 ? '保存成功' : '发布成功');
               this.$emit('getMsgNoteList');
             }
           }).finally(() => {

@@ -100,7 +100,6 @@
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -155,11 +154,11 @@ export default {
         pageNum: this.pageNum,
         orderBy: null,
         order: null,
+        'where.messageType': 2,
         'where.startDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[0],
         'where.endDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[1],
         'where.titleOrPublisher': this.noticeForm.titleOrPublisher,
-        'where.isTop': this.noticeForm.noticeState,
-        'where.messageType': null
+        'where.isTop': this.noticeForm.noticeState
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {
@@ -190,10 +189,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMsgNoteList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -205,6 +200,7 @@ export default {
     },
     resetForm () {
       this.$refs['noticeForm'].resetFields();
+      this.getMsgNoteList();
     }
   }
 }

@@ -20,11 +20,11 @@
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
-              <!-- <el-input v-model="createForm.event"></el-input> -->
               <el-select
                 v-model="createForm.event"
                 filterable
                 remote
+                clearable
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
@@ -173,8 +173,8 @@ export default {
         controlRank: null,
         periodTime: [
           {
-            startTime: null,
-            endTime:  null
+            startTime: new Date(2019, 4, 10, 0, 0, 0),
+            endTime:  new Date(2019, 4, 10, 23, 59, 59)
           }
         ],
       },
@@ -255,14 +255,15 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.otherQuery': query
+        'where.keyword': query,
+        pageSize: 1000000
       }
       getEventList(params).then(res => {
         if (res && res.data) {
           this.eventList = res.data.list.map(m => {
             return {
               label: m.eventCode,
-              value: m.eventCode
+              value: m.uid
             }
           });
         }
@@ -386,7 +387,7 @@ export default {
             })
             let data = {
               alarmLevel: this.createForm.controlRank,// 告警级别
-              eventId: parseInt(this.createForm.event),// 事件id
+              eventId: this.createForm.event,// 事件id
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
@@ -461,7 +462,7 @@ export default {
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
           this.createForm.event = this.controlDetail.eventCode;
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = (this.pageType === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
@@ -554,7 +555,7 @@ export default {
               }
             })
             this.controlDetail.alarmLevel = this.createForm.controlRank;
-            this.controlDetail.eventId = parseInt(this.createForm.event);
+            this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
             this.controlDetail.modelList = modelList;
@@ -569,9 +570,11 @@ export default {
             }
             console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
-            putControl(this.controlDetail).then(() => {
-              this.$message.success('编辑成功');
-              this.$emit('getControlList');
+            putControl(this.controlDetail).then((res) => {
+              if (res) {
+                this.$message.success('编辑成功');
+                this.$emit('getControlList');
+              }
             }).finally(() => {
               this.loadingBtn = false;
             })

@@ -74,7 +74,7 @@
 <script>
 import G2 from '@antv/g2';
 import {formatDate} from '@/utils/util';
-import {getStatistics} from '@/views/index/api/api'
+import {getStatistics} from '@/views/index/api/api.control.js'
 export default {
   data () {
     return {
@@ -513,6 +513,7 @@ export default {
       chart.legend({
         position: 'right',
         title: null,
+        hoverable: false,
         textStyle: {
           fill: '#f1f1f1', // 文本的颜色
           fontSize: 12

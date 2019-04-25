@@ -15,10 +15,10 @@
           </el-form-item>
           <el-form-item label="消息内容:" prop="content" style="width: 754px;">
             <el-input
-              maxlength="140"
+              maxlength="200"
               type="textarea"
               :rows="4"
-              placeholder="请对事发情况进行描述，文字限制140字"
+              placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
           </el-form-item>

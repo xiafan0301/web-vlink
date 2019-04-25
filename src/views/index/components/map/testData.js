@@ -42,12 +42,14 @@ export const testData = {
     renyuan: [
         {
             name: '人员111',
-            addr: '长沙市天心区', 
+            addr: '长沙市天心区',
+            type: 1,
             latitude: 28.09466,
             longitude: 112.974315
         }, {
             name: '人员222',
-            addr: '创谷广告园', 
+            addr: '创谷广告园',
+            type: 2,
             latitude: 28.09335,
             longitude: 112.974122
         }
