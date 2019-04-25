@@ -54,12 +54,13 @@
                   </template>
                   <template v-if="uplaodVideoList.length > 0">
                     <div class="video_box" v-for="(item ,index) in uplaodVideoList" :key="index">
-                      <video :src="item.path"></video>
+                      <video :src="item.path" id="add_video"></video>
                       <div class="close_icon" @click="removeVideo(index)">
-                        <i class="vl_icon vl_icon_event_24 "></i>
+                        <i class="vl_icon vl_icon_event_24"></i>
                       </div>
-                      <div>
-                        <i class="vl_icon vl_icon_judge_01"></i>
+                      <div class="play_icon">
+                        <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
+                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i>
                       </div>
                     </div>
                   </template>
@@ -165,6 +166,7 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isPlaying: false, // 是否播放视频
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       isAddHandleLoading: false,
@@ -192,7 +194,7 @@ export default {
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
-        radius: -1, // 是否推送
+        // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
       },
       rules: {
@@ -581,6 +583,27 @@ export default {
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));
     },
+    // 播放视频
+    playVideo (val) {
+      if (val) {
+        this.isPlaying = true;
+        document.getElementById('add_video').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('add_video').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('add_video');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          this.isPlaying = false;
+        });
+      }
+    }
   }
 }
 </script>
@@ -615,11 +638,31 @@ export default {
               margin-right: 5px;
             }
             .close_icon {
-              display: inline-block;
               position: absolute;
               right: 2px;
               top: 4px;
               cursor: pointer;
+            }
+            .play_icon {
+              position: absolute;
+              cursor: pointer;
+              top: 30%;
+              left: 30%;
+              background: #000;
+              opacity: 0.6;
+              width: 40px;
+              height: 40px;
+              /* line-height: 40px; */
+              /* text-align: center; */
+              border-radius: 50%;
+              .pause_btn {
+                margin-left: 30%;
+                margin-top: 22%;
+              }
+              .play_btn {
+                margin-left: 37%;
+                margin-top: 22%;
+              }
             }
             .img_list, .video_box {
               width: 100px;

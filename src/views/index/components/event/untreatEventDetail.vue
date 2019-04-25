@@ -24,14 +24,15 @@
               <div v-show="isMutual">
                 <span>是否推送消息给附近的用户：</span>
                 <el-select  placeholder="请选择推送距离" size="mini" style='width: 200px' v-model="radiusNumber">
-                  <!-- <el-option
+                  <el-option
                     v-for="item in distanceList"
-                    :key="item.dictId"
-                    :label="item.dictContent"
-                    :value="item.dictCode"
+                    :key="item.uid"
+                    :label="item.enumValue"
+                    :value="item.enumField"
                   >
-                  </el-option> -->
+                  </el-option>
                 </el-select>
+                <p v-show="isShowError" style="color:#F56C6C;font-size:12px;">请选择推送距离</p>
               </div>
             </div>
             <div class="handle-type">
@@ -69,8 +70,10 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 import BigImg from '@/components/common/bigImg.vue';
+import { dataList, operationType } from '@/utils/data.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -84,6 +87,8 @@ export default {
       basicInfo: {}, // 事件详情
       radiusNumber: null, // 推送距离
       isDisabled: true, 
+      isShowError: false,
+      distanceList: [], // 推送距离
     }
   },
   watch: {
@@ -95,6 +100,9 @@ export default {
       }
     },
     isMutual (val) {
+      if (!val) {
+        this.radiusNumber = null;
+      }
       if (!val && !this.handleType) {
         this.isDisabled = true;
       } else {
@@ -104,8 +112,19 @@ export default {
   },
   mounted () {
     this.getDetail();
+    this.getDistanceList();
   },
   methods: {
+    // 获取推送距离
+    getDistanceList () {
+      const distanceId = dataList.distanceId;
+      getDiciData(distanceId)
+        .then(res => {
+          if (res) {
+            this.distanceList = res.data;
+          }
+        });
+    },
     // 图片放大传参
     emitHandleImg (isShow, index) {
       this.openBigImg(index, this.basicInfo.attachmentList);
@@ -134,32 +153,44 @@ export default {
     skipEachPage () {
       const type = this.handleType;
       const eventId = this.$route.query.eventId;
-      // const params = {
-      //   uid: eventId,
-      //   mutualFlag: this.isMutual
-      // }
-      // updateEvent(params)
-      //   .then(res => {
-      //     console.log(res)
-      //   })
-      if (type) {
-        if (type === 1) {
-          // 跳至新增布控页面
-          this.$router.push({path: '/control/create', query: { eventId: eventId }});
-        }
-        if (type === 2) {
-          // 跳至事件管理调度指挥页面
-          this.$router.push({name: 'ctc_operation', query: {eventId: eventId, eventType: this.basicInfo.eventType}});
-        }
-        if (type === 3) {
-          // 跳至呈报上级页面
-          this.$router.push({name: 'event_report', query: {eventId: eventId}});
-        }
-        if (type === 4) {
-          // 跳至转到其他单位页面
-          this.$router.push({name: 'send_other_units', query: {eventId: eventId}});
-        }
+      if (this.isMutual && !this.radiusNumber) {
+        this.isShowError= true;
+        return;
       }
+      const params = {
+        uid: eventId,
+        type: operationType.changeEvent,
+        mutualFlag: this.isMutual,
+        dealType: this.handleType || null,
+        radius: this.radiusNumber || null
+      }
+      updateEvent(params)
+        .then(res => {
+          if (res) {
+            if (this.isMutual && !this.handleType) {
+              this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: eventId}});
+            } else {
+               if (type) {
+                  if (type === 1) {
+                    // 跳至新增布控页面
+                    this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                  }
+                  if (type === 2) {
+                    // 跳至事件管理调度指挥页面
+                    this.$router.push({name: 'ctc_operation', query: {eventId: eventId, eventType: this.basicInfo.eventType}});
+                  }
+                  if (type === 3) {
+                    // 跳至呈报上级页面
+                    this.$router.push({name: 'event_report', query: {eventId: eventId}});
+                  }
+                  if (type === 4) {
+                    // 跳至转到其他单位页面
+                    this.$router.push({name: 'send_other_units', query: {eventId: eventId}});
+                  }
+                }
+            }
+          }
+        }) 
     },
     // 处理方式change
     handleHandleMode () {

@@ -63,7 +63,7 @@ import EventBasic from './components/eventBasic';
 import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 import { ajaxCtx } from '@/config/config.js';
-import { dataList } from '@/utils/data.js';
+import { dataList, operationType } from '@/utils/data.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -72,7 +72,7 @@ export default {
       endForm: {
         // eventId: null,
         // eventLevel: null,
-        type: 4,
+        type: operationType.endEvent,
         eventSummary: null, // 事件总结
         addList: []
       },

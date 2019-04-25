@@ -189,7 +189,7 @@
   </div>
 </template>
 <script>
-import { dataList } from '@/utils/data.js';
+import { dataList, operationType } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
@@ -203,11 +203,8 @@ export default {
       isImgNumber: false,
       newMarker: null,
       addEventForm: {
-        // eventSource: '1',
-        // eventFlag: true,
-        // mutualFlag: false,
         uid: '',
-        type: 1, // 1-事件审核 2-事件处理 3-转到其他单位 4-结束事件
+        type: operationType.auditEvent, // 1-事件审核 2-事件处理 3-转到其他单位 4-结束事件
         reporterPhone: '', // 报案人  手机号码
         reportTime: '', // 上报时间
         eventAddress: '', // 事发地点
@@ -218,8 +215,6 @@ export default {
         longitude: '', // 经度
         latitude: '', // 纬度
         acceptFlag: 2, // 证明是通过
-        // dealOrgId: '', // 处理单位
-        // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
       },
       rules: {
@@ -545,7 +540,7 @@ export default {
           const params = {
             uid: this.addEventForm.uid,
             acceptFlag: 3, // 证明是驳回
-            type: 1, // 1--事件审核
+            type: operationType.auditEvent, // 1--事件审核
             closeRemark: this.rejectForm.closeRemark,
             rejectReason: this.rejectForm.rejectReason
           }
@@ -556,7 +551,7 @@ export default {
                 type: 'success',
                 message: '驳回成功',
                 customClass: 'request_tip'
-              })
+              });
               this.$router.push({name: 'event_audit'});
               this.rejectDialogVisible = false;
               this.isRejectLoading = false;
