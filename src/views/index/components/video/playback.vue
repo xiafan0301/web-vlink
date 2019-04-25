@@ -83,12 +83,19 @@
               <div class="show_his_btn" @click="delAllVideoRecords" v-if="videoRecordList && videoRecordList.length > 0">清空记录</div>
               <div class="show_his_empty" v-else>暂无记录</div>
               <ul class="show_his">
-                <li v-for="(item, index) in videoRecordList" :key="'hty_' + index"
-                  @dragstart="dragStart2($event, item)" @dragend="dragEnd"
-                  draggable="true" style="cursor: move;">
-                  <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                  <p>{{item.playTime | fmTimestamp}}</p>
-                  <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
+                  <!-- 过期 -->
+                  <div class="show_his_dis" v-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                    draggable="true" style="cursor: move;" v-else>
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
                 </li>
               </ul>
             </div>
