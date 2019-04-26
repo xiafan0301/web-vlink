@@ -179,7 +179,7 @@ export default {
         'where.mutualFlag': this.ctcForm.mutualFlag,
         'where.reportTimeStart': this.ctcForm.reportTime[0],
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
-        'where.otherQuery': this.ctcForm.phoneOrNumber,
+        'where.keyword': this.ctcForm.phoneOrNumber,
         'where.dispatchStatus': eventStatus,
         pageNum: this.pagination.pageNum,
         orderBy: 'create_time',

@@ -42,6 +42,7 @@
               style="width: 500px;"
               :action="uploadUrl"
               :on-success="handSuccess"
+              :on-remove="handleRemove"
               :before-upload="beforeUpload"
               :limit="1"
               :file-list="fileList">
@@ -184,10 +185,18 @@ export default {
         })
         .catch(() => {})
     },
+    // 删除附件
+    handleRemove (file) {
+      if (file) {
+        this.editPlanForm.path = null;
+        this.editPlanForm.cname = null;
+        this.editPlanForm.attachmentType = null;
+      }
+    },
     // 上传成功
     handSuccess (res) {
       if (res.data) {
-        this.editPlanForm.url = res.data.fileFullPath;
+        this.editPlanForm.path = res.data.fileFullPath;
         this.editPlanForm.cname = res.data.fileName;
         this.editPlanForm.attachmentType = dataList.fileId;
       }

@@ -342,7 +342,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
       <!--新增组弹出框-->
@@ -365,7 +365,7 @@
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -424,6 +424,8 @@ export default {
       perBottomBankList: [], // 底库列表
       copyPerGroupInfoList: [],
       multipleSelection: [], // 表格多选
+      isAddLoading: false, // 加入组加载中
+      isAddCopyLoading: false, // 复制并加入组加载中
     }
   },
   mounted () {
@@ -556,14 +558,14 @@ export default {
       this.addGroupForm.userGroupName = null;
       this.$refs[form].resetFields();
     },
-    // 复制或新增复制到组 --判断组名是否重复
+    // 复制或新增复制到组
     addCopyGroupInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           const params = {
             name: this.addGroupForm.userGroupName
           };
-          judgePerson(params)
+          judgePerson(params)  // --判断组名是否重复
             .then(res => {
               if (res.data) {
                 this.isShowError = true;
@@ -587,6 +589,7 @@ export default {
         // groupId: id || null,
         memberIds: selectArr
       };
+      this.isAddCopyLoading = true;
       addGroupCopyPerson(params)
         .then(res => {
           if (res) {
@@ -598,15 +601,17 @@ export default {
             this.showGroup = false;
             this.getGroupList();
             this.addGroupCopyDialog = false;
+            this.isAddCopyLoading = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '新增失败',
-              customClass: 'request_tip'
-            })
+            // this.$message({
+            //   type: 'error',
+            //   message: '新增失败',
+            //   customClass: 'request_tip'
+            // })
+            this.isAddCopyLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddCopyLoading = false;})
     },
     // 点击左边分组获取右边人员列表
     getPerDetailInfo (obj, type) {
@@ -706,6 +711,7 @@ export default {
         groupName: this.addGroupForm.userGroupName,
         groupType: 4
       };
+      this.isAddLoading = true;
       addGroup(params)
         .then(res => {
           if (res) {
@@ -716,9 +722,12 @@ export default {
             })
             this.getGroupList();
             this.addGroupDialog = false;
+            this.isAddLoading = false;
+          } else {
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 显示加入组--新增分组弹出框
     showAddGroupCopyDialog () {
@@ -739,7 +748,6 @@ export default {
     },
     // 跳至管理人员组信息页面
     skipAdminPersonPage (id, val, e) {
-      // console.log('111')
       e.stopPropagation();
       this.$router.push({name: 'admin_person_info', query: {type: val, id: id}});
     }

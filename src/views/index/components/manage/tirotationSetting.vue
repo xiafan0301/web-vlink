@@ -111,7 +111,7 @@
           </el-table-column>
           <el-table-column label="操作" width="240">
             <template slot-scope="scope">
-              <span class="operation_btn">查看</span>
+              <span class="operation_btn" @click="skipVideoPatrolPage">查看</span>
               <span style="color: #f2f2f2">|</span>
               <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
               <span style="color: #f2f2f2">|</span>
@@ -222,6 +222,10 @@ export default {
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getList();
+    },
+    // 跳至视频轮巡页面---查看
+    skipVideoPatrolPage () {
+      this.$router.push({name: 'video_patrol'});
     },
     // 跳至新增轮巡页面
     skipAddRatotionPage (obj) {

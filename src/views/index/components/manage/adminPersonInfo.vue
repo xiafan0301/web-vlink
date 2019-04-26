@@ -122,7 +122,7 @@
         </el-table>
         <el-pagination
           @current-change="handleCurrentChange"
-          :current-page="pagination.pageNum"
+          :current-page.sync="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
           :page-size="pagination.pageSize"
           layout="total, prev, pager, next, jumper"
@@ -196,15 +196,14 @@
         <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
          <el-form :model="groupForm" ref="groupForm" :rules="rules">
             <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+              <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
           </el-form>
-        <!-- <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input> -->
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="addGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addGroupDialog = false">确认</el-button>
+        <el-button @click="cancelAddGroup('groupForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="sureAddGroup('groupForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--修改组弹出框-->
@@ -216,18 +215,15 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <!-- <div class="content_body">
-        <el-input placeholder="请输入组名，名字限制在10个" v-model="userGroupName"></el-input>
-      </div> -->
       <el-form :model="groupForm" ref="groupForm" :rules="rules">
         <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-          <el-input placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+          <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
           <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('groupForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editGroupInfo('groupForm')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editGroupInfo('groupForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--删除组弹出框-->
@@ -242,7 +238,7 @@
       <span style="color: #999999;">删除后该组信息可在全部人像中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="deleteGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="sureDeleteGroup">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--移出组弹出框-->
@@ -257,7 +253,7 @@
       <span style="color: #999999;">移除后该条信息可在全部人像中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="moveoutGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isRemoveLoading" @click="moveoutGroupInfo">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -265,7 +261,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getPerGroupList, getPersonData, getPersonDetail, editVeGroup, copyPersonGroup,
-moveoutPerson, deletePersonGroup } from '@/views/index/api/api.manage.js';
+moveoutPerson, deletePersonGroup, addGroupCopyPerson, judgePerson } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -301,7 +297,11 @@ export default {
       copyGroupList: [],
       multipleSelection: [], // 表格多选
       personDetailInfo: {}, // 人员详细信息
-      delTitle: null
+      delTitle: null,
+      isAddCopyLoading: false, // 复制并加入组加载中
+      isEditLoading: false, // 编辑组名加载中
+      isDeleteLoading: false, // 删除组加载中
+      isRemoveLoading: false, // 移除分组加载中
     }
   },
   mounted () {
@@ -374,6 +374,14 @@ export default {
     handleSelectChange (val) {
       this.multipleSelection = val;
     },
+    // 当新增组名输入框改变时
+    handleAGroupName () {
+      this.isShowError = false;
+    },
+    // 当编辑组名输入框改变时
+    handleEGroupName () {
+      this.isShowError = false;
+    },
     // 将人员复制到选择的组
     handleCopyGroup (id) {
       let selectArr = [];
@@ -420,28 +428,49 @@ export default {
     // 取消编辑
     cancelEdit (form) {
       this.$refs[form].resetFields();
+      this.groupForm.userGroupName = null;
       this.isShowError = false;
       this.editGroupDialog = false;
+    },
+    handleEditCopyGroupInfo () {
+      const data = {
+        groupName: this.groupForm.userGroupName,
+        groupType: 4,
+        uid: this.groupId
+      };
+      this.isEditLoading = true;
+      editVeGroup(data)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.editGroupDialog = false;
+            this.isEditLoading = false;
+            this.getGroupList(parseInt(this.groupId));
+          } else {
+            this.isEditLoading = false;
+          }
+        })
+        .catch(() => {this.isEditLoading = false;})
     },
     // 确认编辑
     editGroupInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          const data = {
-            groupName: this.groupForm.userGroupName,
-            groupType: 4,
-            uid: this.groupId
-          }
-          editVeGroup(data)
+          this.isShowError = false;
+          const params = {
+            name: this.groupForm.userGroupName
+          };
+          judgePerson(params)  // --判断组名是否重复
             .then(res => {
-              if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '修改成功',
-                  customClass: 'request_tip'
-                })
-                this.editGroupDialog = false;
-                this.getGroupList(parseInt(this.groupId));
+              if (res.data) {
+                this.isShowError = true;
+              } else {
+                this.isShowError= false;
+                this.handleEditCopyGroupInfo();
               }
             })
             .catch(() => {})
@@ -456,7 +485,8 @@ export default {
     sureDeleteGroup () {
       const params = {
         id: this.groupId
-      }
+      };
+      this.isDeleteLoading = true;
       deletePersonGroup(this.groupId, params)
         .then(res => {
           if (res) {
@@ -466,9 +496,12 @@ export default {
               customClass: 'request_tip'
             });
             this.$router.push({name: 'person_info'});
+            this.isDeleteLoading = false;
+          } else {
+            this.isDeleteLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isDeleteLoading = false;})
     },
     // 显示移出弹出框
     showMoveoutDialog () {
@@ -487,6 +520,7 @@ export default {
         groupId: this.groupId,
         portraitIds: selectArr
       };
+      this.isRemoveLoading = true;
       moveoutPerson(params)
         .then(res => {
           if (res) {
@@ -497,19 +531,79 @@ export default {
             })
             this.getPersonList();
             this.moveoutGroupDialog = false;
+            this.isRemoveLoading = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '移出失败',
-              customClass: 'request_tip'
-            })
+            // this.$message({
+            //   type: 'error',
+            //   message: '移出失败',
+            //   customClass: 'request_tip'
+            // })
+            this.isRemoveLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isRemoveLoading = false;})
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
+      this.groupForm.userGroupName = null;
+      this.isShowError = false;
       this.addGroupDialog = true;
+    },
+    // 取消新增分组弹出框
+    cancelAddGroup (form) {
+      this.$refs[form].resetFields();
+      this.groupForm.userGroupName = null;
+      this.isShowError = false;
+      this.addGroupDialog = false;
+    },
+    handleAddCopyGroupInfo () {
+      let selectArr = [];
+      this.multipleSelection.map(item => {
+        selectArr.push(item.id);
+      });
+      const params = {
+        newGroupName: this.groupForm.userGroupName || null,
+        memberIds: selectArr
+      };
+      this.isAddCopyLoading = true;
+      addGroupCopyPerson(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '新增成功',
+              customClass: 'request_tip'
+            })
+            this.showGroup = false;
+            this.getGroupList();
+            this.addGroupDialog = false;
+            this.isAddCopyLoading = false;
+          } else {
+            this.isAddCopyLoading = false;
+          }
+        })
+        .catch(() => {this.isAddCopyLoading = false;})
+    },
+    // 确定新增分组
+    sureAddGroup (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          this.isShowError = false;
+          const params = {
+            name: this.groupForm.userGroupName
+          };
+          judgePerson(params)  // --判断组名是否重复
+            .then(res => {
+              if (res.data) {
+                this.isShowError = true;
+              } else {
+                this.isShowError= false;
+                this.handleAddCopyGroupInfo();
+              }
+            })
+            .catch(() => {})
+        }
+      })
     }
   }
 }
@@ -665,6 +759,18 @@ export default {
         color: #999999;
         margin-bottom: 20px;
         display: inline-block;
+      }
+    }
+    .group_name {
+      position: relative;
+      .group_error_tip {
+        position: absolute;
+        height: 10px;
+        line-height: 10px;
+        color: #f56c6c;
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
       }
     }
   }

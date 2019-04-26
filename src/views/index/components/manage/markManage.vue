@@ -125,7 +125,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelAdd('markForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addMark('markForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addMark('markForm')">确定</el-button>
       </div>
     </el-dialog>
     <!--编辑标记弹出框-->
@@ -147,7 +147,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('markForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editMark('markForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editMark('markForm')">确定</el-button>
       </div>
     </el-dialog>
     <!--删除标记弹出框-->
@@ -162,7 +162,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delMarkDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteMark">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteMark">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -200,6 +200,9 @@ export default {
       editMarkDialog: false, // 编辑标记弹出框
       delMarkDialog: false, // 删除标记弹出框
       markId: null, // 要编辑或删除的id
+      isAddLoading: false, // 新增标记弹出框
+      isEditLoading: false, // 编辑标记弹出框
+      isDeleteLoading: false // 删除标记探出头
     }
   },
   mounted () {
@@ -249,7 +252,8 @@ export default {
            const params = {
             content: this.markForm.markName,
             uid: 0
-          }
+          };
+          this.isAddLoading = true;
           apiVideoSignContent(params)
             .then(res => {
               if (res) {
@@ -260,9 +264,12 @@ export default {
                 })
                 this.createMarkDialog = false;
                 this.getList();
+                this.isAddLoading = false;
+              } else {
+                this.isAddLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },
@@ -288,6 +295,7 @@ export default {
             uid: this.markId,
             content: this.markForm.markName
           };
+          this.isEditLoading = true;
           updateVideoRecords(params)
             .then(res => {
               if (res) {
@@ -298,9 +306,12 @@ export default {
                 })
                 this.editMarkDialog = false;
                 this.getList();
+                this.isEditLoading = false;
+              } else {
+                this.isEditLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEditLoading = false;})
         }
       })
     },
@@ -321,7 +332,8 @@ export default {
       if (this.markId) {
         const params = {
           id: this.markId
-        }
+        };
+        this.isDeleteLoading = true;
         deleteVideoRecords(params)
           .then(res => {
             if (res) {
@@ -332,9 +344,12 @@ export default {
               })
               this.delMarkDialog = false;
               this.getList();
+              this.isDeleteLoading =  false;
+            } else {
+              this.isDeleteLoading =  false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading =  false;})
       }
     },
     // getOneMonth () { // 设置默认一个月

@@ -95,8 +95,8 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="addPatrolInfo('addForm')">保存</el-button>
-      <el-button class="operation_btn back_btn" @click="cancelSubmit('addForm')">取消</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addPatrolInfo('addForm')">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelSubmit">取消</el-button>
     </div>
   </div>
 </vue-scroll>
@@ -149,6 +149,7 @@ export default {
       selectDeviceNumber: 0, // 可以选择的可选设备数量
       rightAllChecked: false, // 右侧设备全部选中
       currentDeviceList: [], // 要提交的设备
+      isAddLoading: false, // 新增轮巡加载中
     }
   },
   mounted () {
@@ -264,15 +265,16 @@ export default {
           console.log('currentDeviceList', this.currentDeviceList)
           console.log('addForm', this.addForm)
           const params = {
-            frameNumber: this.addForm.frameNum,
-            inerval: parseInt(this.addForm.roundInterval),
+            frameNum: this.addForm.frameNum,
+            roundInterval: parseInt(this.addForm.roundInterval),
             roundName: this.addForm.roundName,
             startTime: this.addForm.dateTime[0],
             endTime: this.addForm.dateTime[1],
             devList: device,
-            deviceNumber: device.length
+            deviceNum: device.length
           }
           console.log(params)
+          this.isAddLoading = true;
           addVideoRound(params)
             .then(res => {
               console.log('res', res)
@@ -282,10 +284,13 @@ export default {
                   message: '新增成功',
                   customClass: 'request_tip'
                 });
+                this.isAddLoading = false;
                 this.$router.push({name: 'tirotation_setting'});
+              } else {
+                this.isAddLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },
@@ -299,8 +304,8 @@ export default {
       this.getAllDevicesList();
     },
     // 返回
-    cancelSubmit (form) {
-      this.$refs[form].resetFields();
+    cancelSubmit () {
+      // this.$refs[form].resetFields();
       this.$router.back(-1);
     }
   }

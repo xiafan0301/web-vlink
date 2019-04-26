@@ -334,7 +334,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
       <!--新增组弹出框-->
@@ -357,7 +357,7 @@
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -416,6 +416,8 @@ export default {
       vehicleDetailInfo: {}, // 车辆详细信息
       copyGroupInfoList: [], // 可复制的分组
       currSelectGroupId: null, // 当前选中的组名id
+      isAddLoading: false, // 加入组加载中
+      isAddCopyLoading: false, // 复制并加入组加载中
     }
   },
   mounted () {
@@ -586,6 +588,7 @@ export default {
     // 取消新增分组 
     cancelAddGroup (form) {
       this.$refs[form].resetFields();
+      this.addGroupDialog = false;
       this.isShowError = false;
     },
     // 显示新增分组弹出框
@@ -619,6 +622,7 @@ export default {
         groupName: this.addGroupForm.userGroupName,
         groupType: 1
       };
+      this.isAddLoading = true;
       addGroup(params)
       .then(res => {
         if (res) {
@@ -629,15 +633,17 @@ export default {
           })
           this.getVeGroupInfo();
           this.addGroupDialog = false;
+          this.isAddLoading = false;
         } else {
-          this.$message({
-            type: 'error',
-            message: '新增失败',
-            customClass: 'request_tip'
-          })
+          // this.$message({
+          //   type: 'error',
+          //   message: '新增失败',
+          //   customClass: 'request_tip'
+          // })
+          this.isAddLoading = false;
         }
       })
-      .catch(() => {})
+      .catch(() => {this.isAddLoading = false;})
     },
     // 显示加入组--新增分组弹出框
     showAddGroupCopyDialog () {
@@ -648,6 +654,7 @@ export default {
     // 显示加入组---取消新增分组
     cancelAddGroupCopy (form) {
       this.isShowError = false;
+      this.addGroupCopyDialog = false;
       this.addGroupForm.userGroupName = null;
       this.$refs[form].resetFields();
     },
@@ -662,6 +669,7 @@ export default {
         groupId: id || null,
         vehicleIds: selectArr
       };
+
       copyGroup(params)
         .then(res => {
           if (res) {
@@ -713,6 +721,7 @@ export default {
         // groupId: id || null,
         vehicleIds: selectArr
       };
+      this.isAddCopyLoading = true;
       copyGroup(params)
         .then(res => {
           if (res) {
@@ -724,15 +733,17 @@ export default {
             this.showGroup = false;
             this.getVeGroupInfo();
             this.addGroupCopyDialog = false;
+            this.isAddCopyLoading = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '新增失败',
-              customClass: 'request_tip'
-            })
+            // this.$message({
+            //   type: 'error',
+            //   message: '新增失败',
+            //   customClass: 'request_tip'
+            // })
+            this.isAddCopyLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddCopyLoading = false;})
     },
     // 显示查看车辆信息弹出框
     showLookDetailInfo (obj) {
