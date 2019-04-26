@@ -969,3 +969,17 @@ export function ScpGETdeviceListById(params) {
   })
 }
 /*--------------------------  检索end  ---------------------------------*/
+/*--------------------------  字典服务start  ---------------------------------*/
+/**
+ * getDicts
+ * 字典列表接口
+ * @param {object} params
+ */
+export function getDicts() {
+  return request({
+    url: '/dict-service/dicts',
+    method: 'get',
+    mode: 'base',
+  })
+}
+/*--------------------------  字典服务end  ---------------------------------*/

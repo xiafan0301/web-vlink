@@ -41,6 +41,7 @@ import QRCode from 'qrcodejs2';
 import {validatePhone, validatePwd} from '@/utils/validator.js';
 import vlFooter from '@/components/footer.vue';
 import { login } from '@/views/index/api/api.user.js';
+import { getDicts } from '@/views/index/api/api.js';
 export default {
   components: {QRCode, vlFooter},
   data () {
@@ -68,6 +69,7 @@ export default {
   },
   mounted () {
     this.downloadQRcode();
+    this.getAllDics()
   },
   methods: {
     loginSubmit (formName) {
@@ -123,6 +125,13 @@ export default {
         // correctLevel: '', // [L|M|Q|H]
       })  
       this.dlQRcode = qrcode;
+    },
+    getAllDics() {
+      // 页面一进来就将字典信息全部存入本地
+      getDicts().then(res => {
+        localStorage.setItem("dic", JSON.stringify(res.data));
+        this.$_setDic(res.data);
+      });
     }
   }
 }

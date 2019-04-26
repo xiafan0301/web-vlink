@@ -281,6 +281,7 @@ export default {
           position: relative;
           .group_copy{
             width:152px;
+            height: 280px;
             position: absolute;
             left: 0;
             top: 50px;
@@ -288,7 +289,7 @@ export default {
             background:rgba(255,255,255,1);
             box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
             border-radius:4px;
-            > li{
+            li{
               padding: 0 10px;
               cursor: pointer;
               &:hover{

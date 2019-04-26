@@ -14,8 +14,10 @@
         <el-button @click="judgeIsSelectedRemove">删除人像</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
-            <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
-            <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
+            <vue-scroll>
+              <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
+              <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
+            </vue-scroll>
           </ul>
         </el-collapse-transition>
       </div>
@@ -141,6 +143,9 @@ export default {
       console.log(this.memberList)
       this.$nextTick(() => {
         this.allChecked = !this.memberList.some(s => s.isChecked === false);
+        if (!this.allChecked) {
+          this.isShowGroupCopy = false;
+        }
       })
     },
     // 全选
@@ -151,6 +156,7 @@ export default {
           this.memberList.map(m => {
             m.isChecked = false;
           })
+          this.isShowGroupCopy = false;
           console.log(this.memberList)
         } else {
           this.memberList.map(m => {
@@ -179,12 +185,17 @@ export default {
       }
     },
     // 获取人像组列表
-    getGroupListIsPortrait () {
+    getGroupListIsPortrait (data) {
       getGroupListIsPortrait().then(res => {
         if (res && res.data) {
           this.groupListPortrait = res.data.filter(f => f.uid !== null);
         }
       })
+      if (data) {
+        setTimeout(() => {
+          this.copyPortrait(data);
+        }, 2000)
+      }
     },
     // 批量删除人像
     delPortrait () {
