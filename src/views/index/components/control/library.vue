@@ -39,7 +39,7 @@
           </div>
         </vue-scroll>
         <!-- 人像库左侧组合搜索 -->
-        <el-form :model="libPortraitForm" class="lib_form" ref="libForm" v-if="tabType === '1'">
+        <el-form :model="libPortraitForm" class="lib_form" ref="portraitLibForm" v-show="tabType === '1'">
           <el-form-item prop="perTime">
             <el-date-picker
               style="width: 192px;"
@@ -82,7 +82,7 @@
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
-        <el-form :model="libVehicleForm" class="lib_form" v-else ref="libForm">
+        <el-form :model="libVehicleForm" class="lib_form" v-show="tabType === '2'" ref="carLibForm">
           <el-form-item prop="carTime">
             <el-date-picker
               style="width: 192px;"
@@ -674,6 +674,7 @@ export default {
       this.currentPage = 1;
       this.pageNum = 1;
       this.getGroupList();
+      this.reset();
       if (this.tabType === '1') {
         this.getPortraitList(null, 0);
       } else {
@@ -688,7 +689,11 @@ export default {
     },
     // 重置左侧组合搜索
     reset () {
-      this.$refs['libForm'].resetFields();
+      if (this.tabType === '1') {
+        this.$refs['portraitLibForm'].resetFields();
+      } else {
+        this.$refs['carLibForm'].resetFields();
+      }
     },
     handleRemove () {
       this.dialogImageUrl = null;

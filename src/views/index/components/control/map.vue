@@ -143,12 +143,21 @@
             <el-card class="more" shadow="hover">
               <p>布控对象</p>
               <div>{{controlObjList.objectList.length}}</div>
-              <el-button size="small">查看更多</el-button>
             </el-card>
-            <el-card class="pic" shadow="hover" v-for="item in controlObjList.objectList" :key="item.name">
-              <img :src="item.photoUrl" alt="" width="130" height="130">
-              <p>{{item.name}}</p>
-            </el-card>
+           
+
+            <swiper :options="swiperOption" ref="mySwiper" style="width: calc(100% - 176px);" @mouseover.native="isShowSwiperBtn = true;" @mouseleave.native="isShowSwiperBtn = false;" :class="{'is_show_btn': isShowSwiperBtn}">
+              <!-- slides -->
+              <swiper-slide v-for="item in controlObjList.objectList" :key="item.id">
+                <el-card class="pic" shadow="hover" :key="item.name">
+                  <img :src="item.photoUrl" alt="" width="130" height="130">
+                  <p>{{item.name}}</p>
+                </el-card>
+              </swiper-slide>
+              <div class="swiper-button-prev" slot="button-prev"></div>
+              <div class="swiper-button-next" slot="button-next"></div>
+            </swiper>
+
           </div>
           <div class="control_info">
             <div class="control_info_list">
@@ -177,6 +186,19 @@ export default {
   components: {flvplayer, controlVideo},
   data () {
     return {
+      swiperOption: {
+        slidesPerView: null,
+        spaceBetween: 10,
+        slidesPerGroup: 1,
+        loop: false,
+        slideToClickedSlide: true,
+        loopFillGroupWithBlank: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      },
+      isShowSwiperBtn: false,
       loading: false,
       loadingBtn: false,
       // 左侧搜索参数
@@ -221,7 +243,8 @@ export default {
       // 布控对象列表参数
       controlObjList: [],
       isShowFullScreen: false, // 是否显示全屏播放页面
-      videoHeight: null
+      videoHeight: null,
+      scrollWidth: null
     }
   },
   created () {
@@ -237,6 +260,13 @@ export default {
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
     this.videoHeight = document.body.clientHeight - 336;
+    this.scrollWidth = window.screen.width;
+    console.log(this.scrollWidth)
+    if (this.scrollWidth <= 1440) {
+      this.swiperOption.slidesPerView = 2;
+    } else {
+      this.swiperOption.slidesPerView = 5;
+    }
   },
   methods: {
     // 获取关联事件列表
@@ -300,9 +330,8 @@ export default {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           this.markerAlarmList.forEach(dev => {
-            console.log(res.timestamp - new Date(dev.snapTime).getTime(), 'aaaaa')
-            if (res.timestamp - new Date(dev.snapTime).getTime() > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
-            
+            const timeDifference = res.timestamp - new Date(dev.snapTime).getTime();
+            if (timeDifference > 10000 || timeDifference <= 0) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
             this.$nextTick(() => {
@@ -396,6 +425,7 @@ export default {
         if (res && res.data) {
           let _this = this;
           _this.controlObjList = res.data;
+          // this.swiperOption.slidesPerView = this.controlObjList.objectList.length;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '', domId = obj.uid + '_' + random14();
           if (obj.surveillanceStatus === 1) {
             vlMapVideo = `
@@ -919,11 +949,11 @@ export default {
               margin-right: 1%;
               p{
                 line-height: 24px;
+                margin-bottom: 10px;
               }
               div{
                 font-size: 24px;
                 line-height: 24px;
-                margin-bottom: 5px;
                 color: #0769E7;
               }
               .el-button{
@@ -932,7 +962,7 @@ export default {
               }
             }
             .pic.el-card{
-              width: 162px;
+              width: 100%;
               padding-top: 10px;
               margin-right: 1%;
               p{
@@ -992,6 +1022,16 @@ export default {
   .map_box{
     .el-card__body{
       padding: 0!important;
+    }
+    .swiper-container{
+      .swiper-button-next, .swiper-button-prev{
+        display: none;
+      }
+    }
+    .swiper-container.is_show_btn{
+      .swiper-button-next, .swiper-button-prev{
+        display: block;
+      }
     }
   }
   #mapBox{
