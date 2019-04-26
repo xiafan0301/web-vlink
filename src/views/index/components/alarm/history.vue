@@ -547,7 +547,7 @@ export default {
               })
             }else {
               this.mAlarmList.push({
-                label: item.alarmTimeD,
+                label: formatDate(item.alarmTimeD, 'yyyy-MM-dd'),
                 value: item
               })
             }
