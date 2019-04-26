@@ -5,6 +5,7 @@
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
+        class="person_info"
         placement="bottom"
         trigger="click">
         <ul class="hd_user_pl">
@@ -410,6 +411,9 @@ export default {
       margin-bottom: 20px;
     }
   }
+}
+.person_info {
+  height: auto;
 }
 </style>
 <style lang="scss">
