@@ -1,6 +1,6 @@
  /* 视频板块 */
 export default {
-  path: 'video',
+  path: '/video',
   name: 'video',
   component: () => import('@/views/index/components/video/video.vue'),
   redirect: {

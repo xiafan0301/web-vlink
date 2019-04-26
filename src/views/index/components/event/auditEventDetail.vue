@@ -64,7 +64,7 @@
                 </li>
                 <li>
                   <span>处理单位:</span>
-                  <span>{{detailInfo.handleCompany}}</span>
+                  <span>{{detailInfo.dealOrgName}}</span>
                 </li>
                 <li>
                   <span>事件类型:</span>
@@ -86,9 +86,9 @@
                     <span>{{detailInfo.casualties}}</span>
                   </template>
                 </li>
-                <li>
+                <li v-show="detailInfo.rejectReasonName">
                   <span>驳回原因:</span>
-                  <span>{{detailInfo.rejectReason}}</span>
+                  <span>{{detailInfo.rejectReasonName}}</span>
                 </li>
               </ul>
             </div>
@@ -116,7 +116,7 @@
   </div>
 </template>
 <script>
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import { getEventDetail } from '@/views/index/api/api.event.js';
 export default {
   components: { BigImg },
@@ -125,64 +125,29 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      imgList: [
-        {
-          uid: '001',
-          src: require('./img/1.jpg')
-        },
-        {
-          uid: '002',
-          src: require('./img/2.jpg')
-        },
-        {
-          uid: '003',
-          src: require('./img/3.jpg')
-        },
-        {
-          uid: '004',
-          src: require('./img/4.jpg')
-        },
-        {
-          uid: '005',
-          src: require('./img/4.jpg')
-        }
-      ],
-      detailInfo: {
-        // eventNumber: 'X23912831283129038210938', // 事件编号
-        // userName: '18077777777', // 报案人  手机号码
-        // createTime: '2019-1-12 12:12:12', // 上报时间
-        // eventAddress: '湖南省怀化市溆浦县', // 事发地点
-        // describe: '啊撒可怜见的昂克赛拉的骄傲啊看来撒娇的啊卢卡斯就的看拉萨角度来看啊卢卡斯就的', // 事件情况
-        // eventType: '自然灾害', // 事件类型
-        // eventLevel: 'IV级', // 事件等级
-        // casualtiesFlag: '无', // 伤亡人员
-        // longitude: 112.975828, // 经度
-        // latitude: 28.093804, // 纬度
-        // handleCompany: '公安部', // 处理单位
-        // fileList: [
-        //   {
-        //     uid: '001',
-        //     src: require('./img/1.jpg')
-        //   },
-        //   {
-        //     uid: '002',
-        //     src: require('./img/2.jpg')
-        //   },
-        //   {
-        //     uid: '003',
-        //     src: require('./img/3.jpg')
-        //   },
-        //   {
-        //     uid: '004',
-        //     src: require('./img/4.jpg')
-        //   },
-        //   {
-        //     uid: '005',
-        //     src: require('./img/4.jpg')
-        //   }
-        // ], // 图片文件
-        // rejectReason: '你猜你猜你猜你猜你猜你猜你猜', // 驳回原因
-      },
+      // imgList: [
+      //   {
+      //     uid: '001',
+      //     src: require('./img/1.jpg')
+      //   },
+      //   {
+      //     uid: '002',
+      //     src: require('./img/2.jpg')
+      //   },
+      //   {
+      //     uid: '003',
+      //     src: require('./img/3.jpg')
+      //   },
+      //   {
+      //     uid: '004',
+      //     src: require('./img/4.jpg')
+      //   },
+      //   {
+      //     uid: '005',
+      //     src: require('./img/4.jpg')
+      //   }
+      // ],
+      detailInfo: {},
       map: null
     }
   },
@@ -277,7 +242,7 @@ export default {
       console.log(index)
       this.isShowImg = true;
       this.imgIndex = index;
-      this.imgList1 = JSON.parse(JSON.stringify(this.imgList));
+      this.imgList1 = JSON.parse(JSON.stringify(this.detailInfo.attachmentList));
     }
   }
 }

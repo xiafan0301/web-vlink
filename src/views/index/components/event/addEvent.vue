@@ -25,24 +25,48 @@
                   <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
-                <el-form-item  label-width="85px" class="img-form-item">
+                <div  class="img-form-item">
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg,.mp4"
-                    :limit='9'
+                    multiple
+                    :disabled="imgDisabled"
                     :before-upload='handleBeforeUpload'
-                    :on-remove="handleRemove"
                     :on-success='handleSuccess'
-                    :on-exceed="handleImgNumber"
+                    :show-file-list='false'
                   >
                     <i class="el-icon-plus"></i>
                     <span class='add-img-text'>添加</span>
-                    <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span>
+                    <!-- <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span> -->
                   </el-upload>
-                </el-form-item>
+                  <template v-if="uploadImgList.length > 0">
+                    <div 
+                      class="img_list"
+                      v-for="(item, index) in uploadImgList"
+                      :key="'item' + index"
+                    >
+                      <img :src="item.path" @click="openBigImg(index, uploadImgList)" />
+                      <div class="close_icon" @click="removeImg(index)">
+                        <i class="vl_icon vl_icon_event_24 "></i>
+                      </div>
+                    </div>
+                  </template>
+                  <template v-if="uplaodVideoList.length > 0">
+                    <div class="video_box" v-for="(item ,index) in uplaodVideoList" :key="index">
+                      <video :src="item.path" id="add_video"></video>
+                      <div class="close_icon" @click="removeVideo(index)">
+                        <i class="vl_icon vl_icon_event_24"></i>
+                      </div>
+                      <div class="play_icon">
+                        <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
+                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i>
+                      </div>
+                    </div>
+                  </template>
+                </div>
                 <el-form-item label-width="85px">
-                  <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
+                  <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
                 </el-form-item>
                 <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
@@ -61,7 +85,7 @@
                       v-for="(item, index) in eventTypeList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -72,7 +96,7 @@
                       v-for="(item, index) in eventLevelList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -108,11 +132,10 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
-      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">保存</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddHandleLoading" @click="skipHandlePage('addEventForm')">保存并处理</el-button>
+      <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addEventForm')">保存</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
-    <BigImg></BigImg>
     <!--返回提示弹出框-->
     <el-dialog
       title="提示"
@@ -128,13 +151,14 @@
         <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
       </div>
     </el-dialog>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { validatePhone } from '@/utils/validator.js';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import { addEvent } from '@/views/index/api/api.event.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
@@ -142,16 +166,22 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isPlaying: false, // 是否播放视频
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      isAddHandleLoading: false,
+      isAddLoading: false,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      isImgNumber: false, // 是否显示图片超过最大数提示
+      // isImgNumber: false, // 是否显示图片超过最大数提示
       backDialog: false, // 返回提示弹出框
+      imgDisabled: false, // 是否禁用上传按钮
       pickerOptions0: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
         }
       },
       addEventForm: {
-        eventSource: 17,
+        eventSource: '1',
         eventFlag: true,
         mutualFlag: false,
         reporterPhone: '', // 报案人  手机号码
@@ -164,8 +194,8 @@ export default {
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
-        radius: -1, // 是否推送
-        attachmentList: [], // 图片文件
+        // radius: -1, // 是否推送
+        appendixInfoList: [], // 图片文件
       },
       rules: {
         reporterPhone:[
@@ -196,7 +226,10 @@ export default {
       eventLevelList: [], // 事件等级列表数据
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
-      userInfo: {}
+      userInfo: {}, // 存储的用户信息
+      uploadImgList: [], // 要上传的图片列表
+      uplaodVideoList: [], // 要上传的视频列表
+      imgList1: [], // 要放大的图片
     }
   },
   created () {
@@ -350,47 +383,66 @@ export default {
       }
     },
     handleBeforeUpload (file) { // 图片上传之前
-      this.isImgDisabled = true;
-      const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
-      const isLtTenM = file.size / 1024 / 1024 < 2;
-      // if (!isImg) {
-      //   this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
-      //   this.isImgDisabled = false;
-      // }
-      // if (!isLtTenM) {
-      //   this.$message.error('上传的图片大小不能超过2M');
-      //   this.isImgDisabled = false;
-      // }
-      // return isImg && isLtTenM;
+      let isLtTenM;
+      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+        isLtTenM = file.size / 1024 / 1024 < 2;
+      } else {
+        isLtTenM = file.size / 1024 / 1024 < 10;
+      }
+      if (!isLtTenM) {
+        this.$message.error('上传的图片大小不能超过2M,视频大小不能超过10M');
+      }
     },
-    handleImgNumber () { // 图片超出最大个数限制
-      this.isImgNumber = true;
+    // 移除图片
+    removeImg (index) {
+      this.uploadImgList.splice(index, 1);
     },
-    handlePictureCardPreview () {},
-    handleRemove () {},
+    // 移除视频
+    removeVideo (index) {
+      this.uplaodVideoList.splice(index, 1);
+    },
     // 图片上传成功
     handleSuccess (res) {
-      console.log('res', res)
-      const data = {
-        contentUid: 0,
-        fileType: dataList.imgId,
-        path: res.data.fileFullPath,
-        filePathName: res.data.filePath,
-        cname: res.data.fileName,
-        imgSize: res.data.fileSize,
-        imgWidth: res.data.fileWidth,
-        imgHeight: res.data.fileHeight,
-        thumbnailPath: res.data.thumbnailFileFullPath,
-        // thumbnailWidth: res.data.thumbnailFileWidth,
-        // thumbnailHeight: res.data.thumbnailFileHeight
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let type, data;
+        if (fileName) {
+          type = fileName.substring(fileName.lastIndexOf('.'));
+          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            data = {
+              contentUid: 0,
+              fileType: dataList.imgId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.uploadImgList.push(data);
+          } else {
+            data = {
+              contentUid: 0,
+              fileType: dataList.videoId,
+              path: res.data.fileFullPath,
+              filePathName: res.data.filePath,
+              cname: res.data.fileName,
+              imgSize: res.data.fileSize,
+              imgWidth: res.data.fileWidth,
+              imgHeight: res.data.fileHeight,
+              thumbnailPath: res.data.thumbnailFileFullPath,
+            }
+            this.uplaodVideoList.push(data);
+          }
+        }
       }
-      this.addEventForm.attachmentList.push(data);
     },
     // 保存提交数据
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          let reg = /^([1-9]\d)(\.\d*[1-9])?$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -414,6 +466,22 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
+          if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
+            this.$message({
+              type: 'warning',
+              message: '图片和视频只能上传一种',
+              customClass: 'request_tip'
+            });
+            return;
+          } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
+            this.$message({
+              type: 'warning',
+              message: '最多上传1个视频或9张图片',
+              customClass: 'request_tip'
+            });
+            return;
+          }
+          this.isAddLoading = true;
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
@@ -422,27 +490,26 @@ export default {
                   message: '保存成功',
                   customClass: 'request_tip'
                 })
-                this.$router.push({name: 'event_manage'});
+                this.$router.push({name: 'event_audit'});
+                this.isAddLoading = false;
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '保存失败',
+                  customClass: 'request_tip'
+                })
+                this.isAddLoading = false;
               }
-              //  else {
-              //   this.$message({
-              //     type: 'error',
-              //     message: '保存失败',
-              //     customClass: 'request_tip'
-              //   })
-              // }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },
     // 返回
     back () {
       const data = JSON.stringify(this.addEventForm);
-      console.log(data)
-      console.log(this.dataStr)
       if (this.dataStr === data) {
-        this.$router.back(-1);
+        this.$router.back(-1);  
       } else {
         this.backDialog = true;
       }
@@ -456,6 +523,7 @@ export default {
     skipHandlePage (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isAddHandleLoading = true;
           let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
@@ -483,50 +551,57 @@ export default {
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
-                this.$message({
-                  type: 'success',
-                  message: '添加成功',
-                  customClass: 'request_tip'
-                })
+                // this.$message({
+                //   type: 'success',
+                //   message: '添加成功',
+                //   customClass: 'request_tip'
+                // })
+                this.isAddHandleLoading = false;
                 this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
               } else {
                 this.$message({
                   type: 'error',
-                  message: '添加失败',
+                  message: '保存失败',
                   customClass: 'request_tip'
                 })
+                this.isAddHandleLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddHandleLoading = false;})
           // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },
-    // 处理要提交的数据
-    handleFormData () {
-      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-      if (this.addEventForm.casualties === '无') {
-        this.addEventForm.casualties = 0;
-      } else if (this.addEventForm.casualties === '不确定') {
-        this.addEventForm.casualties = -1;
-      } else if (this.addEventForm.casualties === '有') {
-        if (!reg.test(this.dieNumber)) {
-          this.isDieError = true;
-          this.dieTip = '死亡人数只能为正整数';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        if (parseInt(this.dieNumber) > 9999) {
-          this.isDieError = true;
-          this.dieTip = '可输入的最大死亡人数为9999';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        this.addEventForm.casualties = this.dieNumber;
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.imgList1 = [];
+      this.isShowImg = value;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
+    // 播放视频
+    playVideo (val) {
+      if (val) {
+        this.isPlaying = true;
+        document.getElementById('add_video').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('add_video').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('add_video');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          this.isPlaying = false;
+        });
       }
     }
   }
@@ -553,33 +628,53 @@ export default {
         width: 96%;
         margin: 20px 0 0 2%;
         .add_event_form {
-          width: 100%;
-          .imgTips {
-            width: 160px;
-            border-radius: 2px;
-            position: absolute;
-            color: #F94539;
-            padding-top: 0;
-            -ms-flex-item-align: center;
-            align-self: center;
-            left: 90px;
-            top: 35px;
-          }
-          .img-form-item /deep/ .el-form-item__content{
+          // width: 100%;
+          .img-form-item {
+            margin-left: 85px;
+            width: 400px;
             display: flex;
-            .img-list {
-              width: 104px;
-              height: 104px;
-              margin-left: 10px;
-              margin-bottom: 10px;
-              display: flex;
-              .error-item {
-                position: absolute;
-                top: -10px;
-                right: -8px;
-                font-size: 18px;
-                color: #666;
-                z-index: 1;
+            flex-wrap: wrap;
+            /deep/ .el-upload--picture-card {
+              margin-right: 5px;
+            }
+            .close_icon {
+              position: absolute;
+              right: 2px;
+              top: 4px;
+              cursor: pointer;
+            }
+            .play_icon {
+              position: absolute;
+              cursor: pointer;
+              top: 30%;
+              left: 30%;
+              background: #000;
+              opacity: 0.6;
+              width: 40px;
+              height: 40px;
+              /* line-height: 40px; */
+              /* text-align: center; */
+              border-radius: 50%;
+              .pause_btn {
+                margin-left: 30%;
+                margin-top: 22%;
+              }
+              .play_btn {
+                margin-left: 37%;
+                margin-top: 22%;
+              }
+            }
+            .img_list, .video_box {
+              width: 100px;
+              height: 100px;
+              margin: 0 5px 5px 0;
+              cursor: pointer;
+              position: relative;
+              img, video {
+                border: 1px solid #cccccc;
+                border-radius: 6px;
+                width: 100%;
+                height: 100%;
               }
             }
           }

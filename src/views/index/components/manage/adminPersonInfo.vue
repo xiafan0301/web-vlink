@@ -44,9 +44,9 @@
               <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
             </el-form-item>
             <el-form-item prop="idType">
-              <el-select v-model="searchForm.idType" style="width: 240px;">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+              <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
+                <el-option label="身份证" :value="1"></el-option>
+                <el-option label="护照" :value="2"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item prop="sex">
@@ -88,8 +88,9 @@
             show-overflow-tooltip
             >
             <template slot-scope="scope">
-              <span v-show="scope.row.sex == 1">男</span>
-              <span v-show="scope.row.sex == 2">女</span>
+              <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
+              <!-- <span v-show="scope.row.sex == 1">男</span>
+              <span v-show="scope.row.sex == 2">女</span> -->
             </template>
           </el-table-column>
           <el-table-column
@@ -97,6 +98,9 @@
             prop="idType"
             show-overflow-tooltip
             >
+            <template slot-scope="scope">
+              <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             label="证件号码"
@@ -154,7 +158,7 @@
           </li>
           <li>
             <span>证件类型：</span>
-            <span>{{personDetailInfo.idType}}</span>
+            <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
           </li>
           <li>
             <span>证件号码：</span>
@@ -235,7 +239,7 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <span style="color: #999999;">删除后该组信息可在系统默认中查找。</span>
+      <span style="color: #999999;">删除后该组信息可在全部人像中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="deleteGroupDialog = false">取消</el-button>
         <el-button class="operation_btn function_btn" @click="sureDeleteGroup">确认</el-button>
@@ -250,7 +254,7 @@
       :close-on-press-escape="false"
       class="dialog_comp"
       >
-      <span style="color: #999999;">移除后该条信息可在系统默认中查找。</span>
+      <span style="color: #999999;">移除后该条信息可在全部人像中查找。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="moveoutGroupDialog = false">取消</el-button>
         <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
@@ -319,7 +323,7 @@ export default {
       getPerGroupList(params)
         .then(res => {
           if (res) {
-            res.data.map(item => {
+            res.data.groupNumList.map(item => {
               if (item.id === uid) {
                 this.groupName = item.name;
               } else {
@@ -373,7 +377,6 @@ export default {
     // 将人员复制到选择的组
     handleCopyGroup (id) {
       let selectArr = [];
-      console.log(this.multipleSelection)
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
       });
@@ -397,7 +400,6 @@ export default {
     },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
-      console.log(obj);
       this.perosnDetailInfoDialog = true;
       if (obj.id) {
         getPersonDetail(obj.id)
@@ -419,6 +421,7 @@ export default {
     cancelEdit (form) {
       this.$refs[form].resetFields();
       this.isShowError = false;
+      this.editGroupDialog = false;
     },
     // 确认编辑
     editGroupInfo (form) {
@@ -431,7 +434,7 @@ export default {
           }
           editVeGroup(data)
             .then(res => {
-              if (!res) {
+              if (res) {
                 this.$message({
                   type: 'success',
                   message: '修改成功',

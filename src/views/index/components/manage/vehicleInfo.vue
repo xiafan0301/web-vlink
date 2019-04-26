@@ -122,72 +122,122 @@
               </div>
             </div>
           </div>
-          <el-table
-            class="event_table"
-            :data="vehicleList"
-            @selection-change="handleSelectChange"
-            >
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="序号"
-              type="index"
+          <template v-if="selectMethod === 1">
+             <el-table
+              class="event_table"
+              :data="vehicleList"
+              @selection-change="handleSelectChange"
               >
-            </el-table-column>
-            <el-table-column
-              label="车牌号"
-              prop="vehicleNumber"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="车主"
-              prop="ownerName"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="性别"
-              prop="ownerSex"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="车辆型号"
-              prop="vehicleModel"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="车辆颜色"
-              prop="vehicleColor"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <template v-if="selectMethod === 1">
               <el-table-column
-                label="分组信息"
-                prop="albumList"
-                :show-overflow-tooltip='true'
-              >
+                type="selection"
+                width="55">
               </el-table-column>
-            </template>
-            <template v-else>
+              <el-table-column
+                label="序号"
+                type="index"
+                >
+              </el-table-column>
+              <el-table-column
+                label="车牌号"
+                prop="vehicleNumber"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车主"
+                prop="ownerName"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="性别"
+                prop="ownerSex"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车辆型号"
+                prop="vehicleModel"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车辆颜色"
+                prop="vehicleColor"
+                show-overflow-tooltip
+                >
+              </el-table-column>
               <el-table-column
                 label="底库信息"
                 prop="albumList"
                 :show-overflow-tooltip='true'
               >
               </el-table-column>
-            </template>
-            <el-table-column fixed="right" label="操作" width="100">
-              <template slot-scope="scope">
-                <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
-              </template>
-            </el-table-column>
-          </el-table>
+              <el-table-column fixed="right" label="操作" width="100">
+                <template slot-scope="scope">
+                  <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
+          <template v-else>
+             <el-table
+              class="event_table"
+              :data="vehicleList"
+              @selection-change="handleSelectChange"
+              >
+              <el-table-column
+                type="selection"
+                width="55">
+              </el-table-column>
+              <el-table-column
+                label="序号"
+                type="index"
+                >
+              </el-table-column>
+              <el-table-column
+                label="车牌号"
+                prop="vehicleNumber"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车主"
+                prop="ownerName"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="性别"
+                prop="ownerSex"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车辆型号"
+                prop="vehicleModel"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="车辆颜色"
+                prop="vehicleColor"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="分组信息"
+                prop="groupList"
+                :show-overflow-tooltip='true'
+              >
+              </el-table-column>
+              <el-table-column fixed="right" label="操作" width="100">
+                <template slot-scope="scope">
+                  <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
         </div>
         <el-pagination
           @current-change="handleCurrentChange"
@@ -414,6 +464,7 @@ export default {
       this.searchForm.albumId = null;
       this.searchForm.keyWord = null;
       this.activeSelect = obj.id;
+      this.showGroup = false;
       if (type === 1) {
         this.searchForm.groupId = obj.id;
         this.vehicleGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
@@ -439,9 +490,9 @@ export default {
       getVehicleGroup(params)
         .then(res => {
           if (res) {
-            this.vehicleGroupList = res.data.groupNumResultDtoList;
-            this.copyGroupInfoList = JSON.parse(JSON.stringify(res.data.groupNumResultDtoList));
-            this.allVelGroupNumber = res.data.total;
+            this.vehicleGroupList = res.data.groupNumList;
+            this.copyGroupInfoList = JSON.parse(JSON.stringify(res.data.groupNumList));
+            this.allVelGroupNumber = res.data.portraitNum;
             this.getVehicleInfoList();
           }
         })
@@ -495,6 +546,11 @@ export default {
     changeGroupName (val) {
       if (!val) {
         this.closeShow = false;
+        if (this.selectMethod === 1) {
+          this.getVeGroupInfo();
+        } else {
+          this.getVelBottomNameInfo();
+        }
       }
     },
     // 清空搜索组框
@@ -509,11 +565,13 @@ export default {
     },
     // 搜索组
     searchData () {
-      this.closeShow = true;
-      if (this.selectMethod === 1) {
-        this.getVeGroupInfo();
-      } else {
-        this.getVelBottomNameInfo();
+      if (this.searchGroupName) {
+        this.closeShow = true;
+        if (this.selectMethod === 1) {
+          this.getVeGroupInfo();
+        } else {
+          this.getVelBottomNameInfo();
+        }
       }
     },
     // 表格多选
@@ -521,6 +579,7 @@ export default {
       this.multipleSelection = val;
     },
     handleCurrentChange (page) {
+      this.showGroup = false;
       this.pagination.pageNum = page;
       this.getVehicleInfoList();
     },

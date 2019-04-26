@@ -80,20 +80,26 @@
                 prop="publishTime"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  {{scope.row.publishTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template>
               </el-table-column>
               <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  <template v-if="scope.row.publishState !== 2 && scope.row.messageType !== 1">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                  </template>
+                  <template v-if="scope.row.publishState === 2">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  </template>
                 </template>
               </el-table-column>
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -111,7 +117,7 @@
 <script>
 import noticeAdd from './noticeAdd.vue';
 import noticeDetail from './noticeDetail.vue';
-import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.js';
+import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.message.js';
 export default {
   components: {noticeAdd, noticeDetail},
   data () {
@@ -148,11 +154,11 @@ export default {
         pageNum: this.pageNum,
         orderBy: null,
         order: null,
+        'where.messageType': 2,
         'where.startDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[0],
         'where.endDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[1],
         'where.titleOrPublisher': this.noticeForm.titleOrPublisher,
-        'where.isTop': this.noticeForm.noticeState,
-        'where.messageType': null
+        'where.isTop': this.noticeForm.noticeState
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {
@@ -183,10 +189,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMsgNoteList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -198,6 +200,7 @@ export default {
     },
     resetForm () {
       this.$refs['noticeForm'].resetFields();
+      this.getMsgNoteList();
     }
   }
 }

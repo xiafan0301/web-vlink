@@ -21,13 +21,13 @@
               v-for="(item, index) in ctcStatusList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="phoneOrNumber">
-          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
+          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
           <el-button class="select_btn" @click="selectDataList">查询</el-button>
@@ -43,14 +43,14 @@
         >
         <el-table-column
           fixed
-          label="事件编号"
+          label="编号"
           prop="eventCode"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
         <el-table-column
           label="手机号"
-          prop="reportUser"
+          prop="reporterPhone"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -86,8 +86,9 @@
           >
         </el-table-column>
         <el-table-column
-          label="事件地点"
+          label="地点"
           prop="eventAddress"
+          width="250"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
@@ -137,7 +138,7 @@ export default {
         eventFlag: 1, // 1--true 0--false
         mutualFlag: 0,
         reportTime: [], // 日期
-        eventStatus: 28, // 事件状态--默认进行中
+        eventStatus: '28', // 事件状态--默认进行中
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [], // 表格数据
@@ -180,7 +181,9 @@ export default {
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
         'where.otherQuery': this.ctcForm.phoneOrNumber,
         'where.dispatchStatus': eventStatus,
-        pageNum: this.pagination.pageNum
+        pageNum: this.pagination.pageNum,
+        orderBy: 'create_time',
+        order: 'desc'
       }
       getEventList(params)
         .then(res => {

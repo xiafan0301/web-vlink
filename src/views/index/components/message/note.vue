@@ -45,6 +45,9 @@
                 prop="createTime"
                 show-overflow-tooltip
                 >
+                <!-- <template slot-scope="scope">
+                  {{scope.row.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template> -->
               </el-table-column>
               <el-table-column
                 label="短信类型"
@@ -70,7 +73,6 @@
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -86,7 +88,7 @@
 </template>
 <script>
 import noteAdd from './noteAdd.vue';
-import {getSmsList, getSmsTemplate} from '@/views/index/api/api.js';
+import {getSmsList, getSmsTemplate} from '@/views/index/api/api.message.js';
 export default {
   components: {noteAdd},
   data () {
@@ -154,10 +156,6 @@ export default {
         }
       })
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getSmsList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -168,6 +166,7 @@ export default {
     },
     resetForm () {
       this.$refs['noteForm'].resetFields();
+      this.getSmsList();
     }
   }
 }

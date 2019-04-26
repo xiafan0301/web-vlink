@@ -238,7 +238,7 @@
         :close-on-press-escape="false"
         class="dialog_comp"
         >
-        <span style="color: #999999;">删除后该组信息可在系统默认中查找。</span>
+        <span style="color: #999999;">删除后该组信息可在全部车辆中查找。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteGroupDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="deleteGroup">确认</el-button>
@@ -253,7 +253,7 @@
         :close-on-press-escape="false"
         class="dialog_comp"
         >
-        <span style="color: #999999;">移除后该条信息可在系统默认中查找。</span>
+        <span style="color: #999999;">移除后该条信息可在全部车辆中查找。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="moveoutGroupDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
@@ -320,7 +320,7 @@ export default {
         .then(res => {
           if (res && res.data) {
             // this.allGroupList = res.data;
-            res.data.groupNumResultDtoList.map(item => {
+            res.data.groupNumList.map(item => {
               if (item.id === uid) {
                 this.groupName = item.name;
               } else {
@@ -396,6 +396,7 @@ export default {
     cancelEditGroup (form) {
       this.isShowError = false;
       this.$refs[form].resetFields();
+      this.editGroupDialog = false;
     },
     // 编辑组
     editGroupInfo (form) {
@@ -434,13 +435,15 @@ export default {
                 customClass: 'request_tip'
               })
               this.editGroupDialog = false;
-            } else {
-              this.$message({
-                type: 'error',
-                message: '修改失败',
-                customClass: 'request_tip'
-              })
+              this.getVeGroupInfo(parseInt(this.groupId));
             }
+            //  else {
+            //   this.$message({
+            //     type: 'error',
+            //     message: '修改失败',
+            //     customClass: 'request_tip'
+            //   })
+            // }
           })
           .catch(() => {})
       }

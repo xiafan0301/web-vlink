@@ -6,7 +6,7 @@
         multiple
         accept="image/*"
         :limit="maxSize"
-        action="http://apidev.aorise.org/vlink-base/appendix"
+        :action="uploadUrl"
         :on-exceed="uploadPicExceed"
         :data="{projectType: 2}"
         list-type="picture-card"
@@ -26,16 +26,16 @@
   </vue-scroll>
 </template>
 <script>
+import { ajaxCtx } from '@/config/config.js';
 export default {
   name: 'uploadPic',
   props: ['maxSize', 'fileList'],
   data () {
     return {
       // 插入图片
+      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
       dialogImageUrl: '',
       dialogVisible: false,
-      imgToPlaceDialogVisible: false,
-      imgSelectedList: {},
       picNum: null,
       picHeight: null
     }
@@ -82,7 +82,7 @@ export default {
 </script>
 <style lang="scss">
   .upload_pic_components{
-    max-height: 224px;
+    max-height: 232px;
     .el-upload-list__item{
       width:104px !important;
       height:104px !important;

@@ -15,34 +15,38 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <p>事件总结附件</p>
-          <div class="content-icon">
-            <ul>
-              <li v-for="(item, index) in eventFile" :key="'item' + index">
-                <i class="vl_icon vl_icon_event_1"></i>
-                <div class="operation_btn">
-                  <div class="arrow"></div>
-                  <p>
-                    <i class="vl_icon vl_icon_manage_17"></i>
-                    <a :href="item.path">下载</a>
-                  </p>
-                  <p>
-                    <i class="vl_icon vl_icon_event_25"></i>
-                    <a>预览</a>
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
-          </div>
-          <div class="divide"></div>
-          <p style="margin-top: 5px;">事件总结内容</p>
-          <div class="content_detail">
-             <p>
-               {{basicInfo.eventSummary}}
-               <span v-show="eventSummaryLength > 800" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
-            </p>
-          </div>
+          <template v-if="eventFile && eventFile.length > 0">
+            <p>事件总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in eventFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path" target="_blank">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+          </template>
+          <template v-if="basicInfo.eventSummary">
+            <p style="margin-top: 5px;">事件总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 800" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+              </p>
+            </div>
+          </template>
         </div>
       </div>
       <div class="summary" v-show="basicInfo.dispatchSummary">
@@ -51,34 +55,38 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <p>调度总结附件</p>
-          <div class="content-icon">
-            <ul>
-              <li v-for="(item, index) in ctcFile" :key="'item' + index">
-                <i class="vl_icon vl_icon_event_1"></i>
-                <div class="operation_btn">
-                  <div class="arrow"></div>
-                  <p>
-                    <i class="vl_icon vl_icon_manage_17"></i>
-                    <a :href="item.path">下载</a>
-                  </p>
-                  <p>
-                    <i class="vl_icon vl_icon_event_25"></i>
-                    <a>预览</a>
-                  </p>
-                </div>
-              </li>
-            </ul>
-            <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
-          </div>
-          <div class="divide"></div>
-          <p style="margin-top: 5px;">调度总结内容</p>
-          <div class="content_detail">
-             <p>
-               {{basicInfo.dispatchSummary}}
-               <span v-show="dispatchSummaryLength > 800" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
-            </p>
-          </div>
+          <template v-if="ctcFile && ctcFile.length > 0">
+            <p>调度总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+          </template>
+          <template v-if="basicInfo.dispatchSummary">
+            <p style="margin-top: 5px;">调度总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 800" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+              </p>
+            </div>
+          </template>
         </div>
       </div>
       <div class="control-result">
@@ -107,13 +115,13 @@
         <div class="divide"></div>
         <div class="control-content">
           <ul class="clearfix">
-            <li>
+            <li v-for="(item, index) in controlImg" :key="'item' + index">
               <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
+                <img :src="item.imgUrl">
                 <div class="control-btn">
                   <div>抓拍设备</div>
                   <!-- <div> -->
-                   <i class="vl_icon_event_15 vl_icon"></i>
+                   <i class="vl_icon_event_15 vl_icon" @click="openVideo(item)"></i>
                   <!-- </div> -->
                 </div>
               </div>
@@ -128,7 +136,7 @@
                 </p>
               </div>
             </li>
-            <li>
+            <!-- <li>
               <div class="control-main">
                 <img src="../../../../assets/img/temp/vis-eg.png" alt="">
                 <div class="control-btn">
@@ -146,143 +154,7 @@
                   <span class="time">2018-12-2414:12:17</span>
                 </p>
               </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <i class="vl_icon_event_15 vl_icon"></i>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <i class="vl_icon_event_15 vl_icon"></i>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <div>
-                    <!-- <i></i>
-                    <i></i> -->
-                    <span>asdasd</span>
-                    <span>asdsdasd</span>
-                  </div>
-                </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
+            </li> -->
           </ul>
           <el-pagination
             @current-change="onPageChange"
@@ -381,7 +253,6 @@
       <el-button class="operation_btn function_btn" v-show="$route.query.status === 'handling'" @click="skipEventEndPage">结束事件</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
-    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     <!--查看总结详情弹出框-->
     <el-dialog
       title=""
@@ -396,17 +267,40 @@
         <p class="content">{{summaryContent}}</p>
       </div>
     </el-dialog>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" :src="videoDetail.videoUrl"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.name}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
   </div>
 </vue-scroll>
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import BigImg from './components/bigImg.vue';
+import BigImg from '@/components/common/bigImg.vue';
 import { getEventDetail } from '@/views/index/api/api.event.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
+      controlImg: [
+        {
+          name: '布控对象1',
+          time: '2019-04-17 12:12:12',
+          imgUrl: require("../../../../assets/img/temp/vis-eg.png"),
+          videoUrl: require("../../../../assets/video/demo.mp4")
+        }
+      ],
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       dateTime: null, // 搜索布控结果的起止时间
       options: [{
@@ -438,13 +332,39 @@ export default {
       summaryTitle: null, // 总结标题
       summaryContent: null, // 总结内容
       eventSummaryLength: 0,
-      dispatchSummaryLength: 0
+      dispatchSummaryLength: 0,
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
     }
   },
   mounted () {
     this.getDetail();
   },
   methods: {
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+      this.isPlaying = true;
+      document.getElementById('vlJtcLargeV').play();
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('vlJtcLargeV').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo () {
+      document.getElementById('vlJtcLargeV').play();
+      this.isPlaying = true;
+    },
+    // 截屏
+    cutScreen () {},
     // 显示查看总结详情弹出框
     showSummaryDialog (type, content) {
       if (type === 'event') {
@@ -470,6 +390,7 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            this.basicInfo = res.data;            
             if (res.data.closeAttachmentList.length > 0) {
               res.data.closeAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -488,9 +409,9 @@ export default {
                 }
               })
             }
-            this.basicInfo = res.data;
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
+            console.log(this.basicInfo)
           }
         })
         .catch(() => {})
@@ -890,6 +811,66 @@ export default {
       }
     }
   }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
 

@@ -16,7 +16,7 @@
               <el-radio :label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <template v-if="endForm.isCloseEvent">
+          <!-- <template v-if="endForm.isCloseEvent">
             <el-form-item label="事件等级:" prop="eventLevel">
               <el-select v-model="endForm.eventLevel" style="width: 100%;">
                 <el-option
@@ -28,21 +28,23 @@
                 </el-option>
               </el-select>
             </el-form-item>
-          </template>
+          </template> -->
           <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[!isEventLevel ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+            <el-input :placeholder="[!isCloseEvent ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">
           <el-upload
             :action="uploadUrl"
-            accept=".doc,.docx,.pdf,.txt, .png, .jpg, .jpeg"
+            multiple
+            accept=".doc,.docx, .png, .jpg, .jpeg"
             :show-file-list='true'
+            :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
             :on-success='handleSuccess'
           >
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
+            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
           </el-upload>
           <!-- <div class="img_list">
             <div v-for="(item, index) in imgList2" :key="'item' + index">
@@ -63,7 +65,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData('endForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEndLoading" @click="submitData('endForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
@@ -73,76 +75,97 @@
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { endEvent } from '@/views/index/api/api.event.js';
-import { getDiciData } from '@/views/index/api/api.js';
+// import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      isEventLevel: false, // 是否显示事件等级
+      // isEventLevel: false, // 是否显示事件等级
       endForm: {
         isCloseEvent: 0, // 1--是  0---否
-        eventLevel: null,
-        summary: null
+        // eventLevel: null,
+        summary: null,
+        // attachmentList: []
       },
       rules: {
-        eventLevel: [
-          { required: true, message: '请选择事件等级', trigger: 'blur' }
-        ],
+        // eventLevel: [
+        //   { required: true, message: '请选择事件等级', trigger: 'blur' }
+        // ],
         summary: [
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      imgList2: [],
-      fileList: [], // 文件列表
-      eventLevelList: [], // 事件等级列表
+      uploadImgList: [], // 要上传的图片列表
+      fileList: [], // 要上传文件列表
+      isEndLoading: false
+      // eventLevelList: [], // 事件等级列表
     }
   },
   mounted () {
-    this.getEventLevelList();
+    // this.getEventLevelList();
   },
   methods: {
     // 获取事件等级
-    getEventLevelList () {
-      const level = dataList.eventLevel;
-      getDiciData(level)
-        .then(res => {
-          if (res) {
-            this.eventLevelList = res.data;
-          }
-        })
-        .catch(() => {})
-    },
+    // getEventLevelList () {
+    //   const level = dataList.eventLevel;
+    //   getDiciData(level)
+    //     .then(res => {
+    //       if (res) {
+    //         this.eventLevelList = res.data;
+    //       }
+    //     })
+    //     .catch(() => {})
+    // },
     // 关闭事件change
-    handleEventChange (val) {
-      if (val) {
-        this.isEventLevel = true;
-      } else {
-        this.isEventLevel = false;
-      }
+    handleEventChange () {
+      // if (val) {
+      //   this.isCloseEvent = true;
+      // } else {
+      //   this.isCloseEvent = false;
+      // }
     },
     handleBeforeUpload (file) { // 图片上传之前
-      // this.isImgDisabled = true;
-      // const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
       const isLtTenM = file.size / 1024 / 1024 < 10;
-      // if (!isImg) {
-      //   this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
-      //   this.isImgDisabled = false;
-      // }
       if (!isLtTenM) {
         this.$message.error('上传的图片大小不能超过10M');
-        this.isImgDisabled = false;
       }
       return isLtTenM;
     },
+    // 移除文件
+    handleRemove (file) {
+      const fileName = file.response.data.fileName;
+      let type;
+      if (fileName) {
+        type = fileName.substring(fileName.lastIndexOf('.'));
+        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          this.uploadImgList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.uploadImgList.splice(index, 1);
+            }
+          });
+        } else {
+          this.fileList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.fileList.splice(index, 1);
+            }
+          });
+        }
+        // this.endForm.attachmentList.map((item, index) => {
+        //   if (item.cname === fileName) {
+        //     this.endForm.attachmentList.splice(index, 1);
+        //   }
+        // });
+      }
+    },
     // 文件上传成功
-    handleSuccess (res, file) {
+    handleSuccess (res) {
       if (res && res.data) {
         const fileName = res.data.fileName;
-        let type;
+        let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          let data;
-          res.fileName = file.name;
+          // let data;
+          // res.fileName = file.name;
           if (type === '.png' || type === '.jpg' || type === '.bmp') {
             data = {
               contentUid: 0,
@@ -155,7 +178,7 @@ export default {
               imgHeight: res.data.fileHeight,
               thumbnailPath: res.data.thumbnailFileFullPath,
             }
-            this.imgList2.push(data);
+            this.uploadImgList.push(data);
           } else {
             data = {
               contentUid: 0,
@@ -171,7 +194,6 @@ export default {
             this.fileList.push(data);
           }
           // this.endForm.attachmentList.push(data);
-          this.isImgDisabled = false;
         }
       }
     },
@@ -180,17 +202,25 @@ export default {
       this.$refs[form].validate(valid => {
         let params, attachmentList = [];
         if (valid) {
+          if (this.uploadImgList.length > 3) {
+            this.$message({
+              type: 'warning',
+              message: '最多上传3张图片',
+              customClass: 'request_tip'
+            });
+            return false;
+          }
           this.fileList && this.fileList.map(item => {
             attachmentList.push(item);
           });
-          this.imgList2 && this.imgList2.map(item => {
+          this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
           if (this.endForm.isCloseEvent) { // 关闭事件
             params = {
               eventId: this.$route.query.eventId,
               isCloseEvent: this.endForm.isCloseEvent,
-              eventLevel: this.endForm.eventLevel,
+              // eventLevel: this.endForm.eventLevel,
               eventSummary: this.endForm.summary,
               attachmentList: attachmentList
             }
@@ -202,6 +232,7 @@ export default {
               dispatchAttachmentList: attachmentList
             }
           }
+          this.isEndLoading = true;
           endEvent(params, this.$route.query.eventId)
             .then(res => {
               if (res) {
@@ -211,9 +242,10 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
+                this.isEndLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEndLoading = false;})
         }
       })
     },

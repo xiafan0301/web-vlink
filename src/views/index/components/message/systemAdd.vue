@@ -15,24 +15,24 @@
           </el-form-item>
           <el-form-item label="消息内容:" prop="content" style="width: 754px;">
             <el-input
-              maxlength="140"
+              maxlength="200"
               type="textarea"
               :rows="4"
-              placeholder="请对事发情况进行描述，文字限制140字"
+              placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
           </el-form-item>
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" @click="addMsgNote('addForm')">发布</el-button>
+        <el-button :loading="loadingBtn" type="primary" @click="addMsgNote('addForm')">发布</el-button>
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
     </div>
   </div>
 </template>
 <script>
-import {addMsgNote} from '@/views/index/api/api.js';
+import {addMsgNote} from '@/views/index/api/api.message.js';
 export default {
   data () {
     return {
@@ -68,6 +68,7 @@ export default {
             title: this.addForm.title,
             details: this.addForm.content
           }
+          this.loadingBtn = true;
           addMsgNote(data).then(res => {
             if (res && res.data) {
               this.$message.success('发布成功');

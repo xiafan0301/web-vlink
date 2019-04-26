@@ -191,6 +191,7 @@ export default {
         if (valid) {
           this.mouseMoveStata = true;
           this.beginClientX = e.clientX;
+          this.dragText = '';
         }
       })
     },
@@ -205,12 +206,22 @@ export default {
             this.confirmSuccess = false;
             $('.handler').removeClass('handler_ok_bg').addClass('handler_bg');
             this.dragText = '该手机账户不存在';
+            $('.drag_text').css('color', "#fff");
+            setTimeout(() => {
+              $('.handler').css('left', 0);
+              $('.drag_bg').css('width', 0);
+              this.dragText = '向右滑动验证';
+              $('.drag_text').css('color', "#666666");
+            }, 1000)
           } else {
+            $('.handler').removeClass('handler_bg').addClass('handler_ok_bg');
             this.confirmSuccess = true;
-            this.dragText = '';
+            this.dragText = '验证成功';
+            $('.drag_text').css('color', "#fff");
             this.step = 2;
           }
         })
+        .catch(() => {})
     },
     nextStep2 (formName) {
       this.$refs[formName].validate((valid) => {
@@ -435,6 +446,9 @@ export default {
               background-color: #ffffff;
               border: 1px solid #F2F2F2;
               cursor: move;
+              .el-icon-circle-check {
+                color: #4FCB61;
+              }
             }
           }
           .nextTwobtn {

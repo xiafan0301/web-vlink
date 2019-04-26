@@ -16,15 +16,15 @@
       <div class="create_content">
         <el-form ref="createForm" :label-position="labelPosition" :model="createForm" class="create_form">
           <el-form-item class="create_form_one" style="margin-bottom: 0;">
-            <el-form-item label="布控名称:" prop="controlName" style="width: 23%;margin-bottom: 22px;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
+            <el-form-item label="布控名称:" prop="controlName" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请输入布控名称', trigger: 'blur'}">
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
-            <el-form-item label="关联事件:" prop="event" style="width: 23%;">
-              <!-- <el-input v-model="createForm.event"></el-input> -->
+            <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select
                 v-model="createForm.event"
                 filterable
                 remote
+                clearable
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
@@ -37,7 +37,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="布控类型:" style="width: 23%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
+            <el-form-item label="布控类型:" style="width: 25%;" prop="controlType" :rules="{required: true, message: '请选择布控类型', trigger: 'change'}">
               <el-select value-key="uid" v-model="createForm.controlType" filterable placeholder="请选择">
                 <el-option
                   v-for="item in controlTypeList"
@@ -47,7 +47,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 23%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
+            <el-form-item v-if="createForm.controlType === 1" label="布控日期:" prop="controlDate" style="width: 25%;" :rules="{required: true, message: '请选择布控日期', trigger: 'blur'}">
               <el-date-picker
                 style="width: 192px;"
                 v-model="createForm.controlDate"
@@ -59,8 +59,8 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 23%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（可分时段布控,最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
@@ -148,7 +148,9 @@
 </template>
 <script>
 import model from './components/model.vue';
-import {getEventList, getAllMonitorList, getDiciData, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.js';
+import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
+import {getDiciData} from '@/views/index/api/api.js';
+import {getEventList, getEventDetail} from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {model},
@@ -171,8 +173,8 @@ export default {
         controlRank: null,
         periodTime: [
           {
-            startTime: null,
-            endTime:  null
+            startTime: new Date(2019, 4, 10, 0, 0, 0),
+            endTime:  new Date(2019, 4, 10, 23, 59, 59)
           }
         ],
       },
@@ -195,6 +197,8 @@ export default {
       modelDTwo: null,//传给子组件的回填数据-车辆追踪
       modelDThree: null,//传给子组件的回填数据-越界分析
       modelDFour: null,//传给子组件的回填数据-范围分析
+      // 事件模块新增布控参数
+      eventDetail: null,
     }
   },
   created () {
@@ -206,6 +210,7 @@ export default {
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
+      this.getEventList();
     // 新增页-1
     } else {
       this.pageType = 1;
@@ -216,12 +221,27 @@ export default {
     if (this.$route.query.createType) {
       this.pageType = parseInt(this.$route.query.createType);
       this.getControlDetailIsEditor(this.$route.query.controlId);
+      this.getEventList();
+    }
+    // 事件管理模块通过路由跳转过来
+    if (this.$route.query.eventId) {
+      this.getEventDetail(this.$route.query.eventId);
     }
   },
   mounted () {
     this.GetTimeAfter();
   },
   methods: {
+    // 获取事件详情
+    getEventDetail (eventId) {
+      getEventDetail(eventId).then(res => {
+        if (res && res.data) {
+          this.eventDetail = res.data;
+          this.createForm.event = res.data.uid;
+          this.getEventList();
+        }
+      })
+    },
     // 获取下个月的今天
     GetTimeAfter() { 
       var dd = new Date();
@@ -238,14 +258,15 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.otherQuery': query
+        'where.keyword': query,
+        pageSize: 1000000
       }
       getEventList(params).then(res => {
         if (res && res.data) {
           this.eventList = res.data.list.map(m => {
             return {
               label: m.eventCode,
-              value: m.eventCode
+              value: m.uid
             }
           });
         }
@@ -369,7 +390,7 @@ export default {
             })
             let data = {
               alarmLevel: this.createForm.controlRank,// 告警级别
-              eventId: parseInt(this.createForm.event),// 事件id
+              eventId: this.createForm.event,// 事件id
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
@@ -442,9 +463,9 @@ export default {
         if (res && res.data) {
           this.controlDetail = res.data;
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
-          this.createForm.event = this.controlDetail.eventCode;
+          this.createForm.event = this.controlDetail.eventId;
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = (this.pageType === 3 && this.controlDetail.surveillanceType === 1) ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
@@ -483,7 +504,7 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
-          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour)
+          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour);
         }
       })
     },
@@ -537,7 +558,7 @@ export default {
               }
             })
             this.controlDetail.alarmLevel = this.createForm.controlRank;
-            this.controlDetail.eventId = parseInt(this.createForm.event);
+            this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
             this.controlDetail.modelList = modelList;
@@ -552,9 +573,11 @@ export default {
             }
             console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
-            putControl(this.controlDetail).then(() => {
-              this.$message.success('编辑成功');
-              this.$emit('getControlList');
+            putControl(this.controlDetail).then((res) => {
+              if (res) {
+                this.$message.success('编辑成功');
+                this.$emit('getControlList');
+              }
             }).finally(() => {
               this.loadingBtn = false;
             })
@@ -639,13 +662,14 @@ export default {
             padding-bottom: 0!important;
           }
           .el-date-editor--time .el-input__inner{
-            width: 140px!important;
+            width: 100%!important;
+            padding-right: 0;
           }
         }
         .period_time{
           display: flex;
           margin-top: 20px;
-          padding-right: 40px;
+          padding-right: 10px;
           > span{
             margin: 0 9px;
           }
@@ -690,7 +714,7 @@ export default {
             cursor: pointer;
             &:nth-child(1){
               color: #0C70F8;
-              margin-right: 25px;
+              margin-right: 10px;
             }
             &:nth-child(2){
               color: #F94539;

@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import {controlStop} from '@/views/index/api/api.js';
+import {controlStop} from '@/views/index/api/api.control.js';
 export default {
   props: ['controlId'],
   data () {
@@ -53,10 +53,12 @@ export default {
       }
       this.$refs[formName].validate((vali) => {
         if (vali) {
-          controlStop(data).then(() => {
-            this.stopManageDialog = false;
-            this.$message.success('终止成功');
-            this.$emit('getControlList');
+          controlStop(data).then((res) => {
+            if (res) {
+              this.stopManageDialog = false;
+              this.$message.success('终止成功');
+              this.$emit('getControlList');
+            }
           })
         } else {
           return false;

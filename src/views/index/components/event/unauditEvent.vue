@@ -54,6 +54,8 @@
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg"
                     :limit='9'
+                    multiple
+                    :file-list="fileList"
                     :before-upload='handleBeforeUpload'
                     :on-remove="handleRemove"
                     :on-success='handleSuccess'
@@ -67,7 +69,7 @@
                 <el-form-item label-width="85px">
                   <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
                 </el-form-item>
-                <!-- <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in handleUnitList"
@@ -77,14 +79,14 @@
                     >
                     </el-option>
                   </el-select>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in eventTypeList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -95,7 +97,7 @@
                       v-for="(item, index) in eventLevelList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -132,10 +134,11 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">通过</el-button>
+      <el-button class="operation_btn function_btn" :loading="isPassLoading" @click="submitData('addEventForm')">通过</el-button>
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <!-- 驳回弹出框 -->
     <el-dialog
       title="驳回"
       :visible.sync="rejectDialogVisible"
@@ -151,7 +154,7 @@
                 v-for="(item, index) in rejectReasonList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
@@ -165,7 +168,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelReject('rejectForm')">取 消</el-button>
-        <el-button class="operation_btn function_btn" @click="rejectEvent('rejectForm')">确 定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isRejectLoading" @click="rejectEvent('rejectForm')">确 定</el-button>
       </div>
     </el-dialog>
     <!--返回提示弹出框-->
@@ -186,7 +189,7 @@
   </div>
 </template>
 <script>
-import { dataList } from '@/utils/data.js';
+import { dataList, operationType } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
@@ -199,7 +202,21 @@ export default {
       backDialog: false, // 返回提示弹出框
       isImgNumber: false,
       newMarker: null,
-      addEventForm: {},
+      addEventForm: {
+        uid: '',
+        type: operationType.auditEvent, // 1-事件审核 2-事件处理 3-转到其他单位 4-结束事件
+        reporterPhone: '', // 报案人  手机号码
+        reportTime: '', // 上报时间
+        eventAddress: '', // 事发地点
+        eventDetail: '', // 事件情况
+        eventType: '', // 事件类型
+        eventLevel: '', // 事件等级
+        casualties: '', // 伤亡人员
+        longitude: '', // 经度
+        latitude: '', // 纬度
+        acceptFlag: 2, // 证明是通过
+        appendixInfoList: [], // 图片文件
+      },
       rules: {
         eventAddress: [
           { required: true, message: '请输入或选择事发地址', trigger: 'blur' }
@@ -228,7 +245,10 @@ export default {
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
       rejectReasonList: [], // 驳回原因列表数据
-      userInfo: {}
+      userInfo: {},
+      fileList: [],
+      isRejectLoading: false, // 驳回加载中
+      isPassLoading: false, // 通过加载中
     }
   },
   created () {
@@ -312,16 +332,41 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            console.log(res);
-            this.addEventForm = JSON.parse(JSON.stringify(res.data));
+            let eventType = res.data.eventType;
+            let eventLevel = res.data.eventLevel;
+           
+           
+            this.addEventForm.uid = res.data.uid;
+            this.addEventForm.eventCode = res.data.eventCode;
+            this.addEventForm.eventDetail = res.data.eventDetail;
+            this.addEventForm.longitude = res.data.longitude;
+            this.addEventForm.latitude = res.data.latitude;
+            this.addEventForm.reporterPhone = res.data.reporterPhone;
+            this.addEventForm.reportTime = res.data.reportTime;
+            this.addEventForm.eventAddress = res.data.eventAddress;
+
+           
             if (res.data.casualties === -1) {
-                this.addEventForm.casualties = '不确定';
-              } else if (res.data.casualties === 0) {
-                this.addEventForm.casualties = '无';
-              } else if (res.data.casualties > 0) {
-                this.addEventForm.casualties = '有';
-                this.dieNumber = res.data.casualties;
-              }
+              this.addEventForm.casualties = '不确定';
+            } else if (res.data.casualties === 0) {
+              this.addEventForm.casualties = '无';
+            } else if (res.data.casualties > 0) {
+              this.addEventForm.casualties = '有';
+              this.dieNumber = res.data.casualties;
+            }
+            if (res.data.attachmentList && res.data.attachmentList.length > 0) {
+              res.data.attachmentList.map(item => {
+                const data = {
+                  fileName: item.cname,
+                  url: item.path
+                };
+                this.fileList.push(data);
+                this.addEventForm.appendixInfoList.push(item);
+              })
+            }
+            this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
+            this.addEventForm.eventLevel = eventLevel.toString();
+            
             this.mapMark(this.addEventForm);
           }
         })
@@ -436,9 +481,29 @@ export default {
     },
     // 在图片上传之前
     handleBeforeUpload (file) {
-      console.log(file)
+      const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isLtTenM = file.size / 1024 / 1024 < 2;
+      if (!isImg) {
+        this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
+        // this.isImgDisabled = false;
+      }
+      if (!isLtTenM) {
+        this.$message.error('上传的图片大小不能超过2M');
+        // this.isImgDisabled = false;
+      }
+      return isImg && isLtTenM;
     },
-    handleRemove () {},
+    handleRemove (file) {
+      console.log('file', file)
+      console.log(this.addEventForm.appendixInfoList)
+      this.addEventForm.appendixInfoList.map((item, index) => {
+        if (item.cname == file.fileName || item.cname == file.response.data.fileName) {
+          console.log('2222')
+          this.addEventForm.appendixInfoList.splice(index, 1);
+        }
+      });
+      console.log('remove', this.addEventForm.appendixInfoList)
+    },
     // 图片上传成功
     handleSuccess (res) {
       const data = {
@@ -452,7 +517,7 @@ export default {
         imgHeight: res.data.fileHeight,
         thumbnailPath: res.data.thumbnailFileFullPath
       }
-      this.addEventForm.attachmentList.push(data);
+      this.addEventForm.appendixInfoList.push(data);
     },
     // 图片数量超出最大值限制
     handleImgNumber () {
@@ -465,13 +530,17 @@ export default {
     // 取消驳回
     cancelReject (form) {
       this.$refs[form].resetFields();
+      this.rejectDialogVisible = false;
     },
     // 驳回
     rejectEvent (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isRejectLoading = true;
           const params = {
             uid: this.addEventForm.uid,
+            acceptFlag: 3, // 证明是驳回
+            type: operationType.auditEvent, // 1--事件审核
             closeRemark: this.rejectForm.closeRemark,
             rejectReason: this.rejectForm.rejectReason
           }
@@ -482,25 +551,27 @@ export default {
                 type: 'success',
                 message: '驳回成功',
                 customClass: 'request_tip'
-              })
+              });
               this.$router.push({name: 'event_audit'});
               this.rejectDialogVisible = false;
+              this.isRejectLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '驳回失败',
                 customClass: 'request_tip'
               })
+              this.isRejectLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRejectLoading = false;})
         }
       })
     },
     // 驳回原因change
     changeCloseReason (val) {
       this.rejectForm.closeRemark = null;
-      if (val === 49) {
+      if (val ===   '4') {
         this.isShowRejectRemark = true;
       } else {
         this.isShowRejectRemark = false;
@@ -532,14 +603,12 @@ export default {
         }
         this.addEventForm.casualties = this.dieNumber;
       }
-      this.addEventForm.eventSource = dataList.sourceWeb;
-      this.addEventForm.eventStatus = 21;
-      this.addEventForm.acceptFlag  = 25;
     },
     submitData (form) { // 审核通过
       this.$refs[form].validate(valid => {
         if (valid) {
           this.handleFormData();
+          this.isPassLoading = true;
           updateEvent(this.addEventForm)
             .then(res => {
               if (res) {
@@ -549,15 +618,17 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_audit'});
+                this.isPassLoading = false;
               } else {
                 this.$message({
                   type: 'error',
                   message: '保存失败',
                   customClass: 'request_tip'
                 })
+                this.isPassLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isPassLoading = false;})
         }
       })
     }

@@ -72,9 +72,9 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/player',
-      name: 'player',
-      component: () => import('@/components/common/rtmpplayer.vue')
+      path: '/webrtc',
+      name: 'webrtc',
+      component: () => import('@/views/index/components/webrtcTest.vue')
     }
   ]
 })
@@ -86,7 +86,7 @@ router.beforeEach((to, from, next) => {
   } else {
     // 需要登陆
     // 通过vuex state获取当前的token是否存在
-    if (store.state.loginUser) {
+    if (store.state.loginToken) {
       next()
     } else {
       next({

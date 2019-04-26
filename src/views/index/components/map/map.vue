@@ -6,7 +6,7 @@
         <div class="map_lt">
           <ul>
             <li :class="{'map_lt_ul_sed': tabType === 1}" @click="tabType = 1">地图信息</li>
-            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">标注历史</li>
+            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">标注列表</li>
           </ul>
           <div :style="{'left': tabType === 1 ? 0 : '50%'}"></div>
         </div>
@@ -15,21 +15,55 @@
           <div class="map_lc_d" v-show="tabType === 1">
             <div class="map_lc_dt">
                 <el-input
-                  class="vl_map_lc_dt_inp"
                   size="small"
-                  placeholder="请输入内容"
+                  placeholder="搜索"
                   v-model="mapInfoVal">
                 </el-input>
-                <i class="el-icon-search"></i>
             </div>
             <div class="map_lc_dc">
-              <div>
-                <el-tree :data="mapTreeData" :props="mapTreeProps"></el-tree>
-              </div>
+              <vue-scroll>
+                <el-tree
+                  ref="mapLeftTree"
+                  :data="mapTreeData"
+                  :render-after-expand="false"
+                  node-key="infoName"
+                  :filter-node-method="filterNode"
+                  :props="mapTreeProps">
+                  <span class="custom-tree-node" slot-scope="{ node, data }">
+                    <span>{{ node.label }}</span>
+                    <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_002 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_001': data.deviceStatus === 1}"></span>
+                    <span class="change_node_pos" v-else-if="!data.infoList"></span>
+                    <div class="map_tree_tab" v-if="data['isFirst']">
+                      <span @click.stop="switchTab(data, 0, $event)">{{constCamera}}</span>
+                      <span @click.stop="switchTab(data, 1, $event)">{{constCard}}</span>
+                      <span @click.stop="switchTab(data, 2, $event)">{{constCar}}</span>
+                      <span @click.stop="switchTab(data, 3, $event)">{{constPerson}}</span>
+                    </div>
+                  </span>
+                </el-tree>
+              </vue-scroll>
             </div>
           </div>
           <!-- 标注历史 -->
-          <div class="map_lc_b" v-show="tabType === 2">标注历史</div>
+          <div class="map_lc_d" v-show="tabType === 2">
+            <div class="map_lc_dt">
+              <el-input
+                size="small"
+                placeholder="搜索"
+                v-model="markInfoVal">
+              </el-input>
+            </div>
+            <div class="map_lc_dc" style="padding-bottom: .8rem;">
+              <vue-scroll>
+                <div class="map_lc_dc_mark" v-for="item in computedMarkList" :key="item.id">
+                  <div class="dc_mark_c">{{item.markContent}}</div>
+                  <p><span>{{item.opUserName}}</span><span>{{item.createTime ? item.time : '未知标注时间'}}</span></p>
+                  <div class="dc_mark_b"><i class="el-icon-location-outline"></i><span>{{item.position}}</span> <span class="el-icon-delete" @click="delMark('这条', item.uid)"></span></div>
+                </div>
+              </vue-scroll>
+            </div>
+            <el-button class="dc_clear_mark" type="primary" @click="delMark('清除所有', 0)">清空标注</el-button>
+          </div>
         </div>
       </div>
     </div>
@@ -42,10 +76,10 @@
         <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
           <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(sxtList.length + kkList.length + clList.length + ryList.length) | fmTenThousand}}</span></el-checkbox>
         <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
-          <el-checkbox label="sxt">摄像头<span class="map_rt_ck_num">&nbsp;{{sxtList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="kk">卡口<span class="map_rt_ck_num">&nbsp;{{kkList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="cl">车辆<span class="map_rt_ck_num">&nbsp;{{clList.length | fmTenThousand}}</span></el-checkbox>
-          <el-checkbox label="ry">人员<span class="map_rt_ck_num">&nbsp;{{ryList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="sxt">{{constCamera}}<span class="map_rt_ck_num">&nbsp;{{sxtList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="kk">{{constCard}}<span class="map_rt_ck_num">&nbsp;{{kkList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="cl">{{constCar}}<span class="map_rt_ck_num">&nbsp;{{clList.length | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox label="ry">{{constPerson}}<span class="map_rt_ck_num">&nbsp;{{ryList.length | fmTenThousand}}</span></el-checkbox>
         </el-checkbox-group>
       </div>
       <!-- 右侧工具栏 -->
@@ -90,16 +124,33 @@
         </li>
       </ul>
     </div>
+    <!--删除标注确定弹窗-->
+    <el-dialog
+      title="提示"
+      :visible.sync="deleteMarkDialog"
+      :show-close="false"
+      width="400px">
+      <span>确定删除{{delMessage}}标注吗？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
+        <el-button :loading="delLoading" type="primary" @click="comfirmDel">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import {testData} from './testData.js';
-import {random14} from '../../../../utils/util.js';
+import {random14, objDeepCopy} from '../../../../utils/util.js';
+import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns} from '../../api/api.map.js';
 export default {
   data () {
     return {
+      constCar: '车辆',
+      constCard: '卡口',
+      constPerson: '人员',
+      constCamera: '摄像头',
       map: null, // 地图对象
-      sxtList: [], // 摄像头
+      sxtList: [],
       sxtMapMarkers: [],
       kkList: [], // 卡口
       kkMapMarkers: [],
@@ -107,16 +158,13 @@ export default {
       clMapMarkers: [],
       ryList: [],  // 人员
       ryMapMarkers: [],
-
       rightSxtList: [], // 右侧摄像头列表
       rightSxtLimit: 4, // 右侧摄像头数量限制
-
       // 选择区域
       mouseTool: null,
       selAreaAcitve: false,
       selAreaAble: false,
       selAreaPolygon: null,
-
       // 标注
       marksList: [],
       marksMarkers: [],
@@ -124,65 +172,44 @@ export default {
       markAcitve: false,
       markEditMarker: null,
       markEditWindow: null,
-
       // 测距
       rangingAcitve: false,
       rangingObj: null,
-
       isIndeterminate: false,
       mapTypeCheckAll: true,
       mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
       mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
-
       tabType: 1, // 1地图信息 2标注历史
       mapInfoVal: '', // 地图信息查询值
-      mapTreeData: [
-        {
-          label: '溆浦县',
-          children: [{
-            label: '桥江镇',
-          }, {
-            label: '小江口乡',
-          }, {
-            label: '新田乡',
-          }, {
-            label: '观音阁镇',
-          }]
-        }, {
-          label: '一级 2',
-          children: [{
-            label: '二级 2-1',
-            children: [{
-              label: '三级 2-1-1'
-            }]
-          }, {
-            label: '二级 2-2',
-            children: [{
-              label: '三级 2-2-1'
-            }]
-          }]
-        }, {
-          label: '一级 3',
-          children: [{
-            label: '二级 3-1',
-            children: [{
-              label: '三级 3-1-1'
-            }]
-          }, {
-            label: '二级 3-2',
-            children: [{
-              label: '三级 3-2-1'
-            }]
-          }]
-        }
-      ],
+      mapTreeData: [],
       mapTreeProps: {
-        children: 'children',
-        label: 'label'
-      }
+        children: 'infoList',
+        label: 'infoName'
+      },
+      markInfoVal: '', // 标注列表查询值
+      markList: [], // 标注列表
+      computedMarkList: [],
+      deleteMarkDialog: false,
+      delMessage: '',
+      curSignId: '',
+      delLoading: false
     }
   },
   watch: {
+    mapInfoVal (val) {
+      this.$refs.mapLeftTree.filter(val);
+    },
+    markInfoVal (val) {
+      let arr = [];
+      if (val) {
+        arr = this.markList.filter(x => {
+          return x.opUserName.indexOf(val) !== -1 || x.markContent.indexOf(val) !== -1
+        })
+      } else {
+        arr = this.markList;
+      }
+      this.computedMarkList = arr;
+    },
     mapTypeList () {
       if (this.mapTypeList.length === 0) {
         this.mapTypeCheckAll = false;
@@ -231,24 +258,286 @@ export default {
         _this.selAreaPolygon = polygon;
         _this.selAreaAble = true;
         _this.mapMarkHandler();
-        /* for (let j = 0; j < _this.sxtList.length; j++) {
-          let _o = _this.sxtList[j];
-          if (_o.longitude > 0 && _o.latitude > 0) {
-            if (polygon.contains(new window.AMap.LngLat(_o.longitude, _o.latitude))) {
-              console.log('============' + _o.sid);
-            }
-
-          }
-        } */
       }, 100);
     });
-
-    _this.getMapData();
-
+    this.getMonitorList();
+    this.getMarkHistory();
     // 地图标记事件
     _this.mapMarkerEvents();
   },
   methods: {
+    // 获取标注历史
+    getMarkHistory () {
+      MapGETsignList().then(res => {
+        if (res) {
+          this.markList = res.data;
+          this.copyObject(this.markList, this.computedMarkList)
+        }
+      })
+    },
+    delMark (mes, curSignId) {
+      this.delMessage = mes;
+      curSignId ? this.curSignId = curSignId : '';
+      this.deleteMarkDialog = true;
+    },
+    // 确定删除标注
+    comfirmDel () {
+      this.delLoading = true;
+      if (this.delMessage === '这条') {
+        let params = {
+          id: this.curSignId
+        }
+        MapDELETEmapSign(params).then(res => {
+          if (res) {
+            this.$message.success('删除成功');
+            this.computedMarkList = this.computedMarkList.filter(x => x.uid !== this.curSignId)
+            this.markList = this.markList.filter(x => x.uid !== this.curSignId)
+          } else {
+            this.$message.success('删除异常')
+          }
+          this.delLoading = false;
+          this.deleteMarkDialog = false;
+        })
+      } else {
+        MapDELETEmapSigns().then(res => {
+          if (res) {
+            this.$message.success('删除成功')
+            this.computedMarkList = [];
+            this.markList = [];
+          } else {
+            this.$message.success('删除异常')
+          }
+          this.delLoading = false;
+          this.deleteMarkDialog = false;
+        })
+      }
+    },
+    //获取地图信息列表
+    getMonitorList () {
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params)
+        .then(res => {
+          if (res) {
+            this.mapTreeData = this.switchData(res.data);
+            this.updateDom();
+            this.moveDom();
+          }
+        })
+    },
+    // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
+    switchData(data) {
+      data['infoList'] = data.areaTreeList;
+      data['infoName'] = data.areaName;
+      data['infoList'].map(x => {
+        // 假的卡口，车辆
+        let carList, cardList;
+        carList = [
+          {
+            name: '我是假车辆11',
+            addr: '长沙市天心区',
+            latitude: 28.094869,
+            longitude: 112.975227
+          }, {
+            name: '我是假车辆22',
+            addr: '创谷广告园',
+            latitude: 28.093596,
+            longitude: 112.97623
+          }
+        ];
+        cardList = [
+          {
+            name: '我是假卡口11',
+            addr: '长沙市天心区',
+            latitude: 28.093222,
+            longitude: 112.974718
+          }, {
+            name: '我是假卡口22',
+            addr: '创谷广告园',
+            latitude: 28.093537,
+            longitude: 112.975628
+          }
+        ]
+        x['infoName'] = x.areaName;
+        // dataType = 0 摄像头，1车辆，2卡口，3人员,
+        x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0});
+        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId});
+        x['cardList'] = this.objSetItem(cardList, {infoName: 'name', areaType: '5', dataType: 1, areaUid: x.areaId});
+        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId});
+        let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['cardList'], ...x['sysUserExtendList']];
+        let newArr = [];
+        this.copyObject(oldArr, newArr)
+        x['infoList'] = newArr;
+        // 给第一个元素加识别号
+        if (x['infoList'].length) {
+          x['infoList'][0]['isFirst'] = true;
+        } else {
+          x['infoList'].push({infoName: '无相关数据'})
+        }
+        // 设置一个数组，判断当前map_tree_tab点了哪几个
+        x['tabActiveList'] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
+        return x;
+      })
+      console.log(data);
+      return [data];
+    },
+    objSetItem (list, obj) {
+      list.map(z => {
+        for (let key in obj) {
+          z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
+        }
+        return z;
+      })
+      return list;
+    },
+    filterNode(value, data, node) {
+      if (!value) return true;
+      if (data.infoName.indexOf(value) !== -1) {
+        return true;
+      } else {
+        if (node.parent.data.infoName) {
+          return node.parent.data.infoName.indexOf(value) !== -1;
+        } else {
+          return false;
+        }
+      }
+    },
+    updateDom () {
+      this.$nextTick(() => {
+        let ss = document.getElementsByClassName('change_node_pos');
+        ss = Array.from(ss);
+        ss.forEach(x => {
+          $(x).parent().siblings().css('display', 'none');
+          $(x).parent().parent().css('padding-left', '26px');
+        })
+      })
+    },
+    moveDom () {
+      this.$nextTick(() => {
+        let tabDom = document.getElementsByClassName('map_tree_tab');
+        tabDom = Array.from(tabDom);
+        tabDom.forEach(dom => {
+          let parent = dom.parentNode.parentNode.parentNode.parentNode;
+          parent.insertBefore(dom, parent.childNodes[0])
+        })
+      })
+    },
+    switchTab (node, dataType, event) {
+      if (event.target.classList.contains('active')) {
+       event.target.classList.remove('active')
+      } else {
+        event.target.classList.add('active')
+      }
+      // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
+      let key;
+      // 找到父级的数据;
+      switch (dataType) {
+        case 0:
+          key = 'deviceBasicList'
+          break;
+        case 1:
+          key = 'cardList'
+          break;
+        case 2:
+          key = 'carList'
+          break;
+        case 3:
+          key = 'sysUserExtendList'
+          break;
+      }
+      let curData = {};
+      curData = this.findParentData(node)
+      if (curData.tabActiveList.includes(dataType)) {
+        // 'delete'
+        curData.tabActiveList.splice(curData.tabActiveList.indexOf(dataType), 1);
+        if (curData.tabActiveList.length) {
+          curData.infoList = curData.infoList.filter(u => u.dataType !== dataType)
+        } else {
+          // '重置'
+          let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']];
+          let ss = [];
+          this.copyObject(oldArr, ss);
+          curData.infoList = ss;
+        }
+      } else {
+        // 'add'
+        curData.tabActiveList.push(dataType);
+        if (curData.tabActiveList.length === 1) {
+          // '第一次'
+          let _ar = [];
+          if (curData[key].length) {
+            this.copyObject(curData[key], _ar)
+            _ar.forEach(k => {
+              k.infoName += ' ';
+            })
+          } else {
+            _ar.push({infoName: '无相关数据'})
+          }
+          curData.infoList = [..._ar]
+        } else {
+          // '已经有了再添加'
+          let _arr3 = [];
+          // 判断目前显示的是不是 无相关数据
+          if (curData.infoList[0].infoName === '无相关数据') {
+            if (curData[key].length) {
+              curData.infoList = [];
+              this.copyObject(curData[key], _arr3);
+              _arr3.forEach(m => {
+                curData.infoList.unshift(m)
+              })
+            }
+          } else {
+            this.copyObject(curData[key], _arr3);
+            _arr3.forEach(m => {
+              curData.infoList.unshift(m)
+            })
+          }
+        }
+      }
+      this.updateDom();
+    },
+    findParentData (node) {
+      let obj;
+      this.mapTreeData.forEach(item => {
+        item.infoList.forEach(x => {
+          if (x.areaId === node.areaUid) {
+            obj = x;
+          }
+        })
+      })
+      return obj;
+    },
+    copyObject (obj, newObj) {
+      if (typeof obj === 'object' && obj) {
+        if (Object.prototype.toString.call(obj).slice(8, 14) === 'Object') {
+          for (let key in obj) {
+            if (typeof obj[key] === 'object') {
+              newObj[key] = {};
+              this.copyObject(obj[key], newObj[key])
+            } else {
+              newObj[key] = obj[key];
+            }
+          }
+        } else {
+          for (let i = 0; i < obj.length; i ++) {
+            if (typeof obj[i] === 'object') {
+              if (Object.prototype.toString.call(obj[i]).slice(8, 14) === 'Object') {
+                newObj[i] = {}
+                this.copyObject(obj[i], newObj[i])
+              } else {
+                newObj[i] = [];
+                this.copyObject(obj[i], newObj[i])
+              }
+            } else {
+              newObj[i] = obj[i]
+            }
+          }
+        }
+      } else {
+        return obj;
+      }
+    },
     // 获取地图数据
     getMapData () {
       setTimeout(() => {
@@ -336,7 +625,7 @@ export default {
               });
             });
             marker.on('mouseout', function () {
-              // if (hoverWindow) { hoverWindow.close(); }
+               // if (hoverWindow) { hoverWindow.close(); }
             });
           }
         }
@@ -357,8 +646,8 @@ export default {
         str += '<li><span>人员名称：</span>' + data.name + '</li>';
         str += '<li><span>设备地址：</span>' + data.addr + '</li>';
         str += '<li style="text-align: center;">' +
-            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
-            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
+            `<i dataId="${data.name}" dataType="${data.addr}" class="vl_map_hover_btn hover_btn_voice">语音通话</i>` +
+            `<i dataId="${data.name}" dataType="${data.addr}" class="vl_map_hover_btn hover_btn_video">视频通话</i>` +
           '</li>';
       } else {
         str += '<li>未知数据</li>';
@@ -370,18 +659,16 @@ export default {
     mapMarkerEvents () {
       let _this = this;
       // 1语音/2视频通话
-      $('body').on('click', '.hover_btn_voice', function (e) {
-        console.log(e)
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 1
-        }});
-      }).on('click', '.hover_btn_video', function () {
-        _this.$router.push({name: 'map_communication', params: {
-          userId: '001',
-          type: 2
-        }});
-      });
+      $('body').on('click', '.vl_map_hover_btn', function (e) {
+        let url = _this.$router.resolve({
+          name: 'map_communication',
+          query: {
+            userId: e.target.getAttribute('dataId'),
+            type: e.target.getAttribute('dataType')
+          }
+        })
+        window.open(url.href, '_blank')
+      })
     },
     // 清除地图标记
     mapClearMarkers (aMarkers) {
@@ -390,14 +677,12 @@ export default {
         aMarkers = [];
       }
     },
-
     // 清除所有
     resetTools () {
       this.selAreaRest();
       this.markRest();
       this.rangingRest();
     },
-
     // 选择区域
     selArea () {
       if (this.selAreaAcitve) {
@@ -430,7 +715,6 @@ export default {
         this.selAreaAble = false;
       }
     },
-
     // 标注
     mark () {
       if (this.markAcitve) {
@@ -538,7 +822,6 @@ export default {
         this.markEditWindow = null;
       }
     },
-
     // 测距
     ranging () {
       if (this.rangingAcitve) {
@@ -582,13 +865,11 @@ export default {
         this.rangingObj.turnOff();
       }
     },
-
     // 视频操作
     videoRemove (_index) {
       // rightSxtList
       this.rightSxtList.splice(_index, 1);
     },
-
     testAddSxt () {
       if ( this.rightSxtList.length < this.rightSxtLimit) {
         this.rightSxtList.push(new Date().getTime());
@@ -599,13 +880,13 @@ export default {
         });
       }
     },
-
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
     mapTypeCheckAllChange (val) {
+      console.log(val)
       this.isIndeterminate = false;
       if (val) {
         this.mapTypeList = this.mapTypeListAll;
@@ -622,4 +903,21 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+  .change_node_pos {
+    vertical-align: middle;
+  }
+  .custom-tree-node {
+    font-size: .14rem;
+    width: 100%;
+    >span {
+      &:first-child {
+        width: calc(100% - .4rem);
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+  }
+</style>
+<style lang="scss">
 </style>

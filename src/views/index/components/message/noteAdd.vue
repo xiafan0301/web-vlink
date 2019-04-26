@@ -10,12 +10,13 @@
     <div class="note_add_box">
       <div class="add_form">
         <el-form :rules="addRules" ref="addForm" label-position="right" :model="addForm" label-width="82px">
-          <el-form-item label="联系人:" prop="recipient">
-            <div class="recipient clearfix">
-              <div class="rec_list" v-for="item in contactListSel" :key="item.id">
+          <el-form-item label="联系人:" prop="contactListSel">
+            <div class="contact_list_sel clearfix" :style="{'border-color': isShowRed ? 'red' : ''}" style="line-height: 34px;">
+              <div class="rec_list" v-for="item in addForm.contactListSel" :key="item.id">
                 <span>{{item.userName}}&lt;{{item.userMobile}}&gt;</span>
                 <i class="el-icon-close" @click="delContact(item.uid)"></i>
               </div>
+              <span v-if="addForm.contactListSel.length === 0" style="margin-left: 10px;color: #C0C4CC;">请选择联系人</span>
               <i class="vl_icon vl_icon_message_3 " @click="recDialog = true"></i>
             </div>
           </el-form-item>
@@ -49,7 +50,7 @@
                 :disabled="true"
                 resize="none"
                 type="textarea"
-                :rows="1"
+                :rows="3"
                 placeholder="此处是已经编辑好的短信内容"
                 v-model="addForm.content">
               </el-input>
@@ -74,7 +75,7 @@
         width="482px"
         top="20vh">
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 10px;">选择接收人（已选{{selContactNum}}人/共{{contactListTotal ? contactListTotal.length : 0}}人）</h1>
-        <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small" @keyup.prevent.enter.native="getOrganUser"></el-input>
+        <el-input v-model="keywords" filterable placeholder="请输入姓名或手机号" size="small" @keyup.prevent.enter.native="getOrganUser(null)"></el-input>
         <div class="rec_box">
           <div class="rec_l">
             <p class="vl_f_999 vl_f_12">组织机构</p>
@@ -92,12 +93,14 @@
           </div>
           <div class="rec_r">
             <p class="vl_f_999 vl_f_12">联系人</p>
-            <ul>
-              <li v-for="item in contactListTotal" :key="item.uid">
-                <span>{{item.userName}}</span>
-                <el-checkbox v-model="item.isChecked"></el-checkbox>
-              </li>
-            </ul>
+            <vue-scroll>
+              <ul style="max-height: 362px;">
+                <li v-for="item in contactListTotal" :key="item.uid">
+                  <span>{{item.userName}}</span>
+                  <el-checkbox v-model="item.isChecked"></el-checkbox>
+                </li>
+              </ul>
+            </vue-scroll>
           </div>
         </div>
         <div slot="footer">
@@ -109,13 +112,13 @@
   </div>
 </template>
 <script>
-import {formatDate,translateDataToTree, objDeepCopy, uniq} from '@/utils/util.js';
-import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.js';
+import {translateDataToTree, objDeepCopy, unique} from '@/utils/util.js';
+import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.message.js';
 export default {
   data () {
     return {
       addForm: {
-        recipient: null,
+        contactListSel: [],
         template: null,
         name: null,
         time: null,
@@ -124,7 +127,7 @@ export default {
       },
       templateList: [{label: '事件调度', value: '0'},{label: '普通通知', value: '1'}],
       addRules: {
-        recipient: [
+        contactListSel: [
           {required: true, message: '请选择联系人', trigger: 'blur'}
         ],
         template: [
@@ -140,7 +143,8 @@ export default {
           {required: true, message: '请输入地点', trigger: 'blur'}
         ]
       },
-      contactListSel: null,//已选择的联系人列表
+      isShowRed: false,//是否显示红边框
+      // contactListSel: [],//已选择的联系人列表
       // 弹窗参数
       recDialog: false,
       loadingBtn: false,
@@ -156,7 +160,6 @@ export default {
       isChecked: null,
       contactList: [],//右边接收人列表数据,单独节点
       contactListTotal: [],//节点总数据
-      loadingBtn: false
     }
   },
   computed: {
@@ -180,7 +183,7 @@ export default {
         this.getOrganUser(nede).then(res => {
           console.log(res)
           this.contactListTotal.push(...this.contactList);
-          this.contactListTotal = uniq(this.contactListTotal);//去重
+          this.contactListTotal = unique(this.contactListTotal);//去重
         }) 
       } else {
         this.getOrganUser(nede).then(res => {
@@ -201,8 +204,8 @@ export default {
     },
     // 切换短信模板
     changeTemplate () {
-      this.addForm.content = this.addForm.template.tempContent;
-      this.addForm.content = this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
+      this.addForm.content = this.addForm.template && this.addForm.template.tempContent;
+      this.addForm.content = this.addForm.content && this.addForm.content.replace(/code/g, `"{\\"code\\":\\"${this.addForm.name}\\"}"`)
       console.log(this.addForm.content)
     },  
     // 获取组织机构
@@ -249,6 +252,11 @@ export default {
             this.contactList.forEach(f => {
               this.$set(f, 'isChecked', false);
             })
+            console.log(data)
+            if (data === null) {
+              this.contactListTotal = this.contactList;
+              console.log(this.contactListTotal, 'this.contactListTotal');
+            }
             resolve(1);
           }
         })
@@ -258,7 +266,13 @@ export default {
     getRecipient () {
       console.log(this.contactListTotal)
       this.recDialog = false;
-      this.contactListSel = this.contactListTotal.filter(f => f.isChecked);
+      this.addForm.contactListSel = this.contactListTotal.filter(f => f.isChecked);
+      if (this.$refs['addForm']) {
+        this.$nextTick(() => {
+          this.$refs['addForm'].clearValidate(['contactListSel']);
+        })
+      }
+      this.isShowRed = false;
     },
     // 删除已选联系人
     delContact (uid) {
@@ -267,7 +281,11 @@ export default {
           f.isChecked = false;
         }
       });
-      this.contactListSel = this.contactListSel.filter(f => f.uid !== uid);
+      this.addForm.contactListSel = this.addForm.contactListSel.filter(f => f.uid !== uid);
+      if (this.addForm.contactListSel.length === 0) {
+        this.isShowRed = true;
+        this.$refs['addForm'].validateField(['contactListSel']);
+      }
     },
     // 获取短信模板
     getSmsTemplate () {
@@ -289,13 +307,14 @@ export default {
     },
     // 确定发送
     sendMsg (formName) {
-      // this.$refs[formName].validate((valid) => {
-      //   if (valid) {
-      //     console.log('通过验证')
+      if (this.addForm.contactListSel.length === 0) this.isShowRed = true;
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log('通过验证')
           const data = {
             tempId: this.addForm.template.value,
             tempValue: this.addForm.content,
-            receiverIdList: this.contactListSel.map(m => m.uid).join(',')
+            receiverIdList: this.addForm.contactListSel.map(m => m.uid).join(',')
           }
           this.loadingBtn = true;
           sendMsg(data).then(res => {
@@ -306,10 +325,10 @@ export default {
           }).finally(() => {
             this.loadingBtn = false;
           })
-        // } else {
-        //   return false;
-        // }
-      // });
+        } else {
+          return false;
+        }
+      });
     },
   }
 }
@@ -368,7 +387,7 @@ export default {
   .template .el-input__inner{
     width: 672px;
   }
-  .recipient{
+  .contact_list_sel{
     width: 672px;
     min-height: 40px;
     padding: 4px 4px 0;

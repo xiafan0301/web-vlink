@@ -1,6 +1,6 @@
  /* 布控板块 */
 export default {
-  path: 'control',
+  path: '/control',
   name: 'control',
   component: () => import('@/views/index/components/control/control.vue'),
   redirect: {

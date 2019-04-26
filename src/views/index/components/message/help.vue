@@ -76,7 +76,7 @@
                 </template>
               </el-table-column>
               <el-table-column  
-                label="发布时间"
+                label="事发时间"
                 prop="reportTime"
                 show-overflow-tooltip
                 >
@@ -91,7 +91,6 @@
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -109,7 +108,7 @@
 <script>
 import helpAdd from './helpAdd.vue';
 import helpDetail from './helpDetail.vue';  
-import {getMutualHelpList} from '@/views/index/api/api.js';
+import {getMutualHelpList} from '@/views/index/api/api.message.js';
 export default {
   components: {helpAdd, helpDetail},
   data () {
@@ -148,8 +147,8 @@ export default {
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
-        orderBy: null,
-        order: null,
+        orderBy: 'report_time',
+        order: 'desc',
         'where.startDateStr': this.helpForm.helpDate && this.helpForm.helpDate[0],
         'where.endDateStr': this.helpForm.helpDate && this.helpForm.helpDate[1],
         'where.keyWord': this.helpForm.content,
@@ -167,10 +166,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMutualHelpList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -182,6 +177,7 @@ export default {
     },
     resetForm () {
       this.$refs['helpForm'].resetFields();
+      this.getMutualHelpList();
     }
   }
 }

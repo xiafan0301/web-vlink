@@ -55,6 +55,7 @@
                 v-model="manageForm.controlObj"
                 filterable
                 remote
+                clearable
                 value-key="value"
                 placeholder="请输入对象搜索"
                 :remote-method="getControlObject"
@@ -73,6 +74,7 @@
                 filterable
                 remote
                 value-key="value"
+                clearable
                 placeholder="请输入设备名搜索"
                 :remote-method="getControlDevice"
                 :loading="loading">
@@ -119,7 +121,12 @@
               :show-overflow-tooltip="true"
               >
               <template slot-scope="scope">
-                {{scope.row.surveillanceDateStart}}-{{scope.row.surveillanceDateEnd}}
+                <template v-if="scope.row.surveillanceType === 1">
+                  {{scope.row.surveillanceDateStart}}至{{scope.row.surveillanceDateEnd}}
+                </template>
+                <template v-else>
+                  --
+                </template>
               </template>
             </el-table-column>
             <el-table-column
@@ -139,7 +146,7 @@
             </el-table-column>
             <el-table-column
               label="关联事件编号"
-              prop="eventNo"
+              prop="eventCode"
               show-overflow-tooltip
               min-width="100px"
               >
@@ -183,7 +190,6 @@
           </el-table>
         </div>
         <el-pagination
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
@@ -206,7 +212,8 @@ import manageDetail from './components/manageDetail.vue';
 import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
-import {getDiciData, getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.js';
+import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
+import {getDiciData} from '@/views/index/api/api.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -226,9 +233,9 @@ export default {
       controlObjList: [],//布控对象列表
       facilityNameList: [],//设备列表
       stateList: [
-        {label: '待开始', value: 0},
+        {label: '待开始', value: 2},
         {label: '进行中', value: 1},
-        {label: '已结束', value: 2}
+        {label: '已结束', value: 3}
       ],
       typeList: [
         {label: '短期布控', value: 1},
@@ -250,7 +257,7 @@ export default {
     if (data.pageType && data.state && data.controlId) {
       this.$nextTick(() => {
         this.pageType = parseInt(data.pageType);
-        this.state = data.state;
+        this.state = parseInt(data.state);
         this.controlId = data.controlId;
       })
     }
@@ -270,10 +277,6 @@ export default {
         }
       })
     },
-    handleSizeChange (size) {
-      this.pageType = size;
-      this.getControlList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -288,7 +291,7 @@ export default {
     },
     // 跳转至布控详情
     skipIsDetail (state, uid) {
-      this.state = state === '待开始' ? '0' : state === '进行中' ? '1' : '2';
+      this.state = state === '待开始' ? 2 : state === '进行中' ? 1 : 3;
       this.controlId = uid;
       this.pageType = 2;
     },

@@ -127,7 +127,7 @@ export default {
             ul{
               li{
                 width: 100%;
-                padding: 10px 30px;
+                padding: 10px 34px;
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: space-between;
@@ -170,8 +170,13 @@ export default {
                 }
               }
               li{
-                margin-left: -8px;
                 cursor: default;
+              }
+            }
+            .highlight{
+              cursor: pointer;
+              &:hover, &.active{
+                background: #ebeff2;
               }
             }
           }
@@ -248,7 +253,7 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         justify-content: space-between;
-        padding: 10px 20px;
+        padding: 10px 20px 0 20px;
         line-height: 40px;
         > div:nth-child(1){
           display: flex;
@@ -276,6 +281,7 @@ export default {
           position: relative;
           .group_copy{
             width:152px;
+            height: 280px;
             position: absolute;
             left: 0;
             top: 50px;
@@ -283,7 +289,7 @@ export default {
             background:rgba(255,255,255,1);
             box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
             border-radius:4px;
-            > li{
+            li{
               padding: 0 10px;
               cursor: pointer;
               &:hover{
@@ -385,6 +391,21 @@ export default {
                 }
               }
             }
+          }
+        }
+      }
+      .bread_crumbs{
+        margin: 20px 20px 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(221,221,221,1);
+        > span:nth-child(5){
+          color: #666;
+        }
+        > span:not(:nth-child(5)){
+          color: #999;
+          cursor: pointer;
+          &:hover{
+            color: #666;
           }
         }
       }

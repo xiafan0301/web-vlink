@@ -1,6 +1,6 @@
  /* 检索模块 */
 export default {
-  path: 'search',
+  path: '/search',
   name: 'search',
   redirect: {
     name: 'search_capture'

@@ -21,16 +21,15 @@
           <div class="end-upload">
             <el-upload
               :action="uploadUrl"
-              accept='.png,.jpg,.bmp,.pdf,.doc,.docx,,.txt'
+              multiple
+              accept='.png,.jpg,.bmp,.doc,.docx'
               :before-upload='handleBeforeUpload'
               :on-success="handleSuccess"
-              :on-exceed="handleImgNumber"
-              :disabled="isImgDisabled"
-              :title="[isImgDisabled === true ? '禁用' : '']"
+              :on-remove="handleRemove"
               :show-file-list='true'
               >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
+              <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
             </el-upload>
             <!-- <div class="img_list">
               <div v-for="(item, index) in imgList2" :key="'item' + index">
@@ -52,7 +51,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEndLoading" @click="submitData">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -61,10 +60,10 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, endEvent } from '@/views/index/api/api.event.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
+import BigImg from '@/components/common/bigImg.vue';
 import { ajaxCtx } from '@/config/config.js';
-import { dataList } from '@/utils/data.js';
+import { dataList, operationType } from '@/utils/data.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -72,22 +71,23 @@ export default {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       endForm: {
         // eventId: null,
-        eventLevel: null,
+        // eventLevel: null,
+        type: operationType.endEvent,
         eventSummary: null, // 事件总结
-        attachmentList: []
+        addList: []
       },
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
-      isImgDisabled: false,
+      // isImgDisabled: false,
       imgList1: [], // 要放大的图片数据
       basicInfo: {}, // 事件详情
       fileList: [], // 要上传的文件列表
-      imgList2: [],
-      imgList: [] // 图片列表
+      uploadImgList: [], //要上传的图片列表
+      isEndLoading: false, // 结束事件加载中
     }
   },
   mounted () {
-    this.endForm.eventId = this.$route.query.id;
+    this.endForm.uid = this.$route.query.id;
     this.getDetail();
   },
   methods: {
@@ -102,15 +102,40 @@ export default {
         })
         .catch(() => {})
     },
-    handleSuccess (res, file) {
-      // console.log(res)
+    // 删除文件
+    handleRemove (file) {
+      const fileName = file.response.data.fileName;
+      let type;
+      if (fileName) {
+        type = fileName.substring(fileName.lastIndexOf('.'));
+        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          this.uploadImgList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.uploadImgList.splice(index, 1);
+            }
+          });
+        } else {
+          this.fileList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.fileList.splice(index, 1);
+            }
+          });
+        }
+        this.endForm.addList.map((item, index) => {
+          if (item.cname === fileName) {
+            this.endForm.addList.splice(index, 1);
+          }
+        });
+      }
+    },
+    // 文件上传成功
+    handleSuccess (res) {
       if (res && res.data) {
         const fileName = res.data.fileName;
-        let type;
+        let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          let data;
-          res.fileName = file.name;
+          // res.fileName = file.name;
           if (type === '.png' || type === '.jpg' || type === '.bmp') {
             data = {
               contentUid: 0,
@@ -123,7 +148,7 @@ export default {
               imgHeight: res.data.fileHeight,
               thumbnailPath: res.data.thumbnailFileFullPath,
             }
-            this.imgList2.push(data);
+            this.uploadImgList.push(data);
           } else {
             data = {
               contentUid: 0,
@@ -138,51 +163,34 @@ export default {
             }
             this.fileList.push(data);
           }
-          this.endForm.attachmentList.push(data);
-          this.isImgDisabled = false;
+          this.endForm.addList.push(data);
         }
       }
     },
     handleBeforeUpload (file) { // 附件上传之前
-      console.log(this.imgList2.length)
-      this.isImgDisabled = true;
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
         this.$message.error('上传的附件大小不能超过10M');
-        this.isImgDisabled = false;
       }
-      // if (this.imgList2.length > 2 || this.fileList.length > 1) {
-      //   console.log('1111')
-      //   this.$message({
-      //     type: 'warning',
-      //     message: '最多上传3张图片或一个文件',
-      //     customClass: 'request_tip'
-      //   })
-      //   return false;
-      // }
       return isLtTenM;
     },
-    // 文件超出个数限制
-    handleImgNumber (files) {
-      console.log(files)
-    },
     // 删除图片
-    closeImgList (index, obj) {
-      this.imgList2.splice(index, 1);
-      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-        if (item.cname === obj.cname) {
-          this.endForm.attachmentList.splice(idx, 1);
-        }
-      });
-    },
-    deleteFile (index, obj) { // 删除文件
-      this.fileList.splice(index, 1);
-      this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-        if (item.cname === obj.cname) {
-          this.endForm.attachmentList.splice(idx, 1);
-        }
-      });
-    },
+    // closeImgList (index, obj) {
+    //   this.imgList2.splice(index, 1);
+    //   this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+    //     if (item.cname === obj.cname) {
+    //       this.endForm.attachmentList.splice(idx, 1);
+    //     }
+    //   });
+    // },
+    // deleteFile (index, obj) { // 删除文件
+    //   this.fileList.splice(index, 1);
+    //   this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
+    //     if (item.cname === obj.cname) {
+    //       this.endForm.attachmentList.splice(idx, 1);
+    //     }
+    //   });
+    // },
     // 返回
     back () {
       this.$router.back(-1);
@@ -204,15 +212,26 @@ export default {
     },
     // 结束事件
     submitData () {
-      this.endForm.eventLevel = this.basicInfo.eventLevel;
-      if (!this.endForm.eventSummary && this.endForm.attachmentList.length === 0) {
+      // this.endForm.eventLevel = this.basicInfo.eventLevel;
+      if (!this.endForm.eventSummary && this.endForm.addList.length === 0) {
         this.$message({
           type: 'warning',
           message: '请先上传或输入事件总结',
           customClass: 'request_tip'
         })
       } else {
-        endEvent(this.endForm, this.endForm.eventId)
+        console.log('uploadImgList', this.uploadImgList)
+        console.log('eventCloseAttachmentList', this.endForm.addList)
+        if (this.uploadImgList.length > 3) {
+          this.$message({
+            type: 'warning',
+            message: '最多上传3张图片',
+            customClass: 'request_tip'
+          });
+          return false;
+        }
+        this.isEndLoading = true;
+        updateEvent(this.endForm)
           .then(res => {
             if (res) {
               this.$message({
@@ -221,9 +240,10 @@ export default {
                 customClass: 'request_tip'
               })
               this.$router.push({name: 'event_manage'});
+              this.isEndLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isEndLoading = false;})
       }
     }
   }

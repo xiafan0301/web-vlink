@@ -61,7 +61,7 @@
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -85,7 +85,7 @@
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
               <el-option
-                v-for="(item, index) in departmentData"
+                v-for="(item, index) in allDepartmentData"
                 :key="'item' + index"
                 :label="item.organName"
                 :value="item.uid"
@@ -108,7 +108,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelAdd('addDepartment')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addDepartmentInfo('addDepartment')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addDepartmentInfo('addDepartment')">确认</el-button>
       </div>
     </el-dialog>
     <!--编辑部门弹框-->
@@ -129,7 +129,7 @@
           <el-form-item label="" prop="pid">
             <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门" disabled>
               <el-option
-                v-for="(item, index) in departmentData"
+                v-for="(item, index) in allDepartmentData"
                 :key="'item' + index"
                 :label="item.organName"
                 :value="item.uid"
@@ -152,7 +152,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('editDepartment')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editDepartmentInfo('editDepartment')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editDepartmentInfo('editDepartment')">确认</el-button>
       </div>
     </el-dialog>
     <!--删除部门弹出框-->
@@ -167,7 +167,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delDepartmentDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteDepartment">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteDepartment">确认</el-button>
       </div>
     </el-dialog>
     <!--删除下级部门弹出框-->
@@ -182,7 +182,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delChildDepartmentDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="delChildDepart">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteChildLoading" @click="delChildDepart">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -196,7 +196,8 @@ export default {
       isShowOrganError: false, // 部门机构错误提示
       closeShow: false, // 清空搜索框
       organName: null, // 搜索的部门名称
-      departmentData: [], // 列表数据
+      departmentData: [], // 分页列表数据
+      allDepartmentData: [], // 所有的部门列表数据
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       newDepartmentDialog: false, // 新建部门弹出框
       delDepartmentDialog: false, // 删除部门弹出框
@@ -233,6 +234,10 @@ export default {
       deleteId: null, // 要删除的部门id
       userList: [], // 用户列表
       userInfo: {}, // 存储的用户信息
+      isAddLoading: false, // 新增部门加载中
+      isEditLoading: false, // 编辑部门加载中
+      isDeleteLoading: false, // 删除部门加载中
+      isDeleteChildLoading: false, // 删除子级部门加载中
     }
   },
   created () {
@@ -244,7 +249,7 @@ export default {
     this.getList();
   },
   methods: {
-    // 获取列表数据
+    // 分页获取列表数据
     getList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
@@ -260,11 +265,22 @@ export default {
           }
         })
     },
+    getAllDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.allDepartmentData = res.data.list;
+          }
+        })
+    },
     // 获取用户数据
     getUsersData () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        pageNum: this.pagination.pageNum,
         pageSize: 0,
       };
       getUserList(params)
@@ -302,6 +318,7 @@ export default {
     },
     // 显示新增部门弹出框
     showNewDepartment () {
+      this.getAllDepartList();
       this.getUsersData();
       this.isShowOrganError = false;
       this.addDepartment.organName = null;
@@ -311,6 +328,7 @@ export default {
     },
     // 显示编辑部门弹出框
     showEditDialog (obj) {
+      this.getAllDepartList();
       this.getUsersData();
       this.isShowOrganError = false;
       this.editDepartment.uid = obj.uid;
@@ -334,6 +352,7 @@ export default {
         deleteId: this.deleteId,
         proKey: this.userInfo.proKey
       };
+      this.isDeleteLoading = true;
       delDepart(params)
         .then(res => {
           if (res) {
@@ -341,18 +360,20 @@ export default {
               type: 'success',
               message: '删除成功',
               customClass: 'request_tip'
-            })
+            });
             this.getList();
             this.delDepartmentDialog = false;
+            this.isDeleteLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '删除失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isDeleteLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isDeleteLoading = false;})
     },
     // 删除下级部门
     delChildDepart () {
@@ -360,6 +381,7 @@ export default {
         deleteId: this.deleteId,
         proKey: this.userInfo.proKey
       };
+      this.isDeleteChildLoading = true;
       delDepart(params)
         .then(res => {
           if (res) {
@@ -367,18 +389,20 @@ export default {
               type: 'success',
               message: '删除成功',
               customClass: 'request_tip'
-            })
+            });
             this.getList();
             this.delChildDepartmentDialog = false;
+            this.isDeleteChildLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '删除失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isDeleteChildLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isDeleteChildLoading = false;})
     },
     // 添加部门
     addDepartmentInfo (form) {
@@ -402,6 +426,7 @@ export default {
       })
     },
     handleAddDepartment () {
+      this.isAddLoading = true;
       addDepart(this.addDepartment)
         .then(res => {
           if (res) {
@@ -409,18 +434,20 @@ export default {
               type: 'success',
               message: '添加成功',
               customClass: 'request_tip'
-            })
+            });
             this.newDepartmentDialog = false;
             this.getList();
+            this.isAddLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '添加失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 编辑部门
     editDepartmentInfo (form) {
@@ -444,6 +471,7 @@ export default {
       })
     },
     handleEditDepartment () {
+      this.isEditLoading = true;
       updateDepart(this.editDepartment)
         .then(res => {
           if (res) {
@@ -451,18 +479,20 @@ export default {
               type: 'success',
               message: '修改成功',
               customClass: 'request_tip'
-            })
+            });
             this.editDepartmentDialog = false;
             this.getList();
+            this.isEditLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '修改失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isEditLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isEditLoading = false;})
     },
     // 取消编辑
     cancelEdit (form) {

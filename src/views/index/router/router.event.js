@@ -1,6 +1,6 @@
  /* 事件板块 */
 export default {
-  path: 'event',
+  path: '/event',
   name: 'event',
   component: () => import('@/views/index/components/event/event.vue'),
   redirect: {
@@ -99,6 +99,10 @@ export default {
       path: 'ctcDetailInfo',
       name: 'ctc_detail_info',
       component: () => import('@/views/index/components/event/ctcDetailInfo.vue')
+    }, {
+      path: 'alarmCtcDetailInfo',
+      name: 'alarm_ctc_detail_info',
+      component: () => import('@/views/index/components/event/alarmCtcDetailInfo.vue')
     }, {
       path: 'ctcEnd',
       name: 'ctc_end',

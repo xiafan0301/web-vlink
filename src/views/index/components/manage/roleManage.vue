@@ -56,14 +56,14 @@
             <span style="color: #f2f2f2">|</span>
             <span class="operation_btn" @click="showConfigRoleDialog(scope.row)">配置权限</span>
             <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除用户</span>
+            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除角色</span>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -81,7 +81,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delRoleDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteRole">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteRole">确认</el-button>
       </div>
     </el-dialog>
     <!--创建角色弹出框-->
@@ -106,7 +106,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelAdd('addRole')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addUser('addRole')">保存</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addUser('addRole')">保存</el-button>
       </div>
     </el-dialog>
     <!--编辑角色弹出框-->
@@ -131,7 +131,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('editRole')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editRoleInfo('editRole')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editRoleInfo('editRole')">确认</el-button>
       </div>
     </el-dialog>
     <!--查看权限弹出框-->
@@ -293,6 +293,9 @@ export default {
       configAuthorityDialog: false, // 配置权限弹出框
       userInfo: {},
       deleteRoleId: null, // 要删除的角色id
+      isAddLoading: false, // 新增角色加载中
+      isEditLoading: false, // 编辑角色加载中
+      isDeleteLoading: false, // 删除角色加载中
     }
   },
   created () {
@@ -368,6 +371,7 @@ export default {
       })
     },
     handleAddRole () {
+      this.isAddLoading = true;
       createRole(this.addRole)
         .then(res => {
           if (res) {
@@ -375,8 +379,9 @@ export default {
               type: 'success',
               message: '添加成功',
               customClass: 'request_tip'
-            })
+            });
             this.createRoleDialog = false;
+            this.isAddLoading = false;
             this.getList();
             // this.$refs[form].resetFields();
           } else {
@@ -384,10 +389,11 @@ export default {
               type: 'error',
               message: '添加失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 取消添加用户
     cancelAdd (form) {
@@ -403,6 +409,7 @@ export default {
     // 删除角色
     deleteRole () {
       if (this.deleteRoleId) {
+        this.isDeleteLoading = true;
         const data = {
           uid: this.deleteRoleId,
           proKey: this.userInfo.proKey
@@ -414,17 +421,20 @@ export default {
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
               this.delRoleDialog = false;
+              this.isDeleteLoading = false;
               this.getList();
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示编辑角色弹出框
@@ -443,7 +453,7 @@ export default {
           const params = {
             proKey: this.userInfo.proKey,
             roleName: this.editRole.roleName
-          }
+          };
           judgeRoleName(params)
             .then(res => {
               if (res.data) {
@@ -458,6 +468,7 @@ export default {
       })
     },
     handleEditRoleInfo () {
+      this.isEditLoading = true;
       updateRole(this.editRole)
         .then(res => {
           if (res) {
@@ -465,23 +476,25 @@ export default {
               type: 'success',
               message: '修改成功',
               customClass: 'request_tip'
-            })
+            });
             this.editRoleDialog = false;
+            this.isEditLoading = false;
             this.getList();
           } else {
             this.$message({
               type: 'error',
               message: '修改失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isEditLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isEditLoading = false;})
     },
     // 取消编辑
     cancelEdit (form) {
       this.isShowOrganError = false;
-      this.$refs[form].resetFileds();
+      this.$refs[form].resetFields();
       this.editRoleDialog = false;
     },
     // 显示查看权限弹出框

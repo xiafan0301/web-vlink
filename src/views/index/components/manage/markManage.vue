@@ -15,8 +15,8 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item prop="departmentName">
-          <el-select  style="width: 240px;" v-model="searchForm.departmentName" placeholder="操作部门">
+        <el-form-item prop="deptId">
+          <el-select  style="width: 240px;" v-model="searchForm.deptId" placeholder="操作部门">
             <el-option value='全部操作部门'></el-option>
             <!-- <el-option
               v-for="(item, index) in eventTypeList"
@@ -27,8 +27,8 @@
             </el-option> -->
           </el-select>
         </el-form-item>
-        <el-form-item prop="operationUser">
-          <el-select style="width: 240px;" v-model="searchForm.operationUser" placeholder="操作用户">
+        <el-form-item prop="userId">
+          <el-select style="width: 240px;" v-model="searchForm.userId" placeholder="操作用户">
             <el-option value='全部操作用户'></el-option>
             <!-- <el-option
               v-for="(item, index) in eventStatusList"
@@ -100,7 +100,7 @@
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -169,20 +169,21 @@
 </vue-scroll>
 </template>
 <script>
-import { apiVideoSignContent, apiSignContentList } from '@/views/index/api/api.video.js';
+// import { formatDate } from '@/utils/util.js';
+import { apiVideoSignContent, apiGetVideoRecords, deleteVideoRecords, updateVideoRecords } from '@/views/index/api/api.video.js';
 export default {
   data () {
     return {
       isShowError: false,
       pickerOptions0: {
         disabledDate (time) {
-          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
+          return time.getTime() > (new Date().getTime());
         }
       },
       searchForm: {
         reportTime: [],
-        departmentName: null,
-        operationUser: null,
+        userId: null,
+        deptId: null,
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       dataList: [],
@@ -198,6 +199,7 @@ export default {
       createMarkDialog: false, // 新增标记弹出框
       editMarkDialog: false, // 编辑标记弹出框
       delMarkDialog: false, // 删除标记弹出框
+      markId: null, // 要编辑或删除的id
     }
   },
   mounted () {
@@ -206,29 +208,38 @@ export default {
   methods: {
     // 获取标记内容列表
     getList () {
-      apiSignContentList()
+      const params = {
+        'where.startDate': this.searchForm.reportTime[0],
+        'where.endDate': this.searchForm.reportTime[1],
+        'where.userId': this.searchForm.userId,
+        'where.deptId': this.searchForm.deptId
+      }
+      apiGetVideoRecords(params)
         .then(res => {
           if (res) {
-            this.dataList = res.data;
-            
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
           }
         })
         .catch(() => {})
     },
     // 搜索数据
     selectDataList () {
-
+      this.getList();
     },
     // 重置查询条件
     resetForm (form) {
       this.$refs[form].resetFields();
+      this.getList();
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
+      this.getList();
     },
     // 显示新增标记弹出框
     showAddMarkDialog () {
       this.isShowError = false;
+      this.markForm.markName = null;
       this.createMarkDialog = true;
     },
     // 新增标记
@@ -236,12 +247,19 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
            const params = {
-            content: this.markForm.markName
+            content: this.markForm.markName,
+            uid: 0
           }
           apiVideoSignContent(params)
             .then(res => {
               if (res) {
-                console.log(res)
+                this.$message({
+                  type: 'success',
+                  message: '新增成功',
+                  customClass: 'request_tip'
+                })
+                this.createMarkDialog = false;
+                this.getList();
               }
             })
             .catch(() => {})
@@ -251,32 +269,83 @@ export default {
     // 取消新增
     cancelAdd (form) {
       this.isShowError = false;
+      this.markForm.markName = null;
+      this.createMarkDialog = false;
       this.$refs[form].resetFields();
     },
     // 显示编辑弹出框
-    showEditDialog () {
+    showEditDialog (obj) {
       this.isShowError = false;
+      this.markId = obj.uid;
+      this.markForm.markName = obj.content;
       this.editMarkDialog = true;
     },
     // 编辑标记
     editMark (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-         
+          const params = {
+            uid: this.markId,
+            content: this.markForm.markName
+          };
+          updateVideoRecords(params)
+            .then(res => {
+              if (res) {
+                 this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                })
+                this.editMarkDialog = false;
+                this.getList();
+              }
+            })
+            .catch(() => {})
         }
       })
     },
     // 取消编辑
     cancelEdit (form) {
       this.isShowError = false;
+      this.markForm.markName = null;
+      this.editMarkDialog = false;
       this.$refs[form].resetFields();
     },
     // 显示删除标记弹出框
-    showDeleteDialog () {
+    showDeleteDialog (obj) {
+      this.markId = obj.uid;
       this.delMarkDialog = true;
     },
     // 删除标记
-    deleteMark () {}
+    deleteMark () {
+      if (this.markId) {
+        const params = {
+          id: this.markId
+        }
+        deleteVideoRecords(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              })
+              this.delMarkDialog = false;
+              this.getList();
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // getOneMonth () { // 设置默认一个月
+    //   const end = new Date();
+    //   const start = new Date();
+    //   start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+    //   const startDate = formatDate(start, 'yyyy-MM-dd');
+    //   const endDate = formatDate(end, 'yyyy-MM-dd');
+    //   this.searchForm.reportTime.push(startDate);
+    //   this.searchForm.reportTime.push(endDate);
+    // },
   }
 }
 </script>
