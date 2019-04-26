@@ -52,7 +52,7 @@
               </template>
             </div>
           </div>
-          <div class="data_list">
+          <div class="data_list" v-if="item.remarks">
             <span>{{item.remarks}}</span>
           </div>
         </div>
@@ -63,7 +63,7 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="protraitMemberList.pageSzie"
+          :page-size="protraitMemberList.pageSize"
           layout="total, prev, pager, next, jumper"
           :total="protraitMemberList.total">
         </el-pagination>

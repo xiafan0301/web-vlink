@@ -325,7 +325,6 @@ export default {
           box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
           display: flex;
           justify-content: space-between;
-          overflow: hidden;
           .list_img{
             width: 50%;
             padding-right: 20px;

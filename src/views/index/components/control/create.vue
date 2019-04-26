@@ -52,6 +52,7 @@
                 style="width: 192px;"
                 v-model="createForm.controlDate"
                 type="daterange"
+                :picker-options="pickerOptions"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -159,6 +160,11 @@ export default {
     return {
       pageType: null,//页面类型
       // 表单参数
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() < Date.now() - 8.64e7;
+        }
+      },
       labelPosition: 'top',
       controlTypeList: [
         {label: '短期布控', value: 1},

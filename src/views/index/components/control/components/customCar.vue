@@ -53,7 +53,7 @@
               </div>
             </template>
           </div>
-          <div class="data_list">
+          <div class="data_list" v-if="item.remarks">
             <span>{{item.desci}}</span>
           </div>
         </div>
@@ -64,7 +64,7 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="carMemberList.pageSzie"
+          :page-size="carMemberList.pageSize"
           layout="total, prev, pager, next, jumper"
           :total="carMemberList.total">
         </el-pagination>

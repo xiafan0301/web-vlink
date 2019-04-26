@@ -30,7 +30,7 @@
             <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
-        <div class="manage_d_c_e" v-if="controlDetail.eventId !== null">
+        <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
           <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
@@ -43,8 +43,7 @@
                 <i class="vl_icon vl_icon_control_33"></i>
                 <p>暂无相关图片</p>
               </div>
-              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.name}}</span></p>
-              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
+              <p><i class="vl_icon vl_icon_control_40"></i><span class="vl_f_333">{{item.name}}</span></p>
             </div>
           </div>
           <el-pagination
@@ -139,6 +138,7 @@
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
             <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
+            <div v-if="controlDetail.terminationReason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
@@ -259,7 +259,7 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg">
+                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
                   <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
@@ -332,14 +332,14 @@
         <div class="detail_list">
           <div>
             <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.dealOrgId}}</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterUserName}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatus}}</span></div>
+            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatusName}}</span></div>
             <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">{{eventDetail.reportTime}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventType}}</span></div>
+            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventTypeName}}</span></div>
             <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevel}}</span></div>
           </div>
         </div>
@@ -440,6 +440,26 @@ export default {
     }
   },
   methods: {
+    // 预览图片
+    previewPictures (index) {
+      setTimeout(() => {
+        let imgs = this.controlResList.list.map(m => m.snapPhoto);
+        // 图片数组2
+        let imgs2 = []
+        imgs.forEach(function (src) {
+          // 生成imgs2数组
+          imgs2.push({
+            url: src,
+            angle: 0
+          })
+        })
+        // 使用方法
+        let ziv = new ZxImageView(null, imgs2);
+        this.$nextTick(() => {
+          ziv.view(index);
+        })
+      }, 50)
+    },
     /* ************布控结果********* */
     // 停止播放
     pauseVideo (item, index) {
@@ -1014,7 +1034,7 @@ export default {
           align-content: flex-start;
           padding: 0 0.5% 20px 0.5%;
           .manage_d_c_o_i{
-            height: 222px;
+            height: 200px;
             border-radius:4px;
             border:1px solid rgba(211,211,211,1);
             flex: 0 0 162px;

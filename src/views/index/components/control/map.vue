@@ -463,7 +463,11 @@ export default {
                 <div class="vl_map_obj_img">
                   <div class="vl_map_obj_box">`;
                   for (let item of _this.controlObjList.objectList) {
-                    vlMapObj += `<div><img src="${item.photoUrl}"><p title="${item.name}">${item.name}</p></div>`;
+                    vlMapObj += `<div><img src="${item.photoUrl}">`;
+                    if (item.name) {
+                      vlMapObj += `<p title="${item.name}">${item.name}</p>`;
+                    }
+                    vlMapObj += `</div>`;
                   }
                   vlMapObj += `</div>
                 </div>
@@ -616,7 +620,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if ((slide.width() + slideMarginLeft) >= 380) {
-              slide.animate({marginLeft: '-=80px'}, 1000, function () {
+              slide.animate({marginLeft: '-=80px'}, 300, function () {
                 offbtnStatusLfet = false;
               });
             } else {
@@ -635,7 +639,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if (slideMarginLeft < 0) {
-              slide.animate({marginLeft: '+=80px'}, 1000,function () {
+              slide.animate({marginLeft: '+=80px'}, 300,function () {
                 offbtnStatusRight = false;
               });
             } else {
