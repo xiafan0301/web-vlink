@@ -204,7 +204,7 @@ export default {
         return;
       }
       const params = {
-        'where.eventId': 1,//this.helpId
+        'where.eventId': this.helpId,
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }

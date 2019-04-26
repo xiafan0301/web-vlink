@@ -210,6 +210,7 @@ export default {
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
+      this.getEventList();
     // 新增页-1
     } else {
       this.pageType = 1;
@@ -220,6 +221,7 @@ export default {
     if (this.$route.query.createType) {
       this.pageType = parseInt(this.$route.query.createType);
       this.getControlDetailIsEditor(this.$route.query.controlId);
+      this.getEventList();
     }
     // 事件管理模块通过路由跳转过来
     if (this.$route.query.eventId) {
@@ -235,7 +237,8 @@ export default {
       getEventDetail(eventId).then(res => {
         if (res && res.data) {
           this.eventDetail = res.data;
-          this.createForm.event = res.data.eventCode;
+          this.createForm.event = res.data.uid;
+          this.getEventList();
         }
       })
     },
@@ -460,7 +463,7 @@ export default {
         if (res && res.data) {
           this.controlDetail = res.data;
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
-          this.createForm.event = this.controlDetail.eventCode;
+          this.createForm.event = this.controlDetail.eventId;
           this.createForm.controlType = this.controlDetail.surveillanceType;
           this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlRank = this.controlDetail.alarmLevel;
@@ -501,7 +504,7 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
-          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour)
+          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour);
         }
       })
     },

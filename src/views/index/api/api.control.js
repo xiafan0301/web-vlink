@@ -414,9 +414,9 @@ export function putControl(data) {
  * getControlObjList 布控对象列表分页查询
  * @param {object} params
  */
-export function getControlObjList(params) {
+export function getControlObjList(params, uid) {
   return request({
-    url: '/surveillances/object/page',
+    url: '/surveillances/'+ uid +'/objects/page',
     method: 'get',
     params,
     mode: 'control'

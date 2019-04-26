@@ -112,7 +112,7 @@
   </div>
 </template>
 <script>
-import {formatDate,translateDataToTree, objDeepCopy, unique} from '@/utils/util.js';
+import {translateDataToTree, objDeepCopy, unique} from '@/utils/util.js';
 import {getOrganInfos, getOrganUser, getSmsTemplate, sendMsg} from '@/views/index/api/api.message.js';
 export default {
   data () {
@@ -160,7 +160,6 @@ export default {
       isChecked: null,
       contactList: [],//右边接收人列表数据,单独节点
       contactListTotal: [],//节点总数据
-      loadingBtn: false
     }
   },
   computed: {
