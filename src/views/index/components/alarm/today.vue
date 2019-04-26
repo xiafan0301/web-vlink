@@ -87,7 +87,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="alarm_list">
+    <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">今日告警<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
         <div class="alarm_grade_info" v-if="isSeen">
@@ -216,6 +216,7 @@ export default {
       controlName: '',     //布控库搜索
       selectControl: [],    //选中的布控数据
       alarmObj: {},
+      isLoading: false,
     }
   },
   watch: {
@@ -312,6 +313,7 @@ export default {
     //今日告警
     getAlarm() {
       this.alarmList = [];
+      this.isLoading = true
       let params = {
         "where.startTime": formatDate(new Date(), 'yyyy-MM-dd'),
         "where.endTime": formatDate(new Date(), 'yyyy-MM-dd'),
@@ -331,6 +333,11 @@ export default {
             item['isSeen'] = false
           }
         }
+        this.$nextTick(()=> {
+          this.isLoading = false
+        })
+      }).catch(()=> {
+        this.isLoading = false
       })
     },
     //告警详情

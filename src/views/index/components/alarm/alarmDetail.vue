@@ -9,7 +9,7 @@
           <el-breadcrumb-item>告警详情</el-breadcrumb-item>
         </el-breadcrumb>
     </div>
-    <div class="struc_detail_dialog">
+    <div class="struc_detail_dialog" v-loading="isLoading">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -215,6 +215,7 @@ export default {
       InfoWindow: null,
       startTime: null,
       endTime: null,
+      isLoading: false,
     }
   },
   mounted() {
@@ -266,11 +267,17 @@ export default {
     },
     //告警详情
     toAlarmDetail(uid, objType) {
+      this.isLoading = true
       getAlarmDetail(uid).then( res => {
         this.sturcDetail = res.data
         this.sturcDetail['objType'] = objType
         this.drawPoint(this.sturcDetail);
-      }).catch(() => {})
+        this.$nextTick(()=> {
+          this.isLoading = false
+        })
+      }).catch(() => {
+        this.isLoading = false
+      })
     },
     imgListTap (item, index) {
       this.curImgUid = item.uid;

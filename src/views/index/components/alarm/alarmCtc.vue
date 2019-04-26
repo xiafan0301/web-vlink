@@ -9,7 +9,7 @@
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <div class="content-box">
+    <div class="content-box" v-loading="isLoading">
       <div class="content-left-box">
         <div class="card-info">
           <div class="struc_c_d_qj struc_c_d_img">
@@ -70,8 +70,8 @@
               </template>
               <template v-if="sturcDetail.eventInfo">
                 <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{sturcDetail.eventInfo.eventType || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{sturcDetail.eventInfo.eventLevel || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ dicFormater( 20, sturcDetail.eventInfo.eventType) || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ dicFormater( 2, sturcDetail.eventInfo.eventLevel) || '无'}}</span></div>
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
               </template>
               <template v-if="!sturcDetail.eventInfo">
@@ -285,6 +285,7 @@ export default {
         type: '',     //今日告警或历史告警
         detailUrl: '',    //告警详情地址
         sturcDetail: {},
+        isLoading: false
     }
   },
   created () {
@@ -333,11 +334,17 @@ export default {
     },
     //告警详情
     toAlarmDetail() {
+      this.isLoading = true
       const eventId = this.$route.query.eventId;
       getAlarmDetail(eventId).then( res => {
         this.sturcDetail = res.data
         this.sturcDetail['objType'] = this.$route.query.objType
-      }).catch(() => {})
+        this.$nextTick(()=> {
+          this.isLoading = false
+        })
+      }).catch(() => {
+        this.isLoading = false
+      })
     },
     // 判断taskList是否都填写完
     judgeData () {
