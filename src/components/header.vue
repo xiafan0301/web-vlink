@@ -16,9 +16,59 @@
       </el-popover>
       <ul>
         <li>
-          <el-badge :value="sums.msg" class="item" :max="99">
-            <i class="vl_icon vl_icon_011"></i>
-          </el-badge>
+          <el-popover
+            ref="popoverTask"
+            placement="bottom"
+            width="378"
+            trigger="click">
+            <vue-scroll>
+            <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
+            <div class="vl_t_b_header">
+              <p :class="{active: type === 1}" @click="changeTab(1)">未读<span>(15)</span></p>
+              <p :class="{active: type === 2}" @click="changeTab(2)">已读<span>(15)</span></p>
+              <p><span>全部标记为已读</span></p>
+            </div>
+            <ul>
+              <li></li>
+            </ul>
+            <!-- <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index">
+              <div class="hd_alarm_t">
+                <div>
+                  <h1>{{item.surveillanceName}}</h1>
+                  <p>{{item.devName}}</p>
+                  <p>{{item.snapTime}}</p>
+                </div>
+                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
+                <div>
+                  <span>{{item.semblance}}</span>
+                  <p>匹配度</p>
+                  <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
+                </div>
+                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
+              </div>
+              <div class="hd_alarm_b">
+                <template v-if="item.objType == 1">
+                  <div class="alarm_b_list">{{item.name}}</div>
+                  <div class="alarm_b_list">{{item.sex}}</div>
+                  <div class="alarm_b_list">{{item.nation}}</div>
+                </template>
+                <template v-if="item.objType == 2">
+                  <div class="alarm_b_list">{{item.vehicleNumber}}</div>
+                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <div class="alarm_b_list">{{item.vehicleType}}</div>
+                </template>
+                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
+              </div>
+            </div>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
+            </div> -->
+            </div>
+            </vue-scroll>
+            <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
+              <i class="vl_icon vl_icon_011"></i>
+            </el-badge>
+          </el-popover>
         </li>
         <li>
           <el-popover
@@ -27,7 +77,7 @@
             width="397"
             trigger="click">
             <vue-scroll>
-            <template  v-if="alarmList && alarmList.length > 0">
+            <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index">
               <div class="hd_alarm_t">
                 <div>
@@ -60,7 +110,7 @@
             <div style="width: 100%;text-align: center;padding: 10px 0;">
               <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
             </div>
-            </template>
+            </div>
             </vue-scroll>
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
@@ -190,7 +240,7 @@ export default {
     };
     return {
       sums: {
-        msg: 109,
+        msg: 0,
         events: 0
       },
       updateForm: {
@@ -217,6 +267,7 @@ export default {
       pageNum: 1,
       pageSize: 10,
       alarmList: [],
+      type: 1,
     }
   },
   mounted () {
@@ -297,6 +348,9 @@ export default {
         }
       })
     },
+    changeTab(type) {
+      this.type = type
+    }
   }
 }
 </script>
@@ -413,82 +467,121 @@ export default {
 }
 </style>
 <style lang="scss">
-.vl_hd_alarm{
-  padding: 10px;
-  border-bottom: 1px solid #F2F2F2;
-  .hd_alarm_t{
-    display: flex;
-    justify-content: space-between;
-    > div{
-      flex: 0 0 25%;
-    }
-    > div:nth-child(1){
+.vl_hd_box {
+  max-height: 456px;
+  .vl_hd_alarm{
+    padding: 10px 22px;
+    border-bottom: 1px solid #F2F2F2;
+    .hd_alarm_t{
+      display: flex;
+      justify-content: space-between;
       > div{
-        margin-bottom: 10px;
-        color: #333333;
-        font-size: 16px;
+        flex: 0 0 25%;
       }
-      > p{
-        font-size: 12px;
-        color: #999999;
-      }
-    }
-    > div:nth-child(3){
-      text-align: center;
-      padding-top: 15px;
-      > span{
-        color: #0C70F8;
-        font-size: 24px;
-        font-weight:bold;
-      }
-      > p{
-        color: #333333;
-        font-size: 12px;
-      }
-      .el-progress{
-        text-align: left;
-        .el-progress-bar{
-          padding-right: 5px!important;
-          padding-left: 5px;
+      > div:nth-child(1){
+        > div{
+          margin-bottom: 10px;
+          color: #333333;
+          font-size: 16px;
         }
-        .el-progress__text{
-          display: none;
+        > p{
+          font-size: 12px;
+          color: #999999;
         }
       }
-    }
-    > div:nth-child(2), > div:nth-child(4){
-      text-align: center;
-      > img{
-        width: 70px;
-        height: 70px;
+      > div:nth-child(3){
+        text-align: center;
+        padding-top: 15px;
+        > span{
+          color: #0C70F8;
+          font-size: 24px;
+          font-weight:bold;
+        }
+        > p{
+          color: #333333;
+          font-size: 12px;
+        }
+        .el-progress{
+          text-align: left;
+          .el-progress-bar{
+            padding-right: 5px!important;
+            padding-left: 5px;
+          }
+          .el-progress__text{
+            display: none;
+          }
+        }
+      }
+      > div:nth-child(2), > div:nth-child(4){
+        text-align: center;
+        > img{
+          width: 70px;
+          height: 70px;
+        }
       }
     }
-  }
-  .hd_alarm_b{
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    > div{
-      padding: 5px;
-      font-size: 12px;
-      background:rgba(250,250,250,1);
-      border:1px solid rgba(242,242,242,1);
-      border-radius:3px;
-      color: #666;
-    }
-    .alarm_b_list {
-      span {
-        padding-left: 9px;
-        color: #999;
-        &:first-of-type {
-          color: #F2F2F2;
+    .hd_alarm_b{
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      > div{
+        padding: 5px;
+        font-size: 12px;
+        background:rgba(250,250,250,1);
+        border:1px solid rgba(242,242,242,1);
+        border-radius:3px;
+        color: #666;
+      }
+      .alarm_b_list {
+        span {
+          padding-left: 9px;
+          color: #999;
+          &:first-of-type {
+            color: #F2F2F2;
+          }
         }
       }
     }
   }
 }
+.vl_task_box {
+  max-height: 456px;
+  padding: 0 30px;
+  .vl_t_b_header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    height: 48px;
+    line-height: 48px;
+    border-bottom: 1px solid #F2F2F2;
+    p {
+      color: #333333;
+      font-size: 16px;
+      cursor: pointer;
+      span {
+        color: #999999;  
+      }
+      &:nth-child(2-n) {
+        width: 30%;
+      }
+      &:nth-child(3) {
+        width: 40%;
+        text-align: right;
+        font-size: 12px;
+      }
+    }
+    .active {
+      color: #0C70F8;
+      border-bottom: 2px solid #0C70F8;
+      span {
+        color: #0C70F8;
+      }
+    }
+  }
+}
 .el-popover {
-  height: 476px;
+  max-height: 476px;
+  padding: 12px 0;
 }
 </style>
 
