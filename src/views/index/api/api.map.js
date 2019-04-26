@@ -34,9 +34,21 @@ export function MapPOSTmapSign(params) {
  */
 export function MapDELETEmapSign(params) {
   return request({
-    url: '/mapSignService/map-sign',
+    url: '/mark-map-service/mark-map/' + params.id,
     method: 'delete',
-    mode: 'base',
+    mode: 'gis'
+  })
+}
+/**
+ * MapDELETEmapSigns
+ 清空标注信息接口
+ * @param {} params
+ */
+export function MapDELETEmapSigns(params) {
+  return request({
+    url: '/mark-map-service/mark-maps',
+    method: 'delete',
+    mode: 'gis',
     params: params
   })
 }
@@ -73,9 +85,9 @@ export function MapGETdeviceList(params) {
  */
 export function MapGETsignList(params) {
   return request({
-    url: '/videoService/signList',
+    url: '/mark-map-service/mark-map-list',
     method: 'get',
-    mode: 'base',
+    mode: 'gis',
     params: params
   })
 }

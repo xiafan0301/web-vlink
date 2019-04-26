@@ -6,7 +6,7 @@
         <div class="map_lt">
           <ul>
             <li :class="{'map_lt_ul_sed': tabType === 1}" @click="tabType = 1">地图信息</li>
-            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">标注历史</li>
+            <li :class="{'map_lt_ul_sed': tabType === 2}" @click="tabType = 2">标注列表</li>
           </ul>
           <div :style="{'left': tabType === 1 ? 0 : '50%'}"></div>
         </div>
@@ -30,8 +30,8 @@
                   :filter-node-method="filterNode"
                   :props="mapTreeProps">
                   <span class="custom-tree-node" slot-scope="{ node, data }">
-                    <span>{{ node.label }}{{data['isFirst']}}</span>
-                    <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_001 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_002': Math.random() > 0.5}"></span>
+                    <span>{{ node.label }}</span>
+                    <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_002 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_001': data.deviceStatus === 1}"></span>
                     <span class="change_node_pos" v-else-if="!data.infoList"></span>
                     <div class="map_tree_tab" v-if="data['isFirst']">
                       <span @click.stop="switchTab(data, 0, $event)">{{constCamera}}</span>
@@ -45,7 +45,25 @@
             </div>
           </div>
           <!-- 标注历史 -->
-          <div class="map_lc_b" v-show="tabType === 2">标注历史</div>
+          <div class="map_lc_d" v-show="tabType === 2">
+            <div class="map_lc_dt">
+              <el-input
+                size="small"
+                placeholder="搜索"
+                v-model="markInfoVal">
+              </el-input>
+            </div>
+            <div class="map_lc_dc" style="padding-bottom: .8rem;">
+              <vue-scroll>
+                <div class="map_lc_dc_mark" v-for="item in computedMarkList" :key="item.id">
+                  <div class="dc_mark_c">{{item.markContent}}</div>
+                  <p><span>{{item.opUserName}}</span><span>{{item.createTime ? item.time : '未知标注时间'}}</span></p>
+                  <div class="dc_mark_b"><i class="el-icon-location-outline"></i><span>{{item.position}}</span> <span class="el-icon-delete" @click="delMark('这条', item.uid)"></span></div>
+                </div>
+              </vue-scroll>
+            </div>
+            <el-button class="dc_clear_mark" type="primary" @click="delMark('清除所有', 0)">清空标注</el-button>
+          </div>
         </div>
       </div>
     </div>
@@ -106,12 +124,24 @@
         </li>
       </ul>
     </div>
+    <!--删除标注确定弹窗-->
+    <el-dialog
+      title="提示"
+      :visible.sync="deleteMarkDialog"
+      :show-close="false"
+      width="400px">
+      <span>确定删除{{delMessage}}标注吗？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
+        <el-button :loading="delLoading" type="primary" @click="comfirmDel">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import {testData} from './testData.js';
 import {random14, objDeepCopy} from '../../../../utils/util.js';
-import {MapGETmonitorList} from '../../api/api.map.js';
+import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns} from '../../api/api.map.js';
 export default {
   data () {
     return {
@@ -155,12 +185,30 @@ export default {
       mapTreeProps: {
         children: 'infoList',
         label: 'infoName'
-      }
+      },
+      markInfoVal: '', // 标注列表查询值
+      markList: [], // 标注列表
+      computedMarkList: [],
+      deleteMarkDialog: false,
+      delMessage: '',
+      curSignId: '',
+      delLoading: false
     }
   },
   watch: {
     mapInfoVal (val) {
       this.$refs.mapLeftTree.filter(val);
+    },
+    markInfoVal (val) {
+      let arr = [];
+      if (val) {
+        arr = this.markList.filter(x => {
+          return x.opUserName.indexOf(val) !== -1 || x.markContent.indexOf(val) !== -1
+        })
+      } else {
+        arr = this.markList;
+      }
+      this.computedMarkList = arr;
     },
     mapTypeList () {
       if (this.mapTypeList.length === 0) {
@@ -212,12 +260,58 @@ export default {
         _this.mapMarkHandler();
       }, 100);
     });
-    // _this.getMapData();
     this.getMonitorList();
+    this.getMarkHistory();
     // 地图标记事件
     _this.mapMarkerEvents();
   },
   methods: {
+    // 获取标注历史
+    getMarkHistory () {
+      MapGETsignList().then(res => {
+        if (res) {
+          this.markList = res.data;
+          this.copyObject(this.markList, this.computedMarkList)
+        }
+      })
+    },
+    delMark (mes, curSignId) {
+      this.delMessage = mes;
+      curSignId ? this.curSignId = curSignId : '';
+      this.deleteMarkDialog = true;
+    },
+    // 确定删除标注
+    comfirmDel () {
+      this.delLoading = true;
+      if (this.delMessage === '这条') {
+        let params = {
+          id: this.curSignId
+        }
+        MapDELETEmapSign(params).then(res => {
+          if (res) {
+            this.$message.success('删除成功');
+            this.computedMarkList = this.computedMarkList.filter(x => x.uid !== this.curSignId)
+            this.markList = this.markList.filter(x => x.uid !== this.curSignId)
+          } else {
+            this.$message.success('删除异常')
+          }
+          this.delLoading = false;
+          this.deleteMarkDialog = false;
+        })
+      } else {
+        MapDELETEmapSigns().then(res => {
+          if (res) {
+            this.$message.success('删除成功')
+            this.computedMarkList = [];
+            this.markList = [];
+          } else {
+            this.$message.success('删除异常')
+          }
+          this.delLoading = false;
+          this.deleteMarkDialog = false;
+        })
+      }
+    },
     //获取地图信息列表
     getMonitorList () {
       let params = {
@@ -241,12 +335,12 @@ export default {
         let carList, cardList;
         carList = [
           {
-            name: '车辆111',
+            name: '我是假车辆11',
             addr: '长沙市天心区',
             latitude: 28.094869,
             longitude: 112.975227
           }, {
-            name: '车辆222',
+            name: '我是假车辆22',
             addr: '创谷广告园',
             latitude: 28.093596,
             longitude: 112.97623
@@ -254,12 +348,12 @@ export default {
         ];
         cardList = [
           {
-            name: '卡口111',
+            name: '我是假卡口11',
             addr: '长沙市天心区',
             latitude: 28.093222,
             longitude: 112.974718
           }, {
-            name: '卡口222',
+            name: '我是假卡口22',
             addr: '创谷广告园',
             latitude: 28.093537,
             longitude: 112.975628
@@ -276,7 +370,11 @@ export default {
         this.copyObject(oldArr, newArr)
         x['infoList'] = newArr;
         // 给第一个元素加识别号
-        this.setFirst(x['infoList'])
+        if (x['infoList'].length) {
+          x['infoList'][0]['isFirst'] = true;
+        } else {
+          x['infoList'].push({infoName: '无相关数据'})
+        }
         // 设置一个数组，判断当前map_tree_tab点了哪几个
         x['tabActiveList'] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
         return x;
@@ -315,7 +413,6 @@ export default {
         })
       })
     },
-    // 移动节点
     moveDom () {
       this.$nextTick(() => {
         let tabDom = document.getElementsByClassName('map_tree_tab');
@@ -351,37 +448,35 @@ export default {
       }
       let curData = {};
       curData = this.findParentData(node)
-      console.log(curData)
       if (curData.tabActiveList.includes(dataType)) {
-        console.log('delete')
+        // 'delete'
         curData.tabActiveList.splice(curData.tabActiveList.indexOf(dataType), 1);
         if (curData.tabActiveList.length) {
-          curData[key].forEach(x => {
-            curData.infoList.splice(curData.infoList.indexOf(x), 1)
-          })
+          curData.infoList = curData.infoList.filter(u => u.dataType !== dataType)
         } else {
-          console.log('重置')
+          // '重置'
           let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']];
           let ss = [];
           this.copyObject(oldArr, ss);
           curData.infoList = ss;
-          this.setFirst(curData.infoList);
         }
       } else {
-        console.log('add')
+        // 'add'
         curData.tabActiveList.push(dataType);
         if (curData.tabActiveList.length === 1) {
-          console.log('第一次')
+          // '第一次'
           let _ar = [];
           if (curData[key].length) {
             this.copyObject(curData[key], _ar)
+            _ar.forEach(k => {
+              k.infoName += ' ';
+            })
           } else {
             _ar.push({infoName: '无相关数据'})
           }
           curData.infoList = [..._ar]
-          // this.setFirst(curData.infoList);
         } else {
-          console.log('已经有了再添加')
+          // '已经有了再添加'
           let _arr3 = [];
           // 判断目前显示的是不是 无相关数据
           if (curData.infoList[0].infoName === '无相关数据') {
@@ -400,7 +495,6 @@ export default {
           }
         }
       }
-      console.log(curData)
       this.updateDom();
     },
     findParentData (node) {
@@ -413,11 +507,6 @@ export default {
         })
       })
       return obj;
-    },
-    setFirst (arr) {
-      if (arr.length) {
-        arr[0]['isFirst'] = true;
-      }
     },
     copyObject (obj, newObj) {
       if (typeof obj === 'object' && obj) {

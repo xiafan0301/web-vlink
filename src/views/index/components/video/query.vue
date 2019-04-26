@@ -74,22 +74,28 @@
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="startTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="startTimeOptions"
+                  @change="startTimeChange"
                   placeholder="选择开始时间">
                 </el-date-picker>
               </div>
               <div class="show_search_ti">
                 <span>结束</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="endTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="endTimeOptions"
+                  @change="endTimeChange"
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
@@ -154,12 +160,14 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import { dateOrigin, formatDate } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, flvplayer},
   data () {
+    let _ndate = new Date();
     return {
       // 直播列表
       deviceList: [],
@@ -169,7 +177,7 @@ export default {
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
-      showMenuActive: false,
+      showMenuActive: true,
       showConTitle: 1,
       searchVal: '',
       searchVal2: '',
@@ -177,8 +185,28 @@ export default {
 
       videoRecordList: [],
 
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 1), _ndate],
+      startTime: '',
+      endTime: '',
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // d > new Date() || d > this.endTime
+          if (d > new Date()) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   watch: {
@@ -196,6 +224,8 @@ export default {
       // 第一次打开
       this.showMenuActive = true;
     }
+    this.startTime = this.initTime[0];
+    this.endTime = this.initTime[1];
     // 监控列表
     this.getDeviceList();
   },
@@ -205,6 +235,31 @@ export default {
     $(window).on('unload', this.unloadSave);
   },
   methods: {
+    startTimeChange (val) {
+      if (val.getTime() > new Date()) {
+        this.startTime = new Date();
+        this.endTime = new Date();
+      } else {
+        let pd = val.getTime() + 3600 * 1000 * 24;
+        this.endTime = pd < new Date().getTime() ? new Date(pd) : new Date();
+      }
+    },
+    endTimeChange (val) {
+      if (val < this.startTime) {
+        this.endTime = this.startTime;
+      } else if (val > new Date()) {
+        this.endTime = new Date();
+      } else {
+        let pd = this.startTime.getTime() + 3600 * 1000 * 24;
+        if (val.getTime() > pd) {
+          if (pd > new Date().getTime()) {
+            pd = new Date().getTime();
+          }
+          this.endTime = new Date(pd);
+        }
+      }
+    },
+
     /* 监控列表 */
     getDeviceList (type) {
       apiDeviceList({

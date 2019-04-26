@@ -22,22 +22,28 @@
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="startTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="startTimeOptions"
+                  @change="startTimeChange"
                   placeholder="选择开始时间">
                 </el-date-picker>
               </div>
               <div class="show_search_ti">
                 <span>结束</span>
                 <el-date-picker
+                  class="vl_vid_sdater"
                   style="width: 175px"
                   size="small"
                   v-model="endTime"
                   type="datetime"
                   :editable="false" :clearable="false"
+                  :picker-options="endTimeOptions"
+                  @change="endTimeChange"
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
@@ -78,9 +84,18 @@
               <div class="show_his_empty" v-else>暂无记录</div>
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
-                  <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                  <p>{{item.playTime | fmTimestamp}}</p>
-                  <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  <!-- 过期 -->
+                  <div class="show_his_dis" v-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                    draggable="true" style="cursor: move;" v-else>
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
                 </li>
               </ul>
             </div>
@@ -114,12 +129,14 @@
 </template>
 <script>
 import {videoTree} from '@/utils/video.tree.js';
+import {dateOrigin} from '@/utils/util.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, flvplayer},
   data () {
+    let _ndate = new Date();
     return {
       // 设备列表
       deviceList: [],
@@ -127,15 +144,36 @@ export default {
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
-      showMenuActive: false,
+      showMenuActive: true,
       showConTitle: 1,
       searchVal: '',
       dragActiveObj: null,
 
       videoRecordList: [],
+      videoRecordSearchTime: null,
 
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 1), _ndate],
+      startTime: '',
+      endTime: '',
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // d > new Date() || d > this.endTime
+          if (d > new Date()) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   watch: {
@@ -159,6 +197,28 @@ export default {
       this.showMenuActive = true;
     }
 
+    // /:uid/:deviceName
+    let _uid = this.$route.query.uid;
+    if (_uid) {
+      let _name = this.$route.query.deviceName;
+      if (!_name) { _name = ''; }
+      // 看的是之前的24小时
+      let _nd = new Date();
+      this.endTime = _nd;
+      this.startTime = new Date(_nd.getTime() - 3600 * 1000 * 24);
+      this.videoList.splice(0, 1, {
+        type: 2,
+        title: _name,
+        startTime: this.startTime,
+        endTime: this.endTime,
+        video: {
+          uid: _uid
+        }
+      });
+    }
+    // console.log(_uid);
+    this.startTime = this.initTime[0];
+    this.endTime = this.initTime[1];
     // 监控列表
     this.getDeviceList();
   },
@@ -167,12 +227,38 @@ export default {
     $(window).on('unload', this.unloadSave);
   },
   methods: {
+    startTimeChange (val) {
+      if (val.getTime() > new Date()) {
+        this.startTime = new Date();
+        this.endTime = new Date();
+      } else {
+        let pd = val.getTime() + 3600 * 1000 * 24;
+        this.endTime = pd < new Date().getTime() ? new Date(pd) : new Date();
+      }
+    },
+    endTimeChange (val) {
+      if (val < this.startTime) {
+        this.endTime = this.startTime;
+      } else if (val > new Date()) {
+        this.endTime = new Date();
+      } else {
+        let pd = this.startTime.getTime() + 3600 * 1000 * 24;
+        if (val.getTime() > pd) {
+          if (pd > new Date().getTime()) {
+            pd = new Date().getTime();
+          }
+          this.endTime = new Date(pd);
+        }
+      }
+    },
+
     /* 播放记录 */
     getVideoRecordList () {
       // 播放类型 1:视频巡逻 2:视频回放
       apiVideoRecordList({
         playType: 2
       }).then(res => {
+        // videoRecordSearchTime
         if (res && res.data) {
           this.videoRecordList = res.data;
         }
@@ -279,6 +365,15 @@ export default {
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');
     },
+    dragStart2 (ev, item) {
+      // console.log('drag start', item)
+      this.dragActiveObj = Object.assign({}, item, {
+        uid: item.deviceUid
+      });
+      // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!ev) { ev = window.event; }
+      ev.dataTransfer.setData('name', 'ouyang');
+    },
     dragOver () {
       // console.log('drag over')
     },
@@ -286,28 +381,20 @@ export default {
       /* console.log('drag drop item', item);
       console.log('drag drop index', index); */
       if (this.dragActiveObj) {
-        // this.videoList.splice(index, 1, Object.assign({}, this.dragActive));
-        /* this.videoList[index] = {
-          title: this.dragActiveObj.name,
-          video: {
-            url: Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream'
+        let op = {};
+        if (this.dragVideoType === 2) {
+          op = {
+            startTime: this.dragActiveObj.playBackStartTime,
+            endTime: this.dragActiveObj.playBackEndTime,
           }
-        } */
-        // 湖南卫视   rtmp://58.200.131.2:1935/livetv/hunantv
-        // console.log(Math.random());
-        // rtmp://10.16.1.139/live/livestream
-        // rtmp://10.16.1.139/live/livestream
-        // rtmp://10.16.1.138/live/livestream
-        // rtmp://live.hkstv.hk.lxdns.com/live/hks1
-        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        // console.log('deviceSip', deviceSip);
-        this.videoList.splice(index, 1, {
+        }
+        this.videoList.splice(index, 1, Object.assign({
           type: 2,
           title: this.dragActiveObj.deviceName,
           startTime: this.startTime,
           endTime: this.endTime,
           video: Object.assign({}, this.dragActiveObj)
-        });
+        }, op));
       }
     },
     dragEnd () {

@@ -12,7 +12,7 @@
         </div>
       </div>
       <!-- 监控列表 -->
-      <template v-if="tabType === '1'">
+      <div v-show="tabType === '1'">
       <div class="group_input">
         <el-input v-model="groupName" size="small" placeholder="请输入设备名称查找">
           <i slot="suffix" class="el-input__icon el-icon-search"></i>
@@ -33,11 +33,11 @@
           </el-tree>
         </div>
       </vue-scroll>
-      </template>
+      </div>
       <!-- 布防库 -->
-      <template v-if="tabType === '2'">
+      <div v-show="tabType === '2'">
       <div class="group_input">
-        <el-input v-model="groupName" size="small" placeholder="请输入组名查找">
+        <el-input v-model="controlName" size="small" placeholder="请输入组名查找">
           <i slot="suffix" class="el-input__icon el-icon-search"></i>
         </el-input>
       </div>
@@ -45,18 +45,18 @@
         <div class="add_group">
           <el-tree
             icon-class="el-icon-arrow-right"
-            :data="deviceList"
+            :data="groups"
             show-checkbox
             node-key="id"
             :default-expanded-keys="[]"
             :default-checked-keys="[]"
             :props="defaultProps"
-            ref="tree"
+            ref="gTree"
             :filter-node-method="filterNode">
           </el-tree>
         </div>
       </vue-scroll>
-      </template>
+      </div>
       <!-- 组合搜索 -->
       <el-form :model="todayAlarmForm" class="lib_form" ref="todayAlarmForm">
         <el-form-item style="width: 192px;" prop="name">
@@ -88,7 +88,7 @@
       </el-form>
     </div>
     <div class="alarm_list">
-      <div class="list_top">今日告警<span>(23)</span></div>
+      <div class="list_top">今日告警<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
         <div class="alarm_grade_info" v-if="isSeen">
           <i class="vl_icon vl_icon_alarm_2"></i>
@@ -117,11 +117,11 @@
               <span>{{item.snapTime}}</span>
             </div>
           </div>
-          <div v-if="item.isSeen">
+          <div v-if="item.isSeen" @click="toAlarmDetail(item.uid, item.objType)">
             <div class="hover_info">
               <p class="name_info" v-if="item.objType == 1">
                 <span>{{item.name}}</span>
-                <span>{{item.sex === 1 ? '男' : item.sex === 2 ? '女' : ''}}</span>
+                <span>{{item.sex}}</span>
                 <span>{{item.nation}}</span>
               </p>
               <p class="name_info" v-if="item.objType == 2">
@@ -157,11 +157,14 @@
         </div>
       </div>
     </div>
+    <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
 </template>
 <script>
-import {getAlarmList} from '@/views/index/api/api'
+import { getGroupsByType } from '@/views/index/api/api'
+import { getAlarmList } from "@/views/index/api/api.control.js";
 import { apiDeviceList } from "@/views/index/api/api.video.js";
+import {formatDate} from '@/utils/util';
 export default {
   data () {
     return {
@@ -209,16 +212,23 @@ export default {
       isSeen: false,     //是否展示信息
       alarmList: null,    //今日告警数据
       selectDevice: [],    //选中的监控数据
+      groups: [],        //布控库数据
+      controlName: '',     //布控库搜索
+      selectControl: [],    //选中的布控数据
+      alarmObj: {},
     }
   },
   watch: {
     groupName(val) {
       this.$refs.tree.filter(val)
-      console.log("----------",this.$refs.tree)
-    }
+    },
+    controlName(val) {
+      this.$refs.gTree.filter(val)
+    },
   },
   mounted () {
     this.getDeviceList()
+    this.getGroups()
     this.getAlarm();
   },
   methods: {
@@ -228,9 +238,12 @@ export default {
     },
     changeTab (type) {
       this.tabType = type;
+      this.groupName = ''
+      this.controlName = ''
     },
     getCheckedKeys() {
       this.selectDevice = this.$refs.tree.getCheckedKeys(true);
+      this.selectControl = this.$refs.gTree.getCheckedKeys(true);
       this.getAlarm()
     },
     onMouseOver (data) {
@@ -264,14 +277,48 @@ export default {
       }
       return data;
     },
+    //获取布控库
+    getGroups() {
+      this.groups = []
+      //布控库人像
+      getGroupsByType({groupType: 6}).then(res => {
+        if(res.data && res.data.length > 0) {
+          for(let item of res.data) {
+            item['id'] = item.uid
+            item['label'] = item.groupName
+          }
+          this.groups.push({
+            label: '人像组',
+            id: 1,
+            children: [...res.data]
+          })
+        }
+      }).catch(()=> {})
+      //布控库车辆
+      getGroupsByType({groupType: 7}).then(res => {
+        if(res.data && res.data.length > 0) {
+          for(let item of res.data) {
+            item['id'] = item.uid
+            item['label'] = item.groupName
+          }
+          this.groups.push({
+            label: '车辆组',
+            id: 2,
+            children: [...res.data]
+          })
+        }
+      }).catch(()=> {})
+    },
     //今日告警
     getAlarm() {
       this.alarmList = [];
       let params = {
-        "where.startTime": '2019-04-01',
-        "where.endTime": '2019-04-01'
+        "where.startTime": formatDate(new Date(), 'yyyy-MM-dd'),
+        "where.endTime": formatDate(new Date(), 'yyyy-MM-dd'),
+        "where.sortType": 2
       };
       (this.selectDevice && this.selectDevice.length > 0) && (params['where.areaIds'] = this.selectDevice.join());
+      (this.selectControl && this.selectControl.length > 0) && (params['where.groupIds'] = this.selectControl.join());
       this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
       this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
       this.todayAlarmForm.age && (params['where.ageGroup'] = this.todayAlarmForm.age);
@@ -285,7 +332,20 @@ export default {
           }
         }
       })
-    }
+    },
+    //告警详情
+    toAlarmDetail(uid,objType) {
+      /* this.alarmObj = item;
+      this.alarmObj['inx'] = index
+      this.$refs["alarmDialogComp"].toogleVisiable(true); */
+      this.$router.push({name: 'alarm_detail', query: {uid: uid, objType: objType, type: 'today'}});
+    },
+    /* showLoading(data) {
+      console.log("---00000------",data)
+      if(data) {
+        this.getAlarm()
+      }
+    }, */
   },
 }
 </script>
@@ -448,6 +508,7 @@ export default {
         top:15px;
         left: 0;
         padding: 24px 20px;
+        cursor: pointer;
         p {
           font-size: 12px;
           color: #666;

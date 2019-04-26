@@ -95,6 +95,55 @@ export default {
               overflow: auto;
               padding: 0 .15rem;
             }
+            .map_lc_dc_mark {
+              width: 100%;
+              padding: .2rem;
+              border-bottom: 1px dashed #D3D3D3;
+              .dc_mark_c {
+                color: #333333;
+                margin-bottom: .15rem;
+              }
+              > p {
+                color: #999999;
+                font-size: 12px;
+                margin-bottom: .1rem;
+                span {
+                  &:last-child {
+                    float: right;
+                  }
+                }
+              }
+              .dc_mark_b {
+                font-size: 12px;
+                position: relative;
+                .el-icon-delete {
+                  float: right;
+                  display: none;
+                  position: absolute;
+                  right: -6px;
+                  bottom: 0px;
+                  cursor: pointer;
+                }
+                .el-icon-location-outline {
+                  margin-right: .04rem;
+                }
+              }
+              &:hover {
+                background: #E0F3FF;
+                .dc_mark_c {
+                  color: #0C70F8;
+                }
+                > p {
+                  color: #0C70F8;
+                }
+                .dc_mark_b {
+                  color: #0C70F8;
+                  .el-icon-delete {
+                    display: block;
+                  }
+                }
+              }
+            }
             .is-expanded {
               > .el-tree-node__content {
                 .el-tree-node__expand-icon{
@@ -130,6 +179,15 @@ export default {
                 background: #ECF0F2;
               }
             }
+          }
+          > .dc_clear_mark {
+            position: absolute;
+            bottom: .2rem;
+            width: 2.2rem;
+            height: .4rem;
+            line-height: .4rem;
+            padding: 0;
+            left: .2rem;
           }
         }
         > .map_lc_b {

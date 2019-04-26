@@ -5,6 +5,8 @@
         <router-link :to="{name: 'video_patrol'}">视频巡逻</router-link>
       </li>
       <li>
+        <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
+        <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
         <router-link :to="{name: 'video_playback'}">录像回放</router-link>
       </li>
       <li>
@@ -173,22 +175,27 @@ export default {
           }
           > .show_his {
             > li {
-              position: relative;
-              padding-right: 40px;
-              padding: 10px 40px 10px 20px;
-              border-bottom: 1px dotted #ddd;
-              cursor: default;
-              &:hover { 
-                color: #186DFB;
-                background-color: #E0F3FF;
-              }
-              > h3 { height: 20px; line-height: 20px; }
-              > p { color: #999; height: 20px; line-height: 20px; }
-              > i {
-                position: absolute; top: 50%; right: 25px;
-                font-size: 16px;
-                margin: -8px;
-                cursor: pointer;
+              > div {
+                position: relative;
+                padding-right: 40px;
+                padding: 10px 40px 10px 20px;
+                border-bottom: 1px dotted #ddd;
+                cursor: default;
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                }
+                > h3 { height: 20px; line-height: 20px; }
+                > p { color: #999; height: 20px; line-height: 20px; }
+                > i {
+                  position: absolute; top: 50%; right: 25px;
+                  font-size: 16px;
+                  margin: -8px;
+                  cursor: pointer;
+                }
+                &.show_his_dis {
+                  > h3 { color: #999; }
+                }
               }
             }
           }
