@@ -42,7 +42,7 @@
           <div class="left_content_box">
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部底库({{allPerBottomNameNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部人像({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
@@ -170,7 +170,8 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                  <span v-show="scope.row.idType === 1">身份证</span>
+                  <span v-show="scope.row.idType === 2">护照</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -233,7 +234,8 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                  <span v-show="scope.row.idType === 1">身份证</span>
+                  <span v-show="scope.row.idType === 2">护照</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -298,7 +300,7 @@
             </li>
             <li>
               <span>证件类型：</span>
-              <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
+              <span>{{personDetailInfo.idType === 1 ? '身份证' : personDetailInfo.idType ===2 ? '护照' : ''}}</span>
             </li>
             <li>
               <span>证件号码：</span>

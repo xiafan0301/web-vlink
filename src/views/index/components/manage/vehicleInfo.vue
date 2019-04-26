@@ -464,6 +464,7 @@ export default {
       this.searchForm.albumId = null;
       this.searchForm.keyWord = null;
       this.activeSelect = obj.id;
+      this.showGroup = false;
       if (type === 1) {
         this.searchForm.groupId = obj.id;
         this.vehicleGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组

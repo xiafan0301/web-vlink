@@ -85,7 +85,7 @@
         </el-form>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData('editPlanForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="submitData('editPlanForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
@@ -135,6 +135,7 @@ export default {
       planTypeList: [], // 预案类型
       eventLevelList: [], // 事件等级
       userInfo: {},
+      isEditLoading: false
     }
   },
   created () {
@@ -296,19 +297,21 @@ export default {
                     this.editPlanForm.taskList[index].departmentName = itm.organName;
                   }
                 })
-              }) 
+              })
+              this.isEditLoading = true;
               updatePlan(this.editPlanForm)
                 .then(res => {
                   if (res) {
-                      this.$message({
-                        type: 'success',
-                        message: '修改成功',
-                        customClass: 'request_tip'
-                      })
-                      this.$router.push({name: 'event_ctcplan'});
+                    this.$message({
+                      type: 'success',
+                      message: '修改成功',
+                      customClass: 'request_tip'
+                    })
+                    this.$router.push({name: 'event_ctcplan'});
+                    this.isEditLoading = false;
                   }
                 })
-                .catch(() => {})
+                .catch(() => {this.isEditLoading = false;})
             }
           })
         }
