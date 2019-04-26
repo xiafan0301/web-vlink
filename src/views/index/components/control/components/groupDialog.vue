@@ -59,7 +59,7 @@ export default {
             if (res && res.data) {
               this.$message.success('新增成功');
               this.groupDialog = false;
-              this.$emit('getGroupList');
+              this.$emit('getGroupList', res.data);
             }
           }).finally(() => {
             this.loadingBtn = false;

@@ -46,7 +46,7 @@
             </span>
           </span>
         </span>
-        <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini}">
+        <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini && !fullScreen}">
           <span class="flvplayer_bot_omh">
             <!-- 标记 -->
             <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
@@ -79,7 +79,7 @@
           <a href="javascript: void(0);" @click="signForm.addSign = true" class="player_add_sign"><span class="el-icon-plus"></span>新建标记内容</a>
         </el-form-item>
         <el-form-item prop="addSignContent" v-show="signForm.addSign">
-          <el-input :clearable="true" v-model="signForm.addSignContent" placeholder="新建标记内容" style="width: 200px;"></el-input>
+          <el-input maxlength="20" :clearable="true" v-model="signForm.addSignContent" placeholder="新建标记内容" style="width: 200px;"></el-input>
           <el-button type="primary" :disabled="addSignSubmitAble" @click="addSignSubmit('signForm')" size="mini" style="margin-left: 15px;">确定</el-button>
           <el-button size="mini" @click="signForm.addSign = false">取消</el-button>
         </el-form-item>
@@ -122,6 +122,9 @@ export default {
       videoLoading: true,
       videoLoadingFailed: false,
       videoLoadingTimeout: 20 * 1000,
+
+      playBackList: [], // 回放资源LIST
+      playBackIndex: 0, // 回放资源索引
 
       playActive: true,
       player: null,
@@ -245,14 +248,16 @@ export default {
         });
       } else if (this.oData.type === 2 || this.oData.type === 3) {
         if (this.oData.startTime) {
-          obj.startTime = formatDate(this.oData.startTime);
+          obj.startTime = formatDate(this.oData.startTime, 'yyyyMMddHHmmss');
         }
         if (this.oData.endTime) {
-          obj.endTime = formatDate(this.oData.endTime);
+          obj.endTime = formatDate(this.oData.endTime, 'yyyyMMddHHmmss');
         }
         apiVideoPlayBack(obj).then(res => {
-          if (res && res.data) {
-            this.initPlayerDo(res.data.liveFlvUrl);
+          if (res && res.data && res.data.length > 0) {
+            // 为一个LIST
+            this.initPlayerDo(res.data[0].liveFlvUrl);
+            this.playBackList = res.data;
           } else {
             // 未获取到视频
             console.log('未获取到视频');
@@ -285,17 +290,30 @@ export default {
           if (this.config.pause) {
             this.playActive = false;
             flvPlayer.pause();
-          } else {
-            this.startPlayTime = new Date().getTime();
           }
+          this.startPlayTime = new Date().getTime();
         });
         this.player = flvPlayer;
         this.video = videoElement;
-
+        if (this.oData.type != 1) {
+          // 回放/录像的时候需要添加ended事件
+          console.log('回放/录像');
+          videoElement.addEventListener('ended', this.playNext, false);
+        }
         // 加载失败
         window.setTimeout(() => {
           this.videoLoadingFailed = true;
         }, this.videoLoadingTimeout);
+      }
+    },
+    // 回放/录像 播放下一个视频
+    playNext () {
+      if (this.playBackList.length > (this.playBackIndex + 1)) {
+        this.playBackIndex += 1;
+        this.destroyPlayer();
+        let _su = this.playBackList[this.playBackIndex].liveFlvUrl;
+        console.log('播放第' + (this.playBackIndex + 1) + '段视频，URL：', _su);
+        this.initPlayerDo(_su);
       }
     },
     destroyPlayer () {
@@ -304,6 +322,10 @@ export default {
         this.player.destroy();
         this.player.detachMediaElement();
         this.player = null;
+        // 回放/录像的时候需要清除ended事件
+        if (this.oData.type != 1) {
+          this.video.removeEventListener('ended', this.playNext);
+        }
       }
     },
     relaodPlayer () {
@@ -316,10 +338,16 @@ export default {
       this.playActive = flag;
       if (this.player) {
         if (flag) {
-          this.destroyPlayer();
-          this.playActive = true; // 去掉暂停按钮
-          this.config.pause = false;
-          this.initPlayer();
+          if (this.oData.type === 1) {
+            // 直播 播放的时候需要重新加载
+            this.destroyPlayer();
+            this.playActive = true; // 去掉暂停按钮
+            this.config.pause = false;
+            this.initPlayer();
+          } else {
+            // 回放/录像 播放的时候直接play
+            this.player.play();
+          }
         } else {
           this.player.pause();
         }
@@ -529,10 +557,10 @@ export default {
     saveVideoRecord () {
       if (this.oData.type === 2 || this.oData.type === 1) {
         let playBack = {};
-        if (this.oData.type === 2) {
-          playBack.playBackStartTime = formatDate(this.startPlayTime); // 回放开始时间
-          playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
-        }
+        // if (this.oData.type === 2) {
+        playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
+        playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+        // }
         apiVideoRecord(Object.assign({
           deviceId: this.oData.video.uid, // 设备id
           playTime: formatDate(new Date().getTime()), // 播放结束时间

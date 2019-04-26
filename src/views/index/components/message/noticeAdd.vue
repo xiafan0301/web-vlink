@@ -30,11 +30,11 @@
       </div>
       <div class="add_footer">
         <!-- 新增 -->
-        <el-button type="primary" v-if="pageType === 2" @click="addMsgNote('addForm', 2)">发布</el-button>
-        <el-button v-if="pageType === 2" @click="addMsgNote('addForm', 1)">保存</el-button>
+        <el-button :loading="loadingBtn" type="primary" v-if="pageType === 2" @click="addMsgNote('addForm', 2)">发布</el-button>
+        <el-button :loading="loadingBtn" v-if="pageType === 2" @click="addMsgNote('addForm', 1)">保存</el-button>
         <!-- 修改 -->
-        <el-button type="primary" v-if="pageType === 4" @click="putMsgNote('addForm', 2)">发布</el-button>
-        <el-button v-if="pageType === 4" @click="putMsgNote('addForm', 1)">保存</el-button>
+        <el-button :loading="loadingBtn" type="primary" v-if="pageType === 4" @click="putMsgNote('addForm', 2)">发布</el-button>
+        <el-button :loading="loadingBtn" v-if="pageType === 4" @click="putMsgNote('addForm', 1)">保存</el-button>
 
         <el-button @click.native="skip(1)">返回</el-button>
       </div>
@@ -99,11 +99,14 @@ export default {
             details: this.addForm.content,
             sysAppendixList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
           }
+          this.loadingBtn = true;
           addMsgNote(data).then(res => {
             if (res && res.data) {
               this.$message.success(type === 1 ? '保存成功' : '发布成功');
               this.$emit('getMsgNoteList');
             }
+          }).finally(() => {
+            this.loadingBtn = false;
           })
         } else {
           return false;
@@ -179,6 +182,7 @@ export default {
               }
             }),//附件信息列表
           }
+          this.loadingBtn = true;
           putMsgNote(data).then(res => {
             if (res && res.data) {
               this.$message.success(type === 1 ? '保存成功' : '发布成功');

@@ -60,7 +60,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEnableLoading" @click="onSubmit">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -91,6 +91,7 @@ export default {
       basicInfo: {}, // 事件详情
       userInfo: {},
       departmentData: [], // 执行部门数据
+      isEnableLoading: false, // 启用预案加载中
     }
   },
   created () {
@@ -218,8 +219,9 @@ export default {
               if (item.departmentId === itm.uid) {
                 _this.taskList[index].departmentName = itm.organName;
               }
-            })
-          }) 
+            });
+          });
+          this.isEnableLoading = true;
           ctcTasks(_this.taskList, eventId)
             .then(res => {
               if (res) {
@@ -227,16 +229,19 @@ export default {
                   type: 'success',
                   message: '启用成功',
                   customClass: 'request_tip'
-                })
+                });
+                this.$router.back(-1);
+                this.isEnableLoading = false;
               } else {
                 this.$message({
                   type: 'error',
                   message: '启用失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isEnableLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEnableLoading = false;})
         }
       })
     },

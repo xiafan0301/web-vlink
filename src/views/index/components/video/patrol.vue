@@ -50,7 +50,7 @@
                       </div>
                       <div class="com_ellipsis"
                         v-else-if="!deviceIsPlaying(sitem)"
-                        @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
+                        @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
                         draggable="true" style="cursor: move;">
                         {{sitem.deviceName}}
                         <span class="vl_icon vl_icon_v11"></span>
@@ -74,9 +74,18 @@
               <div class="show_his_empty" v-else>暂无记录</div>
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
-                  <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                  <p>{{item.playTime | fmTimestamp}}</p>
-                  <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  <!-- 过期 -->
+                  <div class="show_his_dis" v-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                    draggable="true" style="cursor: move;" v-else>
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
                 </li>
               </ul>
             </div>
@@ -182,6 +191,7 @@ export default {
       showConTitle: 1,
       searchVal: '',
       dragActiveObj: null,
+      dragVideoType: 1,
 
       videoRecordList: [],
 
@@ -415,40 +425,42 @@ export default {
     },
 
     // 拖拽开始
-    dragStart (ev, item) {
+    dragStart (ev, item, type) {
       // console.log('drag start', item)
       this.dragActiveObj = item;
+      this.dragVideoType = type;
       // 设置属性dataTransfer   两个参数   1：key   2：value
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');
+    },
+    // 拖拽开始
+    dragStart2 (ev, item, type) {
+      // console.log('drag start', item)
+      this.dragActiveObj = Object.assign({}, item, {
+        uid: item.deviceUid
+      });
+      this.dragVideoType = type;
+      // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!ev) { ev = window.event; }
+      ev.dataTransfer.setData('name', 'ouyang2');
     },
     dragOver () {
       // console.log('drag over')
     },
     dragDrop (item, index) {
-      /* console.log('drag drop item', item);
-      console.log('drag drop index', index); */
       if (this.dragActiveObj) {
-        // this.videoList.splice(index, 1, Object.assign({}, this.dragActive));
-        /* this.videoList[index] = {
-          title: this.dragActiveObj.name,
-          video: {
-            url: Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream'
+        let op = {};
+        if (this.dragVideoType === 2) {
+          op = {
+            startTime: this.dragActiveObj.playBackStartTime,
+            endTime: this.dragActiveObj.playBackEndTime,
           }
-        } */
-        // 湖南卫视   rtmp://58.200.131.2:1935/livetv/hunantv
-        // console.log(Math.random());
-        // rtmp://10.16.1.139/live/livestream
-        // rtmp://10.16.1.139/live/livestream
-        // rtmp://10.16.1.138/live/livestream
-        // rtmp://live.hkstv.hk.lxdns.com/live/hks1
-        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        // console.log('deviceSip', deviceSip);
-        this.videoList.splice(index, 1, {
-          type: 1,
+        }
+        this.videoList.splice(index, 1, Object.assign({
+          type: this.dragVideoType,
           title: this.dragActiveObj.deviceName,
           video: Object.assign({}, this.dragActiveObj)
-        });
+        }, op));
       }
     },
     dragEnd () {

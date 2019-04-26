@@ -5,6 +5,7 @@
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
+        class="person_info"
         placement="bottom"
         trigger="click">
         <ul class="hd_user_pl">
@@ -26,32 +27,42 @@
             placement="bottom"
             width="397"
             trigger="click">
-            <div class="vl_hd_alarm" v-for="item in '123'" :key="item">
+            <vue-scroll>
+            <template  v-if="alarmList && alarmList.length > 0">
+            <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index">
               <div class="hd_alarm_t">
                 <div>
-                  <h1>布控人员</h1>
-                  <p>摄像头0011</p>
-                  <p>11:12</p>
+                  <h1>{{item.surveillanceName}}</h1>
+                  <p>{{item.devName}}</p>
+                  <p>{{item.snapTime}}</p>
                 </div>
-                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
-                  <span>70</span>
+                  <span>{{item.semblance}}</span>
                   <p>匹配度</p>
-                  <el-progress :percentage="70" color="#0C70F8"></el-progress>
+                  <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
-                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
               <div class="hd_alarm_b">
-                <div class="alarm_b_list">李某某</div>
-                <div class="alarm_b_list">女</div>
-                <div class="alarm_b_list">汉族</div>
-                <div class="alarm_b_list">430903199009256265</div>
-                <div class="alarm_b_list">失联事件</div>
+                <template v-if="item.objType == 1">
+                  <div class="alarm_b_list">{{item.name}}</div>
+                  <div class="alarm_b_list">{{item.sex}}</div>
+                  <div class="alarm_b_list">{{item.nation}}</div>
+                </template>
+                <template v-if="item.objType == 2">
+                  <div class="alarm_b_list">{{item.vehicleNumber}}</div>
+                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <div class="alarm_b_list">{{item.vehicleType}}</div>
+                </template>
+                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
             <div style="width: 100%;text-align: center;padding: 10px 0;">
               <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
             </div>
+            </template>
+            </vue-scroll>
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
             </el-badge>
@@ -156,6 +167,8 @@
 </template>
 <script>
 import { logout, updatePwd } from '@/views/index/api/api.user.js';
+import { getAlarmList } from "@/views/index/api/api.control.js";
+import {formatDate} from '@/utils/util';
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
@@ -179,7 +192,7 @@ export default {
     return {
       sums: {
         msg: 109,
-        events: 212
+        events: 0
       },
       updateForm: {
         newPwd: null,
@@ -202,10 +215,14 @@ export default {
       userInfo: null,
       loginoutDialog: false, // 退出登录弹出框
       updatePwdDialog: false, // 修改密码弹出框
+      pageNum: 1,
+      pageSize: 10,
+      alarmList: [],
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    this.getAlarm()
   },
   methods: {
     // 显示退出登录弹出框
@@ -263,7 +280,24 @@ export default {
             .catch(() => {})
         }
       })
-    }
+    },
+    //告警
+    getAlarm() {
+      this.alarmList = [];
+      let params = {
+        "where.startTime": formatDate(new Date().getTime() - 3600 * 1000 * 24 * 90, 'yyyy-MM-dd'),
+        "where.endTime": formatDate(new Date(), 'yyyy-MM-dd'),
+        "where.sortType": 2,
+        "pageNum": this.pageNum,
+        "pageSize": this.pageSize
+      };
+      getAlarmList(params).then( res => {
+        if(res.data.list && res.data.list.length > 0) {
+          this.alarmList = [...res.data.list]
+          this.sums.events = res.data.total;
+        }
+      })
+    },
   }
 }
 </script>
@@ -378,6 +412,9 @@ export default {
     }
   }
 }
+.person_info {
+  height: auto;
+}
 </style>
 <style lang="scss">
 .vl_hd_alarm{
@@ -427,6 +464,7 @@ export default {
       text-align: center;
       > img{
         width: 70px;
+        height: 70px;
       }
     }
   }
@@ -442,7 +480,19 @@ export default {
       border-radius:3px;
       color: #666;
     }
+    .alarm_b_list {
+      span {
+        padding-left: 9px;
+        color: #999;
+        &:first-of-type {
+          color: #F2F2F2;
+        }
+      }
+    }
   }
+}
+.el-popover {
+  height: 476px;
 }
 </style>
 

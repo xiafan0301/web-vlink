@@ -1,19 +1,17 @@
 <template>
   <div class="alarm-dialog">
     <!--详情弹窗-->
-    <vue-scroll>
-    <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/alarm/today' }" v-if="type === 'today'">今日告警</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/alarm/history' }" v-if="type === 'history'">历史告警</el-breadcrumb-item>
-          <el-breadcrumb-item>告警详情</el-breadcrumb-item>
-        </el-breadcrumb>
-    </div>
-    <div class="struc_detail_dialog">
+    <el-dialog
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog_comp"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
         <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
+        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
       </div>
       <div class="struc_main" v-if="sturcDetail">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
@@ -27,58 +25,42 @@
           <div class="hover_info" v-show="isSeen">
             <p class="hover_i_header">布控信息</p>
               <template v-if="sturcDetail.objType == 1">
-                <div v-if="sturcDetail.basePortraitInfo">
-                  <p class="name_info" >
-                    <span>{{sturcDetail.basePortraitInfo.name}}</span>
-                    <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
-                    <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.basePortraitInfo.idNo">
-                  <p class="correlated_info">
-                    <span>{{sturcDetail.basePortraitInfo.idNo}}</span>
-                    <span>身份证号</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.basePortraitInfo.birthDate">
-                  <p class="correlated_info">
-                    <span>{{sturcDetail.basePortraitInfo.birthDate | fmTimestamp('yyyy-MM-dd')}}</span>
-                    <span>出生日期</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.basePortraitInfo.remarks">
-                  <p class="correlated_info">
-                    <span>{{sturcDetail.basePortraitInfo.remarks}}</span>
-                    <span>备注信息</span>
-                  </p>
-                </div>
+                <p class="name_info" >
+                  <span>{{sturcDetail.basePortraitInfo.name}}</span>
+                  <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
+                  <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
+                </p>
+                <p class="correlated_info">
+                  <span>{{sturcDetail.basePortraitInfo.idNo}}</span>
+                  <span>身份证号</span>
+                </p>
+                <p class="correlated_info">
+                  <span>{{sturcDetail.basePortraitInfo.birthDate | fmTimestamp('yyyy-MM-dd')}}</span>
+                  <span>出生日期</span>
+                </p>
+                <p class="correlated_info">
+                  <span>{{sturcDetail.basePortraitInfo.remarks}}</span>
+                  <span>备注信息</span>
+                </p>
               </template>
               <template v-if="sturcDetail.objType == 2">
-                <div v-if="sturcDetail.vehicleInfo">
-                  <p class="name_info" >
-                    <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
-                    <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
-                    <span v-if="sturcDetail.vehicleInfo.ownerName">{{sturcDetail.vehicleInfo.ownerName}}</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.vehicleInfo.ownerIdCard">
-                  <p class="correlated_info" >
-                    <span>{{sturcDetail.vehicleInfo.ownerIdCard}}</span>
-                    <span>身份证号</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.vehicleInfo.ownerBirth">
-                  <p class="correlated_info">
-                    <span>{{sturcDetail.vehicleInfo.ownerBirth | fmTimestamp('yyyy-MM-dd')}}</span>
-                    <span>出生日期</span>
-                  </p>
-                </div>
-                <div v-if="sturcDetail.vehicleInfo.desci">
-                   <p class="correlated_info">
-                    <span>{{sturcDetail.vehicleInfo.desci}}</span>
-                    <span>备注信息</span>
-                  </p>
-                </div>
+                <p class="name_info" >
+                  <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
+                  <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
+                  <span v-if="sturcDetail.vehicleInfo.ownerName">{{sturcDetail.vehicleInfo.ownerName}}</span>
+                </p>
+                <p class="correlated_info" v-if="sturcDetail.vehicleInfo.ownerIdCard">
+                  <span>{{sturcDetail.vehicleInfo.ownerIdCard}}</span>
+                  <span>身份证号</span>
+                </p>
+                <p class="correlated_info" v-if="sturcDetail.vehicleInfo.ownerBirth">
+                  <span>{{sturcDetail.vehicleInfo.ownerBirth | fmTimestamp('yyyy-MM-dd')}}</span>
+                  <span>出生日期</span>
+                </p>
+                <p class="correlated_info" v-if="sturcDetail.vehicleInfo.desci">
+                  <span>{{sturcDetail.vehicleInfo.desci}}</span>
+                  <span>备注信息</span>
+                </p>
               </template>
               <template v-if="sturcDetail.objType == 3 || sturcDetail.objType == 4">
                 <p class="name_info"></p>
@@ -86,17 +68,14 @@
             </div>
           </div>
           <div class="struc_c_d_box">
-            <div class="struc_c_d_img struc_c_d_qj struc_mr" v-show="showImg">
+            <div class="struc_c_d_img" v-show="showImg">
               <img :src="sturcDetail.snapPhoto" alt="抓拍图">
-              <span>抓拍图</span>
-              <i @click="displayImg()">切换全景图</i>
+              <i @click="displayImg()">全景图</i>
             </div>
-            <div class="struc_c_d_img struc_c_d_qj struc_mr" v-show="!showImg">
+            <div class="struc_c_d_img" v-show="!showImg">
               <img :src="sturcDetail.snapFullPhoto" alt="全景图">
-              <span>全景图</span>
-              <i @click="displayImg()">切换抓拍图</i>
+              <i @click="displayImg()">抓拍图</i>
             </div>
-            
             <div class="struc_c_d_info">
               <h2>抓拍信息
                 <div class="box_grade_info"> 
@@ -106,10 +85,11 @@
                     <i class="vl_icon vl_icon_alarm_5" v-if="sturcDetail.alarmLevel == 4"></i>
                     <i class="vl_icon vl_icon_alarm_6" v-if="sturcDetail.alarmLevel == 5"></i>
                 </div>
-                <!-- <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></div> -->
+                <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></div>
               </h2>
-              <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
-                <span>{{sturcDetail.alarmFeature.featureName}}</span>
+              <div class="struc_cdi_line">
+                <span>青年</span>
+                <span>女性</span>
               </div>
               <div v-if="sturcDetail.snapTime">
                 <div class="struc_cdu_line">
@@ -138,13 +118,9 @@
               </div>
             </div>
             <span>相似度</span>
-            <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
           </div>
-          <div class="alarm_btn">
-            <a class="cancel_btn" @click="back">返回</a>
-            <a class="cancel_btn" @click="cancel(sturcDetail.uid)">撤销告警</a>
-            <a class="operate_btn" @click="spinToCtc(sturcDetail)">调度指挥</a>
-          </div>
+          <a class="operate_btn" @click="spinToCtc(sturcDetail)">调度指挥</a>
+          <a class="cancel_btn" @click="cancel(sturcDetail.uid)">撤销告警</a>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
@@ -166,34 +142,40 @@
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
-            <div class="swiper_img_item" :class="{'active': item.uid == curImgUid}" @click="imgListTap(item,index)">
+            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item,index)">
               <img style="width: 100%; height: .88rem;" :src="item.snapPhoto" alt="抓拍图">
-              <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  item.uid == curImgUid}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
+              <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
           <div class="swiper-button-next" slot="button-next"></div>
         </swiper>
       </div>
-    </div>
+    </el-dialog>
     <div id="capMap"></div>
-    </vue-scroll>
   </div>
 </template>
 <script>
 let AMap = window.AMap;
 import { getAlarmList, getAlarmDetail, delAlarm } from "@/views/index/api/api.control.js";
-import {formatDate} from '@/utils/util';
 export default {
+  props: {
+    strucInfoList: {
+      type: Array,
+      default: () => []
+    },
+    alarmObj: {
+      type: Object,
+      default: () => {}
+    },
+  },
   data () {
     return {
-      strucInfoList: [],
-      type: '',     //今日告警或历史告警
       playing: false, // 视频播放是否
       stucOrder: 2, // 1升序，2降序，3监控，4相似度
       showSim: false, // 展示相似度排序
       strucCurTab: 1,
-      curImgUid: null,
+      curImgIndex: 0,
       strucDetailDialog: false,
       showImg: true,      //=true，展示抓拍图片，=false，展示全景图
       isSeen: false,
@@ -213,25 +195,24 @@ export default {
       amap: null, // 地图实例
       markerPoint: null, // 地图点集合
       InfoWindow: null,
-      startTime: null,
-      endTime: null,
     }
   },
   mounted() {
-    let map = new AMap.Map('capMap', {
+    /* let map = new AMap.Map('capMap', {
       center: [112.974691, 28.093846],
       zoom: 16
     });
     map.setMapStyle('amap://styles/whitesmoke');
-    this.amap = map;
-    this.type = this.$route.query.type
-    this.curImgUid = this.$route.query.uid
-    this.getAlarm()
-    if(this.$route.query.uid) {
-      this.toAlarmDetail(this.$route.query.uid, this.$route.query.objType)
-    }
+    this.amap = map; */
   },
   watch: {
+    alarmObj(val) {
+      console.log("========",val)
+      if(val) {
+        this.toAlarmDetail(val)
+        this.curImgIndex = val.inx
+      }
+    },
     strucCurTab (e) {
       if (e === 2) {
         this.drawPoint(this.sturcDetail)
@@ -239,43 +220,26 @@ export default {
     }
   },
   methods: {
-    //告警
-    getAlarm() {
-      this.alarmList = [];
-      if(this.$route.query.type === 'today') {
-        this.startTime = formatDate(new Date(), 'yyyy-MM-dd')
-        this.endTime = formatDate(new Date(), 'yyyy-MM-dd')
-      }else {
-        this.startTime = this.$route.query.startTime
-        this.endTime = this.$route.query.endTime
+    toogleVisiable (f) {
+      this.strucDetailDialog = f
+      if(this.alarmObj.uid) {
+        console.log("99999999",this.alarmObj)
+        this.toAlarmDetail(this.alarmObj)
+        this.curImgIndex = this.alarmObj.inx
       }
-      let params = {
-        "where.startTime": this.startTime,
-        "where.endTime": this.endTime,
-        "where.sortType": 2
-      };
-      getAlarmList(params).then( res => {
-        if(res.data.list && res.data.list.length > 0) {
-          this.strucInfoList = [...res.data.list]
-          for(let item of this.strucInfoList) {
-            item['semblance'] = (item.semblance).toFixed(2)
-            item['isSeen'] = false
-          }
-        }
-      })
     },
     //告警详情
-    toAlarmDetail(uid, objType) {
-      getAlarmDetail(uid).then( res => {
+    toAlarmDetail(item) {
+      getAlarmDetail(item.uid).then( res => {
         this.sturcDetail = res.data
-        this.sturcDetail['objType'] = objType
+        this.sturcDetail['objType'] = item.objType
         this.drawPoint(this.sturcDetail);
       }).catch(() => {})
     },
     imgListTap (item, index) {
-      this.curImgUid = item.uid;
-      console.log("--------------",this.curImgUid, index)
-      this.toAlarmDetail(item.uid, item.objType)
+      this.curImgIndex = index;
+      console.log("--------------",this.curImgIndex)
+      this.toAlarmDetail(item)
     },
     drawPoint (data) {
       this.$nextTick(() => {
@@ -332,13 +296,7 @@ export default {
       if(item.eventInfo) {
         eventType = item.eventInfo.eventType
       }
-      if(this.type === 'history') {
-        this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime}});
-      }else {
-        this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType}});
-      }
+      this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType}});
     },
     //撤销告警
     cancel(uid) {
@@ -348,11 +306,7 @@ export default {
         this.$message.success('撤销告警成功！');
         this.strucDetailDialog = false
       }).catch((e)=> {console.log(e)})
-    },
-    // 返回
-    back () {
-      this.$router.back(-1);
-    },
+    }
   }
 }
 </script>
@@ -364,15 +318,17 @@ export default {
 @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .alarm-dialog {
   height: 100%;
-  .struc_detail_dialog {
-      max-width: 100%;
-      height: 7.26rem;
-      background: #fff;
-      border: 1px solid #EAEAEA;
-      margin: 0 20px;
+  .struc_detail_dialog_comp {
+      .el-dialog {
+        max-width: 13.06rem;
+        width: 100%!important;
+      }
+      .el-dialog__header {
+        display: none;
+      }
       .struc_tab {
-        height: 1.12rem;
-        padding: .4rem .4rem;
+        height: 1.16rem;
+        padding: .3rem 0;
         position: relative;
         color: #999999;
         span {
@@ -394,25 +350,32 @@ export default {
         }
       }
       .struc_main {
-        height: 6.13rem;
-        margin: 0 .4rem;
+        width: 11.46rem;
+        height: 4.4rem;
+        margin: 0 auto;
         border-bottom: 1px solid #F2F2F2;
         @mixin btn-style {
           text-decoration: none;
             text-align: center;
-            width: 1.6rem;
+            width: 1.1rem;
             height: .4rem;
-            display: inline-block;
+            float: right!important;
+            margin-top: .2rem;
             background: rgba(246,248,249,1);
             border: 1px solid rgba(211,211,211,1);
             border-radius: 4px;
             line-height: .4rem;
             cursor: pointer;
             color: #666666;
+            &:hover {
+              color: #FFFFFF;
+              background: #0C70F8;
+              border-color: #0C70F8;
+            }
         }
         .struc_c_detail {
           width:  100%;
-          height: 4.96rem;
+          height: 3.6rem;
           >div {
             float: left;
           }
@@ -460,7 +423,7 @@ export default {
           .struc_c_d_l_box {
             position: relative;
             .hover_info {
-              width: 4.76rem;
+              width: 3.4rem;
               max-height: 2.23rem;
               box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
               background-color: #fff;
@@ -479,8 +442,8 @@ export default {
             }
           }
           .struc_c_d_img {
-            width: 4.96rem;
-            height: 4.96rem;
+            width: 3.6rem;
+            height: 3.6rem;
             background: #EAEAEA;
             position: relative;
             img {
@@ -497,14 +460,14 @@ export default {
             i {
               display: block;
               position: absolute;
-              bottom: .2rem;
-              right: .2rem;
+              top: .1rem;
+              right: .1rem;
               line-height: .26rem;
               height: .26rem;
-              background: #0C70F8;
+              background: rgba(255, 255, 255, .8);
               border-radius: .13rem;
               font-style: normal;
-              color: #fff;
+              color: #0C70F8;
               font-size: 12px;
               padding: 0 .1rem;
               cursor: pointer;
@@ -541,15 +504,8 @@ export default {
               z-index: 99;
             }
           }
-          .struc_mr {
-            margin-right: 0;
-            &:before {
-              border: .5rem solid #50CC62;
-              border-color: transparent transparent #50CC62;
-            }
-          }
           .struc_c_d_box {
-            width: calc(100% - 5.26rem);
+            width: calc(100% - 3.9rem);
             box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
             border-radius:1px;
             position: relative;
@@ -558,14 +514,14 @@ export default {
               float: left;
             }
             .struc_c_d_info {
-              width: calc(100% - 4.96rem);
-              padding-left: .4rem;
+              width: calc(100% - 3.6rem);
+              padding-left: .24rem;
               color: #333333;
               h2 {
                 font-weight: bold;
                 line-height: .74rem;
                 padding-right: 1rem;
-                font-size: .18rem;
+                font-size: 18px;
                 position: relative;
                 .vl_jfo_sim {
                   color: #0C70F8;
@@ -590,19 +546,19 @@ export default {
                   border: 1px solid #F2F2F2;
                   border-radius: 3px;
                   background-color: #FAFAFA;
-                  margin: 0 .1rem .1rem 0;
-                  height: .34rem;
-                  line-height: .34rem;
-                  padding-left: .12rem;
-                  padding-right: .12rem;
-                  font-size: 12px;
+                  margin: 0 .08rem .08rem 0;
                   display: inline-block;
+                  height: .3rem;
+                  line-height: .3rem;
+                  padding-left: .1rem;
+                  padding-right: .1rem;
+                  font-size: 12px;
                   span:nth-child(1) {
-                    padding-right: .12rem;
+                    padding-right: .1rem;
                     border-right: 1px solid#F2F2F2;
                   }
                   span:nth-child(2) {
-                    padding-left: .12rem;
+                    padding-left: .1rem;
                     color: #666;
                   }
               }
@@ -611,16 +567,16 @@ export default {
                   position: relative;
                   max-width: 100%;
                   display: inline-block;
-                  height: .34rem;
-                  line-height: .34rem;
-                  margin-bottom: .1rem;
+                  height: .3rem;
+                  line-height: .3rem;
+                  margin-bottom: .08rem;
                   border: 1px solid #F2F2F2;
                   background: #FAFAFA;
                   color: #333333;
                   border-radius:3px;
                   font-size: 12px;
-                  padding: 0 .12rem;
-                  margin-right: .1rem;
+                  padding: 0 .1rem;
+                  margin-right: .08rem;
                   > i {
                     vertical-align: middle;
                     margin-left: .1rem;
@@ -632,10 +588,10 @@ export default {
               display: block;
               content: '';
               position: absolute;
-              top: -1rem;
-              right: -1rem;
+              top: -.7rem;
+              right: -.7rem;
               transform: rotate(-46deg);
-              border: 1rem solid #0c70f8;
+              border: .7rem solid #0c70f8;
               border-color: transparent transparent transparent #0C70F8;
             }
             &:after {
@@ -664,27 +620,17 @@ export default {
               -o-transform: rotate(45deg);
               transform: rotate(45deg);
               z-index: 99;
-              &:last-child {
-                font-size: .24rem;
-                top: .3rem;
-                right: .3rem;
-                font-weight: bold;
-              }
             }
           }
-          .alarm_btn {
-            margin: .4rem 0;
-            float: right;
-            .operate_btn {
-              @include btn-style;
-              color: #FFFFFF;
-              background: #0C70F8;
-              border-color: #0C70F8;
-            }
-            .cancel_btn {
-              @include btn-style;
-              margin-right: 20px;
-            }
+          .operate_btn {
+            @include btn-style;
+            color: #FFFFFF;
+            background: #0C70F8;
+            border-color: #0C70F8;
+          }
+          .cancel_btn {
+            @include btn-style;
+            margin-right: 20px;
           }
         }
         .struc_c_address {
@@ -762,18 +708,12 @@ export default {
           }
           .download_btn {
             @include btn-style;
-            float: right;
-            margin: .4rem 0;
-            &:hover {
-              color: #FFFFFF;
-              background: #0C70F8;
-              border-color: #0C70F8;
-            }
           }
         }
       }
       .struc-list {
-        margin: 0 .4rem;
+        width: 12.46rem;
+        margin: 0 auto;
         padding: .44rem 0 .34rem 0;
         .swiper-container {
           padding: .02rem .5rem;
@@ -782,19 +722,23 @@ export default {
             content: '';
             width: .5rem;
             height: 110%;
+            background: #FFFFFF;
             position: absolute;
             left: 0;
             z-index: 9;
+            border: 1px solid #FFFFFF;
           }
           &:after {
             display: block;
             content: '';
             width: .5rem;
             height: 110%;
+            background: #FFFFFF;
             position: absolute;
             right: 0;
             top: 0;
             z-index: 9;
+            border: 1px solid #FFFFFF;
           }
           .swiper-button-next {
             right:  0;

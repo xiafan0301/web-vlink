@@ -76,7 +76,7 @@
                 </template>
               </el-table-column>
               <el-table-column  
-                label="发布时间"
+                label="事发时间"
                 prop="reportTime"
                 show-overflow-tooltip
                 >
@@ -147,8 +147,8 @@ export default {
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,
-        orderBy: null,
-        order: null,
+        orderBy: 'report_time',
+        order: 'desc',
         'where.startDateStr': this.helpForm.helpDate && this.helpForm.helpDate[0],
         'where.endDateStr': this.helpForm.helpDate && this.helpForm.helpDate[1],
         'where.keyWord': this.helpForm.content,
