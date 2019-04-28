@@ -322,6 +322,7 @@ export default {
     width: 25%; height: 25%;
   }
 }
+.show_list_empty { padding: 0 20px; color: #999; text-align: center; }
 </style>
 <style lang="scss" scoped>
 .vl_video {

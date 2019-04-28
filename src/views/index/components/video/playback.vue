@@ -15,6 +15,7 @@
                 <el-input
                   placeholder="请输入内容"
                   size="small"
+                  @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
                   <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
                 </el-input>
@@ -50,31 +51,38 @@
             </div>
             <div class="show_list" style="padding-top: 152px;">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
-                  <div>
-                    <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                <template v-if="deviceList && deviceList.length > 0">
+                  <li v-for="(item, index) in deviceList" :key="'tree_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                      </div>
                     </div>
-                  </div>
-                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                      <div class="com_ellipsis"
-                        v-if="!deviceIsPlaying(sitem)"
-                        @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
-                        draggable="true" style="cursor: move;">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="tree_li_dis" v-else>
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                    </li>
-                  </ul>
-                  <ul class="tree_sli" v-else>
-                    <li class="tree_sli_empty">暂无</li>
-                  </ul>
-                </li>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                        <div class="com_ellipsis"
+                          v-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -365,6 +373,7 @@ export default {
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');
     },
+    // 设备ID字段名不一样。。。。
     dragStart2 (ev, item) {
       // console.log('drag start', item)
       this.dragActiveObj = Object.assign({}, item, {
@@ -393,6 +402,7 @@ export default {
           title: this.dragActiveObj.deviceName,
           startTime: this.startTime,
           endTime: this.endTime,
+          record: true,
           video: Object.assign({}, this.dragActiveObj)
         }, op));
       }

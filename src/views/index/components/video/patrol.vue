@@ -15,56 +15,54 @@
                 <el-input
                   placeholder="请输入内容"
                   size="small"
+                  @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
                   <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
                 </el-input>
               </div>
-              
-              <!-- <div>
-                <el-input
-                  class="vl_map_lc_dt_inp"
-                  size="small"
-                  placeholder="请输入内容"
-                  v-model="searchVal">
-                </el-input>
-                <i class="el-icon-search"></i>
-              </div> -->
             </div>
             <div class="show_list">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
-                  <div>
-                    <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                <template v-if="deviceList && deviceList.length > 0">
+                  <li v-for="(item, index) in deviceList" :key="'tree_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                      </div>
                     </div>
-                  </div>
-                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                      <!-- patrolParseDialogVisible -->
-                      <div v-if="patrolActive === 1" class="tree_li_dis" 
-                        @click="dragEndDis"
-                        @dragend="dragEndDis"
-                        draggable="true">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="com_ellipsis"
-                        v-else-if="!deviceIsPlaying(sitem)"
-                        @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
-                        draggable="true" style="cursor: move;">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="tree_li_dis" v-else>
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                    </li>
-                  </ul>
-                  <ul class="tree_sli" v-else>
-                    <li class="tree_sli_empty">暂无</li>
-                  </ul>
-                </li>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                        <!-- patrolParseDialogVisible -->
+                        <div v-if="patrolActive === 1" class="tree_li_dis" 
+                          @click="dragEndDis"
+                          @dragend="dragEndDis"
+                          draggable="true">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="com_ellipsis"
+                          v-else-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -75,12 +73,21 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div v-if="patrolActive === 1" class="show_his_dis" 
+                    @click="dragEndDis"
+                    @dragend="dragEndDis"
+                    draggable="true">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
-                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                  <div class="show_his_dis" v-else-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <!-- 视频巡逻，播放历史，拖动一条记录播放，应该是直接播放该设备的直播，不是回放 -->
+                  <div @dragstart="dragStart2($event, item, 1)" @dragend="dragEnd"
                     draggable="true" style="cursor: move;" v-else>
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playTime | fmTimestamp}}</p>
@@ -235,6 +242,10 @@ export default {
       if (sList && sList.length > 0) {
         this.$nextTick(() => {
           sList = JSON.parse(sList);
+          console.log(sList);
+          for (let i = 0; i < sList.length; i++) {
+            sList[i].record = false;
+          }
           this.videoList = sList;
         });
       }
@@ -459,6 +470,7 @@ export default {
         this.videoList.splice(index, 1, Object.assign({
           type: this.dragVideoType,
           title: this.dragActiveObj.deviceName,
+          record: true,
           video: Object.assign({}, this.dragActiveObj)
         }, op));
       }
@@ -484,24 +496,6 @@ export default {
     }
   },
   destroyed () {
-    // 播放记录
-    /* for (let i = 0; i < this.videoList.length; i++) {
-      let obj = this.videoList[i];
-      console.log('obj', obj);
-      if (obj && obj.video) {
-        apiVideoRecord({
-          deviceId: obj.video.uid, // 设备id
-          // playBackEndTime: '', // 回放结束时间
-          // playBackStartTime: '', // 回放开始时间
-          playTime: formatDate(new Date().getTime()), // 播放结束时间
-          // 播放类型 1:视频巡逻 2:视频回放
-          playType: 1
-        }).then(() => {
-        }).catch(error => {
-          console.log("apiVideoRecord error：", error);
-        });
-      }
-    } */
     if (this.patrolInval) {
       window.clearInterval(this.patrolInval);
     }
