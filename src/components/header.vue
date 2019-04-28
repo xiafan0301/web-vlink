@@ -25,6 +25,7 @@
             ref="popover"
             placement="bottom"
             width="397"
+            popper-class="vl_hd_alarm_box"
             trigger="click">
             <vue-scroll>
             <template  v-if="alarmList && alarmList.length > 0">
@@ -487,8 +488,8 @@ export default {
     }
   }
 }
-.el-popover {
-  height: 476px;
+.vl_hd_alarm_box.el-popover{
+  height: 467px;
 }
 </style>
 

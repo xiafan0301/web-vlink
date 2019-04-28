@@ -167,13 +167,20 @@
                     <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
                   </template>
                   <div class="more" v-if="item.groupNames.split(',').length >= 3">
-                    <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-                    <template v-if="showMoreId === item.uid">
-                      <div>
-                        <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                      </div>
-                      <i></i>
-                    </template>
+                    <el-popover
+                      placement="top-start"
+                      width="220"
+                      popper-class="more_popover_box"
+                      trigger="hover">
+                      <vue-scroll>
+                        <template>
+                          <div class="more_popover">
+                            <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                          </div>
+                        </template>
+                      </vue-scroll>
+                      <span slot="reference" class="more_hover">更多组</span>
+                    </el-popover>
                   </div>
                 </div>
                 <div class="data_list" v-if="item.remarks">
@@ -206,13 +213,20 @@
                       <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
                     </template>
                     <div class="more" v-if="item.groupNames.split(',').length > 1">
-                      <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-                      <template v-if="showMoreId === item.uid">
-                        <div>
-                          <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                        </div>
-                        <i></i>
-                      </template>
+                      <el-popover
+                        placement="top-start"
+                        width="220"
+                        popper-class="more_popover_box"
+                        trigger="hover">
+                        <vue-scroll>
+                          <template>
+                            <div class="more_popover">
+                              <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                            </div>
+                          </template>
+                        </vue-scroll>
+                        <span slot="reference" class="more_hover">更多组</span>
+                      </el-popover>
                     </div>
                   </template>
                 </div>
@@ -482,7 +496,6 @@ export default {
       // 侧边栏参数
       tabType: '1',
       group: null,//搜索组
-      showMoreId: null,
       // 人像库筛选参数
       libPortraitForm: {
         perTime: null,
@@ -1319,34 +1332,12 @@ export default {
             .more{
               position: relative;
               padding-top: 6px;
-              > span{
+              .more_hover{
                 margin-bottom: 10px;
                 cursor: pointer;
                 color: #0C70F8;
-              }
-              > div{
-                width: 220px;
-                padding: 20px 20px 10px;
-                position: absolute;
-                right: 72px;
-                bottom: 0;
-                background:rgba(255,255,255,1);
-                box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
-                border-radius: 5px;
-                display: flex;
-                flex-wrap: wrap;
-                > span{
-                  margin-bottom: 10px;
-                  margin-right: 2px;
-                }
-              }
-              > i{
-                position: absolute;
-                left: -8px;
-                top: 6px;
-                display: inline-block;
-                border: 6px solid transparent;
-                border-left-color: #fff;
+                border: none;
+                padding: 0;
               }
             }
           }
@@ -1403,15 +1394,9 @@ export default {
         }
       }
       .portrait_form{
-        width: 480px;
         padding-left: 30px;
       }
     }
-  }
-}
-@media (max-width: 1400px) {
-  .control_library .list_box .list_info{
-    width: 49%!important;
   }
 }
 </style>
@@ -1464,7 +1449,7 @@ export default {
     }
     .el-dialog__footer{
       text-align: right;
-      padding: 10px 90px 20px!important;
+      padding: 0 90px 20px!important;
     }
     .add_portrait .portrait_form{
       .desc{
@@ -1478,13 +1463,14 @@ export default {
         p{
           padding-right: 10px;
           text-align: right;
+          line-height: 30px;
         }
       }
       .el-form-item{
-        margin-bottom: 10px;
+        margin-bottom: 18px;
       }
       .el-button.active{
-        background: #fff;
+        background: rgb(199, 197, 197);
         border-color: #409EFF;
         color: #409EFF;
       }
@@ -1492,6 +1478,11 @@ export default {
   }
   .el-dialog__wrapper .el-dialog__body{
     padding: 0px 30px;
+  }
+}
+@media (max-width: 1400px) {
+  .control_library .list_box .list_info{
+    width: 49%!important;
   }
 }
 </style>

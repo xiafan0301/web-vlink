@@ -122,14 +122,9 @@
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
 /* 布控状态 */
-.vl_control_state{
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-image: url(../img/temp/con_state.png);
-}
-.vl_control_s{width: 120px; height: 120px; background-position: -18px -10px;}
-.vl_control_o{width: 120px; height: 120px; background-position: -18px -130px;}
-.vl_control_e{width: 120px; height: 120px; background-position: -18px -250px;}
+.vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
+.vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
+.vl_control_e{width: 120px; height: 120px; background-position: -802px -716px;}
 
 .vl_icon_control_14{width: 96px; height: 100px; background-position: -86px -570px;}
 .vl_icon_control_15{width: 96px; height: 100px; background-position: -208px -570px;}

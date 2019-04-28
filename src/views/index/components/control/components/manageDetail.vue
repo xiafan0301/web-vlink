@@ -56,7 +56,7 @@
             :total="controlDetail.objectNum">
           </el-pagination>
         </div>
-        <div :class="['vl_control_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
+        <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="controlArea(1)">
@@ -149,7 +149,7 @@
             <el-collapse-transition>
               <div class="situ_content" v-show="dpTwo">
                   <div class="situ_left">
-                    <div style="padding-left: 20px;">布控设备（12）</div>
+                    <div style="padding-left: 20px;">布控设备</div>
                     <div class="equ_m">
                       <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
                       <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
@@ -1018,13 +1018,14 @@ export default {
       }
       .manage_d_c_o{
         margin-right: 20px;
-        margin-top: 20px;
+        margin-top: 30px;
         border:1px solid rgba(242,242,242,1);
         border-radius:4px 4px 0px 0px;
         >div:nth-child(1){
           height:44px;
           line-height: 44px;
           padding-left: 20px;
+          padding-top: 10px;
           background:rgba(250,250,250,1);
           border-radius:4px 4px 0px 0px;
         }
@@ -1065,10 +1066,10 @@ export default {
           }
         }
       }
-      .vl_control_state{
+      .con_state{
         position: absolute;
-        right: 0;
-        top: 0;
+        right: -1px;
+        top: -2px;
       }
       .manage_d_c_scope{
         width:calc(100% - 20px);
@@ -1107,7 +1108,7 @@ export default {
           padding-left: 15px;
           display: flex;
           > div{
-            width: 20%;
+            width: 25%;
           }
         }
         .situ_box{

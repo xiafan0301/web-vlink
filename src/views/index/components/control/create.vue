@@ -698,7 +698,7 @@ export default {
           margin-top: 20px!important;
         }
         .period_time.one{
-          margin-top: 40px!important;
+          margin-top: 41px!important;
         }
       }
       .period_time_btn_box{ 
