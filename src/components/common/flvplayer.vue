@@ -123,6 +123,9 @@ export default {
       videoLoadingFailed: false,
       videoLoadingTimeout: 20 * 1000,
 
+      playBackList: [], // 回放资源LIST
+      playBackIndex: 0, // 回放资源索引
+
       playActive: true,
       player: null,
       video: null,
@@ -254,6 +257,7 @@ export default {
           if (res && res.data && res.data.length > 0) {
             // 为一个LIST
             this.initPlayerDo(res.data[0].liveFlvUrl);
+            this.playBackList = res.data;
           } else {
             // 未获取到视频
             console.log('未获取到视频');
@@ -291,11 +295,25 @@ export default {
         });
         this.player = flvPlayer;
         this.video = videoElement;
-
+        if (this.oData.type != 1) {
+          // 回放/录像的时候需要添加ended事件
+          console.log('回放/录像');
+          videoElement.addEventListener('ended', this.playNext, false);
+        }
         // 加载失败
         window.setTimeout(() => {
           this.videoLoadingFailed = true;
         }, this.videoLoadingTimeout);
+      }
+    },
+    // 回放/录像 播放下一个视频
+    playNext () {
+      if (this.playBackList.length > (this.playBackIndex + 1)) {
+        this.playBackIndex += 1;
+        this.destroyPlayer();
+        let _su = this.playBackList[this.playBackIndex].liveFlvUrl;
+        console.log('播放第' + (this.playBackIndex + 1) + '段视频，URL：', _su);
+        this.initPlayerDo(_su);
       }
     },
     destroyPlayer () {
@@ -304,6 +322,10 @@ export default {
         this.player.destroy();
         this.player.detachMediaElement();
         this.player = null;
+        // 回放/录像的时候需要清除ended事件
+        if (this.oData.type != 1) {
+          this.video.removeEventListener('ended', this.playNext);
+        }
       }
     },
     relaodPlayer () {
@@ -316,10 +338,16 @@ export default {
       this.playActive = flag;
       if (this.player) {
         if (flag) {
-          this.destroyPlayer();
-          this.playActive = true; // 去掉暂停按钮
-          this.config.pause = false;
-          this.initPlayer();
+          if (this.oData.type === 1) {
+            // 直播 播放的时候需要重新加载
+            this.destroyPlayer();
+            this.playActive = true; // 去掉暂停按钮
+            this.config.pause = false;
+            this.initPlayer();
+          } else {
+            // 回放/录像 播放的时候直接play
+            this.player.play();
+          }
         } else {
           this.player.pause();
         }

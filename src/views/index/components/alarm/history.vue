@@ -107,11 +107,11 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="alarm_list">
+    <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">检索结果<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
         <div class="alarm_grade_info">
-          <p :class="{'active': sortType === sort.type}" @click="changeSort(sort.type)" v-for="(sort,i) in sortList" :key="i"><span>{{sort.name}}</span>
+          <p :class="{'active': sortType === sort.type}" v-for="(sort,i) in sortList" :key="i"><span @click="changeSort(sort.type)">{{sort.name}}</span>
           <template v-if="sortType === sort.type && sortType !== 3">
             <i class="el-icon-arrow-down" v-if="sort.order === 'desc'" @click="changeOrder(sort)"></i>
             <i class="el-icon-arrow-up" v-if="sort.order === 'asc'" @click="changeOrder(sort)"></i>
@@ -285,7 +285,9 @@ export default {
         name: '视频顺序',
         order: 'asc',
       }],
-      sortOrder: 'desc',
+      sortOrderS: 'desc',
+      sortOrderT: 'desc',
+      isLoading: false,
     }
   },
   watch: {
@@ -320,12 +322,26 @@ export default {
     },
     //切换升降序
     changeOrder(sort) {
-      if(sort.order === 'desc') {
-        sort['order'] = 'asc'
+      this.mAlarmList = []
+      this.allAlarmList = []
+      if(sort.type === 1) {
+        if(sort.order === 'desc') {
+          sort['order'] = 'asc'
+          this.sortOrderS = 'asc'
+        }else {
+          sort['order'] = 'desc'
+          this.sortOrderS = 'desc'
+        }
       }else {
-        sort['order'] = 'desc'
+        if(sort.order === 'desc') {
+          sort['order'] = 'asc'
+          this.sortOrderT = 'asc'
+        }else {
+          sort['order'] = 'desc'
+          this.sortOrderT = 'desc'
+        }
       }
-      this.sortOrder = sort['order']
+      this.getNormalAlarm()
     },
     getCheckedKeys() {
       this.selectDevice = this.$refs.tree.getCheckedKeys(true);
@@ -414,6 +430,7 @@ export default {
     //告警
     getAlarm() {
       this.alarmList = [];
+      this.isLoading = true
       let params = {
         "where.startTime": formatDate(this.startTime, 'yyyy-MM-dd'),
         "where.endTime": formatDate(this.endTime, 'yyyy-MM-dd'),
@@ -442,6 +459,11 @@ export default {
           }
           this.getNormalAlarm()
         }
+        this.$nextTick(()=> {
+          this.isLoading = false
+        })
+      }).catch(()=> {
+        this.isLoading = false
       })
     },
     //降序
@@ -464,7 +486,7 @@ export default {
     getNormalAlarm() {
       let params = {}
       if(this.sortType === 1) {
-        if(this.sortOrder === 'desc') {
+        if(this.sortOrderS === 'desc') {
           this.alarmList.sort(this.compareDown("semblance"))
         }else {
           this.alarmList.sort(this.compareUp("semblance"))
@@ -480,7 +502,7 @@ export default {
                    { upTime: 22,time: 28, label: '三周之前' },
                    { upTime: 29,time: 60, label: '一个月之前' },
                    { upTime: 61,time: 90, label: '两个月之前' }]
-        if(this.sortOrder === 'desc') {
+        if(this.sortOrderT === 'desc') {
           this.alarmList.sort(this.compareDown("alarmTime"))
         }else {
           this.alarmList.sort(this.compareUp("alarmTime"))
@@ -525,7 +547,7 @@ export default {
               })
             }else {
               this.mAlarmList.push({
-                label: item.alarmTimeD,
+                label: formatDate(item.alarmTimeD, 'yyyy-MM-dd'),
                 value: item
               })
             }

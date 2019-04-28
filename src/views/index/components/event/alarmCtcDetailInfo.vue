@@ -1,15 +1,133 @@
 <template>
   <vue-scroll>
-    <div class="event-ctc-detail">
+    <div class="ctc-detail-info">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
-          <el-breadcrumb-item>查看调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item>调度详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content-box">
-        <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
+        <div class="basic_info">
+          <div class="card-info">
+            <div class="struc_c_d_qj struc_c_d_img">
+              <img :src="sturcDetail.basePortraitInfo.photoUrl" alt="布控图" v-if="sturcDetail.objType == 1">
+              <img :src="sturcDetail.vehicleInfo.vehicleImagePath" alt="布控图" v-if="sturcDetail.objType == 2">
+              <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
+              <span>布控图</span>
+            </div>
+            <div class="struc_c_d_info">
+                <h2>布控信息</h2>
+                <template v-if="sturcDetail.objType == 1">
+                <div class="struc_cdi_line control_line" v-if="sturcDetail.basePortraitInfo">
+                  <span>{{sturcDetail.basePortraitInfo.name}}</span>
+                  <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
+                  <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
+                </div>
+                <div v-if="sturcDetail.basePortraitInfo.birthDate">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.basePortraitInfo.birthDate | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.basePortraitInfo.idNo">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.basePortraitInfo.idNo}}</span><span>身份证号</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.basePortraitInfo.remarks">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.basePortraitInfo.remarks}}</span><span>备注信息</span>
+                  </div>
+                </div>
+                </template>
+                <template v-if="sturcDetail.objType == 2">
+                <div class="struc_cdi_line control_line" v-if="sturcDetail.vehicleInfo">
+                  <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
+                  <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
+                  <span v-if="sturcDetail.vehicleInfo.ownerName">{{sturcDetail.vehicleInfo.ownerName}}</span>
+                </div>
+                <div v-if="sturcDetail.vehicleInfo.ownerBirth">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.vehicleInfo.ownerBirth | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.vehicleInfo.ownerIdCard">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.vehicleInfo.ownerIdCard}}</span><span>身份证号</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.vehicleInfo.desci">
+                  <div class="struc_cdu_line control_line">
+                    <span>{{sturcDetail.vehicleInfo.desci}}</span><span>备注信息</span>
+                  </div>
+                </div>
+                </template>
+                <template v-if="sturcDetail.surveillanceInfo">
+                  <div class="control_line"><span class="left">布控编号：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceNo || '无'}}</span></div>
+                  <div class="control_line"><span class="left">布控名称：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceName || '无'}}</span></div>
+                </template>
+                <template v-if="sturcDetail.eventInfo">
+                  <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
+                  <div class="control_line"><span class="left">事件类型：</span><span class="right">{{sturcDetail.eventInfo.eventType || '无'}}</span></div>
+                  <div class="control_line"><span class="left">事件等级：</span><span class="right">{{sturcDetail.eventInfo.eventLevel || '无'}}</span></div>
+                  <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
+                </template>
+                <template v-if="!sturcDetail.eventInfo">
+                  <div class="control_line"><span class="left">事件编号：</span><span class="right">无</span></div>
+                  <div class="control_line"><span class="left">事件类型：</span><span class="right">无</span></div>
+                  <div class="control_line"><span class="left">事件等级：</span><span class="right">无</span></div>
+                  <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
+                </template>
+              </div>
+          </div>
+          <div class="card-info right-info">
+            <div class="struc_c_d_qj struc_c_d_img struc_mr">
+              <img :src="sturcDetail.snapPhoto" alt="抓拍图">
+              <span>抓拍图</span>
+            </div>
+            <div class="struc_c_d_info">
+                <h2>抓拍信息
+                  <div class="box_grade_info"> 
+                      <i class="vl_icon vl_icon_alarm_2" v-if="sturcDetail.alarmLevel == 1"></i>
+                      <i class="vl_icon vl_icon_alarm_3" v-if="sturcDetail.alarmLevel == 2"></i>
+                      <i class="vl_icon vl_icon_alarm_4" v-if="sturcDetail.alarmLevel == 3"></i>
+                      <i class="vl_icon vl_icon_alarm_5" v-if="sturcDetail.alarmLevel == 4"></i>
+                      <i class="vl_icon vl_icon_alarm_6" v-if="sturcDetail.alarmLevel == 5"></i>
+                  </div>
+                </h2>
+                <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
+                  <span>{{sturcDetail.alarmFeature.featureName}}</span>
+                </div>
+                <div v-if="sturcDetail.snapTime">
+                  <div class="struc_cdu_line">
+                    <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span><span>抓拍时间</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.devInfo">
+                  <div class="struc_cdu_line">
+                    <span>{{sturcDetail.devInfo.deviceName}}</span><span>抓拍设备</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.addressDesc">
+                  <div class="struc_cdu_line">
+                    <span>{{sturcDetail.addressDesc}}</span><span>抓拍地址</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.areaInfo">
+                  <div class="struc_cdu_line">
+                    <span>{{sturcDetail.areaInfo.cname}}</span><span>区域名称</span>
+                  </div>
+                </div>
+                <div v-if="sturcDetail.eventInfo">
+                  <div class="struc_cdu_line">
+                    <span>{{sturcDetail.eventInfo.eventCode}}</span><span>关联事件</span>
+                  </div>
+                </div>
+            </div>
+            <span>相似度</span>
+            <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
+          </div>
+        </div>
         <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
           <div class="header">
             <p class="ctc-title">调度指挥方案</p>
@@ -29,8 +147,8 @@
                 <span>任务内容：</span>
                 <span>{{item.taskContent}}</span>
               </div>
+              <div class="divide-list"></div>
             </li>
-            <div class="divide-list"></div>
           </ul>
         </div>
         <div class="judge_result">
@@ -51,38 +169,34 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="eventFile && eventFile.length > 0">
-              <p>事件总结附件</p>
-              <div class="content-icon">
-                <ul class="clearfix" style="clear:both">
-                  <li v-for="(item, index) in eventFile" :key="'item' + index">
-                    <i class="vl_icon vl_icon_event_1"></i>
-                    <div class="operation_btn">
-                      <div class="arrow"></div>
-                      <p>
-                        <i class="vl_icon vl_icon_manage_17"></i>
-                        <a :href="item.path">下载</a>
-                      </p>
-                      <p>
-                        <i class="vl_icon vl_icon_event_25"></i>
-                        <a>预览</a>
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-                <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
-              </div>
-              <div class="divide"></div>
-            </template>
-            <template v-if="basicInfo.eventSummary">
-              <p style="margin-top: 5px;">事件总结内容</p>
-              <div class="content_detail">
-                <p>
-                  {{basicInfo.eventSummary}}
-                  <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
-                </p>
-              </div>
-            </template>
+            <p>事件总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in eventFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">事件总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
         <div class="summary" v-show="basicInfo.dispatchSummary">
@@ -91,38 +205,34 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="ctcFile && ctcFile.length > 0">
-              <p>调度总结附件</p>
-              <div class="content-icon">
-                <ul class="clearfix" style="clear:both">
-                  <li v-for="(item, index) in ctcFile" :key="'item' + index">
-                    <i class="vl_icon vl_icon_event_1"></i>
-                    <div class="operation_btn">
-                      <div class="arrow"></div>
-                      <p>
-                        <i class="vl_icon vl_icon_manage_17"></i>
-                        <a :href="item.path">下载</a>
-                      </p>
-                      <p>
-                        <i class="vl_icon vl_icon_event_25"></i>
-                        <a>预览</a>
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
-              </div>
-              <div class="divide"></div>
-            </template>
-            <template v-if="basicInfo.dispatchSummary">
-              <p style="margin-top: 5px;">调度总结内容</p>
-              <div class="content_detail">
-                <p>
-                  {{basicInfo.dispatchSummary}}
-                  <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
-                </p>
-              </div>
-            </template>
+            <p>调度总结附件</p>
+            <div class="content-icon">
+              <ul class="clearfix" style="clear:both">
+                <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                  <i class="vl_icon vl_icon_event_1"></i>
+                  <div class="operation_btn">
+                    <div class="arrow"></div>
+                    <p>
+                      <i class="vl_icon vl_icon_manage_17"></i>
+                      <a :href="item.path">下载</a>
+                    </p>
+                    <p>
+                      <i class="vl_icon vl_icon_event_25"></i>
+                      <a>预览</a>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+            </div>
+            <div class="divide"></div>
+            <p style="margin-top: 5px;">调度总结内容</p>
+            <div class="content_detail">
+              <p>
+                {{basicInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+              </p>
+            </div>
           </div>
         </div>
         <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
@@ -171,7 +281,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <template v-if="$route.query.status !== 'ending'">
+        <template v-if="$route.query.status === 'ctc_ing'">
           <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
           <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
         </template>
@@ -182,7 +292,6 @@
   </vue-scroll>
 </template>
 <script>
-import EventBasic from './components/eventBasic';
 import { getEventDetail } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
@@ -208,21 +317,17 @@ export default {
     this.getDetail();
   },
   methods: {
-    // 返回
-    back () {
-      this.$router.back(-1);
-    },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id }});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType }});
     },
     // 获取事件详情
     getDetail () {
-      const eventId = this.$route.query.eventId;
+      const eventId = this.$route.query.id;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -266,11 +371,15 @@ export default {
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));
     },
+    // 返回
+    back () {
+      this.$router.back(-1);
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
-.event-ctc-detail {
+.ctc-detail-info {
   width: 100%;
   .content-box {
     width: 100%;
@@ -282,16 +391,6 @@ export default {
       background-color: #ffffff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       border-radius:4px;
-      .summary-header{
-        > span {
-          display: inline-block;
-          padding: 10px 20px;
-          color: #333333;
-          font-weight: 600;
-          font-size: 16px;
-        }
-        
-      }
       .header {
         padding: 10px 20px 0 20px;
         > p {
@@ -336,13 +435,20 @@ export default {
               }
             }
           }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
+            
+          }
+          &:last-child {
+            .divide-list {
+              display: none;
+            }
+          }
         }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
-        }
+        
       }
       .judge_result_content {
         width: 100%;
@@ -436,79 +542,8 @@ export default {
       }
       .summary-content {
         padding: 10px 20px;
-        >p {
-          color: #333333;
-          font-weight:600;
-          margin-bottom: 5px;
-        }
-        .content-icon {
-          margin: 5px 0;
-          >ul {
-            >li {
-              position: relative;
-              float: left;
-              i {
-                margin: 0 5px;
-                cursor: pointer;
-              }
-              .operation_btn {
-                display: none;
-                background-color: #ffffff;
-                box-shadow:0px 2px 8px 0px rgba(0,0,0,0.15);
-                position: absolute;
-                right: 0;
-                top: -55px;
-                z-index: 1;
-                padding: 3px 5px;
-                color: #333333;
-                font-size: 12px;
-                // position: relative;
-                .arrow {
-                  position: absolute;
-                  bottom: -5px;
-                  left: 40%;
-                  width: 0;
-                  height: 0;
-                  border-left: 6px solid transparent;
-                  border-right: 6px solid transparent;
-                  border-top: 6px solid #ffffff;
-                }
-                > p {
-                  padding: 3px;
-                  cursor: pointer;
-                  display: flex;
-                  align-items: center;
-                  a {
-                    text-decoration: none;
-                  }
-                  a:hover {
-                    color: #0C70F8;
-                  }
-                }
-              }
-              &:hover {
-                .operation_btn {
-                  display: block;
-                }
-              }
-            }
-          }
-          img {
-            width: 72px;
-            height: 72px;
-            border-radius: 4px;
-            margin: 0 5px;
-            cursor: pointer;
-          }
-        }
-        .content_detail {
-          >p{
-            text-indent: 20px;
-            .look_more {
-              color: #0C70F8;
-              cursor: pointer;
-            }
-          }
+        >p:nth-child(2) {
+          color: #000000;
         }
       }
     }

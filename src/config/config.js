@@ -7,7 +7,7 @@ const oDomains = {
     base: {
         dev: 'http://apidev.aorise.org/vlink-base',
         // dev: 'http://10.116.64.107:8081',
-        // dev: 'http://10.116.64.142:8083',
+        // dev: 'http://10.116.64.142:8082',
         // dev: 'http://10.116.66.29:8082',// 钟赞
         test: 'http://apirel.aorise.org/vlink-base',
         prod: 'http://apirel.aorise.org/vlink-base'
@@ -38,8 +38,8 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      // dev: 'http://apidev.aorise.org/vlink-event',
-      dev: 'http://10.116.64.142:8081',
+      dev: 'http://apidev.aorise.org/vlink-event',
+      // dev: 'http://10.116.64.142:8081',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apirel.aorise.org/vlink-event'
     },

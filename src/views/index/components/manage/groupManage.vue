@@ -88,7 +88,7 @@
     </div>
     <el-pagination
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -106,7 +106,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteUserGroup">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteUserGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--新增用户组弹出框-->
@@ -126,7 +126,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelAdd('userForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addUserGroup('userForm')">保存</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addUserGroup('userForm')">保存</el-button>
       </div>
     </el-dialog>
     <!--编辑用户组弹出框-->
@@ -146,7 +146,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('userForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserGroups('userForm')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editUserGroups('userForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--管理成员弹出框-->
@@ -312,6 +312,9 @@ export default {
       delGroupId: null, // 要删除用户组的id
       selectGroupData: {}, // 要查看的组成员数据
       storageInfo: {}, // 存储的用户信息
+      isAddLoading: false, // 新增组加载中
+      isEditLoading: false, // 编辑组加载中
+      isDeleteLoading: false, // 删除组加载中
     }
   },
   created () {
@@ -428,6 +431,7 @@ export default {
       })
     },
     handleAddGroup (obj) {
+      this.isAddLoading = true;
       createUserGroups(obj)
         .then(res => {
           if (res) {
@@ -435,18 +439,20 @@ export default {
               type: 'success',
               message: '添加成功',
               customClass: 'request_tip'
-            })
+            });
             this.addUserGroupDialog = false;
             this.getList();
+            this.isAddLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '添加失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 取消添加
     cancelAdd (form) {
@@ -462,10 +468,11 @@ export default {
     // 删除用户组
     deleteUserGroup () {
       if (this.delGroupId) {
+        this.isDeleteLoading = true;
         const params = {
           uid: this.delGroupId,
           proKey: this.storageInfo.proKey
-        }
+        };
         delUserGroup(params)
           .then(res => {
             if (res) {
@@ -473,18 +480,20 @@ export default {
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
               this.delUserGroupDialog = false;
               this.getList();
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示管理成员弹出框
@@ -730,11 +739,12 @@ export default {
       })
     },
     handleEditGroups () {
+      this.isEditLoading = true;
       const params = {
         proKey: this.storageInfo.proKey,
         uid: this.editGroupId,
         groupName: this.userForm.groupName
-      }
+      };
       updateUserGroups(params)
         .then(res => {
           if (res) {
@@ -742,18 +752,20 @@ export default {
               type: 'success',
               message: '修改成功',
               customClass: 'request_tip'
-            })
+            });
             this.editUserGroupDialog = false;
+            this.isEditLoading = false;
             this.getList();
           } else {
             this.$message({
               type: 'error',
               message: '修改失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isEditLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isEditLoading = false;})
     },
     // 取消编辑
     cancelEdit (form) {

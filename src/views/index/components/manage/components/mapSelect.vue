@@ -180,9 +180,9 @@ export default {
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
-        let hoverWindow = null;
+        // let hoverWindow = null;
         let unCheckDevice = []; // 没有在多边形中的设备--没有选中的设备
-        let currDeviceList = [];
+        // let currDeviceList = [];
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -219,7 +219,7 @@ export default {
       let _this = this;
       let checkKkList = [], checkSxtList = [];
       // console.log('currrent', unCheckList)
-      unCheckList && unCheckList.map((item, index) => {
+      unCheckList && unCheckList.map((item) => {
         if (item.type === 1) {
           _this.sxtList.map(itm => {
             if (item.uid !== itm.uid) {
