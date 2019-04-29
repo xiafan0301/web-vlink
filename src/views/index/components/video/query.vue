@@ -4,7 +4,7 @@
       <div class="show_menu_t" @click="showMenuActive = !showMenuActive">{{ showMenuActive ? '收起监控列表' : '展开监控列表' }}<i class="el-icon-caret-bottom"></i></div>
       <div class="show_menu_b">
         <div>
-          <ul class="show_title">
+          <ul class="show_title show_title_2">
             <li class="show_title_li" :class="{'show_title_active': showConTitle === 1}" @click="showConTitle = 1">视频直播</li>
             <li class="show_title_li" :class="{'show_title_active': showConTitle === 2}" @click="showConTitle = 2">视频回放</li>
             <li class="show_title_line" :class="{'show_title_line2': showConTitle === 2}"></li>
@@ -34,11 +34,11 @@
             <div class="show_list">
               <!-- 直播列表 -->
               <ul class="show_list_c show_tree" id="videoListTree">
-                <template v-if="deviceList && deviceList.length > 0">
-                  <li v-for="(item, index) in deviceList" :key="'tree_' + index">
+                <template v-if="deviceList && deviceList.areaTreeList && deviceList.areaTreeList.length > 0">
+                  <li v-for="(item, index) in deviceList.areaTreeList" :key="'tree_' + index">
                     <div>
                       <div class="tree_title">
-                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
                       </div>
                     </div>
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
@@ -112,11 +112,11 @@
             <div class="show_list" style="padding-top: 152px;">
               <!-- 回放列表 -->
               <ul class="show_list_c show_tree" id="videoListTree2">
-                <template v-if="deviceList2 && deviceList2.length > 0">  
-                  <li v-for="(item, index) in deviceList2" :key="'tree_' + index">
+                <template v-if="deviceList2 && deviceList2.areaTreeList && deviceList2.areaTreeList.length > 0">  
+                  <li v-for="(item, index) in deviceList2.areaTreeList" :key="'tree_' + index">
                     <div>
                       <div class="tree_title">
-                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
                       </div>
                     </div>
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
@@ -175,11 +175,11 @@
   </div>
 </template>
 <script>
+import {mapXupuxian} from '@/config/config.js';
 import {videoTree} from '@/utils/video.tree.js';
-import { dateOrigin, formatDate } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import { apiDeviceList } from "@/views/index/api/api.video.js";
+import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
 export default {
   components: {videoEmpty, flvplayer},
   data () {
@@ -233,9 +233,20 @@ export default {
   created () {
     // window.localStorage.getItem(name);
     let sType = window.localStorage.getItem('vlink_video_patrol_type3');
+    let sList = window.localStorage.getItem('vlink_video_patrol_list3');
     if (sType && sType.length > 0) {
       sType = Number(sType);
       this.showVideoTotal = sType;
+      if (sList && sList.length > 0) {
+        this.$nextTick(() => {
+          sList = JSON.parse(sList);
+          // console.log(sList);
+          for (let i = 0; i < sList.length; i++) {
+            sList[i].record = false;
+          }
+          this.videoList = sList;
+        });
+      }
     } else {
       // 第一次打开
       this.showMenuActive = true;
@@ -278,8 +289,8 @@ export default {
 
     /* 监控列表 */
     getDeviceList (type) {
-      apiDeviceList({
-        // id: sui.uid,
+      apiAreaServiceDeviceList({
+        areaUid: mapXupuxian.adcode,
         likeKey: type === 1 ? this.searchVal : (type === 2 ? this.searchVal2 : '')
       }).then(res => {
         if (res && res.data) {
@@ -330,7 +341,14 @@ export default {
     },
     // 缓存播放列表
     saveVideoList () {
+      // console.log(this.videoList);
       window.localStorage.setItem('vlink_video_patrol_type3', JSON.stringify(this.showVideoTotal));
+      for (let i = 0; i < this.videoList.length; i++) {
+        if (this.videoList[i] && this.videoList[i].type != 1) {
+          this.videoList[i] = {};
+        }
+      }
+      window.localStorage.setItem('vlink_video_patrol_list3', JSON.stringify(this.videoList));
     },
     unloadSave () {
       this.saveVideoList();
@@ -378,7 +396,6 @@ export default {
      * @param {string} sid 视频ID
      */
     playerClose (iIndex) {
-      console.log('playerClose' + iIndex);
       this.videoList.splice(iIndex, 1, {});
     },
     /* 播放器事件 end */

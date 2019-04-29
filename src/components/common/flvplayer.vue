@@ -161,7 +161,7 @@ export default {
           { required: true, message: '请选择标记内容', trigger: 'change' }
         ],
         addSignContent: [
-          { required: true, message: '请填写标记内容', trigger: 'change' }
+          { required: true, message: '请填写标记内容', trigger: 'blur' }
         ]
       },
       signSubmitLoading: false
@@ -258,7 +258,7 @@ export default {
           if (res && res.data && res.data.length > 0) {
             // 为一个LIST
             if (res.data.length >= (this.playBackIndex + 1)) {
-              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', _su);
+              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
               this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
               this.playBackList = res.data;
             } else {

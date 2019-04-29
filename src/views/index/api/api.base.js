@@ -12,3 +12,14 @@ export const apiDeviceTotalList = () => {
     mode: baseModeName
   })
 }
+/**
+ * 通过区域编码查询区域设备列表
+ */
+export const apiAreaServiceDeviceList = (data) => {
+  return request({
+    url: '/area-service/device-list',
+    method: 'get',
+    params: data,
+    mode: baseModeName
+  })
+}
