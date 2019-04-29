@@ -497,7 +497,7 @@ export default {
           apiVideoSign({
             contentId: this.signForm.content,
             deviceId: this.oData.video.uid,
-            signTime: formatDate(this.signForm.signTime - 1000 * 60 * 60 * 24),
+            signTime: formatDate(this.signForm.signTime),
           }).then((data) => {
             if (data) {
               this.signSubmitLoading = false;
