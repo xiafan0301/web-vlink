@@ -76,6 +76,7 @@
             ref="popover"
             placement="bottom"
             width="397"
+            popper-class="vl_hd_alarm_box"
             trigger="click">
             <vue-scroll>
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">

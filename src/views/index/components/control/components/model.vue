@@ -1254,7 +1254,10 @@ export default {
       } else {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
+            console.log(result.tips, 'result.tips')
             cb(result.tips);
+          } else {
+            cb([]);
           }
         })
       }

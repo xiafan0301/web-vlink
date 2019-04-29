@@ -43,16 +43,23 @@
               <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
             </template>
             <div class="more" v-if="item.groupNames.split(',').length >= 3">
-              <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-              <template v-if="showMoreId === item.uid">
-                <div>
-                  <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                </div>
-                <i></i>
-              </template>
+              <el-popover
+                placement="top-start"
+                width="220"
+                popper-class="more_popover_box"
+                trigger="hover">
+                <vue-scroll>
+                  <template>
+                    <div class="more_popover">
+                      <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                    </div>
+                  </template>
+                </vue-scroll>
+                <span slot="reference" class="more_hover">更多组</span>
+              </el-popover>
             </div>
           </div>
-          <div class="data_list">
+          <div class="data_list" v-if="item.remarks">
             <span>{{item.remarks}}</span>
           </div>
         </div>
@@ -63,7 +70,7 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="protraitMemberList.pageSzie"
+          :page-size="protraitMemberList.pageSize"
           layout="total, prev, pager, next, jumper"
           :total="protraitMemberList.total">
         </el-pagination>

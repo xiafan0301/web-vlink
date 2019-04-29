@@ -67,7 +67,7 @@
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
                 <i class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
@@ -80,7 +80,7 @@
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
                 <i class="el-icon-delete" style="cursor: not-allowed;" title="播放中，无法删除"></i>
               </div>
               <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
@@ -197,10 +197,15 @@ export default {
     },
     dragDrop (item, index) {
       if (this.dragActiveObj) {
+        let _endTime = this.dragActiveObj.signTime + 1000 * 60 * 60 * 24;
+        if (_endTime > new Date().getTime()) {
+          _endTime = new Date().getTime();
+        }
         this.videoList.splice(index, 1, {
           type: 2, // 标记，暂定为回放
           title: this.dragActiveObj.deviceName,
           startTime: this.dragActiveObj.signTime,
+          endTime: _endTime,
           video: Object.assign({}, this.dragActiveObj, {
             uid: this.dragActiveObj.deviceUid
           })
