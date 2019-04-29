@@ -280,6 +280,10 @@ export default {
       selectedOptions: [],    
       searchLoading: false,
       pickerOptions2: {
+        disabledDate: (time) => {
+          console.log("-------------",time.getTime(),new Date().getTime())
+          return time.getTime() > new Date().getTime()
+        },
         shortcuts: [
           {
             text: '今天',
@@ -322,7 +326,7 @@ export default {
               picker.$emit('pick', [start, end]);
             }
           }
-        ]
+        ],
       },
       charts: {
         chart1: null,
@@ -382,6 +386,7 @@ export default {
         if(res.data) {
           let _statsData1 = []
           let _statsData2 = []
+          let total = []
           this.almAreaList = res.data.almAreaList
           if(res.data.almCountList && res.data.almCountList.length > 0) {
             for (let item of res.data.almCountList) {
@@ -403,6 +408,27 @@ export default {
                  percent: item.count/total
                })
             }
+          }
+          if(res.data.almAreaList && res.data.almAreaList.length > 0) {
+            let tLevel1Count = 0, tLevel2Count = 0,tLevel3Count = 0,tLevel4Count = 0,tLevel5Count = 0,tLevelTotal = 0
+            for (let item of res.data.almAreaList) {
+               tLevel1Count += item.level1Count
+               tLevel2Count += item.level2Count
+               tLevel3Count += item.level3Count
+               tLevel4Count += item.level4Count
+               tLevel5Count += item.level5Count
+               tLevelTotal += item.levelTotal
+            }
+            this.almAreaList.unshift({
+              areaName: '总计',
+              level1Count: tLevel1Count,
+              level2Count: tLevel2Count,
+              level3Count: tLevel3Count,
+              level4Count: tLevel4Count,
+              level5Count: tLevel5Count,
+              levelTotal: tLevelTotal,
+            })
+            console.log("-------------",this.almAreaList)
           }
           console.log("=======",_statsData2)
           this.setStats1(_statsData1);
@@ -453,9 +479,14 @@ export default {
           type: 'y'
         }
       });
-      chart.scale('value', {
-        range: [ 0, 1 ],
-        min: 0
+      chart.scale({
+        value: {
+          range: [ 0, 1 ],
+          min: 0,
+        },
+        year: {
+          tickCount: 4,
+        }
       });
       chart.legend(false);
       chart.area().position('year*value')
@@ -522,7 +553,7 @@ export default {
         offsetX: -11 * 12,
         itemGap: 20, // 图例项之间的间距
         useHtml: true,
-        containerTpl: '<div class="g2-legend e_stat_tb_ld1 as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
+        containerTpl: '<div class="g2-legend e_stat_tb_ld1 e_stat_tb_ld_alarm as-trans50-t" style="position:absolute;top:20px;right:60px;width:auto;">' +
         '<ul class="g2-legend-list" style="list-style-type:none;margin:0;padding:0;"></ul>' +
         '</div>',
         itemTpl: (value, color, checked, index) => {
@@ -542,7 +573,7 @@ export default {
       chart.intervalStack().position('percent')
         .color('item', this.colors[0])
         .label('percent', {
-          offset: -40,
+          offset: -10,
           // autoRotate: false,
           /* textStyle: {
             rotate: 0,
@@ -633,3 +664,11 @@ export default {
   }
 }
 </style>
+<style lang="scss">
+.e_stat_tb_ld_alarm {
+  left: 83% !important;
+  right: auto !important;
+}
+</style>
+
+
