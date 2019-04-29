@@ -290,7 +290,8 @@ export default {
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
-        flvPlayer.play().then(() => {
+        /* flvPlayer.play().then(() => {
+          console.log('>>>>>>>>>>>>>>>>>>>>>>> flvPlayer.play then');
           this.videoLoading = false;
           this.videoLoadingFailed = false;
           if (this.config.pause) {
@@ -298,9 +299,66 @@ export default {
             flvPlayer.pause();
           }
           this.startPlayTime = new Date().getTime();
-        });
+        }); */
+        flvPlayer.play();
+        // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
+        videoElement.onplaying = () => {
+          // console.log('真正处于播放的状态，这个时候我们才是真正的在观看视频。');
+          this.videoLoading = false;
+          this.videoLoadingFailed = false;
+          if (this.config.pause) {
+            this.playActive = false;
+            flvPlayer.pause();
+          }
+          this.startPlayTime = new Date().getTime();
+        };
+        videoElement.onerror = () => {
+          this.videoLoadingFailed = true;
+          console.log('player video error: ', videoElement.error);
+        };
+        /* videoElement.oncanplay = function () {
+          console.log('视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待');
+        } */
+        // onloadstart  客户端开始请求数据
+        // onratechange  //播放速率改变
+        // onseeked 寻找完毕
+        // onplay 开始播放时触发
+        // onwaiting 播放由于下一帧数据未获取到导致播放停止，但是播放器没有主动预期其停止，仍然在努力的获取数据，简单的说就是在等待下一帧视频数据，暂时还无法播放。
+        // onplaying 真正处于播放的状态，这个时候我们才是真正的在观看视频。 
+        // oncanplay 视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待。
+        // onpause 暂停播放时触发
+        // onended 播放结束 loop 的情况下不会触发
+        // onloadedmetadata 获取视频meta信息完毕，这个时候播放器已经获取到了视频时长和视频资源的文件大小。 
+        // onloadeddata 视频播放器第一次完成了当前播放位置的视频渲染。
+        // onabort 客户端主动终止下载（不是因为错误引起）
+        // onerror 请求数据时遇到错误
+        // 1.用户终止 2.网络错误 3.解码错误 4.URL无效
+        // alert(myVid.error.code);
+        //客户端请求数据
+       /*  myVid.onprogress=function(){
+
+          console.log(`客户端正在请求数据 触发多次，是分段请求的`);
+          console.log(myVid.buffered);
+          //0.此元素未初始化  1.正常但没有使用网络  2.正在下载数据  3.没有找到资源
+          console.log(`networkState ${myVid.networkState}`);
+          //  //当前播放的位置，赋值可改变位置 myVid.currentTime = 11 从11秒位置开始播放
+          console.log(myVid.currentTime);
+          // //返回当前资源的URL
+          console.log(myVid.currentSrc);
+
+          console.log(myVid.videoWidth);
+          //播放结束 返回true 或 false
+          console.log(myVid.ended);
+          //音量大小 为0-1 之间的值
+          console.log(myVid.volume);
+          //当前资源长度
+          console.log(myVid.duration);
+          console.log(myVid.startDate)
+          // myVid.currentTime = 11 */
+
         this.player = flvPlayer;
         this.video = videoElement;
+
         if (this.oData.type != 1) {
           // 回放/录像的时候需要添加ended事件
           videoElement.addEventListener('ended', this.playNext, false);
@@ -389,8 +447,8 @@ export default {
           // e.pageX/e.pageY 相对于窗口左上角
           startX = Math.floor(e.pageX);
           startY = Math.floor(e.pageY);
-          console.log('startX:', startX);
-          console.log('startY:', startY);
+          // console.log('startX:', startX);
+          // console.log('startY:', startY);
           // 在页面创建 box
           let nBox = $('<div>', {
             id: boxId,

@@ -70,8 +70,8 @@
               </template>
               <template v-if="sturcDetail.eventInfo">
                 <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ dicFormater( 20, sturcDetail.eventInfo.eventType) || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ dicFormater( 2, sturcDetail.eventInfo.eventLevel) || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ sturcDetail.eventInfo.eventType ? dicFormater( eventType, sturcDetail.eventInfo.eventType) :'无'}}</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ sturcDetail.eventInfo.eventLevel ? dicFormater( eventLevel, sturcDetail.eventInfo.eventLevel) : '无'}}</span></div>
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
               </template>
               <template v-if="!sturcDetail.eventInfo">
@@ -264,6 +264,7 @@
 import { addTaskInfo, getPlanData } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
+import { dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -285,7 +286,9 @@ export default {
         type: '',     //今日告警或历史告警
         detailUrl: '',    //告警详情地址
         sturcDetail: {},
-        isLoading: false
+        isLoading: false,
+        eventType: dataList.eventType,
+        eventLevel: dataList.eventLevel,
     }
   },
   created () {
@@ -315,6 +318,14 @@ export default {
         .then((res) => {
           if (res && res.data.list) {
             this.planList = res.data.list;
+            for(let item of this.planList) {
+              let planLevelName = []
+              let levelList = [...item.levelList]
+              if(levelList && levelList.length > 0) {
+                planLevelName = levelList.map(data => data.planLevelName)
+              }
+              item['levelNameList'] = planLevelName
+            }
           }
         })
         .catch(() => {});

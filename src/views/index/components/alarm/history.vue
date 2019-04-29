@@ -142,7 +142,7 @@
             <div class="list_con_info">
               <div>{{item.surveillanceName}}</div>
               <div>
-                <span>{{item.devName}}</span>
+                <span>{{item.devName}}</span>&nbsp;
                 <span>{{item.snapTime}}</span>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default {
       startDateOpt: {
         disabledDate: (time) => {
           if(this.endTime) {
-            return time.getTime() >= this.endTime || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            return time.getTime() > this.endTime || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
           }else {
             return time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 || time.getTime() > new Date().getTime()
           } 
@@ -265,7 +265,7 @@ export default {
       endDateOpt: {
         disabledDate: (time) => {
           if(this.startTime) {
-            return time.getTime() <= this.startTime || time.getTime() > new Date().getTime()
+            return time.getTime() < this.startTime || time.getTime() > new Date().getTime()
           }else {
             return time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 || time.getTime() > new Date().getTime()
           }
@@ -434,9 +434,11 @@ export default {
       let params = {
         "where.startTime": formatDate(this.startTime, 'yyyy-MM-dd'),
         "where.endTime": formatDate(this.endTime, 'yyyy-MM-dd'),
-        "where.sortType": this.sortType
+        "where.sortType": this.sortType,
+        pageNum: -1,
+        pageSize: 0
       };
-      (this.selectDevice && this.selectDevice.length > 0) && (params['where.areaIds'] = this.selectDevice.join());
+      (this.selectDevice && this.selectDevice.length > 0) && (params['where.devIds'] = this.selectDevice.join());
       (this.selectControl && this.selectControl.length > 0) && (params['where.groupIds'] = this.selectControl.join());
       this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
       this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
@@ -525,7 +527,6 @@ export default {
               value: item
             }) 
           }else if(params.lSemblance <= item.semblance && item.semblance < params.rSemblance){
-            alert(item.semblance)
             this.mAlarmList.push({
               label: '相似度' + params.lSemblance + '-' + params.rSemblance,
               value: item

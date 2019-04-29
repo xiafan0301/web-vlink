@@ -21,49 +21,28 @@
             ref="popoverTask"
             placement="bottom"
             width="378"
-            trigger="click">
+            trigger="click"
+            popper-class="task_popover">
             <vue-scroll>
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
-            <div class="vl_t_b_header">
-              <p :class="{active: type === 1}" @click="changeTab(1)">未读<span>(15)</span></p>
-              <p :class="{active: type === 2}" @click="changeTab(2)">已读<span>(15)</span></p>
-              <p><span>全部标记为已读</span></p>
+            <div class="vl_info vl_t_b_header">
+              <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
+              <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p>
+              <p class="h_menu"><span>全部标记为已读</span></p>
             </div>
-            <ul>
-              <li></li>
+            <ul class="vl_t_b_content">
+              <li class="vl_info vl_t_b_list" v-for="(item,index) in 6" :key="index">
+                  <div class="col_content"><i class="vl_icon vl_icon_alarm_2"></i></div>
+                  <div class="col_content">
+                    <h2>调度指挥调度指挥调度指挥调度指挥调度指挥调度指挥</h2>
+                    <p>公告标题，最多显示一行文字，多出...显示内容最多显示两行，超出到详情查看页面。</p>
+                  </div>
+                  <div class="col_content">2018-11-29 14:28</div>
+              </li>
             </ul>
-            <!-- <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index">
-              <div class="hd_alarm_t">
-                <div>
-                  <h1>{{item.surveillanceName}}</h1>
-                  <p>{{item.devName}}</p>
-                  <p>{{item.snapTime}}</p>
-                </div>
-                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
-                <div>
-                  <span>{{item.semblance}}</span>
-                  <p>匹配度</p>
-                  <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
-                </div>
-                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
-              </div>
-              <div class="hd_alarm_b">
-                <template v-if="item.objType == 1">
-                  <div class="alarm_b_list">{{item.name}}</div>
-                  <div class="alarm_b_list">{{item.sex}}</div>
-                  <div class="alarm_b_list">{{item.nation}}</div>
-                </template>
-                <template v-if="item.objType == 2">
-                  <div class="alarm_b_list">{{item.vehicleNumber}}</div>
-                  <div class="alarm_b_list">{{item.numberColor}}</div>
-                  <div class="alarm_b_list">{{item.vehicleType}}</div>
-                </template>
-                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
-              </div>
-            </div>
             <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
-            </div> -->
+              <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
+            </div>
             </div>
             </vue-scroll>
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
@@ -76,11 +55,11 @@
             ref="popover"
             placement="bottom"
             width="397"
-            popper-class="vl_hd_alarm_box"
-            trigger="click">
+            trigger="click"
+            popper-class="alarm_popover">
             <vue-scroll>
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
-            <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index">
+            <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
                 <div>
                   <h1>{{item.surveillanceName}}</h1>
@@ -346,12 +325,26 @@ export default {
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
           this.alarmList = [...res.data.list]
+          for(let item of this.alarmList) {
+            let alarmTimeD = formatDate(item.alarmTime, 'yyyy-MM-dd')
+            item['alarmTimeD'] = new Date(alarmTimeD).getTime()
+          }
           this.sums.events = res.data.total;
         }
       })
     },
     changeTab(type) {
       this.type = type
+    },
+    goSkipDetail(item) {
+      console.log("----------",item)
+      let nowTime = formatDate(new Date(), 'yyyy-MM-dd')
+      let newTime = new Date(nowTime).getTime()
+      if(item.alarmTimeD == newTime) {
+        this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
+      }else {
+        this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
+      }
     }
   }
 }
@@ -477,6 +470,7 @@ export default {
   .vl_hd_alarm{
     padding: 10px 22px;
     border-bottom: 1px solid #F2F2F2;
+    cursor: pointer;
     .hd_alarm_t{
       display: flex;
       justify-content: space-between;
@@ -553,13 +547,15 @@ export default {
   max-height: 456px;
   padding: 0 30px;
   .vl_t_b_header {
+    height: 48px;
+    line-height: 48px;
+  }
+  .vl_info {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
-    height: 48px;
-    line-height: 48px;
     border-bottom: 1px solid #F2F2F2;
-    p {
+    .h_menu {
       color: #333333;
       font-size: 16px;
       cursor: pointer;
@@ -582,11 +578,60 @@ export default {
         color: #0C70F8;
       }
     }
+    .col_content {
+        &:nth-child(1) {
+          width: 7%;
+        }
+        &:nth-child(2) {
+          width: 60%;
+          padding-left: 10px;
+          padding-right: 10px;
+          h2 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1; //行数
+            -webkit-box-orient: vertical;
+            color: #333;
+            font-size: 14px;
+            line-height: 24px;
+            margin-bottom: 4px;
+          }
+          p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; //行数
+            -webkit-box-orient: vertical;
+            color: #999;
+            font-size: 12px;
+          }
+        }
+        &:nth-child(3) {
+          width: 33%;
+          font-size: 10px;
+          color: #656565;
+          text-align: right;
+          line-height: 24px;
+        }
+      }
+  }
+  .vl_t_b_list {
+      padding-top: 18px;
+      height: 85px;
   }
 }
-.el-popover {
+.task_popover {
   max-height: 476px;
   padding: 12px 0;
 }
+.alarm_popover {
+  max-height: 476px;
+  padding: 12px 0;
+}
+/* .el-popover {
+  max-height: 476px;
+  padding: 12px 0;
+} */
 </style>
 
