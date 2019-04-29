@@ -122,14 +122,9 @@
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
 /* 布控状态 */
-.vl_control_state{
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-image: url(../img/temp/con_state.png);
-}
-.vl_control_s{width: 120px; height: 120px; background-position: -18px -10px;}
-.vl_control_o{width: 120px; height: 120px; background-position: -18px -130px;}
-.vl_control_e{width: 120px; height: 120px; background-position: -18px -250px;}
+.vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
+.vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
+.vl_control_e{width: 120px; height: 120px; background-position: -802px -716px;}
 
 .vl_icon_control_14{width: 96px; height: 100px; background-position: -86px -570px;}
 .vl_icon_control_15{width: 96px; height: 100px; background-position: -208px -570px;}
@@ -157,6 +152,7 @@
 .vl_icon_control_37{width: 48px; height: 70px; background-position: -320px -260px;}
 .vl_icon_control_38{width: 24px; height: 48px; background-position: -473px -1520px;}
 .vl_icon_control_39{width: 24px; height: 48px; background-position: -527px -260px;}
+.vl_icon_control_40{width: 18px; height: 18px; background-position: -712px -530px;}
 /**消息图标***/
 .vl_icon_message_1{width: 20px; height: 20px; background-position: -278px -992px;}
 .vl_icon_message_2{width: 20px; height: 20px; background-position: -323px -990px;}

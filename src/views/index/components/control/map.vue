@@ -322,16 +322,23 @@ export default {
     },
     // 获得设备报警列表
     getAlarmListByDev () {
+      let devList = this.devicesList.map(m => m.uid);
+      devList = Array.from(new Set(devList));
+      let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
+      surveillanceList = surveillanceList.join(',').split(',');
+      surveillanceList = Array.from(new Set(surveillanceList));
       const params = {
-        deviceIds: this.devicesList.map(m => m.uid).join(','),
-        surveillanceIds: this.devicesList.map(m => m.surveillanceIds).join(',')
-      }
+        deviceIds: devList.join(','),
+        surveillanceIds: surveillanceList.join(','),
+        interval: 60
+      } 
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           this.markerAlarmList.forEach(dev => {
-            const timeDifference = res.timestamp - new Date(dev.snapTime).getTime();
-            if (timeDifference > 10000 || timeDifference <= 0) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
+            // const timeDifference = res.timestamp - new Date(dev.snapTime).getTime();
+            // console.log(timeDifference, 'timeDifference')
+            // if (timeDifference > 600000 || timeDifference <= 0) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
             this.$nextTick(() => {
@@ -463,7 +470,11 @@ export default {
                 <div class="vl_map_obj_img">
                   <div class="vl_map_obj_box">`;
                   for (let item of _this.controlObjList.objectList) {
-                    vlMapObj += `<div><img src="${item.photoUrl}"><p title="${item.name}">${item.name}</p></div>`;
+                    vlMapObj += `<div><img src="${item.photoUrl}">`;
+                    if (item.name) {
+                      vlMapObj += `<p title="${item.name}">${item.name}</p>`;
+                    }
+                    vlMapObj += `</div>`;
                   }
                   vlMapObj += `</div>
                 </div>
@@ -616,7 +627,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if ((slide.width() + slideMarginLeft) >= 380) {
-              slide.animate({marginLeft: '-=80px'}, 1000, function () {
+              slide.animate({marginLeft: '-=80px'}, 300, function () {
                 offbtnStatusLfet = false;
               });
             } else {
@@ -635,7 +646,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if (slideMarginLeft < 0) {
-              slide.animate({marginLeft: '+=80px'}, 1000,function () {
+              slide.animate({marginLeft: '+=80px'}, 300,function () {
                 offbtnStatusRight = false;
               });
             } else {
@@ -744,10 +755,10 @@ export default {
           return;
         }
         _this.getAlarmListByDev();
-        // 12s重新加载一次
+        // 10s重新加载一次
         _this.timer = setInterval(() => {
           _this.getAlarmListByDev();
-        }, 12000);
+        }, 10050);
         // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
         _this.$once('hook:beforeDestroy', () => {
           clearInterval(_this.timer);

@@ -150,6 +150,9 @@
               show-overflow-tooltip
               min-width="100px"
               >
+              <template slot-scope="scope">
+                {{scope.row.eventCode ? scope.row.eventCode : '--'}}
+              </template>
             </el-table-column>
             <el-table-column
               label="告警级别"
@@ -193,7 +196,7 @@
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
-          :page-size="manageList.pageSzie"
+          :page-size="manageList.pageSize"
           layout="total, prev, pager, next, jumper"
           :total="manageList.total">
         </el-pagination>
@@ -213,8 +216,7 @@ import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
-export default {
+import {getDiciData} from '@/views/index/api/api.js';export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
     return {
@@ -229,6 +231,14 @@ export default {
         controlObj: null,
         facilityId: null
       },
+      lastManageForm: {
+        type: null,
+        state: null,
+        rank: null,
+        time: null,
+        controlObj: null,
+        facilityId: null
+      },//用来记录之前的搜索参数，对比是否需要置为第一页
       loading: false,
       controlObjList: [],//布控对象列表
       facilityNameList: [],//设备列表
@@ -246,7 +256,7 @@ export default {
       manageList: [],
       // 翻页数据
       currentPage: 1,
-      pageSzie: 10,
+      pageSize: 10,
       pageNum: 1,
       controlId: null,//布控id
     }
@@ -320,7 +330,7 @@ export default {
         if (res && res.data) {
           this.controlObjList = res.data.map(m => {
             return {
-              value: m.uid,
+              value: m.objId,
               label: m.name,
               type: m.objType
             }
@@ -348,8 +358,23 @@ export default {
     getControlList () {
       console.log(11111)
       this.pageType = 1;//在布控详情页里删除布控，需要跳转到布控列表页
+      // 删除参数有变化时，当前置为第一页
+      const arr = Object.values(this.manageForm);
+      const lastArr = Object.values(this.lastManageForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastManageForm = Object.assign({}, this.manageForm);
       const params = {
-        pageSzie: this.pageSzie,
+        pageSize: this.pageSize,
         pageNum: this.pageNum,
         orderBy: null,
         order: null,
@@ -377,7 +402,6 @@ export default {
 <style lang="scss" scoped>
 .control_manage{
   width: 100%;
-  height: 100%;
   padding: 20px;
   .control_manage_box{
     width: 100%;
