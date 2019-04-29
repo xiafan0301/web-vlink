@@ -90,13 +90,13 @@
     <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">今日告警<span v-if="alarmList">({{total}})</span></div>
       <div class="alarm_grade">
-       <!--  <div class="alarm_grade_info" v-if="isSeen">
-          <i class="vl_icon vl_icon_alarm_2"></i>
+        <div class="alarm_grade_info" v-if="isSeen">
+          <!-- <i class="vl_icon vl_icon_alarm_2"></i>
           <i class="vl_icon vl_icon_alarm_3"></i>
           <i class="vl_icon vl_icon_alarm_4"></i>
           <i class="vl_icon vl_icon_alarm_5"></i>
-          <i class="vl_icon vl_icon_alarm_6"></i>
-        </div> -->
+          <i class="vl_icon vl_icon_alarm_6"></i> -->
+        </div>
       </div>
       <div class="list_content">
         <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
