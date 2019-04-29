@@ -1,5 +1,5 @@
 <template>
-  <div class="alarm-dialog">
+  <div class="alarm_dialog">
     <!--详情弹窗-->
     <vue-scroll>
     <div class="breadcrumb_heaer">
@@ -143,7 +143,19 @@
           <div class="alarm_btn">
             <a class="cancel_btn" @click="back">返回</a>
             <a class="cancel_btn" @click="cancel(sturcDetail.uid)">撤销告警</a>
-            <a class="operate_btn" @click="spinToCtc(sturcDetail)">调度指挥</a>
+            <a class="operate_btn" @click="spinToCtc(sturcDetail)">
+              <template v-if="sturcDetail.eventInfo">
+                  <template v-if="sturcDetail.eventInfo.taskList">
+                     再次调度
+                  </template>
+                  <template v-else>
+                     调度指挥
+                  </template>
+              </template>
+              <template v-else>
+                  调度指挥
+              </template>
+            </a>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -247,13 +259,15 @@ export default {
         this.startTime = formatDate(new Date(), 'yyyy-MM-dd')
         this.endTime = formatDate(new Date(), 'yyyy-MM-dd')
       }else {
-        this.startTime = this.$route.query.startTime
-        this.endTime = this.$route.query.endTime
+        this.startTime = formatDate(new Date().getTime() - 3600 * 1000 * 24 * 90, 'yyyy-MM-dd'),
+        this.endTime = formatDate(new Date(), 'yyyy-MM-dd')
       }
       let params = {
         "where.startTime": this.startTime,
         "where.endTime": this.endTime,
-        "where.sortType": 2
+        "where.sortType": 2,
+        pageNum:-1,
+        pageSize: 0,
       };
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
@@ -354,6 +368,11 @@ export default {
         this.$emit("isLoading", true)
         this.$message.success('撤销告警成功！');
         this.strucDetailDialog = false
+        if(this.type === 'history') {
+          this.$router.push({path: '/alarm/history'});
+        }else {
+          this.$router.push({path: '/alarm/today'});
+        }
       }).catch((e)=> {console.log(e)})
     },
     // 返回
@@ -364,12 +383,15 @@ export default {
 }
 </script>
 <style lang="scss">
+  html {
+    font-size: 100px;
+  }
 @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
 @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
 @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
 @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
 @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
-.alarm-dialog {
+.alarm_dialog {
   height: 100%;
   .struc_detail_dialog {
       max-width: 100%;
@@ -403,7 +425,6 @@ export default {
       .struc_main {
         height: 6.13rem;
         margin: 0 .4rem;
-        border-bottom: 1px solid #F2F2F2;
         @mixin btn-style {
           text-decoration: none;
             text-align: center;
@@ -780,7 +801,8 @@ export default {
         }
       }
       .struc-list {
-        margin: 0 .4rem;
+        width: 15.6rem;
+        margin: 0 auto;
         padding: .44rem 0 .34rem 0;
         .swiper-container {
           padding: .02rem .5rem;

@@ -39,7 +39,7 @@ const oDomains = {
     // 事件部分地址
     event: {
       dev: 'http://apidev.aorise.org/vlink-event',
-      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.64.142:8083',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apirel.aorise.org/vlink-event'
     },
@@ -53,7 +53,7 @@ const oDomains = {
     // 调度和预案部分地址
     ctc: {
       dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      // dev: 'http://10.116.64.134:8081/api/vlink',
+      // dev: 'http://10.116.64.142:8083/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },

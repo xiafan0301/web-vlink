@@ -16,6 +16,8 @@ const dataList = {
   videoId: 2, // 视频id
   fileId: 3, // 文件id
   distanceId: 23, // 推送距离
+  taskType: 25, // 任务类型
+  taskStatus: 24, // 任务状态
 }
 // 处理方式
 const handeMethods = {

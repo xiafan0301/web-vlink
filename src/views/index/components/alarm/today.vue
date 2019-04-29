@@ -88,15 +88,15 @@
       </el-form>
     </div>
     <div class="alarm_list" v-loading="isLoading">
-      <div class="list_top">今日告警<span v-if="alarmList">({{alarmList.length}})</span></div>
+      <div class="list_top">今日告警<span v-if="alarmList">({{total}})</span></div>
       <div class="alarm_grade">
-        <div class="alarm_grade_info" v-if="isSeen">
+       <!--  <div class="alarm_grade_info" v-if="isSeen">
           <i class="vl_icon vl_icon_alarm_2"></i>
           <i class="vl_icon vl_icon_alarm_3"></i>
           <i class="vl_icon vl_icon_alarm_4"></i>
           <i class="vl_icon vl_icon_alarm_5"></i>
           <i class="vl_icon vl_icon_alarm_6"></i>
-        </div>
+        </div> -->
       </div>
       <div class="list_content">
         <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
@@ -113,7 +113,7 @@
           <div class="list_con_info">
             <div>{{item.surveillanceName}}</div>
             <div>
-              <span>{{item.devName}}</span>
+              <span>{{item.devName}}</span>&nbsp;
               <span>{{item.snapTime}}</span>
             </div>
           </div>
@@ -156,6 +156,17 @@
           </div>
         </div>
       </div>
+      <template v-if="total > 0">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="onPageChange"
+        :current-page.sync="pageNum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pageSize"
+        layout="total, prev, pager, next, jumper"
+        :total="total">
+      </el-pagination>
+      </template>
     </div>
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
@@ -217,6 +228,9 @@ export default {
       selectControl: [],    //选中的布控数据
       alarmObj: {},
       isLoading: false,
+      pageNum: 1,
+      pageSize: 10,
+      total: 0,
     }
   },
   watch: {
@@ -317,9 +331,11 @@ export default {
       let params = {
         "where.startTime": formatDate(new Date(), 'yyyy-MM-dd'),
         "where.endTime": formatDate(new Date(), 'yyyy-MM-dd'),
-        "where.sortType": 2
+        "where.sortType": 2,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
       };
-      (this.selectDevice && this.selectDevice.length > 0) && (params['where.areaIds'] = this.selectDevice.join());
+      (this.selectDevice && this.selectDevice.length > 0) && (params['where.devIds'] = this.selectDevice.join());
       (this.selectControl && this.selectControl.length > 0) && (params['where.groupIds'] = this.selectControl.join());
       this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
       this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
@@ -328,6 +344,7 @@ export default {
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
           this.alarmList = [...res.data.list]
+          this.total = res.data.total;
           for(let item of this.alarmList) {
             item['semblance'] = (item.semblance).toFixed(2)
             item['isSeen'] = false
@@ -346,6 +363,15 @@ export default {
       this.alarmObj['inx'] = index
       this.$refs["alarmDialogComp"].toogleVisiable(true); */
       this.$router.push({name: 'alarm_detail', query: {uid: uid, objType: objType, type: 'today'}});
+    },
+    onPageChange (page) {
+      this.pageNum = page;
+      this.getAlarm();
+    },
+    handleSizeChange (val) {
+      this.pageNum = 1;
+      this.pageSize = val;
+      this.getAlarm();
     },
     /* showLoading(data) {
       console.log("---00000------",data)
