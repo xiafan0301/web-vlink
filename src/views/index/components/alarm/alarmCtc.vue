@@ -644,7 +644,7 @@ export default {
                 }
                 .show_detail_box {
                   width:3.3rem;
-                  max-height:1.62rem;
+                  max-height:2.62rem;
                   box-shadow:0px 1px 21px 0px rgba(97,97,97,0.2);
                   border-radius:5px;
                   position: absolute;
