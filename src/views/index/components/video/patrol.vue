@@ -5,66 +5,114 @@
       <div class="show_menu_b">
         <div>
           <ul class="show_title">
-            <li class="show_title_li" :class="{'show_title_active': showConTitle === 1}" @click="showConTitle = 1">监控列表</li>
+            <li class="show_title_li" :class="{'show_title_active': showConTitle === 3}" @click="showConTitle = 3">监控列表</li>
+            <li class="show_title_li" :class="{'show_title_active': showConTitle === 1}" @click="showConTitle = 1">监控分组</li>
             <li class="show_title_li" :class="{'show_title_active': showConTitle === 2}" @click="showConTitle = 2">播放历史</li>
-            <li class="show_title_line" :class="{'show_title_line2': showConTitle === 2}"></li>
+            <li class="show_title_line" :class="{'show_title_line2': showConTitle === 1, 'show_title_line3': showConTitle === 2}"></li>
           </ul>
+          <div class="show_content" v-show="showConTitle === 3">
+            <div class="show_search">
+              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
+                <el-input
+                  placeholder="请输入内容"
+                  size="small"
+                  @keyup.enter.native="getDeviceList3()"
+                  v-model="searchVal3">
+                  <i slot="suffix" @click="getDeviceList3()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+                </el-input>
+              </div>
+            </div>
+            <div class="show_list">
+              <ul class="show_list_c show_tree" id="videoList3Tree">
+                <template v-if="deviceList3 && deviceList3.areaTreeList && deviceList3.areaTreeList.length > 0">
+                  <li v-for="(item, index) in deviceList3.areaTreeList" :key="'tree3_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
+                      </div>
+                    </div>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list3_' + sindex">
+                        <div class="com_ellipsis"
+                          v-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </div>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
               <div style="margin-left: 8%; width: 84%;">
                 <el-input
                   placeholder="请输入内容"
                   size="small"
+                  @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
                   <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
                 </el-input>
               </div>
-              
-              <!-- <div>
-                <el-input
-                  class="vl_map_lc_dt_inp"
-                  size="small"
-                  placeholder="请输入内容"
-                  v-model="searchVal">
-                </el-input>
-                <i class="el-icon-search"></i>
-              </div> -->
             </div>
             <div class="show_list">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
-                  <div>
-                    <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                <template v-if="deviceList && deviceList.length > 0">
+                  <li v-for="(item, index) in deviceList" :key="'tree_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                      </div>
                     </div>
-                  </div>
-                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                      <!-- patrolParseDialogVisible -->
-                      <div v-if="patrolActive === 1" class="tree_li_dis" 
-                        @click="dragEndDis"
-                        @dragend="dragEndDis"
-                        draggable="true">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="com_ellipsis"
-                        v-else-if="!deviceIsPlaying(sitem)"
-                        @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
-                        draggable="true" style="cursor: move;">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="tree_li_dis" v-else>
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                    </li>
-                  </ul>
-                  <ul class="tree_sli" v-else>
-                    <li class="tree_sli_empty">暂无</li>
-                  </ul>
-                </li>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                        <!-- patrolParseDialogVisible -->
+                        <div v-if="patrolActive === 1" class="tree_li_dis" 
+                          @click="dragEndDis"
+                          @dragend="dragEndDis"
+                          draggable="true">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="com_ellipsis"
+                          v-else-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -75,15 +123,24 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div v-if="patrolActive === 1" class="show_his_dis" 
+                    @click="dragEndDis"
+                    @dragend="dragEndDis"
+                    draggable="true">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
-                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                  <div class="show_his_dis" v-else-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <!-- 视频巡逻，播放历史，拖动一条记录播放，应该是直接播放该设备的直播，不是回放 -->
+                  <div @dragstart="dragStart2($event, item, 1)" @dragend="dragEnd"
                     draggable="true" style="cursor: move;" v-else>
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                 </li>
@@ -163,10 +220,11 @@
   </div>
 </template>
 <script>
+import {mapXupuxian} from '@/config/config.js';
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-// import flvplayer from '@/components/common/flvplayer.vue';
+import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
 import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, flvplayer},
@@ -181,15 +239,17 @@ export default {
       patrolStartPercentage: 100,
       patrolInval: null,
       // 设备列表
-      deviceList: [],
+      deviceList: [], // 监控分组
+      deviceList3: null, // 监控列表
 
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
       bResize: {},
       showMenuActive: false,
-      showConTitle: 1,
+      showConTitle: 3,
       searchVal: '',
+      searchVal3: '',
       dragActiveObj: null,
       dragVideoType: 1,
 
@@ -235,6 +295,10 @@ export default {
       if (sList && sList.length > 0) {
         this.$nextTick(() => {
           sList = JSON.parse(sList);
+          console.log(sList);
+          for (let i = 0; i < sList.length; i++) {
+            sList[i].record = false;
+          }
           this.videoList = sList;
         });
       }
@@ -244,10 +308,13 @@ export default {
     }
 
     // 监控列表
+    this.getDeviceList3();
+    // 监控分组
     this.getDeviceList();
   },
   mounted () {
     videoTree('videoListTree');
+    videoTree('videoList3Tree');
     $(window).on('unload', this.unloadSave);
 
     setTimeout(() => {
@@ -368,7 +435,21 @@ export default {
         });          
       });
     },
+
     /* 监控列表 */
+    getDeviceList3 () {
+      apiAreaServiceDeviceList({
+        areaUid: mapXupuxian.adcode,
+        likeKey: this.searchVal3
+      }).then(res => {
+        if (res && res.data) {
+          this.deviceList3 = res.data;
+        }
+      }).catch(error => {
+        console.log("apiAreaServiceDeviceList error：", error);
+      });
+    },
+    /* 监控分组 */
     getDeviceList () {
       // let sui = window.localStorage.getItem('userInfo');
       // if (sui) { sui = JSON.parse(sui); }
@@ -459,6 +540,7 @@ export default {
         this.videoList.splice(index, 1, Object.assign({
           type: this.dragVideoType,
           title: this.dragActiveObj.deviceName,
+          record: true,
           video: Object.assign({}, this.dragActiveObj)
         }, op));
       }
@@ -473,7 +555,6 @@ export default {
      * @param {string} sid 视频ID
      */
     playerClose (iIndex) {
-      console.log('playerClose' + iIndex);
       this.videoList.splice(iIndex, 1, {});
     },
     /* 播放器事件 end */
@@ -484,24 +565,6 @@ export default {
     }
   },
   destroyed () {
-    // 播放记录
-    /* for (let i = 0; i < this.videoList.length; i++) {
-      let obj = this.videoList[i];
-      console.log('obj', obj);
-      if (obj && obj.video) {
-        apiVideoRecord({
-          deviceId: obj.video.uid, // 设备id
-          // playBackEndTime: '', // 回放结束时间
-          // playBackStartTime: '', // 回放开始时间
-          playTime: formatDate(new Date().getTime()), // 播放结束时间
-          // 播放类型 1:视频巡逻 2:视频回放
-          playType: 1
-        }).then(() => {
-        }).catch(error => {
-          console.log("apiVideoRecord error：", error);
-        });
-      }
-    } */
     if (this.patrolInval) {
       window.clearInterval(this.patrolInval);
     }
