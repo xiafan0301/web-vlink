@@ -67,9 +67,14 @@
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
+            v-if="systemList && systemList.list && systemList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -98,8 +103,12 @@ export default {
         systemDate: null,
         titleOrPublisher: null
       },
+      lastSystemForm: {
+        systemDate: null,
+        titleOrPublisher: null
+      },
       // 表格参数
-      systemList: [{eventType: 'xxx'}],
+      systemList: [],
       systemId: null,//消息id
       // 翻页参数
       pageSize: 10,
@@ -115,6 +124,21 @@ export default {
     // 获取系统消息列表
     getMsgNoteList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.systemForm);
+      const lastArr = Object.values(this.lastSystemForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastSystemForm = Object.assign({}, this.systemForm);
       const params = {
         pageSize: this.pageSize,
         pageNum: this.pageNum,

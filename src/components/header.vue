@@ -584,7 +584,7 @@ export default {
     }
   }
 }
-.el-popover {
+.vl_hd_alarm_box.el-popover {
   max-height: 476px;
   padding: 12px 0;
 }

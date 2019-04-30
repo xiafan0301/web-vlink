@@ -155,9 +155,9 @@
                   </el-tooltip>
                 </div>
                 <div class="data_list">
-                  <span>{{item.name}}</span>
-                  <span>{{item.sex}}</span>
-                  <span>{{item.nation}}</span>
+                  <span :title="item.name">{{item.name}}</span>
+                  <span :title="item.sex">{{item.sex}}</span>
+                  <span :title="item.nation">{{item.nation}}</span>
                 </div>
                 <div class="data_list">
                   <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
@@ -188,6 +188,10 @@
                 </div>
               </div>
             </div>
+            <div class="not_content" v-if="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length === 0">
+              <img src="../../../../assets/img/not-content.png" alt="">
+              <p>暂无相关数据</p>
+            </div>
           </template>
           <template v-else>
             <div class="list_info" v-for="item in carMemberList.list" :key="item.uid">
@@ -201,10 +205,10 @@
                   </el-tooltip>
                 </div>
                 <div class="data_list">
-                  <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
+                  <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span><span :title="item.numberType">{{item.numberType}}</span>
                 </div>
                 <div class="data_list">
-                  <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
+                  <span :title="item.vehicleType">{{item.vehicleType}}</span><span :title="item.vehicleColor">{{item.vehicleColor}}</span>
                 </div>
                 <div class="data_list">
                   <span :title="item.numberColor">{{item.numberColor}}</span>
@@ -230,13 +234,17 @@
                     </div>
                   </template>
                 </div>
-                <div class="data_list">
+                <div class="data_list" v-if="item.desci">
                   <span>{{item.desci}}</span>
                 </div>
               </div>
             </div>
+            <div class="not_content" v-if="carMemberList && carMemberList.list && carMemberList.list.length === 0">
+              <img src="../../../../assets/img/not-content.png" alt="">
+              <p>暂无相关数据</p>
+            </div>
           </template>
-          <div style="width: 100%;" v-show="tabType === '1'">
+          <div style="width: 100%;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
             <el-pagination
               style="text-align: center;"
               @current-change="handleCurrentChange"
@@ -247,7 +255,7 @@
               :total="protraitMemberList.total">
             </el-pagination>
           </div>
-          <div style="width: 100%;" v-show="tabType === '2'">
+          <div style="width: 100%;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
             <el-pagination
               style="text-align: center;"
               @current-change="handleCurrentChange"
@@ -825,7 +833,7 @@ export default {
             protraitInfo.birthDate.splice(10, 0, '日');
             protraitInfo.birthDate = protraitInfo.birthDate.join('');
             protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
-            protraitInfo.groupIds = protraitInfo.groupList.map(m => m.uid);
+            protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
             this.portraitForm = protraitInfo;
             if (protraitInfo.origin === 1) {
               this.isAddDisabled = true;
@@ -914,7 +922,7 @@ export default {
           if (res && res.data && res.data.length > 0) {
             let carInfo = res.data[0];
             this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
-            carInfo.groupIds = carInfo.groupList.map(m => m.uid);
+            carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
             this.carForm = carInfo;
             if (carInfo.origin === 1) {
               this.isAddDisabled = true;
@@ -1205,7 +1213,7 @@ export default {
     }
     .add_group{
       padding: 0 10px 10px;
-      max-height: 540px;
+      max-height: 216px;
       .group_title{
         height: 36px;
         line-height: 36px;
@@ -1279,6 +1287,7 @@ export default {
       line-height: 40px;
     }
     .list_box{
+      height: calc(100% - 100px);
       margin: 20px 0.5%;
       display: flex;
       flex-wrap: wrap;

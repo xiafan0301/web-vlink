@@ -31,10 +31,10 @@
             <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
-            <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
+            <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span><span :title="item.numberType">{{item.numberType}}</span>
           </div>
           <div class="data_list">
-            <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
+            <span :title="item.vehicleType">{{item.vehicleType}}</span><span :title="item.vehicleColor">{{item.vehicleColor}}</span>
           </div>
           <div class="data_list">
             <span :title="item.numberColor">{{item.numberColor}}</span>
@@ -60,7 +60,7 @@
               </div>
             </template>
           </div>
-          <div class="data_list" v-if="item.remarks">
+          <div class="data_list" v-if="item.desci">
             <span>{{item.desci}}</span>
           </div>
         </div>

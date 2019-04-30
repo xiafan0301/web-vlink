@@ -1392,6 +1392,9 @@ export default {
   .close_btn{
     font-size: 1.3rem;
   }
+  .vl_icon{
+    transition: none;
+  }
 }
 </style>
 <style lang="scss">

@@ -550,7 +550,7 @@ export function getAlarmListByDev(params) {
     url: 'alarm-snaps/devices',
     method: 'get',
     params,
-    mode: ' '
+    mode: 'control'
   })
 }
 /**
