@@ -56,6 +56,8 @@
             <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
             <span v-show="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
+            <!-- 全屏 -->
+            <span v-show="config.fullScreen2" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen2"></span>
             <!-- 局部放大 -->
             <template v-if="fullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
@@ -112,7 +114,9 @@ export default {
    *    signEmit: 标记成功后是否需要emit，默认为false
    *    close: 是否可删除，默认为true
    *    fullscreen: 是否可全屏，默认为true
+   *    fullscreen2: 否可全屏，默认为false, for 布控
    *    cut: 是否可截屏，默认为true
+   *    
    * bResize: 播放容器尺寸变化
    */
   props: ['index', 'oData', 'oConfig', 'bResize'],
@@ -138,6 +142,7 @@ export default {
         signEmit: false, // 标记成功后是否需要emit
         close: true, // 是否可删除
         fullscreen: true, // 是否可全屏
+        fullscreen2: false,
         cut: true
       },
 
@@ -301,9 +306,13 @@ export default {
           this.startPlayTime = new Date().getTime();
         }); */
         flvPlayer.play();
+        // 加载失败
+        let failedOut = window.setTimeout(() => {
+          this.videoLoadingFailed = true;
+        }, this.videoLoadingTimeout);
         // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
         videoElement.onplaying = () => {
-          // console.log('真正处于播放的状态，这个时候我们才是真正的在观看视频。');
+          if (failedOut) { window.clearTimeout(failedOut); }
           this.videoLoading = false;
           this.videoLoadingFailed = false;
           if (this.config.pause) {
@@ -363,10 +372,6 @@ export default {
           // 回放/录像的时候需要添加ended事件
           videoElement.addEventListener('ended', this.playNext, false);
         }
-        // 加载失败
-        window.setTimeout(() => {
-          this.videoLoadingFailed = true;
-        }, this.videoLoadingTimeout);
       }
     },
     // 回放/录像 播放下一个视频
@@ -523,6 +528,9 @@ export default {
     playerFullScreen (flag) {
       this.fullScreen = flag;
       this.playerEnlarge(false);
+    },
+    playerFullScreen2 () {
+      this.$emit('playerFullScreen2');
     },
     // 视频关闭事件
     playerClose () {
