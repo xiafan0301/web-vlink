@@ -160,20 +160,19 @@
         </div>
       </div>
     </div>
-    <div is="controlVideo" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @showScreen="showScreen" @playerClose="playerClose" :oData="videoObj" 
-      :oConfig="{sign: true}">
+    <div is="flvplayer" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @playerFullScreenTwo="showScreen" :oData="videoObj" :bResize="bResize"
+      :oConfig="{sign: true, fullscreen: false, fullscreen2: true }">
     </div>
   </div>
 </template>
 <script>
-import controlVideo from './components/controlVideo.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {random14} from '@/utils/util.js';
 import {getControlObject, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {getDiciData} from '@/views/index/api/api.js';
 import {getEventList} from '@/views/index/api/api.event.js';
 export default {
-  components: {flvplayer, controlVideo},
+  components: {flvplayer},
   data () {
     return {
       swiperOption: {
@@ -233,7 +232,8 @@ export default {
       // 布控对象列表参数
       controlObjList: [],
       isShowFullScreen: false, // 是否显示全屏播放页面
-      domId: null
+      domId: null,
+      bResize: {}
     }
   },
   created () {
@@ -290,6 +290,7 @@ export default {
     },
     // 显示大屏
     showScreen () {
+      console.log(1111111111111111)
       $('.control_map').append($('#controlVideo'));
       this.isShowVideo = false;
       this.isShowV = false; 

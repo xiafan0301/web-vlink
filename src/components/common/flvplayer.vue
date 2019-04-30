@@ -48,16 +48,16 @@
         </span>
         <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini && !fullScreen}">
           <span class="flvplayer_bot_omh">
-            <!-- 标记 -->
-            <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 -->
             <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
+            <!-- 标记 -->
+            <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 截屏 -->
             <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
-            <span v-show="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
+            <span v-show="!fullScreen && config.fullscreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
             <!-- 全屏 -->
-            <span v-show="config.fullScreen2" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen2"></span>
+            <span v-show="config.fullscreen2" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreenTwo"></span>
             <!-- 局部放大 -->
             <template v-if="fullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
@@ -526,11 +526,15 @@ export default {
     },
     // 全屏/取消全屏
     playerFullScreen (flag) {
-      this.fullScreen = flag;
-      this.playerEnlarge(false);
+      if (this.config.fullscreen2) {
+        this.playerFullScreenTwo();
+      } else {
+        this.fullScreen = flag;
+        this.playerEnlarge(false);
+      }
     },
-    playerFullScreen2 () {
-      this.$emit('playerFullScreen2');
+    playerFullScreenTwo () {
+      this.$emit('playerFullScreenTwo');
     },
     // 视频关闭事件
     playerClose () {
