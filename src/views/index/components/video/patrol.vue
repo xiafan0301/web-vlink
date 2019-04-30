@@ -230,7 +230,7 @@ export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
-      //0 未进行  1进行中  2暂停
+      // 0 未进行  1进行中  2暂停
       patrolActive: 0, // 轮巡状态
       patrolTipDialogVisible: false,
       patrolParseDialogVisible: false,
@@ -255,20 +255,40 @@ export default {
 
       videoRecordList: [],
 
-      patrolData: {
-        current: {
-          id: '111',
-          name: '轮巡预案名称111',
-          time: 10,
-          sum: 4
+      patrolHandlerData: {
+        currentRound: {
+          roundNo: '111', // 轮巡编号
+          uiState: 0, // 0 未进行  1进行中  2暂停  3停止
         },
-        next: {
-          id: '222',
-          name: '轮巡预案名称222',
-          startTime: 50,
-          time: 12,
-          sum: 5
-        }
+        nextRound: {}
+      },
+      patrolData: {
+        currentRound: {
+          uid: '111', // 轮巡记录标识
+          roundNo: '111', // 轮巡编号
+          roundName: '轮巡预案名称111', // 轮巡名称
+          frameNum: 4, // 画面数
+          roundInterval: 10, // 轮巡间隔(秒)
+          deviceNum: 5, // 轮巡设备数
+          startTime: null, // 开始时间
+          endTime: null, // 结束时间
+          roundStatus: 1, // 轮巡状态
+          deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
+        },
+        currentRoundCountDown: 25, // 当前轮巡倒计时(秒)
+        nextRound: {
+          uid: '222', // 轮巡记录标识
+          roundNo: '222', // 轮巡编号
+          roundName: '轮巡预案名称222', // 轮巡名称
+          frameNum: 4, // 画面数
+          roundInterval: 10, // 轮巡间隔(秒)
+          deviceNum: 5, // 轮巡设备数
+          startTime: null, // 开始时间
+          endTime: null, // 结束时间
+          roundStatus: 1, // 轮巡状态
+          deviceList: [{uid: 2}, {uid: 3}, {uid: 4}, {uid: 5}, {uid: 6}]
+        },
+        nextRoundCountDown: 45 // 下条轮巡倒计时(秒)
       }
     }
   },
@@ -372,10 +392,11 @@ export default {
         }, 500);
       }
     },
+
+
     dragEndDis () {
       this.patrolParseDialogVisible = true;
     },
-
     changeShowType (type) {
       if (this.showVideoTotal != type) {
         if (this.patrolActive === 1) {
@@ -561,7 +582,7 @@ export default {
 
     showListEvent () {
       this.showMenuActive = true;
-      this.showConTitle = 1;
+      this.showConTitle = 3;
     }
   },
   destroyed () {
