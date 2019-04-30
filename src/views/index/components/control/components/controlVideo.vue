@@ -170,23 +170,36 @@ export default {
       if (this.oData.type === 1) {
         apiVideoPlay(obj).then(res => {
           if (res && res.data) {
-            // let ind = res.data.length - 1;
-            // let ird = Math.round(Math.random() * ind);
             this.initPlayerDo(res.data.liveFlvUrl);
+          } else {
+            // 未获取到视频
+            console.log('未获取到视频');
+            this.videoLoadingFailed = true;
           }
         }).catch(error => {
           console.log("apiVideoPlay error：", error);
         });
       } else if (this.oData.type === 2 || this.oData.type === 3) {
         if (this.oData.startTime) {
-          obj.startTime = formatDate(this.oData.startTime);
+          obj.startTime = formatDate(this.oData.startTime, 'yyyyMMddHHmmss');
         }
         if (this.oData.endTime) {
-          obj.endTime = formatDate(this.oData.endTime);
+          obj.endTime = formatDate(this.oData.endTime, 'yyyyMMddHHmmss');
         }
         apiVideoPlayBack(obj).then(res => {
-          if (res && res.data) {
-            this.initPlayerDo(res.data.liveFlvUrl);
+          if (res && res.data && res.data.length > 0) {
+            // 为一个LIST
+            if (res.data.length >= (this.playBackIndex + 1)) {
+              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
+              this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
+              this.playBackList = res.data;
+            } else {
+              // 播放结束处理
+            }
+          } else {
+            // 未获取到视频
+            console.log('未获取到视频');
+            this.videoLoadingFailed = true;
           }
         }).catch(error => {
           console.log("apiVideoPlayBack error：", error);
@@ -209,19 +222,79 @@ export default {
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
-        flvPlayer.play().then(() => {
+        /* flvPlayer.play().then(() => {
+          console.log('>>>>>>>>>>>>>>>>>>>>>>> flvPlayer.play then');
           this.videoLoading = false;
           this.videoLoadingFailed = false;
           if (this.config.pause) {
             this.playActive = false;
             flvPlayer.pause();
-          } else {
-            this.startPlayTime = new Date().getTime();
           }
-        });
+          this.startPlayTime = new Date().getTime();
+        }); */
+        flvPlayer.play();
+        // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
+        videoElement.onplaying = () => {
+          // console.log('真正处于播放的状态，这个时候我们才是真正的在观看视频。');
+          this.videoLoading = false;
+          this.videoLoadingFailed = false;
+          if (this.config.pause) {
+            this.playActive = false;
+            flvPlayer.pause();
+          }
+          this.startPlayTime = new Date().getTime();
+        };
+        videoElement.onerror = () => {
+          this.videoLoadingFailed = true;
+          console.log('player video error: ', videoElement.error);
+        };
+        /* videoElement.oncanplay = function () {
+          console.log('视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待');
+        } */
+        // onloadstart  客户端开始请求数据
+        // onratechange  //播放速率改变
+        // onseeked 寻找完毕
+        // onplay 开始播放时触发
+        // onwaiting 播放由于下一帧数据未获取到导致播放停止，但是播放器没有主动预期其停止，仍然在努力的获取数据，简单的说就是在等待下一帧视频数据，暂时还无法播放。
+        // onplaying 真正处于播放的状态，这个时候我们才是真正的在观看视频。 
+        // oncanplay 视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待。
+        // onpause 暂停播放时触发
+        // onended 播放结束 loop 的情况下不会触发
+        // onloadedmetadata 获取视频meta信息完毕，这个时候播放器已经获取到了视频时长和视频资源的文件大小。 
+        // onloadeddata 视频播放器第一次完成了当前播放位置的视频渲染。
+        // onabort 客户端主动终止下载（不是因为错误引起）
+        // onerror 请求数据时遇到错误
+        // 1.用户终止 2.网络错误 3.解码错误 4.URL无效
+        // alert(myVid.error.code);
+        //客户端请求数据
+       /*  myVid.onprogress=function(){
+
+          console.log(`客户端正在请求数据 触发多次，是分段请求的`);
+          console.log(myVid.buffered);
+          //0.此元素未初始化  1.正常但没有使用网络  2.正在下载数据  3.没有找到资源
+          console.log(`networkState ${myVid.networkState}`);
+          //  //当前播放的位置，赋值可改变位置 myVid.currentTime = 11 从11秒位置开始播放
+          console.log(myVid.currentTime);
+          // //返回当前资源的URL
+          console.log(myVid.currentSrc);
+
+          console.log(myVid.videoWidth);
+          //播放结束 返回true 或 false
+          console.log(myVid.ended);
+          //音量大小 为0-1 之间的值
+          console.log(myVid.volume);
+          //当前资源长度
+          console.log(myVid.duration);
+          console.log(myVid.startDate)
+          // myVid.currentTime = 11 */
+
         this.player = flvPlayer;
         this.video = videoElement;
 
+        if (this.oData.type != 1) {
+          // 回放/录像的时候需要添加ended事件
+          videoElement.addEventListener('ended', this.playNext, false);
+        }
         // 加载失败
         window.setTimeout(() => {
           this.videoLoadingFailed = true;
@@ -418,15 +491,15 @@ export default {
 
     // 播放记录 只有type=1 / 2 才记录
     saveVideoRecord () {
-      if (this.oData.type === 2 || this.oData.type === 1) {
+      if ((this.oData.type === 2 || this.oData.type === 1) && this.oData.record) {
         let playBack = {};
-        if (this.oData.type === 2) {
-          playBack.playBackStartTime = formatDate(this.startPlayTime); // 回放开始时间
-          playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
-        }
+        // if (this.oData.type === 2) {
+        playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
+        playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+        // }
         apiVideoRecord(Object.assign({
           deviceId: this.oData.video.uid, // 设备id
-          playTime: formatDate(new Date().getTime()), // 播放结束时间
+          playTime: formatDate(this.startPlayTime ? this.startPlayTime : new Date()), // 播放结束时间
           // 播放类型 1:视频巡逻 2:视频回放
           playType: this.oData.type
         }, playBack)).then(() => {

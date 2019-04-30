@@ -262,8 +262,10 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.keyword': query,
-        pageSize: 1000000
+        'where.eventCode': query,
+        pageSize: 1000000,
+        orderBy: 'report_time',
+        order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {

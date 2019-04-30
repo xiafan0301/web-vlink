@@ -196,7 +196,7 @@ export default {
         name: null,
         event: null,
         obj: null,
-        state: 2,
+        state: 1,
         type: null,
         rank: null,
         time: null
@@ -253,8 +253,10 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.keyword': query,
-        pageSize: 1000000
+        'where.eventCode': query,
+        pageSize: 1000000,
+        orderBy: 'report_time',
+        order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {

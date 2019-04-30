@@ -834,6 +834,7 @@ export default {
             protraitInfo.birthDate = protraitInfo.birthDate.join('');
             protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
             protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
+            protraitInfo.uid = this.portraitForm.uid;
             this.portraitForm = protraitInfo;
             if (protraitInfo.origin === 1) {
               this.isAddDisabled = true;
@@ -923,6 +924,7 @@ export default {
             let carInfo = res.data[0];
             this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
             carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
+            carInfo.uid = this.carForm.uid;
             this.carForm = carInfo;
             if (carInfo.origin === 1) {
               this.isAddDisabled = true;
