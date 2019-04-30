@@ -104,6 +104,7 @@ export default {
    *    startTime: Date 回放开始时间
    *    endTime: Date 回放结束时间
    *    video: 设备信息（uid、）
+   *    record: 为true时 则生成放历史记录
    *  }
    * oConfig: 播放配置信息
    *    pause: 开始是否暂停，默认为false
@@ -160,7 +161,7 @@ export default {
           { required: true, message: '请选择标记内容', trigger: 'change' }
         ],
         addSignContent: [
-          { required: true, message: '请填写标记内容', trigger: 'change' }
+          { required: true, message: '请填写标记内容', trigger: 'blur' }
         ]
       },
       signSubmitLoading: false
@@ -256,8 +257,13 @@ export default {
         apiVideoPlayBack(obj).then(res => {
           if (res && res.data && res.data.length > 0) {
             // 为一个LIST
-            this.initPlayerDo(res.data[0].liveFlvUrl);
-            this.playBackList = res.data;
+            if (res.data.length >= (this.playBackIndex + 1)) {
+              console.log('回放第' + (this.playBackIndex + 1) + '段视频，URL：', res.data[this.playBackIndex].liveFlvUrl);
+              this.initPlayerDo(res.data[this.playBackIndex].liveFlvUrl);
+              this.playBackList = res.data;
+            } else {
+              // 播放结束处理
+            }
           } else {
             // 未获取到视频
             console.log('未获取到视频');
@@ -284,7 +290,8 @@ export default {
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
-        flvPlayer.play().then(() => {
+        /* flvPlayer.play().then(() => {
+          console.log('>>>>>>>>>>>>>>>>>>>>>>> flvPlayer.play then');
           this.videoLoading = false;
           this.videoLoadingFailed = false;
           if (this.config.pause) {
@@ -292,12 +299,68 @@ export default {
             flvPlayer.pause();
           }
           this.startPlayTime = new Date().getTime();
-        });
+        }); */
+        flvPlayer.play();
+        // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
+        videoElement.onplaying = () => {
+          // console.log('真正处于播放的状态，这个时候我们才是真正的在观看视频。');
+          this.videoLoading = false;
+          this.videoLoadingFailed = false;
+          if (this.config.pause) {
+            this.playActive = false;
+            flvPlayer.pause();
+          }
+          this.startPlayTime = new Date().getTime();
+        };
+        videoElement.onerror = () => {
+          this.videoLoadingFailed = true;
+          console.log('player video error: ', videoElement.error);
+        };
+        /* videoElement.oncanplay = function () {
+          console.log('视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待');
+        } */
+        // onloadstart  客户端开始请求数据
+        // onratechange  //播放速率改变
+        // onseeked 寻找完毕
+        // onplay 开始播放时触发
+        // onwaiting 播放由于下一帧数据未获取到导致播放停止，但是播放器没有主动预期其停止，仍然在努力的获取数据，简单的说就是在等待下一帧视频数据，暂时还无法播放。
+        // onplaying 真正处于播放的状态，这个时候我们才是真正的在观看视频。 
+        // oncanplay 视频播放器已经可以开始播放视频了，但是只是预期可以正常播放，不保证之后的播放不会出现缓冲等待。
+        // onpause 暂停播放时触发
+        // onended 播放结束 loop 的情况下不会触发
+        // onloadedmetadata 获取视频meta信息完毕，这个时候播放器已经获取到了视频时长和视频资源的文件大小。 
+        // onloadeddata 视频播放器第一次完成了当前播放位置的视频渲染。
+        // onabort 客户端主动终止下载（不是因为错误引起）
+        // onerror 请求数据时遇到错误
+        // 1.用户终止 2.网络错误 3.解码错误 4.URL无效
+        // alert(myVid.error.code);
+        //客户端请求数据
+       /*  myVid.onprogress=function(){
+
+          console.log(`客户端正在请求数据 触发多次，是分段请求的`);
+          console.log(myVid.buffered);
+          //0.此元素未初始化  1.正常但没有使用网络  2.正在下载数据  3.没有找到资源
+          console.log(`networkState ${myVid.networkState}`);
+          //  //当前播放的位置，赋值可改变位置 myVid.currentTime = 11 从11秒位置开始播放
+          console.log(myVid.currentTime);
+          // //返回当前资源的URL
+          console.log(myVid.currentSrc);
+
+          console.log(myVid.videoWidth);
+          //播放结束 返回true 或 false
+          console.log(myVid.ended);
+          //音量大小 为0-1 之间的值
+          console.log(myVid.volume);
+          //当前资源长度
+          console.log(myVid.duration);
+          console.log(myVid.startDate)
+          // myVid.currentTime = 11 */
+
         this.player = flvPlayer;
         this.video = videoElement;
+
         if (this.oData.type != 1) {
           // 回放/录像的时候需要添加ended事件
-          console.log('回放/录像');
           videoElement.addEventListener('ended', this.playNext, false);
         }
         // 加载失败
@@ -310,10 +373,13 @@ export default {
     playNext () {
       if (this.playBackList.length > (this.playBackIndex + 1)) {
         this.playBackIndex += 1;
-        this.destroyPlayer();
+        /* this.destroyPlayer();
         let _su = this.playBackList[this.playBackIndex].liveFlvUrl;
         console.log('播放第' + (this.playBackIndex + 1) + '段视频，URL：', _su);
-        this.initPlayerDo(_su);
+        this.initPlayerDo(_su); */
+        this.relaodPlayer();
+      } else {
+        //  播放结束处理
       }
     },
     destroyPlayer () {
@@ -378,10 +444,11 @@ export default {
         let boxId = this.flvplayerId + '_box';
         // e.target.offsetLeft
         nTarget.on('mousedown', function (e) {
+          // e.pageX/e.pageY 相对于窗口左上角
           startX = Math.floor(e.pageX);
           startY = Math.floor(e.pageY);
-          console.log('startX:', startX);
-          console.log('startY:', startY);
+          // console.log('startX:', startX);
+          // console.log('startY:', startY);
           // 在页面创建 box
           let nBox = $('<div>', {
             id: boxId,
@@ -396,6 +463,7 @@ export default {
           // 更新 box 尺寸
           let box = $('#' + boxId);
           if(box && box.length > 0) {
+            // e.pageX/e.pageY 相对于窗口左上角
             box.width(Math.floor(e.pageX - startX));
             box.height(Math.floor(e.pageY - startY));
           }
@@ -406,45 +474,37 @@ export default {
           if(box && box.length > 0) {
             // 如果长宽均小于 3px，移除 box
             if(box.width() < 10 || box.height() < 10) {
-                box.remove();
-                // 可以继续
+              // 太小则移除 box
+              box.remove();
             } else {
-              /* nTarget.off('mousedown');
-              nTarget.off('mousemove');
-              nTarget.off('mouseup'); */
-
+              // 放大
+              // 可视窗口大小
               let ow = nTarget.width(), oh = nTarget.height();
+              // 画的BOX的大小
               let bw = box.width(), bh = box.height();
+              // 视频大小(可能已经被放大了)
               let cw = $c.width(); // ch = $c.height();
-              console.log('ow:' + ow + '--oh:' + oh);
-              console.log('cw:' + ow + '--cw:' + oh);
-              console.log('bw:' + ow + '--bw:' + oh);
-              // 视频分辨率 1920 * 1080
+              // 调整BOX的大小，使其与可视窗口大小保持一致
               if (bw / bh > ow / oh) {
                 bh = Math.floor(bw * oh / ow);
+                bw = Math.floor(bw);
               } else {
                 bw = Math.floor(ow / oh * bh);
+                bh = Math.floor(bh);
               }
-              console.log('bw:' + bw + '--bh:' + bh);
+              // console.log('转换后的 bw:' + bw + '--bh:' + bh);
               let inDO = cw / ow; // 之前放大的倍数
-              let inD = ow / bw * (cw / ow); // 放大的倍数
-              console.log('inDO:' + inDO);
-              console.log('inD:' + inD);
+              let inD = ow / bw * inDO; // 现在放大的倍数
               // if (inD > 4) { inD = 4; } // 最大放大到4倍
-              // startX startY
+              // 设置视频大小
               $c.width(Math.floor(ow * inD));
               $c.height(Math.floor(oh * inD));
-              console.log('$c.width:' + $c.width());
               let iML = $c.css('margin-left').replace(/px/, '');
               let iMT = $c.css('margin-top').replace(/px/, '');
-              console.log('iML:', iML);
-              console.log('iMT:', iMT);
               $c.css({
-                'margin-left': -Math.floor((inD - inDO + 1) * startX - inDO * iML) + 'px',
-                'margin-top': -Math.floor((inD - inDO + 1) * startY - inDO * iMT) + 'px'
+                'margin-left': -Math.floor(startX / inDO * inD - iML / inDO * inD ) + 'px',
+                'margin-top': -Math.floor(startY / inDO * inD - iMT / inDO * inD) + 'px'
               });
-              console.log('margin-left:', $c.css('margin-left'));
-              console.log('margin-top:', $c.css('margin-top'));
               box.remove();
             }
           }
@@ -495,7 +555,7 @@ export default {
           apiVideoSign({
             contentId: this.signForm.content,
             deviceId: this.oData.video.uid,
-            signTime: formatDate(this.signForm.signTime - 1000 * 60 * 60 * 24),
+            signTime: formatDate(this.signForm.signTime),
           }).then((data) => {
             if (data) {
               this.signSubmitLoading = false;
@@ -555,7 +615,7 @@ export default {
 
     // 播放记录 只有type=1 / 2 才记录
     saveVideoRecord () {
-      if (this.oData.type === 2 || this.oData.type === 1) {
+      if ((this.oData.type === 2 || this.oData.type === 1) && this.oData.record) {
         let playBack = {};
         // if (this.oData.type === 2) {
         playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
@@ -563,7 +623,7 @@ export default {
         // }
         apiVideoRecord(Object.assign({
           deviceId: this.oData.video.uid, // 设备id
-          playTime: formatDate(new Date().getTime()), // 播放结束时间
+          playTime: formatDate(this.startPlayTime ? this.startPlayTime : new Date()), // 播放结束时间
           // 播放类型 1:视频巡逻 2:视频回放
           playType: this.oData.type
         }, playBack)).then(() => {

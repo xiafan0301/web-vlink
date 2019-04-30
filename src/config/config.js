@@ -39,7 +39,7 @@ const oDomains = {
     // 事件部分地址
     event: {
       dev: 'http://apidev.aorise.org/vlink-event',
-      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.64.142:8083',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apirel.aorise.org/vlink-event'
     },
@@ -53,7 +53,7 @@ const oDomains = {
     // 调度和预案部分地址
     ctc: {
       dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      // dev: 'http://10.116.64.134:8081/api/vlink',
+      // dev: 'http://10.116.64.142:8083/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },
@@ -101,6 +101,34 @@ for (let _key in oDomains) {
 }
 // console.log('*****oDomains*****', ajaxCtx);
 export {ajaxCtx};
+
+// 视频通讯相关配置
+export const webrtcConfig = {
+  wsUrl: 'ws://apidev.aorise.org/visual-video/ws/signaling', // websocket地址
+  turnUrl: '222.244.147.121:3480', // turn地址
+  turnUsername: 'test', // turn name
+  turnCredential: 'test', // turn credential
+  // websocket 信息
+  stompHeaders: {
+    token: 'dde675aad8a64049894e10f9f65fe291',
+    username: '',
+    name: ''
+  },
+  // 信令
+  apis: {
+    message: '/user/topic/message', // 接收消息
+    ping: '/user/topic/ping', // 接收心跳
+    pong: '/signal/pong', // 发送心跳
+    candidate: '/signal/candidate', // 候选
+    offer: '/signal/offer', // offer
+    refuse: '/signal/refuse', // 拒绝
+    addrefuse: '/signal/addrefuse', // 拒绝
+    answer: '/signal/answer', // 答应
+    addanswer: '/signal/addanswer', // 答应
+    remove: '/signal/remove', // 挂断
+    leave: '/signal/leave' // 挂断
+  }
+};
 
 // cookie名
 export const cookieUserId = 'AS.VLINK.USERID';
