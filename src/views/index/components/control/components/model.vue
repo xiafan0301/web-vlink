@@ -18,7 +18,7 @@
         @change="getLicenseNum"
         value-key="value"
         placeholder="请输入车牌信息"
-        :remote-method="getVehicleByIdNo"
+        :remote-method="getVehicleByVehicleNumber"
         :loading="loading">
         <el-option
           v-for="item in licenseNumList"
@@ -218,7 +218,7 @@
 </template>
 <script>
 import {objDeepCopy} from '@/utils/util.js';
-import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
+import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
 // import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
@@ -444,13 +444,13 @@ export default {
       })
     },
     // 通过车牌号搜索车像列表
-    getVehicleByIdNo (query) {
+    getVehicleByVehicleNumber (query) {
       const idNo = this.Trim(query, 'g');
       const params = {
         vehicleNumber: idNo
       }
       if (idNo) {
-        getVehicleByIdNo(params).then(res => {
+        getVehicleByVehicleNumber(params).then(res => {
           if (res && res.data && res.data.length > 0) {
             this.licenseNumList = res.data.map(m => {
               return {
