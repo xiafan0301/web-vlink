@@ -37,6 +37,7 @@ export default {
     height: 100%;
     padding-left: 200px;
     overflow-y: auto;
+    overflow-x: hidden;
     // 布控模块地图公用样式
     .manage_d_s_m{
       width: 100%;

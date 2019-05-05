@@ -31,9 +31,9 @@
             <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
-            <span>{{item.name}}</span>
-            <span>{{item.sex}}</span>
-            <span>{{item.nation}}</span>
+            <span :title="item.name">{{item.name}}</span>
+            <span :title="item.sex">{{item.sex}}</span>
+            <span :title="item.nation">{{item.nation}}</span>
           </div>
           <div class="data_list">
             <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>

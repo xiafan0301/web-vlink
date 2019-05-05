@@ -68,9 +68,9 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item prop="facilityId">
+            <el-form-item prop="deviceId">
               <el-select
-                v-model="manageForm.facilityId"
+                v-model="manageForm.deviceId"
                 filterable
                 remote
                 value-key="value"
@@ -190,9 +190,14 @@
                 </template>
               </template>
             </el-table-column>
+            <div class="not_content" slot="empty">
+              <img src="../../../../assets/img/not-content.png" alt="">
+              <p>暂无相关数据</p>
+            </div>
           </el-table>
         </div>
         <el-pagination
+          v-if="manageList && manageList.list && manageList.list.length > 0"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
           :page-sizes="[100, 200, 300, 400]"
@@ -207,8 +212,6 @@
     <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
     <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
-
-
 </template>
 <script>
 import manageDetail from './components/manageDetail.vue';
@@ -229,7 +232,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
         rank: null,
         time: null,
         controlObj: null,
-        facilityId: null
+        deviceId: null
       },
       lastManageForm: {
         type: null,
@@ -237,7 +240,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
         rank: null,
         time: null,
         controlObj: null,
-        facilityId: null
+        deviceId: null
       },//用来记录之前的搜索参数，对比是否需要置为第一页
       loading: false,
       controlObjList: [],//布控对象列表
@@ -263,7 +266,9 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
   },
   created () {
     this.getDiciData();
+    this.getControlList();
     const data = this.$route.query;
+    // 外部跳转到详情页
     if (data.pageType && data.state && data.controlId) {
       this.$nextTick(() => {
         this.pageType = parseInt(data.pageType);
@@ -271,7 +276,15 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
         this.controlId = data.controlId;
       })
     }
-    this.getControlList();
+    // 外部跳转到列表页
+    if (data.deviceId && data.state) {
+      this.$nextTick(() => {
+        this.getControlDevice();
+        this.manageForm.state = parseInt(data.state);
+        this.manageForm.deviceId = data.deviceId;
+        this.getControlList();
+      })
+    }
   },
   methods: {
     // 获取告警级别字段
@@ -358,7 +371,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
     getControlList () {
       console.log(11111)
       this.pageType = 1;//在布控详情页里删除布控，需要跳转到布控列表页
-      // 删除参数有变化时，当前置为第一页
+      // 筛选参数有变化时，当前置为第一页
       const arr = Object.values(this.manageForm);
       const lastArr = Object.values(this.lastManageForm);
       let isReset = false;
@@ -385,7 +398,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
         'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
         'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.value,//布控对象id
         'where.objType': this.manageForm.controlObj && this.manageForm.controlObj.type,//布控对象类型【当布控对象id传了则必传】 1人像 2车辆
-        'where.deviceId': this.manageForm.facilityId//布控设备id
+        'where.deviceId': this.manageForm.deviceId//布控设备id
       }
       this.loading = true;
       getControlList(params).then(res => {
@@ -402,6 +415,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
 <style lang="scss" scoped>
 .control_manage{
   width: 100%;
+  height: 100%;
   padding: 20px;
   .control_manage_box{
     width: 100%;
