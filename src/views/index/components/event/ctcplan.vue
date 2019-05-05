@@ -66,11 +66,13 @@
         </el-table-column>
         <el-table-column
           label="适用事件等级"
-          prop="levelNameList"
+          prop="levelList"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span>{{scope.row.levelNameList.join()}}</span>
+            <span v-for="(item, index) in scope.row.levelList" :key="index">
+              {{item.planLevelName + ' '}}
+            </span>
           </template>
         </el-table-column>
         <el-table-column

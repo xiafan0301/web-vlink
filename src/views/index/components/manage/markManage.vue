@@ -193,7 +193,7 @@ export default {
       rules: {
         markName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { max: 20, message: '最多输入20个子', trigger: 'blur' }
+          { max: 20, message: '最多输入20个字', trigger: 'blur' }
         ]
       },
       createMarkDialog: false, // 新增标记弹出框
@@ -215,7 +215,11 @@ export default {
         'where.startDate': this.searchForm.reportTime[0],
         'where.endDate': this.searchForm.reportTime[1],
         'where.userId': this.searchForm.userId,
-        'where.deptId': this.searchForm.deptId
+        'where.deptId': this.searchForm.deptId,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc'
       }
       apiGetVideoRecords(params)
         .then(res => {

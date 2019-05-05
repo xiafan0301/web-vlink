@@ -29,7 +29,7 @@
                 v-for="(item, index) in eventLevelList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
@@ -117,9 +117,7 @@ export default {
             departmentId: null
           }
         ],
-        path: null, // 附件
-        attachmentType: null,
-        cname: null // 附件名称
+        sysAppendixInfo: null
       },
       rules: {
         planName: [
@@ -189,10 +187,23 @@ export default {
     },
     // 上传成功
     handSuccess (res) {
-      if (res.data) {
-        this.addPlanForm.path = res.data.fileFullPath;
-        this.addPlanForm.cname = res.data.fileName;
-        this.addPlanForm.attachmentType = dataList.fileId;
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let data;
+        if (fileName) {
+          data = {
+            contentUid: 0,
+            fileType: dataList.fileId,
+            path: res.data.fileFullPath,
+            filePathName: res.data.filePath,
+            cname: res.data.fileName,
+            imgSize: res.data.fileSize,
+            imgWidth: res.data.fileWidth,
+            imgHeight: res.data.fileHeight,
+            thumbnailPath: res.data.thumbnailFileFullPath,
+          }
+          this.addPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(data));
+        }
       }
     },
     // 在上传之前

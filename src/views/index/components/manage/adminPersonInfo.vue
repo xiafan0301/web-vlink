@@ -1,262 +1,265 @@
 <template>
-  <div class="admin_person_info">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/manage/basicInfo/personInfo' }">基础信息库</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/manage/basicInfo/personInfo' }">人员信息库</el-breadcrumb-item>
-        <el-breadcrumb-item>管理组信息</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-    <div class="content_box">
-      <div class="btn_box">
-        <div class="bnt_box_left">
-          <span>{{groupName}}</span>
-          <i class=" edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
-          <i class=" del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
-        </div>
-        <div class="bnt_box_right">
-          <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
-          <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
-          <div class="copy_info" v-show="showGroup">
-            <div class="copy_info_list">
-              <vue-scroll>
-                <ul class="copy_info_ul">
-                   <li
-                    v-for="(item, index) in copyGroupList"
-                    :key="index"
-                    @click="handleCopyGroup(item.uid)"
-                  >{{item.name}}</li>
-                </ul>
-              </vue-scroll>
-            </div>
-            <div class="add_btn"  @click="showAddGroupDialog">
-              <i class="vl_icon vl_icon_manage_4"></i>
-              <span>新增分组</span>
+  <vue-scroll>
+    <div class="admin_person_info">
+      <div class="breadcrumb_heaer">
+        <el-breadcrumb separator=">">
+          <el-breadcrumb-item :to="{ path: '/manage/basicInfo/personInfo' }">基础信息库</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/manage/basicInfo/personInfo' }">人员信息库</el-breadcrumb-item>
+          <el-breadcrumb-item>管理组信息</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="content_box">
+        <div class="btn_box">
+          <div class="bnt_box_left">
+            <span>{{groupName}}</span>
+            <i class=" edit_btn vl_icon vl_icon_manage_7" @click="showEditDialog"></i>
+            <i class=" del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
+          </div>
+          <div class="bnt_box_right">
+            <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
+            <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
+            <div class="copy_info" v-show="showGroup">
+              <div class="copy_info_list">
+                <vue-scroll>
+                  <ul class="copy_info_ul">
+                    <li
+                      v-for="(item, index) in copyGroupList"
+                      :key="index"
+                      @click="handleCopyGroup(item.uid)"
+                    >{{item.name}}</li>
+                  </ul>
+                </vue-scroll>
+              </div>
+              <div class="add_btn"  @click="showAddGroupDialog">
+                <i class="vl_icon vl_icon_manage_4"></i>
+                <span>新增分组</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="divide"></div>
-      <div class="table_box">
-        <div class="search_box">
-          <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-            <el-form-item prop="idNo">
-              <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
-            </el-form-item>
-            <el-form-item prop="idType">
-              <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
-                <el-option label="身份证" :value="1"></el-option>
-                <el-option label="护照" :value="2"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item prop="sex">
-              <el-select v-model="searchForm.sex" style="width: 240px;">
-                <el-option label="男" :value="1"></el-option>
-                <el-option label="女" :value="2"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button class="select_btn" @click="searchData">查询</el-button>
-              <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
-            </el-form-item>
-          </el-form>
+        <div class="divide"></div>
+        <div class="table_box">
+          <div class="search_box">
+            <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
+              <el-form-item prop="idNo">
+                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
+              </el-form-item>
+              <el-form-item prop="idType">
+                <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
+                  <el-option label="身份证" :value="1"></el-option>
+                  <el-option label="护照" :value="2"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="sex">
+                <el-select v-model="searchForm.sex" style="width: 240px;" placeholder="性别">
+                  <!-- <el-option label="全部" :value="0"></el-option> -->
+                  <el-option label="男" :value="1"></el-option>
+                  <el-option label="女" :value="2"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="select_btn" @click="searchData">查询</el-button>
+                <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+          <el-table
+            class="event_table"
+            :data="personInfoList"
+            @selection-change="handleSelectChange"
+            >
+            <el-table-column
+              type="selection"
+              width="55">
+            </el-table-column>
+            <el-table-column
+              fixed
+              label="序号"
+              type="index"
+              >
+            </el-table-column>
+            <el-table-column
+              label="姓名"
+              prop="name"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="性别"
+              prop="sex"
+              show-overflow-tooltip
+              >
+              <template slot-scope="scope">
+                <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
+                <!-- <span v-show="scope.row.sex == 1">男</span>
+                <span v-show="scope.row.sex == 2">女</span> -->
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="证件类型"
+              prop="idType"
+              show-overflow-tooltip
+              >
+              <template slot-scope="scope">
+                <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="证件号码"
+              prop="idNo"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column
+              label="备注信息"
+              prop="remarks"
+              show-overflow-tooltip
+              >
+            </el-table-column>
+            <el-table-column label="操作" width="140">
+              <template slot-scope="scope">
+                <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total">
+          </el-pagination>
         </div>
-        <el-table
-          class="event_table"
-          :data="personInfoList"
-          @selection-change="handleSelectChange"
-          >
-          <el-table-column
-            type="selection"
-            width="55">
-          </el-table-column>
-          <el-table-column
-            fixed
-            label="序号"
-            type="index"
-            >
-          </el-table-column>
-          <el-table-column
-            label="姓名"
-            prop="name"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="性别"
-            prop="sex"
-            show-overflow-tooltip
-            >
-            <template slot-scope="scope">
-              <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
-              <!-- <span v-show="scope.row.sex == 1">男</span>
-              <span v-show="scope.row.sex == 2">女</span> -->
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="证件类型"
-            prop="idType"
-            show-overflow-tooltip
-            >
-            <template slot-scope="scope">
-              <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="证件号码"
-            prop="idNo"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column
-            label="备注信息"
-            prop="remarks"
-            show-overflow-tooltip
-            >
-          </el-table-column>
-          <el-table-column label="操作" width="140">
-            <template slot-scope="scope">
-              <span class="operation_btn" @click="showLookDetailInfo(scope.row)">查看</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          @current-change="handleCurrentChange"
-          :current-page.sync="pagination.pageNum"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="pagination.pageSize"
-          layout="total, prev, pager, next, jumper"
-          :total="pagination.total">
-        </el-pagination>
       </div>
+      <!--查看人员详细信息弹出框-->
+      <el-dialog
+        title="查看人员信息"
+        :visible.sync="perosnDetailInfoDialog"
+        width="722px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp_person"
+        >
+        <div class="content_body">
+          <div class="content_left">
+            <img :src="personDetailInfo.photoUrl">
+          </div>
+          <ul class="content_right">
+            <li>
+              <span>姓名：</span>
+              <span>{{personDetailInfo.name}}</span>
+            </li>
+            <li>
+              <span>性别：</span>
+              <span>{{personDetailInfo.sex === 1 ? '男' : '女'}}</span>
+            </li>
+            <li>
+              <span>民族：</span>
+              <span>{{personDetailInfo.nation === 1 ? '汉族' : personDetailInfo.nation}}</span>
+            </li>
+            <li>
+              <span>证件类型：</span>
+              <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
+            </li>
+            <li>
+              <span>证件号码：</span>
+              <span>{{personDetailInfo.idNo}}</span>
+            </li>
+            <li>
+              <span>出生日期：</span>
+              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+            </li>
+            <li>
+              <span>底库信息：</span>
+              <span></span>
+            </li>
+            <li>
+              <span>分组信息：</span>
+              <span></span>
+            </li>
+            <li>
+              <span>备注：</span>
+              <span>{{personDetailInfo.remarks}}</span>
+            </li>
+          </ul>
+        </div>
+      </el-dialog>
+      <!--新增组弹出框-->
+      <el-dialog
+        title="新增分组"
+        :visible.sync="addGroupDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <div class="content_body">
+          <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
+          <el-form :model="groupForm" ref="groupForm" :rules="rules">
+              <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+                <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+                <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+              </el-form-item>
+            </el-form>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelAddGroup('groupForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="sureAddGroup('groupForm')">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--修改组弹出框-->
+      <el-dialog
+        title="修改组名"
+        :visible.sync="editGroupDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <el-form :model="groupForm" ref="groupForm" :rules="rules">
+          <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+            <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelEdit('groupForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editGroupInfo('groupForm')">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--删除组弹出框-->
+      <el-dialog
+        title="是否确定删除该组？"
+        :visible.sync="deleteGroupDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">删除后该组信息可在全部人像中查找。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="deleteGroupDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteGroup">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--移出组弹出框-->
+      <el-dialog
+        :title="delTitle"
+        :visible.sync="moveoutGroupDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">移除后该条信息可在全部人像中查找。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="moveoutGroupDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isRemoveLoading" @click="moveoutGroupInfo">确认</el-button>
+        </div>
+      </el-dialog>
     </div>
-    <!--查看人员详细信息弹出框-->
-    <el-dialog
-      title="查看人员信息"
-      :visible.sync="perosnDetailInfoDialog"
-      width="722px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp_person"
-      >
-      <div class="content_body">
-        <div class="content_left">
-          <img :src="personDetailInfo.photoUrl">
-        </div>
-        <ul class="content_right">
-          <li>
-            <span>姓名：</span>
-            <span>{{personDetailInfo.name}}</span>
-          </li>
-          <li>
-            <span>性别：</span>
-            <span>{{personDetailInfo.sex === 1 ? '男' : '女'}}</span>
-          </li>
-          <li>
-            <span>民族：</span>
-            <span>{{personDetailInfo.nation === 1 ? '汉族' : personDetailInfo.nation}}</span>
-          </li>
-          <li>
-            <span>证件类型：</span>
-            <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
-          </li>
-          <li>
-            <span>证件号码：</span>
-            <span>{{personDetailInfo.idNo}}</span>
-          </li>
-          <li>
-            <span>出生日期：</span>
-            <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
-          </li>
-          <li>
-            <span>底库信息：</span>
-            <span></span>
-          </li>
-          <li>
-            <span>分组信息：</span>
-            <span></span>
-          </li>
-          <li>
-            <span>备注：</span>
-            <span>{{personDetailInfo.remarks}}</span>
-          </li>
-        </ul>
-      </div>
-    </el-dialog>
-    <!--新增组弹出框-->
-    <el-dialog
-      title="新增分组"
-      :visible.sync="addGroupDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <div class="content_body">
-        <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
-         <el-form :model="groupForm" ref="groupForm" :rules="rules">
-            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
-              <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
-            </el-form-item>
-          </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelAddGroup('groupForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="sureAddGroup('groupForm')">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--修改组弹出框-->
-    <el-dialog
-      title="修改组名"
-      :visible.sync="editGroupDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <el-form :model="groupForm" ref="groupForm" :rules="rules">
-        <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-          <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
-          <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelEdit('groupForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editGroupInfo('groupForm')">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--删除组弹出框-->
-    <el-dialog
-      title="是否确定删除该组？"
-      :visible.sync="deleteGroupDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">删除后该组信息可在全部人像中查找。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="deleteGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteGroup">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--移出组弹出框-->
-    <el-dialog
-      :title="delTitle"
-      :visible.sync="moveoutGroupDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">移除后该条信息可在全部人像中查找。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="moveoutGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isRemoveLoading" @click="moveoutGroupInfo">确认</el-button>
-      </div>
-    </el-dialog>
-  </div>
+  </vue-scroll>
 </template>
 <script>
 import { validateName } from '@/utils/validator.js';
@@ -281,7 +284,7 @@ export default {
       searchForm: {
         name: null,
         idType: null,
-        sex: 1
+        sex: null
       },
       personInfoList: [],
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
@@ -459,8 +462,8 @@ export default {
     // 确认编辑
     editGroupInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowError = false;
         if (valid) {
-          this.isShowError = false;
           const params = {
             name: this.groupForm.userGroupName
           };
@@ -587,8 +590,8 @@ export default {
     // 确定新增分组
     sureAddGroup (form) {
       this.$refs[form].validate(valid => {
+        this.isShowError = false;
         if (valid) {
-          this.isShowError = false;
           const params = {
             name: this.groupForm.userGroupName
           };

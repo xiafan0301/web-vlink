@@ -1,192 +1,192 @@
 <template>
-<vue-scroll>
-  <div class="department-manage">
-    <div class="header">
-      <el-button class="add-btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
-      <el-input  placeholder="请输入部门名称" style="width: 240px;" v-model="organName">
-        <i v-show="closeShow" slot="suffix" @click="onClear()" class="search_icon el-icon-close" style="font-size: 20px;"></i>
-        <i
-          v-show="!closeShow"
-          class="search_icon vl_icon vl_icon_manage_1"
-          slot="suffix"
-          @click="searchData">
-        </i>
-      </el-input>
-    </div>
-    <div class="table_box">
-      <el-table
-        class="department_table"
-        :data="departmentData"
+  <vue-scroll>
+    <div class="department-manage">
+      <div class="header">
+        <el-button class="add-btn" icon="el-icon-plus" @click="showNewDepartment">新增部门</el-button>
+        <el-input  placeholder="请输入部门名称" style="width: 240px;" v-model="organName">
+          <i v-show="closeShow" slot="suffix" @click="onClear()" class="search_icon el-icon-close" style="font-size: 20px;"></i>
+          <i
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
+        </el-input>
+      </div>
+      <div class="table_box">
+        <el-table
+          class="department_table"
+          :data="departmentData"
+          >
+          <el-table-column
+            fixed
+            label="序号"
+            type="index"
+            :show-overflow-tooltip='true'
+            >
+          </el-table-column>
+          <el-table-column
+            label="部门名称"
+            prop="organName"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="上级部门"
+            prop="parentOrganName"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="部门负责人"
+            prop="chargeUserNameStr"
+            show-overflow-tooltip
+            >
+          </el-table-column>
+          <el-table-column
+            label="负责人联系方式"
+            prop="chargeUserMobile"
+            >
+          </el-table-column>
+          <el-table-column label="操作" width="200">
+            <template slot-scope="scope">
+              <span class="operation_btn" @click="skipSelectDetail(scope.row)">查看</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showEditDialog(scope.row)">编辑</span>
+              <span style="color: #f2f2f2">|</span>
+              <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <el-pagination
+        @current-change="handleCurrentChange"
+        :current-page.sync="pagination.pageNum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pagination.pageSize"
+        layout="total, prev, pager, next, jumper"
+        :total="pagination.total">
+      </el-pagination>
+      <!--新增部门弹框-->
+      <el-dialog
+        title="新增部门"
+        :visible.sync="newDepartmentDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
         >
-        <el-table-column
-          fixed
-          label="序号"
-          type="index"
-          :show-overflow-tooltip='true'
-          >
-        </el-table-column>
-        <el-table-column
-          label="部门名称"
-          prop="organName"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="上级部门"
-          prop="parentOrganName"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="部门负责人"
-          prop="chargeUserNameStr"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="负责人联系方式"
-          prop="chargeUserMobile"
-          >
-        </el-table-column>
-        <el-table-column label="操作" width="200">
-          <template slot-scope="scope">
-            <span class="operation_btn" @click="skipSelectDetail(scope.row)">查看</span>
-            <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showEditDialog(scope.row)">编辑</span>
-            <span style="color: #f2f2f2">|</span>
-            <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
-          </template>
-        </el-table-column>
-      </el-table>
+        <div style="margin-top: 10px;">
+          <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
+            <el-form-item label=" " prop="organName" class="organ_name">
+              <el-input v-model="addDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+              <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
+            </el-form-item>
+            <el-form-item label=" " prop="organPid">
+              <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
+                <el-option
+                  v-for="(item, index) in allDepartmentData"
+                  :key="'item' + index"
+                  :label="item.organName"
+                  :value="item.uid"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label=" " prop="chargeUserName">
+              <el-select style="width: 95%" filterable clearable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
+                <el-option
+                  v-for="(item, index) in userList"
+                  :key="'item' + index"
+                  :label="item.userName"
+                  :value="item.uid"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelAdd('addDepartment')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addDepartmentInfo('addDepartment')">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--编辑部门弹框-->
+      <el-dialog
+        title="编辑部门"
+        :visible.sync="editDepartmentDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <div style="margin-top: 10px;">
+          <el-form :model="editDepartment" ref="editDepartment" :rules="editRules" label-width="10px">
+            <el-form-item label=" " prop="organName" class="organ_name">
+              <el-input v-model="editDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
+              <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
+            </el-form-item>
+            <el-form-item label="" prop="pid">
+              <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门" disabled>
+                <el-option
+                  v-for="(item, index) in allDepartmentData"
+                  :key="'item' + index"
+                  :label="item.organName"
+                  :value="item.uid"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label=" " prop="chargeUserName">
+              <el-select style="width: 95%;" filterable v-model="editDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
+                <el-option
+                  v-for="(item, index) in userList"
+                  :key="'item' + index"
+                  :label="item.userName"
+                  :value="item.uid"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancelEdit('editDepartment')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editDepartmentInfo('editDepartment')">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--删除部门弹出框-->
+      <el-dialog
+        title="是否确认删除部门？"
+        :visible.sync="delDepartmentDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">删除后数据不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="delDepartmentDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteDepartment">确认</el-button>
+        </div>
+      </el-dialog>
+      <!--删除下级部门弹出框-->
+      <el-dialog
+        title="删除时将删除部门及其下级部门，是否确认删除？"
+        :visible.sync="delChildDepartmentDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <span style="color: #999999;">删除后数据不可恢复。</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="delChildDepartmentDialog = false">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteChildLoading" @click="delChildDepart">确认</el-button>
+        </div>
+      </el-dialog>
     </div>
-    <el-pagination
-      @current-change="handleCurrentChange"
-      :current-page.sync="pagination.pageNum"
-      :page-sizes="[100, 200, 300, 400]"
-      :page-size="pagination.pageSize"
-      layout="total, prev, pager, next, jumper"
-      :total="pagination.total">
-    </el-pagination>
-    <!--新增部门弹框-->
-    <el-dialog
-      title="新增部门"
-      :visible.sync="newDepartmentDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <div style="margin-top: 10px;">
-        <el-form :model="addDepartment" :rules="addRules" ref="addDepartment" label-width="10px">
-          <el-form-item label=" " prop="organName" class="organ_name">
-            <el-input v-model="addDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
-            <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
-          </el-form-item>
-          <el-form-item label=" " prop="organPid">
-            <el-select style="width: 95%;" v-model="addDepartment.organPid" placeholder="请选择上级部门">
-              <el-option
-                v-for="(item, index) in allDepartmentData"
-                :key="'item' + index"
-                :label="item.organName"
-                :value="item.uid"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label=" " prop="chargeUserName">
-            <el-select style="width: 95%" filterable clearable v-model="addDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
-              <el-option
-                v-for="(item, index) in userList"
-                :key="'item' + index"
-                :label="item.userName"
-                :value="item.uid"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelAdd('addDepartment')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addDepartmentInfo('addDepartment')">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--编辑部门弹框-->
-    <el-dialog
-      title="编辑部门"
-      :visible.sync="editDepartmentDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <div style="margin-top: 10px;">
-        <el-form :model="editDepartment" ref="editDepartment" :rules="editRules" label-width="10px">
-          <el-form-item label=" " prop="organName" class="organ_name">
-            <el-input v-model="editDepartment.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入部门名称"></el-input>
-            <p class="organ_error_tip" v-show="isShowOrganError">部门已存在</p>
-          </el-form-item>
-          <el-form-item label="" prop="pid">
-            <el-select style="width: 95%;" v-model="editDepartment.pid" placeholder="请选择上级部门" disabled>
-              <el-option
-                v-for="(item, index) in allDepartmentData"
-                :key="'item' + index"
-                :label="item.organName"
-                :value="item.uid"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label=" " prop="chargeUserName">
-            <el-select style="width: 95%;" filterable v-model="editDepartment.chargeUserName" placeholder="请搜索部门负责人姓名">
-              <el-option
-                v-for="(item, index) in userList"
-                :key="'item' + index"
-                :label="item.userName"
-                :value="item.uid"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelEdit('editDepartment')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editDepartmentInfo('editDepartment')">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--删除部门弹出框-->
-    <el-dialog
-      title="是否确认删除部门？"
-      :visible.sync="delDepartmentDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">删除后数据不可恢复。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="delDepartmentDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteDepartment">确认</el-button>
-      </div>
-    </el-dialog>
-    <!--删除下级部门弹出框-->
-    <el-dialog
-      title="删除时将删除部门及其下级部门，是否确认删除？"
-      :visible.sync="delChildDepartmentDialog"
-      width="482px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      class="dialog_comp"
-      >
-      <span style="color: #999999;">删除后数据不可恢复。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="delChildDepartmentDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isDeleteChildLoading" @click="delChildDepart">确认</el-button>
-      </div>
-    </el-dialog>
-  </div>
-</vue-scroll>
+  </vue-scroll>
 </template>
 <script>
 import { judgeDepart, getDepartmentList, updateDepart, delDepart, addDepart, getUserList } from '@/views/index/api/api.manage.js';
@@ -407,6 +407,7 @@ export default {
     // 添加部门
     addDepartmentInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,
@@ -452,6 +453,7 @@ export default {
     // 编辑部门
     editDepartmentInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,

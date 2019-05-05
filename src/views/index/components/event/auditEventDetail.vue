@@ -95,7 +95,7 @@
                 </li>
                 <li v-show="detailInfo.rejectReasonName">
                   <span>驳回原因:</span>
-                  <span>{{detailInfo.rejectReasonName}}</span>
+                  <span>{{detailInfo.rejectReasonDesci ? detailInfo.rejectReasonDesci : detailInfo.rejectReasonName}}</span>
                 </li>
               </ul>
             </div>

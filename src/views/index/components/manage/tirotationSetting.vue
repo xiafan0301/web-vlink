@@ -32,7 +32,7 @@
       <div class="table_box">
         <div class="add_ratation_btn" @click="skipAddRatotionPage">
           <span>+</span>
-          <span>新增轮训</span>
+          <span>新增轮巡</span>
         </div>
         <el-table
           class="ratation_table"

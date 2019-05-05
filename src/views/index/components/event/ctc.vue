@@ -175,8 +175,8 @@ export default {
         eventStatus = this.ctcForm.eventStatus;
       }
       const params = {
-        'where.eventFlag': this.ctcForm.eventFlag,
-        'where.mutualFlag': this.ctcForm.mutualFlag,
+        // 'where.eventFlag': this.ctcForm.eventFlag,
+        // 'where.mutualFlag': this.ctcForm.mutualFlag,
         'where.reportTimeStart': this.ctcForm.reportTime[0],
         'where.reportTimeEnd': this.ctcForm.reportTime[1],
         'where.keyword': this.ctcForm.phoneOrNumber,
