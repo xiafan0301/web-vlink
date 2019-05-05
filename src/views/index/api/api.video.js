@@ -278,3 +278,15 @@ export const deleteVideoRecords = data => {
     mode: videoModeName
   })
 }
+
+/**
+ * 当前轮巡记录查询接口
+ * @param {Object} data 接口入参
+ */
+export const getVideoCurrentRound = () => {
+  return request({
+    url: '/round/current-round',
+    method: 'get',
+    mode: videoModeName
+  })
+}
