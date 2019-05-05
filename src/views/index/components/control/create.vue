@@ -1,5 +1,5 @@
 <template>
-<!-- 新建布控、编辑布控、复用布控公用页面 -->
+  <!-- 新建布控、编辑布控、复用布控公用页面 -->
   <div class="control_create">
     <!-- 面包屑 -->
     <!-- 编辑布控时出现 -->
@@ -52,6 +52,7 @@
                 style="width: 192px;"
                 v-model="createForm.controlDate"
                 type="daterange"
+                :picker-options="pickerOptions"
                 range-separator="-"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -60,7 +61,7 @@
               </el-date-picker>
             </el-form-item>
             <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
-              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+              <el-form-item style="width: 48%;margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
@@ -72,7 +73,7 @@
                 </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item style="margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
+              <el-form-item style="width: 48%;margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
@@ -113,14 +114,14 @@
               </div>
               <template v-if="allDevData && allDevData.length > 0">
                 <!-- 人员追踪 -->
-                <div is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '1' || modelDOne))" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType"></div>
                 <!-- 车辆追踪 -->
-                <div is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '2' || modelDTwo))" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType"></div>
                 <!-- 范围分析 -->
-                <div is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '4' || modelDFour))" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
               </template>
               <!-- 越界分析 -->
-              <div is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree"></div>
+              <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '3' || modelDThree))" is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :operateType="pageType" ></div>
             </div>
           </div>
         </el-form>
@@ -159,6 +160,11 @@ export default {
     return {
       pageType: null,//页面类型
       // 表单参数
+      pickerOptions: {
+        disabledDate (time) {
+          return time.getTime() < Date.now() - 8.64e7;
+        }
+      },
       labelPosition: 'top',
       controlTypeList: [
         {label: '短期布控', value: 1},
@@ -214,8 +220,6 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
-      // this.checkList = ['人员追踪'];
-      // this.modelType = '1';
     }
     // 复用页-3
     if (this.$route.query.createType) {
@@ -258,8 +262,10 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.keyword': query,
-        pageSize: 1000000
+        'where.eventCode': query,
+        pageSize: 1000000,
+        orderBy: 'report_time',
+        order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {
@@ -439,22 +445,18 @@ export default {
     },
     // 获得子组件传过来的人员追踪的数据
     getModelDataOne (data) {
-      console.table(data);
       this.modelDataOne  = data;
     },
     // 获得子组件传过来的车辆追踪的数据
     getModelDataTwo (data) {
-      console.table(data);
       this.modelDataTwo  = data;
     },
     // 获得子组件传过来的越界分析的数据
     getModelDataThree (data) {
-      console.table(data);
       this.modelDataThree  = data;
     },
     // 获得子组件传过来的范围分析的数据
     getModelDataFour (data) {
-      console.table(data);
       this.modelDataFour  = data;
     },
     // 根据布控id获取布控详情，用于回填数据
@@ -692,7 +694,7 @@ export default {
           margin-top: 20px!important;
         }
         .period_time.one{
-          margin-top: 40px!important;
+          margin-top: 41px!important;
         }
       }
       .period_time_btn_box{ 

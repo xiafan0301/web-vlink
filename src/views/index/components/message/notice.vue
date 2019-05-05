@@ -97,9 +97,14 @@
                   </template>
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
+            v-if="noticeList && noticeList.list && noticeList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -129,6 +134,11 @@ export default {
         titleOrPublisher: null,
         noticeState: null
       },
+      lastNoticeForm: {
+        noticeDate: null,
+        titleOrPublisher: null,
+        noticeState: null
+      },
       noticeStateList: [
         {value: '0', label: '未置顶'},
         {value: '1', label: '已置顶'}
@@ -149,6 +159,21 @@ export default {
     // 获取公告消息列表
     getMsgNoteList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.noticeForm);
+      const lastArr = Object.values(this.lastNoticeForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastNoticeForm = Object.assign({}, this.noticeForm);
       const params = {
         pageSize: this.pageSize,
         pageNum: this.pageNum,

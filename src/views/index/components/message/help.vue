@@ -88,9 +88,14 @@
                   <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
+            v-if="helpList && helpList.list && helpList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -120,6 +125,11 @@ export default {
         content: null,
         helpState: null
       },
+      lastHelpForm: {
+        helpDate: null,
+        content: null,
+        helpState: null
+      },
       helpStateList: [
         {value: -1, label: '不推送'},
         {value: 0, label: '全部推送'},
@@ -144,6 +154,21 @@ export default {
     // 获取民众互助列表
     getMutualHelpList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.helpForm);
+      const lastArr = Object.values(this.lastHelpForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastHelpForm = Object.assign({}, this.helpForm);
       const params = {
         pageNum: this.pageNum,
         pageSize: this.pageSize,

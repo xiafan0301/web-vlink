@@ -149,15 +149,15 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i v-if="item.origin !== '1'" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('portraitForm', '2', item.uid)"></i>
+                  <i v-if="item.origin !== 1" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('portraitForm', '2', item.uid)"></i>
                   <el-tooltip v-else class="item" effect="dark" content="底库数据不可编辑" placement="top">
                     <i class="vl_icon vl_icon_control_20"></i>
                   </el-tooltip>
                 </div>
                 <div class="data_list">
-                  <span>{{item.name}}</span>
-                  <span>{{item.sex}}</span>
-                  <span>{{item.nation}}</span>
+                  <span :title="item.name">{{item.name}}</span>
+                  <span :title="item.sex">{{item.sex}}</span>
+                  <span :title="item.nation">{{item.nation}}</span>
                 </div>
                 <div class="data_list">
                   <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
@@ -167,19 +167,30 @@
                     <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
                   </template>
                   <div class="more" v-if="item.groupNames.split(',').length >= 3">
-                    <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-                    <template v-if="showMoreId === item.uid">
-                      <div>
-                        <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                      </div>
-                      <i></i>
-                    </template>
+                    <el-popover
+                      placement="top-start"
+                      width="220"
+                      popper-class="more_popover_box"
+                      trigger="hover">
+                      <vue-scroll>
+                        <template>
+                          <div class="more_popover">
+                            <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                          </div>
+                        </template>
+                      </vue-scroll>
+                      <span slot="reference" class="more_hover">更多组</span>
+                    </el-popover>
                   </div>
                 </div>
-                <div class="data_list">
+                <div class="data_list" v-if="item.remarks">
                   <span>{{item.remarks}}</span>
                 </div>
               </div>
+            </div>
+            <div class="not_content" v-if="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length === 0">
+              <img src="../../../../assets/img/not-content.png" alt="">
+              <p>暂无相关数据</p>
             </div>
           </template>
           <template v-else>
@@ -188,16 +199,16 @@
               <div class="list_data">
                 <div class="data_title">
                   <span class="vl_f_999">详情资料</span>
-                  <i v-if="item.origin !== '1'" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('carForm', '2', item.uid)"></i>
+                  <i v-if="item.origin !== 1" class="vl_icon vl_icon_control_20 can_click" @click="clearForm('carForm', '2', item.uid)"></i>
                   <el-tooltip v-else class="item" effect="dark" content="底库数据不可编辑" placement="top">
                     <i class="vl_icon vl_icon_control_20"></i>
                   </el-tooltip>
                 </div>
                 <div class="data_list">
-                  <span>{{item.vehicleNumber}}</span><span>{{item.numberType}}</span>
+                  <span :title="item.vehicleNumber">{{item.vehicleNumber}}</span><span :title="item.numberType">{{item.numberType}}</span>
                 </div>
                 <div class="data_list">
-                  <span>{{item.vehicleType}}</span><span>{{item.vehicleColor}}</span>
+                  <span :title="item.vehicleType">{{item.vehicleType}}</span><span :title="item.vehicleColor">{{item.vehicleColor}}</span>
                 </div>
                 <div class="data_list">
                   <span :title="item.numberColor">{{item.numberColor}}</span>
@@ -206,23 +217,34 @@
                       <span v-if="index === 0" :title="gN" :key="index + gN">{{gN}}</span>
                     </template>
                     <div class="more" v-if="item.groupNames.split(',').length > 1">
-                      <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-                      <template v-if="showMoreId === item.uid">
-                        <div>
-                          <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                        </div>
-                        <i></i>
-                      </template>
+                      <el-popover
+                        placement="top-start"
+                        width="220"
+                        popper-class="more_popover_box"
+                        trigger="hover">
+                        <vue-scroll>
+                          <template>
+                            <div class="more_popover">
+                              <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                            </div>
+                          </template>
+                        </vue-scroll>
+                        <span slot="reference" class="more_hover">更多组</span>
+                      </el-popover>
                     </div>
                   </template>
                 </div>
-                <div class="data_list">
+                <div class="data_list" v-if="item.desci">
                   <span>{{item.desci}}</span>
                 </div>
               </div>
             </div>
+            <div class="not_content" v-if="carMemberList && carMemberList.list && carMemberList.list.length === 0">
+              <img src="../../../../assets/img/not-content.png" alt="">
+              <p>暂无相关数据</p>
+            </div>
           </template>
-          <div style="width: 100%;" v-show="tabType === '1'">
+          <div style="width: 100%;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
             <el-pagination
               style="text-align: center;"
               @current-change="handleCurrentChange"
@@ -233,7 +255,7 @@
               :total="protraitMemberList.total">
             </el-pagination>
           </div>
-          <div style="width: 100%;" v-show="tabType === '2'">
+          <div style="width: 100%;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
             <el-pagination
               style="text-align: center;"
               @current-change="handleCurrentChange"
@@ -482,7 +504,6 @@ export default {
       // 侧边栏参数
       tabType: '1',
       group: null,//搜索组
-      showMoreId: null,
       // 人像库筛选参数
       libPortraitForm: {
         perTime: null,
@@ -617,6 +638,8 @@ export default {
         numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
         numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
       },
+      lastIdNo: null,
+      lastCarIdNo: null,
       // 上传人像参数
       dialogImageUrl: null,
       dialogVisible: false,
@@ -758,6 +781,8 @@ export default {
         this.$refs[formName].resetFields();
       }
       this.operationType = type;
+      this.lastIdNo = null;
+      this.lastCarIdNo = null;
       // 获取人像信息回填，用来修改人像
       if (formName === 'portraitForm' && type === '2') {
         this.getPortraitById(uid);
@@ -791,24 +816,32 @@ export default {
     // 通过证件号搜索人像
     getPortraitByIdNo () {
       const idNo = this.Trim(this.portraitForm.idNo, 'g');
+      if (this.lastIdNo === idNo) return;
+      this.lastIdNo = idNo;
       const params = {idNo: idNo}
       if (idNo) {
         getPortraitByIdNo(params).then(res => {
           // 人像已存在
-          if (res && res.data) {
-            this.$message.error('证件号已存在');
-            let protraitInfo = res.data;
+          if (res && res.data && res.data.length > 0) {
+            let protraitInfo = res.data[0];
             this.fileList = [{url: protraitInfo.photoUrl}];//回填图片
             protraitInfo.photoUrl = protraitInfo.photoUrl;
+            console.log(protraitInfo.birthDate)
             protraitInfo.birthDate = protraitInfo.birthDate.split('');
             protraitInfo.birthDate.splice(4, 1, '年');
             protraitInfo.birthDate.splice(7, 1, '月');
             protraitInfo.birthDate.splice(10, 0, '日');
             protraitInfo.birthDate = protraitInfo.birthDate.join('');
             protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
-            protraitInfo.groupIds = protraitInfo.groupList.map(m => m.uid);
+            protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
+            protraitInfo.uid = this.portraitForm.uid;
             this.portraitForm = protraitInfo;
-            this.isAddDisabled = true;
+            if (protraitInfo.origin === 1) {
+              this.isAddDisabled = true;
+            } else {
+              this.isAddDisabled = false;
+              this.$message.error('布控库已存在，请修改证件号码');
+            }
             if (this.$refs['portraitForm']) {
               this.$refs['portraitForm'].resetFields();
             }
@@ -878,19 +911,27 @@ export default {
     },
     // 通过车牌号搜索车像
     getVehicleByIdNo () {
-      const idNo = this.Trim(this.carForm.vehicleNumber, 'g');
+      const carIdNo = this.Trim(this.carForm.vehicleNumber, 'g');
+      if (this.lastCarIdNo === carIdNo) return;
+      this.lastCarIdNo = carIdNo;
       const params = {
-        vehicleNumber: idNo
+        vehicleNumber: carIdNo
       }
-      if (idNo) {
+      if (carIdNo) {
         getVehicleByIdNo(params).then(res => {
           // 已存在车像
           if (res && res.data && res.data.length > 0) {
-            this.$message.error('车牌号已存在');
             let carInfo = res.data[0];
             this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
-            carInfo.groupIds = carInfo.groupList.map(m => m.uid);
+            carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
+            carInfo.uid = this.carForm.uid;
             this.carForm = carInfo;
+            if (carInfo.origin === 1) {
+              this.isAddDisabled = true;
+            } else {
+              this.isAddDisabled = false;
+              this.$message.error('布控库已存在，请修改车牌号码');
+            }
             this.isAddDisabled = true;
           // 不存在车像
           } else {
@@ -957,7 +998,8 @@ export default {
           protraitInfo.birthDate.splice(10, 0, '日');
           protraitInfo.birthDate = protraitInfo.birthDate.join('');
           protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
-          protraitInfo.groupIds = protraitInfo.groupList.map(m => m.uid);
+          protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
+          this.lastIdNo = protraitInfo.idNo;
           this.portraitForm = protraitInfo;
           console.log(this.portraitForm)
         }
@@ -1007,7 +1049,8 @@ export default {
           let carInfo = res.data;
           this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
           this.dialogImageUrl = carInfo.vehicleImagePath;
-          carInfo.groupIds = carInfo.groupList.map(m => m.uid);
+          carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
+          this.lastCarIdNo = carInfo.vehicleNumber;
           this.carForm = carInfo;
           console.log(this.carForm)
         }
@@ -1050,7 +1093,7 @@ export default {
       this.groupIndex = index;
       this.groupId = groupId;
       this.groupName = groupName;
-      if (this.groupId !== this.lastGroupId) {
+      if (this.groupId !== this.lastGroupId || pageType === '2') {
         this.currentPage = 1;
         this.pageNum = 1;
       }
@@ -1086,7 +1129,7 @@ export default {
       this.groupIndex = index;
       this.groupId = groupId;
       this.groupName = groupName;
-      if (this.groupId !== this.lastGroupId) {
+      if (this.groupId !== this.lastGroupId || pageType === '2') {
         this.currentPage = 1;
         this.pageNum = 1;
       }
@@ -1172,7 +1215,7 @@ export default {
     }
     .add_group{
       padding: 0 10px 10px;
-      max-height: 540px;
+      max-height: 216px;
       .group_title{
         height: 36px;
         line-height: 36px;
@@ -1246,6 +1289,7 @@ export default {
       line-height: 40px;
     }
     .list_box{
+      height: calc(100% - 100px);
       margin: 20px 0.5%;
       display: flex;
       flex-wrap: wrap;
@@ -1299,34 +1343,12 @@ export default {
             .more{
               position: relative;
               padding-top: 6px;
-              > span{
+              .more_hover{
                 margin-bottom: 10px;
                 cursor: pointer;
                 color: #0C70F8;
-              }
-              > div{
-                width: 220px;
-                padding: 20px 20px 10px;
-                position: absolute;
-                right: 72px;
-                bottom: 0;
-                background:rgba(255,255,255,1);
-                box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
-                border-radius: 5px;
-                display: flex;
-                flex-wrap: wrap;
-                > span{
-                  margin-bottom: 10px;
-                  margin-right: 2px;
-                }
-              }
-              > i{
-                position: absolute;
-                left: -8px;
-                top: 6px;
-                display: inline-block;
-                border: 6px solid transparent;
-                border-left-color: #fff;
+                border: none;
+                padding: 0;
               }
             }
           }
@@ -1383,15 +1405,9 @@ export default {
         }
       }
       .portrait_form{
-        width: 480px;
         padding-left: 30px;
       }
     }
-  }
-}
-@media (max-width: 1400px) {
-  .control_library .list_box .list_info{
-    width: 49%!important;
   }
 }
 </style>
@@ -1444,7 +1460,7 @@ export default {
     }
     .el-dialog__footer{
       text-align: right;
-      padding: 10px 90px 20px!important;
+      padding: 0 90px 20px!important;
     }
     .add_portrait .portrait_form{
       .desc{
@@ -1458,13 +1474,14 @@ export default {
         p{
           padding-right: 10px;
           text-align: right;
+          line-height: 30px;
         }
       }
       .el-form-item{
-        margin-bottom: 10px;
+        margin-bottom: 18px;
       }
       .el-button.active{
-        background: #fff;
+        background: rgb(199, 197, 197);
         border-color: #409EFF;
         color: #409EFF;
       }
@@ -1472,6 +1489,11 @@ export default {
   }
   .el-dialog__wrapper .el-dialog__body{
     padding: 0px 30px;
+  }
+}
+@media (max-width: 1400px) {
+  .control_library .list_box .list_info{
+    width: 49%!important;
   }
 }
 </style>

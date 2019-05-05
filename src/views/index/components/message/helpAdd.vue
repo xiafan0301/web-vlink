@@ -214,6 +214,8 @@ export default {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
             cb(result.tips);
+          } else {
+            cb([]);
           }
         })
       }

@@ -30,7 +30,7 @@
             <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
-        <div class="manage_d_c_e" v-if="controlDetail.eventId !== null">
+        <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
           <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
@@ -43,8 +43,7 @@
                 <i class="vl_icon vl_icon_control_33"></i>
                 <p>暂无相关图片</p>
               </div>
-              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_333">{{item.name}}</span></p>
-              <p><i class="vl_icon vl_icon_control_17"></i><span class="vl_f_666">{{item.controlReason}}</span></p>
+              <p><i class="vl_icon vl_icon_control_40"></i><span class="vl_f_333">{{item.name}}</span></p>
             </div>
           </div>
           <el-pagination
@@ -57,7 +56,7 @@
             :total="controlDetail.objectNum">
           </el-pagination>
         </div>
-        <div :class="['vl_control_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
+        <div :class="['vl_icon con_state', controlState === 2 ? 'vl_control_s' : controlState === 1 ? 'vl_control_o' : 'vl_control_e']"></div>
         <!-- 布控范围 -->
         <div class="manage_d_c_scope">
           <div class="manage_d_s_t" @click="controlArea(1)">
@@ -139,6 +138,7 @@
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
             <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
+            <div v-if="controlDetail.terminationReason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
@@ -149,7 +149,7 @@
             <el-collapse-transition>
               <div class="situ_content" v-show="dpTwo">
                   <div class="situ_left">
-                    <div style="padding-left: 20px;">布控设备（12）</div>
+                    <div style="padding-left: 20px;">布控设备</div>
                     <div class="equ_m">
                       <div @click="tabTypeBySituation = '0'" :class="{'active': tabTypeBySituation === '0'}">摄像头（{{devNum}}）</div>
                       <div @click="tabTypeBySituation = '1'" :class="{'active': tabTypeBySituation === '1'}">卡口（{{bayonetNum}}）</div>
@@ -207,7 +207,7 @@
                     <div class="situ_r_img" v-if="!item.isShowVideo">
                       <div>从左边拖拽设备播放</div>
                     </div>
-                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
                       :oConfig="{sign: true}">
                     </div>
                   </div>
@@ -259,7 +259,7 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg">
+                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
                   <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
@@ -332,14 +332,14 @@
         <div class="detail_list">
           <div>
             <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.dealOrgId}}</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterUserName}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatus}}</span></div>
+            <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatusName}}</span></div>
             <div><span class="vl_f_666">报案时间：</span><span class="vl_f_333">{{eventDetail.reportTime}}</span></div>
           </div>
           <div>
-            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventType}}</span></div>
+            <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventTypeName}}</span></div>
             <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevel}}</span></div>
           </div>
         </div>
@@ -399,6 +399,7 @@ export default {
       pageSizeRes: 8,
       pageNumObjRes: 1,
       
+      bResize: {},
       situList: [],// 实时监控设备列表
       bayList: [],// 实时监控卡口列表
       // rVList: [{},{},{},{}],//用于操作的右边视频列表
@@ -440,6 +441,26 @@ export default {
     }
   },
   methods: {
+    // 预览图片
+    previewPictures (index) {
+      setTimeout(() => {
+        let imgs = this.controlResList.list.map(m => m.snapPhoto);
+        // 图片数组2
+        let imgs2 = []
+        imgs.forEach(function (src) {
+          // 生成imgs2数组
+          imgs2.push({
+            url: src,
+            angle: 0
+          })
+        })
+        // 使用方法
+        let ziv = new ZxImageView(null, imgs2);
+        this.$nextTick(() => {
+          ziv.view(index);
+        })
+      }, 50)
+    },
     /* ************布控结果********* */
     // 停止播放
     pauseVideo (item, index) {
@@ -998,13 +1019,14 @@ export default {
       }
       .manage_d_c_o{
         margin-right: 20px;
-        margin-top: 20px;
+        margin-top: 30px;
         border:1px solid rgba(242,242,242,1);
         border-radius:4px 4px 0px 0px;
         >div:nth-child(1){
           height:44px;
           line-height: 44px;
           padding-left: 20px;
+          padding-top: 10px;
           background:rgba(250,250,250,1);
           border-radius:4px 4px 0px 0px;
         }
@@ -1014,7 +1036,7 @@ export default {
           align-content: flex-start;
           padding: 0 0.5% 20px 0.5%;
           .manage_d_c_o_i{
-            height: 222px;
+            height: 200px;
             border-radius:4px;
             border:1px solid rgba(211,211,211,1);
             flex: 0 0 162px;
@@ -1045,10 +1067,10 @@ export default {
           }
         }
       }
-      .vl_control_state{
+      .con_state{
         position: absolute;
-        right: 0;
-        top: 0;
+        right: -1px;
+        top: -2px;
       }
       .manage_d_c_scope{
         width:calc(100% - 20px);
@@ -1087,7 +1109,7 @@ export default {
           padding-left: 15px;
           display: flex;
           > div{
-            width: 20%;
+            width: 25%;
           }
         }
         .situ_box{
@@ -1370,6 +1392,9 @@ export default {
   }
   .close_btn{
     font-size: 1.3rem;
+  }
+  .vl_icon{
+    transition: none;
   }
 }
 </style>

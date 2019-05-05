@@ -70,9 +70,16 @@
               </template>
               <template v-if="sturcDetail.eventInfo">
                 <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ dicFormater( 20, sturcDetail.eventInfo.eventType) || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ dicFormater( 2, sturcDetail.eventInfo.eventLevel) || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ sturcDetail.eventInfo.eventType ? dicFormater( eventType, sturcDetail.eventInfo.eventType) :'无'}}</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ sturcDetail.eventInfo.eventLevel ? dicFormater( eventLevel, sturcDetail.eventInfo.eventLevel) : '无'}}</span></div>
+                <div class="control_line show_detail">
+                  <span class="left">事件情况：</span>
+                  <span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span>
+                  <div class="show_all" v-if="sturcDetail.eventInfo.eventDetail">
+                    <span v-if="sturcDetail.eventInfo.eventDetail.length > 9" @click="showBox">[查看全部]</span>
+                    <div class="show_detail_box" v-if="isShowBox"><span>{{sturcDetail.eventInfo.eventDetail }}</span><span @click="showBox">[收起]</span></div>
+                  </div>
+                </div>
               </template>
               <template v-if="!sturcDetail.eventInfo">
                 <div class="control_line"><span class="left">事件编号：</span><span class="right">无</span></div>
@@ -264,6 +271,7 @@
 import { addTaskInfo, getPlanData } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
+import { dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -285,7 +293,10 @@ export default {
         type: '',     //今日告警或历史告警
         detailUrl: '',    //告警详情地址
         sturcDetail: {},
-        isLoading: false
+        isLoading: false,
+        eventType: dataList.eventType,
+        eventLevel: dataList.eventLevel,
+        isShowBox: false,
     }
   },
   created () {
@@ -315,6 +326,14 @@ export default {
         .then((res) => {
           if (res && res.data.list) {
             this.planList = res.data.list;
+            for(let item of this.planList) {
+              let planLevelName = []
+              let levelList = [...item.levelList]
+              if(levelList && levelList.length > 0) {
+                planLevelName = levelList.map(data => data.planLevelName)
+              }
+              item['levelNameList'] = planLevelName
+            }
           }
         })
         .catch(() => {});
@@ -428,6 +447,10 @@ export default {
     back () {
       this.$router.back(-1);
     },
+    //展示事件情况
+    showBox() {
+      this.isShowBox = !this.isShowBox
+    },
   }
 }
 </script>
@@ -513,7 +536,7 @@ export default {
             }
           }
           .struc_c_d_info {
-              width: calc(100% - 4.2rem);
+              width: calc(100% - 4rem);
               padding-left: .4rem;
               color: #333333;
               h2 {
@@ -599,6 +622,41 @@ export default {
                 }
                 .right {
                   color: #222;
+                }
+              }
+              .show_detail {
+                position: relative;
+                width: 3.38rem;
+                display: flex;
+                flex: 1;
+                min-width: 0;
+                .right {
+                  width: 48%;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 1; //行数
+                  -webkit-box-orient: vertical;
+                }
+                .show_all {
+                  color: #0C70F8;
+                  cursor: pointer;
+                }
+                .show_detail_box {
+                  width:3.3rem;
+                  max-height:2.62rem;
+                  box-shadow:0px 1px 21px 0px rgba(97,97,97,0.2);
+                  border-radius:5px;
+                  position: absolute;
+                  color: #222222;
+                  padding: .2rem;
+                  bottom: 0;
+                  right: .1rem;
+                  background: #fff;
+                  span:nth-child(2) {
+                    color: #0C70F8;
+                    margin-left: .1rem;
+                  }
                 }
               }
             }

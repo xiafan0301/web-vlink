@@ -5,66 +5,114 @@
       <div class="show_menu_b">
         <div>
           <ul class="show_title">
-            <li class="show_title_li" :class="{'show_title_active': showConTitle === 1}" @click="showConTitle = 1">监控列表</li>
+            <li class="show_title_li" :class="{'show_title_active': showConTitle === 3}" @click="showConTitle = 3">监控列表</li>
+            <li class="show_title_li" :class="{'show_title_active': showConTitle === 1}" @click="showConTitle = 1">监控分组</li>
             <li class="show_title_li" :class="{'show_title_active': showConTitle === 2}" @click="showConTitle = 2">播放历史</li>
-            <li class="show_title_line" :class="{'show_title_line2': showConTitle === 2}"></li>
+            <li class="show_title_line" :class="{'show_title_line2': showConTitle === 1, 'show_title_line3': showConTitle === 2}"></li>
           </ul>
+          <div class="show_content" v-show="showConTitle === 3">
+            <div class="show_search">
+              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
+                <el-input
+                  placeholder="请输入内容"
+                  size="small"
+                  @keyup.enter.native="getDeviceList3()"
+                  v-model="searchVal3">
+                  <i slot="suffix" @click="getDeviceList3()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+                </el-input>
+              </div>
+            </div>
+            <div class="show_list">
+              <ul class="show_list_c show_tree" id="videoList3Tree">
+                <template v-if="deviceList3 && deviceList3.areaTreeList && deviceList3.areaTreeList.length > 0">
+                  <li v-for="(item, index) in deviceList3.areaTreeList" :key="'tree3_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
+                      </div>
+                    </div>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list3_' + sindex">
+                        <div class="com_ellipsis"
+                          v-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </div>
           <div class="show_content" v-show="showConTitle === 1">
             <div class="show_search">
               <div style="margin-left: 8%; width: 84%;">
                 <el-input
                   placeholder="请输入内容"
                   size="small"
+                  @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
                   <i slot="suffix" @click="getDeviceList()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
                 </el-input>
               </div>
-              
-              <!-- <div>
-                <el-input
-                  class="vl_map_lc_dt_inp"
-                  size="small"
-                  placeholder="请输入内容"
-                  v-model="searchVal">
-                </el-input>
-                <i class="el-icon-search"></i>
-              </div> -->
             </div>
             <div class="show_list">
               <ul class="show_list_c show_tree" id="videoListTree">
-                <li v-for="(item, index) in deviceList" :key="'tree_' + index">
-                  <div>
-                    <div class="tree_title">
-                      <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                <template v-if="deviceList && deviceList.length > 0">
+                  <li v-for="(item, index) in deviceList" :key="'tree_' + index">
+                    <div>
+                      <div class="tree_title">
+                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.groupName}}
+                      </div>
                     </div>
-                  </div>
-                  <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                    <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                      <!-- patrolParseDialogVisible -->
-                      <div v-if="patrolActive === 1" class="tree_li_dis" 
-                        @click="dragEndDis"
-                        @dragend="dragEndDis"
-                        draggable="true">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="com_ellipsis"
-                        v-else-if="!deviceIsPlaying(sitem)"
-                        @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
-                        draggable="true" style="cursor: move;">
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                      <div class="tree_li_dis" v-else>
-                        {{sitem.deviceName}}
-                        <span class="vl_icon vl_icon_v11"></span>
-                      </div>
-                    </li>
-                  </ul>
-                  <ul class="tree_sli" v-else>
-                    <li class="tree_sli_empty">暂无</li>
-                  </ul>
-                </li>
+                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
+                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
+                        <!-- patrolParseDialogVisible -->
+                        <div v-if="patrolActive === 1" class="tree_li_dis" 
+                          @click="dragEndDis"
+                          @dragend="dragEndDis"
+                          draggable="true">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="com_ellipsis"
+                          v-else-if="!deviceIsPlaying(sitem)"
+                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
+                          draggable="true" style="cursor: move;">
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                        <div class="tree_li_dis" v-else>
+                          {{sitem.deviceName}}
+                          <span class="vl_icon vl_icon_v11"></span>
+                        </div>
+                      </li>
+                    </ul>
+                    <ul class="tree_sli" v-else>
+                      <li class="tree_sli_empty">暂无</li>
+                    </ul>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="show_list_empty">
+                    暂无记录
+                  </li>
+                </template>
               </ul>
             </div>
           </div>
@@ -75,15 +123,24 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div v-if="patrolActive === 1" class="show_his_dis" 
+                    @click="dragEndDis"
+                    @dragend="dragEndDis"
+                    draggable="true">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
-                  <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
+                  <div class="show_his_dis" v-else-if="item.expireFlag">
+                    <h3 class="com_ellipsis">{{item.deviceName}}</h3>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
+                  </div>
+                  <!-- 视频巡逻，播放历史，拖动一条记录播放，应该是直接播放该设备的直播，不是回放 -->
+                  <div @dragstart="dragStart2($event, item, 1)" @dragend="dragEnd"
                     draggable="true" style="cursor: move;" v-else>
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playTime | fmTimestamp}}</p>
+                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                 </li>
@@ -123,7 +180,7 @@
       </ul>
     </div>
     <!-- 轮巡提示 dialog -->
-    <el-dialog :title="'轮巡预案名称'" :visible.sync="patrolTipDialogVisible" :center="false" :show-close="false" :close-on-click-modal="false" :append-to-body="true" width="400px">
+    <el-dialog :title="patrolHandlerData.nextRound.roundName" :visible.sync="patrolTipDialogVisible" :center="false" :show-close="false" :close-on-click-modal="false" :append-to-body="true" width="400px">
       <div style="padding: 20px 0 20px 0; text-align: center; color: #666;">
         <el-progress type="circle" 
           :width="200" 
@@ -140,8 +197,8 @@
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
       <p style="color: #666; text-align: center; font-size: 14px; padding: 0 20px 10px 20px;">打开轮巡后，您可查看固定地方的视频播放画面，还可以关闭轮巡。</p>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 30px 0;">
-        <el-button @click="patrolClose(true)">关闭轮巡</el-button>
-        <el-button type="primary" @click="patrolStart">执行轮巡</el-button>
+        <el-button @click="patrolClearNext">关闭轮巡</el-button>
+        <el-button type="primary" @click="patrolNextStart">执行轮巡</el-button>
       </div>
     </el-dialog>
     <!-- 轮巡暂停提示 dialog -->
@@ -163,53 +220,53 @@
   </div>
 </template>
 <script>
+import {mapXupuxian} from '@/config/config.js';
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-// import flvplayer from '@/components/common/flvplayer.vue';
-import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords } from "@/views/index/api/api.video.js";
+import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
+import { apiDeviceList, apiVideoRecordList, apiDelVideoRecord, apiDelVideoRecords, getVideoCurrentRound } from "@/views/index/api/api.video.js";
 export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
-      //0 未进行  1进行中  2暂停
+      // 0 未进行  1进行中  2暂停
       patrolActive: 0, // 轮巡状态
-      patrolTipDialogVisible: false,
-      patrolParseDialogVisible: false,
-      patrolCloseDialogVisible: false,
+      patrolTipDialogVisible: false, // 轮巡即将开始窗口
+      patrolParseDialogVisible: false, // 暂停提示窗口
+      patrolCloseDialogVisible: false, // 关闭提示窗口
       patrolStartSecond: 600,
       patrolStartPercentage: 100,
       patrolInval: null,
       // 设备列表
-      deviceList: [],
+      deviceList: [], // 监控分组
+      deviceList3: null, // 监控列表
 
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
       bResize: {},
       showMenuActive: false,
-      showConTitle: 1,
+      showConTitle: 3,
       searchVal: '',
+      searchVal3: '',
       dragActiveObj: null,
       dragVideoType: 1,
 
       videoRecordList: [],
 
-      patrolData: {
-        current: {
-          id: '111',
-          name: '轮巡预案名称111',
-          time: 10,
-          sum: 4
-        },
-        next: {
-          id: '222',
-          name: '轮巡预案名称222',
-          startTime: 50,
-          time: 12,
-          sum: 5
-        }
-      }
+      patrolHandlerData: {
+        currentRound: {},
+        currentRoundVal: null, // 当前轮巡间隔定时器
+        currentRoundRemain: 25, // 当前轮巡倒计时(秒)
+        currentRoundRemainTimeout: null, // 当前轮巡倒计时定时器
+        nextRound: {},
+        nextRoundCountDownDefault: 60,
+        nextRoundCountDown: 65, // 下一个轮巡倒计时(秒)
+        nextRoundCountDownTimeoutPre: null, // 下一个轮巡倒计时前置定时器
+        nextRoundCountDownTimeout: null, // 下一个轮巡倒计时定时器
+      },
+      patrolDataVal: null
     }
   },
   watch: {
@@ -227,69 +284,271 @@ export default {
     }
   },
   created () {
-    // window.localStorage.getItem(name);
-    let sType = window.localStorage.getItem('vlink_video_patrol_type');
-    let sList = window.localStorage.getItem('vlink_video_patrol_list');
-    if (sType && sType.length > 0) {
-      this.showVideoTotal = Number(sType);
-      if (sList && sList.length > 0) {
-        this.$nextTick(() => {
-          sList = JSON.parse(sList);
-          this.videoList = sList;
-        });
-      }
-    } else {
-      // 第一次打开
-      this.showMenuActive = true;
-    }
-
     // 监控列表
+    this.getDeviceList3();
+    // 监控分组
     this.getDeviceList();
+
+    // 获取轮巡数据 页面初始化时候的调用
+    this.patrolGetData(true);
+    this.patrolDataVal = window.setInterval(() => {
+      this.patrolGetData();
+    }, 10 * 1000);
   },
   mounted () {
     videoTree('videoListTree');
+    videoTree('videoList3Tree');
     $(window).on('unload', this.unloadSave);
-
-    setTimeout(() => {
+  },
+  methods: {
+    /* 轮巡控制事件 begin */
+    // 获取轮巡数据 bInit: 是否是页面初始化时候的调用
+    patrolGetData (bInit) {
+      getVideoCurrentRound().then(res => {
+        if (res && res.data) {
+          // this.patrolData = res.data;
+          let patrolData = res.data ? res.data :
+          {
+            currentRound: {
+              uid: '111', // 轮巡记录标识
+              roundNo: '111', // 轮巡编号
+              roundName: '轮巡预案名称111', // 轮巡名称
+              frameNum: 4, // 画面数
+              roundInterval: 20, // 轮巡间隔(秒)
+              deviceNum: 5, // 轮巡设备数
+              startTime: null, // 开始时间
+              endTime: null, // 结束时间
+              roundStatus: 1, // 轮巡状态
+              deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
+            },
+            currentRoundRemain: 111145, // 当前轮巡倒计时(秒)
+            nextRound: {
+              uid: '222', // 轮巡记录标识
+              roundNo: '222', // 轮巡编号
+              roundName: '轮巡预案名称222', // 轮巡名称
+              frameNum: 4, // 画面数
+              roundInterval: 10, // 轮巡间隔(秒)
+              deviceNum: 5, // 轮巡设备数
+              startTime: new Date().getTime() - 10 * 60 * 1000, // 开始时间
+              endTime: new Date().getTime(), // 结束时间
+              roundStatus: 1, // 轮巡状态
+              deviceList: [{uid: 5}, {uid: 3}, {uid: 4}, {uid: 2}, {uid: 6}]
+            },
+            nextRoundCountDown: 45 // 下条轮巡倒计时(秒)
+          }
+          if (bInit) {
+            if (!patrolData.currentRound || patrolData.currentRoundRemain <= 0) {
+              // 不存在当前轮巡，则需要从本地存储中看看是否有数据
+              this.getLocalStorageVideoData();
+            }
+          }
+          this.patrolHandler(patrolData);
+        } else {
+          if (bInit) {
+            // 从本地存储中看看是否有数据
+            this.getLocalStorageVideoData();
+          }
+        }
+      }).catch(error => {
+        console.log("getVideoCurrentRound error：", error);
+      });
+    },
+    // 轮巡处理
+    patrolHandler (pData) {
+      // 数据中有当前轮巡
+      if (pData && pData.currentRound && pData.currentRoundRemain > 0) {
+        if (this.patrolHandlerData.currentRound && this.patrolHandlerData.currentRound.roundNo === pData.currentRound.roundNo) {
+          // 存在正在执行的轮巡 并且 正在执行的轮巡和当前轮巡 是同一个 ==》废弃，不需要处理
+        } else {
+          // 不存在正在执行的轮巡 或者 正在执行的轮巡和当前轮巡 不是同一个 ==> 直接执行当前轮巡
+          this.patrolClearCurrent(); // 清除正在执行的轮巡
+          this.patrolStart(pData); // 开始轮巡
+        }
+      }
+      // 当前有下一个轮巡
+      if (pData && pData.nextRound && pData.nextRoundCountDown > 0) {
+        if (this.patrolHandlerData.nextRound.roundNo === pData.nextRound.roundNo) {
+          // 当前下一个轮巡 和 已储备的下一个轮巡 是同一个
+        } else {
+          // 当前下一个轮巡 和 已储备的下一个轮巡 不是同一个，则执行下一个轮巡逻辑
+          this.patrolClearNext(); // 清除下一个的轮巡信息
+          this.patrolNext(pData); // 下一个
+        }
+      }
+    },
+    
+    // 下一个轮巡
+    patrolNext (pData) {
+      // console.log('>>>>>>>>>> patrolNext 下一个轮巡');
+      this.patrolHandlerData.nextRound = pData.nextRound;
+      if (pData.nextRoundCountDown > this.patrolHandlerData.nextRoundCountDownDefault) {
+        // 下一个轮巡时间大于默认等待时间
+        this.patrolHandlerData.nextRoundCountDownTimeoutPre = window.setTimeout(() => {
+          this.patrolNextTip(this.patrolHandlerData.nextRoundCountDownDefault);
+        }, (pData.nextRoundCountDown - this.patrolHandlerData.nextRoundCountDownDefault) * 1000);
+      } else if (pData.nextRoundCountDown > 0 && pData.nextRoundCountDown <= this.patrolHandlerData.nextRoundCountDownDefault) {
+        this.patrolNextTip(pData.nextRoundCountDown);
+      }
+    },
+    // 下一个轮巡提示（倒计时窗口）
+    patrolNextTip (nextRoundCountDown) {
+      this.patrolStartSecond = nextRoundCountDown * 10;
       this.patrolTipDialogVisible = true;
       this.patrolInval = window.setInterval(() => {
         if (this.patrolStartSecond <= 0) {
           if (this.patrolInval) {
             window.clearInterval(this.patrolInval);
           }
-          this.patrolStart();
+          this.patrolNextStart();
         } else {
           this.patrolStartSecond = Math.round(this.patrolStartSecond - 1);
         }
       }, 100);
-    }, 3 * 1000);
-  },
-  methods: {
-    /* 轮巡控制事件 */
+    },
+
+    // 开始执行下一个轮巡
+    patrolNextStart () {
+      this.patrolClearCurrent();
+      let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
+      if (iT > 0) {
+        iT = Math.round(iT / 1000);
+      }
+      let op = {
+        currentRound:  this.patrolHandlerData.nextRound,
+        currentRoundRemain: iT
+      }
+      this.patrolClearNext();
+      this.patrolStart(op);
+    },
+
+    // 清除下一个的轮巡信息
+    patrolClearNext () {
+      this.patrolHandlerData.nextRound = {};
+      this.patrolHandlerData.nextRoundCountDown = 0;
+      if (this.patrolHandlerData.nextRoundCountDownTimeoutPre) {
+        window.clearTimeout(this.patrolHandlerData.nextRoundCountDownTimeoutPre);
+        this.patrolHandlerData.nextRoundCountDownTimeoutPre = null;
+      }
+      this.patrolTipDialogVisible = false;
+      if (this.patrolInval) {
+        console.log('this.patrolInval', this.patrolInval);
+        window.clearInterval(this.patrolInval);
+      }
+    },
+
+    // 开始轮巡
+    patrolStart (pData) {
+      // console.log('>>>>>>>>>> patrolStart 开始轮巡');
+      this.patrolActive = 1;
+      this.patrolHandlerData.currentRound = pData.currentRound;
+      // 当前轮巡的索引
+      this.patrolHandlerData.currentRound.roundIndex = 0;
+      // 轮巡执行本地开始时间，用于暂停
+      this.patrolHandlerData.currentRound.excuteStartTime = new Date().getTime();
+      this.patrolHandlerData.currentRoundRemain = pData.currentRoundRemain;
+      // 轮巡设备数deviceNum   画面数frameNum
+      if (this.patrolHandlerData.currentRound.deviceList && this.patrolHandlerData.currentRound.deviceList.length > this.showVideoTotal) {
+        this.patrolCurrentGoOn();
+        this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
+          this.patrolCurrentGoOn();
+        }, this.patrolHandlerData.currentRound.roundInterval * 1000);
+        this.patrolHandlerData.currentRoundRemainTimeout = window.setTimeout(() => {
+          this.patrolClearCurrent();
+        }, this.patrolHandlerData.currentRoundRemain * 1000);
+      } else {
+        // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
+        this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
+      }
+      this.$message('轮巡已开始。');
+    },
+    // 当前轮巡 轮
+    patrolCurrentGoOn () {
+      // console.log('>>>>>>>>>> patrolCurrentGoOn 当前轮巡 轮');
+      if (this.showVideoTotal !== this.patrolHandlerData.currentRound.frameNum) {
+        // 改变布局
+        this.showVideoTotal = this.patrolHandlerData.currentRound.frameNum;
+        this.bResize = {};
+      }
+      let pList = null;
+      // 每轮设备数量可执行的轮巡次数 设备数量/画面数 向上取整 至少是2
+       console.log('当前轮巡的轮巡次数 roundIndex:', this.patrolHandlerData.currentRound.roundIndex + 1);
+      let excuteNum = Math.ceil(this.patrolHandlerData.currentRound.deviceList.length / this.showVideoTotal);
+      let excuteIndex = this.patrolHandlerData.currentRound.roundIndex % excuteNum;
+      let iStart = excuteIndex * this.showVideoTotal;
+      let iEnd = (excuteIndex + 1) * this.showVideoTotal;
+      if (iEnd > this.patrolHandlerData.currentRound.deviceList.length) { iEnd = this.patrolHandlerData.currentRound.deviceList.length; }
+      // slice(start,end)表示从下标start开始到下标end（不包括end）进行截取，得到的是一个新数组，不改变原数组。
+      pList = this.patrolHandlerData.currentRound.deviceList.slice(iStart, iEnd);
+      this.patrolSetVideoList(pList);
+      this.patrolHandlerData.currentRound.roundIndex += 1; // 当前轮巡的索引
+    },
+    // 轮巡的时候给VideoList赋值
+    patrolSetVideoList (list) {
+      if (list && list.length > 0) {
+        let _list = [];
+        for (let i = 0; i < list.length; i++) {
+          _list.push({
+            type: 1,
+            title: list[i].deviceName ? list[i].deviceName : '轮巡测试——' + i,
+            record: false,
+            video: Object.assign({}, list[i])
+          });
+        }
+        let _il = _list.length;
+        if (_il < this.showVideoTotal) {
+          for (let j = 0; j < (this.showVideoTotal - _il); j++) {
+            _list.push({});
+          }
+        }
+        this.videoList = _list;
+      }
+    },
+    // 清除正在执行的轮巡
+    patrolClearCurrent () {
+      // console.log('>>>>>>>>>> patrolClearCurrent 清除正在执行的轮巡');
+      // 当前轮巡间隔定时器
+      if (this.patrolHandlerData.currentRoundVal) {
+        window.clearInterval(this.patrolHandlerData.currentRoundVal);
+        this.patrolHandlerData.currentRoundVal = null;
+      }
+      // 当前轮巡倒计时定时器
+      if (this.patrolHandlerData.currentRoundRemainTimeout) {
+        window.clearInterval(this.patrolHandlerData.currentRoundRemainTimeout);
+        this.patrolHandlerData.currentRoundRemainTimeout = null;
+      }
+      // 可能是主动停止的轮巡 还要让其存在
+      // this.patrolHandlerData.currentRound = null;
+      this.patrolHandlerData.currentRoundRemain = 0;
+      this.patrolActive = 0;
+    },
     // 暂停轮巡
     patrolParse () {
       this.patrolParseDialogVisible = false;
       this.patrolActive = 2;
+      // 当前轮巡间隔定时器
+      if (this.patrolHandlerData.currentRoundVal) {
+        window.clearInterval(this.patrolHandlerData.currentRoundVal);
+        this.patrolHandlerData.currentRoundVal = null;
+      }
       this.$message('轮巡已暂停。');
     },
     // 继续轮巡
     patrolContinue () {
-      this.patrolActive = 1;
-      this.$message('轮巡已继续。');
-    },
-    // 执行轮巡
-    patrolStart () {
-      this.patrolActive = 1;
-      this.patrolTipDialogVisible = false;
-      if (this.patrolInval) {
-        window.clearInterval(this.patrolInval);
+      this.patrolActive = 1; // 设置轮巡状态 1正在执行
+      if (this.patrolHandlerData.currentRound.roundIndex > 0) {
+        this.patrolHandlerData.currentRound.roundIndex -= 1;
+      } else {
+        this.patrolHandlerData.currentRound.roundIndex = 0;
       }
-      window.setTimeout(() => {
-        this.patrolStartSecond = 600;
-      }, 500);
+      this.patrolCurrentGoOn();
+      this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
+        this.patrolCurrentGoOn();
+      }, this.patrolHandlerData.currentRound.roundInterval * 1000);
+      this.$message('轮巡已继续。');
     },
     // 关闭轮巡   flag: true, 轮巡开始提示窗口的事件
     patrolClose (flag) {
+      this.patrolClearCurrent();
       this.patrolParseDialogVisible = false;
       this.patrolCloseDialogVisible = false;
       this.patrolActive = 0;
@@ -305,10 +564,34 @@ export default {
         }, 500);
       }
     },
+    /* 轮巡控制事件 end */
+
+    // 从本地存储中获取播放记录
+    getLocalStorageVideoData () {
+      // window.localStorage.getItem(name);
+      let sType = window.localStorage.getItem('vlink_video_patrol_type');
+      let sList = window.localStorage.getItem('vlink_video_patrol_list');
+      if (sType && sType.length > 0) {
+        this.showVideoTotal = Number(sType);
+        if (sList && sList.length > 0) {
+          this.$nextTick(() => {
+            sList = JSON.parse(sList);
+            console.log(sList);
+            for (let i = 0; i < sList.length; i++) {
+              sList[i].record = false;
+            }
+            this.videoList = sList;
+          });
+        }
+      } else {
+        // 第一次打开
+        this.showMenuActive = true;
+      }
+    },
+
     dragEndDis () {
       this.patrolParseDialogVisible = true;
     },
-
     changeShowType (type) {
       if (this.showVideoTotal != type) {
         if (this.patrolActive === 1) {
@@ -368,7 +651,21 @@ export default {
         });          
       });
     },
+
     /* 监控列表 */
+    getDeviceList3 () {
+      apiAreaServiceDeviceList({
+        areaUid: mapXupuxian.adcode,
+        likeKey: this.searchVal3
+      }).then(res => {
+        if (res && res.data) {
+          this.deviceList3 = res.data;
+        }
+      }).catch(error => {
+        console.log("apiAreaServiceDeviceList error：", error);
+      });
+    },
+    /* 监控分组 */
     getDeviceList () {
       // let sui = window.localStorage.getItem('userInfo');
       // if (sui) { sui = JSON.parse(sui); }
@@ -459,6 +756,7 @@ export default {
         this.videoList.splice(index, 1, Object.assign({
           type: this.dragVideoType,
           title: this.dragActiveObj.deviceName,
+          record: true,
           video: Object.assign({}, this.dragActiveObj)
         }, op));
       }
@@ -473,40 +771,25 @@ export default {
      * @param {string} sid 视频ID
      */
     playerClose (iIndex) {
-      console.log('playerClose' + iIndex);
       this.videoList.splice(iIndex, 1, {});
     },
     /* 播放器事件 end */
 
     showListEvent () {
       this.showMenuActive = true;
-      this.showConTitle = 1;
+      this.showConTitle = 3;
     }
   },
   destroyed () {
-    // 播放记录
-    /* for (let i = 0; i < this.videoList.length; i++) {
-      let obj = this.videoList[i];
-      console.log('obj', obj);
-      if (obj && obj.video) {
-        apiVideoRecord({
-          deviceId: obj.video.uid, // 设备id
-          // playBackEndTime: '', // 回放结束时间
-          // playBackStartTime: '', // 回放开始时间
-          playTime: formatDate(new Date().getTime()), // 播放结束时间
-          // 播放类型 1:视频巡逻 2:视频回放
-          playType: 1
-        }).then(() => {
-        }).catch(error => {
-          console.log("apiVideoRecord error：", error);
-        });
-      }
-    } */
     if (this.patrolInval) {
       window.clearInterval(this.patrolInval);
     }
     $(window).off('unload', this.unloadSave);
     this.saveVideoList();
+
+    // 清除当前轮巡
+    this.patrolClearCurrent();
+    this.patrolClearNext();
   }
 }
 </script>

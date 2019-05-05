@@ -79,6 +79,12 @@
       </div>
       <!-- 组合搜索 -->
       <el-form :model="todayAlarmForm" class="lib_form" ref="todayAlarmForm">
+        <el-form-item style="width: 192px;" prop="targetType">
+           <el-radio-group v-model="todayAlarmForm.targetType">
+            <el-radio v-for="(item,index) in targetTypeList" :key="index" :label="item.value">{{item.label}}</el-radio>
+           </el-radio-group>
+        </el-form-item>
+        <template v-if="todayAlarmForm.targetType === 1">
         <el-form-item style="width: 192px;" prop="name">
           <el-input v-model="todayAlarmForm.name" placeholder="输入姓名" clearable></el-input>
         </el-form-item>
@@ -102,6 +108,12 @@
             </el-option>
           </el-select>
         </el-form-item>
+        </template>
+        <template v-if="todayAlarmForm.targetType === 2">
+          <el-form-item style="width: 192px;" prop="vehicleNumber">
+          <el-input v-model="todayAlarmForm.vehicleNumber" placeholder="输入车牌号码" clearable></el-input>
+        </el-form-item>
+        </template>
         <el-form-item style="width: 192px;">
           <el-button style="width: 192px;" type="primary" @click="getCheckedKeys">确定</el-button>
         </el-form-item>
@@ -142,7 +154,7 @@
             <div class="list_con_info">
               <div>{{item.surveillanceName}}</div>
               <div>
-                <span>{{item.devName}}</span>
+                <span>{{item.devName}}</span>&nbsp;
                 <span>{{item.snapTime}}</span>
               </div>
             </div>
@@ -195,9 +207,10 @@
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
 import { getAlarmList } from "@/views/index/api/api.control.js";
-import { apiDeviceList } from "@/views/index/api/api.video.js";
+import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
 /* import alarmDialog from './components/alarmDetail' */
 import {formatDate} from '@/utils/util';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   data () {
     return {
@@ -209,9 +222,11 @@ export default {
       },
       deviceList: [],
       todayAlarmForm: {
+        targetType: 1,
         name: null,
         sex: null,
-        age: null
+        age: null,
+        vehicleNumber: null,
       },
       sexList: [{
         label: '男',
@@ -256,7 +271,7 @@ export default {
       startDateOpt: {
         disabledDate: (time) => {
           if(this.endTime) {
-            return time.getTime() >= this.endTime || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            return time.getTime() > this.endTime || time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
           }else {
             return time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 || time.getTime() > new Date().getTime()
           } 
@@ -265,7 +280,7 @@ export default {
       endDateOpt: {
         disabledDate: (time) => {
           if(this.startTime) {
-            return time.getTime() <= this.startTime || time.getTime() > new Date().getTime()
+            return time.getTime() < this.startTime || time.getTime() > new Date().getTime()
           }else {
             return time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 || time.getTime() > new Date().getTime()
           }
@@ -284,6 +299,13 @@ export default {
         type: 3,
         name: '视频顺序',
         order: 'asc',
+      }],
+      targetTypeList: [{
+        label: '人像',
+        value: 1
+      },{
+        label: '车像',
+        value: 2
       }],
       sortOrderS: 'desc',
       sortOrderT: 'desc',
@@ -304,14 +326,26 @@ export default {
     this.getAlarm();
   },
   methods: {
-    filterNode(value, data) {
+    filterNode(value, data, node) {
       if (!value) return true;
-      return data.label.indexOf(value) !== -1;
+      /* let level = node.level; */
+      let _array = [];//这里使用数组存储 只是为了存储值。
+      this.getReturnNode(node,_array,value);
+      let result = false;
+      _array.forEach((item)=>{
+        result = result || item;
+      });
+      return result;
+    },
+    getReturnNode(node,_array,value){
+      let isPass = node.data &&  node.data.label && node.data.label.indexOf(value) !== -1;
+      isPass?_array.push(isPass):'';
+      if(!isPass && node.level!=1 && node.parent){
+        this.getReturnNode(node.parent,_array,value);
+      }
     },
     changeTab (type) {
       this.tabType = type;
-      this.groupName = ''
-      this.controlName = ''
     },
     //切换排序方式
     changeSort(type) {
@@ -374,16 +408,21 @@ export default {
     },
     //获取监控列表
     getDeviceList() {
-      apiDeviceList().then( res => {
-        if(res.data && res.data.length > 0) {
-          this.deviceList = this.getTreeList(res.data)
+      apiAreaServiceDeviceList({
+        areaUid: mapXupuxian.adcode,
+        likeKey: this.groupName
+      }).then(res => {
+        if (res && res.data) {
+          this.deviceList = this.getTreeList(res.data.areaTreeList);
         }
-      }).catch(() => {})
+      }).catch(error => {
+        console.log("apiAreaServiceDeviceList error：", error);
+      });
     },
     getTreeList(data) {
       for(let item of data) {
-        item['id'] = item.uid
-        item['label'] = item.groupName
+        item['id'] = item.areaId
+        item['label'] = item.areaName
         if(item.deviceBasicList && item.deviceBasicList.length > 0) {
           item['children'] = item.deviceBasicList
           delete(item.deviceBasicList)
@@ -430,17 +469,25 @@ export default {
     //告警
     getAlarm() {
       this.alarmList = [];
+      this.allAlarmList = [];
       this.isLoading = true
       let params = {
         "where.startTime": formatDate(this.startTime, 'yyyy-MM-dd'),
         "where.endTime": formatDate(this.endTime, 'yyyy-MM-dd'),
-        "where.sortType": this.sortType
+        "where.sortType": this.sortType,
+        pageNum: -1,
+        pageSize: 0,
+        "where.targetType": this.todayAlarmForm.targetType,
       };
-      (this.selectDevice && this.selectDevice.length > 0) && (params['where.areaIds'] = this.selectDevice.join());
+      (this.selectDevice && this.selectDevice.length > 0) && (params['where.devIds'] = this.selectDevice.join());
       (this.selectControl && this.selectControl.length > 0) && (params['where.groupIds'] = this.selectControl.join());
-      this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
-      this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
-      this.todayAlarmForm.age && (params['where.ageGroup'] = this.todayAlarmForm.age);
+      if(this.todayAlarmForm.targetType === 1) {
+        this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
+        this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
+        this.todayAlarmForm.age && (params['where.ageGroup'] = this.todayAlarmForm.age);
+      }else {
+        this.todayAlarmForm.vehicleNumber && (params['where.vehicleNumber'] = this.todayAlarmForm.vehicleNumber);
+      }
       console.log("---------3333---------",params);
       getAlarmList(params).then( res => {
         if(res.data.list && res.data.list.length > 0) {
@@ -515,7 +562,6 @@ export default {
       }
     },
     filterList(params) {
-      let sAlarm = []
       for(let i = 0; i < this.alarmList.length; i++) {
         let item = this.alarmList[i]
         if(this.sortType === 1) { 
@@ -525,7 +571,6 @@ export default {
               value: item
             }) 
           }else if(params.lSemblance <= item.semblance && item.semblance < params.rSemblance){
-            alert(item.semblance)
             this.mAlarmList.push({
               label: '相似度' + params.lSemblance + '-' + params.rSemblance,
               value: item

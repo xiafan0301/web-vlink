@@ -281,47 +281,6 @@ export default {
       areaList: []//受限范围
     }
   },
-  // 监听修改和复用回填数据
-  watch: {
-    modelDataOne: {
-      handler (val) {
-        if (val) {
-          console.log('oneoneoneone')
-          this.getModelDataOne();
-        }
-      },
-      deep: true
-    },
-    modelDataTwo: {
-      handler (val) {
-        if (val) {
-          console.log('twotwotwo')
-          this.getModelDataTwo();
-        }
-      },
-      deep: true
-    },
-    modelDataThree: {
-      handler (val) {
-        if (val) {
-          console.log('threethreethree')
-          this.getAreas().then(() => {
-            this.getModelDataThree();
-          })  
-        }
-      },
-      deep: true
-    },
-    modelDataFour: {
-      handler (val) {
-        if (val) {
-          console.log('fourfourfour')
-          this.getModelDataFour();
-        }
-      },
-      deep: true
-    }
-  },
   computed: {
     changeObj () {
       if (this.modelType === '1') {
@@ -367,13 +326,25 @@ export default {
     }
   },
   created () {
-    if (this.modelType === '3' && !this.modelDataThree) {
-      this.getAreas();
+    if (this.modelType === '3') {
+      this.getAreas()
     }
   },
   mounted () {
     if (this.modelType !== '3' && this.allDevData && this.allDevData.length > 0) {
       this.resetMap();
+      // 编辑、复用回填数据时
+      if (this.operateType === 2 || this.operateType === 3) {
+        if (this.modelDataOne) {
+          this.getModelDataOne();
+        }
+        if (this.modelDataTwo) {
+          this.getModelDataTwo();
+        }
+        if (this.modelDataFour) {
+          this.getModelDataFour();
+        }
+      }
     }
   },
   methods: {
@@ -828,16 +799,16 @@ export default {
         // 回填设备特性
         this.features = this.modelDataThree.pointDtoList[0].deviceChara;
         let _data = [];
-          _data = this.modelDataThree.pointDtoList.map(m => {
-            return {
-              area: this.areaList.find(f => f.label === m.address),
-              bayonetList: m.bayonetList
-            }
-          });
-          _data.forEach(f => {
-            // 回填受限范围
-            this.getAllBayontListByAreaId(f.area, f.bayonetList);
-          })
+            _data = this.modelDataThree.pointDtoList.map(m => {
+              return {
+                area: this.areaList.find(f => f.label === m.address),
+                bayonetList: m.bayonetList
+              }
+            })
+            _data.forEach(f => {
+              // 回填受限范围
+              this.getAllBayontListByAreaId(f.area, f.bayonetList);
+            })
           this.lastSelList = this.modelForm.limitation;
           this.lastLimitationNum = this.modelForm.limitation.length;
       }
@@ -879,6 +850,8 @@ export default {
           // 移入覆盖物生成删除小图标
           let offSet = [-10, -10], _marker = null;
           polygon.on('mouseover', function(e) {
+            if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+            if (_marker) return;
             _marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
               position: [e.lnglat.lng, e.lnglat.lat],
@@ -900,8 +873,10 @@ export default {
             _marker.setMap(_this.map);
           })
           polygon.on('mouseout', function() {
+            if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
             setTimeout(() => {
               _this.map.remove(_marker);//移除删除小图标
+              _marker = null;
             }, 100)
           })
           _this.polygonLnglat = _this.getLngLatList(f);
@@ -1254,7 +1229,10 @@ export default {
       } else {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
+            console.log(result.tips, 'result.tips')
             cb(result.tips);
+          } else {
+            cb([]);
           }
         })
       }
@@ -1603,22 +1581,25 @@ export default {
     /******************************* 越界分析方法start **************************/
     // 获取所有行政区列表
     getAreas () {
-      return new Promise((resolve) => {
-        const params = {
-          parentUid: '431224'
-        }
-        getAreas(params).then(res => {
-          if (res && res.data) {
-            this.areaList = res.data.map(m => {
-              return {
-                value: m.uid,
-                label: m.cname
-              }
-            });
-            resolve();
-            this.resetMap();
+      const params = {
+        parentUid: '431224'
+      }
+      getAreas(params).then(res => {
+        if (res && res.data) {
+          this.areaList = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.cname
+            }
+          });
+          this.resetMap();
+          // 编辑、复用回填数据时
+          if (this.operateType === 2 || this.operateType === 3) {
+            if (this.modelDataThree && this.areaList.length > 0) {
+              this.getModelDataThree();
+            }
           }
-        })
+        }
       })
     },
     // 删除单个受限范围时，同时删除已选卡口列表和点标记
@@ -1892,7 +1873,7 @@ export default {
                 }
               }
               _this.trackPointList[index].devList.push(_obj);
-            }, 10)
+            }, 1000)
           }
         }
       }
