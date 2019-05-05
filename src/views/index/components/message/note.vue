@@ -70,9 +70,14 @@
                   {{scope.row.sendSuccCount}}/{{scope.row.sendTotal}}
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
+            v-if="noteList && noteList.list && noteList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -100,6 +105,11 @@ export default {
         content: null,
         noteState: null
       },
+      lastNoteForm: {
+        noteDate: null,
+        content: null,
+        noteState: null
+      },
       noteStateList: [],
       // 表格参数
       noteList: [{eventType: 'xxx'}],
@@ -118,6 +128,21 @@ export default {
     // 获取短信列表
     getSmsList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.noteForm);
+      const lastArr = Object.values(this.lastNoteForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastNoteForm = Object.assign({}, this.noteForm);
       const params = {
         pageSize: this.pageSize,
         pageNum: this.pageNum,

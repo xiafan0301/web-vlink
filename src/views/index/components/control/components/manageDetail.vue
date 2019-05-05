@@ -207,7 +207,7 @@
                     <div class="situ_r_img" v-if="!item.isShowVideo">
                       <div>从左边拖拽设备播放</div>
                     </div>
-                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" 
+                    <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
                       :oConfig="{sign: true}">
                     </div>
                   </div>
@@ -399,6 +399,7 @@ export default {
       pageSizeRes: 8,
       pageNumObjRes: 1,
       
+      bResize: {},
       situList: [],// 实时监控设备列表
       bayList: [],// 实时监控卡口列表
       // rVList: [{},{},{},{}],//用于操作的右边视频列表
@@ -1391,6 +1392,9 @@ export default {
   }
   .close_btn{
     font-size: 1.3rem;
+  }
+  .vl_icon{
+    transition: none;
   }
 }
 </style>
