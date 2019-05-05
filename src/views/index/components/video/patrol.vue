@@ -790,6 +790,10 @@ export default {
     // 清除当前轮巡
     this.patrolClearCurrent();
     this.patrolClearNext();
+    if (this.patrolDataVal) {
+      window.clearInterval(this.patrolDataVal);
+      this.patrolDataVal = null;
+    }
   }
 }
 </script>
