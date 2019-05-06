@@ -423,7 +423,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="numberType">
-                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" :disabled="isAddDisabled">
+                  <el-select v-model="carForm.numberType" placeholder="选择号牌类型" style="width: 100%;" @change="carForm.numberColor = carForm.numberType" :disabled="isAddDisabled">
                     <el-option
                       v-for="item in numTypeList"
                       :key="item.value"
@@ -433,7 +433,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="numberColor">
-                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="isAddDisabled">
+                  <el-select v-model="carForm.numberColor" placeholder="选择号牌颜色" style="width: 100%;" :disabled="true">
                     <el-option
                       v-for="item in numColorList"
                       :key="item.value"
@@ -604,9 +604,18 @@ export default {
         {label: '黑', value: 10}
       ],//车身颜色列表
       numColorList: [
-        {label: '其他', value: 0},
-        {label: '红底白字', value: 1},
-        {label: '蓝底白字', value: 2}
+        {label: '黄底黑字', value: 1},
+        {label: '蓝底白字', value: 2},
+        {label: '蓝底白字', value: 8},
+        {label: '黄底黑字', value: 15},
+        {label: '白底黑字', value: 23},
+        {label: '白底黑字', value: 24},
+        {label: '绿底黑字', value: 25},
+        {label: '黄绿双拼底黑字', value: 26},
+        {label: '蓝底白字', value: 27},
+        {label: '黄底黑字', value: 28},
+        {label: '黄底黑字', value: 29},
+        {label: '其他', value: 99}
       ],//号牌颜色列表
       // 翻页数据
       currentPage: 1,
@@ -897,7 +906,7 @@ export default {
               this.isAddDisabled = true;
             } else {
               this.isAddDisabled = false;
-              this.$message.error('布控库已存在，请修改证件号码');
+              this.$message.warning('布控库已存在，请修改证件号码');
             }
             protraitInfo.uid = this.portraitForm.uid;
             protraitInfo.origin = this.portraitForm.origin
@@ -981,7 +990,7 @@ export default {
               this.isAddDisabled = true;
             } else {
               this.isAddDisabled = false;
-              this.$message.error('布控库已存在，请修改车牌号码');
+              this.$message.warning('布控库已存在，请修改车牌号码');
             }
             carInfo.uid = this.carForm.uid;
             carInfo.origin = this.carForm.origin;

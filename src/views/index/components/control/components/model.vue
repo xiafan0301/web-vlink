@@ -60,8 +60,9 @@
     <div class="manage_d_s_m">
       <div :id="mapId"></div>
       <div class="manage_d_s_m_l">
-        <div class="manage_t" style="height: 130px;padding: 20px 20px;" :class="{'equ_h': (modelType === '3' || modelType === '4')}">
-          <el-input v-if="modelType === '1' || modelType === '2'" v-model="scopeRadius" @keyup.enter.native="mapCircle(pointIndex)" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+        <!-- 人员追踪/车辆追踪 -->
+        <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
+          <el-input v-model="scopeRadius" @keyup.enter.native="mapCircle(pointIndex)" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
           <el-select value-key="uid" v-model="features" filterable placeholder="选择设备特性" style="width: 220px;">
             <el-option
               v-for="item in featuresTypeList"
@@ -71,6 +72,18 @@
             </el-option>
           </el-select>
         </div>
+        <!-- 范围分析 -->
+        <div class="manage_t equ_h" style="height: 130px;padding: 20px 20px;" v-if="modelType === '4'">
+          <el-select value-key="uid" v-model="features" filterable placeholder="选择设备特性" style="width: 220px;">
+            <el-option
+              v-for="item in featuresTypeList"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </div>
+
         <div class="manage_b" style="height: 617px;">
           <div class="vl_f_333 top">
             <span>已选{{modelType !== '3' ? '设备' : '卡口'}}({{selDevOrBayNum}})</span>
@@ -1510,7 +1523,7 @@ export default {
         longitude: _this.lnglat[0],//追踪点经度
         latitude: _this.lnglat[1],//追踪点纬度
         radius: _this.scopeRadius,//范围半径
-        groupId: 1,//设备组id,先写死
+        groupId: 1,//设备组id,随便传个
         devList: []//设备列表
       }
       // 把在圆形覆盖物范围之内的追踪点添加进来
@@ -1672,7 +1685,7 @@ export default {
       let obj = {
         tid: _this.trackPointList.length + 1, 
         deviceChara: _this.features,//设备特性
-        groupId: 1,//设备组id,先写死
+        groupId: 1,//设备组id,随便传个
         bayonetList: []//设备列表
       }
       if (selBayList instanceof Array) {
@@ -1829,7 +1842,7 @@ export default {
         tid: _this.trackPointList.length + 1, 
         trackPointName: '范围00' + (_this.trackPointList.length + 1),
         address: '范围00' + (_this.trackPointList.length + 1),
-        deviceChara: _this.features,//设备特性
+        deviceChara: null,//设备特性,随便传个
         latitude: _this.polygonLnglat.map(m => m.lat).join(','),
         longitude: _this.polygonLnglat.map(m => m.lng).join(','),
         groupId: 1,//设备组id,先写死
