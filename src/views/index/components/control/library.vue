@@ -891,29 +891,29 @@ export default {
           // 人像已存在
           if (res && res.data && res.data.length > 0) {
             let protraitInfo = res.data[0];
-            this.fileList = [{url: protraitInfo.photoUrl}];//回填图片
-            this.dialogImageUrl = protraitInfo.photoUrl;
-            protraitInfo.photoUrl = protraitInfo.photoUrl;
-            console.log(protraitInfo.birthDate)
-            protraitInfo.birthDate = protraitInfo.birthDate.split('');
-            protraitInfo.birthDate.splice(4, 1, '年');
-            protraitInfo.birthDate.splice(7, 1, '月');
-            protraitInfo.birthDate.splice(10, 0, '日');
-            protraitInfo.birthDate = protraitInfo.birthDate.join('');
-            protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
-            protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
             if (protraitInfo.origin === 1) {
+              this.fileList = [{url: protraitInfo.photoUrl}];//回填图片
+              this.dialogImageUrl = protraitInfo.photoUrl;
+              protraitInfo.photoUrl = protraitInfo.photoUrl;
+              console.log(protraitInfo.birthDate)
+              protraitInfo.birthDate = protraitInfo.birthDate.split('');
+              protraitInfo.birthDate.splice(4, 1, '年');
+              protraitInfo.birthDate.splice(7, 1, '月');
+              protraitInfo.birthDate.splice(10, 0, '日');
+              protraitInfo.birthDate = protraitInfo.birthDate.join('');
+              protraitInfo.idType = protraitInfo.idType === '身份证' ? '1' : '';
+              protraitInfo.groupIds = protraitInfo.groupList.filter(f => f.selected).map(m => m.uid);
               this.isAddDisabled = true;
+              protraitInfo.uid = this.portraitForm.uid;
+              protraitInfo.origin = this.portraitForm.origin
+              this.portraitForm = protraitInfo;
             } else {
               this.isAddDisabled = false;
               this.$message.warning('布控库已存在，请修改证件号码');
             }
-            protraitInfo.uid = this.portraitForm.uid;
-            protraitInfo.origin = this.portraitForm.origin
-            this.portraitForm = protraitInfo;
-            if (this.$refs['portraitForm']) {
-              this.$refs['portraitForm'].resetFields();
-            }
+            // if (this.$refs['portraitForm']) {
+            //   this.$refs['portraitForm'].resetFields();
+            // }
             console.log(this.portraitForm)
           // 人像不存在
           } else {
@@ -983,18 +983,18 @@ export default {
           // 已存在车像
           if (res && res.data && res.data.length > 0) {
             let carInfo = res.data[0];
-            this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
-            this.dialogImageUrl = carInfo.vehicleImagePath;
-            carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
             if (carInfo.origin === 1) {
+              this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+              this.dialogImageUrl = carInfo.vehicleImagePath;
+              carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
               this.isAddDisabled = true;
+              carInfo.uid = this.carForm.uid;
+              carInfo.origin = this.carForm.origin;
+              this.carForm = carInfo;
             } else {
               this.isAddDisabled = false;
               this.$message.warning('布控库已存在，请修改车牌号码');
             }
-            carInfo.uid = this.carForm.uid;
-            carInfo.origin = this.carForm.origin;
-            this.carForm = carInfo;
           // 不存在车像
           } else {
             this.isAddDisabled = false;

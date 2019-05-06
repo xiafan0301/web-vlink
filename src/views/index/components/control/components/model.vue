@@ -1587,7 +1587,7 @@ export default {
         _this.trackPointList[_index].devList.sort((x, y) => {
           return x.distance - y.distance;
         })
-      }, 10)
+      }, 20)
     },
     /******************************* 人员、车辆追踪方法end ****************************/
 
@@ -1697,8 +1697,8 @@ export default {
       }
       _this.$set(obj, 'isDropdown', false);
       _this.trackPointList.push(obj);
-      let index = _this.trackPointList.indexOf(obj);
-      _this.trackPointList[index].bayonetList = [];
+      let _index = _this.trackPointList.indexOf(obj);
+      _this.trackPointList[_index].bayonetList = [];
       // 把属于当前行政区卡口添加进来
       for (let s = 0; s < data.length; s++) {
         let _obj = data[s];
@@ -1720,9 +1720,13 @@ export default {
               _obj.isSelected = true;//在范围内的置为选中-多选框
             }
           }
-          _this.trackPointList[index].bayonetList.push(_obj);
+          _this.trackPointList[_index].bayonetList.push(_obj);
         }, 500)
       }
+      // 左边卡口列表按a-z字母排序
+      setTimeout(() => {
+        _this.trackPointList[_index].bayonetList.sort((x, y) => x.bayonetName.localeCompare(y.bayonetName, 'zh'));
+      }, 550)
     },
     /******************************* 越界分析方法end ****************************/
 
@@ -1753,6 +1757,7 @@ export default {
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
           polygon.on('mouseover', function(p) {
+            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
             if (_marker) return;
             _marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -1782,10 +1787,11 @@ export default {
             _marker.setMap(_this.map);
           })
           polygon.on('mouseout', function(e) {
-            if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-              return;
-            }
+            // if (_this.trackPointList.length === 1) return;//只有一个范围时，不生成删除小图标
             setTimeout(() => {
+              if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
+                return;
+              }
               _this.map.remove(_marker);//移除删除小图标
               _marker = null;
             }, 100)
@@ -1850,7 +1856,7 @@ export default {
       }
       _this.$set(obj, 'isDropdown', false);
       _this.trackPointList.push(obj);
-      let index = _this.trackPointList.indexOf(obj);
+      let _index = _this.trackPointList.indexOf(obj);
 
       // 把多边形覆盖物范围之内的设备添加进来
       for (let s = 0; s < data.length; s++) {
@@ -1885,11 +1891,15 @@ export default {
                   _obj.isSelected = true;//在覆盖物内的置为选中-多选框
                 }
               }
-              _this.trackPointList[index].devList.push(_obj);
+              _this.trackPointList[_index].devList.push(_obj);
             }, 1000)
           }
         }
       }
+      // 左边设备列表按a-z字母排序
+      setTimeout(() => {
+        _this.trackPointList[_index].devList.sort((x, y) => x.deviceName.localeCompare(y.deviceName, 'zh'));
+      }, 1050)
     },
     /******************************* 范围分析方法end ****************************/
   },
