@@ -48,6 +48,8 @@
         </span>
         <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini && !fullScreen}">
           <span class="flvplayer_bot_omh">
+            <!-- 标记 (更新需求：取消所有回放画面（录像回放、智能查看-视频回放）的标记功能 2019.05.05)-->
+            <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 -->
             <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
             <!-- 标记 -->
