@@ -443,7 +443,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
-          let reg = /^[0-9]*[1-9][0-9]*$/; // 校验死亡人数
+          let reg = /^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -527,7 +527,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
-          let reg = /^[0-9]*[1-9][0-9]*$/; // 校验死亡人数
+          let reg =/^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
