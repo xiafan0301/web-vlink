@@ -9,7 +9,7 @@ const dataList = {
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员
-  ctcStatus: 9, // 调度事件状态
+  ctcStatus: 26, // 调度事件状态
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
   imgId: 1, // 图片id

@@ -56,8 +56,8 @@
                 <div class="title">
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
-                <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:"  label-position="left" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
+                <el-form class="plan_form" label-width="90px" :model="item" size="middle" >
+                  <el-form-item label="执行部门:"  label-position="left">
                     <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
                       <el-option
                         v-for="(item, index) in departmentList"
@@ -67,11 +67,13 @@
                       </el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                    <el-input v-model="item.taskName" @change="changeTaskName"></el-input>
+                  <el-form-item label="任务名称:">
+                    <el-input v-model="item.taskName"  placeholder="请输入任务名称" @change="changeTaskName(item.taskName, index)"></el-input>
+                    <span v-show="item.isError && item.isError" style="color: #F56C6C;font-size:12px;">最多输入140个字</span>
                   </el-form-item>
-                  <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                    <el-input type="textarea" rows="8" @change="changeTaskContent" v-model="item.taskContent"></el-input>
+                  <el-form-item label="任务内容:">
+                    <el-input type="textarea" rows="8"  placeholder="请输入任务内容" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent"></el-input>
+                    <span v-show="item.isContentError && item.isContentError" style="color: #F56C6C;font-size:12px;">最多输入1000个字</span>
                   </el-form-item>
                 </el-form>
               </div>
@@ -140,6 +142,8 @@ export default {
       userInfo: {}, // 存储的用户信息
       departmentList: [], // 部门列表
       isAddLoading: false,
+      isShowName: false, // 是否显示任务名称的错误提示
+      isShowContent: false, // 是否显示任务内容的错误提示
     }
   },
   created () {
@@ -243,23 +247,6 @@ export default {
               message: '请先填写完内容',
               customClass: 'request_tip'
             });
-          } else {
-            if (item.taskName.length > 140) {
-              this.$message({
-                type:'warning',
-                message: '任务名称最多输入140个字',
-                customClass: 'request_tip'
-              });
-              return;
-            }
-            if (item.taskContent.length > 140) {
-              this.$message({
-                type:'warning',
-                message: '任务内容最多输入140个字',
-                customClass: 'request_tip'
-              });
-              return;
-            }
           }
         })
         if (arr.length > 0) {
@@ -290,29 +277,61 @@ export default {
                   }
                 });
               });
-              this.isAddLoading = true;
-              addPlan(this.addPlanForm)
-                .then(res => {
-                  if (res) {
-                    this.$message({
-                      type: 'success',
-                      message: '添加成功',
-                      customClass: 'request_tip'
-                    })
-                    this.$router.push({name: 'event_ctcplan'});
-                    this.isAddLoading = false;
-                  }
-                })
-                .catch(() => {this.isAddLoading = false;})
+              let isResult = this.addPlanForm.taskList.filter(val => {
+                return val.isError === true || val.isContentError === true;
+              });
+              if (isResult.length === 0) {
+                this.isAddLoading = true;
+                addPlan(this.addPlanForm)
+                  .then(res => {
+                    if (res) {
+                      this.$message({
+                        type: 'success',
+                        message: '添加成功',
+                        customClass: 'request_tip'
+                      })
+                      this.$router.push({name: 'event_ctcplan'});
+                      this.isAddLoading = false;
+                    } else {
+                      this.isAddLoading = false;
+                    }
+                  })
+                  .catch(() => {this.isAddLoading = false;})
+              }
             }
-          })
-          
+          }) 
         }
       })
     },
     // 返回
     back () {
       this.$router.back(-1);
+    },
+    // 任务名称change
+    changeTaskName (val, index) {
+      if (val) {
+        if (val.length > 140) {
+          this.addPlanForm.taskList[index].isError = true;
+        } else {
+          this.addPlanForm.taskList[index].isError = false;
+        }
+      } else {
+        this.addPlanForm.taskList[index].isError = false;
+      }
+      this.addPlanForm.taskList = JSON.parse(JSON.stringify(this.addPlanForm.taskList));
+    },
+    // 任务内容change
+    changeTaskContent (val, index) {
+      if (val) {
+        if (val.length > 1000) {
+          this.addPlanForm.taskList[index].isContentError = true;
+        } else {
+          this.addPlanForm.taskList[index].isContentError = false;
+        }
+      } else {
+        this.addPlanForm.taskList[index].isContentError = false;
+      }
+      this.addPlanForm.taskList = JSON.parse(JSON.stringify(this.addPlanForm.taskList));
     }
   }
 }

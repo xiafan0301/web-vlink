@@ -132,10 +132,13 @@ export default {
       }, // 事件详情
     }
   },
+  mounted () {
+    this.getDetail();
+  },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -146,7 +149,7 @@ export default {
     },
     // 跳至向上级呈报页面
     skipReportPage () {
-      this.$router.push({name: 'event_report'});
+      this.$router.push({name: 'event_report', query: { eventId: this.$route.query.eventId }});
     },
     // 返回
     back () {
@@ -154,9 +157,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -183,7 +184,8 @@ export default {
       width: 100%;
       margin-top: -20px;
       margin-bottom: 20px;
-      background: #ffffff;
+      background: #fff;
+      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       .divide {
         border: 1px dashed #F2F2F2;
       }

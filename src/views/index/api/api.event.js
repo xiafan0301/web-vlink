@@ -155,11 +155,11 @@ export const ctcTasks = (data, uid) =>{
  * 修改事件过程状态
  * @param {*} data
  */
-export const updateProcess = (uid, data) => {
+export const updateProcess = (uid) => {
   return request({
     url: 'task-services/task/process/' + uid,
     method: 'put',
-    data,
+    // data,
     mode: 'ctc'
   });
 }
@@ -179,9 +179,9 @@ export const addTaskInfo = (data, uid) => {
  * 结束调度--结束事件
  * @param {*} data 
  */
-export const endEvent = (data, uid) => {
+export const endEvent = (data) => {
   return request({
-    url: 'events/finish/' + uid,
+    url: 'events/finish',
     method: 'put',
     data,
     mode: 'event'

@@ -11,26 +11,13 @@
       <div class="content_box">
         <el-form class="end_form" :model="endForm" :rules="rules" ref="endForm" label-width="100px">
           <el-form-item label="关闭事件:" prop="isCloseEvent">
-            <el-radio-group v-model="endForm.isCloseEvent" @change="handleEventChange">
+            <el-radio-group v-model="endForm.isCloseEvent">
               <el-radio :label="1">是</el-radio>
-              <el-radio :label="0">否</el-radio>
+              <el-radio :label="2">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <!-- <template v-if="endForm.isCloseEvent">
-            <el-form-item label="事件等级:" prop="eventLevel">
-              <el-select v-model="endForm.eventLevel" style="width: 100%;">
-                <el-option
-                  v-for="(item, index) in eventLevelList"
-                  :key="index"
-                  :label="item.enumValue"
-                  :value="item.uid"
-                >
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </template> -->
           <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[!endForm.isCloseEvent ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+            <el-input :placeholder="[endForm.isCloseEvent === 2 ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">
@@ -75,22 +62,15 @@
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { endEvent } from '@/views/index/api/api.event.js';
-// import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      // isEventLevel: false, // 是否显示事件等级
       endForm: {
-        isCloseEvent: 0, // 1--是  0---否
-        // eventLevel: null,
+        isCloseEvent: 2, // 1--结束事件  2---结束调度
         summary: null,
-        // attachmentList: []
       },
       rules: {
-        // eventLevel: [
-        //   { required: true, message: '请选择事件等级', trigger: 'blur' }
-        // ],
         summary: [
           { max: 1000, message: '最多输入1000字' }
         ]
@@ -98,32 +78,11 @@ export default {
       uploadImgList: [], // 要上传的图片列表
       fileList: [], // 要上传文件列表
       isEndLoading: false
-      // eventLevelList: [], // 事件等级列表
     }
   },
   mounted () {
-    // this.getEventLevelList();
   },
   methods: {
-    // 获取事件等级
-    // getEventLevelList () {
-    //   const level = dataList.eventLevel;
-    //   getDiciData(level)
-    //     .then(res => {
-    //       if (res) {
-    //         this.eventLevelList = res.data;
-    //       }
-    //     })
-    //     .catch(() => {})
-    // },
-    // 关闭事件change
-    handleEventChange () {
-      // if (val) {
-      //   this.isCloseEvent = true;
-      // } else {
-      //   this.isCloseEvent = false;
-      // }
-    },
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
@@ -150,11 +109,6 @@ export default {
             }
           });
         }
-        // this.endForm.attachmentList.map((item, index) => {
-        //   if (item.cname === fileName) {
-        //     this.endForm.attachmentList.splice(index, 1);
-        //   }
-        // });
       }
     },
     // 文件上传成功
@@ -216,11 +170,10 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
-          if (this.endForm.isCloseEvent) { // 关闭事件
+          if (this.endForm.isClose) { // 关闭事件
             params = {
               eventId: this.$route.query.eventId,
               isCloseEvent: this.endForm.isCloseEvent,
-              // eventLevel: this.endForm.eventLevel,
               eventSummary: this.endForm.summary,
               attachmentList: attachmentList
             }
@@ -233,7 +186,7 @@ export default {
             }
           }
           this.isEndLoading = true;
-          endEvent(params, this.$route.query.eventId)
+          endEvent(params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -242,6 +195,8 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
+                this.isEndLoading = false;
+              } else {
                 this.isEndLoading = false;
               }
             })
