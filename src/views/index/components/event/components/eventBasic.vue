@@ -85,13 +85,35 @@
           <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
         </div>
       </div>
-      <div class='basic-list img-content'>
-        <img
-          v-for="(item, index) in basicInfo.attachmentList"
-          :key="index"
-          :src="item.path"
-          @click="handleBigImg(index)"
-        />
+      <div class='upload_box'>
+        <div class="img-content" v-for="(item, index) in uploadImgList" :key="index">
+          <img
+            :src="item.path"
+            @click="handleBigImg(index)"
+          />
+        </div>
+        <div class='video-content' v-for="(item, index) in uplaodVideoList" :key="index">
+          <video
+            :src="item.path"
+          />
+          <div class="play_icon">
+            <i v-show="!isSmallPlaying" class="play_btn vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.cname}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
       </div>
     </div>
   </div>
@@ -101,12 +123,51 @@ export default {
   props: [ 'status', 'basicInfo' ],
   data () {
     return {
+      uploadImgList: [],
+      uplaodVideoList: [],
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
+      isSmallPlaying: false, // 小屏显示
     }
   },
   mounted () {
-    console.log(this.basicInfo)
+    setTimeout(() => {
+      if (this.basicInfo.attachmentList && this.basicInfo.attachmentList.length > 0) {
+        this.basicInfo.attachmentList.map(item => {
+          if (item.fileType === 1) {
+            this.uploadImgList.push(item);
+          } else {
+            this.uplaodVideoList.push(item);
+          }
+        });
+      }
+    }, 500)
   },
   methods: {
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+      this.isPlaying = true;
+      document.getElementById('vlJtcLargeV').play();
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('vlJtcLargeV').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo () {
+      document.getElementById('vlJtcLargeV').play();
+      this.isPlaying = true;
+    },
+    // 截屏
+    cutScreen () {},
     // 图片放大
     handleBigImg (index) {
       const isShowImg = true;
@@ -204,18 +265,99 @@ export default {
         }
       }
     }
-    .img-content {
+    .upload_box {
       width: 100%;
       padding-left: 80px;
-      img {
-        width: 80px;
-        height: 80px;
-        border-radius: 4px;
-        margin: 0 5px 5px 0;
-        cursor: pointer;
+      display: flex;
+      flex-wrap: wrap;
+      .img-content, .video-content {
+        position: relative;
+        .play_icon {
+          position: absolute;
+          cursor: pointer;
+          top: 25%;
+          left: 28%;
+          border-radius: 50%;
+          background: #000;
+          opacity: 0.6;
+          width: 40px;
+          height: 40px;
+          .play_btn {
+            margin-left: 37%;
+            margin-top: 22%;
+          }
+        }
+        img, video {
+          border: 1px solid #ccc;
+          width: 100px;
+          height: 100px;
+          border-radius: 4px;
+          margin: 0 5px 5px 0;
+          cursor: pointer;
+        }
       }
     }
   }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
 

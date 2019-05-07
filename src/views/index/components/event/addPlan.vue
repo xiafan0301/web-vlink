@@ -29,7 +29,7 @@
                 v-for="(item, index) in eventLevelList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
@@ -68,10 +68,10 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                    <el-input v-model="item.taskName"></el-input>
+                    <el-input v-model="item.taskName" @change="changeTaskName"></el-input>
                   </el-form-item>
                   <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                    <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
+                    <el-input type="textarea" rows="8" @change="changeTaskContent" v-model="item.taskContent"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
@@ -117,9 +117,7 @@ export default {
             departmentId: null
           }
         ],
-        path: null, // 附件
-        attachmentType: null,
-        cname: null // 附件名称
+        sysAppendixInfo: null
       },
       rules: {
         planName: [
@@ -189,10 +187,23 @@ export default {
     },
     // 上传成功
     handSuccess (res) {
-      if (res.data) {
-        this.addPlanForm.path = res.data.fileFullPath;
-        this.addPlanForm.cname = res.data.fileName;
-        this.addPlanForm.attachmentType = dataList.fileId;
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let data;
+        if (fileName) {
+          data = {
+            contentUid: 0,
+            fileType: dataList.fileId,
+            path: res.data.fileFullPath,
+            filePathName: res.data.filePath,
+            cname: res.data.fileName,
+            imgSize: res.data.fileSize,
+            imgWidth: res.data.fileWidth,
+            imgHeight: res.data.fileHeight,
+            thumbnailPath: res.data.thumbnailFileFullPath,
+          }
+          this.addPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(data));
+        }
       }
     },
     // 在上传之前
@@ -231,7 +242,24 @@ export default {
               type:'warning',
               message: '请先填写完内容',
               customClass: 'request_tip'
-            })
+            });
+          } else {
+            if (item.taskName.length > 140) {
+              this.$message({
+                type:'warning',
+                message: '任务名称最多输入140个字',
+                customClass: 'request_tip'
+              });
+              return;
+            }
+            if (item.taskContent.length > 140) {
+              this.$message({
+                type:'warning',
+                message: '任务内容最多输入140个字',
+                customClass: 'request_tip'
+              });
+              return;
+            }
           }
         })
         if (arr.length > 0) {
