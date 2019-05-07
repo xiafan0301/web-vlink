@@ -52,8 +52,6 @@
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 -->
             <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
-            <!-- 标记 -->
-            <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 截屏 -->
             <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
