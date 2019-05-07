@@ -144,7 +144,7 @@ export default {
       if (queryString === '') {
         cb([])
       } else {
-        JigGETEvent({'where.otherQuery': queryString, 'where.eventFlag': 1}).then(result => {
+        JigGETEvent({'where.eventCode': queryString, 'where.eventFlag': 1}).then(result => {
           cb(result.data.list);
         })
       }
