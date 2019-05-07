@@ -461,7 +461,7 @@ export default {
             shadowColor: 'rgba(0, 0, 0, .45)'
           }
         }).tooltip('item*percent', function (item, percent) {
-          percent = percent * 100 + '%';
+          percent = (percent * 100).toFixed(2) + '%';
           return {
             name: item,
             value: percent

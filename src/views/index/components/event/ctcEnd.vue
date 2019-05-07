@@ -30,7 +30,7 @@
             </el-form-item>
           </template> -->
           <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[!isCloseEvent ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+            <el-input :placeholder="[!endForm.isCloseEvent ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">

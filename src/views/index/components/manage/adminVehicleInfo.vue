@@ -25,12 +25,12 @@
                     <li
                       v-for="(item, index) in copyGroupList"
                       :key="index"
-                      @click="handleCopyGroup(item.uid)"
+                      @click="handleCopyGroup(item.groupName)"
                     >{{item.groupName}}</li>
                   </ul>
                 </vue-scroll>
               </div>
-              <div class="add_btn"  @click="showAddGroupDialog">
+              <div class="add_btn" @click="showAddGroupDialog">
                 <i class="vl_icon vl_icon_manage_4"></i>
                 <span>新增分组</span>
               </div>
@@ -108,7 +108,7 @@
           </el-table>
           <el-pagination
             @current-change="handleCurrentChange"
-            :current-page="pagination.pageNum"
+            :current-page.sync="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
             :page-size="pagination.pageSize"
             layout="total, prev, pager, next, jumper"
@@ -198,15 +198,14 @@
           <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
             <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+              <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
           </el-form>
-          <!-- <el-input placeholder="请输入组名，名字限制在10个" v-model="addGroupName"></el-input> -->
         </div>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="addGroupDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addCopyGroupDialog('addGroupForm')">确认</el-button>
+          <el-button @click="cancelAddCopyGroup('addGroupForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupDialog('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
       <!--修改组弹出框-->
@@ -220,13 +219,13 @@
         >
         <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelEditGroup('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="editGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
       <!--删除组弹出框-->
@@ -241,7 +240,7 @@
         <span style="color: #999999;">删除后该组信息可在全部车辆中查找。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteGroupDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="deleteGroup">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteGroup">确认</el-button>
         </div>
       </el-dialog>
       <!--移出组弹出框-->
@@ -256,7 +255,7 @@
         <span style="color: #999999;">移除后该条信息可在全部车辆中查找。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="moveoutGroupDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="moveoutGroupInfo">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isRemoveLoading" @click="moveoutGroupInfo">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -301,6 +300,10 @@ export default {
       multipleSelection: [], // 表格选中的行
       vehicleDetailInfo: {}, // 车辆详情
       copyGroupList: [], // 可以复制的分组
+      isAddCopyLoading: false, // 复制并加入组加载中
+      isEditLoading: false, // 编辑组名加载中
+      isDeleteLoading: false, // 删除组加载中
+      isRemoveLoading: false, // 移除分组加载中
     }
   },
   mounted () {
@@ -369,6 +372,14 @@ export default {
       this.pagination.pageNum = page;
       this.getList();
     },
+    // 当新增组名输入框改变时
+    handleAGroupName () {
+      this.isShowError = false;
+    },
+    // 当编辑组名输入框改变时
+    handleEGroupName () {
+      this.isShowError = false;
+    },
     // 显示查看详细信息弹出框
     showLookDetailInfo (obj) {
       this.getVehicleDetailInfo(obj.uid);
@@ -397,11 +408,13 @@ export default {
       this.isShowError = false;
       this.$refs[form].resetFields();
       this.editGroupDialog = false;
+      this.addGroupForm.userGroupName = null;
     },
     // 编辑组
     editGroupInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isShowError = false;
           const params = {
             groupName: this.addGroupForm.userGroupName
           };
@@ -423,8 +436,9 @@ export default {
         uid: parseInt(this.groupId),
         groupName: this.addGroupForm.userGroupName,
         groupType: 1
-      }
+      };
       if (this.isGroup) {
+        this.isEditLoading = true;
         editVeGroup(params)
           .then(res => {
             if (res) {
@@ -435,17 +449,19 @@ export default {
                 customClass: 'request_tip'
               })
               this.editGroupDialog = false;
+              this.isEditLoading = false;
               this.getVeGroupInfo(parseInt(this.groupId));
             }
-            //  else {
-            //   this.$message({
-            //     type: 'error',
-            //     message: '修改失败',
-            //     customClass: 'request_tip'
-            //   })
-            // }
+             else {
+              // this.$message({
+              //   type: 'error',
+              //   message: '修改失败',
+              //   customClass: 'request_tip'
+              // })
+              this.editGroupDialog = false;
+            }
           })
-          .catch(() => {})
+          .catch(() => {this.editGroupDialog = false;})
       }
     },
     // 显示删除弹出框
@@ -455,6 +471,7 @@ export default {
     // 删除分组
     deleteGroup () {
       if (this.groupId) {
+        this.isDeleteLoading = true;
         delVeGroup(this.groupId)
           .then(res => {
             if (res) {
@@ -464,15 +481,17 @@ export default {
                 customClass: 'request_tip'
               })
               this.$router.back(-1);
+              this.isDeleteLoading = false;
             } else {
-              this.$message({
-                type: 'error',
-                message: '删除失败',
-                customClass: 'request_tip'
-              })
+              // this.$message({
+              //   type: 'error',
+              //   message: '删除失败',
+              //   customClass: 'request_tip'
+              // })
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示移出弹出框
@@ -492,6 +511,7 @@ export default {
         groupId: this.groupId,
         vehicleIds: selectArr
       };
+      this.isRemoveLoading = true;
       moveoutGroup(params)
         .then(res => {
           if (res) {
@@ -501,26 +521,28 @@ export default {
               customClass: 'request_tip'
             })
             this.getList();
+            this.isRemoveLoading = false;
             this.moveoutGroupDialog = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '移出失败',
-              customClass: 'request_tip'
-            })
+            // this.$message({
+            //   type: 'error',
+            //   message: '移出失败',
+            //   customClass: 'request_tip'
+            // })
+            this.isRemoveLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isRemoveLoading = false;})
     },
     // 处理复制分组
-    handleCopyGroup (id) {
+    handleCopyGroup (name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.uid);
       });
       const params = {
         // groupName: this.addGroupName || null,
-        groupId: id || null,
+        groupName: name || null,
         vehicleIds: selectArr
       };
       copyGroup(params)
@@ -533,19 +555,21 @@ export default {
             })
             this.getList();
             this.showGroup = false;
-          } else {
-            this.$message({
-              type: 'error',
-              message: '复制失败',
-              customClass: 'request_tip'
-            })
           }
+          // else {
+          //   this.$message({
+          //     type: 'error',
+          //     message: '复制失败',
+          //     customClass: 'request_tip'
+          //   })
+          // }
         })
         .catch(() => {})
     },
     addCopyGroupDialog (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isShowError = false;
           const params = {
             groupName: this.addGroupForm.userGroupName
           };
@@ -573,6 +597,7 @@ export default {
         // groupId: id || null,
         vehicleIds: selectArr
       };
+      this.isAddCopyLoading = true;
       copyGroup(params)
         .then(res => {
           if (res) {
@@ -583,21 +608,30 @@ export default {
             })
             this.getList();
             this.addGroupDialog = false;
+            this.isAddCopyLoading = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '新增失败',
-              customClass: 'request_tip'
-            })
+            this.isAddCopyLoading = false;
+            // this.$message({
+            //   type: 'error',
+            //   message: '新增失败',
+            //   customClass: 'request_tip'
+            // })
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddCopyLoading = false;})
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
       this.isShowError = false;
       this.addGroupForm.userGroupName = null;
       this.addGroupDialog = true;
+    },
+    // 取消新增分组弹出框
+    cancelAddCopyGroup (form) {
+      this.$refs[form].resetFields();
+      this.isShowError = false;
+      this.addGroupDialog = false;
+      this.addGroupForm.userGroupName = null;
     }
   }
 }

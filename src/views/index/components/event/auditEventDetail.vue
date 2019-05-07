@@ -52,14 +52,21 @@
                 <li>
                   <span>事件情况:</span>
                   <span>{{detailInfo.eventDetail}}</span>
-                  <div class="img_list">
-                    <img
-                      v-for="(item, index) in detailInfo.attachmentList"
-                      :key="index"
-                      :src="item.path"
-                      @click="handleBigImg(index)"
-                      alt="" 
-                    />
+                  <div class="upload_box">
+                    <div class="img_list" v-for="(item, index) in uploadImgList" :key="index">
+                      <img
+                        :src="item.path"
+                        @click="handleBigImg(index)"
+                      />
+                    </div>
+                    <div class="video_list" v-for="(itm, index) in uplaodVideoList" :key="index">
+                      <video
+                        :src="itm.path"
+                      />
+                      <div class="play_icon">
+                        <i v-show="!isSmallPlaying" class="play_btn vl_icon vl_icon_control_09" @click="openVideo(itm)"></i>
+                      </div>
+                    </div>
                   </div>
                 </li>
                 <li>
@@ -88,7 +95,7 @@
                 </li>
                 <li v-show="detailInfo.rejectReasonName">
                   <span>驳回原因:</span>
-                  <span>{{detailInfo.rejectReasonName}}</span>
+                  <span>{{detailInfo.rejectReasonDesci ? detailInfo.rejectReasonDesci : detailInfo.rejectReasonName}}</span>
                 </li>
               </ul>
             </div>
@@ -112,6 +119,20 @@
     <div class="operation-footer">
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+     <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.cname}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
@@ -124,31 +145,15 @@ export default {
     return {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
+      isSmallPlaying: false, // 小屏显示
       imgList1: [],
-      // imgList: [
-      //   {
-      //     uid: '001',
-      //     src: require('./img/1.jpg')
-      //   },
-      //   {
-      //     uid: '002',
-      //     src: require('./img/2.jpg')
-      //   },
-      //   {
-      //     uid: '003',
-      //     src: require('./img/3.jpg')
-      //   },
-      //   {
-      //     uid: '004',
-      //     src: require('./img/4.jpg')
-      //   },
-      //   {
-      //     uid: '005',
-      //     src: require('./img/4.jpg')
-      //   }
-      // ],
       detailInfo: {},
-      map: null
+      map: null,
+      uploadImgList: [], // 要上传的图片列表
+      uplaodVideoList: [], // 要上传的视频列表
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
     }
   },
   mounted () {
@@ -160,7 +165,7 @@ export default {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        center: [110.596015, 27.907662], // 中心点坐标110.596015, 27.907662
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -172,6 +177,15 @@ export default {
         .then(res => {
           if (res) {
             this.detailInfo = res.data;
+            if (res.data.attachmentList && res.data.attachmentList.length > 0) {
+              res.data.attachmentList.map(item => {
+                if (item.fileType === 1) {
+                  this.uploadImgList.push(item);
+                } else {
+                  this.uplaodVideoList.push(item);
+                }
+              })
+            }
             this.mapMark(this.detailInfo);
           }
         })
@@ -199,6 +213,7 @@ export default {
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
+        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],
@@ -239,11 +254,33 @@ export default {
     },
     // 图片放大
     handleBigImg (index) {
-      console.log(index)
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(this.detailInfo.attachmentList));
-    }
+    },
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+      this.isPlaying = true;
+      document.getElementById('vlJtcLargeV').play();
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('vlJtcLargeV').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo () {
+      document.getElementById('vlJtcLargeV').play();
+      this.isPlaying = true;
+    },
+    // 截屏
+    cutScreen () {},
   }
 }
 </script>
@@ -339,18 +376,37 @@ export default {
                   }
                 }
               }
-              .img_list {
+              .upload_box {
                 width: 100%;
                 flex-wrap: wrap;
                 display: flex;
                 margin-left: 20%;
-                img {
-                  cursor: pointer;
-                  width: 80px;
-                  height: 80px;
-                  border-radius: 4px;
-                  margin-bottom: 5px;
-                  margin-right: 5px;
+                .img_list, .video_list {
+                  position: relative;
+                  .play_icon {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 25%;
+                    left: 28%;
+                    border-radius: 50%;
+                    background: #000;
+                    opacity: 0.6;
+                    width: 40px;
+                    height: 40px;
+                    .play_btn {
+                      margin-left: 37%;
+                      margin-top: 22%;
+                    }
+                  }
+                  img, video {
+                    border: 1px solid #ccc;
+                    cursor: pointer;
+                    width: 100px;
+                    height: 100px;
+                    border-radius: 4px;
+                    margin-bottom: 5px;
+                    margin-right: 5px;
+                  }
                 }
               }
             }
@@ -417,5 +473,65 @@ export default {
       color: #666666;
     }
   }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
