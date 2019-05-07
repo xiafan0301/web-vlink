@@ -307,6 +307,7 @@ export default {
           this.showVideoTotal = type;
         }
       }
+      console.log(this.videoList)
     },
 
     /* 播放记录 */

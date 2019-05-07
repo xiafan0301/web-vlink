@@ -312,10 +312,126 @@ export default {
       }
     }
   }
+  .my-tip {
+    position: fixed;
+    top: 500px;
+    left: 800px;
+    padding: 14px;
+    z-index: 9;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-transition: all .1s;
+    -moz-transition: all .1s;
+    -ms-transition: all .1s;
+    -o-transition: all .1s;
+    transition: all .1s;
+  }
+  .vl_map_selarea_hide {
+    display: none;
+  }
+  .vl_cut_screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    >img {
+      width: 100%;
+      height: 100%;
+    }
+    >div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      background: rgba(0, 0, 0, .4);
+      cursor: crosshair;
+      >span {
+        display: block;
+        overflow: hidden;
+        position: absolute;
+        width: 0px;
+        height: 0px;
+        &:after {
+          content: '';
+          display: block;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          cursor: move;
+          top: 0;
+          left: 0;
+          margin: auto;
+          bottom: 0;
+          right: 0;
+        }
+        >img {
+          width: auto;
+          height: auto;
+          position: absolute;
+        }
+        > i {
+          position: absolute;
+          width: 7px;
+          height: 7px;
+          background: #0C70F8;
+          z-index: 8;
+        }
+        >.move_icon1 {cursor: nw-resize; top: 0px;left: 0px;}
+        >.move_icon8 {cursor: nw-resize; bottom: 0px;right: 0px;}
+        >.move_icon2 {cursor: n-resize; left: 50%;top: 0px;}
+        >.move_icon7 {cursor: n-resize; left: 50%; bottom: 0px;}
+        >.move_icon3 {cursor: sw-resize;top: 0px;right: 0px;}
+        >.move_icon6 {cursor: sw-resize;left: 0px;bottom: 0px;}
+        >.move_icon4 {cursor: w-resize;top: 50%;left: 0px;}
+        >.move_icon5 {cursor: w-resize;top: 50%;right: 0px;}
+      }
+      .cut_end {
+        position: absolute;
+        bottom: 500px;
+        left: 500px;
+        height: 30px;
+        background: #ffffff;
+        width: 100px;
+        box-shadow: 0px 12px 12px 0px rgba(2,10,62,0.36);
+        border-radius: 4px;
+        line-height: 30px;
+        span {
+          cursor: pointer;
+          vertical-align: middle;
+          padding: 0 5px;
+          i {
+            color: #F95826;
+            font-weight: bold;
+            font-size: 20px;
+            vertical-align: inherit;
+            padding: 0 1px;
+          }
+          &:last-child {
+            i {
+              color: #1264F8;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 .map_rt_ck_num {
   font-size: 12px;
   color: #999;
   display: inline-block;
 }
+.map_icons {
+  -webkit-transition: 0s all!important;
+  -moz-transition: 0s all!important;;
+  -ms-transition: 0s all!important;;
+  -o-transition: 0s all!important;;
+  transition: 0s all!important;;
+}
+  textarea {
+    overflow: hidden;
+  }
 </style>

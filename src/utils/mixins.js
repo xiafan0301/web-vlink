@@ -37,7 +37,7 @@ Vue.mixin(mixin);
 const testMxin = {
   methods: {
     testOne () {
-      console.log('我是测试一下啊')
+      console.log('随便来点')
     }
   }
 }
