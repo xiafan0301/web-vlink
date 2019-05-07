@@ -236,8 +236,9 @@ export default {
         casualties: '', // 伤亡人员
         longitude: '', // 经度
         latitude: '', // 纬度
+        dealOrgId: '', // 处理单位
         acceptFlag: 2, // 证明是通过
-        appendixInfoList: [], // 图片文件
+        addList: [], // 图片文件
       },
       rules: {
         eventAddress: [
@@ -284,11 +285,11 @@ export default {
     this.getRejectReasonList();
   },
   mounted () {
-    this.getDetail();
     this.initMap();
     setTimeout(() => {
       this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
     }, 1000);
+    this.getDetail();
   },
   methods: {
     // 返回
@@ -369,7 +370,7 @@ export default {
             this.addEventForm.reporterPhone = res.data.reporterPhone;
             this.addEventForm.reportTime = res.data.reportTime;
             this.addEventForm.eventAddress = res.data.eventAddress;
-
+            this.addEventForm.dealOrgId = res.data.dealOrgId;
            
             if (res.data.casualties === -1) {
               this.addEventForm.casualties = '不确定';
@@ -388,10 +389,11 @@ export default {
                 }
               })
             }
+
+            this.mapMark(this.addEventForm);
+
             this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
             this.addEventForm.eventLevel = eventLevel.toString();
-            
-            this.mapMark(this.addEventForm);
           }
         })
         .catch(() => {})
@@ -402,6 +404,7 @@ export default {
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+        // center: [_this.addEventForm.longitude, _this.addEventForm.latitude]
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -446,12 +449,12 @@ export default {
     // 地图标记
     mapMark (obj) {
       let _this = this;
-      console.log(_this.map);
       
       _this.map.clearMap();
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
+        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],
@@ -614,52 +617,10 @@ export default {
         this.isShowRejectRemark = false;
       }
     },
-    // 处理要提交的数据
-    // handleFormData () {
-    //   let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-    //   if (this.addEventForm.casualties === '无') {
-    //     this.addEventForm.casualties = 0;
-    //   } else if (this.addEventForm.casualties === '不确定') {
-    //     this.addEventForm.casualties = -1;
-    //   } else if (this.addEventForm.casualties === '有') {
-    //     if (!reg.test(this.dieNumber)) {
-    //       this.isDieError = true;
-    //       this.dieTip = '死亡人数只能为正整数';
-    //       return false;
-    //     } else {
-    //       this.isDieError = false;
-    //       this.dieTip = '';
-    //     }
-    //     if (parseInt(this.dieNumber) > 9999) {
-    //       this.isDieError = true;
-    //       this.dieTip = '可输入的最大死亡人数为9999';
-    //       return false;
-    //     } else {
-    //       this.isDieError = false;
-    //       this.dieTip = '';
-    //     }
-    //     this.addEventForm.casualties = this.dieNumber;
-    //   }
-    //   if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-    //     this.$message({
-    //       type: 'warning',
-    //       message: '图片和视频只能上传一种',
-    //       customClass: 'request_tip'
-    //     });
-    //     return;
-    //   } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-    //     this.$message({
-    //       type: 'warning',
-    //       message: '最多上传1个视频或9张图片',
-    //       customClass: 'request_tip'
-    //     });
-    //     return;
-    //   }
-    // },
     submitData (form) { // 审核通过
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.addEventForm.appendixInfoList = [];
+          this.addEventForm.addList = [];
           let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
@@ -700,10 +661,16 @@ export default {
             return;
           }
           this.uploadImgList.map(item => {
-            this.addEventForm.appendixInfoList.push(item);
+            if (item.uid) {
+              item.uid = null;
+            }
+            this.addEventForm.addList.push(item);
           });
           this.uplaodVideoList.map(item => {
-            this.addEventForm.appendixInfoList.push(item);
+            if (item.uid) {
+              item.uid = null;
+            }
+            this.addEventForm.addList.push(item);
           });
           this.isPassLoading = true;
           updateEvent(this.addEventForm)
@@ -713,15 +680,10 @@ export default {
                   type: 'success',
                   message: '保存成功',
                   customClass: 'request_tip'
-                })
+                });
                 this.$router.push({name: 'event_audit'});
                 this.isPassLoading = false;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '保存失败',
-                  customClass: 'request_tip'
-                })
                 this.isPassLoading = false;
               }
             })

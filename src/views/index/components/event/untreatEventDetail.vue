@@ -159,9 +159,9 @@ export default {
       }
       const params = {
         uid: eventId,
-        type: operationType.changeEvent,
+        type: type === 4 ? operationType.sendOtherUint : operationType.changeEvent, // 操作类型
         mutualFlag: this.isMutual,
-        dealType: this.handleType || null,
+        dealType: this.handleType || null, // 处理方式
         radius: this.radiusNumber || null
       }
       updateEvent(params)

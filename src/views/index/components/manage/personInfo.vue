@@ -603,11 +603,6 @@ export default {
             this.addGroupCopyDialog = false;
             this.isAddCopyLoading = false;
           } else {
-            // this.$message({
-            //   type: 'error',
-            //   message: '新增失败',
-            //   customClass: 'request_tip'
-            // })
             this.isAddCopyLoading = false;
           }
         })
@@ -622,17 +617,20 @@ export default {
       this.searchForm.keyWord = null;
       this.activeSelect = obj.id;
       if (type === 1) {
-        this.searchForm.groupId = obj.id;
-        this.perGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
-          if (item.id === obj.id) {
-            this.copyPerGroupInfoList.splice(index, 1);
-          }
-        })
+        if (obj) {
+          this.searchForm.groupId = obj.id;
+          this.perGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
+            if (item.id === obj.id) {
+              this.copyPerGroupInfoList.splice(index, 1);
+            }
+          })
+        }
       } else {
         this.searchForm.albumId = obj.id;
       }
       if (!obj) {
         this.activeSelect = -1;
+        this.copyPerGroupInfoList = JSON.parse(JSON.stringify(this.perGroupList));
       }
       this.getPersonList();
     },

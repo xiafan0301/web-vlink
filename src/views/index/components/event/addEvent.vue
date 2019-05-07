@@ -501,11 +501,6 @@ export default {
                 this.isAddLoading = false;
               } 
               else {
-                // this.$message({
-                //   type: 'error',
-                //   message: '保存失败',
-                //   customClass: 'request_tip'
-                // })
                 this.isAddLoading = false;
               }
             })
@@ -532,7 +527,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
-          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          let reg = /^[0-9]*[1-9][0-9]*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {

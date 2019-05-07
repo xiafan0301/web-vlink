@@ -5,7 +5,7 @@
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/manage/videoSetting/customGroup' }">视频设置</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/manage/videoSetting/customGroup' }">自定义组</el-breadcrumb-item>
-        <el-breadcrumb-item>新增分组</el-breadcrumb-item>
+        <el-breadcrumb-item>{{this.$route.query.groupId ? '编辑分组' : '新增分组'}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content_box">
@@ -49,20 +49,31 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
-              :selectDeviceList="allDeviceList" 
+              :selectDeviceList="selectDeviceList"
+              :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
+              :leftDeviceNumber="leftDeviceNumber"
+              @emitOpenLeftArrow="emitOpenLeftArrow"
+              @emitLeftParentChecked="emitLeftParentChecked"
+              @emitLeftChildChecked="emitLeftChildChecked"
             ></mapSelect>
           </template>
           <template v-if="tabState === 2">
             <listSelect
+              :leftDeviceNumber="leftDeviceNumber"
               :rightAllChecked="rightAllChecked"
-              :selectDeviceList="allDeviceList" 
+              :selectDeviceList="selectDeviceList" 
               :selectDeviceNumber="selectDeviceNumber"
+              :currentDeviceList="currentDeviceList"
               @emitOpenRightArrow="emitOpenRightArrow"
               @emitParentChecked="emitParentChecked"
               @emitChildChecked="emitChildChecked"
+              @emitOpenLeftArrow="emitOpenLeftArrow"
+              @emitLeftParentChecked="emitLeftParentChecked"
+              @emitLeftChildChecked="emitLeftChildChecked"
               @emitAllChecked="emitAllChecked"
               @emitFinalDevice="emitFinalDevice"
+              @emitRemoveFinalDevice="emitRemoveFinalDevice"
             >
             </listSelect>
           </template>
@@ -70,7 +81,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="submitData">保存</el-button>
+      <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData">保存</el-button>
       <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
   </div>
@@ -80,7 +91,7 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
-import { getAllDevices, addGroupDevice } from '@/views/index/api/api.manage.js';
+import { getAllDevices, addGroupDevice, getCurrentDevices } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -95,45 +106,56 @@ export default {
       },
       groupName: null, // 新增分组名
       allDeviceList: [], // 所有设备列表数据
+      selectDeviceList: [], // 可选设备列表
       selectDeviceNumber: 0, // 可选设备数量
       currentDeviceList: [], // 已有的设备数据
       rightAllChecked: false, // 右侧设备全部选中
-      // leftAllChecked: false, // 左侧设备全部选中
+      groupId: null, // 当前分组id
+      leftDeviceNumber: 0, // 左侧设备数量
+      isLoading: false
     }
   },
   mounted () {
+    if (this.$route.query.groupId) {
+      this.groupId = this.$route.query.groupId;
+    }
+    this.getCurrentDeviceList();
     this.getAllDevicesList();
   },
   methods: {
     // 打开右侧箭头
     emitOpenRightArrow (index) {
-      console.log(index)
-      this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
-      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      this.selectDeviceList[index].isOpenArrow = !this.selectDeviceList[index].isOpenArrow;
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
+    },
+    // 打开左侧箭头
+    emitOpenLeftArrow (index) {
+      this.currentDeviceList[index].isOpenArrow = !this.currentDeviceList[index].isOpenArrow;
+      this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
     },
     // 右侧---全部选中
     emitAllChecked (val) {
       this.rightAllChecked = val;
-      this.allDeviceList.map(item => {
+      this.selectDeviceList.map(item => {
         item.isChecked = val;
         item.deviceList.map(itm => {
           itm.isChildChecked = val;
         });
       });
-      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
     },
     // 右侧--父级多选框选中
     emitParentChecked (index, val) {
-      this.allDeviceList[index].isChecked = val;
-      this.allDeviceList[index].deviceList.map(item => {
+      this.selectDeviceList[index].isChecked = val;
+      this.selectDeviceList[index].deviceList.map(item => {
         item.isChildChecked = val;
       });
       if (!val) {
         this.rightAllChecked = false;
       }
-      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
       // 过滤出父级中没有选中
-      let checkedParentArr = this.allDeviceList.filter(itm => {
+      let checkedParentArr = this.selectDeviceList.filter(itm => {
         return itm.isChecked === false;
       });
       // 如果父级全部选中， 则全选选中
@@ -143,27 +165,53 @@ export default {
         this.rightAllChecked = false;
       }
     },
-    // 右侧--子级多选框选中
-    emitChildChecked (index, idx, val) {
-      this.allDeviceList[index].deviceList[idx].isChildChecked = val;
+    // 左侧--父级多选框选中
+    emitLeftParentChecked (index, val) {
+      this.currentDeviceList[index].isChecked = val;
+      this.currentDeviceList[index].deviceList.map(item => {
+        item.isChildChecked = val;
+      });
+      this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
+    },
+    // 左侧--子级多选框选中
+    emitLeftChildChecked (index, idx, val) {
+      this.currentDeviceList[index].deviceList[idx].isChildChecked = val;
       // 过滤出子级选中的
-      let checkedArr = this.allDeviceList[index].deviceList.filter((item) => {
+      let checkedArr = this.currentDeviceList[index].deviceList.filter((item) => {
         return item.isChildChecked === true;
       })
       if (checkedArr.length === 0) { // 没有选中的
-        this.allDeviceList[index].isChecked = false;
+        this.currentDeviceList[index].isChecked = false;
       }
-      if (checkedArr.length === this.allDeviceList[index].deviceList.length) { // 全选
-        this.allDeviceList[index].isChecked = true;
+      if (checkedArr.length === this.currentDeviceList[index].deviceList.length) { // 全选
+        this.currentDeviceList[index].isChecked = true;
       }
-      if (checkedArr.length === 0 || checkedArr.length < this.allDeviceList[index].deviceList.length) {
+      if (checkedArr.length === 0 || checkedArr.length < this.currentDeviceList[index].deviceList.length) {
         // this.rightAllChecked = false;
-        this.allDeviceList[index].isChecked = false;
+        this.currentDeviceList[index].isChecked = false;
+      }
+    },
+    // 右侧--子级多选框选中
+    emitChildChecked (index, idx, val) {
+      this.selectDeviceList[index].deviceList[idx].isChildChecked = val;
+      // 过滤出子级选中的
+      let checkedArr = this.selectDeviceList[index].deviceList.filter((item) => {
+        return item.isChildChecked === true;
+      })
+      if (checkedArr.length === 0) { // 没有选中的
+        this.selectDeviceList[index].isChecked = false;
+      }
+      if (checkedArr.length === this.selectDeviceList[index].deviceList.length) { // 全选
+        this.selectDeviceList[index].isChecked = true;
+      }
+      if (checkedArr.length === 0 || checkedArr.length < this.selectDeviceList[index].deviceList.length) {
+        // this.rightAllChecked = false;
+        this.selectDeviceList[index].isChecked = false;
       }
 
-      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
       // 过滤出父级中没有选中
-      let checkedParentArr = this.allDeviceList.filter(itm => {
+      let checkedParentArr = this.selectDeviceList.filter(itm => {
         return itm.isChecked === false;
       });
       // 如果父级全部选中， 则全选选中
@@ -171,6 +219,29 @@ export default {
         this.rightAllChecked = true;
       } else {
         this.rightAllChecked = false;
+      }
+    },
+    // 获取当前分组下的设备列表
+    getCurrentDeviceList () {
+      if (this.groupId) {
+        const params = {
+          groupId: this.groupId
+        }
+        getCurrentDevices(params)
+          .then(res => {
+            if (res) {
+              this.currentDeviceList = res.data;
+              this.currentDeviceList.map(item => {
+                item.isOpenArrow = false; // 设置是否展开
+                item.isChecked = false; // 父级是否选中
+                this.leftDeviceNumber += item.deviceList.length;
+                item.deviceList.map(itm => {
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+              });
+            }
+          })
+          .catch(() => {})
       }
     },
      // 获取所有可选的设备
@@ -179,7 +250,8 @@ export default {
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;
-            this.allDeviceList.map(item => {
+            this.selectDeviceList = res.data;
+            this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
               item.isChecked = false; // 父级是否选中
               item.deviceList.map(itm => {
@@ -200,19 +272,52 @@ export default {
       this.$refs[form].resetFields();
       this.getAllDevicesList();
     },
-    // 接收已有的设备
-    emitFinalDevice (list) {
-      console.log(list);
+    // 从添加设备接收要提交的设备
+    emitFinalDevice (list, number, selectList, selectNum) {
+      if (list) {
+        list.map(item => {
+          this.currentDeviceList.push(item);
+        });
+        this.leftDeviceNumber = number;
+      }
+      if (selectList) {
+        this.selectDeviceList = [];
+        selectList.map(item => {
+          this.selectDeviceList.push(item);
+        });
+        this.selectDeviceNumber = selectNum;
+      }
+    },
+    // 从移除设备接受要提交的设备
+    emitRemoveFinalDevice (list, number, selectList, selectNum) {
       this.currentDeviceList = [];
       if (list) {
-        this.currentDeviceList = JSON.parse(JSON.stringify(list));
+        list.map(item => {
+          this.currentDeviceList.push(item);
+        });
+        this.leftDeviceNumber = number;
+      }
+      if (selectList) {
+        let arr = [];
+        selectList.map(item => {
+          arr = this.selectDeviceList.filter(itm => {
+            if (itm.uid === item.uid) {
+              item.deviceList.map(val => {
+                itm.deviceList.push(val);
+              });
+              return item;
+            }
+          });
+          if (arr.length === 0) {
+            this.selectDeviceList.push(item);
+          }
+        });
+        this.selectDeviceNumber += selectNum;
       }
     },
     // change分组名称
     changeGroupName (val) {
-      console.log(val)
       if (!val) {
-        console.log('oooo')
         this.errorText = '该项内容不可为空';
         this.isShowError = true;
       } else {
@@ -227,6 +332,14 @@ export default {
         this.isShowError = true;
         return;
       }
+      if (this.currentDeviceList.length === 0) {
+        this.$message({
+          type: 'warning',
+          message: '请先选择需要关联的设备',
+          customClass: 'request_tip'
+        });
+        return;
+      }
       let arrId = [];
       this.currentDeviceList.map(item => {
         item.deviceList.map(itm => {
@@ -237,6 +350,7 @@ export default {
         groupName: this.groupName,
         vehicleIds: arrId
       };
+      this.isLoading = true;
       addGroupDevice(params)
         .then(res => {
           if (res) {
@@ -244,17 +358,19 @@ export default {
               type: 'success',
               message: '保存成功',
               customClass: 'request_tip'
-            })
+            });
+            this.isLoading = false;
             this.$router.push({name: 'custom_group'});
           } else {
-            this.$message({
-              type: 'error',
-              message: '保存失败',
-              customClass: 'request_tip'
-            })
+            // this.$message({
+            //   type: 'error',
+            //   message: '保存失败',
+            //   customClass: 'request_tip'
+            // })
+            this.isLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => { this.isLoading = false; })
     },
     // 取消添加
     cancelAdd () {

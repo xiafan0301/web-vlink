@@ -44,7 +44,7 @@
         <el-table-column
           fixed
           label="编号"
-          prop="eventCode"
+          prop="code"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
@@ -81,7 +81,7 @@
         </el-table-column>
         <el-table-column
           label="调度时间"
-          prop="acceptTime"
+          prop="dispatchTime"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -122,7 +122,7 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, updateProcess } from '@/views/index/api/api.event.js';
+import { getAllCtcList, updateProcess } from '@/views/index/api/api.event.js';
 import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
@@ -175,17 +175,15 @@ export default {
         eventStatus = this.ctcForm.eventStatus;
       }
       const params = {
-        // 'where.eventFlag': this.ctcForm.eventFlag,
-        // 'where.mutualFlag': this.ctcForm.mutualFlag,
-        'where.reportTimeStart': this.ctcForm.reportTime[0],
-        'where.reportTimeEnd': this.ctcForm.reportTime[1],
+        'where.startTime': this.ctcForm.reportTime[0],
+        'where.endTime': this.ctcForm.reportTime[1],
         'where.keyword': this.ctcForm.phoneOrNumber,
-        'where.dispatchStatus': eventStatus,
+        'where.status': eventStatus,
         pageNum: this.pagination.pageNum,
         orderBy: 'create_time',
         order: 'desc'
       }
-      getEventList(params)
+      getAllCtcList(params)
         .then(res => {
           if(res) {
             this.ctcList = res.data.list;
@@ -229,10 +227,10 @@ export default {
           .catch(() => {})
       }
       if (obj.dispatchStatusName === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
       }
       if (obj.dispatchStatusName === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
       }
     }
   }

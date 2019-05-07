@@ -68,6 +68,18 @@ export const addVideoRound = data => {
   })
 }
 /**
+ * 查看轮巡详情
+ * @param {Object} data 接口入参
+ */
+export const getVideoRoundDetail = id => {
+  return request({
+    url: '/round/' + id,
+    method: 'get',
+    // data,
+    mode: videoModeName
+  })
+}
+/**
  * 关闭轮巡
  * @param {Object} data 接口入参
  */
@@ -262,7 +274,7 @@ export const updateVideoRecords = data => {
   return request({
     url: '/video-sign-content-service/video-sign-content',
     method: 'put',
-    params: data,
+    data,
     mode: videoModeName
   })
 }

@@ -68,10 +68,10 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                    <el-input v-model="item.taskName"></el-input>
+                    <el-input v-model="item.taskName" @change="changeTaskName"></el-input>
                   </el-form-item>
                   <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                    <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
+                    <el-input type="textarea" rows="8" @change="changeTaskContent" v-model="item.taskContent"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
@@ -242,7 +242,24 @@ export default {
               type:'warning',
               message: '请先填写完内容',
               customClass: 'request_tip'
-            })
+            });
+          } else {
+            if (item.taskName.length > 140) {
+              this.$message({
+                type:'warning',
+                message: '任务名称最多输入140个字',
+                customClass: 'request_tip'
+              });
+              return;
+            }
+            if (item.taskContent.length > 140) {
+              this.$message({
+                type:'warning',
+                message: '任务内容最多输入140个字',
+                customClass: 'request_tip'
+              });
+              return;
+            }
           }
         })
         if (arr.length > 0) {

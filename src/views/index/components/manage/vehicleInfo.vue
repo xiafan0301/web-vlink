@@ -103,14 +103,14 @@
                       <li
                         v-for="(item, index) in copyGroupInfoList"
                         :key="'item' + index"
-                        @click="handleCopyGroup(item.id)"
+                        @click="handleCopyGroup(item.name)"
                       >{{item.name}}</li>
                     </template>
                     <template v-else>
                       <li
                         v-for="(item, index) in vehicleGroupList"
                         :key="'item' + index"
-                        @click="handleCopyGroup(item.id)"
+                        @click="handleCopyGroup(item.name)"
                       >{{item.name}}</li>
                     </template>
                   </ul>
@@ -468,17 +468,20 @@ export default {
       this.activeSelect = obj.id;
       this.showGroup = false;
       if (type === 1) {
-        this.searchForm.groupId = obj.id;
-        this.vehicleGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
-          if (item.id === obj.id) {
-            this.copyGroupInfoList.splice(index, 1);
-          }
-        })
+        if (obj) {
+          this.searchForm.groupId = obj.id;
+          this.vehicleGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
+            if (item.id === obj.id) {
+              this.copyGroupInfoList.splice(index, 1);
+            }
+          });
+        }
       } else {
         this.searchForm.albumId = obj.id;
       }
       if (!obj) {
         this.activeSelect = -1;
+        this.copyGroupInfoList = JSON.parse(JSON.stringify(this.vehicleGroupList));
       }
       this.getVehicleInfoList();
     },
@@ -635,11 +638,6 @@ export default {
           this.addGroupDialog = false;
           this.isAddLoading = false;
         } else {
-          // this.$message({
-          //   type: 'error',
-          //   message: '新增失败',
-          //   customClass: 'request_tip'
-          // })
           this.isAddLoading = false;
         }
       })
@@ -659,14 +657,14 @@ export default {
       this.$refs[form].resetFields();
     },
     // 处理复制分组
-    handleCopyGroup (id) {
+    handleCopyGroup (name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.uid);
       });
       const params = {
         // groupName: this.addGroupName || null,
-        groupId: id || null,
+        groupName: name || null,
         vehicleIds: selectArr
       };
 
@@ -678,15 +676,9 @@ export default {
               message: '复制成功',
               customClass: 'request_tip'
             })
-            this.getList();
+            this.getVeGroupInfo();
             this.showGroup = false;
-          } else {
-            this.$message({
-              type: 'error',
-              message: '复制失败',
-              customClass: 'request_tip'
-            })
-          }
+          } 
         })
         .catch(() => {})
     },

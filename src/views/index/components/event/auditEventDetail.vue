@@ -165,7 +165,7 @@ export default {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
+        center: [110.596015, 27.907662], // 中心点坐标110.596015, 27.907662
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -213,6 +213,7 @@ export default {
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
+        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],

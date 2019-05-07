@@ -104,8 +104,9 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
+import { formatDate } from '@/utils/util.js';
 import { getAllDevices } from '@/views/index/api/api.manage.js';
-import { addVideoRound } from '@/views/index/api/api.video.js';
+import { addVideoRound, getVideoRoundDetail } from '@/views/index/api/api.video.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -150,12 +151,34 @@ export default {
       rightAllChecked: false, // 右侧设备全部选中
       currentDeviceList: [], // 要提交的设备
       isAddLoading: false, // 新增轮巡加载中
+      patrolId: null, // 要编辑的轮巡id
     }
   },
   mounted () {
+    if (this.$route.query.id) {
+      this.patrolId = this.$route.query.id;
+      this.getDetail();
+    }
     this.getAllDevicesList();
   },
   methods: {
+    // 查看轮巡详情
+    getDetail () {
+      if (this.patrolId) {
+        getVideoRoundDetail(this.patrolId)
+          .then(res => {
+            console.log(res);
+            if (res.data) {
+              this.addForm.roundName = res.data.roundName;
+              this.addForm.roundInterval = res.data.roundInterval;
+              this.addForm.frameNum = res.data.frameNum;
+              this.addForm.dateTime.push(formatDate(res.data.startTime));
+              this.addForm.dateTime.push(formatDate(res.data.endTime));
+            }
+          })
+          .catch(() => {})
+      }
+    },
     // 接收已有的设备
     emitFinalDevice (list) {
       this.currentDeviceList = [];
