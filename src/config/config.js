@@ -90,6 +90,12 @@ const oDomains = {
       dev: 'http://apidev.aorise.org/vlink-link',
       test: 'http://apidev.aorise.org/vlink-link',
       prod: 'http://apidev.aorise.org/vlink-link'
+    },
+    // 视频播放服务 gis
+    gis: {
+      dev: 'http://apidev.aorise.org/vlink-gis',
+      test: 'http://apidev.aorise.org/vlink-gis',
+      prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
