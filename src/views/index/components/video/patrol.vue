@@ -340,6 +340,7 @@ export default {
               roundStatus: 1, // 轮巡状态
               deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
             },
+            currentDeviceList: null,
             currentRoundRemain: 111145, // 当前轮巡倒计时(秒)
             nextRound: {
               uid: '222', // 轮巡记录标识
@@ -353,7 +354,14 @@ export default {
               roundStatus: 1, // 轮巡状态
               deviceList: [{uid: 5}, {uid: 3}, {uid: 4}, {uid: 2}, {uid: 6}]
             },
+            nextDeviceList: null,
             nextRoundCountDown: 65 // 下条轮巡倒计时(秒)
+          }
+          if (patrolData.currentRound && patrolData.currentDeviceList) {
+            patrolData.currentRound = patrolData.currentDeviceList;
+          }
+          if (patrolData.nextRound && patrolData.nextDeviceList) {
+            patrolData.nextDeviceList = patrolData.nextDeviceList;
           }
           if (bInit) {
             if (!patrolData.currentRound || patrolData.currentRoundRemain <= 0) {
@@ -618,7 +626,7 @@ export default {
         if (sList && sList.length > 0) {
           this.$nextTick(() => {
             sList = JSON.parse(sList);
-            console.log(sList);
+            // console.log(sList);
             for (let i = 0; i < sList.length; i++) {
               sList[i].record = false;
             }
@@ -642,6 +650,7 @@ export default {
           this.showVideoTotal = type;
         }
       }
+      console.log(this.videoList)
     },
 
     /* 播放记录 */

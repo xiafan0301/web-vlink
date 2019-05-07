@@ -38,8 +38,8 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      // dev: 'http://apidev.aorise.org/vlink-event',
-      dev: 'http://10.116.64.142:8081',
+      dev: 'http://apidev.aorise.org/vlink-event',
+      // dev: 'http://10.116.64.142:8081',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apirel.aorise.org/vlink-event'
     },
@@ -90,6 +90,12 @@ const oDomains = {
       dev: 'http://apidev.aorise.org/vlink-link',
       test: 'http://apidev.aorise.org/vlink-link',
       prod: 'http://apidev.aorise.org/vlink-link'
+    },
+    // 视频播放服务 gis
+    gis: {
+      dev: 'http://apidev.aorise.org/vlink-gis',
+      test: 'http://apidev.aorise.org/vlink-gis',
+      prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

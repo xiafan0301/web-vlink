@@ -631,7 +631,7 @@ export default {
         state: obj.state
       });
       // emmit
-      /*
+      /* 
         通话状态改变emit
         remoteId: 通讯方ID remoteId
         state: 状态 

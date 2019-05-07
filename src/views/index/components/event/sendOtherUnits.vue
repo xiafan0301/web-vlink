@@ -55,7 +55,9 @@ export default {
   mounted () {
     this.userInfo =  this.$store.state.loginUser;
     this.getDetail();
-    this.getList();
+    setTimeout(() => {
+      this.getList();
+    }, 500);
   },
   methods: {
     // 获取事件详情
@@ -79,6 +81,13 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            if (this.basicInfo && this.basicInfo) {
+              this.departmentData.map((item, index) => {
+                if (item.uid === this.basicInfo.dealOrgId) {
+                  this.departmentData.splice(index, 1);
+                }
+              });
+            }
           }
         })
     },

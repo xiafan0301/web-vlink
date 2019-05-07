@@ -40,7 +40,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData">确定提交</el-button>
+        <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData('reportForm')">确定提交</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <!--提交弹出框-->
@@ -121,6 +121,7 @@ export default {
       ],
       reportUserList: [], // 所有的接收者
       basicInfo: {}, // 事件详情
+      isLoading: false
     }
   },
   mounted () {
@@ -156,7 +157,12 @@ export default {
         .catch(() => {})
     },
     // 提交数据
-    submitData () {
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          
+        }
+      });
       this.dialogVisible = true;
     },
     // 返回
