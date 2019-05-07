@@ -618,7 +618,7 @@ export default {
         if (sList && sList.length > 0) {
           this.$nextTick(() => {
             sList = JSON.parse(sList);
-            console.log(sList);
+            // console.log(sList);
             for (let i = 0; i < sList.length; i++) {
               sList[i].record = false;
             }
@@ -642,6 +642,7 @@ export default {
           this.showVideoTotal = type;
         }
       }
+      console.log(this.videoList)
     },
 
     /* 播放记录 */

@@ -19,12 +19,12 @@ export function MapGETmonitorList(params) {
  新增地图标注
  * @param {} params
  */
-export function MapPOSTmapSign(params) {
+export function MapPOSTmapSign(data) {
   return request({
-    url: '/mapSignService/map-sign',
+    url: '/mark-map-service/mark-map',
     method: 'post',
-    mode: 'base',
-    params: params
+    mode: 'gis',
+    data
   })
 }
 /**
@@ -37,6 +37,19 @@ export function MapDELETEmapSign(params) {
     url: '/mark-map-service/mark-map/' + params.id,
     method: 'delete',
     mode: 'gis'
+  })
+}
+/**
+ * MapDELETEmapSign
+ 修改地图标注
+ * @param {} params
+ */
+export function MapUPDATEEmapSign(data) {
+  return request({
+    url: '/mark-map-service/mark-map',
+    method: 'put',
+    mode: 'gis',
+    data
   })
 }
 /**
