@@ -16,7 +16,7 @@
         
       </li>
     </ul>
-    <div is="webrtc" :oAdd="oAdd" :oDel="oDel"></div>
+    <div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>
   </div>
 </template>
 <script>
@@ -50,6 +50,10 @@ export default {
         remoteId: this.form.val2,
         remoteName: this.form.val2
       };
+    },
+
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
     }
   }
 }
