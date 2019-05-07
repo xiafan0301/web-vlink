@@ -358,10 +358,10 @@ export default {
             nextRoundCountDown: 65 // 下条轮巡倒计时(秒)
           }
           if (patrolData.currentRound && patrolData.currentDeviceList) {
-            patrolData.currentRound = patrolData.currentDeviceList;
+            patrolData.currentRound.deviceList = patrolData.currentDeviceList;
           }
           if (patrolData.nextRound && patrolData.nextDeviceList) {
-            patrolData.nextDeviceList = patrolData.nextDeviceList;
+            patrolData.nextRound.deviceList = patrolData.nextDeviceList;
           }
           if (bInit) {
             if (!patrolData.currentRound || patrolData.currentRoundRemain <= 0) {
