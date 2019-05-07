@@ -204,7 +204,7 @@
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
       <p style="color: #666; text-align: center; font-size: 14px; padding: 0 20px 10px 20px;">打开轮巡后，您可查看固定地方的视频播放画面，还可以关闭轮巡。</p>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 30px 0;">
-        <el-button @click="patrolNextClose">关闭轮巡</el-button>
+        <el-button @click="patrolNextClose" :disabled="patrolNextCloseDis">关闭轮巡</el-button>
         <el-button type="primary" @click="patrolNextImm">执行轮巡</el-button>
       </div>
     </el-dialog>
@@ -245,6 +245,8 @@ export default {
       patrolStartSecond: 600,
       patrolStartPercentage: 100,
       patrolInval: null,
+
+      patrolNextCloseDis: false,
       // 设备列表
       deviceList: [], // 监控分组
       deviceList3: null, // 监控列表
@@ -323,8 +325,8 @@ export default {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
           // let patrolData = res.data;
-          // let patrolData = res.data ? res.data :
-          let patrolData =
+          let patrolData = res.data ? res.data :
+          // let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
@@ -421,6 +423,7 @@ export default {
     },
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
+      this.patrolNextCloseDis = true;
       this.patrolClearDataVal();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
@@ -473,6 +476,7 @@ export default {
     },
     // 清除下一个的轮巡信息
     patrolClearNext () {
+      this.patrolNextCloseDis = false;
       this.patrolHandlerData.nextRound = {};
       this.patrolHandlerData.nextRoundCountDown = 0;
       if (this.patrolHandlerData.nextRoundCountDownTimeoutPre) {
