@@ -61,9 +61,9 @@ export const getEventDetail = (uid) => {
  * 获取调度指挥列表数据
  * @param {*} data
  */
-export const getCtcList = (data) => {
+export const getAllCtcList = (data) => {
   return request({
-    url: 'events/page',
+    url: 'task-services/dispatches',
     method: 'get',
     params: data,
     mode: 'ctc'

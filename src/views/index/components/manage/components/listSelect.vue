@@ -5,11 +5,11 @@
         <span>已有设备 ({{leftDeviceNumber}})</span>
         <p @click="removeDevice">移除设备</p>
       </div>
-      <template v-if="leftDeviceList && leftDeviceList.length > 0">
+      <template v-if="currentDeviceList && currentDeviceList.length > 0">
         <div class="detail_list">
           <vue-scroll>
             <ul class="temp_detail_info">
-              <li v-for="(item, index) in leftDeviceList" :key="'item' + index">
+              <li v-for="(item, index) in currentDeviceList" :key="'item' + index">
                 <div style="display: flex; padding: 0 10px;">
                   <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleLeftParentChecked(index, item.isChecked)"></el-checkbox>
                   <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openLeftArrow(index)">
@@ -88,13 +88,14 @@
 </template>
 <script>
 export default {
-  props: [ 'selectDeviceList', 'selectDeviceNumber', 'currentDeviceList', 'leftAllChecked', 'rightAllChecked' ],
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'currentDeviceList', 'rightAllChecked', 'leftDeviceNumber' ],
   data () {
     return {
       arrowActiveLeft: false, // 左侧展开箭头
       closeShow: false,
-      leftDeviceList: [], // 左侧的设备列表
-      leftDeviceNumber: 0, // 左侧设备数
+      checkedDeviceList: [],
+      // leftDeviceList: [], // 左侧的设备列表
+      // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
     }
   },
@@ -127,96 +128,117 @@ export default {
     },
     // 左侧---子级多选框change
     handleLeftChildChecked (index, idx, val) {
-      this.leftDeviceList[index].deviceList[idx].isChildChecked = val;
-      // 过滤出子级选中的
-      let checkedArr = this.leftDeviceList[index].deviceList.filter((item) => {
-        return item.isChildChecked === true;
-      })
-      if (checkedArr.length === 0) { // 没有选中的
-        this.leftDeviceList[index].isChecked = false;
-      }
-      if (checkedArr.length === this.leftDeviceList[index].deviceList.length) { // 全选
-        this.leftDeviceList[index].isChecked = true;
-      }
-      if (checkedArr.length === 0 || checkedArr.length < this.leftDeviceList[index].deviceList.length) {
-        // this.rightAllChecked = false;
-        this.leftDeviceList[index].isChecked = false;
-      }
-
-      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList));
-      // 过滤出父级中没有选中
-      // let checkedParentArr = this.leftDeviceList.filter(itm => {
-      //   return itm.isChecked === false;
-      // });
+      this.$emit('emitLeftChildChecked', index, idx, val);
+      
     },
     // 左侧---展开左侧列表
     openLeftArrow (index) {
-      console.log('33333')
-      this.leftDeviceList[index].isOpenArrow = !this.leftDeviceList[index].isOpenArrow;
-      console.log(this.selectDeviceList)
-      // this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      this.$emit('emitOpenLeftArrow', index);
     },
     // 左侧--父级多选框
     handleLeftParentChecked (index, val) {
-      this.leftDeviceList[index].isChecked = val;
-      this.leftDeviceList[index].deviceList.map(item => {
-        item.isChildChecked = val;
-      });
-      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
-      // 过滤出父级中没有选中
-      // let checkedParentArr = this.leftDeviceList.filter(itm => {
-      //   return itm.isChecked === false;
-      // });
+      this.$emit('emitLeftParentChecked', index, val);
     },
     // 添加设备
     addDeviceToLeft () {
-      let allDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
-      this.leftDeviceList = [];
-      this.leftDeviceNumber = 0;
-      allDeviceList.map(item => {
-        if (item.isChecked === true) {
-          this.leftDeviceList.push(item);
+      let willRemoveDevice = JSON.parse(JSON.stringify(this.selectDeviceList));
+      let checkedDeviceList = [], checkedDeviceNumber = 0, selectDeviceNumber = 0;
+      for (let len = this.selectDeviceList.length, i = len - 1; i >= 0; i --) {
+        if (this.selectDeviceList[i].isChecked === true) {
+          checkedDeviceList.push(this.selectDeviceList[i]);
+          willRemoveDevice.splice(i, 1);
         } else {
-          item.deviceList.map(itm => {
-            if (itm.isChildChecked === true) {
-              const params = {
-                cname: item.cname,
-                uid: item.uid,
-                ctype: item.ctype,
+          let params;
+          for (let length = this.selectDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
+            if (this.selectDeviceList[i].deviceList[j].isChildChecked === true) {
+              params = {
+                cname: this.selectDeviceList[i].cname,
+                uid:this.selectDeviceList[i].uid,
+                ctype: this.selectDeviceList[i].ctype,
                 deviceList: []
               }
-              params.deviceList.push(itm);
-              this.leftDeviceList.push(params);
+              params.deviceList.push(this.selectDeviceList[i].deviceList[j]);
+              checkedDeviceList.push(params);
+              willRemoveDevice[i].deviceList.splice(j, 1);
             }
-          })
+          }
         }
-      })
-      this.leftDeviceList.map(item => {
-        this.leftDeviceNumber += item.deviceList.length;
-        item.isChecked = false;
-        item.isOpenArrow = false;
-        item.deviceList.map(itm => {
-          itm.isChildChecked = false;
-        })
-      })
-      this.$emit('emitFinalDevice', this.leftDeviceList);
+      }
+      if (checkedDeviceList && checkedDeviceList.length > 0) {
+        checkedDeviceList.map(item => {
+          checkedDeviceNumber += item.deviceList.length;
+          item.isChecked = false;
+          item.isOpenArrow = false;
+          item.deviceList.map(itm => {
+            itm.isChildChecked = false;
+          });
+        });
+      }
+      if (willRemoveDevice && willRemoveDevice.length > 0) {
+        willRemoveDevice.map(item => {
+          selectDeviceNumber += item.deviceList.length;
+          item.isChecked = false;
+          item.isOpenArrow = false;
+          item.deviceList.map(itm => {
+            itm.isChildChecked = false;
+          });
+        });
+      }
+      this.$emit('emitFinalDevice', checkedDeviceList, checkedDeviceNumber, willRemoveDevice, selectDeviceNumber);
+      
     },
     // 移除设备
     removeDevice () {
-      let removeDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList));
-      removeDeviceList.map((item, index) => {
-        if (item.isChecked === true) {
-          removeDeviceList.splice(index, 1);
-        } else {
-          item.deviceList.map((itm, idx) => {
-            if (itm.isChildChecked === true) {
-              item.deviceList[idx].splice(idx, 1);
+      console.log(this.currentDeviceList)
+      let currDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
+      let checkedDeviceNumber = 0, selectDeviceNumber = 0, checkedDeviceList = [];
+      if (this.currentDeviceList && this.currentDeviceList.length > 0) {
+        for (let len = this.currentDeviceList.length, i = len - 1; i >= 0; i --) {
+           if (this.currentDeviceList[i].isChecked === true) {
+              checkedDeviceList.push(this.currentDeviceList[i]);
+              currDeviceList.splice(i, 1);
+            } else {
+              let params;
+              for (let length = this.currentDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
+                if (this.currentDeviceList[i].deviceList[j].isChildChecked == true) {
+                  params = {
+                    cname: this.currentDeviceList[i].cname,
+                    uid: this.currentDeviceList[i].uid,
+                    ctype: this.currentDeviceList[i].ctype,
+                    deviceList: []
+                  }
+                  params.deviceList.push(this.currentDeviceList[i].deviceList[j]);
+                  checkedDeviceList.push(params);
+
+                  currDeviceList[i].deviceList.splice(idx, 1);
+
+                }
+              }
             }
+        }
+        console.log('currDeviceList', currDeviceList)
+        if (currDeviceList && currDeviceList.length > 0) {
+          currDeviceList.map(item => {
+            checkedDeviceNumber += item.deviceList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
           });
         }
-      });
-      this.finalDeviceList = JSON.parse(JSON.stringify(removeDeviceList));
-      this.$emit('emitFinalDevice', this.finalDeviceList);
+        if (checkedDeviceList && checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            selectDeviceNumber += item.deviceList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
+          });
+        }
+        this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
+      }
     }
   }
 }

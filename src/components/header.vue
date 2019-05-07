@@ -5,7 +5,7 @@
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
-        class="person_info"
+        popper-class="person_info"
         placement="bottom"
         trigger="click">
         <ul class="hd_user_pl">
@@ -460,9 +460,7 @@ export default {
     }
   }
 }
-.person_info {
-  height: auto;
-}
+
 </style>
 <style lang="scss">
 .vl_hd_box {
@@ -628,6 +626,9 @@ export default {
 .alarm_popover {
   max-height: 476px;
   padding: 12px 0;
+}
+.person_info {
+  height: auto !important;
 }
 /* .el-popover {
   max-height: 476px;

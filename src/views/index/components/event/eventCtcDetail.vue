@@ -226,6 +226,7 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            this.basicInfo = res.data;
             if (res.data.closeAttachmentList.length > 0) {
               res.data.closeAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -244,7 +245,6 @@ export default {
                 }
               })
             }
-            this.basicInfo = res.data;
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }

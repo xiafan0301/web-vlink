@@ -18,7 +18,7 @@
               v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.enumValue"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -29,7 +29,7 @@
                 v-for="(item, index) in eventLevelList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
@@ -42,6 +42,7 @@
               style="width: 500px;"
               :action="uploadUrl"
               :on-success="handSuccess"
+              :on-remove="handleRemove"
               :before-upload="beforeUpload"
               :limit="1"
               :file-list="fileList">
@@ -109,9 +110,10 @@ export default {
         eventTypeName: null,
         planName: null,
         planDetail: null,
-        path: null,
-        cname: null,
-        attachmentType: null,
+        sysAppendixInfo: {},
+        // path: null,
+        // cname: null,
+        // attachmentType: null,
         uid: null,
       },
       rules: {
@@ -184,12 +186,33 @@ export default {
         })
         .catch(() => {})
     },
+    // 删除附件
+    handleRemove (file) {
+      if (file) {
+        // this.editPlanForm.path = null;
+        // this.editPlanForm.cname = null;
+        this.editPlanForm.sysAppendixInfo = null;
+      }
+    },
     // 上传成功
     handSuccess (res) {
-      if (res.data) {
-        this.editPlanForm.url = res.data.fileFullPath;
-        this.editPlanForm.cname = res.data.fileName;
-        this.editPlanForm.attachmentType = dataList.fileId;
+      if (res && res.data) {
+        const fileName = res.data.fileName;
+        let data;
+        if (fileName) {
+          data = {
+            contentUid: 0,
+            fileType: dataList.fileId,
+            path: res.data.fileFullPath,
+            filePathName: res.data.filePath,
+            cname: res.data.fileName,
+            imgSize: res.data.fileSize,
+            imgWidth: res.data.fileWidth,
+            imgHeight: res.data.fileHeight,
+            thumbnailPath: res.data.thumbnailFileFullPath,
+          }
+          this.editPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(data));
+        }
       }
     },
     // 在上传之前
@@ -229,11 +252,8 @@ export default {
             this.editPlanForm.uid = res.data.uid;
             this.editPlanForm.planName = res.data.planName;
             this.editPlanForm.planDetail = res.data.planDetail;
-            this.editPlanForm.attachmentType = res.data.attachmentType;
-            this.editPlanForm.cname = res.data.cname;
+            this.editPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(res.data.sysAppendixInfo));
             this.editPlanForm.editEventType =  res.data.eventTypeName;
-            this.editPlanForm.levelList = res.data.levelList;
-            this.editPlanForm.path = res.data.path;
             if (res.data.taskList) {
               res.data.taskList.map(item => {
                 const params = {
@@ -245,12 +265,19 @@ export default {
                 this.editPlanForm.taskList.push(params);
               })
             }
-            if (res.data.path) {
+            if (res.data.sysAppendixInfo) {
               this.fileList.push({
-                name: res.data.cname,
-                url: res.data.path
+                name: res.data.sysAppendixInfo.cname,
+                url: res.data.sysAppendixInfo.path
               })
             }
+            if (res.data.levelList) {
+              res.data.levelList.map(item => {
+                let planLevel = item.planLevel;
+                this.editPlanForm.levelList.push(planLevel.toString());
+              })
+            }
+            console.log(this.editPlanForm.levelList)
           }
         })
         .catch(() => {})
@@ -282,12 +309,16 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           let filterArr = this.planTypeList.filter(val => {
-            return val.enumValue === this.editPlanForm.editEventType;
+            return val.enumField == this.editPlanForm.editEventType;
           });
           if (filterArr.length === 0) {
             this.editPlanForm.eventTypeName = this.editPlanForm.editEventType;
           } else {
             this.editPlanForm.eventType = filterArr[0].uid;
+          }
+          // this.editPlanForm.editEventType = null;
+          if (this.editPlanForm.sysAppendixInfo) {
+            this.editPlanForm.sysAppendixInfo.uid = null;
           }
           this.judgeData().then(result => {
             if (result === true) {

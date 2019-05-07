@@ -3,7 +3,7 @@
     <div class="ctc-detail-info">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctc'}">调度指挥</el-breadcrumb-item>
           <el-breadcrumb-item>调度详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -213,6 +213,7 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            this.basicInfo = res.data;
             if (res.data.closeAttachmentList.length > 0) {
               res.data.closeAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -231,7 +232,6 @@ export default {
                 }
               })
             }
-            this.basicInfo = res.data;
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
