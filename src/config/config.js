@@ -22,7 +22,7 @@ const oDomains = {
     // 布控部分地址
     control: {
         dev: 'http://apidev.aorise.org/vlink-control',
-        // dev: 'http://10.116.64.98:8081',//钟赞
+        // test: 'http://10.116.64.98:8081',//钟赞
         // dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://apirel.aorise.org/vlink-control',
         prod: 'http://apirel.aorise.org/vlink-control'

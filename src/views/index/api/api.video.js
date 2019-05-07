@@ -302,3 +302,16 @@ export const getVideoCurrentRound = () => {
     mode: videoModeName
   })
 }
+
+/**
+ * 修改轮巡状态接口
+ * @param {Object} data 接口入参
+ */
+export const mdfVideoRoundState = (data) => {
+  return request({
+    url: '/round/' + data.id,
+    method: 'put',
+    data: data,
+    mode: videoModeName
+  })
+}
