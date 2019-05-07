@@ -18,7 +18,7 @@
         @change="getLicenseNum"
         value-key="value"
         placeholder="请输入车牌信息"
-        :remote-method="getVehicleByIdNo"
+        :remote-method="getVehicleByVehicleNumber"
         :loading="loading">
         <el-option
           v-for="item in licenseNumList"
@@ -60,8 +60,9 @@
     <div class="manage_d_s_m">
       <div :id="mapId"></div>
       <div class="manage_d_s_m_l">
-        <div class="manage_t" style="height: 130px;padding: 20px 20px;" :class="{'equ_h': (modelType === '3' || modelType === '4')}">
-          <el-input v-if="modelType === '1' || modelType === '2'" v-model="scopeRadius" @keyup.enter.native="mapCircle(pointIndex)" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+        <!-- 人员追踪/车辆追踪 -->
+        <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
+          <el-input v-model="scopeRadius" @keyup.enter.native="mapCircle(pointIndex)" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
           <el-select value-key="uid" v-model="features" filterable placeholder="选择设备特性" style="width: 220px;">
             <el-option
               v-for="item in featuresTypeList"
@@ -71,6 +72,18 @@
             </el-option>
           </el-select>
         </div>
+        <!-- 范围分析 -->
+        <div class="manage_t equ_h" style="height: 130px;padding: 20px 20px;" v-if="modelType === '4'">
+          <el-select value-key="uid" v-model="features" filterable placeholder="选择设备特性" style="width: 220px;">
+            <el-option
+              v-for="item in featuresTypeList"
+              :key="item.uid"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </div>
+
         <div class="manage_b" style="height: 617px;">
           <div class="vl_f_333 top">
             <span>已选{{modelType !== '3' ? '设备' : '卡口'}}({{selDevOrBayNum}})</span>
@@ -218,7 +231,7 @@
 </template>
 <script>
 import {objDeepCopy} from '@/utils/util.js';
-import {getAreas, repertorySel, getVehicleByIdNo, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
+import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAreaId} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
 // import {bonDataTwo, bonDataOne} from '../testData.js';
 export default {
@@ -444,13 +457,13 @@ export default {
       })
     },
     // 通过车牌号搜索车像列表
-    getVehicleByIdNo (query) {
+    getVehicleByVehicleNumber (query) {
       const idNo = this.Trim(query, 'g');
       const params = {
         vehicleNumber: idNo
       }
       if (idNo) {
-        getVehicleByIdNo(params).then(res => {
+        getVehicleByVehicleNumber(params).then(res => {
           if (res && res.data && res.data.length > 0) {
             this.licenseNumList = res.data.map(m => {
               return {
@@ -1510,7 +1523,7 @@ export default {
         longitude: _this.lnglat[0],//追踪点经度
         latitude: _this.lnglat[1],//追踪点纬度
         radius: _this.scopeRadius,//范围半径
-        groupId: 1,//设备组id,先写死
+        groupId: 1,//设备组id,随便传个
         devList: []//设备列表
       }
       // 把在圆形覆盖物范围之内的追踪点添加进来
@@ -1574,7 +1587,7 @@ export default {
         _this.trackPointList[_index].devList.sort((x, y) => {
           return x.distance - y.distance;
         })
-      }, 10)
+      }, 20)
     },
     /******************************* 人员、车辆追踪方法end ****************************/
 
@@ -1672,7 +1685,7 @@ export default {
       let obj = {
         tid: _this.trackPointList.length + 1, 
         deviceChara: _this.features,//设备特性
-        groupId: 1,//设备组id,先写死
+        groupId: 1,//设备组id,随便传个
         bayonetList: []//设备列表
       }
       if (selBayList instanceof Array) {
@@ -1684,8 +1697,8 @@ export default {
       }
       _this.$set(obj, 'isDropdown', false);
       _this.trackPointList.push(obj);
-      let index = _this.trackPointList.indexOf(obj);
-      _this.trackPointList[index].bayonetList = [];
+      let _index = _this.trackPointList.indexOf(obj);
+      _this.trackPointList[_index].bayonetList = [];
       // 把属于当前行政区卡口添加进来
       for (let s = 0; s < data.length; s++) {
         let _obj = data[s];
@@ -1707,9 +1720,13 @@ export default {
               _obj.isSelected = true;//在范围内的置为选中-多选框
             }
           }
-          _this.trackPointList[index].bayonetList.push(_obj);
+          _this.trackPointList[_index].bayonetList.push(_obj);
         }, 500)
       }
+      // 左边卡口列表按a-z字母排序
+      setTimeout(() => {
+        _this.trackPointList[_index].bayonetList.sort((x, y) => x.bayonetName.localeCompare(y.bayonetName, 'zh'));
+      }, 550)
     },
     /******************************* 越界分析方法end ****************************/
 
@@ -1740,6 +1757,7 @@ export default {
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
           polygon.on('mouseover', function(p) {
+            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
             if (_marker) return;
             _marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -1769,10 +1787,11 @@ export default {
             _marker.setMap(_this.map);
           })
           polygon.on('mouseout', function(e) {
-            if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-              return;
-            }
+            // if (_this.trackPointList.length === 1) return;//只有一个范围时，不生成删除小图标
             setTimeout(() => {
+              if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
+                return;
+              }
               _this.map.remove(_marker);//移除删除小图标
               _marker = null;
             }, 100)
@@ -1829,7 +1848,7 @@ export default {
         tid: _this.trackPointList.length + 1, 
         trackPointName: '范围00' + (_this.trackPointList.length + 1),
         address: '范围00' + (_this.trackPointList.length + 1),
-        deviceChara: _this.features,//设备特性
+        deviceChara: null,//设备特性,随便传个
         latitude: _this.polygonLnglat.map(m => m.lat).join(','),
         longitude: _this.polygonLnglat.map(m => m.lng).join(','),
         groupId: 1,//设备组id,先写死
@@ -1837,7 +1856,7 @@ export default {
       }
       _this.$set(obj, 'isDropdown', false);
       _this.trackPointList.push(obj);
-      let index = _this.trackPointList.indexOf(obj);
+      let _index = _this.trackPointList.indexOf(obj);
 
       // 把多边形覆盖物范围之内的设备添加进来
       for (let s = 0; s < data.length; s++) {
@@ -1872,11 +1891,15 @@ export default {
                   _obj.isSelected = true;//在覆盖物内的置为选中-多选框
                 }
               }
-              _this.trackPointList[index].devList.push(_obj);
+              _this.trackPointList[_index].devList.push(_obj);
             }, 1000)
           }
         }
       }
+      // 左边设备列表按a-z字母排序
+      setTimeout(() => {
+        _this.trackPointList[_index].devList.sort((x, y) => x.deviceName.localeCompare(y.deviceName, 'zh'));
+      }, 1050)
     },
     /******************************* 范围分析方法end ****************************/
   },

@@ -199,10 +199,10 @@ export function getVehicleById(uid) {
   })
 }
 /**
- * getVehicleByIdNo 通过车牌号搜索车辆
+ * getVehicleByVehicleNumber 通过车牌号搜索车辆
  * @param {object} params
  */
-export function getVehicleByIdNo(params) {
+export function getVehicleByVehicleNumber(params) {
   return request({
     url: '/vehicles',
     method: 'get',
