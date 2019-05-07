@@ -66,11 +66,13 @@
         </el-table-column>
         <el-table-column
           label="适用事件等级"
-          prop="levelNameList"
+          prop="levelList"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span>{{scope.row.levelNameList.join()}}</span>
+            <span v-for="(item, index) in scope.row.levelList" :key="index">
+              {{item.planLevelName + ' '}}
+            </span>
           </template>
         </el-table-column>
         <el-table-column
@@ -116,7 +118,7 @@
       <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delPlanDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deletePlan">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deletePlan">确认</el-button>
       </div>
     </el-dialog>
   </div>
@@ -140,6 +142,7 @@ export default {
       planLevelList: [], // 适用等级
       planTypeList: [], // 预案类型
       dePlanId: null, // 要删除的预案id
+      isDeleteLoading: false, // 删除加载中
     }
   },
   created () {
@@ -221,17 +224,16 @@ export default {
     },
     // 跳至修改预案页面
     skipEditPage (obj) {
-      console.log(obj);
       this.$router.push({name: 'edit_plan', query:{planId: obj.uid}});
     },
     // 跳至预案详情页面
     skipDetailPage (obj) {
-      console.log(obj);
       this.$router.push({name: 'ctc_plan_detail', query:{planId: obj.uid}});
     },
     // 确认删除
     deletePlan () {
       if (this.dePlanId) {
+        this.isDeleteLoading = true;
         delPlan(this.dePlanId)
           .then(res => {
             if (res) {
@@ -242,15 +244,17 @@ export default {
               })
               this.getPlanList();
               this.delPlanDialog = false;
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     }
   }

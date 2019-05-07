@@ -177,7 +177,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteUser">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteUser">确认</el-button>
       </div>
     </el-dialog>
     <!--编辑信息弹出框-->
@@ -222,7 +222,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('editUser')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserInfo('editUser')">保存</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editUserInfo('editUser')">保存</el-button>
       </div>
     </el-dialog>
     <!--修改所属组弹出框-->
@@ -381,6 +381,8 @@ export default {
       groupUserId: null, // 用户组id
       roleUserId: null, // 角色组id
       resetPwdInfo: {}, // 重置密码所需要的信息
+      isEditLoading: false, // 编辑用户加载中
+      isDeleteLoading: false, // 删除用户加载中
     }
   },
   created () {
@@ -557,6 +559,7 @@ export default {
     editUserInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isEditLoading = true;
           updateUser(this.editUser)
             .then(res => {
               if (res) {
@@ -564,18 +567,20 @@ export default {
                   type: 'success',
                   message: '修改成功',
                   customClass: 'request_tip'
-                })
+                });
                 this.editUserInfoDialog = false;
                 this.getList();
+                this.isEditLoading = false;
               } else {
                 this.$message({
                   type: 'error',
                   message: '修改失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isEditLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEditLoading = false;})
         }
       })
     },
@@ -592,10 +597,11 @@ export default {
     // 删除用户
     deleteUser () {
       if (this.deleteId) {
+        this.isDeleteLoading = true;
         const params = {
           proKey: this.userInfo.proKey,
           uid: this.deleteId
-        }
+        };
         delUser(params)
           .then(res => {
             if (res) {
@@ -603,18 +609,20 @@ export default {
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
               this.delUserDialog = false;
               this.getList();
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示修改所属组弹出框

@@ -7,7 +7,7 @@ const oDomains = {
     base: {
         dev: 'http://apidev.aorise.org/vlink-base',
         // dev: 'http://10.116.64.107:8081',
-        // dev: 'http://10.116.64.142:8083',
+        // dev: 'http://10.116.64.142:8082',
         // dev: 'http://10.116.66.29:8082',// 钟赞
         test: 'http://apirel.aorise.org/vlink-base',
         prod: 'http://apirel.aorise.org/vlink-base'
@@ -22,7 +22,7 @@ const oDomains = {
     // 布控部分地址
     control: {
         dev: 'http://apidev.aorise.org/vlink-control',
-        // dev: 'http://10.116.64.98:8081',//钟赞
+        // test: 'http://10.116.64.98:8081',//钟赞
         // dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://apirel.aorise.org/vlink-control',
         prod: 'http://apirel.aorise.org/vlink-control'
@@ -52,8 +52,9 @@ const oDomains = {
     },
     // 调度和预案部分地址
     ctc: {
-      dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
-      // dev: 'http://10.116.64.134:8081/api/vlink',
+      // dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
+      dev: 'http://10.116.64.142:8083/api/vlink',
+      // dev: 'http://10.116.64.142:8083/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },
@@ -78,17 +79,17 @@ const oDomains = {
       test: 'http://apirel.aorise.org/smart-city-common/',
       prod: 'http://apidev.aorise.org/smart-city-common/'
     },
+    // 文件上传
+    upload: {
+        dev: 'http://apidev.aorise.org/vlink-base',
+        test: 'http://apirel.aorise.org/vlink-base',
+        prod: 'http://apirel.aorise.org/vlink-base'
+    },
     // test-video服务
     live: {
       dev: 'http://apidev.aorise.org/vlink-link',
       test: 'http://apidev.aorise.org/vlink-link',
       prod: 'http://apidev.aorise.org/vlink-link'
-    },
-    // 视频播放服务
-    gis: {
-      dev: 'http://apidev.aorise.org/vlink-gis',
-      test: 'http://apidev.aorise.org/vlink-gis',
-      prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
@@ -97,7 +98,7 @@ console.log('config.js env', ENV_API);
 // ajax default
 let ajaxCtx = {};
 for (let _key in oDomains) {
-  ajaxCtx[_key] = oDomains[_key][ENV_API]
+    ajaxCtx[_key] = oDomains[_key][ENV_API]
 }
 // console.log('*****oDomains*****', ajaxCtx);
 export {ajaxCtx};
@@ -128,7 +129,7 @@ export const webrtcConfig = {
     remove: '/signal/remove', // 挂断
     leave: '/signal/leave' // 挂断
   }
-}
+};
 
 // cookie名
 export const cookieUserId = 'AS.VLINK.USERID';
@@ -138,7 +139,7 @@ export const cookieTime = 24;
 
 // 高德地图 溆浦县 adcode
 export const mapXupuxian = {
-  adcode: '431224',
-  name: '溆浦县',
-  center: [110.685133, 27.907633]
+    adcode: '431224',
+    name: '溆浦县',
+    center: [110.685133, 27.907633]
 };

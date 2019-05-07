@@ -128,7 +128,7 @@
       </div>
       <!-- 布控进行中页面 -->
       <div class="underway_box" v-if="isShowFullScreen">
-        <div class="video_box" :style="{'height': videoHeight + 'px'}">
+        <div class="video_box" :style="{'height': controlObjList.objectList && controlObjList.objectList.length ? '75%' : '100%'}">
           <div class="video">
             <div>
               <div is="flvplayer" @playerClose="playerClose" :oData="videoObj" 
@@ -138,45 +138,56 @@
             </div>
           </div>
         </div>
-        <div class="control_box">
-          <div v-if="controlObjList.objectList && controlObjList.objectList.length > 0" class="control_obj_list">
+        <div class="control_box" v-if="controlObjList.objectList && controlObjList.objectList.length > 0" @mouseover="isShowSwiperBtn = true;" @mouseleave="isShowSwiperBtn = false;">
             <el-card class="more" shadow="hover">
               <p>布控对象</p>
               <div>{{controlObjList.objectList.length}}</div>
-              <el-button size="small">查看更多</el-button>
             </el-card>
-            <el-card class="pic" shadow="hover" v-for="item in controlObjList.objectList" :key="item.name">
-              <img :src="item.photoUrl" alt="" width="130" height="130">
-              <p>{{item.name}}</p>
-            </el-card>
-          </div>
-          <div class="control_info">
-            <div class="control_info_list">
-              <div><span>布控名称：</span><span>{{controlObjList.list[0].surveillanceName}}</span></div>
-              <div v-if="controlObjList.list[0].surveillanceType === 1"><span>布控日期：</span><span>{{controlObjList.list[0].surveillanceDateStart}}至{{controlObjList.list[0].surveillanceDateEnd}}</span></div>
-              <div v-if="controlObjList.list[0].eventDetail"><span>事件预览：</span><span>{{controlObjList.list[0].eventDetail}}</span></div>
-            </div>
-            <el-button type="primary" size="small" @click="skipIsVideo(videoObj.video.uid, videoObj.video.deviceName)">视频回放</el-button>
-          </div>
+           
+
+            <swiper :options="swiperOption" ref="mySwiper" style="width: 89%;" :class="{'is_show_btn': isShowSwiperBtn}">
+              <!-- slides -->
+              <swiper-slide v-for="item in controlObjList.objectList" :key="item.id">
+                <el-card class="pic" shadow="hover" :key="item.name">
+                  <img :src="item.photoUrl" alt="" width="90%" height="55%">
+                  <p>{{item.name}}</p>
+                </el-card>
+              </swiper-slide>
+              <div class="swiper-button-prev" slot="button-prev"><i class="vl_icon vl_icon_control_38"></i></div>
+              <div class="swiper-button-next" slot="button-next"><i class="vl_icon vl_icon_control_39"></i></div>
+            </swiper>
+
         </div>
       </div>
     </div>
-    <div is="controlVideo" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @showScreen="showScreen" @playerClose="playerClose" :oData="videoObj" 
-      :oConfig="{sign: true}">
+    <div is="flvplayer" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @playerFullScreenTwo="showScreen" :oData="videoObj" :bResize="bResize"
+      :oConfig="{sign: true, fullscreen: false, fullscreen2: true }">
     </div>
   </div>
 </template>
 <script>
-import controlVideo from './components/controlVideo.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {random14} from '@/utils/util.js';
 import {getControlObject, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {getDiciData} from '@/views/index/api/api.js';
 import {getEventList} from '@/views/index/api/api.event.js';
 export default {
-  components: {flvplayer, controlVideo},
+  components: {flvplayer},
   data () {
     return {
+      swiperOption: {
+        slidesPerView: 8,
+        spaceBetween: 10,
+        slidesPerGroup: 1,
+        loop: false,
+        slideToClickedSlide: true,
+        loopFillGroupWithBlank: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      },
+      isShowSwiperBtn: false,
       loading: false,
       loadingBtn: false,
       // 左侧搜索参数
@@ -221,7 +232,8 @@ export default {
       // 布控对象列表参数
       controlObjList: [],
       isShowFullScreen: false, // 是否显示全屏播放页面
-      videoHeight: null
+      domId: null,
+      bResize: {}
     }
   },
   created () {
@@ -236,14 +248,15 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
-    this.videoHeight = document.body.clientHeight - 336;
   },
   methods: {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.keyword': query,
-        pageSize: 1000000
+        'where.eventCode': query,
+        pageSize: 1000000,
+        orderBy: 'report_time',
+        order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {
@@ -277,30 +290,37 @@ export default {
     },
     // 显示大屏
     showScreen () {
-      if (this.clickWindow) {
-        $('.control_map').append($('#controlVideo'));
-        this.isShowVideo = false;
-        this.isShowV = false; 
-        this.clickWindow.close();
-        this.isShowFullScreen = true;
-      }
+      console.log(1111111111111111)
+      $('.control_map').append($('#controlVideo'));
+      this.isShowVideo = false;
+      this.isShowV = false; 
+      this.isShowFullScreen = true;
     },
-    // 关闭播放器
+    // 关闭大屏播放器
     playerClose (index, sid) {
-      console.log('sid', sid);
+      this.isShowVideo = true;
+        setTimeout(() => {
+          $('#' + this.domId).append($('#controlVideo'));
+          this.isShowV = true;
+      }, 100)
       this.isShowFullScreen = false;
     },
     // 获得设备报警列表
     getAlarmListByDev () {
+      let devList = this.devicesList.map(m => m.uid);
+      devList = Array.from(new Set(devList));
+      let surveillanceList = this.devicesList.map(m => m.surveillanceIds);
+      surveillanceList = surveillanceList.join(',').split(',');
+      surveillanceList = Array.from(new Set(surveillanceList));
       const params = {
-        deviceIds: this.devicesList.map(m => m.uid).join(','),
-        surveillanceIds: this.devicesList.map(m => m.surveillanceIds).join(',')
-      }
+        deviceIds: devList.join(','),
+        surveillanceIds: surveillanceList.join(','),
+        interval: 60
+      } 
       getAlarmListByDev(params).then(res => {
         if (res && res.data) {
           this.markerAlarmList = res.data;
           this.markerAlarmList.forEach(dev => {
-            if (res.timestamp - new Date(dev.snapTime).getTime() > 10000) return;// 抓拍时间与请求时间之差在10s之内的数据才闪烁
             const childDiv = '<div class="vl_icon_warning">发现可疑目标</div>';
             // 给有警情的点标记追加class
             this.$nextTick(() => {
@@ -394,13 +414,14 @@ export default {
         if (res && res.data) {
           let _this = this;
           _this.controlObjList = res.data;
-          let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '', domId = obj.uid + '_' + random14();
+          let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
+          _this.domId = obj.uid + '_' + random14()
           if (obj.surveillanceStatus === 1) {
             vlMapVideo = `
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
               <div class="vl_map_img">
-                <div id="${domId}" style="width: 300px;height: 150px;background: #000;"></div>
+                <div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>
                 <div class="vl_map_state">进行中</div>
                
               </div>`;
@@ -413,7 +434,7 @@ export default {
                 vlMapObj += `<div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}至${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>`;
               }
               if (_this.controlObjList.list[0].eventDetail) {
-                vlMapObj += `<div><span>事件预览：</span><span>${_this.controlObjList.list[0].eventDetail}</span></div>`;
+                vlMapObj += `<div><span>事件预览：</span><span title="${_this.controlObjList.list[0].eventDetail}">${_this.strCutWithLen(_this.controlObjList.list[0].eventDetail, 120)}</span></div>`;
               }
               if (obj.surveillanceStatus === 3) {
                 vlMapObj += `<div><span>布控结果：</span><span>${_this.controlObjList.list[0].snapNum}张抓拍图片</span></div>`;
@@ -431,14 +452,23 @@ export default {
                 <div class="vl_map_obj_img">
                   <div class="vl_map_obj_box">`;
                   for (let item of _this.controlObjList.objectList) {
-                    vlMapObj += `<div><img src="${item.photoUrl}"><p title="${item.name}">${item.name}</p></div>`;
+                    vlMapObj += `<div><img src="${item.photoUrl}">`;
+                    if (item.name) {
+                      vlMapObj += `<p title="${item.name}">${item.name}</p>`;
+                    }
+                    vlMapObj += `</div>`;
                   }
                   vlMapObj += `</div>
                 </div>
               </div>`;
           }
           if (_this.controlObjList.num > 1) {
-            for (let item of _this.controlObjList.list) {
+            for (let i = 0; i < _this.controlObjList.list.length ; i++) {
+              if (i === 10) {
+                vlMapObjList += `<div class="control_more"><span>查看更多</span></div>`
+                break; 
+              }
+              let item = _this.controlObjList.list[i];
               vlMapObjList += 
               `<div class="vl_map_info">
                 <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>`;
@@ -446,7 +476,7 @@ export default {
                   vlMapObjList += `<div><span>布控日期：</span><span>${item.surveillanceDateStart}至${item.surveillanceDateEnd}</span></div>`;
                 }
                 if (item.eventDetail) {
-                  vlMapObjList += `<div><span>事件预览：</span><span>${item.eventDetail}</span></div>`;
+                  vlMapObjList += `<div><span>事件预览：</span><span title="${item.eventDetail}">${_this.strCutWithLen(item.eventDetail, 120)}</span></div>`;
                 }
                 if (obj.surveillanceStatus === 3) {
                   vlMapObjList += `<div><span>布控结果：</span><span>${item.snapNum}张抓拍图片</span></div>`;
@@ -584,7 +614,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if ((slide.width() + slideMarginLeft) >= 380) {
-              slide.animate({marginLeft: '-=80px'}, 1000, function () {
+              slide.animate({marginLeft: '-=80px'}, 300, function () {
                 offbtnStatusLfet = false;
               });
             } else {
@@ -603,7 +633,7 @@ export default {
             const slide = $('#mapBox .vl_map_obj_box');
             const slideMarginLeft = parseInt(slide.css('margin-left').slice(0, -2));
             if (slideMarginLeft < 0) {
-              slide.animate({marginLeft: '+=80px'}, 1000,function () {
+              slide.animate({marginLeft: '+=80px'}, 300,function () {
                 offbtnStatusRight = false;
               });
             } else {
@@ -612,6 +642,7 @@ export default {
               }, 1000)
             }
           })
+          // 获得布控进行中直播视频
           if (obj.surveillanceStatus === 1) {
             // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
             // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
@@ -624,14 +655,17 @@ export default {
               title: obj.deviceName,
               video: Object.assign({}, obj)
             };
-            console.log(_this.videoObj, '_this.videoObj')
             _this.isShowVideo = true;
             setTimeout(() => {
-              $('#' + domId).append($('#controlVideo'));
+              $('#' + _this.domId).append($('#controlVideo'));
               _this.isShowV = true;
             }, 100)
             console.log($('#controlVideo'))
           }
+          // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
+          $('#mapBox').on('click', '.control_more', function () {
+            _this.$router.push({ name: 'control_manage', query: {deviceId: obj.uid, state: obj.surveillanceStatus} })
+          })
         }
       })
     },
@@ -712,10 +746,10 @@ export default {
           return;
         }
         _this.getAlarmListByDev();
-        // 12s重新加载一次
+        // 10s重新加载一次
         _this.timer = setInterval(() => {
           _this.getAlarmListByDev();
-        }, 12000);
+        }, 10050);
         // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
         _this.$once('hook:beforeDestroy', () => {
           clearInterval(_this.timer);
@@ -853,10 +887,9 @@ export default {
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 99;
+        z-index: 9999;
         .video_box{
           width: 100%;
-          // height: 602px;
           padding: 20px 80px;
           background:rgba(0,0,0,0.67);
           box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
@@ -893,35 +926,30 @@ export default {
         }
         .control_box{
           width: 100%;
-          height: 200px;
+          height: 25%;
           overflow: hidden;
           display: flex;
           flex-wrap: nowrap;
           justify-content: space-between;
-          .control_obj_list{
-            width: calc(100% - 344px);
-            height: 200px;
-            padding-right: 20px;
-            overflow: hidden;
-            display: flex;
-            flex-wrap: wrap;
             .el-card{
-              height: 182px;
               margin-top: 18px;
               text-align: center;
               box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
             }
             .more.el-card{
-              width: 152px;
-              padding: 40px 0;
+              width: 11%;
               margin-right: 1%;
+              display: flex;
+              flex-flow: column;
+              justify-content: center;
+              align-items: center;
               p{
                 line-height: 24px;
+                margin-bottom: 10px;
               }
               div{
                 font-size: 24px;
                 line-height: 24px;
-                margin-bottom: 5px;
                 color: #0769E7;
               }
               .el-button{
@@ -930,7 +958,8 @@ export default {
               }
             }
             .pic.el-card{
-              width: 162px;
+              width: 100%;
+              height: 100%;
               padding-top: 10px;
               margin-right: 1%;
               p{
@@ -938,36 +967,6 @@ export default {
                 color: #333;
               }
             }
-          }
-          .control_info{
-            width: 344px;
-            height: 180px;
-            padding: 10px;
-            margin-top: 19px;
-            background: #fff;
-            .control_info_list{
-              padding: 10px 0;
-              height: 110px;
-              overflow: hidden;
-              & > div:nth-child(1){
-                font-size: 16px;
-                color: #333;
-                line-height:24px;
-              }
-              & > div:not(:nth-child(1)){
-                font-size: 12px;
-                color: #999999;
-                line-height:22px;
-              }
-              & > div:nth-child(3){
-                display: flex;
-                flex-wrap: nowrap;
-                > span:nth-child(2){
-                  flex: 1;
-                }
-              }
-            }
-          }
         }
       }
     }
@@ -990,6 +989,17 @@ export default {
   .map_box{
     .el-card__body{
       padding: 0!important;
+    }
+    .swiper-container{
+      .swiper-button-next, .swiper-button-prev{
+        display: none;
+        background-image: none;
+      }
+    }
+    .swiper-container.is_show_btn{
+      .swiper-button-next, .swiper-button-prev{
+        display: block;
+      }
     }
   }
   #mapBox{
@@ -1081,6 +1091,14 @@ export default {
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis; 
+          }
+        }
+        .control_more{
+          padding-top: 10px;
+          text-align: center;
+          > span{
+            color: #0567E1;
+            cursor: pointer;
           }
         }
         .vl_map_obj{
@@ -1209,6 +1227,9 @@ export default {
     .vl_icon_alarm{
       animation: twinkle 1s linear infinite both;
     }
+  }
+  .pic.el-card .el-card__body{
+    height: 100%
   }
 }
 </style>

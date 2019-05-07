@@ -641,6 +641,17 @@ export function getAllDevices (params) {
   });
 }
 /**
+ * 获取当前分组下的设备列表
+ * @param {*} data
+ */
+export function getCurrentDevices (params) {
+  return request({
+    url: '/group-device-service/devices',
+    params,
+    method: 'get'
+  });
+}
+/**
  * 删除分组设备
  * @param {*} data
  */

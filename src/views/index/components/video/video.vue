@@ -95,7 +95,7 @@ export default {
         width: 100%;
         > .show_title_li {
           float: left;
-          width: 50%; height: 48px; line-height: 48px;
+          width: 33.33%; height: 48px; line-height: 48px;
           color: #999;
           border-bottom: 1px solid #ddd;
           text-align: center;
@@ -110,9 +110,17 @@ export default {
           height: 2px;
           background-color: #186DFB;
           overflow: hidden;
-          width: 50%;
+          width: 33.33%;
           transition: left 0.3s ease-out;
-          &.show_title_line2 { left: 50%; }
+          &.show_title_line2 { left: 33.33%; }
+          &.show_title_line3 { left: 66.67%; }
+        }
+        &.show_title_2 {
+          > .show_title_li { width: 50%; }
+          > .show_title_line {
+            width: 50%;
+            &.show_title_line2 { left: 50%; }
+          }
         }
       }
       .show_content {
@@ -175,22 +183,27 @@ export default {
           }
           > .show_his {
             > li {
-              position: relative;
-              padding-right: 40px;
-              padding: 10px 40px 10px 20px;
-              border-bottom: 1px dotted #ddd;
-              cursor: default;
-              &:hover { 
-                color: #186DFB;
-                background-color: #E0F3FF;
-              }
-              > h3 { height: 20px; line-height: 20px; }
-              > p { color: #999; height: 20px; line-height: 20px; }
-              > i {
-                position: absolute; top: 50%; right: 25px;
-                font-size: 16px;
-                margin: -8px;
-                cursor: pointer;
+              > div {
+                position: relative;
+                padding-right: 40px;
+                padding: 10px 40px 10px 20px;
+                border-bottom: 1px dotted #ddd;
+                cursor: default;
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                }
+                > h3 { height: 20px; line-height: 20px; }
+                > p { color: #999; height: 20px; line-height: 20px; }
+                > i {
+                  position: absolute; top: 50%; right: 25px;
+                  font-size: 16px;
+                  margin: -8px;
+                  cursor: pointer;
+                }
+                &.show_his_dis {
+                  > h3 { color: #999; }
+                }
               }
             }
           }
@@ -317,6 +330,7 @@ export default {
     width: 25%; height: 25%;
   }
 }
+.show_list_empty { padding: 0 20px; color: #999; text-align: center; }
 </style>
 <style lang="scss" scoped>
 .vl_video {

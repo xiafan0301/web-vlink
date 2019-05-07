@@ -20,6 +20,21 @@ export default {
       path: 'statistics',
       name: 'alarm_statistics',
       component: () => import('@/views/index/components/alarm/statistics.vue')
+    },
+    {
+      path: 'ctc',
+      name: 'alarm_ctc',
+      component: () => import('@/views/index/components/alarm/alarmCtc.vue')
+    },
+    {
+      path: 'detail',
+      name: 'alarm_detail',
+      component: () => import('@/views/index/components/alarm/alarmDetail.vue')
+    },
+    {
+      path: 'default',
+      name: 'alarm_default',
+      component: () => import('@/views/index/components/alarm/default.vue')
     }
   ]
 }

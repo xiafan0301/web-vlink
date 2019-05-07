@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: this.$route.query.eventId, status: 'ctc_ing' } }">事件详情</el-breadcrumb-item>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -129,7 +129,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
+      <el-button class="operation_btn function_btn" :loading="isLoading" @click="onSubmit">确定</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -160,6 +160,7 @@ export default {
         planList: [], // 表格数据
         userInfo: {},
         departmentData: [],
+        isLoading: false,
     }
   },
   created () {
@@ -242,8 +243,9 @@ export default {
               if (item.departmentId === itm.uid) {
                 this.taskList[index].departmentName = itm.organName;
               }
-            })
-          }) 
+            });
+          });
+          this.isLoading = true;
           addTaskInfo(this.taskList, this.$route.query.eventId)
             .then(res => {
               if (res) {
@@ -252,17 +254,19 @@ export default {
                   message: '添加任务成功',
                   customClass: 'request_tip'
                 })
-                // this.$router.push({name: 'event_manage'});
-                this.$router.back(-1);
+                this.$router.push({name: 'event_ctc'});
+                // this.$router.back(-1);
+                this.isLoading = false;
               } else {
                 this.$message({
                   type:'error',
                   message: '添加任务失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isLoading = false;})
         }
       })
     },

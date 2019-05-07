@@ -8,7 +8,7 @@
       <div class="detail_list">
         <vue-scroll>
           <ul class="temp_detail_info">
-            <li v-for="(item, index) in leftDeviceList" :key="'item' + index">
+            <li v-for="(item, index) in currentDeviceList" :key="'item' + index">
                 <div style="display: flex; padding: 0 10px;">
                   <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleLeftParentChecked(index, item.isChecked)"></el-checkbox>
                   <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openLeftArrow(index)">
@@ -61,7 +61,7 @@
 import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
-  props: [ 'selectDeviceList', 'selectDeviceNumber' ],
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList' ],
   data () {
     return {
       arrowActiveTemp: false,
@@ -78,9 +78,11 @@ export default {
       kkList: [], // 卡口
       kkMapMarkers: [],
 
-      leftDeviceList: [], // 选中的已有设备
-      leftDeviceNumber: 0, // 左侧设备数
+      // leftDeviceList: [], // 选中的已有设备
+      // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
+
+      unCheckDevice: [] // 没有在多边形中的设备--没有选中的设备
     }
   },
   mounted () {
@@ -152,14 +154,6 @@ export default {
             })
           })
         }
-        // if (this.selectDeviceList && this.selectDeviceList.length > 0) {
-        //   this.selectDeviceList.map(item => {
-        //     item.deviceList.map(itm => {
-        //       console.log(itm.longitude + ' ' + itm.latitude)
-        //       this.sxtList.push(itm);
-        //     })
-        //   })
-        // }
         this.mapMarkHandler();
       }, 200);
     },
@@ -180,9 +174,9 @@ export default {
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
-        let hoverWindow = null;
-        let unCheckDevice = []; // 没有在多边形中的设备--没有选中的设备
-        let currDeviceList = [];
+        // let hoverWindow = null;
+        // let unCheckDevice = []; // 没有在多边形中的设备--没有选中的设备
+        // let currDeviceList = [];
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -192,7 +186,7 @@ export default {
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
-              unCheckDevice.push(obj); // 没有选中的设备
+              this.unCheckDevice.push(obj); // 没有选中的设备
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -210,55 +204,13 @@ export default {
             aMarkers.push(marker);
           }
         }
-        _this.handleDeviceData(unCheckDevice);
+        _this.handleDeviceData(this.unCheckDevice);
       }
     },
     // 处理多边形中选中的设备数据
     handleDeviceData (unCheckList) {
-      // console.log(this.sxtList)
-      let _this = this;
-      let checkKkList = [], checkSxtList = [];
-      // console.log('currrent', unCheckList)
-      unCheckList && unCheckList.map((item, index) => {
-        if (item.type === 1) {
-          _this.sxtList.map(itm => {
-            if (item.uid !== itm.uid) {
-              checkSxtList.push(itm);
-            }
-          });
-        } else {
-          _this.kkList.map(itm => {
-            if (item.uid !== itm.uid) {
-              checkKkList.push(itm);
-            }
-          });
-        }
-      });
+      console.log('unCheckList', unCheckList)
       
-      console.log('checkSxtList', checkSxtList)
-      console.log('checkKkList', checkKkList)
-      // if (currList && currList.length > 0) {
-      //   let params;
-      //   currList.map(itm => {
-      //     testData.map((item, index) => {
-      //       if (item.uid === itm.parentUid) {
-      //         console.log('itm', itm);
-      //         console.log('item', item);
-      //         params = {
-      //           cname: item.cname,
-      //           uid: item.uid,
-      //           isOpenArrow: item.isOpenArrow,
-      //           isChecked: item.isChecked,
-      //           deviceList: []
-      //         };
-      //         params.deviceList.push(itm);
-      //       }
-      //     });
-      //   });
-      //   this.leftDeviceList.push(params);
-      //   this.leftDeviceNumber = this.leftDeviceList.length;
-      // }
-      // console.log('currentDeviceList', this.leftDeviceList);
     },
     // 清除所有
     resetTools () {
@@ -316,46 +268,16 @@ export default {
     },
     // 左侧---子级多选框change
     handleLeftChildChecked (index, idx, val) {
-      this.leftDeviceList[index].deviceList[idx].isChildChecked = val;
-      // 过滤出子级选中的
-      let checkedArr = this.leftDeviceList[index].deviceList.filter((item) => {
-        return item.isChildChecked === true;
-      })
-      if (checkedArr.length === 0) { // 没有选中的
-        this.leftDeviceList[index].isChecked = false;
-      }
-      if (checkedArr.length === this.leftDeviceList[index].deviceList.length) { // 全选
-        this.leftDeviceList[index].isChecked = true;
-      }
-      if (checkedArr.length === 0 || checkedArr.length < this.leftDeviceList[index].deviceList.length) {
-        // this.rightAllChecked = false;
-        this.leftDeviceList[index].isChecked = false;
-      }
-
-      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList));
-      // 过滤出父级中没有选中
-      // let checkedParentArr = this.leftDeviceList.filter(itm => {
-      //   return itm.isChecked === false;
-      // });
+      this.$emit('emitLeftChildChecked', index, idx, val);
+      
     },
     // 左侧---展开左侧列表
     openLeftArrow (index) {
-      console.log('33333')
-      this.leftDeviceList[index].isOpenArrow = !this.leftDeviceList[index].isOpenArrow;
-      console.log(this.selectDeviceList)
-      // this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+      this.$emit('emitOpenLeftArrow', index);
     },
     // 左侧--父级多选框
     handleLeftParentChecked (index, val) {
-      this.leftDeviceList[index].isChecked = val;
-      this.leftDeviceList[index].deviceList.map(item => {
-        item.isChildChecked = val;
-      });
-      // this.leftDeviceList = JSON.parse(JSON.stringify(this.leftDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
-      // 过滤出父级中没有选中
-      // let checkedParentArr = this.leftDeviceList.filter(itm => {
-      //   return itm.isChecked === false;
-      // });
+      this.$emit('emitLeftParentChecked', index, val);
     },
   }
 }

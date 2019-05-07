@@ -15,17 +15,17 @@
             <span>接收单位:</span>
             <el-select v-model="unitsName" placeholder="" size="small">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid">
               </el-option>
             </el-select>
           </div>
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData">确定提交</el-button>
+        <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData">确定提交</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -34,7 +34,9 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { operationType, handeMethods } from '@/utils/data.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -44,56 +46,21 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
+      userInfo: {},
+      departmentData: [], // 单位列表数据
+      isLoading: false, // 提交加载中
     }
+  },
+  mounted () {
+    this.userInfo =  this.$store.state.loginUser;
+    this.getDetail();
+    this.getList();
   },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -102,9 +69,45 @@ export default {
         })
         .catch(() => {})
     },
+    // 获取部门列表数据
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.departmentData = res.data.list;
+          }
+        })
+    },
     // 提交数据
     submitData () {
-
+      if (this.unitsName) {
+        this.isLoading = true;
+        const params = {
+          uid: this.$route.query.eventId,
+          dealOrgId: this.unitsName,
+          dealType: handeMethods.sendOtherUint,
+          type: operationType.sendOtherUint
+        };
+        updateEvent(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '提交成功',
+                customClass: 'request_tip'
+              });
+              this.isLoading = false;
+              this.$router.push({name: 'event_manage'});
+            } else {
+              this.isLoading = false;
+            }
+          })
+          .catch(() => { this.isLoading = false; })
+      }
     },
     // 返回
     back () {
@@ -112,9 +115,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

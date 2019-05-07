@@ -42,7 +42,7 @@
           <div class="left_content_box">
             <vue-scroll>
               <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部底库({{allPerBottomNameNumber}})</li>
+                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部人像({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
                   <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
@@ -170,7 +170,8 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                  <span v-show="scope.row.idType === 1">身份证</span>
+                  <span v-show="scope.row.idType === 2">护照</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -233,7 +234,8 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  <span>{{scope.row.idType === 1 ? '身份证' : '护照'}}</span>
+                  <span v-show="scope.row.idType === 1">身份证</span>
+                  <span v-show="scope.row.idType === 2">护照</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -298,7 +300,7 @@
             </li>
             <li>
               <span>证件类型：</span>
-              <span>{{personDetailInfo.idType === 1 ? '身份证' : '护照'}}</span>
+              <span>{{personDetailInfo.idType === 1 ? '身份证' : personDetailInfo.idType ===2 ? '护照' : ''}}</span>
             </li>
             <li>
               <span>证件号码：</span>
@@ -340,7 +342,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
       <!--新增组弹出框-->
@@ -363,7 +365,7 @@
         </div>
         <div slot="footer" class="dialog-footer">
           <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -422,6 +424,8 @@ export default {
       perBottomBankList: [], // 底库列表
       copyPerGroupInfoList: [],
       multipleSelection: [], // 表格多选
+      isAddLoading: false, // 加入组加载中
+      isAddCopyLoading: false, // 复制并加入组加载中
     }
   },
   mounted () {
@@ -554,14 +558,14 @@ export default {
       this.addGroupForm.userGroupName = null;
       this.$refs[form].resetFields();
     },
-    // 复制或新增复制到组 --判断组名是否重复
+    // 复制或新增复制到组
     addCopyGroupInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           const params = {
             name: this.addGroupForm.userGroupName
           };
-          judgePerson(params)
+          judgePerson(params)  // --判断组名是否重复
             .then(res => {
               if (res.data) {
                 this.isShowError = true;
@@ -585,6 +589,7 @@ export default {
         // groupId: id || null,
         memberIds: selectArr
       };
+      this.isAddCopyLoading = true;
       addGroupCopyPerson(params)
         .then(res => {
           if (res) {
@@ -596,15 +601,12 @@ export default {
             this.showGroup = false;
             this.getGroupList();
             this.addGroupCopyDialog = false;
+            this.isAddCopyLoading = false;
           } else {
-            this.$message({
-              type: 'error',
-              message: '新增失败',
-              customClass: 'request_tip'
-            })
+            this.isAddCopyLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddCopyLoading = false;})
     },
     // 点击左边分组获取右边人员列表
     getPerDetailInfo (obj, type) {
@@ -615,17 +617,20 @@ export default {
       this.searchForm.keyWord = null;
       this.activeSelect = obj.id;
       if (type === 1) {
-        this.searchForm.groupId = obj.id;
-        this.perGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
-          if (item.id === obj.id) {
-            this.copyPerGroupInfoList.splice(index, 1);
-          }
-        })
+        if (obj) {
+          this.searchForm.groupId = obj.id;
+          this.perGroupList.map((item, index) => { // 在所有分组中去掉当前选中的组
+            if (item.id === obj.id) {
+              this.copyPerGroupInfoList.splice(index, 1);
+            }
+          })
+        }
       } else {
         this.searchForm.albumId = obj.id;
       }
       if (!obj) {
         this.activeSelect = -1;
+        this.copyPerGroupInfoList = JSON.parse(JSON.stringify(this.perGroupList));
       }
       this.getPersonList();
     },
@@ -704,6 +709,7 @@ export default {
         groupName: this.addGroupForm.userGroupName,
         groupType: 4
       };
+      this.isAddLoading = true;
       addGroup(params)
         .then(res => {
           if (res) {
@@ -714,9 +720,12 @@ export default {
             })
             this.getGroupList();
             this.addGroupDialog = false;
+            this.isAddLoading = false;
+          } else {
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 显示加入组--新增分组弹出框
     showAddGroupCopyDialog () {
@@ -737,7 +746,6 @@ export default {
     },
     // 跳至管理人员组信息页面
     skipAdminPersonPage (id, val, e) {
-      // console.log('111')
       e.stopPropagation();
       this.$router.push({name: 'admin_person_info', query: {type: val, id: id}});
     }

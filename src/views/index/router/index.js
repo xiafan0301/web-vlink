@@ -20,6 +20,8 @@ import routerMessage from './router.message.js'
 import routerAlarm from './router.alarm.js'
 // 事件板块 router
 import routerManage from './router.manage.js'
+// 任务板块 router
+import routerTask from './router.task.js'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -47,7 +49,8 @@ const router = new VueRouter({
         routerControl,
         routerMessage,
         routerAlarm,
-        routerManage
+        routerManage,
+        routerTask
       ]
     }, {
       path: '/login',
