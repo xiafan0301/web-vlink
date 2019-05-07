@@ -297,7 +297,7 @@ export default {
       this.isShowFullScreen = true;
     },
     // 关闭大屏播放器
-    playerClose (index, sid) {
+    playerClose () {
       this.isShowVideo = true;
         setTimeout(() => {
           $('#' + this.domId).append($('#controlVideo'));

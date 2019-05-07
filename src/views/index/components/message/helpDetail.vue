@@ -204,11 +204,10 @@ export default {
         return;
       }
       const params = {
-        'where.eventId': this.helpId,
         pageNum: this.pageNum,
         pageSize: this.pageSize
       }
-      getCommentInfoList(params).then(res => {
+      getCommentInfoList(params, this.helpId).then(res => {
         if (res && res.data) {
           this.total = res.data.total;
           this.commentList = this.commentList.concat(res.data.list);

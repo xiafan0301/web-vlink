@@ -106,22 +106,22 @@
             <div class="create_model_box">
               <div class="model_checkbox">
                 <el-checkbox-group v-model="checkList">
-                  <el-checkbox label="人员追踪" @change="modelType = '1'" :class="{'is_checked': modelType === '1'}"></el-checkbox>
-                  <el-checkbox label="车辆追踪" @change="modelType = '2'" :class="{'is_checked': modelType === '2'}"></el-checkbox>
-                  <el-checkbox label="越界分析" @change="modelType = '3'" :class="{'is_checked': modelType === '3'}"></el-checkbox>
-                  <el-checkbox label="范围分析" @change="modelType = '4'" :class="{'is_checked': modelType === '4'}"></el-checkbox>
+                  <el-checkbox label="人员追踪" @change="modelType = '1';modelDOne = modelDOne ? modelDOne : 1" :class="{'is_checked': modelType === '1'}"></el-checkbox>
+                  <el-checkbox label="车辆追踪" @change="modelType = '2';modelDTwo = modelDTwo ? modelDTwo : 1" :class="{'is_checked': modelType === '2'}"></el-checkbox>
+                  <el-checkbox label="越界分析" @change="modelType = '3';modelDThree = modelDThree ? modelDThree : 1" :class="{'is_checked': modelType === '3'}"></el-checkbox>
+                  <el-checkbox label="范围分析" @change="modelType = '4';modelDFour = modelDFour ? modelDFour : 1" :class="{'is_checked': modelType === '4'}"></el-checkbox>
                 </el-checkbox-group>
               </div>
               <template v-if="allDevData && allDevData.length > 0">
                 <!-- 人员追踪 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '1' || modelDOne))" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDOne)" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType"></div>
                 <!-- 车辆追踪 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '2' || modelDTwo))" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType"></div>
                 <!-- 范围分析 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '4' || modelDFour))" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDFour)" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
               </template>
               <!-- 越界分析 -->
-              <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && (modelType === '3' || modelDThree))" is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :operateType="pageType" ></div>
+              <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDThree)" is="model" ref="mapThree" :class="{'model_height': modelType !== '3'}" mapId="mapThree" :modelType="'3'" :checkList="checkList" @sendModelDataThree="getModelDataThree" :modelDataThree="modelDThree" :operateType="pageType" ></div>
             </div>
           </div>
         </el-form>
@@ -514,9 +514,13 @@ export default {
     putControl (formName) {
       // 点击保存按钮时清除没勾选的模型类别的验证结果
       if (!this.checkList.some(s => s === '人员追踪')) {
-        this.$refs.mapOne.reset();
+        if (this.$refs.mapOne) {
+          this.$refs.mapOne.reset();
+        }
       } else if (!this.checkList.some(s => s === '车辆追踪')) {
-        this.$refs.mapTwo.reset();
+        if (this.$refs.mapTwo) {
+          this.$refs.mapTwo.reset();
+        }
       }
       this.$refs[formName].validate((valid) => {
         if (valid) {
