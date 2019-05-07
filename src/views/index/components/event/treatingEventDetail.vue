@@ -25,7 +25,7 @@
                     <div class="arrow"></div>
                     <p>
                       <i class="vl_icon vl_icon_manage_17"></i>
-                      <a :href="item.path" target="_blank">下载</a>
+                      <a :href="item.path">下载</a>
                     </p>
                     <p>
                       <i class="vl_icon vl_icon_event_25"></i>
@@ -34,7 +34,7 @@
                   </div>
                 </li>
               </ul>
-              <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+              <img v-for="(item, index) in eventImg" :src="item.path" :key="index" @click="openBigImg(index, eventImg)" />
             </div>
             <div class="divide"></div>
           </template>
@@ -74,7 +74,7 @@
                   </div>
                 </li>
               </ul>
-              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index" @click="openBigImg(index, ctcImg)" />
             </div>
             <div class="divide"></div>
           </template>
@@ -391,8 +391,8 @@ export default {
         .then(res => {
           if (res) {
             this.basicInfo = res.data;            
-            if (res.data.closeAttachmentList.length > 0) {
-              res.data.closeAttachmentList.map(item => {
+            if (res.data.eventCloseAttachmentList.length > 0) {
+              res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.eventImg.push(item);
                 } else {
@@ -400,8 +400,8 @@ export default {
                 }
               })
             }
-            if (res.data.dispatchAttachmentList.length > 0) {
-              res.data.dispatchAttachmentList.map(item => {
+            if (res.data.dispatchCloseAttachmentList.length > 0) {
+              res.data.dispatchCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.ctcImg.push(item);
                 } else {
@@ -411,7 +411,6 @@ export default {
             }
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
-            console.log(this.basicInfo)
           }
         })
         .catch(() => {})
@@ -422,7 +421,7 @@ export default {
     },
     // 跳至结束事件页面
     skipEventEndPage () {
-      this.$router.push({name: 'event_end', query: {status: this.$route.query.status}});
+      this.$router.push({name: 'event_end', query: {id: this.$route.query.eventId}});
     },
     // 跳至查看互助页面
     skipCommentPage () {
@@ -438,7 +437,7 @@ export default {
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {
-      this.$router.push({name: 'report_detail', query: {status: this.$route.query.status}});
+      this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId}});
     },
     // 放大图片
     openBigImg (index, data) {
@@ -594,6 +593,8 @@ export default {
         }
         .content-icon {
           margin: 5px 0;
+          display: flex;
+          flex-wrap: wrap;
           >ul {
             >li {
               position: relative;
@@ -613,7 +614,6 @@ export default {
                 padding: 3px 5px;
                 color: #333333;
                 font-size: 12px;
-                // position: relative;
                 .arrow {
                   position: absolute;
                   bottom: -5px;

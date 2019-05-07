@@ -443,7 +443,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
-          let reg = /^[0-9]*[1-9][0-9]*$/; // 校验死亡人数
+          let reg = /^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -527,7 +527,7 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
-          let reg = /^[0-9]*[1-9][0-9]*$/; // 校验死亡人数
+          let reg =/^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -576,25 +576,14 @@ export default {
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
-                // this.$message({
-                //   type: 'success',
-                //   message: '添加成功',
-                //   customClass: 'request_tip'
-                // })
                 this.isAddHandleLoading = false;
                 this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
               } 
               else {
-                // this.$message({
-                //   type: 'error',
-                //   message: '保存失败',
-                //   customClass: 'request_tip'
-                // })
                 this.isAddHandleLoading = false;
               }
             })
             .catch(() => {this.isAddHandleLoading = false;})
-          // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },
@@ -626,7 +615,7 @@ export default {
       const obj = document.getElementById('add_video');
       if (obj) {
         obj.addEventListener('ended', () => { // 当视频播放结束后触发
-          this.isPlaying = false;
+          _this.isPlaying = false;
         });
       }
     }

@@ -138,7 +138,7 @@ export default {
         eventFlag: 1, // 1--true 0--false
         mutualFlag: 0,
         reportTime: [], // 日期
-        eventStatus: '28', // 事件状态--默认进行中
+        eventStatus: '1', // 事件状态--默认进行中
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [], // 表格数据
@@ -157,11 +157,7 @@ export default {
       getDiciData(status)
         .then(res => {
           if (res) {
-            res.data.map(item => {
-              if (item.uid !== 27) {
-                this.ctcStatusList.push(item);
-              }
-            })
+            this.ctcStatusList = res.data;
           }
         })
         .catch(() => {})
@@ -218,11 +214,11 @@ export default {
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
       // 在点击查看的时候将新反馈数量清零
-      if (obj.reportContent > 0) {
-        const params = {
-          'read_flag': true
-        }
-        updateProcess(obj.uid, params)
+      if (obj.feedbackNumber > 0) {
+        // const params = {
+        //   'read_flag': true
+        // }
+        updateProcess(obj.uid)
           .then(res => {console.log(res);})
           .catch(() => {})
       }

@@ -4,7 +4,12 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: this.$route.query.eventId, status: 'ctc_ing' } }">事件详情</el-breadcrumb-item>
+        <template v-if="$route.query.type === 'ctc'">
+          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: this.$route.query.eventId }}">调度详情</el-breadcrumb-item>
+        </template>
+        <template v-else>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: this.$route.query.eventId }}">事件详情</el-breadcrumb-item>
+        </template>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
