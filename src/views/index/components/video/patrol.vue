@@ -612,6 +612,17 @@ export default {
       this.patrolParseDialogVisible = false;
       this.patrolCloseDialogVisible = false;
       this.patrolActive = 0;
+      // 将下一个轮巡状态设为 关闭 4
+      this.patrolClearDataVal();
+      mdfVideoRoundState({
+        id: this.patrolHandlerData.currentRound.uid,
+        status: 4
+      }).then(() => {
+        this.patrolSetDataVal();
+      }).catch(error => {
+        this.patrolSetDataVal();
+        console.log("mdfVideoRoundState error：", error);
+      });
       this.$message('轮巡已关闭。');
     },
     /* 轮巡控制事件 end */
