@@ -14,7 +14,7 @@
             <div class="show_search">
               <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
                 <el-input
-                  placeholder="请输入内容"
+                  placeholder="请输入设备或区域名称"
                   size="small"
                   @keyup.enter.native="getDeviceList3()"
                   v-model="searchVal3">
@@ -91,7 +91,7 @@
             <div class="show_search">
               <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
                 <el-input
-                  placeholder="请输入内容"
+                  placeholder="请输入设备或分组名称"
                   size="small"
                   @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
