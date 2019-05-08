@@ -1824,8 +1824,6 @@ export default {
       _this.mouseTool = mouseTool;
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        console.log('drawPaths e', e); // 获取路径/范围
-        console.log('drawPaths', e.obj.getPath()); // 获取路径/范围
         _this.polygonLnglat = null;
         setTimeout(() => {
           _this.selAreaRest(true);
@@ -1859,15 +1857,18 @@ export default {
               _this.map.remove(_marker);
               // 移除覆盖物内对应的设备
               const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.obj.getPath()[0].lat && p.longitude == e.obj.getPath()[0].lng);
-              console.log(_this.trackPointList)
               const _obj = _this.trackPointList.splice(delObjIndex, 1);
               // 把覆盖物内的设备置为未选中
-              _obj[0].devList.forEach(f => {
+              for (let f of _obj[0].devList) {
+                // 如果该设备还存在于其他覆盖物中，跳过此操作
+                if (_this.trackPointList.some(t => t.devList.some(d => d.uid === f.uid))) {
+                  continue;
+                }
                 if (f.isSelected) {
                   f.isSelected = !f.isSelected;
                   _this.changeSelectedStatus(f, 1);
                 }
-              })
+              }
             })
             _marker.setMap(_this.map);
           })
@@ -1891,11 +1892,6 @@ export default {
     },
     // 选择区域
     selArea () {
-      // if (this.selAreaAcitve) {
-      //   this.selAreaRest();
-      //   return false;
-      // }
-      // this.selAreaRest();
       if (this.trackPointList.length > 9) {
         this.$message.error('最多可选取10个范围');
         return;

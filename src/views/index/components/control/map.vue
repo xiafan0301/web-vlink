@@ -504,6 +504,7 @@ export default {
                 `<div class="vl_map_click">`;
                   sContent += vlMapVideo;
                   sContent += vlMapObjList;
+                  sContent += `<div class="vl_map_btn">视频回放</div>`;
                 sContent +=  `</div>
                   <div class="vl_map_triangle"></div>
                 </div>`;
@@ -691,70 +692,65 @@ export default {
       if (_this.map) {
         _this.map.clearMap();
       }
-      // new Promise((resolve) => { 
-        for (let i = 0; i < data.length; i++) {
-          let obj = data[i];
-          let content = '';
-          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
-          if (obj.longitude > 0 && obj.latitude > 0) {
-            let offSet = [-20.5, -48];
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.map,
-              position: [obj.longitude, obj.latitude],
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              // 自定义点标记覆盖物内容
-              content: content
-            });
-            // 点标记点击事件
-            marker.on('click', function(e) {
-              // 点击切换告警闪烁图标
-              if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
-                if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
-                  $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
-                  $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
-                  $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                } else {
-                  $('#' + e.target.C.extData.uid).removeClass("vl_icon_alarm");
-                  $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
-                  $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
-                  $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                  $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
-                  $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
-                }
-              } else {
-                // 点击切换普通点标记图标
+      for (let i = 0; i < data.length; i++) {
+        let obj = data[i];
+        let content = '';
+        content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+        if (obj.longitude > 0 && obj.latitude > 0) {
+          let offSet = [-20.5, -48];
+          let marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: _this.map,
+            position: [obj.longitude, obj.latitude],
+            offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            extData: obj,
+            // 自定义点标记覆盖物内容
+            content: content
+          });
+          // 点标记点击事件
+          marker.on('click', function(e) {
+            // 点击切换告警闪烁图标
+            if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
+              if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
                 $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
-                $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
+                $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
+              } else {
+                $('#' + e.target.C.extData.uid).removeClass("vl_icon_alarm");
+                $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
+                $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
+                $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
+                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
               }
-              _this.getControlMapByDevice(e.target.C.extData);
-            })
-            marker.setMap(_this.map);
-            _this.markerList.push(marker);
-          }
+            } else {
+              // 点击切换普通点标记图标
+              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+              $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
+              $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+              $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
+            }
+            _this.getControlMapByDevice(e.target.C.extData);
+          })
+          marker.setMap(_this.map);
+          _this.markerList.push(marker);
         }
-        // resolve();
-      // }).then(() => {
-        // _this.map.setFitView();// 自动适配到合适视野范围
-
-        // 当布控状态不是进行中时，清除之前保存的定时器，并return
-        clearInterval(_this.timer);
-        if (this.mapForm.state !== 1) {
-          return;
-        }
+      }
+      // _this.map.setFitView();// 自动适配到合适视野范围
+      // 当布控状态不是进行中时，清除之前保存的定时器，并return
+      clearInterval(_this.timer);
+      if (this.mapForm.state !== 1) {
+        return;
+      }
+      _this.getAlarmListByDev();
+      // 10s重新加载一次
+      _this.timer = setInterval(() => {
         _this.getAlarmListByDev();
-        // 10s重新加载一次
-        _this.timer = setInterval(() => {
-          _this.getAlarmListByDev();
-        }, 10050);
-        // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
-        _this.$once('hook:beforeDestroy', () => {
-          clearInterval(_this.timer);
-        })
-      // })
+      }, 11000);
+      // 通过$once来监听定时器，在beforeDestroy钩子可以被清除。
+      _this.$once('hook:beforeDestroy', () => {
+        clearInterval(_this.timer);
+      })
     },
     // 跳转至视频回放页面
     skipIsVideo (uid, deviceName) {
@@ -887,7 +883,7 @@ export default {
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 9999;
+        z-index: 999;
         .video_box{
           width: 100%;
           padding: 20px 80px;
