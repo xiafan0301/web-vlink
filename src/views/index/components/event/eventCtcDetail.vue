@@ -70,7 +70,7 @@
                     </div>
                   </li>
                 </ul>
-                <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+                <img v-for="(item, index) in eventImg" :src="item.path" :key="index" @click="openBigImg(index, eventImg)" />
               </div>
               <div class="divide"></div>
             </template>
@@ -110,7 +110,7 @@
                     </div>
                   </li>
                 </ul>
-                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index" @click="openBigImg(index, ctcImg)" />
               </div>
               <div class="divide"></div>
             </template>
@@ -218,7 +218,7 @@ export default {
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, type: 'event' }});
     },
     // 获取事件详情
     getDetail () {
@@ -227,8 +227,8 @@ export default {
         .then(res => {
           if (res) {
             this.basicInfo = res.data;
-            if (res.data.closeAttachmentList.length > 0) {
-              res.data.closeAttachmentList.map(item => {
+            if (res.data.eventCloseAttachmentList.length > 0) {
+              res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.eventImg.push(item);
                 } else {
@@ -236,8 +236,8 @@ export default {
                 }
               })
             }
-            if (res.data.dispatchAttachmentList.length > 0) {
-              res.data.dispatchAttachmentList.map(item => {
+            if (res.data.dispatchCloseAttachmentList.length > 0) {
+              res.data.dispatchCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.ctcImg.push(item);
                 } else {
@@ -443,6 +443,8 @@ export default {
         }
         .content-icon {
           margin: 5px 0;
+          display: flex;
+          flex-wrap: wrap;
           >ul {
             >li {
               position: relative;
