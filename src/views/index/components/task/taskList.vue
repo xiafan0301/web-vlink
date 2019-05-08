@@ -49,31 +49,34 @@
       <el-table
         class="task_table"
         :data="taskList"
+        v-loading="isLoading"
         >
         <el-table-column
           label="状态"
-          prop="eventCode"
-          >
-        </el-table-column>
-        <el-table-column
-          label="类型"
-          prop="eventTypeName"
-          show-overflow-tooltip
-          >
-        </el-table-column>
-        <el-table-column
-          label="发送者账号"
-          prop="reporterPhone"
-          show-overflow-tooltip
+          prop="readFlag"
           >
           <template slot-scope="scope">
-            <span v-if='scope.row.reporterPhone'>{{scope.row.reporterPhone}}</span>
-            <span v-else>-</span>
+            {{ dicFormater( taskStatus, scope.row.readFlag)}}
           </template>
         </el-table-column>
         <el-table-column
+          label="类型"
+          prop="processType"
+          show-overflow-tooltip
+          >
+          <template slot-scope="scope">
+            {{ dicFormater( taskType, scope.row.processType)}}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="发送者账号"
+          prop="senderPhone"
+          show-overflow-tooltip
+          >
+        </el-table-column>
+        <el-table-column
           label="发送者部门"
-          prop="reporterRole"
+          prop="senderDepartmentName"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
@@ -84,13 +87,13 @@
         </el-table-column>
         <el-table-column
           label="发送者姓名"
-          prop="reportTime"
+          prop="senderName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="发送时间"
-          prop="eventAddress"
+          prop="createTime"
           width="200"
           show-overflow-tooltip
           >
@@ -102,6 +105,7 @@
         </el-table-column>
       </el-table>
     </div>
+    <template v-if="pagination.total > 0">
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="onPageChange"
@@ -111,15 +115,14 @@
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
     </el-pagination>
+    </template>
   </div>
 </vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList } from '@/views/index/api/api.event.js';
-import { getDepartmentList } from '@/views/index/api/api.manage.js';
-import { getDiciData } from '@/views/index/api/api.js';
+import { getTasks } from '@/views/index/api/api.event.js';
 export default {
   data () {
     return {
@@ -130,10 +133,13 @@ export default {
       },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       taskList: [], // 表格数据
-      taskStatusList: [], // 事件状态数据
-      taskTypeList: [], // 事件类型
+      taskStatusList: [], // 任务状态数据
+      taskTypeList: [], // 任务类型
       identityList: [], // 上报者身份
-      userInfo: {}
+      userInfo: {},
+      isLoading: false,
+      taskType: dataList.taskType,
+      taskStatus: dataList.taskStatus,
     }
   },
   created () {
@@ -148,8 +154,10 @@ export default {
     this.getTaskData();
   },
   methods: {
-    // 获取事件列表数据
+    // 获取任务列表数据
     getTaskData () {
+      this.isLoading = true;
+      this.taskList = [];
       let taskType, taskStatus;
       if (this.taskForm.taskType === '全部类型') {
         taskType = null;
@@ -161,23 +169,31 @@ export default {
       } else {
         taskStatus = this.taskForm.taskStatus;
       }
-      const params = {
-        'where.reportTimeStart': this.taskForm.reportTime[0],
-        'where.reportTimeEnd': this.taskForm.reportTime[1],
-        'where.eventStatus': taskStatus,
-        'where.eventType': taskType,
+      let params = {
+        'where.processType': taskType,
+        'where.isRead': taskStatus,
         pageNum: this.pagination.pageNum,
-        orderBy: 'report_time',
-        order: 'asc'
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc',
       }
-      getEventList(params)
+      if(this.taskForm.reportTime) {
+        params['where.startTime'] = this.taskForm.reportTime[0];
+        params['where.endTime'] = this.taskForm.reportTime[1];
+      }
+      getTasks(params)
         .then(res => {
           if (res && res.data.list) {
             this.taskList = res.data.list;
             this.pagination.total = res.data.total;
           }
+          this.$nextTick(()=> {
+            this.isLoading = false;
+          })
         })
-        .catch(() => {})
+        .catch(() => {
+          this.isLoading = false;
+        })
     },
     onPageChange (page) {
       this.pagination.pageNum = page;
@@ -190,7 +206,7 @@ export default {
     },
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
-      this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
+      this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType}});
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
