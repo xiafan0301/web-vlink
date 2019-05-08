@@ -26,19 +26,23 @@
             <vue-scroll>
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
-              <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
-              <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p>
-              <p class="h_menu"><span>全部标记为已读</span></p>
+              <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
+                {{item.enumValue}}<span v-show="item.total">({{item.total}})</span>
+              </p>
+              <!-- <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
+              <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
+              <p class="h_menu"><span @click="mark">全部标记为已读</span></p>
             </div>
             <ul class="vl_t_b_content">
-              <li class="vl_info vl_t_b_list" v-for="(item,index) in 6" :key="index">
+              <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
                   <div class="col_content"><i class="vl_icon vl_icon_alarm_2"></i></div>
                   <div class="col_content">
-                    <h2>调度指挥调度指挥调度指挥调度指挥调度指挥调度指挥</h2>
-                    <p>公告标题，最多显示一行文字，多出...显示内容最多显示两行，超出到详情查看页面。</p>
+                    <h2>{{ dicFormater( taskType, item.processType)}}</h2>
+                    <p>您收到一个{{ dicFormater( taskType, item.processType)}}</p>
                   </div>
-                  <div class="col_content">2018-11-29 14:28</div>
+                  <div class="col_content">{{item.createTime}}</div>
               </li>
+              <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
             </ul>
             <div style="width: 100%;text-align: center;padding: 10px 0;">
               <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
@@ -46,7 +50,7 @@
             </div>
             </vue-scroll>
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_011"></i>
+              <i class="vl_icon vl_icon_011" @click="getTaskData"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -94,7 +98,7 @@
             </div>
             </vue-scroll>
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
+              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -198,7 +202,9 @@
 <script>
 import { logout, updatePwd } from '@/views/index/api/api.user.js';
 import { getAlarmList } from "@/views/index/api/api.control.js";
+import { getTasks, markTask } from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util';
+import { dataList } from '@/utils/data.js';
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
@@ -249,11 +255,18 @@ export default {
       pageSize: 10,
       alarmList: [],
       type: 1,
+      taskList: [], // 任务数据
+      taskStatusList: [], // 任务状态数据
+      taskType: dataList.taskType,
+      taskListAll: [],
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    let taskStatusL = this.dicFormater(dataList.taskStatus)
+    this.taskStatusList = taskStatusL[0].dictList
     this.getAlarm()
+    this.getTaskData();
   },
   methods: {
     // 显示退出登录弹出框
@@ -335,6 +348,8 @@ export default {
     },
     changeTab(type) {
       this.type = type
+      this.taskList = []
+      this.taskList = this.taskListAll.filter(key => this.type == key.readFlag)
     },
     goSkipDetail(item) {
       console.log("----------",item)
@@ -345,6 +360,41 @@ export default {
       }else {
         this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
       }
+    },
+    goSkipTaskDetail(item) {
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType}});
+    },
+    // 获取任务列表数据
+    getTaskData () {
+      this.taskList = [];
+      let params = {
+        pageNum: -1,
+        pageSize: 0,
+      }
+      getTasks(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.taskListAll = res.data.list;
+            this.sums.msg = res.data.total;
+            this.taskList  = res.data.list.filter(key => this.type == key.readFlag)
+          }
+          for(let item of this.taskStatusList) {
+            item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length
+          }
+        })
+        .catch(() => {})
+    },
+    //标记全部已读
+    mark() {
+      let params = {
+        userId: this.userInfo.uid,
+        departmentId: null,
+      }
+      markTask(params).then(res => {
+        console.log(res)
+        this.$message.success('全部标记为已读成功')
+        this.getTaskData();
+      }).catch(()=>{})
     }
   }
 }
@@ -553,6 +603,7 @@ export default {
     flex-flow: row nowrap;
     justify-content: space-between;
     border-bottom: 1px solid #F2F2F2;
+    cursor: pointer;
     .h_menu {
       color: #333333;
       font-size: 16px;
@@ -581,9 +632,9 @@ export default {
           width: 7%;
         }
         &:nth-child(2) {
-          width: 60%;
           padding-left: 10px;
           padding-right: 10px;
+          width: 55%;
           h2 {
             overflow: hidden;
             text-overflow: ellipsis;
@@ -606,7 +657,6 @@ export default {
           }
         }
         &:nth-child(3) {
-          width: 33%;
           font-size: 10px;
           color: #656565;
           text-align: right;
@@ -617,6 +667,12 @@ export default {
   .vl_t_b_list {
       padding-top: 18px;
       height: 85px;
+  }
+  .no_data {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #F2F2F2;
   }
 }
 .task_popover {

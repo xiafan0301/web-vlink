@@ -80,9 +80,18 @@
       <!-- 组合搜索 -->
       <el-form :model="todayAlarmForm" class="lib_form" ref="todayAlarmForm">
         <el-form-item style="width: 192px;" prop="targetType">
-           <el-radio-group v-model="todayAlarmForm.targetType">
+          <label>告警类型:</label>
+          <el-select v-model="todayAlarmForm.targetType" placeholder="选择告警类型" clearable >
+            <el-option
+              v-for="item in targetTypeList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+           <!-- <el-radio-group v-model="todayAlarmForm.targetType">
             <el-radio v-for="(item,index) in targetTypeList" :key="index" :label="item.value">{{item.label}}</el-radio>
-           </el-radio-group>
+           </el-radio-group> -->
         </el-form-item>
         <template v-if="todayAlarmForm.targetType === 1">
         <el-form-item style="width: 192px;" prop="name">
@@ -115,7 +124,8 @@
         </el-form-item>
         </template>
         <el-form-item style="width: 192px;">
-          <el-button style="width: 192px;" type="primary" @click="getCheckedKeys">确定</el-button>
+          <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
+          <el-button style="width: 45%;" type="primary" @click="resetForm('todayAlarmForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -222,11 +232,11 @@ export default {
       },
       deviceList: [],
       todayAlarmForm: {
-        targetType: 1,
-        name: null,
-        sex: null,
-        age: null,
-        vehicleNumber: null,
+        targetType: '',
+        name: '',
+        sex: '',
+        age: '',
+        vehicleNumber: '',
       },
       sexList: [{
         label: '男',
@@ -301,10 +311,13 @@ export default {
         order: 'asc',
       }],
       targetTypeList: [{
-        label: '人像',
+        label: '不限',
+        value: ''
+      },{
+        label: '布控人像',
         value: 1
       },{
-        label: '车像',
+        label: '布控车像',
         value: 2
       }],
       sortOrderS: 'desc',
@@ -378,9 +391,21 @@ export default {
       this.getNormalAlarm()
     },
     getCheckedKeys() {
+      this.allAlarmList = []
       this.selectDevice = this.$refs.tree.getCheckedKeys(true);
       this.selectControl = this.$refs.gTree.getCheckedKeys(true);
       this.getAlarm()
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.startTime = new Date().getTime() - 3600 * 1000 * 24
+      this.endTime = new Date().getTime() - 3600 * 1000 * 24
+      this.selectDevice = []
+      this.selectControl = []
+      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.gTree.setCheckedKeys([]);
+      this.getAlarm();
     },
     onMouseOver (data) {
       this.isSeen = true
@@ -470,6 +495,7 @@ export default {
     getAlarm() {
       this.alarmList = [];
       this.allAlarmList = [];
+      this.mAlarmList = []
       this.isLoading = true
       let params = {
         "where.startTime": formatDate(this.startTime, 'yyyy-MM-dd'),
@@ -477,16 +503,18 @@ export default {
         "where.sortType": this.sortType,
         pageNum: -1,
         pageSize: 0,
-        "where.targetType": this.todayAlarmForm.targetType,
       };
       (this.selectDevice && this.selectDevice.length > 0) && (params['where.devIds'] = this.selectDevice.join());
       (this.selectControl && this.selectControl.length > 0) && (params['where.groupIds'] = this.selectControl.join());
-      if(this.todayAlarmForm.targetType === 1) {
+      if(this.todayAlarmForm.targetType) {
+        params['where.targetType'] = this.todayAlarmForm.targetType
+        if(this.todayAlarmForm.targetType === 1) {
         this.todayAlarmForm.name && (params['where.username'] = this.todayAlarmForm.name);
         this.todayAlarmForm.sex && (params['where.sex'] = this.todayAlarmForm.sex);
         this.todayAlarmForm.age && (params['where.ageGroup'] = this.todayAlarmForm.age);
-      }else {
-        this.todayAlarmForm.vehicleNumber && (params['where.vehicleNumber'] = this.todayAlarmForm.vehicleNumber);
+        }else {
+          this.todayAlarmForm.vehicleNumber && (params['where.vehicleNumber'] = this.todayAlarmForm.vehicleNumber);
+        }
       }
       console.log("---------3333---------",params);
       getAlarmList(params).then( res => {
@@ -612,11 +640,11 @@ export default {
       this.allAlarmList = this.getNAlarmList(this.mAlarmList)
     },
     getNAlarmList(arr) {
+      console.log("------------",arr)
       let map = {}, dest = []
       for(let item of arr) {
         if(!map[item.label]) {
           dest.push({label: item.label, value: [item.value], isExpand: false})
-          console.log("------------",dest)
           map[item.label] = item.value
         }else {
           for(let key of dest) {
