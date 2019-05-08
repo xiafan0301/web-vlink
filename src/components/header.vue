@@ -35,12 +35,14 @@
             </div>
             <ul class="vl_t_b_content">
               <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
-                  <div class="col_content"><i class="vl_icon vl_icon_alarm_2"></i></div>
+                  <div class="col_content">
+                    <i :class="item.processType == 2 ? 'vl_icon vl_icon_task_3' : item.processType == 3 ? 'vl_icon vl_icon_task_2': 'vl_icon vl_icon_task_1'"></i>
+                  </div>
                   <div class="col_content">
                     <h2>{{ dicFormater( taskType, item.processType)}}</h2>
                     <p>您收到一个{{ dicFormater( taskType, item.processType)}}</p>
                   </div>
-                  <div class="col_content">{{item.createTime}}</div>
+                  <div class="col_content">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</div>
               </li>
               <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
             </ul>
@@ -629,12 +631,12 @@ export default {
     }
     .col_content {
         &:nth-child(1) {
-          width: 7%;
+          width: 15%;
         }
         &:nth-child(2) {
-          padding-left: 10px;
+          padding-left: 8px;
           padding-right: 10px;
-          width: 55%;
+          width: 52%;
           h2 {
             overflow: hidden;
             text-overflow: ellipsis;
