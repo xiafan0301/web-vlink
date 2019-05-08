@@ -135,23 +135,26 @@
     </el-dialog>
     <!--全屏视频监控-->
     <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :bResize="bResize" :oConfig="{sign: true}"></div>
+    <!--语音视频通话-->
+    <!--<div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>-->
   </div>
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
+import webrtc from '@/components/common/webrtc.vue';
 import {formatDate, h2canvas, objDeepCopy, random14} from '../../../../utils/util.js';
 import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign} from '../../api/api.map.js';
 import {apiVideoPlay} from "@/views/index/api/api.video.js";
 import {getAlarmListByDev} from '@/views/index/api/api.control.js';
 export default {
-  components: {flvplayer},
+  components: {flvplayer, webrtc},
   data () {
     return {
       showBigVideo: false,
       oData: null,
       bResize: null,
       timer: null,
-      constObj: [{name:'摄像头', _key: 'deviceBasicListNum'}, {name:'卡口', _key: 'carListNum'}, {name: '车辆', _key: 'cardListNum'}, {name: '人员', _key: 'sysUserExtendListNum'}],
+      constObj: [{name:'摄像头', _key: 'deviceBasicListNum'}, {name:'卡口', _key: 'carListNum'}, {name: '车辆', _key: 'bayonetListNum'}, {name: '人员', _key: 'sysUserExtendListNum'}],
       map: null, // 地图对象
       isIndeterminate: false,
       mapTypeCheckAll: true,
@@ -194,7 +197,10 @@ export default {
       markEditMarker: null,
       markEditWindow: null,
       // 报警
-      snapMarks: []
+      snapMarks: [],
+      // 语音，视频
+      oDel: null,
+      oAdd: {}
     }
   },
   watch: {
@@ -385,12 +391,12 @@ export default {
     },
     // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
     switchData(data) {
-      let numObj= {'deviceBasicListNum': 0, 'carListNum': 0, 'cardListNum': 0, 'sysUserExtendListNum': 0};
+      let numObj= {'deviceBasicListNum': 0, 'carListNum': 0, 'bayonetListNum': 0, 'sysUserExtendListNum': 0};
       data['infoList'] = data.areaTreeList;
       data['infoName'] = data.areaName;
       data['infoList'].map(x => {
         // 假的卡口，车辆
-        let carList, cardList;
+        let carList;
         carList = [
           {
             name: '我是假车辆11',
@@ -404,26 +410,13 @@ export default {
             longitude: 112.17623
           }
         ];
-        cardList = [
-          {
-            name: '我是假卡口11',
-            addr: '长沙市天心区',
-            latitude: 28.093222,
-            longitude: 112.274718
-          }, {
-            name: '我是假卡口22',
-            addr: '创谷广告园',
-            latitude: 28.293537,
-            longitude: 112.975628
-          }
-        ]
         x['infoName'] = x.areaName;
         // dataType = 0 摄像头，1车辆，2卡口，3人员,
         x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0});
         x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId});
-        x['cardList'] = this.objSetItem(cardList, {infoName: 'name', areaType: '5', dataType: 1, areaUid: x.areaId});
+        x['bayonetList'] = this.objSetItem(x['bayonetList'], {infoName: 'bayonetName', areaType: '5', dataType: 1, areaUid: x.areaId});
         x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId});
-        let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['cardList'], ...x['sysUserExtendList']];
+        let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['bayonetList'], ...x['sysUserExtendList']];
         let newArr = objDeepCopy(oldArr)
         x['infoList'] = newArr;
         // 给第一个元素加识别号
@@ -499,7 +492,7 @@ export default {
           key = 'deviceBasicList'
           break;
         case 1:
-          key = 'cardList'
+          key = 'bayonetList'
           break;
         case 2:
           key = 'carList'
@@ -520,7 +513,7 @@ export default {
           }
         } else {
           // '重置'
-          let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['cardList'], ...curData['sysUserExtendList']];
+          let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
           let ss = objDeepCopy(oldArr);
           curData.infoList = ss;
         }
@@ -578,54 +571,56 @@ export default {
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           data[i].infoList.forEach(obj => {
-            let offSet = [-15, -16], sId = 'mapMark' + i + random14(), sDataType;
-            if (obj.dataType === 0 && obj.deviceStatus !== 1) {
-              sDataType = 6;
-            } else {
-              sDataType = obj.dataType;
-            }
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.map,
-              position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: obj,
-              // 自定义点标记覆盖物内容
-              content: '<div id="' + sId + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
-            });
-            _this.marks[obj.dataType].push(marker);
-            // 点击地图上的摄像头/卡口播放视频
-            if (obj.dataType === 0) {
-              marker.on('click', function () {
-                if (obj.deviceStatus === 1) {
-                  _this.signListTap(obj, 'Marker');
-                } else {
-                  _this.$message.warning('该设备异常')
-                }
-              });
-            }
-            // hover
-            marker.on('mouseover', function () {
-              // 判断是否已经打开视频
-              let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
-              if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
-                return false
+            if (obj.longitude > 0 && obj.latitude > 0) {
+              let offSet = [-15, -16], sId = 'mapMark' + i + random14(), sDataType;
+              if (obj.dataType === 0 && obj.deviceStatus !== 1) {
+                sDataType = 6;
+              } else {
+                sDataType = obj.dataType;
               }
-              $('#' + sId).addClass('vl_icon_map_hover_mark' + obj.dataType)
-              let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
-              _this.hoverWindow = new window.AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                content: sContent
+              let marker = new window.AMap.Marker({ // 添加自定义点标记
+                map: _this.map,
+                position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+                offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+                draggable: false, // 是否可拖动
+                extData: obj,
+                // 自定义点标记覆盖物内容
+                content: '<div id="' + sId + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
               });
-              _this.hoverWindow.on('open', function () { _this.showInfoWin = true; })
-              _this.hoverWindow.on('close', function () { _this.showInfoWin = false; })
-              _this.hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-            });
-            marker.on('mouseout', function () {
-              $('#' + sId).removeClass('vl_icon_map_hover_mark' + obj.dataType)
-            })
+              _this.marks[obj.dataType].push(marker);
+              // 点击地图上的摄像头/卡口播放视频
+              if (obj.dataType === 0) {
+                marker.on('click', function () {
+                  if (obj.deviceStatus === 1) {
+                    _this.signListTap(obj, 'Marker');
+                  } else {
+                    _this.$message.warning('该设备异常')
+                  }
+                });
+              }
+              // hover
+              marker.on('mouseover', function () {
+                // 判断是否已经打开视频
+                let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
+                if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
+                  return false
+                }
+                $('#' + sId).addClass('vl_icon_map_hover_mark' + obj.dataType)
+                let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
+                _this.hoverWindow = new window.AMap.InfoWindow({
+                  isCustom: true,
+                  closeWhenClickMap: true,
+                  offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+                  content: sContent
+                });
+                _this.hoverWindow.on('open', function () { _this.showInfoWin = true; })
+                _this.hoverWindow.on('close', function () { _this.showInfoWin = false; })
+                _this.hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+              });
+              marker.on('mouseout', function () {
+                $('#' + sId).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+              })
+            }
           })
         }
         if (!isSetView) {
@@ -1300,6 +1295,9 @@ export default {
           }, 12000)
         }
       })
+    },
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
     }
   },
   beforeDestroy () {

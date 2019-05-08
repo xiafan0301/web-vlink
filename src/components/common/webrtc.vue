@@ -250,6 +250,7 @@ export default {
     wrWsMessageHandler (message) {
       let _this = this;
       let oMsg = JSON.parse(message);
+      console.log(message)
       if (oMsg.type === 'CANDIDATE') {
         // 收到 CANDIDATE 候选
         let oData = JSON.parse(oMsg.data);
