@@ -381,7 +381,7 @@ export default {
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
-          _this.vedioHandler('localVideo', stream); // 本机视频
+          // _this.vedioHandler('localVideo', stream); // 本机视频
           _this.wrCreatConnection(type, obj, desc);
           _this.wrStateHandler({
             remoteId: obj.remoteId,
