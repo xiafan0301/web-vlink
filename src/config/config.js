@@ -21,9 +21,9 @@ const oDomains = {
     },
     // 布控部分地址
     control: {
-        dev: 'http://apidev.aorise.org/vlink-control',
+        // dev: 'http://apidev.aorise.org/vlink-control',
         // test: 'http://10.116.64.98:8081',//钟赞
-        // dev: 'http://10.116.64.127:8081',//龙志海
+        dev: 'http://10.116.64.127:8081',//龙志海
         test: 'http://apirel.aorise.org/vlink-control',
         prod: 'http://apirel.aorise.org/vlink-control'
     },
@@ -38,8 +38,8 @@ const oDomains = {
     },
     // 事件部分地址
     event: {
-      dev: 'http://apidev.aorise.org/vlink-event',
-      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://apidev.aorise.org/vlink-event',
+      dev: 'http://10.116.64.142:8081',
       test: 'http://apirel.aorise.org/vlink-event',
       prod: 'http://apirel.aorise.org/vlink-event'
     },
@@ -88,14 +88,14 @@ const oDomains = {
     // test-video服务
     live: {
       dev: 'http://apidev.aorise.org/vlink-link',
-      test: 'http://apirel.aorise.org/vlink-link',
-      prod: 'http://apirel.aorise.org/vlink-link'
+      test: 'http://apidev.aorise.org/vlink-link',
+      prod: 'http://apidev.aorise.org/vlink-link'
     },
     // 视频播放服务 gis
     gis: {
       dev: 'http://apidev.aorise.org/vlink-gis',
-      test: 'http://apirel.aorise.org/vlink-gis',
-      prod: 'http://apirel.aorise.org/vlink-gis'
+      test: 'http://apidev.aorise.org/vlink-gis',
+      prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

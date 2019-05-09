@@ -123,6 +123,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             @current-change="handleCurrentChange"
             :current-page="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
@@ -562,6 +563,7 @@ export default {
     // 添加部门
     addDepartmentInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,

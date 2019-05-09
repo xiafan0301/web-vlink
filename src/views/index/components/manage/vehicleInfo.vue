@@ -1,32 +1,32 @@
 <template>
-  <vue-scroll>
-    <div class="vehicle_info">
-      <div class="vehicle_info_left">
-        <el-select v-model="selectMethod" @change="handleChangeVehicle" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
-          <el-option
-            v-for="item in selectType"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id">
-          </el-option>
-        </el-select>
-        <div class="search_box">
-          <el-input placeholder="搜索组" size="small" v-model="searchGroupName" @change="changeGroupName">
-            <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
-            <i
-              v-show="!closeShow"
-              class="search_icon vl_icon vl_icon_manage_1"
-              slot="suffix"
-              @click="searchData">
-            </i>
-          </el-input>
-        </div>
-        <template v-if="selectMethod === 1">
-          <div class="left_content_box">
-            <div class="add_btn">
-              <i class="vl_icon vl_icon_manage_4" @click="showAddGroupDialog"></i>
-              <span>新增分组</span>
-            </div>
+  <div class="vehicle_info">
+    <div class="vehicle_info_left">
+      <el-select v-model="selectMethod" @change="handleChangeVehicle" style="width: 220px;margin: 15px;" size="small" placeholder="请选择">
+        <el-option
+          v-for="item in selectType"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id">
+        </el-option>
+      </el-select>
+      <div class="search_box">
+        <el-input placeholder="搜索组" size="small" v-model="searchGroupName" @change="changeGroupName">
+          <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
+          <i
+            v-show="!closeShow"
+            class="search_icon vl_icon vl_icon_manage_1"
+            slot="suffix"
+            @click="searchData">
+          </i>
+        </el-input>
+      </div>
+      <template v-if="selectMethod === 1">
+        <div class="left_content_box">
+          <div class="add_btn">
+            <i class="vl_icon vl_icon_manage_4" @click="showAddGroupDialog"></i>
+            <span>新增分组</span>
+          </div>
+          <div class="one_group_ul">
             <vue-scroll>
               <ul class="group_ul">
                 <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 1)">全部车辆({{allVelGroupNumber}})</li>
@@ -37,22 +37,24 @@
               </ul>
             </vue-scroll>
           </div>
-        </template>
-        <template v-if="selectMethod === 2">
-          <div class="left_content_box">
-            <vue-scroll>
-              <ul class="group_ul">
-                <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 2)">全部车辆({{allVelBottomNameNumber}})</li>
-                <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
-                  <span>{{item.title}}({{item.portraitNum}})</span>
-                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
-                </li>
-              </ul>
-            </vue-scroll>
-          </div>
-        </template>
-      </div>
-      <div class="vehicle_info_right_group">
+        </div>
+      </template>
+      <template v-if="selectMethod === 2">
+        <div class="left_content_box">
+          <vue-scroll>
+            <ul class="group_ul">
+              <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 2)">全部车辆({{allVelBottomNameNumber}})</li>
+              <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
+                <span>{{item.title}}({{item.portraitNum}})</span>
+                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
+              </li>
+            </ul>
+          </vue-scroll>
+        </div>
+      </template>
+    </div>
+    <div class="vehicle_info_right_group">
+      <vue-scroll>
         <div class="search_right_box">
           <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
             <el-form-item style="width: 240px;" prop="keyWord">
@@ -123,7 +125,7 @@
             </div>
           </div>
           <template v-if="selectMethod === 1">
-             <el-table
+              <el-table
               class="event_table"
               :data="vehicleList"
               @selection-change="handleSelectChange"
@@ -181,7 +183,7 @@
             </el-table>
           </template>
           <template v-else>
-             <el-table
+              <el-table
               class="event_table"
               :data="vehicleList"
               @selection-change="handleSelectChange"
@@ -240,6 +242,7 @@
           </template>
         </div>
         <el-pagination
+          class="cum_pagination"
           @current-change="handleCurrentChange"
           :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
@@ -247,121 +250,121 @@
           layout="total, prev, pager, next, jumper"
           :total="pagination.total">
         </el-pagination>
-      </div>
-      <!--查看车辆详细信息弹出框-->
-      <el-dialog
-        title="查看车辆信息"
-        :visible.sync="vehicleDetailInfoDialog"
-        width="722px"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        class="dialog_comp_person"
-        >
-        <div class="content_body">
-          <div class="content_left">
-            <img :src="vehicleDetailInfo.vehicleImagePath" alt="">
-          </div>
-          <ul class="content_right">
-            <li>
-              <span>车牌号：</span>
-              <span>{{vehicleDetailInfo.vehicleNumber}}</span>
-            </li>
-            <li>
-              <span>车牌类型：</span>
-              <span>{{vehicleDetailInfo.numberType}}</span>
-            </li>
-            <li>
-              <span>车牌颜色：</span>
-              <span>{{vehicleDetailInfo.numberColor}}</span>
-            </li>
-            <li>
-              <span>车主：</span>
-              <span>{{vehicleDetailInfo.ownerName}}</span>
-            </li>
-            <li>
-              <span>证件号码：</span>
-              <span>{{vehicleDetailInfo.ownerIdCard}}</span>
-            </li>
-            <li>
-              <span>车辆类型：</span>
-              <span>{{vehicleDetailInfo.vehicleType}}</span>
-            </li>
-            <li>
-              <span>车辆型号：</span>
-              <span>{{vehicleDetailInfo.vehicleModel}}</span>
-            </li>
-            <li>
-              <span>车辆颜色：</span>
-              <span>{{vehicleDetailInfo.vehicleColor}}</span>
-            </li>
-            <li>
-              <span>车主性别：</span>
-              <span>{{vehicleDetailInfo.ownerSex}}</span>
-            </li>
-            <li>
-              <span>车主生日：</span>
-              <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
-            </li>
-            <li>
-              <span>底库信息：</span>
-              <span>{{vehicleDetailInfo.albumList}}</span>
-            </li>
-            <li>
-              <span>分组信息：</span>
-              <span>{{vehicleDetailInfo.groupList}}</span>
-            </li>
-            <li>
-              <span>备注：</span>
-              <span>{{vehicleDetailInfo.desci}}</span>
-            </li>
-          </ul>
+      </vue-scroll>
+    </div>
+    <!--查看车辆详细信息弹出框-->
+    <el-dialog
+      title="查看车辆信息"
+      :visible.sync="vehicleDetailInfoDialog"
+      width="722px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp_person"
+      >
+      <div class="content_body">
+        <div class="content_left">
+          <img :src="vehicleDetailInfo.vehicleImagePath" alt="">
         </div>
-      </el-dialog>
-      <!--新增组弹出框-->
-      <el-dialog
-        title="新增分组"
-        :visible.sync="addGroupDialog"
-        width="482px"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        class="dialog_comp"
-        >
+        <ul class="content_right">
+          <li>
+            <span>车牌号：</span>
+            <span>{{vehicleDetailInfo.vehicleNumber}}</span>
+          </li>
+          <li>
+            <span>车牌类型：</span>
+            <span>{{vehicleDetailInfo.numberType}}</span>
+          </li>
+          <li>
+            <span>车牌颜色：</span>
+            <span>{{vehicleDetailInfo.numberColor}}</span>
+          </li>
+          <li>
+            <span>车主：</span>
+            <span>{{vehicleDetailInfo.ownerName}}</span>
+          </li>
+          <li>
+            <span>证件号码：</span>
+            <span>{{vehicleDetailInfo.ownerIdCard}}</span>
+          </li>
+          <li>
+            <span>车辆类型：</span>
+            <span>{{vehicleDetailInfo.vehicleType}}</span>
+          </li>
+          <li>
+            <span>车辆型号：</span>
+            <span>{{vehicleDetailInfo.vehicleModel}}</span>
+          </li>
+          <li>
+            <span>车辆颜色：</span>
+            <span>{{vehicleDetailInfo.vehicleColor}}</span>
+          </li>
+          <li>
+            <span>车主性别：</span>
+            <span>{{vehicleDetailInfo.ownerSex}}</span>
+          </li>
+          <li>
+            <span>车主生日：</span>
+            <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
+          </li>
+          <li>
+            <span>底库信息：</span>
+            <span>{{vehicleDetailInfo.albumList}}</span>
+          </li>
+          <li>
+            <span>分组信息：</span>
+            <span>{{vehicleDetailInfo.groupList}}</span>
+          </li>
+          <li>
+            <span>备注：</span>
+            <span>{{vehicleDetailInfo.desci}}</span>
+          </li>
+        </ul>
+      </div>
+    </el-dialog>
+    <!--新增组弹出框-->
+    <el-dialog
+      title="新增分组"
+      :visible.sync="addGroupDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
+        <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
+          <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+          <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroupInfo('addGroupForm')">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--新增组弹出框-->
+    <el-dialog
+      title="新增分组"
+      :visible.sync="addGroupCopyDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div class="content_body">
+        <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
         <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
             <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="cancelAddGroup('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroupInfo('addGroupForm')">确认</el-button>
-        </div>
-      </el-dialog>
-      <!--新增组弹出框-->
-      <el-dialog
-        title="新增分组"
-        :visible.sync="addGroupCopyDialog"
-        width="482px"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        class="dialog_comp"
-        >
-        <div class="content_body">
-          <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
-          <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
-            <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
-              <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
-            </el-form-item>
-          </el-form>
-        </div>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
-          <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
-        </div>
-      </el-dialog>
-    </div>
-  </vue-scroll>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelAddGroupCopy('addGroupForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddCopyLoading" @click="addCopyGroupInfo('addGroupForm')">确认</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 <script>
 import { validateName } from '@/utils/validator.js';
@@ -596,13 +599,14 @@ export default {
     },
     // 显示新增分组弹出框
     showAddGroupDialog () {
-      this.userGroupName = null;
+      this.addGroupForm.userGroupName = null;
       this.isShowError = false;
       this.addGroupDialog = true;
     },
     // 新增分组
     addGroupInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowError = false;
         if (valid) {
           const params = {
             groupName: this.addGroupForm.userGroupName
@@ -685,6 +689,7 @@ export default {
     // 复制或新增复制到组 --判断组名是否重复
     addCopyGroupInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowError = false;
         if (valid) {
           const params = {
             groupName: this.addGroupForm.userGroupName
@@ -727,11 +732,6 @@ export default {
             this.addGroupCopyDialog = false;
             this.isAddCopyLoading = false;
           } else {
-            // this.$message({
-            //   type: 'error',
-            //   message: '新增失败',
-            //   customClass: 'request_tip'
-            // })
             this.isAddCopyLoading = false;
           }
         })
@@ -739,7 +739,6 @@ export default {
     },
     // 显示查看车辆信息弹出框
     showLookDetailInfo (obj) {
-      // this.vehicleId = obj.id;
       this.vehicleDetailInfoDialog = true;
       this.getVehicleDetailInfo(obj.uid);
     },
@@ -783,7 +782,12 @@ export default {
     }
     .left_content_box {
       margin-top: 10px;
+      height: calc(100% - 105px);
+      .one_group_ul {
+        height: calc( 100% - 35px );
+      }
       .group_ul {
+        height: 100%;
         >li {
           padding-left: 40px;
           height: 36px;

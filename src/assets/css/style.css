@@ -512,11 +512,11 @@
 }
 
 /** 分页样式 **/
-.el-pagination {
+.cum_pagination {
   text-align: right;
   padding: 20px;
 }
-.el-pagination .btn-prev, .el-pagination .btn-next {
+.cum_pagination  .btn-prev, .el-pagination .btn-next {
   width: 32px;
   height: 32px;
   padding: 0;
@@ -524,14 +524,14 @@
   border-radius: 5px;
   color: #333333;
 }
-.el-pager li.active {
+.cum_pagination .el-pager li.active {
   color: #ffffff;
   width: 32px;
   height: 32px;
   background-color: #0C70F8;
   border-radius: 5px;
 }
-.el-pager li {
+.cum_pagination .el-pager li {
   width: 32px;
   height: 32px;
   line-height: 32px;

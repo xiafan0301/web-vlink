@@ -62,6 +62,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -351,6 +352,7 @@ export default {
     // 创建用户
     addUser (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,
@@ -449,6 +451,7 @@ export default {
     // 编辑角色 
     editRoleInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,
