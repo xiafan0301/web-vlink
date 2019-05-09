@@ -78,6 +78,10 @@ const router = new VueRouter({
       path: '/webrtc',
       name: 'webrtc',
       component: () => import('@/views/index/components/webrtcTest.vue')
+    }, {
+      path: '/webrtcTri',
+      name: 'webrtcTri',
+      component: () => import('@/views/index/components/webrtcTerminal.vue')
     }
   ]
 })

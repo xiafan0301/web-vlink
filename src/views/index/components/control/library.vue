@@ -342,8 +342,8 @@
                   <el-input v-model="portraitForm.name" placeholder="姓名" maxlength="50" :disabled="isAddDisabled"></el-input>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" class="portrait_form_sex" prop="sex">
-                  <el-button plain @click.native="selSex(1)" :class="{'active': portraitForm.sex === 1}" :disabled="isAddDisabled">男</el-button>
-                  <el-button plain @click.native="selSex(2)" :class="{'active': portraitForm.sex === 2}" :disabled="isAddDisabled">女</el-button>
+                  <el-button plain @click.native="selSex(1)" :class="{'active': portraitForm.sex === 1, 'disabled': isAddDisabled}" :disabled="isAddDisabled">男</el-button>
+                  <el-button plain @click.native="selSex(2)" :class="{'active': portraitForm.sex === 2, 'disabled': isAddDisabled}" :disabled="isAddDisabled">女</el-button>
                 </el-form-item>
                 <el-form-item label=" " style="width: 415px;" prop="nation">
                   <el-select v-model="portraitForm.nation" placeholder="民族" style="width: 100%;" :disabled="isAddDisabled">
@@ -709,29 +709,35 @@ export default {
   methods: {
     // 通过证件号模糊匹配人像列表
     getPortraitDropdownListByIdNo (query) {
-      getPortraitByIdNo({idNo: query}).then(res => {
-        if (res && res.data) {
-          this.portraitDropdownList = res.data.map(m => {
-            return {
-              label: m.idNo,
-              value: m.idNo
-            }
-          });
-        }
-      })
+      const idNo = this.Trim(query, 'g');
+      if (idNo) {
+        getPortraitByIdNo({idNo: idNo}).then(res => {
+          if (res && res.data) {
+            this.portraitDropdownList = res.data.map(m => {
+              return {
+                label: m.idNo,
+                value: m.idNo
+              }
+            });
+          }
+        })
+      }
     },
     // 通过证件号模糊匹配人像列表
     getVehicleDropdownListByVehicleNumber (query) {
-      getVehicleByVehicleNumber({vehicleNumber: query}).then(res => {
-        if (res && res.data) {
-          this.carDropdownList = res.data.map(m => {
-            return {
-              label: m.vehicleNumber,
-              value: m.vehicleNumber
-            }
-          });
-        }
-      })
+      const idNo = this.Trim(query, 'g');
+      if (idNo) {
+        getVehicleByVehicleNumber({vehicleNumber: idNo}).then(res => {
+          if (res && res.data) {
+            this.carDropdownList = res.data.map(m => {
+              return {
+                label: m.vehicleNumber,
+                value: m.vehicleNumber
+              }
+            });
+          }
+        })
+      }
     },
     selSex (type) {
       this.portraitForm.sex = type;
@@ -1087,6 +1093,7 @@ export default {
               this.addPortraitDialog = false;
               this.$message.success('修改成功！');
               this.getPortraitList(this.groupId, this.groupIndex);
+              this.getGroupList();
             }
           }).finally(() => {
             this.loadingBtn = false;
@@ -1133,6 +1140,7 @@ export default {
               this.addPortraitDialog = false;
               this.$message.success('修改成功！');
               this.getVehicleList(this.groupId, this.groupIndex);
+              this.getGroupList();
             }
           }).finally(() => {
             this.loadingBtn = false;
@@ -1534,8 +1542,10 @@ export default {
       .el-form-item{
         margin-bottom: 18px;
       }
+      .el-button.disabled{
+        background: #f5f7fa;
+      }
       .el-button.active{
-        background: rgb(199, 197, 197);
         border-color: #409EFF;
         color: #409EFF;
       }

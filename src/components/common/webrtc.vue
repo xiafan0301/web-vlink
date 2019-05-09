@@ -376,13 +376,13 @@ export default {
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         navigator.getMedia({
           'audio': true,
-          'video': true
+          'video': false
         }, function (stream) {
           console.log('getUserMedia success');
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
-          // _this.vedioHandler('localVideo', stream); // 本机视频
+//          _this.vedioHandler('localVideo', stream); // 本机视频
           _this.wrCreatConnection(type, obj, desc);
           _this.wrStateHandler({
             remoteId: obj.remoteId,
@@ -482,6 +482,7 @@ export default {
       };
       // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
       _pc.onaddstream = function (event) {
+        console.log('终端流', event)
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
       };
       // 向PeerConnection中加入需要发送的流

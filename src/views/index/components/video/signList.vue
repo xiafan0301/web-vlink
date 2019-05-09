@@ -99,6 +99,18 @@
           <div class="sign_content_list_empty" v-else>
             暂无
           </div>
+          <div class="sign_content_pager">
+            <el-pagination
+              :small="true"
+              :background="false"
+              :pager-count="5"
+              layout="pager"
+              @current-change="handleCurrentChange"
+              :current-page="pagination.currentPage"
+              :page-size="pagination.pageSize"
+              :total="pagination.total">
+            </el-pagination>
+          </div>
         </div>
       </div>
     </div>
@@ -133,6 +145,11 @@ export default {
 
       searchLoading: false,
       signList: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
+      },
       searchVal: '',
       startTime: new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6),
       endTime: dateOrigin(true),
@@ -222,6 +239,7 @@ export default {
       this.endTime = dateOrigin(true);
       this.signPeople = '';
       this.signContent = '';
+      this.searchSubmit();
     },
     searchSubmit () {
       this.getData();
@@ -233,10 +251,11 @@ export default {
         'where.endTime': formatDate(this.endTime),
         'where.userId': this.signPeople,
         'where.contentId': this.signContent,
-        pageNum: 1,
-        pageSize: 50
+        pageNum: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize
       }).then(res => {
         if (res && res.data) {
+          this.pagination.total = res.data.total;
           this.signList = res.data.list;
         }
         this.searchLoading = false;
@@ -244,6 +263,10 @@ export default {
         this.searchLoading = false;
         console.log("apiVideoList error：", error);
       });
+    },
+    handleCurrentChange (val) {
+      this.pagination.currentPage = val;
+      this.searchSubmit();
     },
     getSignPeopleList () {
       apiVideoSignPeopleList().then(res => {
@@ -325,7 +348,7 @@ export default {
   }
 }
 .show_search {
-  position: absolute; top: 24px; left: 0;
+  position: absolute; top: 24px; left: 0; z-index: 2;
   width: 100%;
   padding-top: 15px; padding-bottom: 5px;
   border-bottom: 1px solid #f6f6f6;
@@ -354,7 +377,8 @@ export default {
   }
 }
 .sign_content_list {
-  height: 100%; padding-top: 240px;
+  position: relative;
+  height: 100%; padding-top: 240px; padding-bottom: 30px;
   > ul {
     height: 100%;
     overflow: auto;
@@ -413,6 +437,13 @@ export default {
         }
       }
     }
+  }
+  .sign_content_pager {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    padding-top: 2px;
+    text-align: center;
+    border-top: 1px solid #f6f6f6;
   }
 }
 .sign_content_list_empty {

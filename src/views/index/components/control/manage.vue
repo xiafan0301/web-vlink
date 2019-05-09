@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%;position: relative;">
-    <div class="control_manage" v-if="pageType === 1">
+    <div class="control_manage" v-show="pageType === 1">
       <!-- 顶部搜索栏 -->
       <div class="control_manage_box">
         <div class="search_box">
@@ -219,7 +219,8 @@ import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';export default {
+import {getDiciData} from '@/views/index/api/api.js';
+export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
     return {
@@ -333,6 +334,7 @@ import {getDiciData} from '@/views/index/api/api.js';export default {
     },
     resetForm () {
       this.$refs['manageForm'].resetFields();
+      this.getControlList();
     },
     // 获取所有布控对象
     getControlObject (query) {

@@ -493,6 +493,17 @@ export function getAllMonitorList(params) {
   })
 }
 /**
+ * getAllMonitorGroupList 查询监控设备分组列表   
+ * @param {object} params
+ */
+export function getAllMonitorGroupList() {
+  return request({
+    url: '/device-service/device-list',
+    method: 'get',
+    mode: ''
+  })
+}
+/**
  * getAreas 区域列表查询
  * @param {object} params
  */
