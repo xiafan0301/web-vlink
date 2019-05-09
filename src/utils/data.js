@@ -34,4 +34,12 @@ const operationType = {
   sendOtherUint: 3, // 转到其他单位
   endEvent: 4 // 结束事件
 }
-export { dataList, handeMethods, operationType };
+// 事件处理过程类型
+const proccessEventType = {
+  dispatchId: 1, // 派单
+  directiveId: 2, // 上级指示
+  reportSuperId: 3, // 下级呈报
+  acceptId: 4, // 受理
+  feedbackId: 5 // 反馈
+}
+export { dataList, handeMethods, operationType, proccessEventType };

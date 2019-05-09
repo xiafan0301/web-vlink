@@ -215,6 +215,7 @@ export default {
           })
         } else {
           _this.taskList.map((item, index) => {
+            item.uid = null;
             _this.departmentData.map(itm => {
               if (item.departmentId === itm.uid) {
                 _this.taskList[index].departmentName = itm.organName;

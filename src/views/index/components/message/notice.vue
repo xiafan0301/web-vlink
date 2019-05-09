@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mes_notice" v-if="pageType === 1">
+    <div class="mes_notice" v-show="pageType === 1">
       <div class="notice_box">
         <div class="notice_form">
           <el-form ref="noticeForm" :model="noticeForm" class="notice_form">

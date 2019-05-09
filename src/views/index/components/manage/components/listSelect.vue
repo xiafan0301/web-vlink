@@ -189,7 +189,6 @@ export default {
     },
     // 移除设备
     removeDevice () {
-      console.log(this.currentDeviceList)
       let currDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
       let checkedDeviceNumber = 0, selectDeviceNumber = 0, checkedDeviceList = [];
       if (this.currentDeviceList && this.currentDeviceList.length > 0) {
@@ -216,7 +215,6 @@ export default {
               }
             }
         }
-        console.log('currDeviceList', currDeviceList)
         if (currDeviceList && currDeviceList.length > 0) {
           currDeviceList.map(item => {
             checkedDeviceNumber += item.deviceList.length;

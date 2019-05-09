@@ -173,11 +173,14 @@ export default {
     }
   },
   watch: {
-    oData () {
-      console.log('watch oData', this.oData);
+    oData (newData, oldData) {
+      console.log('watch oData', newData);
       // 去掉暂停按钮
       this.playActive = true;
       this.relaodPlayer();
+      if (oldData && oldData.record) {
+        this.saveVideoRecord(oldData);
+      }
     },
     oConfig () {
       if (this.oConfig) {
@@ -626,18 +629,19 @@ export default {
     },
 
     // 播放记录 只有type=1 / 2 才记录
-    saveVideoRecord () {
-      if ((this.oData.type === 2 || this.oData.type === 1) && this.oData.record) {
+    saveVideoRecord (_data) {
+      if (!_data) { _data = this.oData; }
+      if ((_data.type === 2 || _data.type === 1) && _data.record) {
         let playBack = {};
         // if (this.oData.type === 2) {
         playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
         playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
         // }
         apiVideoRecord(Object.assign({
-          deviceId: this.oData.video.uid, // 设备id
+          deviceId: _data.video.uid, // 设备id
           playTime: formatDate(this.startPlayTime ? this.startPlayTime : new Date()), // 播放结束时间
           // 播放类型 1:视频巡逻 2:视频回放
-          playType: this.oData.type
+          playType: _data.type
         }, playBack)).then(() => {
         }).catch(error => {
           console.log("apiVideoRecord error：", error);

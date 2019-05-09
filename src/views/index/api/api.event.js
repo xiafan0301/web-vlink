@@ -164,6 +164,18 @@ export const updateProcess = (uid) => {
   });
 }
 /**
+ * 新增事件处理过程
+ * @param {*} data
+ */
+export const addEventProcess = (data, uid) => {
+  return request({
+    url: 'task-services/task/process/' + uid,
+    method: 'post',
+    data,
+    mode: 'ctc'
+  });
+}
+/**
  * 添加调度任务
  * @param {*} data 
  */
@@ -260,3 +272,42 @@ export const getSurveillance = (data) => {
     mode: 'event'
   });
 }
+
+/*-------------------------- 任务start -------------------------------*/
+/**
+ * getTasks
+ * 查看任务列表
+ * @param {object} params
+ */
+export function getTasks(params) {
+  return request({
+    url: '/task-services/tasks',
+    method: 'get',
+    mode: 'ctc',
+    params: params
+  })
+}
+/**
+ * 标记全部已读
+ * @param {*} data 
+ */
+export const markTask = (data) => {
+  return request({
+    url: '/task-services/task/processes?userId=' + data.userId + '&departmentId=' + data.departmentId,
+    method: 'put',
+    mode: 'ctc'
+  });
+}
+/**
+ * 新增事件处理过程
+ * @param {*} data 
+ */
+export const taskProcess = (data) => {
+  return request({
+    url: '/task-services/task/process/' + data.eventId,
+    method: 'post',
+    data,
+    mode: 'ctc'
+  });
+}
+/*-------------------------- 任务end -------------------------------*/

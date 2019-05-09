@@ -211,6 +211,10 @@ export default {
   methods: {
     // 获取标记内容列表
     getList () {
+      console.log(this.searchForm.reportTime)
+      if (this.searchForm.reportTime === null) {
+        this.searchForm.reportTime = [];
+      }
       const params = {
         'where.startDate': this.searchForm.reportTime[0],
         'where.endDate': this.searchForm.reportTime[1],
