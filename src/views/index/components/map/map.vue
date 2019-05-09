@@ -54,9 +54,10 @@
               <vue-scroll>
                 <div class="map_lc_dc_mark" @click="signListTap(item, 'InfoWindow')" v-for="item in markList" :key="item.id" v-if="item.isShow">
                   <div class="dc_mark_c">{{item.markContent}}</div>
-                  <p><span>{{item.opUserName}}</span><span>{{item.createTime | fmTimestamp('yy-MM-dd HH-mm')}}</span></p>
+                  <p><span>{{item.opUserName}}</span><span>{{item.createTime | fmTimestamp('yy-MM-dd HH:mm')}}</span></p>
                   <div class="dc_mark_b"><i class="el-icon-location-outline"></i><span>{{item.position}}</span> <span class="el-icon-delete" @click.stop="delMark('这条', item)"></span></div>
                 </div>
+                <p v-show="markList.length === 0 || signEmpty" style="text-indent: 20px;">无相关数据</p>
               </vue-scroll>
             </div>
             <el-button class="dc_clear_mark" type="primary" @click="delMark('清除所有', 0)">清空标注</el-button>
@@ -85,7 +86,7 @@
       <!-- 头部统计 -->
       <div class="map_rt">
         <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
-          <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].cardListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>
+          <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].bayonetListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>
         </el-checkbox>
         <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
           <el-checkbox v-for="(item, index) in constObj" :key="item.id" :label="index">{{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span></el-checkbox>
@@ -134,7 +135,7 @@
       </span>
     </el-dialog>
     <!--全屏视频监控-->
-    <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :bResize="bResize" :oConfig="{sign: true}"></div>
+    <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
     <!--语音视频通话-->
     <!--<div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>-->
   </div>
@@ -151,6 +152,7 @@ export default {
   data () {
     return {
       showBigVideo: false,
+      signEmpty: false,
       oData: null,
       bResize: null,
       timer: null,
@@ -213,6 +215,11 @@ export default {
         this.markList.filter(x => {
           return x.opUserName.indexOf(val) !== -1 || x.markContent.indexOf(val) !== -1
         }).forEach(y => y.isShow = true)
+        if(this.markList.findIndex(z => z.isShow) === -1) {
+          this.signEmpty = true;
+        } else {
+          this.signEmpty = false;
+        }
       } else {
         this.markList.forEach(x => x.isShow = true)
       }
@@ -638,7 +645,8 @@ export default {
         str += '</ul></div>'
       } else if (data.dataType === 1) {
         str += '<li><span>卡口名称：</span>' + data.infoName + '</li>';
-        str += '<li><span>设备地址：</span>' + data.infoName + '</li>';
+        str += '<li><span>卡口编号：</span>' + data.bayonetNo + '</li>';
+        str += '<li><span>设备数量：</span>' + '待添加字段' + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 2) {
         str += '<li><span>车辆名称：</span>' + data.infoName + '</li>';
@@ -772,7 +780,7 @@ export default {
               } else {
                 _this.addSignInfoWin['isShow'] = true;
               }
-              _this.markList.push(_this.addSignInfoWin);
+              _this.markList.unshift(_this.addSignInfoWin);
               let obj = {}
               obj['infoList'] = [_this.addSignInfoWin];
               _this.markRest(true);
@@ -1449,6 +1457,7 @@ export default {
   .map_video_box {
     width: 220px;
     height: 134px;
+    border: 1px solid #0C70F8;
     &:before {
       content: '';
       display: block;
