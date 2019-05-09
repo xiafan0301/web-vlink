@@ -236,6 +236,10 @@
 .vl_icon_manage_16{width: 16px; height: 16px; background-position: -482px -671px;} /*视频设置--临时授权--终止*/
 .vl_icon_manage_17{width: 16px; height: 16px; background-position: -713px -585px;} /* 文件下载 */
 .vl_icon_manage_18{width: 16px; height: 16px; background-position: -744px -585px;} /* 文件上传 */
+/**告警图标***/
+.vl_icon_task_1{width: 46px; height: 46px; background-position: -592px -1522px;}
+.vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
+.vl_icon_task_3{width: 46px; height: 46px; background-position: -731px -1522px;}
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}

@@ -14,7 +14,7 @@
             <div class="show_search">
               <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
                 <el-input
-                  placeholder="请输入内容"
+                  placeholder="请输入设备或区域名称"
                   size="small"
                   @keyup.enter.native="getDeviceList3()"
                   v-model="searchVal3">
@@ -70,7 +70,7 @@
             <div class="show_search">
               <div style="margin-left: 8%; width: 84%;">
                 <el-input
-                  placeholder="请输入内容"
+                  placeholder="请输入设备或分组名称"
                   size="small"
                   @keyup.enter.native="getDeviceList()"
                   v-model="searchVal">
@@ -324,23 +324,23 @@ export default {
     patrolGetData (bInit) {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
-          // let patrolData = res.data;
-          let patrolData = res.data ? res.data :
-          // let patrolData =
+          let patrolData = res.data;
+          /* let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
               roundNo: '111', // 轮巡编号
               roundName: '轮巡预案名称111', // 轮巡名称
               frameNum: 4, // 画面数
-              roundInterval: 20, // 轮巡间隔(秒)
+              roundInterval: 10, // 轮巡间隔(秒)
               deviceNum: 5, // 轮巡设备数
               startTime: null, // 开始时间
               endTime: null, // 结束时间
               roundStatus: 1, // 轮巡状态
               deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
             },
-            currentRoundRemain: 111145, // 当前轮巡倒计时(秒)
+            currentDeviceList: null,
+            currentRoundRemain: 25, // 当前轮巡倒计时(秒)
             nextRound: {
               uid: '222', // 轮巡记录标识
               roundNo: '222', // 轮巡编号
@@ -353,7 +353,14 @@ export default {
               roundStatus: 1, // 轮巡状态
               deviceList: [{uid: 5}, {uid: 3}, {uid: 4}, {uid: 2}, {uid: 6}]
             },
+            nextDeviceList: null,
             nextRoundCountDown: 65 // 下条轮巡倒计时(秒)
+          } */
+          if (patrolData.currentRound && patrolData.currentDeviceList) {
+            patrolData.currentRound.deviceList = patrolData.currentDeviceList;
+          }
+          if (patrolData.nextRound && patrolData.nextDeviceList) {
+            patrolData.nextRound.deviceList = patrolData.nextDeviceList;
           }
           if (bInit) {
             if (!patrolData.currentRound || patrolData.currentRoundRemain <= 0) {
@@ -382,6 +389,9 @@ export default {
           this.patrolStart(pData); // 开始轮巡
         }
         // 存在正在执行的轮巡 并且 正在执行的轮巡和当前轮巡 是同一个 ==> 废弃，不需要处理
+      } else {
+        // 当前轮巡为空，则清除正在执行的轮巡
+        this.patrolClearCurrent(); // 清除正在执行的轮巡
       }
       // 当前有下一个轮巡
       if (pData && pData.nextRound && pData.nextRoundCountDown > 0) {
@@ -391,6 +401,9 @@ export default {
           this.patrolNext(pData); // 下一个
         }
         // 当前下一个轮巡 和 已储备的下一个轮巡 是同一个 ==> 废弃，不需要处理
+      } else {
+        // 下一个轮巡不存在，则清除正在执行的轮巡
+        this.patrolClearNext(); // 清除下一个的轮巡信息
       }
     },
     // 下一个轮巡
@@ -424,6 +437,16 @@ export default {
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
       this.patrolNextCloseDis = true;
+      if (this.patrolHandlerData.currentRound) {
+        // 停止当前沦胥
+        mdfVideoRoundState({
+          id: this.patrolHandlerData.currentRound.uid,
+          status: 3
+        }).then(() => {
+        }).catch(error => {
+          console.log("mdfVideoRoundState error：", error);
+        });
+      }
       this.patrolClearDataVal();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
@@ -499,13 +522,14 @@ export default {
       this.patrolHandlerData.currentRound.excuteStartTime = new Date().getTime();
       this.patrolHandlerData.currentRoundRemain = pData.currentRoundRemain;
       // 轮巡设备数deviceNum   画面数frameNum
-      if (this.patrolHandlerData.currentRound.deviceList && this.patrolHandlerData.currentRound.deviceList.length > this.showVideoTotal) {
+      if (this.patrolHandlerData.currentRound.deviceList && this.patrolHandlerData.currentRound.deviceList.length > this.patrolHandlerData.currentRound.frameNum) {
         this.patrolCurrentGoOn();
         this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
           this.patrolCurrentGoOn();
         }, this.patrolHandlerData.currentRound.roundInterval * 1000);
         this.patrolHandlerData.currentRoundRemainTimeout = window.setTimeout(() => {
           this.patrolClearCurrent();
+          this.$message('轮巡时间已到。');
         }, this.patrolHandlerData.currentRoundRemain * 1000);
       } else {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
@@ -541,7 +565,7 @@ export default {
         for (let i = 0; i < list.length; i++) {
           _list.push({
             type: 1,
-            title: list[i].deviceName ? list[i].deviceName : '轮巡测试——' + i,
+            title: list[i].deviceName,
             record: false,
             video: Object.assign({}, list[i])
           });
@@ -604,6 +628,17 @@ export default {
       this.patrolParseDialogVisible = false;
       this.patrolCloseDialogVisible = false;
       this.patrolActive = 0;
+      // 将下一个轮巡状态设为 关闭 4
+      this.patrolClearDataVal();
+      mdfVideoRoundState({
+        id: this.patrolHandlerData.currentRound.uid,
+        status: 4
+      }).then(() => {
+        this.patrolSetDataVal();
+      }).catch(error => {
+        this.patrolSetDataVal();
+        console.log("mdfVideoRoundState error：", error);
+      });
       this.$message('轮巡已关闭。');
     },
     /* 轮巡控制事件 end */
