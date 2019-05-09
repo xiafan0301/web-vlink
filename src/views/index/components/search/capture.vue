@@ -1,6 +1,10 @@
 <template>
   <div class="vl_judge_tc">
     <div class="vl_j_left">
+      <div class="vl_jtc_target_type">
+        <el-radio v-model="targetType" label="1">人像抓拍</el-radio>
+        <el-radio v-model="targetType" label="2">车像抓拍</el-radio>
+      </div>
       <div class="vl_jtc_img_box">
         <div class="vl_jtc_upload_img" :style="{}" @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
@@ -33,39 +37,39 @@
       </div>
       <div class="vl_jtc_search">
         <el-date-picker
-                v-model="searchData.time"
-                type="daterange"
-                range-separator="-"
-                value-format="yyyy-MM-dd"
-                format="yy/MM/dd"
-                :picker-options="pickerOptions"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
+          v-model="searchData.time"
+          type="daterange"
+          range-separator="-"
+          value-format="yyyy-MM-dd"
+          format="yy/MM/dd"
+          :picker-options="pickerOptions"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
         </el-date-picker>
-        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,'')" v-model="searchData.minSemblance" placeholder="填写相似度(数字)"></el-input> - 100</div>
+        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="填写相似度(数字)"></el-input> - 100</div>
         <el-select
-                v-model="devIdData"
-                multiple
-                class="camera-select"
-                @remove-tag="removeCamera"
-                @click.native="vChange"
-                collapse-tags
-                :popper-append-to-body="false"
-                placeholder="选择监控">
+          v-model="devIdData"
+          multiple
+          class="camera-select"
+          @remove-tag="removeCamera"
+          @click.native="vChange"
+          collapse-tags
+          :popper-append-to-body="false"
+          placeholder="选择监控">
           <el-option value="0" label=" "></el-option>
         </el-select>
         <div class="vl_jtc_search_item">
           <vue-scroll>
             <el-tree
-                    v-show="showCameraList"
-                    :data="cameraData"
-                    class="camera-tree"
-                    ref="cameraTree"
-                    :default-checked-keys="defaultTreeKes"
-                    @check-change="chooseCamera"
-                    show-checkbox
-                    node-key="uid"
-                    :props="defaultProps">
+              v-show="showCameraList"
+              :data="cameraData"
+              class="camera-tree"
+              ref="cameraTree"
+              :default-checked-keys="defaultTreeKes"
+              @check-change="chooseCamera"
+              show-checkbox
+              node-key="deviceName"
+              :props="defaultProps">
             </el-tree>
           </vue-scroll>
         </div>
@@ -101,13 +105,13 @@
               </div>
             </div>
             <el-pagination
-                    v-show="pagination.total > 16"
-                    style="text-align: center"
-                    background
-                    @current-change="handleCurrentChange"
-                    :current-page="pagination.pageNum"
-                    layout="prev, pager, next"
-                    :total="pagination.total">
+              v-show="pagination.total > 16"
+              style="text-align: center"
+              background
+              @current-change="handleCurrentChange"
+              :current-page="pagination.pageNum"
+              layout="prev, pager, next"
+              :total="pagination.total">
             </el-pagination>
           </vue-scroll>
         </div>
@@ -115,11 +119,11 @@
     </div>
     <!--历史记录弹窗-->
     <el-dialog
-            :visible.sync="historyPicDialog"
-            class="history-pic-dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            title="最近上传的图片">
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片">
       <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
       <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
         <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
@@ -135,11 +139,11 @@
     </el-dialog>
     <!--检索详情弹窗-->
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+        :visible.sync="strucDetailDialog"
+        class="struc_detail_dialog"
+        :close-on-click-modal="false"
+        top="4vh"
+        :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -180,7 +184,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.panoramaPath" alt="">
+            <img :src="sturcDetail.photoPath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -219,6 +223,7 @@
   export default {
     data() {
       return {
+        targetType: '1',
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 18,
@@ -376,6 +381,7 @@
                   x['deviceName'] = x.groupName;
                   return x;
                 })
+                console.log(this.cameraData)
               }
               cb()
             })
@@ -529,12 +535,13 @@
         this.showCameraList = !this.showCameraList;
       },
       removeCamera (e) { // 有问题，摄像头名字是否会有相同的，
-        this.cameraData.forEach(x => {
-          let _index = x.deviceBasicList.findIndex(y => y.deviceName === e);
+        for (let i = 0; i < this.cameraData.length; i++) {
+          let _index = this.cameraData[i].deviceBasicList.findIndex(y => y.deviceName === e);
           if (_index !== -1) {
-            this.$refs.cameraTree.setChecked(x.deviceBasicList[_index].uid, false)
+            this.$refs.cameraTree.setChecked(this.cameraData[i].deviceBasicList[_index].deviceName, false)
+            break;
           }
-        })
+        }
       },
       chooseCamera () {
         let obj = [];
@@ -547,9 +554,9 @@
         this.devIdData = obj.splice(0, obj.length);
       },
       resetSearch () {
+        this.$refs.cameraTree.setCheckedKeys([]);
         this.searchData.minSemblance = null;
         this.searchData.devIds = [];
-        this.cameraData = [];
         this.devIdData = [];
         this.uploadFileList.splice(0, this.uploadFileList.length);
         this.imgList = ['', '', ''];
@@ -562,14 +569,20 @@
           this.showSim = true;
         }
         this.$_showLoading({target: '.vl_jfo_event'});
-        let _ids = [];
-        let devIds = this.$refs.cameraTree.getCheckedKeys();
+        let _ids = [],devIds = [];
+        let _arr = this.$refs.cameraTree.getCheckedNodes();
+        _arr.forEach(x => {
+            if (!x.deviceBasicList) {
+              devIds.push(x.uid)
+            }
+          })
         let params = {
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize,
           'where.sortType': this.stucOrder,
           'where.startTime': this.searchData.time[0],
-          'where.endTime': this.searchData.time[1]
+          'where.endTime': this.searchData.time[1],
+          'where.targetType': this.targetType * 1
         }
         if (this.searchData.minSemblance) {
           params['where.minSemblance'] = this.searchData.minSemblance;
@@ -679,6 +692,24 @@
   }
 </script>
 <style lang="scss">
+  .vl_jtc_target_type {
+    position: absolute;
+    z-index: 9;
+    top: 4px;
+    .is-checked {
+      .el-radio__label{
+        color: #0C70F8!important;
+      }
+    }
+    .el-radio__label {
+      padding-left: 0px;
+    }
+    .el-radio {
+      margin-right: 0;
+      width: 1.16rem;
+      text-align: center;
+    }
+  }
   .camera-select {
     .el-select-dropdown {
       display: none;

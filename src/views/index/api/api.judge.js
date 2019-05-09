@@ -79,7 +79,7 @@ export function JigGETEventAlarm(params) {
  */
 export function JigGETAlarmSnapList(params) {
   return request({
-    url: '/surveillances/' + params.surveillanceId + '/alarm-snaps',
+    url: '/surveillances/alarm-snaps',
     method: 'get',
     params: params,
     mode: 'judge'
@@ -143,6 +143,18 @@ export function JhaGETAlarmSnapByAddress(params) {
     method: 'get',
     params: params,
     mode: 'judge'
+  })
+}
+/**
+ * MapGetPortraitsByName 通过姓名模糊搜索人像
+ * @param {object} params
+ */
+export function MapGetPortraitsByName(params) {
+  return request({
+    url: '/portraits/by-name',
+    method: 'get',
+    params,
+    mode: 'control'
   })
 }
 /*--------------------------  研判end  ---------------------------------*/
