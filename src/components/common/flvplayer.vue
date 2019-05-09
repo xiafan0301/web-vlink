@@ -55,19 +55,19 @@
             <!-- 截屏 -->
             <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
-            <span v-show="!fullScreen && config.fullscreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
+            <span v-show="!fullScreen && config.fullscreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
             <!-- 全屏 -->
             <span v-show="config.fullscreen2" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreenTwo"></span>
             <!-- 局部放大 -->
-            <template v-if="fullScreen">
+            <template v-if="fullScreen || showFullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
               <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
               <!-- 退出全屏 -->
-              <span v-if="fullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+              <span v-if="fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
             </template>
           </span>
           <!-- 更多 -->
-          <span v-if="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
+          <span v-if="!fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
         </span>
       </div>
     </div>
@@ -119,7 +119,7 @@ export default {
    *    
    * bResize: 播放容器尺寸变化
    */
-  props: ['index', 'oData', 'oConfig', 'bResize'],
+  props: ['index', 'oData', 'oConfig', 'bResize', 'showFullScreen'],
   data () {
     return {
       mini: false, // 主要控制播放器操作栏显示方式

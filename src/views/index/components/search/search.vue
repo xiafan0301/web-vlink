@@ -54,7 +54,7 @@
     .vl_j_left {
       float: left;
       width: 2.32rem;
-      padding-top: 24px;
+      padding-top: 32px;
       height: 100%;
       margin-left: 0.2rem;
       background: #ffffff;
