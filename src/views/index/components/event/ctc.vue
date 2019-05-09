@@ -8,6 +8,7 @@
             style="width: 260px;"
             v-model="ctcForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -224,9 +225,11 @@ export default {
       }
       if (obj.dispatchStatusName === '进行中') {
         this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
       }
       if (obj.dispatchStatusName === '已结束') {
         this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
+        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
       }
     }
   }

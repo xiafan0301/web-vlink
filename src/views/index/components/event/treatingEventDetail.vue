@@ -794,9 +794,8 @@ export default {
     }
   }
   .dialog_comp {
-    height: 100%;;
     /deep/ .el-dialog {
-      height: 100%;
+      top: 53%;
       .content_body {
         color: #000000;
         .title {

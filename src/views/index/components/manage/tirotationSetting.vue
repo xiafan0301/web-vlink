@@ -92,12 +92,15 @@
             show-overflow-tooltip
             >
           </el-table-column>
-          
           <el-table-column
             label="轮巡设备"
             prop="deviceNumber"
+            class-name="device_num"
             :show-overflow-tooltip='true'
           >
+          <template slot-scope="scope">
+            <span @click="handleSelectDevice(scope.row)">{{scope.row.deviceNumber}}</span>
+          </template>
           </el-table-column>
           <el-table-column
             label="更新时间"
@@ -111,13 +114,22 @@
           </el-table-column>
           <el-table-column label="操作" width="240">
             <template slot-scope="scope">
-              <span class="operation_btn" @click="skipVideoPatrolPage">查看</span>
-              <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
-              <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
-              <span style="color: #f2f2f2">|</span>
-              <span class="operation_btn" @click="showCloseDialog(scope.row)">关闭</span>
+              <template v-if="scope.row.roundStatus === 2">
+                <span class="operation_btn" @click="skipVideoPatrolPage">查看</span>
+                <span style="color: #f2f2f2">|</span>
+                <span class="operation_btn" @click="showCloseDialog(scope.row)">关闭</span>
+              </template>
+              <!-- <span style="color: #f2f2f2">|</span> -->
+              <template v-if="scope.row.roundStatus === 1">
+                <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
+                <span style="color: #f2f2f2">|</span>
+                <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+              </template>
+              <template v-if="scope.row.roundStatus === 3">
+                <!-- <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
+                <span style="color: #f2f2f2">|</span> -->
+                <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
+              </template>
             </template>
           </el-table-column>
         </el-table>
@@ -160,12 +172,44 @@
           <el-button class="operation_btn function_btn" @click="delRotationInfo">确认</el-button>
         </div>
       </el-dialog>
+      <!--查看轮巡设备出框-->
+      <el-dialog
+        title="轮巡设备"
+        :visible.sync="selectDeviceDialog"
+        width="482px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_device_comp dialog_comp"
+        >
+        <div class="content_body">
+          <vue-scroll>
+            <ul class="temp_detail_info">
+              <li v-for="(item, index) in allDeviceList" :key="'item' + index">
+                <div style="display: flex; padding: 0 10px;">
+                  <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openArrow(index)">
+                    <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                    <span>{{item.cname}}</span>
+                  </div>
+                </div>
+                <div class="child_temp" v-show="item.isOpenArrow === true">
+                  <ul class="child_temp_detail">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                      <i class="vl_icon vl_icon_manage_6"></i>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </vue-scroll>
+        </div>
+      </el-dialog>
     </div>
   </vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
-import { apiVideoRoundList, apiDelVideoRoundList, closeVideoRound } from '@/views/index/api/api.video.js';
+import { apiVideoRoundList, apiDelVideoRoundList, closeVideoRound, getVideoRoundDetail } from '@/views/index/api/api.video.js';
 export default {
   data () {
     return {
@@ -178,6 +222,45 @@ export default {
       closeRatationDialog: false, // 关闭轮巡弹出框
       delRotationDialog: false, // 删除轮巡弹出框
       deleteId: null, // 要删除--关闭的轮巡id
+      allDeviceList: [
+        {
+          cname: '溆浦县',
+          isOpenArrow: false,
+          deviceList: [
+            {
+              deviceName: '设备1'
+            },
+            {
+              deviceName: '设备1'
+            }
+          ]
+        },
+        {
+          cname: '溆浦县',
+          isOpenArrow: false,
+          deviceList: [
+            {
+              deviceName: '设备1'
+            },
+            {
+              deviceName: '设备1'
+            }
+          ]
+        },
+        {
+          cname: '溆浦县',
+          isOpenArrow: false,
+          deviceList: [
+            {
+              deviceName: '设备1'
+            },
+            {
+              deviceName: '设备1'
+            }
+          ]
+        }
+      ],
+      selectDeviceDialog: false, // 查看轮巡设备弹出框
     }
   },
   mounted () {
@@ -198,7 +281,9 @@ export default {
         'where.endTime': this.searchForm.dateTime[1],
         'where.status': status,
         pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc'
       };
       apiVideoRoundList(params)
         .then(res => {
@@ -294,6 +379,25 @@ export default {
       const endDate = formatDate(end, 'yyyy-MM-dd');
       this.searchForm.dateTime.push(startDate);
       this.searchForm.dateTime.push(endDate);
+    },
+    // 查看所有的轮巡设备
+    handleSelectDevice (obj) {
+      console.log(obj)
+      if (obj.id) {
+        getVideoRoundDetail(obj.id)
+          .then(res => {
+            console.log(res);
+            if (res.data) {
+              this.allDeviceList = res.data.deviceList;
+              this.selectDeviceDialog = true;
+            }
+          })
+          .catch(() => {})
+      }
+    },
+    // 展开箭头
+    openArrow (index) {
+      this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
     }
   }
 }
@@ -344,6 +448,14 @@ export default {
     }
     .ratation_table {
       margin-top: 8px;
+      /deep/.el-table__row {
+        .device_num {
+          cursor: pointer;
+          &:hover {
+            color: #0C70F8;
+          }
+        }
+      }
       .event_status {
         &:before {
           content: '.';
@@ -373,6 +485,52 @@ export default {
         cursor: pointer;
         padding: 0 10px;
         display: inline-block;
+      }
+    }
+  }
+  .dialog_device_comp {
+    .content_body {
+      .temp_detail_info {
+        > li {
+          width: auto;
+          cursor: pointer;
+          font-size: 14px;
+          line-height: 26px;
+          color: #333333;
+          .parent_temp_li {
+            width: 100%;
+            >span {
+              margin-left: 5px;
+            }
+            &.temp_active {
+              width: 100%;
+              &:hover {
+                background-color: #E0F2FF;
+              }
+              i, span {
+                color: #0C70F8;
+              }
+            }
+          }
+          .child_temp {
+            width: 100%;
+            .child_temp_detail {
+              padding-left: 30px;
+              padding-right: 10px;
+              >li {
+                // padding-bottom: 10px;
+                font-size: 14px;
+                cursor: default;
+                color: #666666;
+                display: flex;
+                align-items: center;
+                >span {
+                  margin: 0 80px 0 0;
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

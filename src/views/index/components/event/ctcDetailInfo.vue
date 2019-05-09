@@ -168,6 +168,20 @@
         </template>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+       <!--查看总结详情弹出框-->
+      <el-dialog
+        title=""
+        :visible.sync="summaryDetailDialog"
+        width="794px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <div class="content_body">
+          <p class="title">{{summaryTitle}}</p>
+          <p class="content">{{summaryContent}}</p>
+        </div>
+      </el-dialog>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     </div>
   </vue-scroll>
@@ -256,7 +270,17 @@ export default {
     // 返回
     back () {
       this.$router.back(-1);
-    }
+    },
+    // 显示查看总结详情弹出框
+    showSummaryDialog (type, content) {
+      if (type === 'event') {
+        this.summaryTitle = '事件总结报告';
+      } else {
+        this.summaryTitle = '调度总结报告';
+      }
+      this.summaryContent = content;
+      this.summaryDetailDialog = true;
+    },
   }
 }
 </script>
@@ -422,10 +446,22 @@ export default {
           }
         }
       }
+      .summary-header{
+        > span {
+          display: inline-block;
+          padding: 10px 20px;
+          color: #333333;
+          font-weight: 600;
+          font-size: 16px;
+        }
+        
+      }
       .summary-content {
         padding: 10px 20px;
-        >p:nth-child(2) {
-          color: #000000;
+        >p {
+          color: #333333;
+          font-weight:600;
+          margin-bottom: 5px;
         }
         .content-icon {
           margin: 5px 0;
@@ -488,6 +524,15 @@ export default {
             cursor: pointer;
           }
         }
+        .content_detail {
+          >p{
+            text-indent: 20px;
+            .look_more {
+              color: #0C70F8;
+              cursor: pointer;
+            }
+          }
+        }
       }
     }
   }
@@ -514,6 +559,23 @@ export default {
       background: #ffffff;
       border: 1px solid #DDDDDD;
       color: #666666;
+    }
+  }
+  .dialog_comp {
+    /deep/ .el-dialog {
+      top: 53%;
+      .content_body {
+        color: #000000;
+        .title {
+          font-size: 22px;
+          text-align: center;
+          margin: 40px 0;
+        }
+        .content {
+          text-indent: 20px;
+          padding: 0 40px;
+        }
+      }
     }
   }
 }

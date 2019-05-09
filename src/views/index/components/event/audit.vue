@@ -8,6 +8,7 @@
             style="width: 260px;"
             v-model="auditForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
