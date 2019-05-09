@@ -3,21 +3,34 @@
     <div class="ctc_end">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo' }">调度详情</el-breadcrumb-item>
-          <el-breadcrumb-item>结束调度</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/task/list' }">全部任务</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: detailUrl }">{{ dicFormater( taskType, processType)}}</el-breadcrumb-item>
+          <el-breadcrumb-item>
+            {{processType == 2 ? '反馈' : processType == 3 ? '处理': '反馈情况'}}
+          </el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content_box">
         <el-form class="end_form" :model="endForm" :rules="rules" ref="endForm" label-width="100px">
-          <el-form-item label="关闭事件:" prop="isCloseEvent">
-            <el-radio-group v-model="endForm.isCloseEvent">
-              <el-radio :label="1">是</el-radio>
-              <el-radio :label="2">否</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[endForm.isCloseEvent === 2 ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+          <el-form-item label="处理人:" label-width="100px" prop="reportUser" class="report_user" v-if="processType == 3">
+              <el-select
+                style="width: 100%;"
+                v-model="endForm.reportUser"
+                multiple
+                filterable
+                reserve-keyword
+                :multiple-limit="50"
+                placeholder="请选择处理人">
+                <el-option
+                  v-for="item in userList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          <el-form-item :label="processType == 2 ? '处理内容' : processType == 3 ? '任务内容': '事件反馈'" prop="summary">
+            <el-input :placeholder="[processType == 2 ? '请输入处理内容' : processType == 3 ? '请输入任务内容': '请输入事件反馈']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">
@@ -33,22 +46,6 @@
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
             <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
           </el-upload>
-          <!-- <div class="img_list">
-            <div v-for="(item, index) in imgList2" :key="'item' + index">
-              <img
-                :src="item.path"
-                @click="openBigImg(index, imgList2)"
-              >
-              <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
-            </div>
-          </div>
-          <div class="file_list">
-            <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
-              <i class="vl_icon vl_icon_event_5"></i>
-              <span>{{item.cname}}</span>
-              <i class='el-icon-close' @click="deleteFile(index, item)"></i>
-            </div>
-          </div> -->
         </div>
       </div>
       <div class="operation-footer">
@@ -61,28 +58,46 @@
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
-import { endEvent } from '@/views/index/api/api.event.js';
+import { taskProcess } from '@/views/index/api/api.event.js';
+import { getUserList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       endForm: {
-        isCloseEvent: 2, // 1--结束事件  2---结束调度
+        reportUser: null,
         summary: null,
       },
       rules: {
         summary: [
+          { required: true, message: '请输入内容', trigger: 'blur' },
           { max: 1000, message: '最多输入1000字' }
         ]
       },
       uploadImgList: [], // 要上传的图片列表
       fileList: [], // 要上传文件列表
-      isEndLoading: false
+      isEndLoading: false,
+      processType: null,
+      detailUrl: '',
+      taskType: dataList.taskType,
+      userList: [],
+      userInfo: {},
     }
   },
   mounted () {
+      this.userInfo =  this.$store.state.loginUser;
+      this.processType = this.$route.query.processType
+      this.detailUrl = '/task/detail?id='+ this.$route.query.eventId +'&processType=' + this.processType
+      if(this.processType == 3) {
+          this.rules['reportUser'] = [
+          { required: true, message: '请选择处理人', trigger: 'change' }]
+          this.getList()
+      }
   },
   methods: {
+    // 关闭事件change
+    handleEventChange () {
+    },
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
@@ -118,8 +133,6 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          // let data;
-          // res.fileName = file.name;
           if (type === '.png' || type === '.jpg' || type === '.bmp') {
             data = {
               contentUid: 0,
@@ -147,14 +160,33 @@ export default {
             }
             this.fileList.push(data);
           }
-          // this.endForm.attachmentList.push(data);
         }
       }
     },
-    // 结束调度
+    // 获取所有的用户
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            res.data.list.map(item => {
+              const params = {
+                id: item.uid,
+                name: item.userName
+              }
+              this.userList.push(params);
+            })
+          }
+        })
+        .catch(() => {})
+    },
+    // 提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        let params, attachmentList = [];
+        let params, attachmentList = [], taskProcessDto = {};
         if (valid) {
           if (this.uploadImgList.length > 3) {
             this.$message({
@@ -170,33 +202,30 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
-          if (this.endForm.isCloseEvent === 1) { // 关闭事件
-            params = {
-              eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
-              eventSummary: this.endForm.summary,
-              attachmentList: attachmentList
-            }
-          } else { // 不关闭事件
-            params = {
-              eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
-              dispatchSummary: this.endForm.summary,
-              dispatchAttachmentList: attachmentList
-            }
+          taskProcessDto = {
+              processContent: this.endForm.summary,
+              processType: this.processType 
           }
+          if(attachmentList && attachmentList.length > 0) {
+              taskProcessDto['attachmentList'] = attachmentList
+          }
+          if(this.processType == 3) {
+              taskProcessDto['uid'] = this.endForm.reportUser
+          }
+          params = {
+              eventId: this.$route.query.eventId,
+              taskProcessDto: taskProcessDto
+            }
           this.isEndLoading = true;
-          endEvent(params)
+          taskProcess(params)
             .then(res => {
               if (res) {
                 this.$message({
                   type: 'success',
-                  message: '结束成功',
+                  message: '提交成功',
                   customClass: 'request_tip'
                 })
-                this.$router.push({name: 'event_ctc'});
-                this.isEndLoading = false;
-              } else {
+                this.$router.push({name: 'task_list'});
                 this.isEndLoading = false;
               }
             })

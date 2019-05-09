@@ -8,6 +8,7 @@
             style="width: 260px;"
             v-model="eventForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -295,7 +296,7 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
+      this.$router.push({path: '/control/manage', query: {eventId: obj.uid}});
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();

@@ -26,10 +26,10 @@
                 :remote-method="remoteMethod"
                 :loading="loading">
                 <el-option
-                  v-for="item in options4"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in reportUserList"
+                  :key="item.uid"
+                  :label="item.userRealName"
+                  :value="item.uid">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -65,33 +65,15 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, addEventProcess } from '@/views/index/api/api.event.js';
+import { getUserList} from '@/views/index/api/api.manage.js';
+import { proccessEventType } from '@/utils/data.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
-      options4: [],
-      list: [],
       loading: false,
-      states: ["Alabama", "Alaska", "Arizona",
-        "Arkansas", "California", "Colorado",
-        "Connecticut", "Delaware", "Florida",
-        "Georgia", "Hawaii", "Idaho", "Illinois",
-        "Indiana", "Iowa", "Kansas", "Kentucky",
-        "Louisiana", "Maine", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota",
-        "Mississippi", "Missouri", "Montana",
-        "Nebraska", "Nevada", "New Hampshire",
-        "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Ohio",
-        "Oklahoma", "Oregon", "Pennsylvania",
-        "Rhode Island", "South Carolina",
-        "South Dakota", "Tennessee", "Texas",
-        "Utah", "Vermont", "Virginia",
-        "Washington", "West Virginia", "Wisconsin",
-        "Wyoming"
-      ],
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
@@ -110,39 +92,47 @@ export default {
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      userList: [
-        { userName: '张三' },
-        { userName: '里斯' },
-        { userName: '李四李四李四李四' },
-        { userName: '王李四五' },
-        { userName: '王李四五' },
-        { userName: '李四' },
-        { userName: '李敏' },
-      ],
+      userList: [],
       reportUserList: [], // 所有的接收者
       basicInfo: {}, // 事件详情
-      isLoading: false
+      isLoading: false,
+      userInfo: {}
     }
   },
+  created () {
+    this.userInfo = this.$store.state.loginUser;
+  },
   mounted () {
-    this.list = this.states.map(item => {
-      return { value: item, label: item };
-    });
     this.getDetail();
+    this.getList();
   },
   methods: {
+    // 获取所有的用户
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageNum: 1,
+        pageSize: 0,
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userList = res.data.list;
+          }
+        })
+    },
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
         setTimeout(() => {
           this.loading = false;
-          this.options4 = this.list.filter(item => {
-            return item.label.toLowerCase()
+          this.reportUserList = this.userList.filter(item => {
+            return item.userRealName.toLowerCase()
               .indexOf(query.toLowerCase()) > -1;
           });
         }, 200);
       } else {
-        this.options4 = [];
+        this.reportUserList = [];
       }
     },
     // 获取事件详情
@@ -160,10 +150,37 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          
+          const eventId = this.$route.query.eventId;
+          let reporterName = [];
+          this.reportForm.reportUser.map(item => {
+            this.userList.map(itm => {
+              if (item === itm.uid) {
+                reporterName.push(itm.userRealName);
+              }
+            });
+          });
+          const params = {
+            currentUid: this.userInfo.uid,
+            currentName: this.userInfo.userRealName,
+            processContent: this.reportForm.explain,
+            processType: proccessEventType.reportSuperId,
+            name: reporterName,
+            uid: this.reportForm.reportUser
+          }
+          this.isLoading = true;
+          addEventProcess(params, eventId)
+            .then(res => {
+              if (res) {
+                console.log(res)
+                this.isLoading = false;
+                this.dialogVisible = true;
+              } else {
+                this.isLoading = false;
+              }
+            })
+            .catch(() => {this.isLoading = false;})
         }
       });
-      this.dialogVisible = true;
     },
     // 返回
     back () {
@@ -171,7 +188,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
