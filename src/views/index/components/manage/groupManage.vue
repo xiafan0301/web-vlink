@@ -44,6 +44,9 @@
           width="200"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createTime | fmTimestamp}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="成员数"
@@ -168,7 +171,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeMembers">移除所选成员</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveMemberLoading" @click="removeMembers">移除所选成员</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">
@@ -191,7 +194,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addMembers">添加所选成员</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddMemberLoading" @click="addMembers">添加所选成员</el-button>
         </div>
       </div>
     </el-dialog>
@@ -214,7 +217,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeRoles">移除所选角色</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveRoleLoading" @click="removeRoles">移除所选角色</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
@@ -234,7 +237,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addSelectRoles">添加所选角色</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddRoleLoading" @click="addSelectRoles">添加所选角色</el-button>
         </div>
       </div>
     </el-dialog>
@@ -315,6 +318,10 @@ export default {
       isAddLoading: false, // 新增组加载中
       isEditLoading: false, // 编辑组加载中
       isDeleteLoading: false, // 删除组加载中
+      isRemoveRoleLoading: false, // 移除角色加载中
+      isAddRoleLoading: false, // 添加角色加载中
+      isRemoveMemberLoading: false, // 移除成员加载中
+      isAddMemberLoading: false, // 添加成员加载中
     }
   },
   created () {
@@ -548,6 +555,7 @@ export default {
         this.checkCurrMember.map(item => {
           params.userIdList.push(item.uid);
         });
+        this.isRemoveMemberLoading = true;
         delMemberInfo(params)
           .then(res => {
             if (res) {
@@ -564,9 +572,13 @@ export default {
               });
               this.getList();
               this.checkCurrMember = [];
+              this.adminMemberDialog = false;
+              this.isRemoveMemberLoading = false;
+            } else {
+              this.isRemoveMemberLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveMemberLoading = false;})
       }
     },
     // 添加所选成员
@@ -580,6 +592,7 @@ export default {
         this.checkSelectMember.map(item => {
           params.uids.push(item.uid);
         });
+        this.isAddMemberLoading = true;
         addMemberInfo(params)
           .then(res => {
             if (res) {
@@ -596,9 +609,13 @@ export default {
               });
               this.getList();
               this.checkSelectMember = [];
+              this.adminMemberDialog = false;
+              this.isAddMemberLoading = false;
+            } else {
+              this.isAddMemberLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddMemberLoading = false;})
       }
     },
     // 显示配置角色弹出框
@@ -620,7 +637,7 @@ export default {
       const params = {
         'where.proKey': this.storageInfo.proKey,
         pageSize: 0,
-      }
+      };
       getRoleList(params)
         .then(res => {
           if (res) {
@@ -650,6 +667,7 @@ export default {
         this.checkSelectRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isAddRoleLoading = true;
         addUserGroupRoles(params)
           .then(res => {
             if (res) {
@@ -666,9 +684,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.configRoleDialog = false;
+              this.isAddRoleLoading = false;
+            } else {
+              this.isAddRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddRoleLoading = false;})
       }
     },
     // 移除所选角色
@@ -682,6 +704,7 @@ export default {
         this.checkCurrRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isRemoveRoleLoading = true;
         delUserGroupRoles(params)
           .then(res => {
             if (res) {
@@ -698,9 +721,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.configRoleDialog = false;
+              this.isRemoveRoleLoading = false;
+            } else {
+              this.isRemoveRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveRoleLoading = false;})
       }
     },
     // 显示查看组成员弹出框
@@ -710,7 +737,6 @@ export default {
     },
     // 显示编辑信息弹出框
     showEditDialog (obj) {
-      console.log(obj);
       this.editGroupId = obj.uid;
       this.isShowOrganError = false;
       this.userForm.groupName = obj.groupName;
@@ -866,12 +892,12 @@ export default {
           }
         }
         .group_btn {
-          text-align: center;
-          line-height: 40px;
+          // text-align: center;
+          // line-height: 40px;
           width: 220px;
           height: 40px;
-          border-radius: 4px;
-          cursor: pointer;
+          // border-radius: 4px;
+          // cursor: pointer;
         }
         .group_number {
           color: #999999;

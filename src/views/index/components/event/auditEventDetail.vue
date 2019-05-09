@@ -160,6 +160,9 @@ export default {
     this.initMap();
     this.getDetail();
   },
+  destroyed () {
+    // document.getElementById('vlJtcLargeV').pause();
+  },
   methods: {
     initMap () {
       let _this = this;
@@ -262,12 +265,15 @@ export default {
     openVideo (obj) {
       this.videoDetail = obj;
       this.showLarge = true;
-      this.isPlaying = true;
+      // this.isPlaying = true;
       document.getElementById('vlJtcLargeV').play();
     },
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
+      // // const videoObj = document.getElementById('vlJtcLargeV');
+      // // videoObj.
+      document.getElementById('vlJtcLargeV').pause();
     },
     // 暂停视频
     pauseLargeVideo () {

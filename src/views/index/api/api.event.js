@@ -164,6 +164,18 @@ export const updateProcess = (uid) => {
   });
 }
 /**
+ * 新增事件处理过程
+ * @param {*} data
+ */
+export const addEventProcess = (data, uid) => {
+  return request({
+    url: 'task-services/task/process/' + uid,
+    method: 'post',
+    data,
+    mode: 'ctc'
+  });
+}
+/**
  * 添加调度任务
  * @param {*} data 
  */

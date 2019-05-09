@@ -170,7 +170,7 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
-          if (this.endForm.isClose) { // 关闭事件
+          if (this.endForm.isCloseEvent === 1) { // 关闭事件
             params = {
               eventId: this.$route.query.eventId,
               isCloseEvent: this.endForm.isCloseEvent,

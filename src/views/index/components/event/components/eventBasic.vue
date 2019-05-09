@@ -149,12 +149,13 @@ export default {
     openVideo (obj) {
       this.videoDetail = obj;
       this.showLarge = true;
-      this.isPlaying = true;
+      // this.isPlaying = true;
       document.getElementById('vlJtcLargeV').play();
     },
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
+      document.getElementById('vlJtcLargeV').pause();
     },
     // 暂停视频
     pauseLargeVideo () {
