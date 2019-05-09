@@ -473,8 +473,10 @@ export default {
     dragStart2 (ev, item) {
       // console.log('drag start', item)
       this.dragActiveObj = Object.assign({}, item, {
-        uid: item.deviceUid
+        uid: item.deviceUid,
+        _record: true
       });
+      console.log('this.dragActiveObj', this.dragActiveObj)
       // 设置属性dataTransfer   两个参数   1：key   2：value
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');
@@ -486,21 +488,19 @@ export default {
       /* console.log('drag drop item', item);
       console.log('drag drop index', index); */
       if (this.dragActiveObj) {
-        let op = {};
-        /* if (this.dragVideoType === 2) {
-          op = {
-            startTime: this.dragActiveObj.playBackStartTime,
-            endTime: this.dragActiveObj.playBackEndTime,
-          }
-        } */
-        this.videoList.splice(index, 1, Object.assign({
+        let sT = this.startTime, sE = this.endTime;
+        if (this.dragActiveObj._record) {
+          sT = this.dragActiveObj.playBackStartTime;
+          sE = this.dragActiveObj.playBackEndTime;
+        }
+        this.videoList.splice(index, 1, Object.assign({}, {
           type: 2,
           title: this.dragActiveObj.deviceName,
-          startTime: this.startTime,
-          endTime: this.endTime,
+          startTime: sT,
+          endTime: sE,
           record: true,
           video: Object.assign({}, this.dragActiveObj)
-        }, op));
+        }));
       }
     },
     dragEnd () {
