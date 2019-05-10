@@ -135,6 +135,7 @@
         </el-table>
       </div>
       <el-pagination
+        class="cum_pagination"
         @current-change="handleCurrentChange"
         :current-page.sync="pagination.pageNum"
         :page-sizes="[100, 200, 300, 400]"

@@ -89,6 +89,7 @@
           </el-table>
         </div>
         <el-pagination
+          class="cum_pagination"
           @current-change="onPageChange"
           :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"

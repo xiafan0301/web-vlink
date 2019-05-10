@@ -89,82 +89,76 @@
           </template>
         </div>
       </div>
-      <div class="control-result">
+      <div class="control-result" v-show="isAllShowControl || controlList.length > 0">
         <div class="control-header">
           <div class="left">
-            <span>布控结果 (200个)</span>
+            <span>布控结果 ({{controlList.length}}个)</span>
           </div>
           <div class="right">
             <el-date-picker
               v-model="dateTime"
               type="daterange"
+              value-format="yyyy-MM-dd"
               range-separator="至"
               start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              end-placeholder="结束日期"
+              @change="handleChangeTime"
+            >
             </el-date-picker>
-            <el-select v-model="devicesSearch" placeholder="请选择设备">
+            <el-select v-model="devicesSearch" placeholder="请选择设备" clearable @change="handleChangeDevice">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="item in controlDeviceList"
+                :key="item.uid"
+                :label="item.name"
+                :value="item.name"
+              >
               </el-option>
             </el-select>
           </div>
         </div>
         <div class="divide"></div>
-        <div class="control-content">
-          <ul class="clearfix">
-            <li v-for="(item, index) in controlImg" :key="'item' + index">
-              <div class="control-main">
-                <img :src="item.imgUrl">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <!-- <div> -->
-                   <i class="vl_icon_event_15 vl_icon" @click="openVideo(item)"></i>
-                  <!-- </div> -->
+        <template v-if="controlList && controlList.length > 0">
+          <div class="control-content">
+            <ul class="clearfix">
+              <li v-for="(item, index) in controlList" :key="'item' + index">
+                <div class="control-main">
+                  <img :src="item.snapPhoto">
+                  <div class="control-btn">
+                    <div>{{item.deviceName}}</div>
+                    <i class="vl_icon_event_15 vl_icon" @click="openVideo(item)"></i>
+                  </div>
                 </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i class="vl_icon vl_icon_event_2"></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i class="vl_icon vl_icon_event_3"></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li>
-            <!-- <li>
-              <div class="control-main">
-                <img src="../../../../assets/img/temp/vis-eg.png" alt="">
-                <div class="control-btn">
-                  <div>抓拍设备</div>
-                  <i class="vl_icon_event_15 vl_icon"></i>
+                <div class="control-text">
+                  <p>
+                    <i class="vl_icon vl_icon_event_2"></i>
+                    <span class="name">{{item.objName}}</span>
+                  </p>
+                  <p>
+                    <i class="vl_icon vl_icon_event_3"></i>
+                    <span class="time">{{item.snapTime}}</span>
+                  </p>
                 </div>
-              </div>
-              <div class="control-text">
-                <p>
-                  <i></i>
-                  <span class="name">匹配名称</span>
-                </p>
-                <p>
-                  <i></i>
-                  <span class="time">2018-12-2414:12:17</span>
-                </p>
-              </div>
-            </li> -->
-          </ul>
-          <el-pagination
-            @current-change="onPageChange"
-            :current-page="pagination.pageNum"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="pagination.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="pagination.total">
-          </el-pagination>
-        </div>
+              </li>
+            </ul>
+            <el-pagination
+              class="cum_pagination"
+              @current-change="onPageChange"
+              :current-page="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total">
+            </el-pagination>
+          </div>
+        </template>
+        <template v-else>
+          <div class="judge_result_content">
+            <div class="no_result">
+              <i class="vl_icon vl_icon_event_16"></i>
+              <span>暂无数据</span>
+            </div>
+          </div>
+        </template>
       </div>
       <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
         <div class="process-header">
@@ -251,6 +245,7 @@
     </div>
     <div class="operation-footer">
       <el-button class="operation_btn function_btn" v-show="$route.query.status === 'handling'" @click="skipEventEndPage">结束事件</el-button>
+      <el-button class="operation_btn function_btn" v-show="$route.query.status === 'handling'" @click="skipAgainHandlePage">再次处理</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <!--查看总结详情弹出框-->
@@ -267,21 +262,21 @@
         <p class="content">{{summaryContent}}</p>
       </div>
     </el-dialog>
-    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" :src="videoDetail.videoUrl"></video>
+      <video id="controlVideo" :src="videoDetail.snapVideo"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
-        <div>{{videoDetail.name}}</div>
+        <div>{{videoDetail.deviceName}}</div>
         <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
           <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+          <span><a download="视频" :href="videoDetail.snapVideo" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
     </div>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </vue-scroll>
 </template>
@@ -289,37 +284,16 @@
 import EventBasic from './components/eventBasic';
 import BigImg from '@/components/common/bigImg.vue';
 import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getControlDevice, getEventControlResult } from '@/views/index/api/api.control.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
-      controlImg: [
-        {
-          name: '布控对象1',
-          time: '2019-04-17 12:12:12',
-          imgUrl: require("../../../../assets/img/temp/vis-eg.png"),
-          videoUrl: require("../../../../assets/video/demo.mp4")
-        }
-      ],
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      dateTime: null, // 搜索布控结果的起止时间
-      options: [{
-        value: '选项1',
-        label: '黄金糕'
-      }, {
-        value: '选项2',
-        label: '双皮奶'
-      }, {
-        value: '选项3',
-        label: '蚵仔煎'
-      }, {
-        value: '选项4',
-        label: '龙须面'
-      }, {
-        value: '选项5',
-        label: '北京烤鸭'
-      }],
-      devicesSearch: '',
+      isAllShowControl: false, // 是否显示布控结果列表
+      controlList: [], // 布控结果列表
+      pagination: { total: 0, pageSize: 8, pageNum: 1 },
+      dateTime: [], // 搜索布控结果的起止时间
+      devicesSearch: null, // 布控设备名称
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
@@ -336,35 +310,94 @@ export default {
       showLarge: false, // 全屏显示
       videoDetail: {}, // 播放视频的信息
       isPlaying: false, // 是否播放视频
+      controlDeviceList: [], // 布控设备列表
     }
   },
   mounted () {
+    this.getDevices();
+    this.getControlResult();
     this.getDetail();
   },
   methods: {
+    // 获取所有的布控设备
+    getDevices () {
+      getControlDevice()
+        .then(res => {
+          if (res) {
+            this.controlDeviceList = res.data;
+          }
+        })
+    },
+    // 获取布控结果
+    getControlResult () {
+      if (this.dateTime === null) {
+        this.dateTime = [];
+      }
+      if (this.devicesSearch === '') {
+        this.devicesSearch = null;
+      }
+      const params = {
+        'where.dateStart': this.dateTime[0],
+        'where.dateEnd': this.dateTime[1],
+        'where.deviceName': this.devicesSearch,
+        eventId: this.$route.query.eventId,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getEventControlResult(params)
+        .then(res => {
+          if (res) {
+            this.controlList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
+    // change 布控设备
+    handleChangeDevice () {
+      this.isAllShowControl = true;
+      this.getControlResult();
+    },
+    // change 起止时间
+    handleChangeTime () {
+      this.isAllShowControl = true;
+      this.getControlResult();
+    },
     // 点击视频播放按钮全屏播放视频
     openVideo (obj) {
       this.videoDetail = obj;
       this.showLarge = true;
-      this.isPlaying = true;
-      document.getElementById('vlJtcLargeV').play();
     },
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
-    },
-    // 暂停视频
-    pauseLargeVideo () {
-      document.getElementById('vlJtcLargeV').pause();
-      this.isPlaying = false;
+      document.getElementById('controlVideo').pause();
     },
     // 播放视频
-    playLargeVideo () {
-      document.getElementById('vlJtcLargeV').play();
-      this.isPlaying = true;
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('controlVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('controlVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
     },
     // 截屏
-    cutScreen () {},
+    cutScreen () {
+
+    },
     // 显示查看总结详情弹出框
     showSummaryDialog (type, content) {
       if (type === 'event') {
@@ -417,7 +450,7 @@ export default {
     },
     onPageChange (page) {
       this.pagination.pageNum = page;
-      // this.getCtcDataList();
+      this.getControlResult();
     },
     // 跳至结束事件页面
     skipEventEndPage () {
@@ -425,11 +458,11 @@ export default {
     },
     // 跳至查看互助页面
     skipCommentPage () {
-      this.$router.push({path: '/message/help', query: {helpId: this.$route.query.eventId}});
+      this.$router.push({path: '/message/help', query: {helpId: this.$route.query.eventId, pageType: 3}});
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      this.$router.push({path: '/control/manage'});
+      this.$router.push({path: '/control/manage', query: { pageType: 2, state: 1, controlId: 1 }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
@@ -438,6 +471,10 @@ export default {
     // 跳至查看呈报内容
     skipReportDetailPage () {
       this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId}});
+    },
+    // 跳至再次处理页面
+    skipAgainHandlePage () {
+      this.$router.push({name: 'untreat_event_detail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status, type: 'again'}});
     },
     // 放大图片
     openBigImg (index, data) {
@@ -763,6 +800,21 @@ export default {
                 display: none;
               }
             }
+          }
+        }
+      }
+      .judge_result_content {
+        width: 100%;
+        .no_result {
+          height: 100px;
+          line-height: 100px;
+          display: flex;
+          align-items: center;
+          margin-left: 45%;
+          >span {
+            margin-left: 10px;
+            color: #999999;
+            font-size: 16px;
           }
         }
       }

@@ -104,15 +104,15 @@
     </div>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <video id="eventVideo" :src="videoDetail.path"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.cname}}</div>
         <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-else></span>
           <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+          <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
     </div>
@@ -149,23 +149,37 @@ export default {
     openVideo (obj) {
       this.videoDetail = obj;
       this.showLarge = true;
-      // this.isPlaying = true;
-      document.getElementById('vlJtcLargeV').play();
     },
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
-      document.getElementById('vlJtcLargeV').pause();
+      document.getElementById('eventVideo').pause();
     },
     // 暂停视频
     pauseLargeVideo () {
-      document.getElementById('vlJtcLargeV').pause();
+      document.getElementById('eventVideo').pause();
       this.isPlaying = false;
     },
     // 播放视频
-    playLargeVideo () {
-      document.getElementById('vlJtcLargeV').play();
-      this.isPlaying = true;
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('eventVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('eventVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
     },
     // 截屏
     cutScreen () {},
