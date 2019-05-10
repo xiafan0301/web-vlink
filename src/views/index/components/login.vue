@@ -81,17 +81,15 @@ export default {
             .then(res => {
               if (res) {
                 localStorage.setItem('as_vlink_user_info', JSON.stringify(res.data));
-                console.log('item', localStorage.getItem('as_vlink_user_info'))
-                setTimeout(() => {
-                  this.$store.commit('setLoginUser', {
-                    loginUser: res.data
-                  });
-                  this.$store.commit('setLoginToken', {
-                    loginToken: true
-                  });
-                  this.loginBtnLoading = false;
-                  this.$router.push({name: 'index'});
-                }, 1000);
+                // console.log('item', localStorage.getItem('as_vlink_user_info'))
+                this.$store.commit('setLoginUser', {
+                  loginUser: res.data
+                });
+                this.$store.commit('setLoginToken', {
+                  loginToken: true
+                });
+                // this.loginBtnLoading = false;
+                this.$router.push({name: 'index'});
               } else {
                 this.loginBtnLoading = false;
               }

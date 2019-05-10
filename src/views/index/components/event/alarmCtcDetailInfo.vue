@@ -17,8 +17,8 @@
               <span>布控图</span>
             </div>
             <div class="struc_c_d_info">
-                <h2>布控信息</h2>
-                <template v-if="sturcDetail.objType == 1">
+              <h2>布控信息</h2>
+              <template v-if="sturcDetail.objType == 1">
                 <div class="struc_cdi_line control_line" v-if="sturcDetail.basePortraitInfo">
                   <span>{{sturcDetail.basePortraitInfo.name}}</span>
                   <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
@@ -39,8 +39,8 @@
                     <span>{{sturcDetail.basePortraitInfo.remarks}}</span><span>备注信息</span>
                   </div>
                 </div>
-                </template>
-                <template v-if="sturcDetail.objType == 2">
+              </template>
+              <template v-if="sturcDetail.objType == 2">
                 <div class="struc_cdi_line control_line" v-if="sturcDetail.vehicleInfo">
                   <span>{{sturcDetail.vehicleInfo.vehicleNumber}}</span>
                   <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
@@ -61,24 +61,32 @@
                     <span>{{sturcDetail.vehicleInfo.desci}}</span><span>备注信息</span>
                   </div>
                 </div>
-                </template>
-                <template v-if="sturcDetail.surveillanceInfo">
-                  <div class="control_line"><span class="left">布控编号：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceNo || '无'}}</span></div>
-                  <div class="control_line"><span class="left">布控名称：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceName || '无'}}</span></div>
-                </template>
-                <template v-if="sturcDetail.eventInfo">
-                  <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
-                  <div class="control_line"><span class="left">事件类型：</span><span class="right">{{sturcDetail.eventInfo.eventType || '无'}}</span></div>
-                  <div class="control_line"><span class="left">事件等级：</span><span class="right">{{sturcDetail.eventInfo.eventLevel || '无'}}</span></div>
-                  <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
-                </template>
-                <template v-if="!sturcDetail.eventInfo">
-                  <div class="control_line"><span class="left">事件编号：</span><span class="right">无</span></div>
-                  <div class="control_line"><span class="left">事件类型：</span><span class="right">无</span></div>
-                  <div class="control_line"><span class="left">事件等级：</span><span class="right">无</span></div>
-                  <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
-                </template>
-              </div>
+              </template>
+              <template v-if="sturcDetail.surveillanceInfo">
+                <div class="control_line"><span class="left">布控编号：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceNo || '无'}}</span></div>
+                <div class="control_line"><span class="left">布控名称：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceName || '无'}}</span></div>
+              </template>
+              <template v-if="sturcDetail.eventInfo">
+                <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{sturcDetail.eventInfo.eventType || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{sturcDetail.eventInfo.eventLevel || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
+              </template>
+              <template v-if="!sturcDetail.eventInfo">
+                <div class="control_line"><span class="left">事件编号：</span><span class="right">无</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">无</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">无</span></div>
+                <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
+              </template>
+            </div>
+            <div class="event-status-img">
+              <template v-if="$route.query.status === 'ctc_end'">
+                <i class="vl_icon vl_icon_event_11"></i>
+              </template>
+              <template v-if="$route.query.status === 'ctc_ing'">
+                <i class="vl_icon vl_icon_event_13"></i>
+              </template>     
+            </div>
           </div>
           <div class="card-info right-info">
             <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -86,43 +94,43 @@
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-                <h2>抓拍信息
-                  <div class="box_grade_info"> 
-                      <i class="vl_icon vl_icon_alarm_2" v-if="sturcDetail.alarmLevel == 1"></i>
-                      <i class="vl_icon vl_icon_alarm_3" v-if="sturcDetail.alarmLevel == 2"></i>
-                      <i class="vl_icon vl_icon_alarm_4" v-if="sturcDetail.alarmLevel == 3"></i>
-                      <i class="vl_icon vl_icon_alarm_5" v-if="sturcDetail.alarmLevel == 4"></i>
-                      <i class="vl_icon vl_icon_alarm_6" v-if="sturcDetail.alarmLevel == 5"></i>
-                  </div>
-                </h2>
-                <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
-                  <span>{{sturcDetail.alarmFeature.featureName}}</span>
+              <h2>抓拍信息
+                <div class="box_grade_info"> 
+                  <i class="vl_icon vl_icon_alarm_2" v-if="sturcDetail.alarmLevel == 1"></i>
+                  <i class="vl_icon vl_icon_alarm_3" v-if="sturcDetail.alarmLevel == 2"></i>
+                  <i class="vl_icon vl_icon_alarm_4" v-if="sturcDetail.alarmLevel == 3"></i>
+                  <i class="vl_icon vl_icon_alarm_5" v-if="sturcDetail.alarmLevel == 4"></i>
+                  <i class="vl_icon vl_icon_alarm_6" v-if="sturcDetail.alarmLevel == 5"></i>
                 </div>
-                <div v-if="sturcDetail.snapTime">
-                  <div class="struc_cdu_line">
-                    <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span><span>抓拍时间</span>
-                  </div>
+              </h2>
+              <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
+                <span>{{sturcDetail.alarmFeature.featureName}}</span>
+              </div>
+              <div v-if="sturcDetail.snapTime">
+                <div class="struc_cdu_line">
+                  <span>{{sturcDetail.snapTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}</span><span>抓拍时间</span>
                 </div>
-                <div v-if="sturcDetail.devInfo">
-                  <div class="struc_cdu_line">
-                    <span>{{sturcDetail.devInfo.deviceName}}</span><span>抓拍设备</span>
-                  </div>
+              </div>
+              <div v-if="sturcDetail.devInfo">
+                <div class="struc_cdu_line">
+                  <span>{{sturcDetail.devInfo.deviceName}}</span><span>抓拍设备</span>
                 </div>
-                <div v-if="sturcDetail.addressDesc">
-                  <div class="struc_cdu_line">
-                    <span>{{sturcDetail.addressDesc}}</span><span>抓拍地址</span>
-                  </div>
+              </div>
+              <div v-if="sturcDetail.addressDesc">
+                <div class="struc_cdu_line">
+                  <span>{{sturcDetail.addressDesc}}</span><span>抓拍地址</span>
                 </div>
-                <div v-if="sturcDetail.areaInfo">
-                  <div class="struc_cdu_line">
-                    <span>{{sturcDetail.areaInfo.cname}}</span><span>区域名称</span>
-                  </div>
+              </div>
+              <div v-if="sturcDetail.areaInfo">
+                <div class="struc_cdu_line">
+                  <span>{{sturcDetail.areaInfo.cname}}</span><span>区域名称</span>
                 </div>
-                <div v-if="sturcDetail.eventInfo">
-                  <div class="struc_cdu_line">
-                    <span>{{sturcDetail.eventInfo.eventCode}}</span><span>关联事件</span>
-                  </div>
+              </div>
+              <div v-if="sturcDetail.eventInfo">
+                <div class="struc_cdu_line">
+                  <span>{{sturcDetail.eventInfo.eventCode}}</span><span>关联事件</span>
                 </div>
+              </div>
             </div>
             <span>相似度</span>
             <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
@@ -293,9 +301,10 @@
 </template>
 <script>
 import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getAlarmDetail } from "@/views/index/api/api.control.js";
 import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: { EventBasic, BigImg },
+  components: { BigImg },
   data () {
     return {
       imgIndex: 0, // 点击的图片索引
@@ -310,11 +319,14 @@ export default {
       summaryTitle: null, // 总结标题
       summaryContent: null, // 总结内容
       eventSummaryLength: 0,
-      dispatchSummaryLength: 0
+      dispatchSummaryLength: 0,
+      sturcDetail: {},
+      isLoading: false
     }
   },
   mounted () {
     this.getDetail();
+    this.toAlarmDetail();
   },
   methods: {
     // 跳至结束调度页面
@@ -325,12 +337,27 @@ export default {
     skipAgainCtcPage () {
       this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType }});
     },
+    //告警详情
+    toAlarmDetail() {
+      this.isLoading = true;
+      const eventId = this.$route.query.id;
+      getAlarmDetail(eventId).then( res => {
+        this.sturcDetail = res.data;
+        this.sturcDetail['objType'] = this.$route.query.objType;
+        this.$nextTick(()=> {
+          this.isLoading = false;
+        })
+      }).catch(() => {
+        this.isLoading = false;
+      })
+    },
     // 获取事件详情
     getDetail () {
       const eventId = this.$route.query.id;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
+            this.basicInfo = res.data;
             if (res.data.closeAttachmentList.length > 0) {
               res.data.closeAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -349,7 +376,6 @@ export default {
                 }
               })
             }
-            this.basicInfo = res.data;
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
@@ -378,6 +404,13 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
+@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
+@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
+@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
+@media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
+</style>
 <style lang="scss" scoped>
 .ctc-detail-info {
   width: 100%;
@@ -385,6 +418,251 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
+    .basic_info {
+      width: 100%;
+      display: flex;
+      .card-info {
+        width: 49%;
+        height: 4.4rem;
+        background: #fff;
+        box-shadow:12px 0px 27px 0px rgba(141,142,142,0.19);
+        border-radius:1px;
+        padding: .2rem .18rem;
+        display: flex;
+        margin-bottom: .2rem;
+        position: relative;
+        .event-status-img {
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
+        .struc_c_d_img {
+          width: 4rem;
+          height: 4rem;
+          background: #EAEAEA;
+          position: relative;
+          img {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+          }
+        }
+        .struc_c_d_qj {
+          &:before {
+            display: block;
+            content: '';
+            position: absolute;
+            top: -.5rem;
+            left: -.5rem;
+            transform: rotate(-45deg);
+            border: .5rem solid #0c70f8;
+            border-color: transparent transparent #0C70F8;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: .1rem;
+            left: .1rem;
+            width: .6rem;
+            height: .6rem;
+            text-align: center;
+            color: #FFFFFF;
+            font-size: .12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
+        }
+        .struc_mr {
+          &:before {
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
+          }
+        }
+        .struc_c_d_info {
+          width: calc(100% - 4rem);
+          padding-left: .4rem;
+          color: #333333;
+          h2 {
+            font-weight: bold;
+            padding-right: 1rem;
+            font-size: .18rem;
+            margin: .08rem 0 .28rem 0;
+            position: relative;
+            .vl_jfo_sim {
+              color: #0C70F8;
+              font-weight: bold;
+              font-size: .24rem;
+              float: right;
+              i {
+                vertical-align: text-bottom;
+                margin-right: .1rem;
+              }
+              span {
+                font-weight: normal;
+              }
+            }
+            .box_grade_info {
+              position: absolute;
+              top: .02rem;
+              left: .8rem;
+            }
+          }
+          .struc_cdu_line {
+            border: 1px solid #F2F2F2;
+            border-radius: 3px;
+            background-color: #FAFAFA;
+            margin: 0 .1rem .1rem 0;
+            display: inline-block;
+            height: .34rem;
+            line-height: .34rem;
+            padding-left: .12rem;
+            padding-right: .12rem;
+            font-size: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            span:nth-child(1) {
+              padding-right: .12rem;
+              border-right: 1px solid#F2F2F2;
+            }
+            span:nth-child(2) {
+              padding-left: .12rem;
+              color: #666;
+            }
+          }
+          .struc_cdi_line {
+            margin-bottom: .1rem;
+            span {
+              position: relative;
+              max-width: 100%;
+              display: inline-block;
+              height: .34rem;
+              line-height: .34rem;
+              border: 1px solid #F2F2F2;
+              background: #FAFAFA;
+              color: #333333;
+              border-radius:3px;
+              font-size: 12px;
+              padding: 0 .12rem;
+              margin-right: .1rem;
+              > i {
+                vertical-align: middle;
+                margin-left: .1rem;
+              }
+            }
+          }
+          .control_line {
+            font-size: .12rem;
+            height: .26rem;
+            line-height: .26rem;
+            span {
+              height: .26rem;
+              line-height: .26rem;
+            }
+            .left {
+              color: #666;
+              margin-right: .1rem;
+            }
+            .right {
+              color: #222;
+            }
+          }
+          .show_detail {
+            position: relative;
+            width: 3.38rem;
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            .right {
+              width: 48%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 1; //行数
+              -webkit-box-orient: vertical;
+            }
+            .show_all {
+              color: #0C70F8;
+              cursor: pointer;
+            }
+            .show_detail_box {
+              width:3.3rem;
+              max-height:2.62rem;
+              box-shadow:0px 1px 21px 0px rgba(97,97,97,0.2);
+              border-radius:5px;
+              position: absolute;
+              color: #222222;
+              padding: .2rem;
+              bottom: 0;
+              right: .1rem;
+              background: #fff;
+              span:nth-child(2) {
+                color: #0C70F8;
+                margin-left: .1rem;
+              }
+            }
+          }
+        }
+      }
+      .right-info {
+        position: relative;
+        margin-left: 2%;
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.8rem;
+          right: -.8rem;
+          transform: rotate(-45deg);
+          border: .8rem solid #0c70f8;
+          border-color: transparent transparent transparent #0C70F8;
+        }
+        &:after {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.3rem;
+          right: -.3rem;
+          transform: rotate(-45deg);
+          border: .3rem solid #FFFFFF;
+          border-color: transparent transparent transparent #FFFFFF;
+        }
+        >span {
+          display: block;
+          position: absolute;
+          top: .1rem;
+          right: .1rem;
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          color: #FFFFFF;
+          font-size: .12rem;
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+          z-index: 99;
+          &:last-child {
+            font-size: .24rem;
+            top: .2rem;
+            right: .2rem;
+            font-weight: bold;
+          }
+        }
+      }
+    }
     .event-ctc-content, .judge_result, .event-process, .summary {
       width: 100%;
       margin-bottom: 20px;

@@ -25,7 +25,7 @@
                   <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
-                <div  class="img-form-item">
+                <div class="img-form-item">
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
@@ -442,7 +442,8 @@ export default {
     submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          let reg = /^([1-9]\d)(\.\d*[1-9])?$/; // 校验死亡人数
+          this.addEventForm.appendixInfoList = [];
+          let reg = /^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -481,6 +482,12 @@ export default {
             });
             return;
           }
+          this.uploadImgList.map(item => {
+            this.addEventForm.appendixInfoList.push(item);
+          });
+          this.uplaodVideoList.map(item => {
+            this.addEventForm.appendixInfoList.push(item);
+          });
           this.isAddLoading = true;
           addEvent(this.addEventForm)
             .then(res => {
@@ -492,12 +499,8 @@ export default {
                 })
                 this.$router.push({name: 'event_audit'});
                 this.isAddLoading = false;
-              } else {
-                this.$message({
-                  type: 'error',
-                  message: '保存失败',
-                  customClass: 'request_tip'
-                })
+              } 
+              else {
                 this.isAddLoading = false;
               }
             })
@@ -523,8 +526,8 @@ export default {
     skipHandlePage (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.isAddHandleLoading = true;
-          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          this.addEventForm.appendixInfoList = [];
+          let reg =/^[1-9]\d*$/; // 校验死亡人数
           if (this.addEventForm.casualties === '无') {
             this.addEventForm.casualties = 0;
           } else if (this.addEventForm.casualties === '不确定') {
@@ -548,27 +551,39 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
+          if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
+            this.$message({
+              type: 'warning',
+              message: '图片和视频只能上传一种',
+              customClass: 'request_tip'
+            });
+            return;
+          } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
+            this.$message({
+              type: 'warning',
+              message: '最多上传1个视频或9张图片',
+              customClass: 'request_tip'
+            });
+            return;
+          }
+          this.uploadImgList.map(item => {
+            this.addEventForm.appendixInfoList.push(item);
+          });
+          this.uplaodVideoList.map(item => {
+            this.addEventForm.appendixInfoList.push(item);
+          });
+          this.isAddHandleLoading = true;
           addEvent(this.addEventForm)
             .then(res => {
               if (res) {
-                // this.$message({
-                //   type: 'success',
-                //   message: '添加成功',
-                //   customClass: 'request_tip'
-                // })
                 this.isAddHandleLoading = false;
                 this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: res.data}});
-              } else {
-                this.$message({
-                  type: 'error',
-                  message: '保存失败',
-                  customClass: 'request_tip'
-                })
+              } 
+              else {
                 this.isAddHandleLoading = false;
               }
             })
             .catch(() => {this.isAddHandleLoading = false;})
-          // this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle'}});
         }
       })
     },
@@ -600,7 +615,7 @@ export default {
       const obj = document.getElementById('add_video');
       if (obj) {
         obj.addEventListener('ended', () => { // 当视频播放结束后触发
-          this.isPlaying = false;
+          _this.isPlaying = false;
         });
       }
     }

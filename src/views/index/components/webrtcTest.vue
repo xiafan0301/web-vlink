@@ -1,5 +1,6 @@
 <template>
   <div class="wrt_main">
+    <h1 style="text-align: center;font-size: 40px;color: #0C70F8;">我是web端</h1>
     <ul style="padding: 100px 0 0 400px;">
       <li>
         <el-input style="width: 250px;" v-model="form.val1" placeholder="请输入对方ID"></el-input>
@@ -16,7 +17,7 @@
         
       </li>
     </ul>
-    <div is="webrtc" :oAdd="oAdd" :oDel="oDel"></div>
+    <div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>
   </div>
 </template>
 <script>
@@ -50,6 +51,10 @@ export default {
         remoteId: this.form.val2,
         remoteName: this.form.val2
       };
+    },
+
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
     }
   }
 }

@@ -244,7 +244,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeCurrGroup">移除所选组</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveGroupLoading" @click="removeCurrGroup">移除所选组</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选组 (已选{{checkSelectGroups.length > 0 ? checkSelectGroups.length : 0}}个/共{{searchSelectGroups.length > 0 ? searchSelectGroups.length : 0}}个)</p>
@@ -264,7 +264,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addSelectGroup">加入所选组</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddGroupLoading" @click="addSelectGroup">加入所选组</el-button>
         </div>
       </div>
     </el-dialog>
@@ -287,7 +287,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeRolesData">移除所选角色</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveRoleLoading" @click="removeRolesData">移除所选角色</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
@@ -307,7 +307,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addRolesData">添加所选角色</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddRoleLoading" @click="addRolesData">添加所选角色</el-button>
         </div>
       </div>
     </el-dialog>
@@ -383,6 +383,10 @@ export default {
       resetPwdInfo: {}, // 重置密码所需要的信息
       isEditLoading: false, // 编辑用户加载中
       isDeleteLoading: false, // 删除用户加载中
+      isRemoveRoleLoading: false, // 移除角色加载中
+      isAddRoleLoading: false, // 添加角色加载中
+      isRemoveGroupLoading: false, // 移除所属组加载中
+      isAddGroupLoading: false, // 加入所属组加载中
     }
   },
   created () {
@@ -651,6 +655,7 @@ export default {
         this.checkSelectGroups.map(item => {
           params.uids.push(item.uid);
         });
+        this.isAddGroupLoading = true;
         addUserBatchGroups(params)
           .then(res => {
             if (res) {
@@ -667,9 +672,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.editUserGroupDialog = false;
+              this.isAddGroupLoading = false;
+            } else {
+              this.isAddGroupLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddGroupLoading = false;})
       }
     },
     // 移除所选组
@@ -683,6 +692,7 @@ export default {
         this.checkCurrGroups.map(item => {
           params.uids.push(item.uid);
         });
+        this.isRemoveGroupLoading = true;
         delUserBatchGroups(params)
           .then(res => {
             if (res) {
@@ -699,9 +709,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.editUserGroupDialog = false;
+              this.isRemoveGroupLoading = false;
+            } else {
+              this.isRemoveGroupLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveGroupLoading = false;})
       }
     },
     // 显示配置角色弹出框
@@ -757,6 +771,7 @@ export default {
         this.checkCurrRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isRemoveRoleLoading = true;
         delUserBatchRoles(params)
           .then(res => {
             if (res) {
@@ -773,9 +788,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.configRoleDialog = false;
+              this.isRemoveRoleLoading = false;
+            } else {
+              this.isRemoveRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveRoleLoading = false;})
       }
     },
     // 加入所选角色
@@ -789,6 +808,7 @@ export default {
         this.checkSelectRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isAddRoleLoading = true;
         addUserBatchRoles(params)
           .then(res => {
             if (res) {
@@ -805,9 +825,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.configRoleDialog = false;
+              this.isAddRoleLoading = false;
+            } else {
+              this.isAddRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddRoleLoading = false;})
       }
     },
     // 禁用用户
@@ -985,12 +1009,12 @@ export default {
           }
         }
         .group_btn {
-          text-align: center;
-          line-height: 40px;
+          // text-align: center;
+          // line-height: 40px;
           width: 220px;
           height: 40px;
-          border-radius: 4px;
-          cursor: pointer;
+          // border-radius: 4px;
+          // cursor: pointer;
         }
         .group_number {
           color: #999999;

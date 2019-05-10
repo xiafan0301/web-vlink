@@ -9,7 +9,7 @@ const dataList = {
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员
-  ctcStatus: 9, // 调度事件状态
+  ctcStatus: 26, // 调度事件状态
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
   imgId: 1, // 图片id
@@ -34,4 +34,12 @@ const operationType = {
   sendOtherUint: 3, // 转到其他单位
   endEvent: 4 // 结束事件
 }
-export { dataList, handeMethods, operationType };
+// 事件处理过程类型
+const proccessEventType = {
+  dispatchId: 1, // 派单
+  directiveId: 2, // 上级指示
+  reportSuperId: 3, // 下级呈报
+  acceptId: 4, // 受理
+  feedbackId: 5 // 反馈
+}
+export { dataList, handeMethods, operationType, proccessEventType };

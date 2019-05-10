@@ -70,8 +70,6 @@ export default {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       endForm: {
-        // eventId: null,
-        // eventLevel: null,
         type: operationType.endEvent,
         eventSummary: null, // 事件总结
         addList: []
@@ -220,8 +218,6 @@ export default {
           customClass: 'request_tip'
         })
       } else {
-        console.log('uploadImgList', this.uploadImgList)
-        console.log('eventCloseAttachmentList', this.endForm.addList)
         if (this.uploadImgList.length > 3) {
           this.$message({
             type: 'warning',
@@ -240,6 +236,8 @@ export default {
                 customClass: 'request_tip'
               })
               this.$router.push({name: 'event_manage'});
+              this.isEndLoading = false;
+            } else {
               this.isEndLoading = false;
             }
           })

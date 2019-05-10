@@ -52,24 +52,22 @@
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 -->
             <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
-            <!-- 标记 -->
-            <span v-if="config.sign" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 截屏 -->
             <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
-            <span v-show="!fullScreen && config.fullscreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
+            <span v-show="!fullScreen && config.fullscreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
             <!-- 全屏 -->
             <span v-show="config.fullscreen2" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreenTwo"></span>
             <!-- 局部放大 -->
-            <template v-if="fullScreen">
+            <template v-if="fullScreen || showFullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
               <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
               <!-- 退出全屏 -->
-              <span v-if="fullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
+              <span v-if="fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
             </template>
           </span>
           <!-- 更多 -->
-          <span v-if="!fullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
+          <span v-if="!fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
         </span>
       </div>
     </div>
@@ -121,7 +119,7 @@ export default {
    *    
    * bResize: 播放容器尺寸变化
    */
-  props: ['index', 'oData', 'oConfig', 'bResize'],
+  props: ['index', 'oData', 'oConfig', 'bResize', 'showFullScreen'],
   data () {
     return {
       mini: false, // 主要控制播放器操作栏显示方式
@@ -175,11 +173,14 @@ export default {
     }
   },
   watch: {
-    oData () {
-      console.log('watch oData', this.oData);
+    oData (newData, oldData) {
+      console.log('watch oData', newData);
       // 去掉暂停按钮
       this.playActive = true;
       this.relaodPlayer();
+      if (oldData && oldData.record) {
+        this.saveVideoRecord(oldData);
+      }
     },
     oConfig () {
       if (this.oConfig) {
@@ -628,18 +629,19 @@ export default {
     },
 
     // 播放记录 只有type=1 / 2 才记录
-    saveVideoRecord () {
-      if ((this.oData.type === 2 || this.oData.type === 1) && this.oData.record) {
+    saveVideoRecord (_data) {
+      if (!_data) { _data = this.oData; }
+      if ((_data.type === 2 || _data.type === 1) && _data.record) {
         let playBack = {};
         // if (this.oData.type === 2) {
         playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
         playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
         // }
         apiVideoRecord(Object.assign({
-          deviceId: this.oData.video.uid, // 设备id
+          deviceId: _data.video.uid, // 设备id
           playTime: formatDate(this.startPlayTime ? this.startPlayTime : new Date()), // 播放结束时间
           // 播放类型 1:视频巡逻 2:视频回放
-          playType: this.oData.type
+          playType: _data.type
         }, playBack)).then(() => {
         }).catch(error => {
           console.log("apiVideoRecord error：", error);

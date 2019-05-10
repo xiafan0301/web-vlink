@@ -8,6 +8,7 @@
             style="width: 260px;"
             v-model="ctcForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -44,7 +45,7 @@
         <el-table-column
           fixed
           label="编号"
-          prop="eventCode"
+          prop="code"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
@@ -81,7 +82,7 @@
         </el-table-column>
         <el-table-column
           label="调度时间"
-          prop="acceptTime"
+          prop="dispatchTime"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -122,7 +123,7 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, updateProcess } from '@/views/index/api/api.event.js';
+import { getAllCtcList, updateProcess } from '@/views/index/api/api.event.js';
 import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
@@ -138,7 +139,7 @@ export default {
         eventFlag: 1, // 1--true 0--false
         mutualFlag: 0,
         reportTime: [], // 日期
-        eventStatus: '28', // 事件状态--默认进行中
+        eventStatus: '1', // 事件状态--默认进行中
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [], // 表格数据
@@ -157,11 +158,7 @@ export default {
       getDiciData(status)
         .then(res => {
           if (res) {
-            res.data.map(item => {
-              if (item.uid !== 27) {
-                this.ctcStatusList.push(item);
-              }
-            })
+            this.ctcStatusList = res.data;
           }
         })
         .catch(() => {})
@@ -175,17 +172,15 @@ export default {
         eventStatus = this.ctcForm.eventStatus;
       }
       const params = {
-        'where.eventFlag': this.ctcForm.eventFlag,
-        'where.mutualFlag': this.ctcForm.mutualFlag,
-        'where.reportTimeStart': this.ctcForm.reportTime[0],
-        'where.reportTimeEnd': this.ctcForm.reportTime[1],
-        'where.otherQuery': this.ctcForm.phoneOrNumber,
-        'where.dispatchStatus': eventStatus,
+        'where.startTime': this.ctcForm.reportTime[0],
+        'where.endTime': this.ctcForm.reportTime[1],
+        'where.keyword': this.ctcForm.phoneOrNumber,
+        'where.status': eventStatus,
         pageNum: this.pagination.pageNum,
         orderBy: 'create_time',
         order: 'desc'
       }
-      getEventList(params)
+      getAllCtcList(params)
         .then(res => {
           if(res) {
             this.ctcList = res.data.list;
@@ -220,19 +215,21 @@ export default {
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
       // 在点击查看的时候将新反馈数量清零
-      if (obj.reportContent > 0) {
-        const params = {
-          'read_flag': true
-        }
-        updateProcess(obj.uid, params)
+      if (obj.feedbackNumber > 0) {
+        // const params = {
+        //   'read_flag': true
+        // }
+        updateProcess(obj.uid)
           .then(res => {console.log(res);})
           .catch(() => {})
       }
       if (obj.dispatchStatusName === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
       }
       if (obj.dispatchStatusName === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
+        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
+        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
       }
     }
   }

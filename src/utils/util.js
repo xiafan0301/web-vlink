@@ -50,6 +50,7 @@ export const formatDate = (iDate, sFormat = 'yyyy-MM-dd HH:mm:ss') => {
   if (second < 10) { second = '0' + second; }
   let millisecond = dDate.getMilliseconds();// 毫秒
   if (sFormat.indexOf('yyyy') >= 0) { sFormat = sFormat.replace('yyyy', year + ''); }
+  if (sFormat.indexOf('yy') >= 0) { sFormat = sFormat.replace('yy', (year + '').slice(2, 4)); }
   if (sFormat.indexOf('MM') >= 0) { sFormat = sFormat.replace('MM', month + ''); }
   if (sFormat.indexOf('dd') >= 0) { sFormat = sFormat.replace('dd', date + ''); }
   if (sFormat.indexOf('HH') >= 0) { sFormat = sFormat.replace('HH', hour + ''); }
@@ -265,3 +266,6 @@ export const translateDataToTree = (data) => {
   translator(parents, children)
   return parents
 }
+// html2canvas
+import html2canvas from 'html2canvas';
+export const h2canvas = html2canvas;

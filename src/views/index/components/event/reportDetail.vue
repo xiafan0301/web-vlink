@@ -102,40 +102,16 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
     }
+  },
+  mounted () {
+    this.getDetail();
   },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -146,7 +122,7 @@ export default {
     },
     // 跳至向上级呈报页面
     skipReportPage () {
-      this.$router.push({name: 'event_report'});
+      this.$router.push({name: 'event_report', query: { eventId: this.$route.query.eventId }});
     },
     // 返回
     back () {
@@ -154,9 +130,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -183,7 +157,8 @@ export default {
       width: 100%;
       margin-top: -20px;
       margin-bottom: 20px;
-      background: #ffffff;
+      background: #fff;
+      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       .divide {
         border: 1px dashed #F2F2F2;
       }

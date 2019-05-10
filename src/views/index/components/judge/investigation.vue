@@ -75,8 +75,9 @@ export default {
       testData: testData,
       evData: [],
       searchData: {
-        eventNo: '',
-        time: null
+        uid: '',
+        time: null,
+        curNum: ''
       },
       pickerOptions: {
         disabledDate (time) {
@@ -138,13 +139,15 @@ export default {
       this.searchData.time = [_e, _s]
     },
     resetSearch () {
-      this.searchData.eventNo = '';
+      this.searchData.uid = '';
+      this.searchData.carNum = '';
+      this.searchData.time = null;
     },
     autoEvent (queryString, cb) {
-      if (queryString === '') {
+      if (!queryString) {
         cb([])
       } else {
-        JigGETEvent({'where.otherQuery': queryString, 'where.eventFlag': 1}).then(result => {
+        JigGETEvent({'where.eventCode': queryString, 'where.eventFlag': 1}).then(result => {
           cb(result.data.list);
         })
       }
@@ -244,6 +247,7 @@ export default {
       })
     },
     showVideo (data) {
+      console.log(this.curSXT)
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;

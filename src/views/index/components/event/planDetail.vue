@@ -21,8 +21,10 @@
           <li>
             <span>适用事件等级:</span>
             <span>
-              <template v-if='planDetailInfo.levelNameList'>
-                {{planDetailInfo.levelNameList.join()}}
+              <template v-if='planDetailInfo.levelList'>
+                <span v-for="(item, index) in planDetailInfo.levelList" :key="index">
+                  {{item.planLevelName + ' '}}
+                </span>
               </template>
             </span>
           </li>

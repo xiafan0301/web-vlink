@@ -70,7 +70,7 @@
                     </div>
                   </li>
                 </ul>
-                <img v-for="(item, index) in eventImg" :src="item.path" :key="index">
+                <img v-for="(item, index) in eventImg" :src="item.path" :key="index" @click="openBigImg(index, eventImg)" />
               </div>
               <div class="divide"></div>
             </template>
@@ -79,7 +79,7 @@
               <div class="content_detail">
                 <p>
                   {{basicInfo.eventSummary}}
-                  <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+                  <span v-show="eventSummaryLength > 800" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
                 </p>
               </div>
             </template>
@@ -110,7 +110,7 @@
                     </div>
                   </li>
                 </ul>
-                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index">
+                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index" @click="openBigImg(index, ctcImg)" />
               </div>
               <div class="divide"></div>
             </template>
@@ -119,7 +119,7 @@
               <div class="content_detail">
                 <p>
                   {{basicInfo.dispatchSummary}}
-                  <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+                  <span v-show="dispatchSummaryLength > 800" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
                 </p>
               </div>
             </template>
@@ -177,6 +177,20 @@
         </template>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+       <!--查看总结详情弹出框-->
+      <el-dialog
+        title=""
+        :visible.sync="summaryDetailDialog"
+        width="794px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp"
+        >
+        <div class="content_body">
+          <p class="title">{{summaryTitle}}</p>
+          <p class="content">{{summaryContent}}</p>
+        </div>
+      </el-dialog>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
     </div>
   </vue-scroll>
@@ -218,7 +232,7 @@ export default {
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, type: 'event' }});
     },
     // 获取事件详情
     getDetail () {
@@ -226,8 +240,9 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            if (res.data.closeAttachmentList.length > 0) {
-              res.data.closeAttachmentList.map(item => {
+            this.basicInfo = res.data;
+            if (res.data.eventCloseAttachmentList.length > 0) {
+              res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.eventImg.push(item);
                 } else {
@@ -235,8 +250,8 @@ export default {
                 }
               })
             }
-            if (res.data.dispatchAttachmentList.length > 0) {
-              res.data.dispatchAttachmentList.map(item => {
+            if (res.data.dispatchCloseAttachmentList.length > 0) {
+              res.data.dispatchCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
                   this.ctcImg.push(item);
                 } else {
@@ -244,7 +259,6 @@ export default {
                 }
               })
             }
-            this.basicInfo = res.data;
             this.eventSummaryLength = this.basicInfo.eventSummary.length;
             this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
           }
@@ -265,6 +279,16 @@ export default {
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
+    // 显示查看总结详情弹出框
+    showSummaryDialog (type, content) {
+      if (type === 'event') {
+        this.summaryTitle = '事件总结报告';
+      } else {
+        this.summaryTitle = '调度总结报告';
+      }
+      this.summaryContent = content;
+      this.summaryDetailDialog = true;
     },
   }
 }
@@ -443,6 +467,8 @@ export default {
         }
         .content-icon {
           margin: 5px 0;
+          display: flex;
+          flex-wrap: wrap;
           >ul {
             >li {
               position: relative;
@@ -536,6 +562,23 @@ export default {
       background: #ffffff;
       border: 1px solid #DDDDDD;
       color: #666666;
+    }
+  }
+  .dialog_comp {
+    /deep/ .el-dialog {
+      top: 53%;
+      .content_body {
+        color: #000000;
+        .title {
+          font-size: 22px;
+          text-align: center;
+          margin: 40px 0;
+        }
+        .content {
+          text-indent: 20px;
+          padding: 0 40px;
+        }
+      }
     }
   }
 }

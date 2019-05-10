@@ -61,9 +61,9 @@ export const getEventDetail = (uid) => {
  * 获取调度指挥列表数据
  * @param {*} data
  */
-export const getCtcList = (data) => {
+export const getAllCtcList = (data) => {
   return request({
-    url: 'events/page',
+    url: 'task-services/dispatches',
     method: 'get',
     params: data,
     mode: 'ctc'
@@ -155,10 +155,22 @@ export const ctcTasks = (data, uid) =>{
  * 修改事件过程状态
  * @param {*} data
  */
-export const updateProcess = (uid, data) => {
+export const updateProcess = (uid) => {
   return request({
     url: 'task-services/task/process/' + uid,
     method: 'put',
+    // data,
+    mode: 'ctc'
+  });
+}
+/**
+ * 新增事件处理过程
+ * @param {*} data
+ */
+export const addEventProcess = (data, uid) => {
+  return request({
+    url: 'task-services/task/process/' + uid,
+    method: 'post',
     data,
     mode: 'ctc'
   });
@@ -179,9 +191,9 @@ export const addTaskInfo = (data, uid) => {
  * 结束调度--结束事件
  * @param {*} data 
  */
-export const endEvent = (data, uid) => {
+export const endEvent = (data) => {
   return request({
-    url: 'events/finish/' + uid,
+    url: 'events/finish',
     method: 'put',
     data,
     mode: 'event'
@@ -260,3 +272,42 @@ export const getSurveillance = (data) => {
     mode: 'event'
   });
 }
+
+/*-------------------------- 任务start -------------------------------*/
+/**
+ * getTasks
+ * 查看任务列表
+ * @param {object} params
+ */
+export function getTasks(params) {
+  return request({
+    url: '/task-services/tasks',
+    method: 'get',
+    mode: 'ctc',
+    params: params
+  })
+}
+/**
+ * 标记全部已读
+ * @param {*} data 
+ */
+export const markTask = (data) => {
+  return request({
+    url: '/task-services/task/processes?userId=' + data.userId + '&departmentId=' + data.departmentId,
+    method: 'put',
+    mode: 'ctc'
+  });
+}
+/**
+ * 新增事件处理过程
+ * @param {*} data 
+ */
+export const taskProcess = (data) => {
+  return request({
+    url: '/task-services/task/process/' + data.eventId,
+    method: 'post',
+    data,
+    mode: 'ctc'
+  });
+}
+/*-------------------------- 任务end -------------------------------*/
