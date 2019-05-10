@@ -149,6 +149,14 @@ export default {
   },
   mounted () {
     this.getMutualHelpList();
+    const data = this.$route.query;
+    // 外部跳转到详情页
+    if (data.pageType && data.helpId) {
+      this.$nextTick(() => {
+        this.pageType = parseInt(data.pageType);
+        this.helpId = data.helpId;
+      })
+    }
   },
   methods: {
     // 获取民众互助列表

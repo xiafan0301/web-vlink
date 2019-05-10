@@ -62,7 +62,7 @@
       <div class="manage_d_s_m_l">
         <!-- 人员追踪/车辆追踪 -->
         <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
-          <el-input v-model="scopeRadius" @keyup.enter.native="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+          <el-input v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
           <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option
               v-for="item in featuresTypeList"
@@ -288,6 +288,7 @@ export default {
       devGroupList: [],//设备组下拉列表
       devGroupId: null,//设备组id
       scopeRadius: 20, // 范围半径
+      lastScopeRadius: 20,//记录最后一次输入的范围半径
       lnglat: [], // 圆形覆盖物圆心坐标
       polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
@@ -1632,16 +1633,21 @@ export default {
     },
     // 设备圆形覆盖物半径
     setCircleRadius () {
+      // 只有在输入的半径有变化时才会执行下去
+      if (this.scopeRadius === this.lastScopeRadius) {
+        return;
+      }
+      this.lastScopeRadius = this.scopeRadius;
       if (this.lnglat.length === 0) {
         this.$message.error('请输入追踪点');
-        return false;
+        return;
       }
       if (this.scopeRadius < 0) {
         this.$message.error('半径为正数');
-        return false;
+        return;
       } else if (this.scopeRadius > 20) {
         this.$message.error('半径不可超过20千米');
-        return false;
+        return;
       }
       this.trackPointList = [];
       let selAreaData = this.map.getAllOverlays('circle');//获得所有的圆形覆盖物

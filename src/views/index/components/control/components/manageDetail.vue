@@ -160,7 +160,7 @@
                         <vue-scroll>
                           <li
                             v-for="(item, index) in situList"
-                            :key="item.uid + index"
+                            :key="item.uid"
                             @dragstart="dragstart($event, index, item)"
                             @dragover="dragover"
                             :draggable="true"
@@ -174,7 +174,7 @@
                     <el-collapse-transition>
                       <div v-if="tabTypeBySituation === '1'" class="bayone_list">
                         <vue-scroll>
-                          <div v-for="(bay, index) in bayList" :key="bay.uid + index">
+                          <div v-for="bay in bayList" :key="bay.uid">
                             <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
                               <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
                             </div>
@@ -182,7 +182,7 @@
                               <ul style="max-height: 346px;" v-show="bay.isDropdown">
                                 <li
                                   v-for="(dev, index) in bay.devList"
-                                  :key="dev.uid + index"
+                                  :key="dev.uid"
                                   @dragstart="dragstart($event, index, dev)"
                                   @dragover="dragover"
                                   :draggable="true"

@@ -233,7 +233,7 @@ export default {
     }
   },
   mounted () {
-    this.GetTimeAfter();
+    this.getTimeAfter();
   },
   methods: {
     // 获取事件详情
@@ -247,7 +247,7 @@ export default {
       })
     },
     // 获取下个月的今天
-    GetTimeAfter() { 
+    getTimeAfter() { 
       var dd = new Date();
       function checkT(s) {
           return s < 10 ? '0' + s: s;
@@ -434,7 +434,7 @@ export default {
         return true;
       } else {
         for (let k = 1; k < begin.length; k++) {
-          if (begin[k] <= over[k-1]) {
+          if (begin[k] < over[k-1]) {
             this.$message.error('所选的时间段出现重叠现象，请重新选取！');
             return false;
           } else if (k === begin.length - 1) {
