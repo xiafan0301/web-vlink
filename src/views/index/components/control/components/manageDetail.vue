@@ -199,8 +199,6 @@
                 <div class="situ_right">
                   <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
                     @dragend="dragend"
-                    @dragenter="dragenter"
-                    @dragleave="dragleave"
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
@@ -743,45 +741,17 @@ export default {
     },
     /* ************运行情况********* */
     // 关闭播放器
-    playerClose (index, sid) {
-      console.log('sid', sid);
+    playerClose (index) {
       this.rightVideoList.splice(index, 1, {isShowVideo: false});
-
-      // let _div = document.createElement('div');
-      // _div.className = 'situ_r_img';
-      // _div.innerHTML = '<div></div>'
-      // e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      // let _video = this.rVList.splice(index, 1, {})[0];
-      // let _index = _video.index;
-      // this.situList.splice(_index, 1, _video);
     },
     // 拖拽
     dragstart (e, index, item) {
-      // 使其半透明
-      // e.target.style.opacity = .5;
       this.dragstartIndex = index;
-      console.log(this.dragstartIndex, 'dragstartIndex')
-
       this.dragActiveObj = item;
     },
   
     dragend () {
-      // 重置透明度
-      // e.target.style.opacity = "";
-
       this.dragActiveObj = null;
-    },
-    dragenter (e) {
-      // 当可拖动的元素进入可放置的目标高亮目标节点
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "#E0F3FF";
-      }
-    },
-    dragleave (e) {
-      // 当拖动元素离开可放置目标节点，重置其背景
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "";
-      }
     },
     dragover (e) {
       // 阻止默认动作
@@ -793,9 +763,6 @@ export default {
       e.stopPropagation();
       console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
-        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-        // console.log('deviceSip', deviceSip);
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
           type: 1,
@@ -803,50 +770,6 @@ export default {
           video: Object.assign({}, this.dragActiveObj)
         });
       }
-      // 移动拖动的元素到所选择的放置目标节点
-      // console.log(e.target)
-      // if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
-      //     e.target.style.background = "";
-      //     let sid = this.situList[this.dragstartIndex].uid;
-      //     let div = document.createElement('div');
-      //     let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
-      //       <div>
-      //         <i class="vl_icon vl_icon_control_06"></i>
-      //         <i class="vl_icon vl_icon_control_11"></i>
-      //         <i class="vl_icon vl_icon_control_07"></i>
-      //       </div>
-      //       <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
-      //     `;
-      //     div.innerHTML = video;
-      //     e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
-      //     // 从左往右边拖拽逻辑
-      //     const rVList = [{},{},{},{}]
-      //     let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
-      //     delVideo[0]['index'] = this.dragstartIndex;
-      //     if (rVList[index].uid) {
-      //       let _video = rVList.splice(index, 1)[0];
-      //       let _index = _video.index;
-      //       this.situList.splice(_index, 1 , _video);
-      //       rVList.splice(index, 1, {});
-      //     } else {
-      //       rVList.splice(index, 1, ...delVideo);
-      //     }
-      //     console.log(delVideo) 
-      //     // 防止重复绑定点击事件，先解绑
-      //     $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
-      //     // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
-      //     let _this = this;
-      //     $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
-      //       let _div = document.createElement('div');
-      //       _div.className = 'situ_r_img';
-      //       _div.innerHTML = '<div></div>'
-      //       e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      //       let _video = rVList.splice(index, 1, {})[0];
-      //       let _index = _video.index;
-            
-      //       _this.situList.splice(_index, 1, _video);
-      //     })
-      // }
     }, 
     mapMark () {
       let _this = this, hoverWindow = null, data = null;

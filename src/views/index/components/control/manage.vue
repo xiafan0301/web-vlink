@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%;position: relative;">
-    <div class="control_manage" v-show="pageType === 1">
+    <div class="control_manage" v-if="pageType === 1">
       <!-- 顶部搜索栏 -->
       <div class="control_manage_box">
         <div class="search_box">
@@ -333,7 +333,9 @@ export default {
       this.$router.push({ name: 'control_create', query: {controlId: uid, createType: 3} });
     },
     resetForm () {
-      this.$refs['manageForm'].resetFields();
+      for (let key in this.manageForm) {
+        this.manageForm[key] = null;
+      }
       this.getControlList();
     },
     // 获取所有布控对象
