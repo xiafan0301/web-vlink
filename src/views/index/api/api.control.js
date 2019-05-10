@@ -377,6 +377,18 @@ export function getControlDevice(params) {
   })
 }
 /**
+ * getEventControlResult 根据事件id获取当前事件下的布控结果
+ * @param {object} params
+ */
+export function getEventControlResult(params) {
+  return request({
+    url: '/events/' + params.eventId + '/alarm-snaps/page',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
  * getControlDetail 布控详情查询接口
  * @param {object} params
  */

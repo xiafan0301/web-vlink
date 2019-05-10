@@ -117,7 +117,7 @@
           prop="eventStatusName"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatusName === '待处理' ? 'untreated_event' : scope.row.eventStatusName === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
+            <span class="event_status" :class="[scope.row.eventStatus === 1 ? 'untreated_event' : scope.row.eventStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -152,6 +152,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
       :current-page.sync="pagination.pageNum"
@@ -284,19 +285,24 @@ export default {
     },
     // 跳至事件详情页
     skipEventDetailPage (obj) {
-      if (obj.eventStatusName === '待处理') {
+      if (obj.eventStatus === 1) {
         this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '处理中') {
+      if (obj.eventStatus === 2) {
         this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '已结束') {
+      if (obj.eventStatus === 3) {
         this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.uid}});
       }
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      this.$router.push({path: '/control/manage', query: {eventId: obj.uid}});
+      if (obj.eventStatus === 1) {
+        this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
+      } 
+      if (obj.eventStatus === 2) {
+        this.$router.push({path: '/control/manage', query: {controlId: obj.uid, pageType: 2, state: 1}});
+      }
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
