@@ -104,6 +104,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="noticeList && noticeList.list && noticeList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"

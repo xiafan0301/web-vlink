@@ -68,11 +68,11 @@
       <div style="width: 100%;">
         <el-pagination
           style="text-align: center;"
+          background
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
           :page-size="carMemberList.pageSize"
-          layout="total, prev, pager, next, jumper"
+          layout="prev, pager, next"
           :total="carMemberList.total">
         </el-pagination>
       </div>

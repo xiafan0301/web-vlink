@@ -47,6 +47,7 @@
             </div>
           </div>
           <el-pagination
+            class="cum_pagination"
             style="align-self: flex-start;"
             @current-change="handleCurrentChangeObj"
             :current-page="currentPage"
@@ -138,7 +139,7 @@
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
             <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
-            <div v-if="controlDetail.terminationReason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
+            <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
@@ -258,7 +259,7 @@
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
                   <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
-                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
+                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="239px" @click="showLargeVideo(item)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
                     <div>
@@ -275,6 +276,7 @@
               </div>
             </div>
             <el-pagination
+              class="cum_pagination"
               style="align-self: flex-start;"
               @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
@@ -1030,9 +1032,19 @@ export default {
         .situ_time{
           line-height: 44px;
           padding-left: 15px;
+          padding-bottom: 10px;
           display: flex;
+          flex-wrap: wrap;
           > div{
-            width: 25%;
+            width: 33%;
+          }
+          .termination_reason{
+            width: 100%;
+            line-height: 20px;
+            display: flex;
+            > span:nth-child(2){
+              flex: 1;
+            }
           }
         }
         .situ_box{
@@ -1055,10 +1067,11 @@ export default {
           .situ_content{
             display: flex;
             flex-wrap: nowrap;
+            height: 812px;
             .situ_left{
               width: 258px;
               min-width: 258px;
-              height: 600px;
+              height: 100%;
               border-right: 1px solid #F2F2F2;
               > div{
                 height: 50px;
@@ -1148,6 +1161,7 @@ export default {
             }
             .situ_right{
               width: calc(100% - 258px);
+              height: 100%;
               display: flex;
               flex-flow: row wrap;
               align-content: flex-start;
@@ -1155,7 +1169,7 @@ export default {
               padding-right: 1%;
               .situ_r_video{
                 flex: 0 0 49%;
-                height: 49%;
+                height: 47.5%;
                 position: relative;
                 overflow: hidden;
                 margin-bottom: 20px;
@@ -1216,6 +1230,10 @@ export default {
               border:1px solid rgba(211,211,211,1);
               img{
                 width: 100%;
+                height: 239px;
+              }
+              video{
+                object-fit: fill;
               }
               .result_tool{
                 width: 100%;
@@ -1226,7 +1244,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 52px;
+                bottom: 48px;
                 left: 0;
                 > div{
                   color: #fff;
@@ -1246,7 +1264,10 @@ export default {
                 }
               }
               > div:nth-child(1){
+                width: 100%;
+                height: 239px;
                 cursor: pointer;
+                background: #000;
               }
               > div:nth-child(2){
                 p{
@@ -1319,6 +1340,28 @@ export default {
   .vl_icon{
     transition: none;
   }
+}
+@media (max-width: 1400px) {
+  .control_manage_d{
+    .situ_content{
+      height: 500px!important;
+    }
+    .result_img_box{
+      height: 208px!important;
+      >div{
+        height: 160px!important;
+        >img{
+          height: 160px!important;
+        }
+        >video{
+          height: 160px!important;
+        }
+        .result_tool{
+          bottom: 46px!important;
+        }
+      }
+    }
+  } 
 }
 </style>
 <style lang="scss">
