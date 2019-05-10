@@ -204,28 +204,44 @@
           </div>
         </div>
       </div>
-      <div class="event-handle event-end">
+      <div class="event-handle event-end" v-show="basicInfo.dealTypeList && basicInfo.dealTypeList.length > 0">
         <div class="handle-header">
           <span>事件处理</span>
         </div>
         <div class="divide"></div>
         <div class="handle-content">
           <ul class="clearfix">
-            <li>
+            <li v-show="basicInfo.mutualFlag">
               <div>
                 <span class="title">民众互助：</span>
                 <span class="content" @click="skipCommentPage">5条评论</span>
                 <span class="status">（已发布）</span>
               </div>
             </li>
-            <li>
-              <div>
-                <span class="title">智能布控：</span>
-                <span class="content" @click="skipControlPage">查看布控方案</span>
-                <span class="status">（已设置）</span>
-              </div>
+            <li v-for="(item, index) in basicInfo.dealTypeList" :key="'item' + index">
+              <template v-if="item.dealType === 1">
+                <div>
+                  <span class="title">智能布控：</span>
+                  <span class="content" @click="skipControlPage">查看布控方案</span>
+                  <span class="status">（已设置）</span>
+                </div>
+              </template>
+              <template v-if="item.dealType === 2">
+                <div>
+                  <span class="title">调度指挥：</span>
+                  <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
+                  <span class="status">（已发布）</span>
+                </div>
+              </template>
+              <template v-if="item.dealType === 3">
+                <div>
+                  <span class="title">向上呈报：</span>
+                  <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
+                  <span class="status">（已呈报）</span>
+                </div>
+              </template>
             </li>
-            <li>
+            <!-- <li>
               <div>
                 <span class="title">调度指挥：</span>
                 <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
@@ -238,7 +254,7 @@
                 <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
                 <span class="status">（已呈报）</span>
               </div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
