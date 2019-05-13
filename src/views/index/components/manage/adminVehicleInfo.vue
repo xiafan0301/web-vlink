@@ -107,6 +107,7 @@
             </el-table-column>
           </el-table>
           <el-pagination
+            class="cum_pagination"
             @current-change="handleCurrentChange"
             :current-page.sync="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
@@ -556,20 +557,13 @@ export default {
             this.getList();
             this.showGroup = false;
           }
-          // else {
-          //   this.$message({
-          //     type: 'error',
-          //     message: '复制失败',
-          //     customClass: 'request_tip'
-          //   })
-          // }
         })
         .catch(() => {})
     },
     addCopyGroupDialog (form) {
       this.$refs[form].validate(valid => {
+        this.isShowError = false;
         if (valid) {
-          this.isShowError = false;
           const params = {
             groupName: this.addGroupForm.userGroupName
           };

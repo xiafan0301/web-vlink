@@ -511,6 +511,37 @@
   font-weight: bolder;
 }
 
+/** 分页样式 **/
+.cum_pagination {
+  text-align: right;
+  padding: 20px;
+}
+.cum_pagination  .btn-prev, .el-pagination .btn-next {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+}
+.cum_pagination .el-pager li.active {
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  background-color: #0C70F8;
+  border-radius: 5px;
+}
+.cum_pagination .el-pager li {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+  margin: 0 5px;
+  font-weight: 500;
+}
+
 /** 面包屑导航样式 **/
 .breadcrumb_heaer {
   padding: 20px;
