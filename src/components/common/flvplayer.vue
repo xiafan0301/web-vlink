@@ -53,7 +53,7 @@
             <!-- 录视频 -->
             <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
             <!-- 截屏 -->
-            <span v-if="config.cut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
+            <span v-if="config.cut" @click="playerCut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
             <span v-show="!fullScreen && config.fullscreen" class="flvplayer_opt vl_icon vl_icon_v27 player_fullscreen" title="全屏" @click="playerFullScreen(true)"></span>
             <!-- 全屏 -->
@@ -71,6 +71,7 @@
         </span>
       </div>
     </div>
+    <!-- 添加标记 dialog -->
     <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666; font-size: 15px;">当前监控：{{oData.title}}</div>
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding-left: 30px;">
@@ -89,6 +90,17 @@
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="signDialogVisible = false">取 消</el-button>
         <el-button type="primary" :loading="signSubmitLoading" @click="signSubmit('signForm')">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 截屏 dialog -->
+    <el-dialog v-if="config.cut" title="" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button type="primary" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
   </div>
@@ -169,7 +181,10 @@ export default {
           { required: true, message: '请填写标记内容', trigger: 'blur' }
         ]
       },
-      signSubmitLoading: false
+      signSubmitLoading: false,
+
+      cutDialogVisible: false,
+      cutTime: 0
     }
   },
   watch: {
@@ -539,6 +554,52 @@ export default {
     playerFullScreenTwo () {
       this.$emit('playerFullScreenTwo');
     },
+    // 截屏
+    playerCut () {
+      this.cutDialogVisible = true;
+      this.$nextTick(() => {
+        let $video = $('#' + this.flvplayerId);
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        if ($canvas && $canvas.length > 0) {
+          let w = 920, h = 540;
+          $canvas.attr({
+              width: w,
+              height: h,
+          });
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏 保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        let img = $canvas[0].toDataURL('image/png');
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
+    },
     // 视频关闭事件
     playerClose () {
       this.$emit('playerClose', this.index, 123123);
@@ -780,7 +841,7 @@ export default {
 .flvplayer_bot_om_h:hover .flvplayer_bot_omh{
   display: block;
 }
-.player_cut { cursor: not-allowed; }
+.player_cut { cursor: default; }
 .player_tran { cursor: not-allowed; }
 .player_add_sign {
   display: inline-block;
