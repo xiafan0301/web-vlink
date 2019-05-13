@@ -580,6 +580,7 @@ export default {
         let img = $canvas[0].toDataURL('image/png');
         let filename = 'image_' + this.cutTime + '.png';
         if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
           let arr = img.split(',');
           let mime = arr[0].match(/:(.*?);/)[1];
           let bstr = atob(arr[1]);
