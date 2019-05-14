@@ -28,6 +28,10 @@ export default {
 .vl_map {
   position: relative;
   height: 100%;
+  .vl_map_hover_main {
+    left: -96px;
+    bottom: 28px;
+  }
   > .map_l {
     position: absolute; top: 0; left: 0; z-index: 2;
     padding: .2rem 0 .2rem .2rem;
@@ -75,9 +79,24 @@ export default {
             position: absolute; top: 0; left: 0;
             width: 100%; height: .36rem;
             padding: 2px .2rem;
-            input {
+            display: flex;
+            input, button , .el-input__suffix{
               height: .32rem;
               line-height: .32rem;
+            }
+            .el-input__suffix {
+              padding: 0;
+              i {
+                height: .32rem;
+                line-height: .32rem;
+              }
+            }
+            button {
+              padding: 0 .08rem;
+              margin-left: .1rem;
+              i {
+                line-height: .32rem;
+              }
             }
             > i {
               position: absolute; top: .1rem; right: .35rem;
