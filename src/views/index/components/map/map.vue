@@ -17,8 +17,10 @@
               <el-input
                 size="small"
                 placeholder="搜索"
+                clearable
                 v-model="mapInfoVal">
               </el-input>
+              <el-button type="primary" @click="filterMapTree" icon="el-input__icon el-icon-search" style="font-size: .2rem;line-height: .32rem;cursor:pointer;"></el-button>
             </div>
             <div class="map_lc_dc">
               <vue-scroll>
@@ -151,12 +153,19 @@ export default {
   components: {flvplayer, webrtc},
   data () {
     return {
+      key2Type: {
+        0: 'deviceBasicList',
+        1:  'bayonetList',
+        2:'carList',
+        3: 'sysUserExtendList'
+      },
+      hideClass: 'vl_map_selarea_hide',
       showBigVideo: false,
       signEmpty: false,
       oData: null,
       bResize: null,
       timer: null,
-      constObj: [{name:'摄像头', _key: 'deviceBasicListNum'}, {name:'卡口', _key: 'carListNum'}, {name: '车辆', _key: 'bayonetListNum'}, {name: '人员', _key: 'sysUserExtendListNum'}],
+      constObj: [{name:'摄像头', _key: 'deviceBasicListNum'}, {name:'卡口', _key: 'bayonetListNum'}, {name: '车辆', _key: 'carListNum'}, {name: '人员', _key: 'sysUserExtendListNum'}],
       map: null, // 地图对象
       isIndeterminate: false,
       mapTypeCheckAll: true,
@@ -207,7 +216,18 @@ export default {
   },
   watch: {
     mapInfoVal (val) {
-      this.$refs.mapLeftTree.filter(val);
+      if (!val) {
+        this.$refs.mapLeftTree.filter(val);
+        this.mapTreeData[0].infoList.forEach(x => {
+          x.infoList.forEach(y => {
+            this.mapTypeListAll.forEach(z => {
+              this.objSetItem(x[this.key2Type[z]], {isShow: true})
+            })
+            y.isShow = true;
+          })
+        })
+        this.updateNumberss();
+      }
     },
     markInfoVal (val) {
       if (val) {
@@ -238,9 +258,12 @@ export default {
         arr = newValue.filter(x => !oldValue.includes(x))
         bool = true;
       }
-      arr.forEach(x => {
-        this.operClassToEL(this.marks[x], 'vl_map_selarea_hide', bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+      // 更新地图Top栏 跟
+      arr.forEach(u => {
+        this.updateNumberss(true, u, bool);
       })
+      // 更新地图
+      this.operClassToEL(this.marks[arr[0]], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
     }
   },
   mounted () {
@@ -269,8 +292,9 @@ export default {
           draggable: false, // 是否可拖动
           content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
         })
+        // 给范围内的marker加class
         _this.marks.forEach(x => {
-          _this.operClassToEL(x, 'vl_map_selarea_hide', false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+          _this.operClassToEL(x, _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
         })
       }
     });
@@ -283,6 +307,76 @@ export default {
     }, 12000)
   },
   methods: {
+    filterMapTree () {
+      if (this.mapInfoVal) {
+        this.$refs.mapLeftTree.filter(this.mapInfoVal);
+        console.log(this.mapTreeData[0])
+        this.updateNumberss();
+        this.updateVillageIsShow();
+      }
+    },
+    // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素
+    updateNumberss (boolean, key, isAdd) {
+      let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
+      this.mapTreeData[0].infoList.forEach(x => {
+        if (boolean) {
+          let _arr = [];
+          if (isAdd) {
+            _arr = objDeepCopy(x[this.key2Type[key]]);
+            _arr.forEach(m => {
+              if (m.isShow) {
+                x.infoList.unshift(m)
+              }
+            })
+            // x.infoList有数据了之后，把“无相关数据”清除
+            if (x.infoList.length > 1 && x.infoList[x.infoList.length - 1].infoName === '无相关数据') {
+              x.infoList.pop();
+            }
+          } else {
+            if (x.isShow) {
+              x.infoList = x.infoList.filter(u => u.dataType !== key);
+            }
+            if (x.infoList.length === 0) {
+              x.infoList.push({infoName: '无相关数据'})
+            }
+          }
+          x.infoList.forEach(y => {
+            if (y.isShow && this.mapTypeList.indexOf(y.dataType) !== -1) {
+              newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+            }
+          })
+        } else {
+          if(this.mapInfoVal && x.infoName.indexOf(this.mapInfoVal) !== -1) { // 有镇数据符合，镇下所有数据都符合
+            x.infoList.forEach(y => {
+              if (this.mapTypeList.indexOf(y.dataType) !== -1) {
+                y.isShow = true;
+                newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+              } else {
+                y.isShow = false;
+              }
+            })
+          } else {
+            x.infoList.forEach(y => {
+              if (y.infoName.indexOf(this.mapInfoVal) !== -1 && this.mapTypeList.indexOf(y.dataType) !== -1) {
+                y.isShow = true;
+                newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+              } else {
+                y.isShow = false;
+              }
+            })
+          }
+          this.marks.forEach((x, _index) => {
+            if (_index < 4) {
+              this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
+            }
+          })
+        }
+      })
+      newNum.forEach((x, _index) => {
+        this.mapTreeData[0][this.constObj[_index]._key] = x[this.constObj[_index]._key];
+      })
+      this.updateDom();
+    },
     // 获取标注列表
     getMarkHistory () {
       MapGETsignList().then(res => {
@@ -406,23 +500,26 @@ export default {
         let carList;
         carList = [
           {
-            name: '我是假车辆11',
+            name: '卢我是假车辆11',
             addr: '长沙市天心区',
+            uid: 1,
             latitude: 28.099869,
             longitude: 112.935227
           }, {
             name: '我是假车辆22',
             addr: '创谷广告园',
+            uid: 2,
             latitude: 28.393596,
             longitude: 112.17623
           }
         ];
         x['infoName'] = x.areaName;
+        x['isShow'] = true;
         // dataType = 0 摄像头，1车辆，2卡口，3人员,
-        x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0});
-        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId});
-        x['bayonetList'] = this.objSetItem(x['bayonetList'], {infoName: 'bayonetName', areaType: '5', dataType: 1, areaUid: x.areaId});
-        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId});
+        x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0, isShow: true});
+        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId, isShow: true});
+        x['bayonetList'] = this.objSetItem(x['bayonetList'], {infoName: 'bayonetName', areaType: '5', dataType: 1, areaUid: x.areaId, isShow: true});
+        x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId, isShow: true});
         let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['bayonetList'], ...x['sysUserExtendList']];
         let newArr = objDeepCopy(oldArr)
         x['infoList'] = newArr;
@@ -455,11 +552,32 @@ export default {
     },
     filterNode(value, data, node) {
       if (!value) return true;
+      let pData = node.parent.data;
       if (data.infoName.indexOf(value) !== -1) {
-        return true;
+        if (data.dataType && this.mapTypeList.indexOf(data.dataType) === -1) {
+          pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = false;
+          data['isShow'] = false;
+          return false;
+        } else {
+          data['isShow'] = true;
+          if (pData.areaType === '4') {
+            pData['isShow'] = true;
+            pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = true;
+          } else {
+            this.mapTypeList.forEach(k => {
+              this.objSetItem(data[this.key2Type[k]], {isShow: true})
+            })
+          }
+          return true;
+        }
       } else {
+        if (pData.areaType === '4' && pData.infoName.indexOf(value) === -1) {
+          pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = false;
+        }
         if (node.parent.data.infoName) {
-          return node.parent.data.infoName.indexOf(value) !== -1;
+          let _b = pData.infoName.indexOf(value) !== -1;
+          pData['isShow'] = _b
+          return _b;
         } else {
           return false;
         }
@@ -492,22 +610,8 @@ export default {
         event.target.classList.add('active')
       }
       // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
-      let key;
+      let key = this.key2Type[dataType];
       // 找到父级的数据;
-      switch (dataType) {
-        case 0:
-          key = 'deviceBasicList'
-          break;
-        case 1:
-          key = 'bayonetList'
-          break;
-        case 2:
-          key = 'carList'
-          break;
-        case 3:
-          key = 'sysUserExtendList'
-          break;
-      }
       let curData = {};
       curData = this.findParentData(node)
       if (curData.tabActiveList.includes(dataType)) {
@@ -571,6 +675,16 @@ export default {
         })
       })
       return obj;
+    },
+    updateVillageIsShow () {
+      this.mapTreeData[0].infoList.forEach(x => {
+        console.log(x.infoList, x.infoList.forEach(z => console.log(z.isShow)))
+        if (x.infoList.find(y => y.isShow)) {
+          x['isShow'] = true;
+        } else {
+          x['isShow'] = false;
+        }
+      })
     },
     // 地图标记
     mapMark (data, isSetView) {
@@ -798,7 +912,7 @@ export default {
           _this.map.emit('rightclick');
           _this.selAreaPolygon = null;
           _this.mapTypeList.forEach(x => {
-            _this.operClassToEL(_this.marks[x], 'vl_map_selarea_hide', true, false)
+            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null, true)
           })
         }
         // close small video
@@ -844,7 +958,7 @@ export default {
           this.selAreaPolygon = null;
           this.mouseTool.close(true);
           this.mapTypeList.forEach(x => {
-            this.operClassToEL(this.marks[x], 'vl_map_selarea_hide', true, false)
+            this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
           })
           break;
         case 1: // clear all tap event but selArea
@@ -864,31 +978,49 @@ export default {
           break;
       }
     },
-    // boolean 为 true时 移除class, 默认 false.
-    operClassToEL (elList, className, boolean, isSetAera, path) {
+    // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
+    operClassToEL (elList, className, boolean, isSetAera, path, operLeft) {
       elList.forEach(y => {
-        let _curObj = y.Le.contentDom.classList;
-        if (boolean) {
-          if (_curObj.contains(className)) {
-            if (path) {
-              let point = y.getPosition();
-              if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
-                _curObj.remove(className)
+        let _curObj = y.Le.contentDom.classList, point = y.getPosition();
+        if (operLeft) {
+          if (y.Le.extData.isShow && boolean){
+            if (_curObj.contains(className)) {
+              if (path) {
+                if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
+                  _curObj.remove(className);
+                }
+              } else {
+                _curObj.remove(className);
               }
-            } else {
-              _curObj.remove(className)
+            }
+          } else {
+            if (!_curObj.contains(className)) {
+              _curObj.add(className)
             }
           }
         } else {
-          //移除有className并且dataType 不等于4的元素
-          if (!_curObj.contains(className) && y.Le.extData.dataType !== 4) {
-            if (path && isSetAera) {
-              let point = y.getPosition();
-              if (!window.AMap.GeometryUtil.isPointInRing(point, path)) {
+          if (boolean) {
+            if (_curObj.contains(className)) {
+              if (path) {
+                let point = y.getPosition();
+                if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
+                  _curObj.remove(className)
+                }
+              } else {
+                _curObj.remove(className)
+              }
+            }
+          } else {
+            //没有className并且dataType 不等于4的元素
+            if (!_curObj.contains(className) && y.Le.extData.dataType !== 4) {
+              if (path && isSetAera) {
+                let point = y.getPosition();
+                if (!window.AMap.GeometryUtil.isPointInRing(point, path)) {
+                  _curObj.add(className)
+                }
+              } else {
                 _curObj.add(className)
               }
-            } else {
-              _curObj.add(className)
             }
           }
         }
@@ -1210,7 +1342,7 @@ export default {
     },
     mapTypeCheckAllChange (val) {
       this.marks.forEach(x => {
-        this.operClassToEL(x, 'vl_map_selarea_hide', val, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+        this.operClassToEL(x, this.hideClass, val, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
       })
       this.isIndeterminate = false;
       this.mapTypeList = val ? this.mapTypeListAll : [];
@@ -1449,10 +1581,6 @@ export default {
     cursor: pointer;
     top: 9px;
     left: 3px;
-  }
-  .vl_map_hover_main {
-    left: -96px;
-    bottom: 28px;
   }
   .map_video_box {
     width: 220px;
