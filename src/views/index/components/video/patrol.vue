@@ -336,7 +336,7 @@ export default {
               deviceNum: 5, // 轮巡设备数
               startTime: null, // 开始时间
               endTime: null, // 结束时间
-              roundStatus: 1, // 轮巡状态
+              roundStatus: 1, // 状态（1.待开始 2.进行中 3.已结束 4.关闭）
               deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
             },
             currentDeviceList: null,
@@ -382,7 +382,7 @@ export default {
     // 轮巡处理
     patrolHandler (pData) {
       // 数据中有当前轮巡
-      if (pData && pData.currentRound && pData.currentRoundRemain > 0) {
+      if (pData && pData.currentRound && pData.currentRound.roundStatus === 2 && pData.currentRoundRemain > 0) {
         if (!this.patrolHandlerData.currentRound || this.patrolHandlerData.currentRound.roundNo != pData.currentRound.roundNo) {
           // 不存在正在执行的轮巡 或者 正在执行的轮巡和当前轮巡 不是同一个 ==> 直接执行当前轮巡
           this.patrolClearCurrent(); // 清除正在执行的轮巡
@@ -393,8 +393,8 @@ export default {
         // 当前轮巡为空，则清除正在执行的轮巡
         this.patrolClearCurrent(); // 清除正在执行的轮巡
       }
-      // 当前有下一个轮巡
-      if (pData && pData.nextRound && pData.nextRoundCountDown > 0) {
+      // 当前有下一个轮巡  状态（1.待开始 2.进行中 3.已结束 4.关闭）
+      if (pData && pData.nextRound && pData.nextRound.roundStatus === 1 && pData.nextRoundCountDown > 0) {
         if (!this.patrolHandlerData.nextRound || this.patrolHandlerData.nextRound.roundNo != pData.nextRound.roundNo) {
           // 下一个轮巡不存在 或 下一个轮巡和已储备的下一个轮巡 不是同一个 ==> 则执行下一个轮巡逻辑
           this.patrolClearNext(); // 清除下一个的轮巡信息
