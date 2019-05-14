@@ -17,7 +17,9 @@ const dataList = {
   fileId: 3, // 文件id
   distanceId: 23, // 推送距离
   taskType: 25, // 任务类型
-  taskStatus: 24, // 任务状态
+  taskStatus: 24, // 任务状态,
+  alarmLevel: 11, //告警级别
+  sourceType: 5, //资源来源
 }
 // 处理方式
 const handeMethods = {

@@ -27,11 +27,11 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item prop="rank">
-              <el-select v-model="manageForm.rank" placeholder="告警级别">
+            <el-form-item prop="alarmId">
+              <el-select v-model="manageForm.alarmId" placeholder="告警级别">
                 <el-option label="全部" :value="null"></el-option>
                 <el-option
-                  v-for="item in rankList"
+                  v-for="item in alarmLevelList"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -220,7 +220,7 @@ import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
@@ -231,7 +231,7 @@ export default {
       manageForm: {
         type: null,
         state: null,
-        rank: null,
+        alarmId: null,
         time: null,
         controlObj: null,
         deviceId: null
@@ -239,7 +239,7 @@ export default {
       lastManageForm: {
         type: null,
         state: null,
-        rank: null,
+        alarmId: null,
         time: null,
         controlObj: null,
         deviceId: null
@@ -256,7 +256,12 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],
-      rankList: [],
+      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // 布控管理列表数据
       manageList: [],
       // 翻页数据
@@ -267,7 +272,6 @@ export default {
     }
   },
   created () {
-    this.getDiciData();
     this.getControlList();
     const data = this.$route.query;
     // 外部跳转到详情页
@@ -289,19 +293,6 @@ export default {
     }
   },
   methods: {
-    // 获取告警级别字段
-    getDiciData () {
-      getDiciData(11).then(res => {
-        if (res && res.data) {
-          this.rankList = res.data.map(m => {
-            return {
-              value: parseInt(m.enumField),
-              label: m.enumValue
-            }
-          })
-        }
-      })
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -398,7 +389,7 @@ export default {
         order: null,
         'where.surveillanceType': this.manageForm.type,//布控类型
         'where.status': this.manageForm.state,//布控状态
-        'where.level': this.manageForm.rank,//告警级别
+        'where.level': this.manageForm.alarmId,//告警级别
         'where.dateStart': this.manageForm.time && this.manageForm.time[0],//布控开始时间
         'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
         'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.value,//布控对象id

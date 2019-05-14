@@ -371,6 +371,7 @@ import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {delDialog, stopDialog, flvplayer},
   props: ['state', 'controlId'],
@@ -868,6 +869,7 @@ export default {
           marker.setMap(_this.map);
         }
       }
+      _this.map.setFitView();
     },
     // 地图缩放
     mapZoomSet (val) {
@@ -878,10 +880,9 @@ export default {
     // 初始化地图
     resetMap () {
       let _this = this;
-      console.log(_this.controlState)
       let map = new window.AMap.Map('mapBox', {
-        zoom: 16, // 级别
-        center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
+        zoom: 10,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;

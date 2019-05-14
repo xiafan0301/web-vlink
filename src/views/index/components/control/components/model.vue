@@ -234,7 +234,7 @@
 import {objDeepCopy} from '@/utils/util.js';
 import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAreaId, getAllMonitorGroupList, getAllMonitorList} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
-// import {bonDataTwo, bonDataOne} from '../testData.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   name: 'model',
@@ -875,14 +875,13 @@ export default {
       // 共有部分
       let _this = this, _hoverWindow = null;
       let map = new window.AMap.Map(_this.mapId, {
-        zoom: 12, // 级别27.898681, longitude: 110.690875
-        center: [112.97503, 28.09358], // 中心点坐标[112.97503, 28.09358]
-        // viewMode: '3D' // 使用3D视图
+        zoom: 10,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
-          city: '长沙'
+          city: '溆浦县'
         }
         _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })
@@ -1147,6 +1146,7 @@ export default {
           })
         }
       }
+      _this.map.setFitView();
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
     changeSelectedStatus (_obj, type) {
@@ -1261,7 +1261,7 @@ export default {
     // 获取所有监控设备列表,初始化地图
     getAllMonitorList (type) {
       const params = {
-        ccode: 431224,
+        ccode: mapXupuxian.adcode,
         intelligentCharac: this.featuresId,// 设备特性id
         groupId: this.devGroupId// 设备组id
       }
@@ -1673,7 +1673,7 @@ export default {
     // 获取所有行政区列表
     getAreas () {
       const params = {
-        parentUid: '431224'
+        parentUid: mapXupuxian.adcode
       }
       getAreas(params).then(res => {
         if (res && res.data) {
@@ -1733,20 +1733,6 @@ export default {
       getAllBayontListByAreaId(params).then(res => {
         if (res && res.data) {
           this.allBayData = res.data;
-          // if (selBayList instanceof Array) {
-          //   if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // } else {
-          //   if (selBayList.label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // }
-         
           this.allBayData.forEach(f => {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 2);
