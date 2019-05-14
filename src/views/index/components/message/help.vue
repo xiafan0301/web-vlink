@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mes_help" v-show="pageType === 1">
+    <div class="mes_help" v-if="pageType === 1">
       <div class="help_box">
         <div class="help_form">
           <el-form ref="helpForm" :model="helpForm" class="help_form">
@@ -95,6 +95,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="helpList && helpList.list && helpList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -149,6 +150,14 @@ export default {
   },
   mounted () {
     this.getMutualHelpList();
+    const data = this.$route.query;
+    // 外部跳转到详情页
+    if (data.pageType && data.helpId) {
+      this.$nextTick(() => {
+        this.pageType = parseInt(data.pageType);
+        this.helpId = data.helpId;
+      })
+    }
   },
   methods: {
     // 获取民众互助列表
@@ -201,7 +210,9 @@ export default {
       this.helpId = uid;
     },
     resetForm () {
-      this.$refs['helpForm'].resetFields();
+      for (let key in this.helpForm) {
+        this.helpForm[key] = null;
+      }
       this.getMutualHelpList();
     }
   }

@@ -63,11 +63,11 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item style="width: 192px;" prop="rank">
-          <el-select v-model="mapForm.rank" placeholder="告警级别">
+        <el-form-item style="width: 192px;" prop="alarmId">
+          <el-select v-model="mapForm.alarmId" placeholder="告警级别">
             <el-option label="全部" :value="null"></el-option>
             <el-option
-              v-for="item in rankList"
+              v-for="item in alarmLevelList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
@@ -169,8 +169,9 @@
 import flvplayer from '@/components/common/flvplayer.vue';
 import {random14} from '@/utils/util.js';
 import {getControlObject, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
+import {dataList} from '@/utils/data.js';
 import {getEventList} from '@/views/index/api/api.event.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {flvplayer},
   data () {
@@ -197,7 +198,7 @@ export default {
         obj: null,
         state: 1,
         type: null,
-        rank: null,
+        alarmId: null,
         time: null
       },
       eventList: [],
@@ -214,7 +215,12 @@ export default {
         {label: '半球机', value: 3},
         {label: '红外', value: 4}
       ],
-      rankList: [],
+      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // 地图参数
       map: null,
       devicesList: null, // 布控数据列表
@@ -236,15 +242,11 @@ export default {
       bResize: {}
     }
   },
-  created () {
-    this.getDiciData();
-  },
   mounted () {
     this.getControlMap();
     let map = new window.AMap.Map('mapBox', {
-      zoom: 12, // 级别
-      center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-      // viewMode: '3D' // 使用3D视图
+      zoom: 10,
+      center: mapXupuxian.center
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.map = map;
@@ -341,18 +343,18 @@ export default {
       })
     },
     // 获取告警级别字段
-    getDiciData () {
-      getDiciData(11).then(res => {
-        if (res && res.data) {
-          this.rankList = res.data.map(m => {
-            return {
-              value: parseInt(m.enumField),
-              label: m.enumValue
-            }
-          })
-        }
-      })
-    },
+    // getDiciData () {
+    //   getDiciData(11).then(res => {
+    //     if (res && res.data) {
+    //       this.alarmLevelList = res.data.map(m => {
+    //         return {
+    //           value: parseInt(m.enumField),
+    //           label: m.enumValue
+    //         }
+    //       })
+    //     }
+    //   })
+    // },
     // 获取实时监控的布控设备
     getControlMap () {
       if (this.mapForm.state !== 1) {
@@ -363,7 +365,7 @@ export default {
       const params = {
         deviceType: this.mapForm.type,//设备类型
         surveillanceStatus: this.mapForm.state,//布控状态
-        alarmLevel: this.mapForm.rank,//告警级别
+        alarmLevel: this.mapForm.alarmId,//告警级别
         surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
         surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
@@ -736,7 +738,7 @@ export default {
           _this.markerList.push(marker);
         }
       }
-      // _this.map.setFitView();// 自动适配到合适视野范围
+      _this.map.setFitView();// 自动适配到合适视野范围
       // 当布控状态不是进行中时，清除之前保存的定时器，并return
       clearInterval(_this.timer);
       if (this.mapForm.state !== 1) {

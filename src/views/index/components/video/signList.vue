@@ -348,7 +348,7 @@ export default {
   }
 }
 .show_search {
-  position: absolute; top: 24px; left: 0;
+  position: absolute; top: 24px; left: 0; z-index: 2;
   width: 100%;
   padding-top: 15px; padding-bottom: 5px;
   border-bottom: 1px solid #f6f6f6;

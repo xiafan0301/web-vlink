@@ -183,7 +183,8 @@
         :page-sizes="[100, 200, 300, 400]"
         :page-size="pageSize"
         layout="total, prev, pager, next, jumper"
-        :total="total">
+        :total="total"
+        class="cum_pagination">
       </el-pagination>
       </template>
     </div>

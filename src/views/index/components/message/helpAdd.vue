@@ -91,6 +91,7 @@
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
 import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.message.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   props: ['pageType', 'helpId'],
@@ -166,14 +167,13 @@ export default {
     resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
-        zoom: 16, // 级别
-        center: [112.980377, 28.100175], // 中心点坐标112.980377,28.100175
-        // viewMode: '3D' // 使用3D视图
+        zoom: 10,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
-          city: '长沙'
+          city: '溆浦县'
         }
         _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })

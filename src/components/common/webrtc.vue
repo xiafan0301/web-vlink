@@ -467,7 +467,7 @@ export default {
         if (event.candidate) {
           if (_pc.remoteDescription) {
             // 已经存在remote信息，则直接发送候选 （接收）
-            AS_WEBRTC.wsSend(webrtcConfig.apis.candidate, {
+            _this.wsSend(webrtcConfig.apis.candidate, {
               type: 'CANDIDATE',
               data: JSON.stringify(event.candidate),
               recipient: obj.remoteId,

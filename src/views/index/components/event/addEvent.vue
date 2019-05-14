@@ -252,30 +252,63 @@ export default {
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
-      _this.map = map;
       map.on('click', function(e) {
-        console.log(e);  
-        if (_this.newMarker) {
-          _this.map.remove(_this.newMarker);
-          _this.newMarker = null;
-        }
         _this.addEventForm.longitude = e.lnglat.getLng();
         _this.addEventForm.latitude = e.lnglat.getLat();
-        window.AMap.service('AMap.Geocoder', function () { // 回调函数
-          let geocoder = new window.AMap.Geocoder({});
-          geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
-            let sAddr = '';
+        
+        new window.AMap.service('AMap.Geocoder', function () { // 回调函数
+          let geocoder = null;
+          geocoder = new window.AMap.Geocoder({});
+
+          const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
+
+          geocoder.getAddress(lnglatXY, function (status, result) {
             if (status === 'complete' && result.info === 'OK') {
-              // 获得了有效的地址信息: result.regeocode.formattedAddress
-              // console.log(result.regeocode.formattedAddress);
-              sAddr = result.regeocode.formattedAddress;
+              console.log('11111')
+              _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
+              _this.mapMark(e.lnglat.getLng(), e.lnglat.getLat(), _this.addEventForm.eventAddress);
             }
-            _this.addEventForm.eventAddress = sAddr;
-            _this.mapMark(_this.addEventForm);
           });
         });
       });
-      _this.mapMark(_this.addEventForm);
+      _this.map = map;
+    },
+    // 地图标记
+    mapMark (longitude, latitude, eventAddress) {
+      console.log('mmmmmm')
+      let _this = this;
+      if (_this.newMarker) {
+        _this.map.remove(_this.newMarker);
+        _this.newMarker = null;
+      }
+      let hoverWindow = null, offSet = [-20.5, -48];
+      if (longitude > 0 && latitude > 0) {
+        _this.newMarker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [longitude, latitude],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          extData: '',
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_control_30"></div>'
+        });
+        _this.newMarker.on('mouseover', function () {
+          let sContent = '<div class="vl_map_hover" >' +
+            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + eventAddress + '</p></div></div>';
+          hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: sContent
+          });
+          hoverWindow.open(_this.map, new window.AMap.LngLat(longitude, latitude));
+        });
+        _this.newMarker.on('mouseout', function () {
+          if (hoverWindow) { hoverWindow.close(); }
+        });
+        _this.map.setCenter([longitude, latitude]);
+        _this.newMarker.setMap(_this.map);
+      }
     },
     // 获取处理单位
     getHandleUnit () {
@@ -316,44 +349,7 @@ export default {
     resetMap () {
       this.initMap();
     },
-   // 地图标记
-    mapMark (obj) {
-      let _this = this;
-      _this.map.clearMap();
-      let hoverWindow = null;
-      if (obj.longitude > 0 && obj.latitude > 0) {
-        let offSet = [-20.5, -48];
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
-          position: [obj.longitude, obj.latitude],
-          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // 自定义点标记覆盖物内容
-          content: '<div class="vl_icon vl_icon_control_30"></div>'
-        });
-        marker.setMap(_this.map);
-        _this.newMarker = marker;
-        // hover
-        marker.on('mouseover', function () {
-          let sContent = '<div class="vl_map_hover" >' +
-            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + obj.eventAddress + '</p></div></div>';
-          hoverWindow = new window.AMap.InfoWindow({
-            isCustom: true,
-            closeWhenClickMap: true,
-            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-            content: sContent
-          });
-          // aCenter = mEvent.target.F.position
-          hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-          hoverWindow.on('close', function () {
-            // console.log('infoWindow close')
-          });
-        });
-        marker.on('mouseout', function () {
-          if (hoverWindow) { hoverWindow.close(); }
-        });
-      }
-    },
+   
     // 事件地址change
     changeAddress () {
       console.log('aaa')
@@ -764,5 +760,4 @@ export default {
     }
   }
 }
-
 </style>

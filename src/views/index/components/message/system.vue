@@ -74,6 +74,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="systemList && systemList.list && systemList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
