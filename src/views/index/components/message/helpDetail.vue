@@ -90,7 +90,8 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
-import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
+import {getEventDetail} from '@/views/index/api/api.event.js';
+import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
 import {dataList} from '@/utils/data.js';
 export default {
   components: {emotion},
@@ -125,7 +126,7 @@ export default {
   methods: {
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
-      getMutualHelpDetail(this.helpId).then(res => {
+      getEventDetail(this.helpId).then(res => {
         if (res && res.data) {
           this.helpDetail = res.data;
           // 生产可供预览的图片
@@ -179,9 +180,10 @@ export default {
       }
       const params = {
         pageNum: this.pageNum,
-        pageSize: this.pageSize
+        pageSize: this.pageSize,
+        'where.eventId': this.helpId
       }
-      getCommentInfoList(params, this.helpId).then(res => {
+      getCommentInfoList(params).then(res => {
         if (res && res.data) {
           this.total = res.data.total;
           this.commentList = this.commentList.concat(res.data.list);

@@ -891,7 +891,7 @@ export default {
           let   _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main">`
             if (_this.modelType === '1' || _this.modelType === '2') {
-              _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
+              _sContent += `<ul><li>输入追踪点后可以改变范围半径大小</li></ul>`;
             } else if (_this.modelType === '4') {
               _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
             }
