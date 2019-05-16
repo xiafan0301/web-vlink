@@ -146,7 +146,7 @@
 import flvplayer from '@/components/common/flvplayer.vue';
 import webrtc from '@/components/common/webrtc.vue';
 import {formatDate, h2canvas, objDeepCopy, random14} from '../../../../utils/util.js';
-import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign} from '../../api/api.map.js';
+import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
 import {apiVideoPlay} from "@/views/index/api/api.video.js";
 import {getAlarmListByDev} from '@/views/index/api/api.control.js';
 export default {
@@ -185,7 +185,8 @@ export default {
       curSignObj: {},
       delLoading: false,
       marks: [[], [], [], [], []], // 地图上的覆盖物集合
-      videoMarker: {curObj: [], marks: [], players: []},
+      videoMarker: {curObj: [], marks: [], players: []}, // 摄像头播放视频对象集合
+      bayonetOpened: [], // 点开过的卡口
       signInfoWin: null, // 标注信息窗口对象
       addSignInfoWin: null, // 新增标注对象
       showInfoWin: false, // 信息窗体显示状态
@@ -217,7 +218,6 @@ export default {
   watch: {
     mapInfoVal (val) {
       if (!val) {
-        this.$refs.mapLeftTree.filter(val);
         this.mapTreeData[0].infoList.forEach(x => {
           x.infoList.forEach(y => {
             this.mapTypeListAll.forEach(z => {
@@ -226,7 +226,16 @@ export default {
             y.isShow = true;
           })
         })
-        this.updateNumberss();
+        this.mapTypeList.forEach(u => {
+          this.updateNumberss(true, u, false);
+          setTimeout(() => {
+            this.updateNumberss(true, u, true);
+          }, 0)
+        })
+        this.mapTypeList.forEach(u => {
+          this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+        })
+        this.$refs.mapLeftTree.filter(val);
       }
     },
     markInfoVal (val) {
@@ -261,9 +270,12 @@ export default {
       // 更新地图Top栏 跟
       arr.forEach(u => {
         this.updateNumberss(true, u, bool);
+        setTimeout(() => {
+          this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+        }, 0)
       })
       // 更新地图
-      this.operClassToEL(this.marks[arr[0]], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
+      // this.operClassToEL(this.marks[arr[0]], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
     }
   },
   mounted () {
@@ -292,9 +304,50 @@ export default {
           draggable: false, // 是否可拖动
           content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
         })
+        // 给范围内外的元素添加isInArea,原始数据也同样设置
+        let m;
+        _this.mapTreeData[0].infoList.forEach(x => {
+          x.infoList.forEach(y => {
+            if (y.longitude && y.latitude) {
+              m = new window.AMap.Marker({
+                position: [y.longitude, y.latitude]
+              })
+              let point = m.getPosition();
+              if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path) && y.isShow) {
+                y['isInArea'] = true;
+              } else {
+                y['isInArea'] = false;
+              }
+              m = null;
+            }
+          })
+          // 原始数据也加上isInArea
+          _this.mapTypeList.forEach(z => {
+            x[_this.key2Type[z]].forEach(y => {
+              if (y.longitude && y.latitude) {
+                m = new window.AMap.Marker({
+                  position: [y.longitude, y.latitude]
+                })
+                let point = m.getPosition();
+                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path)) {
+                  y['isInArea'] = true;
+                } else {
+                  y['isInArea'] = false;
+                }
+                m = null;
+              }
+            })
+          })
+        })
+        console.log(_this.mapTreeData[0])
+        _this.updateNumberss(false, '', false, true);
+        setTimeout(() => {
+          let allNode = _this.$refs.mapLeftTree.store._getAllNodes();
+          _this.objSetItem(allNode, {expanded: true})
+        }, 30)
         // 给范围内的marker加class
-        _this.marks.forEach(x => {
-          _this.operClassToEL(x, _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+        _this.mapTypeList.forEach(u => {
+          _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
         })
       }
     });
@@ -309,14 +362,31 @@ export default {
   methods: {
     filterMapTree () {
       if (this.mapInfoVal) {
+        // 如果过滤前已经有checkbox未被勾选，需要先把对应原始数据的数据置为 false
+        // let _arr = this.mapTypeListAll.filter(x => !this.mapTypeList.includes(x))
+        this.mapTreeData[0].infoList.forEach(x => {
+          this.mapTypeListAll.forEach(y => {
+            if (x.infoName.indexOf(this.mapInfoVal) === -1) {
+              x[this.key2Type[y]].forEach(z => {
+                if (z.infoName.indexOf(this.mapInfoVal) === -1) {
+                  z.isShow = false;
+                }
+              })
+            }
+          })
+        })
         this.$refs.mapLeftTree.filter(this.mapInfoVal);
-        console.log(this.mapTreeData[0])
         this.updateNumberss();
-        this.updateVillageIsShow();
+        this.marks.forEach((x, _index) => {
+          if (_index < 4) {
+            this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+          }
+        })
+        console.log(this.mapTreeData[0])
       }
     },
     // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素
-    updateNumberss (boolean, key, isAdd) {
+    updateNumberss (boolean, key, isAdd, isSetArea) {
       let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
       this.mapTreeData[0].infoList.forEach(x => {
         if (boolean) {
@@ -324,8 +394,14 @@ export default {
           if (isAdd) {
             _arr = objDeepCopy(x[this.key2Type[key]]);
             _arr.forEach(m => {
-              if (m.isShow) {
-                x.infoList.unshift(m)
+              if (this.selAreaPolygon) {
+                if (m.isInArea && m.isShow) {
+                  x.infoList.unshift(m)
+                }
+              } else {
+                if (m.isShow) {
+                  x.infoList.unshift(m)
+                }
               }
             })
             // x.infoList有数据了之后，把“无相关数据”清除
@@ -333,9 +409,12 @@ export default {
               x.infoList.pop();
             }
           } else {
-            if (x.isShow) {
-              x.infoList = x.infoList.filter(u => u.dataType !== key);
-            }
+            x.infoList.forEach(t => {
+              if (t.dataType === key && t.isShow) {
+                t.isShow = false;
+              }
+            })
+            x.infoList = x.infoList.filter(z => z.isShow);
             if (x.infoList.length === 0) {
               x.infoList.push({infoName: '无相关数据'})
             }
@@ -346,30 +425,63 @@ export default {
             }
           })
         } else {
-          if(this.mapInfoVal && x.infoName.indexOf(this.mapInfoVal) !== -1) { // 有镇数据符合，镇下所有数据都符合
-            x.infoList.forEach(y => {
-              if (this.mapTypeList.indexOf(y.dataType) !== -1) {
-                y.isShow = true;
-                newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-              } else {
-                y.isShow = false;
+          if (isSetArea) {
+            // 有画区域
+            if (this.selAreaPolygon) {
+              x.infoList = x.infoList.filter(z => z.isInArea);
+              if (x.infoList.length === 0) {
+                x.infoList.push({infoName: '无相关数据'})
               }
-            })
-          } else {
-            x.infoList.forEach(y => {
-              if (y.infoName.indexOf(this.mapInfoVal) !== -1 && this.mapTypeList.indexOf(y.dataType) !== -1) {
-                y.isShow = true;
-                newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
-              } else {
-                y.isShow = false;
+              x.infoList.forEach(y => {
+                if (y.isInArea && this.mapTypeList.indexOf(y.dataType) !== -1) {
+                  newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+                }
+              })
+            } else {
+              x.infoList = [];
+              this.mapTypeList.forEach(u => {
+                let _arr1 = objDeepCopy(x[this.key2Type[u]]);
+                _arr1.forEach(m => {
+                  if (m.isShow) {
+                    x.infoList.unshift(m)
+                  }
+                })
+              })
+              if (x.infoList.length === 0) {
+                x.infoList.push({infoName: '无相关数据'})
               }
-            })
-          }
-          this.marks.forEach((x, _index) => {
-            if (_index < 4) {
-              this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
+              x.infoList.forEach(y => {
+                if (y.isShow && this.mapTypeList.indexOf(y.dataType) !== -1) {
+                  newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+                }
+              })
             }
-          })
+          } else {
+            if(this.mapInfoVal && x.infoName.indexOf(this.mapInfoVal) !== -1) { // 有镇数据符合，镇下所有数据都符合
+              x.infoList.forEach(y => {
+                if (this.mapTypeList.indexOf(y.dataType) !== -1) {
+                  y.isShow = true;
+                  newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+                } else {
+                  y.isShow = false;
+                }
+              })
+            } else {
+              x.infoList.forEach(y => {
+                if (y.infoName.indexOf(this.mapInfoVal) !== -1) {
+                  y.isShow = true;
+                  if (this.mapTypeList.indexOf(y.dataType) !== -1) {
+                    newNum[y.dataType][this.constObj[y.dataType]._key] += 1;
+                  }
+                } else {
+                  if (y.infoName !== '无相关数据') {
+                    y.isShow = false;
+                    x[this.key2Type[y.dataType]].find(e => e.uid === y.uid)['isShow'] = false;
+                  }
+                }
+              })
+            }
+          }
         }
       })
       newNum.forEach((x, _index) => {
@@ -428,49 +540,110 @@ export default {
       }
     },
     // 根据点击类型，地图响应
-    signListTap (obj, classType) {
-      let newObj, _id = 'flv' + random14();
-      let _index = this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
-      if ( _index !== -1) {
-        $('#' + this.videoMarker.curObj[_index]._id).show();
-        this.videoMarker.marks[_index].setPosition([obj.longitude, obj.latitude])
-//        this.videoMarker.players[_index].load();
-        this.videoMarker.players[_index].play();
-        return false;
-      }
-      if (classType === 'Marker') {
-        newObj = objDeepCopy(obj);
-        this.objSetItem([newObj], {dataType: 5, _id: _id, _index: this.videoMarker.curObj.length})
+    signListTap (objList, classType, originObj) {
+      if (originObj) {
+        let newObj, _id = 'flv' + random14(), _indexList = [];
+        if (objList.length > 1) {
+          this.map.setZoomAndCenter(16, [originObj.longitude, originObj.latitude])
+        }
+        objList.forEach((x, _i) => {
+          let _index = this.videoMarker.curObj.findIndex(y => y.uid === x.uid);
+          if (_index !== -1){
+            _indexList.push(_index);
+            let offsetXY = this.getXY(_i)
+            $('#' + this.videoMarker.curObj[_index]._id).show();
+            this.videoMarker.marks[_index].setPosition([originObj.longitude + offsetXY.x, originObj.latitude + offsetXY.y])
+            this.videoMarker.players[_index].play();
+          }
+          x['_id'] = _id + _i;
+          x['_index'] = this.videoMarker.curObj.length + _i;
+        })
+        if (_indexList.length) {
+          if (_indexList.length === 1) {
+            if (!document.getElementById(this.videoMarker.curObj[_indexList[0]]._id).parentNode.classList.contains('vl_map_hover0')) {
+              document.getElementById(this.videoMarker.curObj[_indexList[0]]._id).parentNode.classList.add('vl_map_hover0')
+            }
+          } else {
+            _indexList.forEach(z => {
+              if (document.getElementById(this.videoMarker.curObj[_indexList[z]]._id).parentNode.classList.contains('vl_map_hover0')) {
+                document.getElementById(this.videoMarker.curObj[_indexList[z]]._id).parentNode.classList.remove('vl_map_hover0')
+              }
+            })
+          }
+          return false;
+        }
+        newObj = objDeepCopy(objList);
+        this.objSetItem(newObj, {dataType: 5})
+        newObj.forEach((x, _i) => {
+          let _pClass = 'vl_map_hover', offsetXY;
+          setTimeout(() => {
+            // _pClass += _i
+            // 计算卡口每个视频的偏移量，来修改mark可移动的区域
+            offsetXY = this.getXY(_i)
+            let sContent = '<div class="vl_map_hover ' + _pClass + '" >' + this.mapHoverInfo(x) + '</div>';
+            let options = {
+              offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+              content: sContent,
+              position: [originObj.longitude + offsetXY.x, originObj.latitude + offsetXY.y], topWhenClick: true,draggable: true, map: this.map
+            }
+            let marker = new window.AMap[classType](options);
+            this.videoMarker.curObj.push(x)
+            this.videoMarker.marks.push(marker)
+            setTimeout(() => {
+              this.$_showLoading({target: '#' + x._id})
+              this.initPlayer(x);
+            }, 200)
+          }, 1000 * _i)
+        })
       } else {
-        newObj = obj;
-      }
-      let sContent = '<div class="vl_map_hover" >' + this.mapHoverInfo(newObj) + '</div>';
-      let options = {
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        content: sContent
-      }
-      if (classType === 'Marker') {
-        this.objSetItem([options], {position: [obj.longitude, obj.latitude], topWhenClick: true,draggable: true, map: this.map})
-        let marker = new window.AMap[classType](options);
-        this.videoMarker.curObj.push(newObj)
-        this.videoMarker.marks.push(marker)
-        setTimeout(() => {
-          this.$_showLoading({target: '#' + _id})
-          this.initPlayer();
-        }, 200)
-      } else {
-        this.objSetItem([options], {closeWhenClickMap: true,isCustom: true})
+        let sContent = '<div class="vl_map_hover" >' + this.mapHoverInfo(objList) + '</div>';
+        let options = {
+          offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+          content: sContent,
+          closeWhenClickMap: true,isCustom: true
+        }
+        this.map.setZoomAndCenter(16, [objList.longitude, objList.latitude])
         this.hoverWindow = new window.AMap[classType](options);
         this.hoverWindow.on('open', function () { this.showInfoWin = true; })
         this.hoverWindow.on('close', function () { this.showInfoWin = false; })
-        this.hoverWindow.open(this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+        this.hoverWindow.open(this.map, new window.AMap.LngLat(objList.longitude, objList.latitude));
       }
+    },
+    getXY (i) {
+     let obj = {x: 0, y: 0}
+     switch (i) {
+       case 1:
+         obj.x = 0.0047;
+         obj.y = -0.0025;
+         break;
+       case 2:
+         obj.y = -0.0051
+         break;
+       case 3:
+         obj.x = -0.0047;
+         obj.y = -0.0025;
+         break;
+       case 4:
+         obj.x = -0.0047;
+         break;
+       case 5:
+         obj.x = 0.0047;
+         break;
+       case 6:
+         obj.x = 0.0047;
+         obj.y = -0.0051;
+         break;
+       case 7:
+         obj.x = -0.0047;
+         obj.y = -0.0051
+         break;
+     }
+     return obj;
     },
     // 点击地图信息
     mapInfoListTap (data) {
       if (data.areaType === '5') {
         this.signListTap(data, 'InfoWindow');
-        this.map.setZoomAndCenter(16, [data.longitude, data.latitude])
       }
     },
     //获取地图信息列表
@@ -500,17 +673,11 @@ export default {
         let carList;
         carList = [
           {
-            name: '卢我是假车辆11',
+            name: x.areaName + '的假车辆',
             addr: '长沙市天心区',
-            uid: 1,
-            latitude: 28.099869,
-            longitude: 112.935227
-          }, {
-            name: '我是假车辆22',
-            addr: '创谷广告园',
-            uid: 2,
-            latitude: 28.393596,
-            longitude: 112.17623
+            uid: random14(),
+            latitude: 28.099869 + Math.random() / 10,
+            longitude: 112.935227 + Math.random() / 10
           }
         ];
         x['infoName'] = x.areaName;
@@ -553,6 +720,9 @@ export default {
     filterNode(value, data, node) {
       if (!value) return true;
       let pData = node.parent.data;
+      if (pData.areaType === '3' || data.infoName === '无相关数据' || data.areaType === '3') {
+        return false;
+      }
       if (data.infoName.indexOf(value) !== -1) {
         if (data.dataType && this.mapTypeList.indexOf(data.dataType) === -1) {
           pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = false;
@@ -562,7 +732,7 @@ export default {
           data['isShow'] = true;
           if (pData.areaType === '4') {
             pData['isShow'] = true;
-            pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = true;
+            // pData[this.key2Type[data.dataType]].find(x => x.uid === data.uid)['isShow'] = true;
           } else {
             this.mapTypeList.forEach(k => {
               this.objSetItem(data[this.key2Type[k]], {isShow: true})
@@ -625,7 +795,13 @@ export default {
         } else {
           // '重置'
           let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
-          let ss = objDeepCopy(oldArr);
+          let ss;
+          if (this.selAreaPolygon) {
+            ss = objDeepCopy(oldArr.filter(y => y.isInArea && y.isShow))
+          } else {
+            ss = objDeepCopy(oldArr.filter(y => y.isShow))
+          }
+          if (ss.length === 0) ss.push({infoName: '无相关数据'})
           curData.infoList = ss;
         }
       } else {
@@ -634,11 +810,16 @@ export default {
         if (curData.tabActiveList.length === 1) {
           // '第一次'
           let _ar = [];
-          if (curData[key].length) {
-            _ar = objDeepCopy(curData[key])
+          if (curData[key].length && curData[key].find(x => x.isShow)) {
+            if (this.selAreaPolygon) {
+              _ar = objDeepCopy(curData[key].filter(y => y.isInArea))
+            } else {
+              _ar = objDeepCopy(curData[key].filter(y => y.isShow))
+            }
             _ar.forEach(k => {
               k.infoName += ' ';
             })
+            if (_ar.length === 0) _ar.push({infoName: '无相关数据'})
           } else {
             _ar.push({infoName: '无相关数据'})
           }
@@ -647,20 +828,28 @@ export default {
           // '已经有了再添加'
           let _arr3 = [];
           // 判断目前显示的是不是 无相关数据
+          if (this.selAreaPolygon) {
+            _arr3 = objDeepCopy(curData[key].filter(y => y.isInArea))
+          } else {
+            _arr3 = objDeepCopy(curData[key].filter(y => y.isShow))
+          }
           if (curData.infoList[0].infoName === '无相关数据') {
-            if (curData[key].length) {
+            if (curData[key].length && curData[key].find(x => x.isShow)) {
               curData.infoList = [];
-              _arr3 = objDeepCopy(curData[key]);
+              // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
               _arr3.forEach(m => {
                 curData.infoList.unshift(m)
               })
+              // _arr3 = _arr3.filter(x => x.isShow)
             }
           } else {
-            _arr3 = objDeepCopy(curData[key]);
+            // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
             _arr3.forEach(m => {
               curData.infoList.unshift(m)
             })
+            // _arr3 = _arr3.filter(x => x.isShow)
           }
+          if (curData.infoList.length === 0) curData.infoList.push({infoName: '无相关数据'})
         }
       }
       this.updateDom();
@@ -675,16 +864,6 @@ export default {
         })
       })
       return obj;
-    },
-    updateVillageIsShow () {
-      this.mapTreeData[0].infoList.forEach(x => {
-        console.log(x.infoList, x.infoList.forEach(z => console.log(z.isShow)))
-        if (x.infoList.find(y => y.isShow)) {
-          x['isShow'] = true;
-        } else {
-          x['isShow'] = false;
-        }
-      })
     },
     // 地图标记
     mapMark (data, isSetView) {
@@ -709,24 +888,68 @@ export default {
                 content: '<div id="' + sId + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
               });
               _this.marks[obj.dataType].push(marker);
-              // 点击地图上的摄像头/卡口播放视频
+              // 点击地图上的摄像头播放视频
               if (obj.dataType === 0) {
                 marker.on('click', function () {
                   if (obj.deviceStatus === 1) {
-                    _this.signListTap(obj, 'Marker');
+                    _this.signListTap([obj], 'Marker', obj);
                   } else {
                     _this.$message.warning('该设备异常')
                   }
-                });
+                })
+              }
+              // 卡口视频
+              if (obj.dataType === 1) {
+                marker.on('click', function () {
+                  let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
+                  if (bayIndex === -1) {
+                    MapGetBayonetInfo({id: obj.uid})
+                      .then(res => {
+                          if (res) {
+                            if (res.data.deviceBasicInfoList.length) {
+                              let deviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus === 1);
+                              let badDeviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus !== 1);
+                              if (deviceList.length) {
+                                _this.signListTap(deviceList, 'Marker', obj);
+                                let _bay = {uid: obj.uid, deviceList: deviceList}
+                                _this.bayonetOpened.push(_bay)
+                              }
+                              if (badDeviceList.length) {
+                                let badName = badDeviceList.map(n => {return n.deviceName})
+                                _this.$message.warning('该卡口里设备' + badName.jion(',') + '异常')
+                              }
+                            } else {
+                              _this.$message.warning('该卡口没有关联设备')
+                            }
+                          }
+                        })
+                  } else {
+                    _this.signListTap(_this.bayonetOpened[bayIndex].deviceList, 'Marker', obj);
+                  }
+                })
               }
               // hover
               marker.on('mouseover', function () {
                 // 判断是否已经打开视频
-                let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
-                if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
-                  return false
-                }
                 $('#' + sId).addClass('vl_icon_map_hover_mark' + obj.dataType)
+                if (obj.dataType === 0) {
+                  let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
+                  if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
+                    document.getElementById(_this.videoMarker.curObj[_index]._id).style.border = '2px solid #FA453A'
+                    return false
+                  }
+                } else if (obj.dataType === 1) {
+                  let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
+                  if (bayIndex !== -1) {
+                    _this.bayonetOpened[bayIndex].deviceList.forEach(g => {
+                      let _index = _this.videoMarker.curObj.findIndex(x => x.uid === g.uid);
+                      if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
+                        document.getElementById(_this.videoMarker.curObj[_index]._id).style.border = '2px solid #FA453A'
+                      }
+                    })
+                    return false
+                  }
+                }
                 let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
                 _this.hoverWindow = new window.AMap.InfoWindow({
                   isCustom: true,
@@ -739,6 +962,22 @@ export default {
                 _this.hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
               });
               marker.on('mouseout', function () {
+                if (obj.dataType === 0) {
+                  let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
+                  if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
+                    document.getElementById(_this.videoMarker.curObj[_index]._id).style.border = '1px solid #0C70F8'
+                  }
+                } else if (obj.dataType === 1) {
+                  let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
+                  if (bayIndex !== -1) {
+                    _this.bayonetOpened[bayIndex].deviceList.forEach(g => {
+                      let _index = _this.videoMarker.curObj.findIndex(x => x.uid === g.uid);
+                      if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
+                        document.getElementById(_this.videoMarker.curObj[_index]._id).style.border = '1px solid #0C70F8'
+                      }
+                    })
+                  }
+                }
                 $('#' + sId).removeClass('vl_icon_map_hover_mark' + obj.dataType)
               })
             }
@@ -760,7 +999,7 @@ export default {
       } else if (data.dataType === 1) {
         str += '<li><span>卡口名称：</span>' + data.infoName + '</li>';
         str += '<li><span>卡口编号：</span>' + data.bayonetNo + '</li>';
-        str += '<li><span>设备数量：</span>' + '待添加字段' + '</li>';
+        str += '<li><span>设备数量：</span>' + data.devNum + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 2) {
         str += '<li><span>车辆名称：</span>' + data.infoName + '</li>';
@@ -911,8 +1150,9 @@ export default {
           _this.map.remove(_this.selAreaPolygon);
           _this.map.emit('rightclick');
           _this.selAreaPolygon = null;
+          _this.updateNumberss(false, '', false, true);
           _this.mapTypeList.forEach(x => {
-            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null, true)
+            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
           })
         }
         // close small video
@@ -979,11 +1219,12 @@ export default {
       }
     },
     // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
-    operClassToEL (elList, className, boolean, isSetAera, path, operLeft) {
+    operClassToEL (elList, className, boolean, isSetAera, path) {
       elList.forEach(y => {
         let _curObj = y.Le.contentDom.classList, point = y.getPosition();
-        if (operLeft) {
-          if (y.Le.extData.isShow && boolean){
+        let b = this.updateMarkVisible(y.Le.extData)
+        if (b){
+          if (boolean) {
             if (_curObj.contains(className)) {
               if (path) {
                 if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
@@ -991,23 +1232,6 @@ export default {
                 }
               } else {
                 _curObj.remove(className);
-              }
-            }
-          } else {
-            if (!_curObj.contains(className)) {
-              _curObj.add(className)
-            }
-          }
-        } else {
-          if (boolean) {
-            if (_curObj.contains(className)) {
-              if (path) {
-                let point = y.getPosition();
-                if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
-                  _curObj.remove(className)
-                }
-              } else {
-                _curObj.remove(className)
               }
             }
           } else {
@@ -1023,14 +1247,32 @@ export default {
               }
             }
           }
+        } else {
+          if (!_curObj.contains(className)) {
+            _curObj.add(className)
+          }
         }
       })
+    },
+    // 找到设备当前显示状态，更新地图mark的extData里的状态
+    updateMarkVisible(obj) {
+      let bool, arr = this.mapTreeData[0].infoList;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i][this.key2Type[obj.dataType]].find(x => x.uid === obj.uid) && this.mapTypeList.indexOf(obj.dataType) !== -1) {
+          bool = arr[i][this.key2Type[obj.dataType]].find(x => x.uid === obj.uid).isShow;
+          break;
+        } else {
+          bool = false;
+        }
+      }
+      return bool;
     },
     // 选择区域
     selArea () {
       this.activeType === 1 ? this.activeType = 0 : this.activeType = 1;
       this.resetTools(1);
       if (this.activeType === 0) {
+        this.map.setDefaultCursor('');
         return false;
       }
       this.map.setDefaultCursor('crosshair');
@@ -1341,9 +1583,6 @@ export default {
       }
     },
     mapTypeCheckAllChange (val) {
-      this.marks.forEach(x => {
-        this.operClassToEL(x, this.hideClass, val, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
-      })
       this.isIndeterminate = false;
       this.mapTypeList = val ? this.mapTypeListAll : [];
     },
@@ -1354,9 +1593,9 @@ export default {
     },
 
     // 视频播放
-    initPlayer () {
+    initPlayer (curV) {
       this.videoLoadingFailed = false;
-      let curV = this.videoMarker.curObj[this.videoMarker.curObj.length - 1];
+      // let curV = this.videoMarker.curObj[this.videoMarker.curObj.length - 1];
       let obj = {deviceId: curV.uid};
       apiVideoPlay(obj).then(res => {
         if (res && res.data) {
@@ -1638,5 +1877,37 @@ export default {
       width: 100%;
       height: 100%;
     }
+  }
+  .vl_map_hover1 {
+    right: -220px;
+    top: 132px;
+  }
+  .vl_map_hover2 {
+    right: 0px;
+    top: 268px;
+  }
+  .vl_map_hover3 {
+    right: 220px;
+    top: 134px;
+  }
+  .vl_map_hover4 {
+    right: 220px;
+    top: 134px;
+  }
+  .vl_map_hover5 {
+    right: -220px;
+    top: 0px;
+  }
+  .vl_map_hover6 {
+    right: -220px;
+    top: 268px;
+  }
+  .vl_map_hover7 {
+    right: 220px;
+    top: 268px;
+  }
+  .vl_map_hover0 {
+    right: 0px;
+    top: 0px;
   }
 </style>

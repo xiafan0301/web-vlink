@@ -181,4 +181,17 @@ export function MapDELETEsigns(params) {
     mode: 'base'
   })
 }
+/**
+ * MapGetBayonetInfo
+ 查看卡口详情接口
+ * @param {} params
+ */
+export function MapGetBayonetInfo(params) {
+  return request({
+    url: '/bayonet-service/bayonet-info',
+    method: 'get',
+    mode: 'base',
+    params: params
+  })
+}
 /*--------------------------  地图end  ---------------------------------*/
