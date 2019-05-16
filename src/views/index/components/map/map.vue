@@ -903,9 +903,11 @@ export default {
                 marker.on('click', function () {
                   let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
                   if (bayIndex === -1) {
+                    _this.$_showLoading({target: '.vl_map'})
                     MapGetBayonetInfo({id: obj.uid})
                       .then(res => {
                           if (res) {
+                            _this.$_hideLoading();
                             if (res.data.deviceBasicInfoList.length) {
                               let deviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus === 1);
                               let badDeviceList = res.data.deviceBasicInfoList.filter(s => s.deviceStatus !== 1);
