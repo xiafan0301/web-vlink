@@ -186,7 +186,7 @@ export default {
     // 提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        let params, attachmentList = [], taskProcessDto = {};
+        let attachmentList = [], taskProcessDto = {};
         if (valid) {
           if (this.uploadImgList.length > 3) {
             this.$message({
@@ -202,9 +202,10 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
+          let cProcessType = this.processType == 3 ? 2 : 5;
           taskProcessDto = {
               processContent: this.endForm.summary,
-              processType: this.processType 
+              processType: cProcessType 
           }
           if(attachmentList && attachmentList.length > 0) {
               taskProcessDto['attachmentList'] = attachmentList
@@ -212,12 +213,12 @@ export default {
           if(this.processType == 3) {
               taskProcessDto['uid'] = this.endForm.reportUser
           }
-          params = {
+          /* params = {
               eventId: this.$route.query.eventId,
               taskProcessDto: taskProcessDto
-            }
+            } */
           this.isEndLoading = true;
-          taskProcess(params)
+          taskProcess(taskProcessDto,this.$route.query.eventId)
             .then(res => {
               if (res) {
                 this.$message({

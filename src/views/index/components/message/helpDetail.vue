@@ -36,15 +36,20 @@
           <img src="//via.placeholder.com/32x32" alt="">
           <ul>
             <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserName}}）</span></li>
-            <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{transcoding(sourceTypeList, item.eventSource)}}</span></li>
-            <li class="con_three">{{transcoding(participateTypeList, item.participateType)}}</li>
+            <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{dicFormater(sourceType, String(item.eventSource))}}</span></li>
+            <li class="con_three">{{dicFormater(participateType, String(item.participateType))}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
             <li class="con_five" v-if="item.sysAppendixInfoList.length > 0" :id="'imgsTwo_' + item.uid">
               <!-- <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid"> -->
             </li>
-            <li class="con_six" v-if="!item.replayContent">
+            <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
               <div><i class="vl_icon vl_icon_message_4"></i><span class="vl_f_666" @click="popShield(item, index)">屏蔽该评论</span></div>
+            </li>
+            <li class="reply_content" v-if="item.replayList.length > 0 || (commentId === item.uid && isConfirmation)">
+              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
+              <p>回复内容：</p>
+              <p v-for="_item in item.replayList" :key="_item.uid" v-html="_item.replayContent ? _item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion) : ''" class="vl_f_333"></p>
             </li>
             <el-collapse-transition>
               <li class="con_seven" v-if="commentId === item.uid && !isConfirmation">
@@ -60,11 +65,6 @@
                 </div>
               </li>
             </el-collapse-transition>
-            <li class="reply_content" v-if="item.replayContent || (commentId === item.uid && isConfirmation)">
-              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
-              <p>回复内容：</p>
-              <p v-html="item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion)" class="vl_f_333"></p>
-            </li>
           </ul>
         </div>
         <div class="list_more">
@@ -90,8 +90,10 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
-import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
-import {getDiciData} from '@/views/index/api/api.js';
+import {objDeepCopy} from '../../../../utils/util.js';
+import {getEventDetail} from '@/views/index/api/api.event.js';
+import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {emotion},
   props: ['helpId'],
@@ -100,8 +102,8 @@ export default {
       pageNum: 0,
       pageSize: 5,
       total: 0,
-      participateTypeList: [],
-      sourceTypeList: [],
+      participateType: dataList.participateType,
+      sourceType: dataList.sourceType,
       helpDetail: null,//民众互助详情
       commentList: [],//评论列表内容
       content: '',//评论内容,
@@ -110,7 +112,6 @@ export default {
       commentId: null,//评论id
       shieldId: null,//屏蔽id
       shieldUserId: null,//被屏蔽用户id
-      userId: null,//用户id
       commentIndex: null,//评论下标
       // 屏蔽弹窗参数
       shieldDialog: null,
@@ -119,39 +120,13 @@ export default {
     }
   },
   mounted () {
-    this.getParticipateTypeDiciData();
-    this.getSourceTypeDiciData();
     this.getMutualHelpDetail();
     this.getCommentInfoList();
   },
   methods: {
-    // 转码
-    transcoding (data, code) {
-      if (code) {
-        return data && data.find(f => f.enumField === String(code)).enumValue;
-      } else {
-        return ''
-      }
-    },
-    // 获取参与类型字典
-    getParticipateTypeDiciData () {
-      getDiciData(6).then(res => {
-        if (res && res.data) {
-          this.participateTypeList = res.data;
-        }
-      })
-    },
-    // 获取资源来源字典
-    getSourceTypeDiciData () {
-      getDiciData(5).then(res => {
-        if (res && res.data) {
-          this.sourceTypeList = res.data;
-        }
-      })
-    },
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
-      getMutualHelpDetail(this.helpId).then(res => {
+      getEventDetail(this.helpId).then(res => {
         if (res && res.data) {
           this.helpDetail = res.data;
           // 生产可供预览的图片
@@ -205,9 +180,10 @@ export default {
       }
       const params = {
         pageNum: this.pageNum,
-        pageSize: this.pageSize
+        pageSize: this.pageSize,
+        'where.eventId': this.helpId
       }
-      getCommentInfoList(params, this.helpId).then(res => {
+      getCommentInfoList(params).then(res => {
         if (res && res.data) {
           this.total = res.data.total;
           this.commentList = this.commentList.concat(res.data.list);
@@ -221,8 +197,8 @@ export default {
     // 回复评论
     replyComment () {
       const data = {
-        replyContent: this.content,
-        uid: this.commentId
+        replayContent: this.content,
+        commentId: this.commentId
       }
       this.loadingBtn = true;
       replyComment(data).then(res => {
@@ -232,7 +208,10 @@ export default {
           this.isShowEmoji = false;
           this.commentList.forEach(f => {
             if (this.commentId === f.uid) {
-              f.replayContent = this.content;
+              const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
+              obj.uid++;
+              obj.replayContent = this.content;
+              f.replayList.push(obj);
             }
           })
           this.content = null;
@@ -243,7 +222,6 @@ export default {
     },
     // 弹出屏蔽弹窗
     popShield (item, index) {
-      this.userId = item.replayUserId;//暂时取这个
       this.shieldUserId = item.commentUserId;
       this.isConfirmation = true;
       this.shieldId = item.uid;
@@ -253,7 +231,7 @@ export default {
     // 屏蔽评论
     shieldComment () {
       const data = {
-        userId: this.userId,//操作的用户id
+        userId: this.$store.state.loginUser.uid,//操作的用户id
         shieldId: this.shieldChecked ? this.shieldUserId : this.shieldId,
         opType: this.shieldChecked ? 2 : 1,//屏蔽操作类型
         shieldType: 1

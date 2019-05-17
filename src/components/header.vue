@@ -351,7 +351,7 @@ export default {
     changeTab(type) {
       this.type = type
       this.taskList = []
-      this.taskList = this.taskListAll.filter(key => this.type == key.readFlag)
+      this.taskList = this.taskListAll.filter(key => this.type == key.readFlag).filter((item,index) => index < 10)
     },
     goSkipDetail(item) {
       console.log("----------",item)
@@ -364,7 +364,7 @@ export default {
       }
     },
     goSkipTaskDetail(item) {
-      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType}});
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid}});
     },
     // 获取任务列表数据
     getTaskData () {
@@ -372,13 +372,15 @@ export default {
       let params = {
         pageNum: -1,
         pageSize: 0,
+        orderBy: 'create_time',
+        order: 'desc',
       }
       getTasks(params)
         .then(res => {
           if (res && res.data.list) {
             this.taskListAll = res.data.list;
             this.sums.msg = res.data.total;
-            this.taskList  = res.data.list.filter(key => this.type == key.readFlag)
+            this.taskList  = res.data.list.filter(key=> this.type == key.readFlag).filter((item,index) => index < 10)
           }
           for(let item of this.taskStatusList) {
             item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length

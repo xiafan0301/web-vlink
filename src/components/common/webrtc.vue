@@ -372,6 +372,7 @@ export default {
     wrMediaStream (type, obj, desc) {
       let _this = this;
       if (!_this.wrObj.mediaStream) {
+        console.log('----------------11111')
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         navigator.getMedia({
@@ -394,6 +395,7 @@ export default {
           alert('对不起，您的电脑上没有摄像头或摄像头不可用。');
         });
       } else {
+        console.log('----------------222222')
         // 设备已经被唤醒
         _this.wrCreatConnection(type, obj, desc);
         _this.wrStateHandler({
@@ -465,7 +467,7 @@ export default {
         if (event.candidate) {
           if (_pc.remoteDescription) {
             // 已经存在remote信息，则直接发送候选 （接收）
-            AS_WEBRTC.wsSend(webrtcConfig.apis.candidate, {
+            _this.wsSend(webrtcConfig.apis.candidate, {
               type: 'CANDIDATE',
               data: JSON.stringify(event.candidate),
               recipient: obj.remoteId,
@@ -486,7 +488,7 @@ export default {
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
       };
       // 向PeerConnection中加入需要发送的流
-      _pc.addStream(_this.wrObj.mediaStream);
+      // _pc.addStream(_this.wrObj.mediaStream);
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {

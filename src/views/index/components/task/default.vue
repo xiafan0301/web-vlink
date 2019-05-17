@@ -9,7 +9,7 @@ export default {
     }
   },
   mounted() {
-    this.$router.push({name: 'task_detail', query: {id: this.$route.query.id, processType: this.$route.query.processType}});
+    this.$router.push({name: 'task_detail', query: {id: this.$route.query.id, processType: this.$route.query.processType, uid: this.$route.query.uid}});
   },
   methods: {
   }

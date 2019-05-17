@@ -62,7 +62,7 @@
       <div class="manage_d_s_m_l">
         <!-- 人员追踪/车辆追踪 -->
         <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
-          <el-input v-model="scopeRadius" @keyup.enter.native="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+          <el-input v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
           <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option
               v-for="item in featuresTypeList"
@@ -234,7 +234,7 @@
 import {objDeepCopy} from '@/utils/util.js';
 import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAreaId, getAllMonitorGroupList, getAllMonitorList} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
-// import {bonDataTwo, bonDataOne} from '../testData.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   name: 'model',
@@ -288,6 +288,7 @@ export default {
       devGroupList: [],//设备组下拉列表
       devGroupId: null,//设备组id
       scopeRadius: 20, // 范围半径
+      lastScopeRadius: 20,//记录最后一次输入的范围半径
       lnglat: [], // 圆形覆盖物圆心坐标
       polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
@@ -874,14 +875,13 @@ export default {
       // 共有部分
       let _this = this, _hoverWindow = null;
       let map = new window.AMap.Map(_this.mapId, {
-        zoom: 12, // 级别27.898681, longitude: 110.690875
-        center: [112.97503, 28.09358], // 中心点坐标[112.97503, 28.09358]
-        // viewMode: '3D' // 使用3D视图
+        zoom: 10,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
-          city: '长沙'
+          city: '溆浦县'
         }
         _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })
@@ -891,7 +891,7 @@ export default {
           let   _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main">`
             if (_this.modelType === '1' || _this.modelType === '2') {
-              _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
+              _sContent += `<ul><li>输入追踪点后可以改变范围半径大小</li></ul>`;
             } else if (_this.modelType === '4') {
               _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
             }
@@ -925,7 +925,7 @@ export default {
     },
     // 地图标记 data:摄像头数据/卡口数据
     mapMark (data, selBayList, type) {
-      let _this = this, _hoverWindow = null, areaName = null;
+      let _this = this, _hoverWindow = null, areaName = null, markerList = [];
       // 卡口
       if (data.length > 0 && data[0].type === 2) {
         if (selBayList) {
@@ -1072,12 +1072,11 @@ export default {
               }
             }
           })
-          _marker.setMap(_this.map);
-          // _this.map.setFitView();// 自动适配到合适视野范围
           // 卡口
           if (_obj.type === 2) {
             _this.allBayMarker[areaName].push(_marker);
           }
+          markerList.push(_marker);
         }
       }
       if ((_this.operateType === 2 || _this.operateType === 3) && type) {
@@ -1146,6 +1145,8 @@ export default {
           })
         }
       }
+      _this.map.add(markerList);
+      _this.map.setFitView();
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
     changeSelectedStatus (_obj, type) {
@@ -1260,7 +1261,7 @@ export default {
     // 获取所有监控设备列表,初始化地图
     getAllMonitorList (type) {
       const params = {
-        ccode: 431224,
+        ccode: mapXupuxian.adcode,
         intelligentCharac: this.featuresId,// 设备特性id
         groupId: this.devGroupId// 设备组id
       }
@@ -1632,16 +1633,21 @@ export default {
     },
     // 设备圆形覆盖物半径
     setCircleRadius () {
+      // 只有在输入的半径有变化时才会执行下去
+      if (this.scopeRadius === this.lastScopeRadius) {
+        return;
+      }
+      this.lastScopeRadius = this.scopeRadius;
       if (this.lnglat.length === 0) {
         this.$message.error('请输入追踪点');
-        return false;
+        return;
       }
       if (this.scopeRadius < 0) {
         this.$message.error('半径为正数');
-        return false;
+        return;
       } else if (this.scopeRadius > 20) {
         this.$message.error('半径不可超过20千米');
-        return false;
+        return;
       }
       this.trackPointList = [];
       let selAreaData = this.map.getAllOverlays('circle');//获得所有的圆形覆盖物
@@ -1667,7 +1673,7 @@ export default {
     // 获取所有行政区列表
     getAreas () {
       const params = {
-        parentUid: '431224'
+        parentUid: mapXupuxian.adcode
       }
       getAreas(params).then(res => {
         if (res && res.data) {
@@ -1727,20 +1733,6 @@ export default {
       getAllBayontListByAreaId(params).then(res => {
         if (res && res.data) {
           this.allBayData = res.data;
-          // if (selBayList instanceof Array) {
-          //   if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // } else {
-          //   if (selBayList.label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // }
-         
           this.allBayData.forEach(f => {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 2);

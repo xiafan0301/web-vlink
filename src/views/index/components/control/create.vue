@@ -91,10 +91,10 @@
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
-            <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
+          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlAlarmId" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+            <el-select value-key="uid" v-model="createForm.controlAlarmId" filterable placeholder="请选择">
               <el-option
-                v-for="item in controlRankList"
+                v-for="item in controAlarmList"
                 :key="item.uid"
                 :label="item.label"
                 :value="item.value">
@@ -150,9 +150,10 @@
 <script>
 import model from './components/model.vue';
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
 import {getEventList, getEventDetail} from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util.js';
+import {mapXupuxian} from '@/config/config.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {model},
   props: ['createType', 'controlId'],
@@ -170,13 +171,18 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],//布控类型
-      controlRankList: [],//告警类型
+      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),//告警类型
       createForm: {
         controlName: null,
         event: null,
         controlType: null,
         controlDate: [],
-        controlRank: null,
+        controlAlarmId: null,
         periodTime: [
           {
             startTime: new Date(2019, 4, 10, 0, 0, 0),
@@ -208,7 +214,7 @@ export default {
     }
   },
   created () {
-    this.getDiciData();
+    // this.getDiciData();
     this.getAllMonitorList();
     // 编辑页-2
     if (this.createType) {
@@ -233,7 +239,7 @@ export default {
     }
   },
   mounted () {
-    this.GetTimeAfter();
+    this.getTimeAfter();
   },
   methods: {
     // 获取事件详情
@@ -247,7 +253,7 @@ export default {
       })
     },
     // 获取下个月的今天
-    GetTimeAfter() { 
+    getTimeAfter() { 
       var dd = new Date();
       function checkT(s) {
           return s < 10 ? '0' + s: s;
@@ -280,7 +286,7 @@ export default {
     },
     // 获取所有监控设备列表
     getAllMonitorList () {
-      const params = {ccode: 431224}
+      const params = {ccode: mapXupuxian.adcode}
       getAllMonitorList(params).then(res => {
         if (res && res.data) {
           this.allDevData = res.data;
@@ -316,19 +322,6 @@ export default {
         this.$router.push({ name: 'control_manage' });
       }
       this.toGiveUpDialog = false;
-    },
-    // 获取告警级别字段
-    getDiciData () {
-      getDiciData(11).then(res => {
-        if (res && res.data) {
-          this.controlRankList = res.data.map(m => {
-            return {
-              value: parseInt(m.enumField),
-              label: m.enumValue
-            }
-          })
-        }
-      })
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
@@ -395,7 +388,7 @@ export default {
               }
             })
             let data = {
-              alarmLevel: this.createForm.controlRank,// 告警级别
+              alarmLevel: this.createForm.controlAlarmId,// 告警级别
               eventId: this.createForm.event,// 事件id
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
@@ -434,7 +427,7 @@ export default {
         return true;
       } else {
         for (let k = 1; k < begin.length; k++) {
-          if (begin[k] <= over[k-1]) {
+          if (begin[k] < over[k-1]) {
             this.$message.error('所选的时间段出现重叠现象，请重新选取！');
             return false;
           } else if (k === begin.length - 1) {
@@ -468,7 +461,7 @@ export default {
           this.createForm.event = this.controlDetail.eventId;
           this.createForm.controlType = this.controlDetail.surveillanceType;
           this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
-          this.createForm.controlRank = this.controlDetail.alarmLevel;
+          this.createForm.controlAlarmId = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
               startTime: new Date(2019, 9, 10, m.startTime.split(':')[0], m.startTime.split(':')[1]),
@@ -563,7 +556,7 @@ export default {
                 endTime: formatDate(m.endTime, 'HH:mm:ss')
               }
             })
-            this.controlDetail.alarmLevel = this.createForm.controlRank;
+            this.controlDetail.alarmLevel = this.createForm.controlAlarmId;
             this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
