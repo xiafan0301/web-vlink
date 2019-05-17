@@ -19,6 +19,9 @@
       <li>
         <router-link :to="{name: 'authority_info'}">权限管理</router-link>
       </li>
+      <!-- <li>
+        <router-link :to="{name: 'authority_info'}">APP版本管理</router-link>
+      </li> -->
     </ul>
     <div class="manage_content">
       <router-view></router-view>

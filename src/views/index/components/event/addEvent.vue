@@ -182,8 +182,7 @@ export default {
       },
       addEventForm: {
         eventSource: '1',
-        eventFlag: true,
-        mutualFlag: false,
+        type: 1, // 1---事件  2---互助
         reporterPhone: '', // 报案人  手机号码
         reportTime: '', // 上报时间
         eventAddress: '', // 事发地点
@@ -264,7 +263,6 @@ export default {
 
           geocoder.getAddress(lnglatXY, function (status, result) {
             if (status === 'complete' && result.info === 'OK') {
-              console.log('11111')
               _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
               _this.mapMark(e.lnglat.getLng(), e.lnglat.getLat(), _this.addEventForm.eventAddress);
             }
@@ -275,7 +273,6 @@ export default {
     },
     // 地图标记
     mapMark (longitude, latitude, eventAddress) {
-      console.log('mmmmmm')
       let _this = this;
       if (_this.newMarker) {
         _this.map.remove(_this.newMarker);
@@ -352,13 +349,11 @@ export default {
    
     // 事件地址change
     changeAddress () {
-      console.log('aaa')
       let _this = this;
       let autoInput = new window.AMap.Autocomplete({
         input: 'address'
       })
       window.AMap.event.addListener(autoInput, 'select', function (e) {
-        console.log('e', e)
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
