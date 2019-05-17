@@ -891,7 +891,7 @@ export default {
           let   _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main">`
             if (_this.modelType === '1' || _this.modelType === '2') {
-              _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
+              _sContent += `<ul><li>输入追踪点后可以改变范围半径大小</li></ul>`;
             } else if (_this.modelType === '4') {
               _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
             }
@@ -925,7 +925,7 @@ export default {
     },
     // 地图标记 data:摄像头数据/卡口数据
     mapMark (data, selBayList, type) {
-      let _this = this, _hoverWindow = null, areaName = null;
+      let _this = this, _hoverWindow = null, areaName = null, markerList = [];
       // 卡口
       if (data.length > 0 && data[0].type === 2) {
         if (selBayList) {
@@ -1072,12 +1072,11 @@ export default {
               }
             }
           })
-          _marker.setMap(_this.map);
-          // _this.map.setFitView();// 自动适配到合适视野范围
           // 卡口
           if (_obj.type === 2) {
             _this.allBayMarker[areaName].push(_marker);
           }
+          markerList.push(_marker);
         }
       }
       if ((_this.operateType === 2 || _this.operateType === 3) && type) {
@@ -1146,6 +1145,7 @@ export default {
           })
         }
       }
+      _this.map.add(markerList);
       _this.map.setFitView();
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
