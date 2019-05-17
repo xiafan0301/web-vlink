@@ -92,7 +92,28 @@ export default {
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      userList: [],
+      userList: [
+        {
+          uid: 1,
+          userRealName: '石原'
+        },
+        {
+          uid: 2,
+          userRealName: '石原1'
+        },
+        {
+          uid:3,
+          userRealName: '石原2'
+        },
+        {
+          uid: 4,
+          userRealName: '石原3'
+        },
+        {
+          uid: 5,
+          userRealName: '石原4'
+        }
+      ],
       reportUserList: [], // 所有的接收者
       basicInfo: {}, // 事件详情
       isLoading: false,
@@ -104,7 +125,7 @@ export default {
   },
   mounted () {
     this.getDetail();
-    this.getList();
+    // this.getList();
   },
   methods: {
     // 获取所有的用户

@@ -25,13 +25,21 @@
             </li>
           </ul>
         </div>
-        <div class="report-content">
+        <div class="report-content" v-show="superPointList && superPointList.length > 0">
           <div class="header">
             <p class="ctc-title">上级指示</p>
           </div>
           <div class="divide"></div>
           <ul class="report-list">
-            <li>
+            <li v-for="(item, index) in superPointList" :key="'item' + index">
+              <div>
+                <span>{{item.opUserId}}</span>
+                <span>{{item.createTime}}</span>
+              </div>
+              <div>{{item.processContent}}</div>
+            </li>
+            <div class="content-divide"></div>
+            <!-- <li>
               <div>
                 <span>wang东东</span>
                 <span>2018-11-21 17:15</span>
@@ -65,19 +73,7 @@
                 调度城管一起协同解决增大支援队伍，
                 调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
               </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
@@ -93,7 +89,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, getTasks } from '@/views/index/api/api.event.js';
+import { proccessEventType } from '@/utils/data.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -103,10 +100,12 @@ export default {
       isShowImg: false, // 是否放大图片
       imgList1: [],
       basicInfo: {}, // 事件详情
+      superPointList: [], // 上级指示列表
     }
   },
   mounted () {
     this.getDetail();
+    this.getSuperPointList();
   },
   methods: {
     // 获取事件详情
@@ -119,6 +118,19 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    // 获取上级指示列表
+    getSuperPointList () {
+      const params= {
+        'where.processType': proccessEventType.directiveId,
+        pageSize: 0
+      }
+      getTasks(params) 
+        .then(res => {
+          if (res) {
+            this.superPointList = res.data.list;
+          }
+        })
     },
     // 跳至向上级呈报页面
     skipReportPage () {
@@ -228,6 +240,9 @@ export default {
           height: 1px;
           margin: 5px 0;
           border-bottom: 1px dashed #F2F2F2;
+          &:last-child {
+            display: none;
+          }
         }
       }
     }

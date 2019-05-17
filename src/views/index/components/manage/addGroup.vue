@@ -85,12 +85,12 @@
       <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
   </div>
-
 </vue-scroll>
 </template>
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
+import { testData } from './components/testData.js';
 import { getAllDevices, addGroupDevice, getCurrentDevices } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
@@ -246,22 +246,32 @@ export default {
     },
      // 获取所有可选的设备
     getAllDevicesList () {
-      getAllDevices(this.searchForm)
-        .then(res => {
-          if (res) {
-            this.allDeviceList = res.data;
-            this.selectDeviceList = res.data;
-            this.selectDeviceList.map(item => {
-              item.isOpenArrow = false; // 设置是否展开
-              item.isChecked = false; // 父级是否选中
-              item.deviceList.map(itm => {
-                itm.isChildChecked = false; // 子级是否选中
-              });
-              this.selectDeviceNumber += item.deviceList.length;
-            });
-          }
-        })
-        .catch(() => {})
+      this.allDeviceList = testData;
+      this.selectDeviceList = testData;
+      this.selectDeviceList.map(item => {
+        item.isOpenArrow = false; // 设置是否展开
+        item.isChecked = false; // 父级是否选中
+        item.deviceList.map(itm => {
+          itm.isChildChecked = false; // 子级是否选中
+        });
+        this.selectDeviceNumber += item.deviceList.length;
+      });
+      // getAllDevices(this.searchForm)
+      //   .then(res => {
+      //     if (res) {
+      //       this.allDeviceList = res.data;
+      //       this.selectDeviceList = res.data;
+      //       this.selectDeviceList.map(item => {
+      //         item.isOpenArrow = false; // 设置是否展开
+      //         item.isChecked = false; // 父级是否选中
+      //         item.deviceList.map(itm => {
+      //           itm.isChildChecked = false; // 子级是否选中
+      //         });
+      //         this.selectDeviceNumber += item.deviceList.length;
+      //       });
+      //     }
+      //   })
+      //   .catch(() => {})
     },
     // 搜索框
     searchData () {
