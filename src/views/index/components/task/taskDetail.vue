@@ -113,7 +113,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, updateProcess } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -132,11 +132,19 @@ export default {
   mounted () {
     this.processType = this.$route.query.processType
     this.getDetail();
+    this.editProcessStatus();
   },
   methods: {
     // 跳至反馈情况页面
     skipCtcEndPage () {
       this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType }});
+    },
+    //修改事件处理过程状态
+    editProcessStatus() {
+      const uid = this.$route.query.uid;
+      updateProcess(uid).then((res)=>{
+        console.log(res)
+      }).catch(()=>{})
     },
     // 获取事件详情
     getDetail () {

@@ -47,6 +47,7 @@
             </div>
           </div>
           <el-pagination
+            class="cum_pagination"
             style="align-self: flex-start;"
             @current-change="handleCurrentChangeObj"
             :current-page="currentPage"
@@ -138,7 +139,7 @@
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
             <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
-            <div v-if="controlDetail.terminationReason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
+            <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
@@ -160,7 +161,7 @@
                         <vue-scroll>
                           <li
                             v-for="(item, index) in situList"
-                            :key="item.uid + index"
+                            :key="item.uid"
                             @dragstart="dragstart($event, index, item)"
                             @dragover="dragover"
                             :draggable="true"
@@ -174,7 +175,7 @@
                     <el-collapse-transition>
                       <div v-if="tabTypeBySituation === '1'" class="bayone_list">
                         <vue-scroll>
-                          <div v-for="(bay, index) in bayList" :key="bay.uid + index">
+                          <div v-for="bay in bayList" :key="bay.uid">
                             <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
                               <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
                             </div>
@@ -182,7 +183,7 @@
                               <ul style="max-height: 346px;" v-show="bay.isDropdown">
                                 <li
                                   v-for="(dev, index) in bay.devList"
-                                  :key="dev.uid + index"
+                                  :key="dev.uid"
                                   @dragstart="dragstart($event, index, dev)"
                                   @dragover="dragover"
                                   :draggable="true"
@@ -199,8 +200,6 @@
                 <div class="situ_right">
                   <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
                     @dragend="dragend"
-                    @dragenter="dragenter"
-                    @dragleave="dragleave"
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
@@ -260,7 +259,7 @@
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
                   <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
-                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
+                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="239px" @click="showLargeVideo(item)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
                     <div>
@@ -277,6 +276,7 @@
               </div>
             </div>
             <el-pagination
+              class="cum_pagination"
               style="align-self: flex-start;"
               @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
@@ -371,6 +371,7 @@ import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {delDialog, stopDialog, flvplayer},
   props: ['state', 'controlId'],
@@ -743,45 +744,17 @@ export default {
     },
     /* ************运行情况********* */
     // 关闭播放器
-    playerClose (index, sid) {
-      console.log('sid', sid);
+    playerClose (index) {
       this.rightVideoList.splice(index, 1, {isShowVideo: false});
-
-      // let _div = document.createElement('div');
-      // _div.className = 'situ_r_img';
-      // _div.innerHTML = '<div></div>'
-      // e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      // let _video = this.rVList.splice(index, 1, {})[0];
-      // let _index = _video.index;
-      // this.situList.splice(_index, 1, _video);
     },
     // 拖拽
     dragstart (e, index, item) {
-      // 使其半透明
-      // e.target.style.opacity = .5;
       this.dragstartIndex = index;
-      console.log(this.dragstartIndex, 'dragstartIndex')
-
       this.dragActiveObj = item;
     },
   
     dragend () {
-      // 重置透明度
-      // e.target.style.opacity = "";
-
       this.dragActiveObj = null;
-    },
-    dragenter (e) {
-      // 当可拖动的元素进入可放置的目标高亮目标节点
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "#E0F3FF";
-      }
-    },
-    dragleave (e) {
-      // 当拖动元素离开可放置目标节点，重置其背景
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "";
-      }
     },
     dragover (e) {
       // 阻止默认动作
@@ -793,9 +766,6 @@ export default {
       e.stopPropagation();
       console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
-        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-        // console.log('deviceSip', deviceSip);
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
           type: 1,
@@ -803,53 +773,9 @@ export default {
           video: Object.assign({}, this.dragActiveObj)
         });
       }
-      // 移动拖动的元素到所选择的放置目标节点
-      // console.log(e.target)
-      // if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
-      //     e.target.style.background = "";
-      //     let sid = this.situList[this.dragstartIndex].uid;
-      //     let div = document.createElement('div');
-      //     let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
-      //       <div>
-      //         <i class="vl_icon vl_icon_control_06"></i>
-      //         <i class="vl_icon vl_icon_control_11"></i>
-      //         <i class="vl_icon vl_icon_control_07"></i>
-      //       </div>
-      //       <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
-      //     `;
-      //     div.innerHTML = video;
-      //     e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
-      //     // 从左往右边拖拽逻辑
-      //     const rVList = [{},{},{},{}]
-      //     let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
-      //     delVideo[0]['index'] = this.dragstartIndex;
-      //     if (rVList[index].uid) {
-      //       let _video = rVList.splice(index, 1)[0];
-      //       let _index = _video.index;
-      //       this.situList.splice(_index, 1 , _video);
-      //       rVList.splice(index, 1, {});
-      //     } else {
-      //       rVList.splice(index, 1, ...delVideo);
-      //     }
-      //     console.log(delVideo) 
-      //     // 防止重复绑定点击事件，先解绑
-      //     $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
-      //     // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
-      //     let _this = this;
-      //     $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
-      //       let _div = document.createElement('div');
-      //       _div.className = 'situ_r_img';
-      //       _div.innerHTML = '<div></div>'
-      //       e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      //       let _video = rVList.splice(index, 1, {})[0];
-      //       let _index = _video.index;
-            
-      //       _this.situList.splice(_index, 1, _video);
-      //     })
-      // }
     }, 
     mapMark () {
-      let _this = this, hoverWindow = null, data = null;
+      let _this = this, hoverWindow = null, data = null, markerList = [];
       if (!_this.trackPointList) {
         return false;
       }
@@ -940,9 +866,11 @@ export default {
             }
             _this.devIdOrBayId = obj.uid;//左侧列表高亮
           });
-          marker.setMap(_this.map);
+          markerList.push(marker);
         }
       }
+      _this.map.add(markerList);
+      _this.map.setFitView();
     },
     // 地图缩放
     mapZoomSet (val) {
@@ -953,10 +881,9 @@ export default {
     // 初始化地图
     resetMap () {
       let _this = this;
-      console.log(_this.controlState)
       let map = new window.AMap.Map('mapBox', {
-        zoom: 16, // 级别
-        center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
+        zoom: 10,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -1107,9 +1034,19 @@ export default {
         .situ_time{
           line-height: 44px;
           padding-left: 15px;
+          padding-bottom: 10px;
           display: flex;
+          flex-wrap: wrap;
           > div{
-            width: 25%;
+            width: 33%;
+          }
+          .termination_reason{
+            width: 100%;
+            line-height: 20px;
+            display: flex;
+            > span:nth-child(2){
+              flex: 1;
+            }
           }
         }
         .situ_box{
@@ -1132,10 +1069,11 @@ export default {
           .situ_content{
             display: flex;
             flex-wrap: nowrap;
+            height: 812px;
             .situ_left{
               width: 258px;
               min-width: 258px;
-              height: 600px;
+              height: 100%;
               border-right: 1px solid #F2F2F2;
               > div{
                 height: 50px;
@@ -1225,6 +1163,7 @@ export default {
             }
             .situ_right{
               width: calc(100% - 258px);
+              height: 100%;
               display: flex;
               flex-flow: row wrap;
               align-content: flex-start;
@@ -1232,7 +1171,7 @@ export default {
               padding-right: 1%;
               .situ_r_video{
                 flex: 0 0 49%;
-                height: 49%;
+                height: 47.5%;
                 position: relative;
                 overflow: hidden;
                 margin-bottom: 20px;
@@ -1293,6 +1232,10 @@ export default {
               border:1px solid rgba(211,211,211,1);
               img{
                 width: 100%;
+                height: 239px;
+              }
+              video{
+                object-fit: fill;
               }
               .result_tool{
                 width: 100%;
@@ -1303,7 +1246,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 52px;
+                bottom: 48px;
                 left: 0;
                 > div{
                   color: #fff;
@@ -1323,7 +1266,10 @@ export default {
                 }
               }
               > div:nth-child(1){
+                width: 100%;
+                height: 239px;
                 cursor: pointer;
+                background: #000;
               }
               > div:nth-child(2){
                 p{
@@ -1396,6 +1342,28 @@ export default {
   .vl_icon{
     transition: none;
   }
+}
+@media (max-width: 1400px) {
+  .control_manage_d{
+    .situ_content{
+      height: 500px!important;
+    }
+    .result_img_box{
+      height: 208px!important;
+      >div{
+        height: 160px!important;
+        >img{
+          height: 160px!important;
+        }
+        >video{
+          height: 160px!important;
+        }
+        .result_tool{
+          bottom: 46px!important;
+        }
+      }
+    }
+  } 
 }
 </style>
 <style lang="scss">

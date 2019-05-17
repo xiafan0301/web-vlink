@@ -19,6 +19,16 @@
             <el-form-item prop="titleOrPublisher">
               <el-input v-model="systemForm.titleOrPublisher" placeholder="输入标题或发布者"></el-input>
             </el-form-item>
+            <el-form-item prop="department">
+              <el-select value-key="uid" v-model="systemForm.department" filterable placeholder="请选择发布部门">
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item style="width: 25%;">
               <el-button type="primary" @click="getMsgNoteList">查询</el-button>
               <el-button @click="resetForm">重置</el-button>
@@ -51,6 +61,12 @@
                 >
               </el-table-column>
               <el-table-column
+                label="发布部门"
+                prop="publishUnitName"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
                 label="发布者"
                 prop="publishUserName"
                 show-overflow-tooltip
@@ -74,6 +90,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="systemList && systemList.list && systemList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -101,13 +118,16 @@ export default {
       // 顶部筛选参数
       systemForm: {
         systemDate: null,
+        department: null,
         titleOrPublisher: null
       },
       lastSystemForm: {
         systemDate: null,
+        department: null,
         titleOrPublisher: null
       },
       // 表格参数
+      departmentList: [],
       systemList: [],
       systemId: null,//消息id
       // 翻页参数

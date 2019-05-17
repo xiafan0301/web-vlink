@@ -1,51 +1,15 @@
 import request from '@/config/axios';
 /*=================消息模块================== */
 /**
- * addMutualHelp 新增民众互助接口
- * @param {object} params
- */
-export function addMutualHelp(data) {
-  return request({
-    url: '/event-service/mutual-help',
-    method: 'post',
-    data,
-    mode: 'message'
-  })
-}
-/**
- * getMutualHelpDetail 民众互助详情查询接口  
-
- * @param {object} params
- */
-export function getMutualHelpDetail(uid) {
-  return request({
-    url: '/event-service/mutual-help/' + uid,
-    method: 'get',
-    mode: 'message'
-  })
-}
-/**
- * putMutualHelp 修改民众互助接口
- * @param {object} params
- */
-export function putMutualHelp(data) {
-  return request({
-    url: '/event-service/mutual-help',
-    method: 'put',
-    data,
-    mode: 'message'
-  })
-}
-/**
  * replyComment 回复事件评论接口   
  * @param {object} params
  */
 export function replyComment(data) {
   return request({
-    url: '/event-service/reply-comment',
-    method: 'post',
+    url: '/events/reply-comment',
+    method: 'put',
     data,
-    mode: 'message'
+    mode: 'event'
   })
 }
 /**
@@ -57,31 +21,19 @@ export function shieldComment(data) {
     url: '/event-service/shield-comment',
     method: 'post',
     data,
-    mode: 'message'
-  })
-}
-/**
- * getMutualHelpList 民众互助列表分页查询接口
- * @param {object} params
- */
-export function getMutualHelpList(params) {
-  return request({
-    url: '/event-service/mutual-help-list',
-    method: 'get',
-    params,
-    mode: 'message'
+    mode: 'event'
   })
 }
 /**
  * getCommentInfoList 事件评论列表分页查询接口
  * @param {object} params
  */
-export function getCommentInfoList(params, uid) {
+export function getCommentInfoList(params) {
   return request({
-    url: '/event-service/comment-info-list/' + uid,
+    url: '/events/comments/page',
     method: 'get',
     params,
-    mode: 'message'
+    mode: 'event'
   })
 }
 /**

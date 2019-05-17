@@ -274,25 +274,25 @@
               <p>暂无相关数据</p>
             </div>
           </template>
-          <div style="width: 100%;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
+          <div style="width: 100%;padding-bottom: 10px;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
             <el-pagination
               style="text-align: center;"
+              background
               @current-change="handleCurrentChange"
               :current-page="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="protraitMemberList.pageSize"
-              layout="total, prev, pager, next, jumper"
+              layout="prev, pager, next"
               :total="protraitMemberList.total">
             </el-pagination>
           </div>
-          <div style="width: 100%;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
+          <div style="width: 100%;padding-bottom: 10px;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
             <el-pagination
               style="text-align: center;"
+              background
               @current-change="handleCurrentChange"
               :current-page="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="carMemberList.pageSize"
-              layout="total, prev, pager, next, jumper"
+              layout="prev, pager, next"
               :total="carMemberList.total">
             </el-pagination>
           </div>

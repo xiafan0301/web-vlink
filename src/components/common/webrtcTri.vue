@@ -372,6 +372,7 @@
       wrMediaStream (type, obj, desc) {
         let _this = this;
         if (!_this.wrObj.mediaStream) {
+          console.log('----------------11111')
           // 设备还没被唤醒
           navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
           navigator.getMedia({
@@ -394,6 +395,7 @@
             alert('对不起，您的电脑上没有摄像头或摄像头不可用。');
           });
         } else {
+          console.log('----------------222222')
           // 设备已经被唤醒
           _this.wrCreatConnection(type, obj, desc);
           _this.wrStateHandler({

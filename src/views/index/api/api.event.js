@@ -302,9 +302,9 @@ export const markTask = (data) => {
  * 新增事件处理过程
  * @param {*} data 
  */
-export const taskProcess = (data) => {
+export const taskProcess = (data,uid) => {
   return request({
-    url: '/task-services/task/process/' + data.eventId,
+    url: '/task-services/task/process/' + uid,
     method: 'post',
     data,
     mode: 'ctc'
