@@ -48,9 +48,9 @@ service.interceptors.response.use(function (response) {
     if (_data.code === '00000000') {
       return _data;
     } else if (_data.code === '10060002') {
-      // store.commit('setLoginToken', {
-      //   loginToken: false
-      // });
+      store.commit('setLoginToken', {
+        loginToken: false
+      });
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {

@@ -42,9 +42,14 @@
             <li class="con_five" v-if="item.sysAppendixInfoList.length > 0" :id="'imgsTwo_' + item.uid">
               <!-- <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid"> -->
             </li>
-            <li class="con_six" v-if="!item.replayContent">
+            <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
               <div><i class="vl_icon vl_icon_message_4"></i><span class="vl_f_666" @click="popShield(item, index)">屏蔽该评论</span></div>
+            </li>
+            <li class="reply_content" v-if="item.replayList.length > 0 || (commentId === item.uid && isConfirmation)">
+              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
+              <p>回复内容：</p>
+              <p v-for="_item in item.replayList" :key="_item.uid" v-html="_item.replayContent ? _item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion) : ''" class="vl_f_333"></p>
             </li>
             <el-collapse-transition>
               <li class="con_seven" v-if="commentId === item.uid && !isConfirmation">
@@ -60,11 +65,6 @@
                 </div>
               </li>
             </el-collapse-transition>
-            <li class="reply_content" v-if="item.replayContent || (commentId === item.uid && isConfirmation)">
-              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
-              <p>回复内容：</p>
-              <p v-html="item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion)" class="vl_f_333"></p>
-            </li>
           </ul>
         </div>
         <div class="list_more">
@@ -90,6 +90,7 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
+import {objDeepCopy} from '../../../../utils/util.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
 import {dataList} from '@/utils/data.js';
@@ -111,7 +112,6 @@ export default {
       commentId: null,//评论id
       shieldId: null,//屏蔽id
       shieldUserId: null,//被屏蔽用户id
-      userId: null,//用户id
       commentIndex: null,//评论下标
       // 屏蔽弹窗参数
       shieldDialog: null,
@@ -197,8 +197,8 @@ export default {
     // 回复评论
     replyComment () {
       const data = {
-        replyContent: this.content,
-        uid: this.commentId
+        replayContent: this.content,
+        commentId: this.commentId
       }
       this.loadingBtn = true;
       replyComment(data).then(res => {
@@ -208,7 +208,10 @@ export default {
           this.isShowEmoji = false;
           this.commentList.forEach(f => {
             if (this.commentId === f.uid) {
-              f.replayContent = this.content;
+              const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
+              obj.uid++;
+              obj.replayContent = this.content;
+              f.replayList.push(obj);
             }
           })
           this.content = null;
@@ -219,7 +222,6 @@ export default {
     },
     // 弹出屏蔽弹窗
     popShield (item, index) {
-      this.userId = item.replayUserId;//暂时取这个
       this.shieldUserId = item.commentUserId;
       this.isConfirmation = true;
       this.shieldId = item.uid;
@@ -229,7 +231,7 @@ export default {
     // 屏蔽评论
     shieldComment () {
       const data = {
-        userId: this.userId,//操作的用户id
+        userId: this.$store.state.loginUser.uid,//操作的用户id
         shieldId: this.shieldChecked ? this.shieldUserId : this.shieldId,
         opType: this.shieldChecked ? 2 : 1,//屏蔽操作类型
         shieldType: 1

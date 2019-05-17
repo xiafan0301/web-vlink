@@ -317,28 +317,11 @@ export default {
           this.addForm.situation = detail.eventDetail;
           this.lngLat = [detail.longitude, detail.latitude];
           this.hId = detail.uid;
-          this.fileList = detail.attachmentList.map(m => {
-            return {
-              cname: m.cname,
-              contentUid: m.contentUid,
-              createTime: m.createTime,
-              delFlag: m.delFlag,
-              desci: m.desci,
-              filePathName: m.filePathName,
-              fileType: m.fileType,
-              imgHeight: m.imgHeight,
-              imgSize: m.imgSize,
-              imgWidth: m.imgWidth,
-              opUserId: m.opUserId,
-              url: m.path,
-              sort: m.sort,
-              thumbnailName: m.thumbnailName,
-              thumbnailPath: m.thumbnailPath,
-              uid: m.uid,
-              updateTime: m.updateTime,
-              updateUserId: m.updateUserId
-            }
+          detail.attachmentList.forEach(f => {
+            f.url = f.path;
+            delete f.path;
           })
+          this.fileList = detail.attachmentList;
           this.addForm.radius = detail.radius;
           this.markLocation(detail.longitude, detail.latitude, detail.eventAddress);
         }
@@ -349,33 +332,20 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log('通过验证')
+          let _fileList = [];
+          this.fileList.forEach(f => {
+            if (f.response) {
+              delete f.response.data.sysAppendixInfo.uid;
+              _fileList.push(f.response.data.sysAppendixInfo);
+            } else {
+              f.path = f.url;
+              delete f.url;
+              delete f.uid;
+              _fileList.push(f);
+            }
+          })
           const data = {
-            addList: this.fileList.map(m => {
-              if (m.response) {
-                delete m.response.data.sysAppendixInfo.uid;
-                return m.response.data.sysAppendixInfo;
-              } else {
-                return {
-                  cname: m.cname,
-                  contentUid: m.contentUid,
-                  createTime: m.createTime,
-                  delFlag: m.delFlag,
-                  desci: m.desci,
-                  filePathName: m.filePathName,
-                  fileType: m.fileType,
-                  imgHeight: m.imgHeight,
-                  imgSize: m.imgSize,
-                  imgWidth: m.imgWidth,
-                  opUserId: m.opUserId,
-                  path: m.url,
-                  sort: m.sort,
-                  thumbnailName: m.thumbnailName,
-                  thumbnailPath: m.thumbnailPath,
-                  updateTime: m.updateTime,
-                  updateUserId: m.updateUserId
-                }
-              }
-            }),//附件信息列表
+            addList: _fileList,//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
             eventSource: 1,//事件来源
