@@ -51,14 +51,15 @@
             <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
-            <el-radio-group v-model="addForm.radio">
+            <el-radio-group v-model="addForm.radius">
               <el-radio :label="-1">不推送</el-radio>
-              <el-radio :label="0">推送</el-radio>
+              <el-radio :label="0" v-if="addForm.radius === -1">推送</el-radio>
+              <el-radio :label="addForm.radius" v-if="addForm.radius >= 0">推送</el-radio>
             </el-radio-group>
             <p class="vl_f_999">(APP是否推送消息?）</p>
           </el-form-item>
-          <el-form-item label="接收范围:" v-if="addForm.radio === 0">
-            <el-select value-key="uid" v-model="addForm.scope" filterable placeholder="请选择">
+          <el-form-item label="接收范围:" v-if="addForm.radius !== -1">
+            <el-select value-key="uid" v-model="addForm.radius" filterable placeholder="请选择">
               <el-option
                 v-for="item in scopeList"
                 :key="item.uid"
@@ -90,8 +91,9 @@
 <script>
 import uploadPic from '../control/components/uploadPic';
 import {validatePhone} from '@/utils/validator.js';
-import {addMutualHelp, putMutualHelp, getMutualHelpDetail} from '@/views/index/api/api.message.js';
+import {addEvent, updateEvent, getEventDetail} from '@/views/index/api/api.event.js';
 import {mapXupuxian} from '@/config/config.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {uploadPic},
   props: ['pageType', 'helpId'],
@@ -104,8 +106,7 @@ export default {
         time: null,
         place: null,
         situation: null,
-        radio: -1,
-        scope: null
+        radius: -1,
       },
       pickerOptions: {
         disabledDate (time) {
@@ -127,13 +128,12 @@ export default {
           {required: true, message: '请输入事件情况', trigger: 'blur'}
         ]
       },
-      scopeList: [
-        {value: 0, label: '全部推送'},
-        {value: 10, label: '10公里以内的'},
-        {value: 20, label: '20公里以内的'},
-        {value: 30, label: '30公里以内的'},
-        {value: 40, label: '40公里以内的'}
-      ],
+      scopeList: this.dicFormater(dataList.distanceId)[0].dictList.filter(f => f.enumField !== '-1').map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       loadingBtn: false,
       hId: null,//民众互助id，用于修改
       // 地图参数
@@ -191,6 +191,7 @@ export default {
                     //获得了有效的地址信息:
                     //即，result.regeocode.formattedAddress
                     _this.addForm.place = result.regeocode.formattedAddress;
+                    _this.$refs['addForm'].clearValidate(['place']);
                     _this.markLocation(e.lnglat.getLng(), e.lnglat.getLat(), _this.addForm.place);
 
                 }else{
@@ -276,19 +277,23 @@ export default {
         if (valid) {
           console.log('通过验证')
           const data = {
-            attachmentList: this.fileList.map(m => m.response.data.sysAppendixInfo),//附件信息列表
+            appendixInfoList: this.fileList.map(m => {
+              delete m.response.data.sysAppendixInfo.uid;
+              return m.response.data.sysAppendixInfo;
+            }),//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
+            eventSource: 1,//事件来源
             latitude: this.lngLat[1],//事发地点纬度
             longitude: this.lngLat[0],//事发地点经度
-            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio === 0 ? this.addForm.scope : '',//推送范围
+            radius: this.addForm.radius,//推送范围
             reportTime: this.addForm.time,//上报时间
             reporterPhone: this.addForm.phone,//上报手机号
-            reporterUserId: 123//上报人标识
+            type: 2
           }
           console.log(JSON.stringify(data) )
           this.loadingBtn = true;
-          addMutualHelp(data).then(res => {
+          addEvent(data).then(res => {
             if (res && res.data) {
               this.$message.success('发布成功');
               this.$emit('getMutualHelpList'); 
@@ -303,7 +308,7 @@ export default {
     },
     // 根据id获取民众互助详情,用于回填数据
     getMutualHelpDetail () {
-      getMutualHelpDetail(this.helpId).then(res => {
+      getEventDetail(this.helpId).then(res => {
         if (res && res.data) {
           const detail = res.data;
           this.addForm.phone = detail.reporterPhone;
@@ -312,34 +317,12 @@ export default {
           this.addForm.situation = detail.eventDetail;
           this.lngLat = [detail.longitude, detail.latitude];
           this.hId = detail.uid;
-          this.fileList = detail.attachmentList.map(m => {
-            return {
-              cname: m.cname,
-              contentUid: m.contentUid,
-              createTime: m.createTime,
-              delFlag: m.delFlag,
-              desci: m.desci,
-              filePathName: m.filePathName,
-              fileType: m.fileType,
-              imgHeight: m.imgHeight,
-              imgSize: m.imgSize,
-              imgWidth: m.imgWidth,
-              opUserId: m.opUserId,
-              url: m.path,
-              sort: m.sort,
-              thumbnailName: m.thumbnailName,
-              thumbnailPath: m.thumbnailPath,
-              uid: m.uid,
-              updateTime: m.updateTime,
-              updateUserId: m.updateUserId
-            }
+          detail.attachmentList.forEach(f => {
+            f.url = f.path;
+            delete f.path;
           })
-          if (detail.radius >= 0) {
-            this.addForm.radio = 0;
-            this.addForm.scope = detail.radius;
-          } else {
-            this.addForm.radio = -1;
-          }
+          this.fileList = detail.attachmentList;
+          this.addForm.radius = detail.radius;
           this.markLocation(detail.longitude, detail.latitude, detail.eventAddress);
         }
       })
@@ -349,46 +332,34 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log('通过验证')
+          let _fileList = [];
+          this.fileList.forEach(f => {
+            if (f.response) {
+              delete f.response.data.sysAppendixInfo.uid;
+              _fileList.push(f.response.data.sysAppendixInfo);
+            } else {
+              f.path = f.url;
+              delete f.url;
+              delete f.uid;
+              _fileList.push(f);
+            }
+          })
           const data = {
-            attachmentList: this.fileList.map(m => {
-              if (m.response) {
-                return m.response.data.sysAppendixInfo;
-              } else {
-                return {
-                  cname: m.cname,
-                  contentUid: m.contentUid,
-                  createTime: m.createTime,
-                  delFlag: m.delFlag,
-                  desci: m.desci,
-                  filePathName: m.filePathName,
-                  fileType: m.fileType,
-                  imgHeight: m.imgHeight,
-                  imgSize: m.imgSize,
-                  imgWidth: m.imgWidth,
-                  opUserId: m.opUserId,
-                  path: m.url,
-                  sort: m.sort,
-                  thumbnailName: m.thumbnailName,
-                  thumbnailPath: m.thumbnailPath,
-                  uid: m.uid,
-                  updateTime: m.updateTime,
-                  updateUserId: m.updateUserId
-                }
-              }
-            }),//附件信息列表
+            addList: _fileList,//附件信息列表
             eventAddress: this.addForm.place,//事发地点
             eventDetail: this.addForm.situation,//事件详情
+            eventSource: 1,//事件来源
             latitude: this.lngLat[1],//事发地点纬度
             longitude: this.lngLat[0],//事发地点经度
-            radius: this.addForm.radio === -1 ? this.addForm.radio : this.addForm.radio >= 0 ? this.addForm.scope : '',//推送范围
+            radius: this.addForm.radius,//推送范围
             reportTime: this.addForm.time,//上报时间
             reporterPhone: this.addForm.phone,//上报手机号
-            reporterUserId: 123,//上报人标识
-            uid: this.hId
+            uid: this.hId,
+            type: 5
           }
           this.loadingBtn = true;
           console.log(data)
-          putMutualHelp(data).then(res => {
+          updateEvent(data).then(res => {
             if (res && res.data) {
               this.$message.success('修改成功');
               this.$emit('getMutualHelpList'); 
@@ -493,6 +464,7 @@ export default {
     }
   }
   .vl_map_hover_main{
+    bottom: 58px;
     li{
       display: flex;
       > span{

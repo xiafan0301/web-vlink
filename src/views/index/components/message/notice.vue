@@ -19,8 +19,18 @@
             <el-form-item prop="titleOrPublisher">
               <el-input v-model="noticeForm.titleOrPublisher" placeholder="请输入标题或者发布者"></el-input>
             </el-form-item>
+            <el-form-item prop="department">
+              <el-select value-key="uid" v-model="noticeForm.department" filterable placeholder="请选择发布部门">
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="noticeState">
-              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择">
+              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择是否置顶">
                 <el-option
                   v-for="item in noticeStateList"
                   :key="item.uid"
@@ -57,6 +67,12 @@
               <el-table-column
                 label="内容预览"
                 prop="details"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="发布部门"
+                prop="publishUnitName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -133,13 +149,16 @@ export default {
       noticeForm: {
         noticeDate: null,
         titleOrPublisher: null,
+        department: null,
         noticeState: null
       },
       lastNoticeForm: {
         noticeDate: null,
         titleOrPublisher: null,
+        department: null,
         noticeState: null
       },
+      departmentList: [],
       noticeStateList: [
         {value: '0', label: '未置顶'},
         {value: '1', label: '已置顶'}

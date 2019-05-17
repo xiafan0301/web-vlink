@@ -20,7 +20,7 @@
               <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
             <el-form-item prop="helpState">
-              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择">
+              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择推送范围">
                 <el-option
                   v-for="item in helpStateList"
                   :key="item.uid"
@@ -62,7 +62,7 @@
               </el-table-column>
               <el-table-column
                 label="发布者"
-                prop="reporterUserName"
+                prop="reportUserName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -72,7 +72,7 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  {{scope.row.radius === -1 ? '不推送' : scope.row.radius === 0 ? '全部推送' : scope.row.radius > 0 ? (scope.row.radius + '公里以内') : ''}}
+                  {{scope.row.radius === -1 ? '不推送' : scope.row.radius === 0 ? '全部用户' : scope.row.radius > 0 ? (scope.row.radius/1000 + '公里以内') : ''}}
                 </template>
               </el-table-column>
               <el-table-column  
@@ -114,7 +114,8 @@
 <script>
 import helpAdd from './helpAdd.vue';
 import helpDetail from './helpDetail.vue';  
-import {getMutualHelpList} from '@/views/index/api/api.message.js';
+import {getEventList} from '@/views/index/api/api.event.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {helpAdd, helpDetail},
   data () {
@@ -131,14 +132,12 @@ export default {
         content: null,
         helpState: null
       },
-      helpStateList: [
-        {value: -1, label: '不推送'},
-        {value: 0, label: '全部推送'},
-        {value: 10, label: '10公里以内的'},
-        {value: 20, label: '20公里以内的'},
-        {value: 30, label: '30公里以内的'},
-        {value: 40, label: '40公里以内的'}
-      ],
+      helpStateList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // 表格参数
       helpList: [{name: 'xxx'}],
       // 翻页参数
@@ -183,13 +182,14 @@ export default {
         pageSize: this.pageSize,
         orderBy: 'report_time',
         order: 'desc',
-        'where.startDateStr': this.helpForm.helpDate && this.helpForm.helpDate[0],
-        'where.endDateStr': this.helpForm.helpDate && this.helpForm.helpDate[1],
+        'where.reportTimeStart': this.helpForm.helpDate && this.helpForm.helpDate[0],
+        'where.reportTimeEnd': this.helpForm.helpDate && this.helpForm.helpDate[1],
         'where.keyWord': this.helpForm.content,
-        'where.radius': this.helpForm.helpState
+        'where.radius': this.helpForm.helpState,
+        'where.mutualFlag': 1
       }
       this.loading = true;
-      getMutualHelpList(params).then(res => {
+      getEventList(params).then(res => {
         if (res && res.data) {
           this.helpList = res.data;
         }

@@ -342,19 +342,6 @@ export default {
         }
       })
     },
-    // 获取告警级别字段
-    // getDiciData () {
-    //   getDiciData(11).then(res => {
-    //     if (res && res.data) {
-    //       this.alarmLevelList = res.data.map(m => {
-    //         return {
-    //           value: parseInt(m.enumField),
-    //           label: m.enumValue
-    //         }
-    //       })
-    //     }
-    //   })
-    // },
     // 获取实时监控的布控设备
     getControlMap () {
       if (this.mapForm.state !== 1) {
@@ -398,7 +385,7 @@ export default {
           return;
         }
         this.mapMark();
-        this.getAllAlarmSnapListByDev();
+        if (this.mapForm.state === 1) this.getAllAlarmSnapListByDev();
       }).finally(() => {
         this.loadingBtn = false;
       })
@@ -694,6 +681,7 @@ export default {
       if (_this.map) {
         _this.map.clearMap();
       }
+      _this.markerList = [];
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let content = '';
@@ -734,10 +722,10 @@ export default {
             }
             _this.getControlMapByDevice(e.target.C.extData);
           })
-          marker.setMap(_this.map);
           _this.markerList.push(marker);
         }
       }
+      _this.map.add(_this.markerList);
       _this.map.setFitView();// 自动适配到合适视野范围
       // 当布控状态不是进行中时，清除之前保存的定时器，并return
       clearInterval(_this.timer);

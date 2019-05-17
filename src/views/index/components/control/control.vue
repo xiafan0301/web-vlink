@@ -489,6 +489,9 @@ export default {
       }
     }
   }
+  .vl_map_hover_main{
+    bottom: 58px;
+  }
 }
 // 重置布控库popover
 .more_popover_box .more_popover{

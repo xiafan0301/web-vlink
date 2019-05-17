@@ -775,7 +775,7 @@ export default {
       }
     }, 
     mapMark () {
-      let _this = this, hoverWindow = null, data = null;
+      let _this = this, hoverWindow = null, data = null, markerList = [];
       if (!_this.trackPointList) {
         return false;
       }
@@ -866,9 +866,10 @@ export default {
             }
             _this.devIdOrBayId = obj.uid;//左侧列表高亮
           });
-          marker.setMap(_this.map);
+          markerList.push(marker);
         }
       }
+      _this.map.add(markerList);
       _this.map.setFitView();
     },
     // 地图缩放
