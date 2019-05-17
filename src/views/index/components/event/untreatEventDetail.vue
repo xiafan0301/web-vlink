@@ -11,17 +11,17 @@
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-handle">
           <div class="event-handle-header">
-            <span>处理事件</span>
+            <span>{{$route.query.type && $route.query.type === 'again' ? '再次处理事件' : '处理事件'}}</span>
           </div>
           <div class="divide"></div>
           <div class="handle-content">
             <div class="mutual">
               <p class="title">是否发布民众互助:</p>
-              <el-radio-group v-model="isMutual">
+              <el-radio-group v-model="isMutual" :disabled="basicInfo.mutualFlag && basicInfo.mutualFlag ? true : false">
                 <el-radio :label="false">不发布</el-radio>
                 <el-radio :label="true">发布</el-radio>
               </el-radio-group>
-              <div v-show="isMutual">
+              <div v-show="isMutual && isShowMutual">
                 <span>是否推送消息给附近的用户：</span>
                 <el-select  placeholder="请选择推送距离" size="mini" style='width: 200px' v-model="radiusNumber">
                   <el-option
@@ -37,7 +37,7 @@
             </div>
             <div class="handle-type">
               <p class="title">请选择处理方式:</p>
-              <el-radio-group v-model="handleType" @change="handleHandleMode">
+              <el-radio-group v-model="handleType">
                 <el-radio :label="1">
                   <span class="content">智能布控</span>
                   <span class="tip">（在监控设备上做布控，发现情况会自动告警提醒）</span>
@@ -87,6 +87,8 @@ export default {
       basicInfo: {}, // 事件详情
       radiusNumber: null, // 推送距离
       isDisabled: true, 
+      isShowMutual: true, // 是否显示推送距离，，如果是已经发布过的则不显示
+      isDisabledMutual: false, // 是否禁用民众互助选择
       isShowError: false,
       distanceList: [], // 推送距离
     }
@@ -141,6 +143,10 @@ export default {
         .then(res => {
           if (res) {
             this.basicInfo = res.data;
+           if (this.basicInfo.mutualFlag) {
+             this.isMutual = true;
+             this.isShowMutual = false;
+           }
           }
         })
         .catch(() => {})
@@ -151,11 +157,14 @@ export default {
     },
     // 确定---跳页面
     skipEachPage () {
+      console.log('111')
       const type = this.handleType;
       const eventId = this.$route.query.eventId;
-      if (this.isMutual && !this.radiusNumber) {
-        this.isShowError= true;
-        return;
+      if (!this.basicInfo.mutualFlag) {
+        if (this.isMutual && !this.radiusNumber) {
+          this.isShowError= true;
+          return;
+        }
       }
       const params = {
         uid: eventId,
@@ -191,9 +200,6 @@ export default {
             }
           }
         }) 
-    },
-    // 处理方式change
-    handleHandleMode () {
     },
     // 返回
     back () {

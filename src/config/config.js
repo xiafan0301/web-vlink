@@ -60,7 +60,7 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      // dev: 'http://10.116.64.142:8084', // 江先琨
+      // test: 'http://10.116.64.142:8084', // 江先琨
       dev: 'http://apidev.aorise.org/vlink-user',
       test: 'http://apirel.aorise.org/vlink-user',
       prod: 'http://apirel.aorise.org/vlink-user'

@@ -19,11 +19,11 @@
                 </div>
                 <div class="child_temp" v-show="item.isOpenArrow === true">
                   <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
+                    <span :class="[changeLeftTab === 1 ? 'active_span' : '']" @click="changeLDeviceType(1)">摄像头</span>
+                    <span :class="[changeLeftTab === 2 ? 'active_span' : '']" @click="changeLDeviceType(2)">卡口</span>
                   </div>
                   <ul class="child_temp_detail">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx" v-show="itm.type === changeLeftTab">
                       <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked)"></el-checkbox>
                       <span>{{itm.deviceName}}</span>
                     </li>
@@ -68,11 +68,11 @@
                 </div>
                 <div class="child_temp" v-show="item.isOpenArrow === true">
                   <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
+                    <span :class="[changeRightTab === 1 ? 'active_span' : '']" @click="changeRDeviceType(1)">摄像头</span>
+                    <span :class="[changeRightTab === 2 ? 'active_span' : '']" @click="changeRDeviceType(2)">卡口</span>
                   </div>
                   <ul class="child_temp_detail">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx" v-show="itm.type === changeRightTab">
                       <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked)"></el-checkbox>
                       <span>{{itm.deviceName}}</span>
                     </li>
@@ -97,6 +97,8 @@ export default {
       // leftDeviceList: [], // 左侧的设备列表
       // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
+      changeRightTab: 1, // 右侧摄像头和卡口切换  1--摄像头  2---卡口
+      changeLeftTab: 1, // 左侧摄像头和卡口切换  1--摄像头  2---卡口
     }
   },
   mounted () {
@@ -129,7 +131,6 @@ export default {
     // 左侧---子级多选框change
     handleLeftChildChecked (index, idx, val) {
       this.$emit('emitLeftChildChecked', index, idx, val);
-      
     },
     // 左侧---展开左侧列表
     openLeftArrow (index) {
@@ -237,7 +238,15 @@ export default {
         }
         this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
       }
-    }
+    },
+    // 切换摄像头和卡口----right
+    changeRDeviceType (val) {
+      this.changeRightTab = val;
+    },
+    // 切换摄像头和卡口----left
+    changeLDeviceType (val) {
+      this.changeLeftTab = val;
+    },
   }
 }
 </script>
@@ -279,6 +288,7 @@ export default {
           line-height: 26px;
           color: #333333;
           .parent_temp_li {
+            width: 100%;
             // padding: 0 10px;
             >span {
               margin-left: 5px;
@@ -405,6 +415,7 @@ export default {
           line-height: 26px;
           color: #333333;
           .parent_temp_li {
+            width: 100%;
             // padding: 0 10px;
             >span {
               margin-left: 5px;
