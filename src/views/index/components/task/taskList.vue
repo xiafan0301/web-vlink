@@ -56,6 +56,7 @@
           prop="readFlag"
           >
           <template slot-scope="scope">
+            <span :class="scope.row.readFlag == 1 ? 'dot bg_blue' : 'dot bg_white'"></span>
             {{ dicFormater( taskStatus, scope.row.readFlag)}}
           </template>
         </el-table-column>
@@ -207,7 +208,7 @@ export default {
     },
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
-      this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType}});
+      this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid}});
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
@@ -265,6 +266,25 @@ export default {
     padding: 0 20px;
     .task_table {
       margin-top: 8px;
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .bg_blue {
+        background: #0C70F8;
+      }
+      .bg_white {
+        background: #fff;
+      }
+      .hover-row {
+        &:hover {
+          .bg_white {
+            background: #E6F7FF!important;
+          }
+        }
+      }
       .task_status {
         &:before {
           content: '.';
