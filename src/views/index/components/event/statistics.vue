@@ -20,7 +20,7 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.eventDealOrgId" clearable placeholder="请选择" style="margin-left: 10px;">
+          <el-select v-model="searchForm.dealOrgId" clearable placeholder="请选择" style="margin-left: 10px;">
             <el-option
             v-for="(item, index) in departmentData"
             :key="index"
@@ -189,7 +189,7 @@ export default {
     return {
       searchForm: {
         dateTime: [new Date(new Date().getTime() - 3600 * 1000 * 24 * 30), new Date()],
-        eventDealOrgId: null
+        dealOrgId: null
       },
       pickerOptions2: {
         shortcuts: [
@@ -929,7 +929,8 @@ export default {
       return {
         'where.reportTimeStart': formatDate(this.searchForm.dateTime[0], 'yyyy-MM-dd'),
         'where.reportTimeEnd': formatDate(this.searchForm.dateTime[1], 'yyyy-MM-dd'),
-        'where.eventDealOrgId': this.searchForm.eventDealOrgId
+        'where.dealOrgId': this.searchForm.dealOrgId,
+        'where.eventFlag': 1 // 1--是  0--否  是否为事件
       }
     },
     loadHandler () {

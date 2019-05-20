@@ -67,10 +67,10 @@
           <span>+</span>
           <span>新增事件</span>
         </div>
-        <div class="select-checkbox">
+        <!-- <div class="select-checkbox">
           <span>自动审核政务人员的</span>
           <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
-        </div>
+        </div> -->
       </div>
       <el-table
         class="audit_table"
@@ -150,7 +150,6 @@
     </div>
     <el-pagination
       class="cum_pagination"
-      @size-change="onSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -164,7 +163,7 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, openAutoCheck } from '@/views/index/api/api.event.js';
+import { getEventList } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getDiciData } from '@/views/index/api/api.js';
 export default {
@@ -179,7 +178,7 @@ export default {
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
-      isOpen: false, // 自动审核政务人员
+      // isOpen: false, // 自动审核政务人员
       auditList: [],
       auditStatusList: [], // 审核状态
       eventTypeList: [], // 事件类型
@@ -192,14 +191,14 @@ export default {
     this.userInfo =  this.$store.state.loginUser;
   },
   mounted () {
-    const status = window.localStorage.getItem('iaAutoCheck');
-    if (status !== null) {
-      if (status) {
-        this.isOpen = true;
-      } else {
-        this.isOpen = false;
-      }
-    }
+    // const status = window.localStorage.getItem('iaAutoCheck');
+    // if (status !== null) {
+    //   if (status) {
+    //     this.isOpen = true;
+    //   } else {
+    //     this.isOpen = false;
+    //   }
+    // }
     this.getOneMonth();
     this.getAutoCheck();
     this.getAuditStatusList();
@@ -289,11 +288,6 @@ export default {
           }
         })
     },
-    onSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      this.getAuditData();
-    },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getAuditData();
@@ -331,28 +325,28 @@ export default {
       this.getOneMonth();
       this.getAuditData();
     },
-    // 自动审核政务人员
-    isAutoCheck (val) {
-      window.localStorage.setItem('iaAutoCheck', val); // 记住自动审核的状态
-      let value  = '';
-      if (val) {
-        value = '1';
-      } else {
-        value = '0'
-      }
-      const params = {
-        uid: this.autoCheckList[0].uid,
-        desci: value,
-        typeKey: dataList.autoCheck
-      };
-      openAutoCheck(params)
-        .then(res => {
-          if (res) {
-            this.getAuditData();
-          }
-        })
-        .catch(() => {})
-    }
+    // // 自动审核政务人员
+    // isAutoCheck (val) {
+    //   window.localStorage.setItem('iaAutoCheck', val); // 记住自动审核的状态
+    //   let value  = '';
+    //   if (val) {
+    //     value = '1';
+    //   } else {
+    //     value = '0'
+    //   }
+    //   const params = {
+    //     uid: this.autoCheckList[0].uid,
+    //     desci: value,
+    //     typeKey: dataList.autoCheck
+    //   };
+    //   openAutoCheck(params)
+    //     .then(res => {
+    //       if (res) {
+    //         this.getAuditData();
+    //       }
+    //     })
+    //     .catch(() => {})
+    // }
   }
 }
 </script>

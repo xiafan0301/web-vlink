@@ -184,13 +184,13 @@
         <p>如果忘记旧密码，请在登录页使用“忘记密码”功能重设密码。</p>
         <el-form :model="updateForm" ref="updateForm" :rules="rules" label-width="20px">
           <el-form-item label=" " prop="oldPwd">
-            <el-input type="password" placeholder="请输入旧密码" v-model="updateForm.oldPwd"></el-input>
+            <el-input :type="inputType.oldType" placeholder="请输入旧密码" v-model="updateForm.oldPwd" @focus="changeFocus(1)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="newPwd">
-            <el-input type="password" placeholder="请设置新密码" v-model="updateForm.newPwd"></el-input>
+            <el-input :type="inputType.newType" placeholder="请设置新密码" v-model="updateForm.newPwd" @focus="changeFocus(2)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="sureNewPwd">
-            <el-input type="password" placeholder="请确认密码" v-model="updateForm.sureNewPwd"></el-input>
+            <el-input :type="inputType.sureType" placeholder="请确认密码" v-model="updateForm.sureNewPwd" @focus="changeFocus(3)"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -261,6 +261,11 @@ export default {
       taskStatusList: [], // 任务状态数据
       taskType: dataList.taskType,
       taskListAll: [],
+      inputType: {
+        oldType: 'text',
+        newType: 'text',
+        sureType: 'text'
+      }, // 输入框类型
     }
   },
   mounted () {
@@ -271,6 +276,18 @@ export default {
     this.getTaskData();
   },
   methods: {
+    // 将输入框的type改为password
+    changeFocus (val) {
+      if (val === 1) {
+        this.inputType.oldType = 'password';
+      }
+      if (val === 2) {
+        this.inputType.newType = 'password';
+      }
+      if (val === 3) {
+        this.inputType.sureType = 'password';
+      }
+    },
     // 显示退出登录弹出框
     showLoginOutDialog () {
       this.loginoutDialog = true;
