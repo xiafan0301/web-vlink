@@ -19,8 +19,18 @@
             <el-form-item style="width: 260px;" prop="content">
               <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
+            <el-form-item prop="helpRadius">
+              <el-select value-key="uid" v-model="helpForm.helpRadius" filterable placeholder="请选择推送范围">
+                <el-option
+                  v-for="item in helpRadiusList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="helpState">
-              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择推送范围">
+              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择互助状态">
                 <el-option
                   v-for="item in helpStateList"
                   :key="item.uid"
@@ -76,6 +86,12 @@
                 </template>
               </el-table-column>
               <el-table-column  
+                label="状态"
+                prop=""
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column  
                 label="事发时间"
                 prop="reportTime"
                 show-overflow-tooltip
@@ -86,6 +102,8 @@
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                  <span class="operation_wire">|</span>
+                  <span class="operation_btn" @click="skip(4, scope.row.uid)">结束</span>
                 </template>
               </el-table-column>
               <div class="not_content" slot="empty">
@@ -125,14 +143,20 @@ export default {
       helpForm: {
         helpDate: null,
         content: null,
-        helpState: null
+        helpRadius: null
       },
       lastHelpForm: {
         helpDate: null,
         content: null,
-        helpState: null
+        helpRadius: null
       },
-      helpStateList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
+      helpRadiusList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
+      helpStateList: this.dicFormater(dataList.eventStatus)[0].dictList.filter(f => f.enumField !== '1').map(m => {
         return {
           value: parseInt(m.enumField),
           label: m.enumValue
@@ -185,7 +209,7 @@ export default {
         'where.reportTimeStart': this.helpForm.helpDate && this.helpForm.helpDate[0],
         'where.reportTimeEnd': this.helpForm.helpDate && this.helpForm.helpDate[1],
         'where.keyWord': this.helpForm.content,
-        'where.radius': this.helpForm.helpState,
+        'where.radius': this.helpForm.helpRadius,
         'where.mutualFlag': 1
       }
       this.loading = true;
