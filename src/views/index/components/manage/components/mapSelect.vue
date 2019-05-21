@@ -129,28 +129,10 @@ export default {
         if (testData && testData.length > 0) {
           testData.map(item => {
             item.deviceList.map(itm => {
-              let param;
-              if (itm.type === 1) {
-                param = {
-                  parentUid: item.uid,
-                  type: itm.type,
-                  uid: itm.uid,
-                  deviceName: itm.deviceName,
-                  longitude: itm.longitude,
-                  latitude: itm.latitude
-                };
-                this.sxtList.push(param);
-              } else {
-                param = {
-                  parentUid: item.uid,
-                  uid: itm.uid,
-                  type: itm.type,
-                  deviceName: itm.deviceName,
-                  longitude: itm.longitude,
-                  latitude: itm.latitude
-                };
-                this.kkList.push(param);
-              }
+              this.sxtList.push(itm);
+            });
+            item.bayonetList.map(itm => {
+              this.kkList.push(itm);
             })
           })
         }

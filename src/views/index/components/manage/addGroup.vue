@@ -74,6 +74,8 @@
               @emitAllChecked="emitAllChecked"
               @emitFinalDevice="emitFinalDevice"
               @emitRemoveFinalDevice="emitRemoveFinalDevice"
+              @emitChangeRDeviceType="emitChangeRDeviceType"
+              @emitChangeLDeviceType="emitChangeLDeviceType"
             >
             </listSelect>
           </template>
@@ -123,6 +125,14 @@ export default {
     this.getAllDevicesList();
   },
   methods: {
+    // 左侧切换摄像头和卡口
+    emitChangeLDeviceType (index, val) {
+      this.currentDeviceList[index].isSXT = val;
+    },
+    // 右侧切换摄像头和卡口
+    emitChangeRDeviceType (index, val) {
+      this.selectDeviceList[index].isSXT = val;
+    },
     // 打开右侧箭头
     emitOpenRightArrow (index) {
       this.selectDeviceList[index].isOpenArrow = !this.selectDeviceList[index].isOpenArrow;
@@ -141,6 +151,9 @@ export default {
         item.deviceList.map(itm => {
           itm.isChildChecked = val;
         });
+        item.bayonetList.map(itm => {
+          itm.isChildChecked = val;
+        });
       });
       this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
     },
@@ -148,6 +161,9 @@ export default {
     emitParentChecked (index, val) {
       this.selectDeviceList[index].isChecked = val;
       this.selectDeviceList[index].deviceList.map(item => {
+        item.isChildChecked = val;
+      });
+      this.selectDeviceList[index].bayonetList.map(item => {
         item.isChildChecked = val;
       });
       if (!val) {
@@ -171,42 +187,89 @@ export default {
       this.currentDeviceList[index].deviceList.map(item => {
         item.isChildChecked = val;
       });
+       this.currentDeviceList[index].bayonetList.map(item => {
+        item.isChildChecked = val;
+      });
       this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList)); // 必须放在过滤父级的上面，因为先要更新在过滤
     },
     // 左侧--子级多选框选中
-    emitLeftChildChecked (index, idx, val) {
-      this.currentDeviceList[index].deviceList[idx].isChildChecked = val;
-      // 过滤出子级选中的
-      let checkedArr = this.currentDeviceList[index].deviceList.filter((item) => {
-        return item.isChildChecked === true;
-      })
-      if (checkedArr.length === 0) { // 没有选中的
+    emitLeftChildChecked (index, idx, val, isSxt) {
+      if (isSxt) {
+        this.currentDeviceList[index].deviceList[idx].isChildChecked = val;
+      } else {
+        this.currentDeviceList[index].bayonetList[idx].isChildChecked = val;
+      }
+      // 过滤出子级选中的(摄像头和卡口)
+      let checkedSxtArr = [], checkedKKArr = [];
+      if (this.currentDeviceList[index].deviceList.length > 0) {
+        checkedSxtArr = this.currentDeviceList[index].deviceList.filter((item) => { // 摄像头
+          return item.isChildChecked === true;
+        });
+      }
+      if (this.currentDeviceList[index].bayonetList.length > 0) {
+        checkedKKArr = this.currentDeviceList[index].bayonetList.filter((item) => { // 卡口
+          return item.isChildChecked === true;
+        });
+      }
+
+      if (checkedSxtArr.length === 0 && checkedKKArr.length === 0) { // 没有选中的
         this.currentDeviceList[index].isChecked = false;
       }
-      if (checkedArr.length === this.currentDeviceList[index].deviceList.length) { // 全选
+
+      if (checkedSxtArr.length === this.currentDeviceList[index].deviceList.length && checkedKKArr.length === this.currentDeviceList[index].bayonetList.length) { // 全选
         this.currentDeviceList[index].isChecked = true;
       }
-      if (checkedArr.length === 0 || checkedArr.length < this.currentDeviceList[index].deviceList.length) {
-        // this.rightAllChecked = false;
-        this.currentDeviceList[index].isChecked = false;
+
+      if (this.currentDeviceList[index].deviceList.length !== 0) {
+        if (checkedSxtArr.length === 0 || checkedSxtArr.length < this.currentDeviceList[index].deviceList.length) {
+          this.currentDeviceList[index].isChecked = false;
+        }
       }
+      if (this.currentDeviceList[index].bayonetList.length !== 0) {
+        if (checkedKKArr.length === 0 || checkedKKArr.length < this.currentDeviceList[index].bayonetList.length) {
+          this.currentDeviceList[index].isChecked = false;
+        }
+      }
+
     },
     // 右侧--子级多选框选中
-    emitChildChecked (index, idx, val) {
-      this.selectDeviceList[index].deviceList[idx].isChildChecked = val;
-      // 过滤出子级选中的
-      let checkedArr = this.selectDeviceList[index].deviceList.filter((item) => {
-        return item.isChildChecked === true;
-      })
-      if (checkedArr.length === 0) { // 没有选中的
+    emitChildChecked (index, idx, val, isSxt) {
+      if (isSxt) {
+        this.selectDeviceList[index].deviceList[idx].isChildChecked = val;
+      } else {
+        this.selectDeviceList[index].bayonetList[idx].isChildChecked = val;
+      }
+      // 过滤出子级选中的(摄像头和卡口)
+      let checkedSxtArr = [], checkedKKArr = [];
+      if (this.selectDeviceList[index].deviceList.length > 0) {
+        checkedSxtArr = this.selectDeviceList[index].deviceList.filter((item) => { // 摄像头
+          return item.isChildChecked === true;
+        });
+      }
+
+      if (this.selectDeviceList[index].bayonetList.length > 0) {
+        checkedKKArr = this.selectDeviceList[index].bayonetList.filter((item) => { // 卡口
+          return item.isChildChecked === true;
+        });
+      }
+
+      if (checkedSxtArr.length === 0 && checkedKKArr.length === 0) { // 没有选中的
         this.selectDeviceList[index].isChecked = false;
       }
-      if (checkedArr.length === this.selectDeviceList[index].deviceList.length) { // 全选
+      
+      if (checkedSxtArr.length === this.selectDeviceList[index].deviceList.length && checkedKKArr.length === this.selectDeviceList[index].bayonetList.length) { // 全选
         this.selectDeviceList[index].isChecked = true;
       }
-      if (checkedArr.length === 0 || checkedArr.length < this.selectDeviceList[index].deviceList.length) {
-        // this.rightAllChecked = false;
-        this.selectDeviceList[index].isChecked = false;
+
+      if (this.selectDeviceList[index].deviceList.length !== 0) {
+        if (checkedSxtArr.length === 0 || checkedSxtArr.length < this.selectDeviceList[index].deviceList.length) {
+          this.selectDeviceList[index].isChecked = false;
+        }
+      }
+      if (this.selectDeviceList[index].bayonetList.length !== 0) {
+        if (checkedKKArr.length === 0 || checkedKKArr.length < this.selectDeviceList[index].bayonetList.length) {
+          this.selectDeviceList[index].isChecked = false;
+        }
       }
 
       this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
@@ -234,8 +297,13 @@ export default {
               this.currentDeviceList.map(item => {
                 item.isOpenArrow = false; // 设置是否展开
                 item.isChecked = false; // 父级是否选中
+                item.isSXT = true; // 默认选中摄像头
                 this.leftDeviceNumber += item.deviceList.length;
+                this.leftDeviceNumber += item.bayonetList.length;
                 item.deviceList.map(itm => {
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+                item.bayonetList.map(itm => {
                   itm.isChildChecked = false; // 子级是否选中
                 });
               });
@@ -251,10 +319,15 @@ export default {
       this.selectDeviceList.map(item => {
         item.isOpenArrow = false; // 设置是否展开
         item.isChecked = false; // 父级是否选中
+        item.isSXT = true; // 默认显示摄像头
         item.deviceList.map(itm => {
           itm.isChildChecked = false; // 子级是否选中
         });
+        item.bayonetList.map(itm => {
+          itm.isChildChecked = false; // 子级是否选中
+        });
         this.selectDeviceNumber += item.deviceList.length;
+        this.selectDeviceNumber += item.bayonetList.length;
       });
       // getAllDevices(this.searchForm)
       //   .then(res => {
@@ -285,10 +358,24 @@ export default {
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {
       if (list) {
+        let arr = [];
         list.map(item => {
-          this.currentDeviceList.push(item);
+          arr = this.currentDeviceList.filter(itm => {
+            if (itm.uid === item.uid) {
+              item.deviceList.map(val => {
+                itm.deviceList.push(val);
+              });
+              item.bayonetList.map(val => {
+                itm.bayonetList.push(val);
+              });
+              return item;
+            }
+          });
+          if (arr.length === 0) {
+            this.currentDeviceList.push(item);
+          }
         });
-        this.leftDeviceNumber = number;
+        this.leftDeviceNumber += number;
       }
       if (selectList) {
         this.selectDeviceList = [];
@@ -314,6 +401,9 @@ export default {
             if (itm.uid === item.uid) {
               item.deviceList.map(val => {
                 itm.deviceList.push(val);
+              });
+              item.bayonetList.map(val => {
+                itm.bayonetList.push(val);
               });
               return item;
             }
@@ -350,15 +440,19 @@ export default {
         });
         return;
       }
-      let arrId = [];
+      let vehicleIds = [], bayonetIds = [];
       this.currentDeviceList.map(item => {
         item.deviceList.map(itm => {
-          arrId.push(itm.uid);
+          vehicleIds.push(itm.uid);
+        });
+        item.bayonetIds.map(itm => {
+          bayonetIds.push(itm.uid);
         });
       });
       const params = {
         groupName: this.groupName,
-        vehicleIds: arrId
+        vehicleIds,
+        bayonetIds
       };
       this.isLoading = true;
       addGroupDevice(params)
@@ -372,11 +466,6 @@ export default {
             this.isLoading = false;
             this.$router.push({name: 'custom_group'});
           } else {
-            // this.$message({
-            //   type: 'error',
-            //   message: '保存失败',
-            //   customClass: 'request_tip'
-            // })
             this.isLoading = false;
           }
         })
