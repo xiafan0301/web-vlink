@@ -54,7 +54,6 @@
                     list-type="picture-card"
                     accept=".png,.jpg,.jpeg,.mp4"
                     multiple
-                    :disabled="imgDisabled"
                     :before-upload='handleBeforeUpload'
                     :on-success='handleSuccess'
                     :show-file-list='false'
@@ -88,8 +87,9 @@
                     </div>
                   </template>
                 </div>
-                <el-form-item label-width="85px">
+                <el-form-item label-width="85px" class="upload_tip">
                   <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
+                  <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p>
                 </el-form-item>
                 <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
@@ -208,17 +208,23 @@
         <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
       </div>
     </el-dialog>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
 import { dataList, operationType } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
+import BigImg from '@/components/common/bigImg.vue';
 import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getDiciData } from '@/views/index/api/api.js';
 export default {
+  components: { BigImg },
   data () {
     return {
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [], // 要放大的图片
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
       backDialog: false, // 返回提示弹出框
@@ -271,10 +277,39 @@ export default {
       userInfo: {},
       uploadImgList: [], // 要上传的图片列表
       uplaodVideoList: [], // 要上传的视频列表
-      imgDisabled: false, // 是否禁用上传按钮
       isRejectLoading: false, // 驳回加载中
       isPassLoading: false, // 通过加载中
       isPlaying: false, // 是否播放视频
+      isShowErrorTip: false, // 是否显示图片上传错误提示
+      errorText: null, // 图片上传错误提示
+    }
+  },
+  watch: {
+    uplaodVideoList (val) {
+      if (this.uploadImgList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uploadImgList.length > 9 || val.length > 1) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
+    },
+    uploadImgList (val) {
+      if (this.uplaodVideoList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uplaodVideoList.length > 1 || val.length > 9) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
     }
   },
   created () {
@@ -517,6 +552,20 @@ export default {
       if (!isLtTenM) {
         this.$message.error('上传的图片大小不能超过2M,视频大小不能超过10M');
       }
+      if (this.isShowErrorTip) { // 上传错误提示
+        return;
+      }
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.imgList1 = [];
+      this.isShowImg = value;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
     },
     // 移除图片
     removeImg (index) {
@@ -528,37 +577,41 @@ export default {
     },
     // 图片上传成功
     handleSuccess (res) {
-      if (res && res.data) {
-        const fileName = res.data.fileName;
-        let type, data;
-        if (fileName) {
-          type = fileName.substring(fileName.lastIndexOf('.'));
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
-            data = {
-              contentUid: 0,
-              fileType: dataList.imgId,
-              path: res.data.fileFullPath,
-              filePathName: res.data.filePath,
-              cname: res.data.fileName,
-              imgSize: res.data.fileSize,
-              imgWidth: res.data.fileWidth,
-              imgHeight: res.data.fileHeight,
-              thumbnailPath: res.data.thumbnailFileFullPath,
+      if (this.isShowErrorTip) { // 上传错误提示
+        return;
+      } else {
+        if (res && res.data) {
+          const fileName = res.data.fileName;
+          let type, data;
+          if (fileName) {
+            type = fileName.substring(fileName.lastIndexOf('.'));
+            if (type === '.png' || type === '.jpg' || type === '.bmp') {
+              data = {
+                contentUid: 0,
+                fileType: dataList.imgId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath,
+              }
+              this.uploadImgList.push(data);
+            } else {
+              data = {
+                contentUid: 0,
+                fileType: dataList.videoId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath,
+              }
+              this.uplaodVideoList.push(data);
             }
-            this.uploadImgList.push(data);
-          } else {
-            data = {
-              contentUid: 0,
-              fileType: dataList.videoId,
-              path: res.data.fileFullPath,
-              filePathName: res.data.filePath,
-              cname: res.data.fileName,
-              imgSize: res.data.fileSize,
-              imgWidth: res.data.fileWidth,
-              imgHeight: res.data.fileHeight,
-              thumbnailPath: res.data.thumbnailFileFullPath,
-            }
-            this.uplaodVideoList.push(data);
           }
         }
       }
@@ -645,19 +698,22 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
-          if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-            this.$message({
-              type: 'warning',
-              message: '图片和视频只能上传一种',
-              customClass: 'request_tip'
-            });
-            return;
-          } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-            this.$message({
-              type: 'warning',
-              message: '最多上传1个视频或9张图片',
-              customClass: 'request_tip'
-            });
+          // if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '图片和视频只能上传一种',
+          //     customClass: 'request_tip'
+          //   });
+          //   return;
+          // } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '最多上传1个视频或9张图片',
+          //     customClass: 'request_tip'
+          //   });
+          //   return;
+          // }
+          if (this.isShowErrorTip) { // 上传错误提示
             return;
           }
           this.uploadImgList.map(item => {
@@ -856,6 +912,16 @@ export default {
           }
           /deep/ .el-form-item__label {
             color: #666666;
+          }
+          .upload_tip {
+            /deep/ .el-form-item__content {
+              line-height: 20px;
+              .error_tip {
+                padding-left: 5px;
+                color: #F56C6C;
+                font-size: 12px;
+              }
+            }
           }
         }
       }

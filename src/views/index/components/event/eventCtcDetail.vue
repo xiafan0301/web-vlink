@@ -33,7 +33,7 @@
             <div class="divide-list"></div>
           </ul>
         </div>
-        <div class="judge_result">
+        <!-- <div class="judge_result">
           <div class="header">
             <p class="ctc-title">研判结果</p>
           </div>
@@ -44,7 +44,7 @@
               <span>暂无数据</span>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
@@ -300,7 +300,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .event-ctc-content, .judge_result, .event-process, .summary {
+    .event-ctc-content, .event-process, .summary {
       width: 100%;
       margin-bottom: 20px;
       background-color: #ffffff;
@@ -368,21 +368,21 @@ export default {
           border-bottom: 1px dashed #F2F2F2;
         }
       }
-      .judge_result_content {
-        width: 100%;
-        .no_result {
-          height: 100px;
-          line-height: 100px;
-          display: flex;
-          align-items: center;
-          margin-left: 45%;
-          >span {
-            margin-left: 10px;
-            color: #999999;
-            font-size: 16px;
-          }
-        }
-      }
+      // .judge_result_content {
+      //   width: 100%;
+      //   .no_result {
+      //     height: 100px;
+      //     line-height: 100px;
+      //     display: flex;
+      //     align-items: center;
+      //     margin-left: 45%;
+      //     >span {
+      //       margin-left: 10px;
+      //       color: #999999;
+      //       font-size: 16px;
+      //     }
+      //   }
+      // }
       .process-box {
         width: 100%;
         padding: 20px;

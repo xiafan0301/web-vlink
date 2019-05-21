@@ -42,8 +42,11 @@
           <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头</li>
           <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
         </ul>
-        <div class="data_list">
+        <div class="data_list" v-show="arrowActive === 1">
           <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+        </div>
+        <div class="data_list" v-show="arrowActive === 2">
+          <p v-for="(item, index) in bayonetList" :key="index">{{item.bayonetName}}</p>
         </div>
       </div>
     </div>
@@ -76,6 +79,7 @@ export default {
       closeShow: false,
       groupList: [], // 所有的分组
       deviceList: [], // 设备列表
+      bayonetList: [], // 卡口列表
       deleteId: null, // 要删除的分组设备id
     }
   },
@@ -115,6 +119,7 @@ export default {
       this.groupList.map(item => {
         if (item.uid === id) {
           this.deviceList = JSON.parse(JSON.stringify(item.deviceList));
+          this.bayonetList = JSON.parse(JSON.stringify(item.bayonetList));
         }
       })
     },
