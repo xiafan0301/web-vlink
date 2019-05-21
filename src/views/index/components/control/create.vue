@@ -21,6 +21,7 @@
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select
+                :disabled="$route.query.eventId ? true : false"
                 v-model="createForm.event"
                 filterable
                 remote
@@ -269,13 +270,15 @@ export default {
     getEventList (query) {
       const params = {
         'where.eventCode': query,
+        'where.isSurveillance': false,//没有关联布控的事件
         pageSize: 1000000,
         orderBy: 'report_time',
         order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {
-          this.eventList = res.data.list.map(m => {
+          // 过滤掉事件状态为已结束的关联事件
+          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
             return {
               label: m.eventCode,
               value: m.uid
