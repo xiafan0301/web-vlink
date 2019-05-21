@@ -50,8 +50,8 @@
           <span class="flvplayer_bot_omh">
             <!-- 标记 (更新需求：取消所有回放画面（录像回放、智能查看-视频回放）的标记功能 2019.05.05)-->
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
-            <!-- 录视频 -->
-            <span class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
+            <!-- 录视频 回放无此功能 -->
+            <span v-if="oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
             <!-- 截屏 -->
             <span v-if="config.cut" @click="playerCut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
@@ -272,10 +272,10 @@ export default {
         });
       } else if (this.oData.type === 2 || this.oData.type === 3) {
         if (this.oData.startTime) {
-          obj.startTime = formatDate(this.oData.startTime, 'yyyyMMddHHmmss');
+          obj.startTime = formatDate(this.oData.startTime, 'yyyy-MM-dd HH:mm:ss');
         }
         if (this.oData.endTime) {
-          obj.endTime = formatDate(this.oData.endTime, 'yyyyMMddHHmmss');
+          obj.endTime = formatDate(this.oData.endTime, 'yyyy-MM-dd HH:mm:ss');
         }
         apiVideoPlayBack(obj).then(res => {
           if (res && res.data && res.data.length > 0) {
@@ -560,8 +560,14 @@ export default {
       this.$nextTick(() => {
         let $video = $('#' + this.flvplayerId);
         let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
         if ($canvas && $canvas.length > 0) {
-          let w = 920, h = 540;
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
           $canvas.attr({
               width: w,
               height: h,
@@ -569,6 +575,8 @@ export default {
           // video canvas 必须为原生对象
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
+          let _i = $video[0];
+          // console.log(_i.width, _i.height);
           ctx.drawImage($video[0], 0, 0, w, h);
         }
       });
