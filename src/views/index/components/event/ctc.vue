@@ -178,8 +178,8 @@ export default {
         'where.keyword': this.ctcForm.phoneOrNumber,
         'where.status': eventStatus,
         pageNum: this.pagination.pageNum,
-        orderBy: 'create_time',
-        order: 'desc'
+        orderBy: 'dispatch_time',
+        order: 'asc'
       }
       getAllCtcList(params)
         .then(res => {
@@ -224,13 +224,21 @@ export default {
           .then(res => {console.log(res);})
           .catch(() => {})
       }
-      if (obj.dispatchStatusName === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
-        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
-      }
-      if (obj.dispatchStatusName === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
-        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+      if (obj.objType === 1) { // 事件
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
+        }
+
+      } else { // 告警
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid, objType: 1 }});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.uid, objType: 1 }});
+        }
       }
     }
   }

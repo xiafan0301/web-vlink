@@ -41,7 +41,7 @@
             <el-upload
               style="width: 500px;"
               :action="uploadUrl"
-              accept='.txt.pdf,.doc,.docx,.ppt,.pptx'
+              accept='.txt,.pdf,.doc,.docx'
               :on-success="handSuccess"
               :before-upload="beforeUpload"
               :limit="1"
@@ -266,7 +266,7 @@ export default {
           if (filterArr.length === 0) {
             this.addPlanForm.eventTypeName = this.addPlanForm.editEventType;
           } else {
-            this.addPlanForm.eventType = filterArr[0].uid;
+            this.addPlanForm.eventType = filterArr[0].enumField;
           }
           this.judgeData().then(result => {
             if (result) {

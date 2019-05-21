@@ -3,7 +3,7 @@
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件管理</el-breadcrumb-item>
         <el-breadcrumb-item>事件详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -470,7 +470,7 @@ export default {
     },
     // 跳至结束事件页面
     skipEventEndPage () {
-      this.$router.push({name: 'event_end', query: {id: this.$route.query.eventId}});
+      this.$router.push({name: 'event_end', query: {id: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至查看互助页面
     skipCommentPage () {
@@ -478,7 +478,7 @@ export default {
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      this.$router.push({path: '/control/manage', query: { pageType: 2, state: 1, controlId: 1 }});
+      this.$router.push({path: '/control/manage', query: { pageType: 2, state: 1, controlId: this.basicInfo.surveillanceId }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
@@ -486,7 +486,7 @@ export default {
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {
-      this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至再次处理页面
     skipAgainHandlePage () {

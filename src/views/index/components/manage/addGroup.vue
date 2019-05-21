@@ -98,7 +98,7 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 2, // 地图选择
+      tabState: 1, // 地图选择
       isShowError: false,
       errorText: null,
       searchForm: {
@@ -337,10 +337,15 @@ export default {
       //       this.selectDeviceList.map(item => {
       //         item.isOpenArrow = false; // 设置是否展开
       //         item.isChecked = false; // 父级是否选中
+      //         item.isSXT = true; // 默认显示摄像头
       //         item.deviceList.map(itm => {
       //           itm.isChildChecked = false; // 子级是否选中
       //         });
+      //         item.bayonetList.map(itm => {
+      //           itm.isChildChecked = false; // 子级是否选中
+      //         });
       //         this.selectDeviceNumber += item.deviceList.length;
+      //         this.selectDeviceNumber += item.bayonetList.length;
       //       });
       //     }
       //   })
@@ -442,12 +447,16 @@ export default {
       }
       let vehicleIds = [], bayonetIds = [];
       this.currentDeviceList.map(item => {
-        item.deviceList.map(itm => {
-          vehicleIds.push(itm.uid);
-        });
-        item.bayonetIds.map(itm => {
-          bayonetIds.push(itm.uid);
-        });
+        if (item.deviceList.length > 0) {
+          item.deviceList.map(itm => {
+            vehicleIds.push(itm.uid);
+          });
+        }
+        if (item.bayonetList.length > 0) {
+          item.bayonetIds.map(itm => {
+            bayonetIds.push(itm.uid);
+          });
+        }
       });
       const params = {
         groupName: this.groupName,
