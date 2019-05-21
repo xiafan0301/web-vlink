@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}}">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>

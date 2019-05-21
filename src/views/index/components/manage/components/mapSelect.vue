@@ -58,7 +58,7 @@
   </div>
 </template>
 <script>
-import { testData } from './testData.js';
+// import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
   props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList' ],
@@ -78,12 +78,51 @@ export default {
       kkList: [], // 卡口
       kkMapMarkers: [],
 
-      // leftDeviceList: [], // 选中的已有设备
-      // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
 
       unCheckDevice: [] // 没有在多边形中的设备--没有选中的设备
     }
+  },
+  watch: {
+    // finalDeviceList (val) {
+    //   console.log('val', val)
+    //   console.log(this.selectDeviceList);
+    //   let _this = this, checkedDeviceList = [];
+    //   if (val && val.length > 0) {
+    //     let deviceList = [], bayonetList = [];
+    //     val.map(item => {
+    //       if (item.isSxt) { // 摄像头
+    //         deviceList.push(item);
+    //       } else {
+    //         bayonetList.push(item);
+    //       }
+    //     });
+    //     console.log('deviceList', deviceList)
+    //     console.log('bayonetList', bayonetList)
+    //     // deviceList.map(item => {
+    //     //   let params = {
+    //     //     cname: item.parentName,
+    //     //     uid: item.parentId,
+    //     //     isChecked: false,
+    //     //     isOpenArrow: false,
+    //     //     isSXT: true,
+    //     //     deviceList: [],
+    //     //     bayonetList: []
+    //     //   }
+    //     //   bayonetList.map(val => {
+    //     //     if (item.parentId === val.parentId) {
+    //     //       params.deviceList.push(item);
+    //     //       params.bayonetList.push(val);
+    //     //     } else {
+    //     //       console.log(item)
+    //     //       console.log(val)
+    //     //       console.log('44444')
+    //     //     }
+    //     //   })
+    //     //   console.log('params', params)
+    //     // });
+    //   }
+    // }
   },
   mounted () {
     this.initMap();
@@ -126,13 +165,33 @@ export default {
     // 获取地图数据
     getMapData () {
       setTimeout(() => {
-        if (testData && testData.length > 0) {
-          testData.map(item => {
+        if (this.selectDeviceList && this.selectDeviceList.length > 0) {
+          this.selectDeviceList.map(item => {
             item.deviceList.map(itm => {
-              this.sxtList.push(itm);
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: true, // 摄像头
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.sxtList.push(params);
             });
             item.bayonetList.map(itm => {
-              this.kkList.push(itm);
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: false, // 卡口
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.kkList.push(params);
             })
           })
         }
@@ -156,9 +215,6 @@ export default {
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
-        // let hoverWindow = null;
-        // let unCheckDevice = []; // 没有在多边形中的设备--没有选中的设备
-        // let currDeviceList = [];
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -168,7 +224,11 @@ export default {
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
-              this.unCheckDevice.push(obj); // 没有选中的设备
+              // this.unCheckDevice.push(obj); // 没有选中的设备
+            }
+            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
+              _this.finalDeviceList.push(obj);
+              console.log('obj', obj)
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -186,13 +246,7 @@ export default {
             aMarkers.push(marker);
           }
         }
-        _this.handleDeviceData(this.unCheckDevice);
       }
-    },
-    // 处理多边形中选中的设备数据
-    handleDeviceData (unCheckList) {
-      console.log('unCheckList', unCheckList)
-      
     },
     // 清除所有
     resetTools () {

@@ -159,18 +159,6 @@
             </li>
           </ul>
         </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div>
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
@@ -325,7 +313,7 @@ export default {
     }
   },
   mounted () {
-    this.getDetail();
+    // this.getDetail();
     this.toAlarmDetail();
   },
   methods: {
@@ -352,36 +340,36 @@ export default {
       })
     },
     // 获取事件详情
-    getDetail () {
-      const eventId = this.$route.query.id;
-      getEventDetail(eventId)
-        .then(res => {
-          if (res) {
-            this.basicInfo = res.data;
-            if (res.data.closeAttachmentList.length > 0) {
-              res.data.closeAttachmentList.map(item => {
-                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
-                  this.eventImg.push(item);
-                } else {
-                  this.eventFile.push(item);
-                }
-              })
-            }
-            if (res.data.dispatchAttachmentList.length > 0) {
-              res.data.dispatchAttachmentList.map(item => {
-                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
-                  this.ctcImg.push(item);
-                } else {
-                  this.ctcFile.push(item);
-                }
-              })
-            }
-            this.eventSummaryLength = this.basicInfo.eventSummary.length;
-            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
-          }
-        })
-        .catch(() => {})
-    },
+    // getDetail () {
+    //   const eventId = this.$route.query.id;
+    //   getEventDetail(eventId)
+    //     .then(res => {
+    //       if (res) {
+    //         this.basicInfo = res.data;
+    //         if (res.data.closeAttachmentList.length > 0) {
+    //           res.data.closeAttachmentList.map(item => {
+    //             if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+    //               this.eventImg.push(item);
+    //             } else {
+    //               this.eventFile.push(item);
+    //             }
+    //           })
+    //         }
+    //         if (res.data.dispatchAttachmentList.length > 0) {
+    //           res.data.dispatchAttachmentList.map(item => {
+    //             if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+    //               this.ctcImg.push(item);
+    //             } else {
+    //               this.ctcFile.push(item);
+    //             }
+    //           })
+    //         }
+    //         this.eventSummaryLength = this.basicInfo.eventSummary.length;
+    //         this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
+    //       }
+    //     })
+    //     .catch(() => {})
+    // },
     // 图片放大传参
     emitHandleImg (isShow, index) {
       this.openBigImg(index, this.basicInfo.attachmentList);

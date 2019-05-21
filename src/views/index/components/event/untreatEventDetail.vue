@@ -153,11 +153,10 @@ export default {
     },
     // 跳至结束事件页面
     skipEventEndPage () {
-      this.$router.push({name: 'event_end', query:{ id: this.$route.query.eventId }});
+      this.$router.push({name: 'event_end', query:{ id: this.$route.query.eventId, status: this.$route.query.status }});
     },
     // 确定---跳页面
     skipEachPage () {
-      console.log('111')
       const type = this.handleType;
       const eventId = this.$route.query.eventId;
       if (!this.basicInfo.mutualFlag) {
@@ -190,11 +189,11 @@ export default {
                   }
                   if (type === 3) {
                     // 跳至呈报上级页面
-                    this.$router.push({name: 'event_report', query: {eventId: eventId}});
+                    this.$router.push({name: 'event_report', query: {eventId: eventId, status: this.$route.query.status}});
                   }
                   if (type === 4) {
                     // 跳至转到其他单位页面
-                    this.$router.push({name: 'send_other_units', query: {eventId: eventId}});
+                    this.$router.push({name: 'send_other_units', query: {eventId: eventId, status: this.$route.query.status}});
                   }
                 }
             }

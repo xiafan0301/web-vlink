@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>向上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -92,28 +92,7 @@ export default {
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      userList: [
-        {
-          uid: 1,
-          userRealName: '石原'
-        },
-        {
-          uid: 2,
-          userRealName: '石原1'
-        },
-        {
-          uid:3,
-          userRealName: '石原2'
-        },
-        {
-          uid: 4,
-          userRealName: '石原3'
-        },
-        {
-          uid: 5,
-          userRealName: '石原4'
-        }
-      ],
+      userList: [],
       reportUserList: [], // 所有的接收者
       basicInfo: {}, // 事件详情
       isLoading: false,
@@ -125,7 +104,7 @@ export default {
   },
   mounted () {
     this.getDetail();
-    // this.getList();
+    this.getList();
   },
   methods: {
     // 获取所有的用户

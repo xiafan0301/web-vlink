@@ -18,7 +18,7 @@
               v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.enumField"
+              :value="item.enumValue"
             >
             </el-option>
           </el-select>
@@ -40,6 +40,7 @@
           <el-form-item label="附件：" label-width="120px">
             <el-upload
               style="width: 500px;"
+              accept='.txt,.pdf,.doc,.docx'
               :action="uploadUrl"
               :on-success="handSuccess"
               :on-remove="handleRemove"
@@ -113,9 +114,6 @@ export default {
         planName: null,
         planDetail: null,
         sysAppendixInfo: {},
-        // path: null,
-        // cname: null,
-        // attachmentType: null,
         uid: null,
       },
       rules: {
@@ -123,7 +121,7 @@ export default {
           { required: true, message: '请输入预案名称', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        eventType: [
+        editEventType: [
           { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
@@ -191,8 +189,6 @@ export default {
     // 删除附件
     handleRemove (file) {
       if (file) {
-        // this.editPlanForm.path = null;
-        // this.editPlanForm.cname = null;
         this.editPlanForm.sysAppendixInfo = null;
       }
     },
@@ -256,6 +252,7 @@ export default {
             this.editPlanForm.planDetail = res.data.planDetail;
             this.editPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(res.data.sysAppendixInfo));
             this.editPlanForm.editEventType =  res.data.eventTypeName;
+
             if (res.data.taskList) {
               res.data.taskList.map(item => {
                 const params = {
