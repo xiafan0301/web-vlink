@@ -297,11 +297,11 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      if (obj.eventStatus === 1) {
+      if (!obj.surveillanceResult) {
         this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
       } 
-      if (obj.eventStatus === 2) {
-        this.$router.push({path: '/control/manage', query: {controlId: obj.uid, pageType: 2, state: 1}});
+      if (obj.surveillanceResult) {
+        this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});
       }
     },
     getOneMonth () { // 设置默认一个月

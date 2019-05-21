@@ -32,18 +32,6 @@
             </li>
           </ul>
         </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div>
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
@@ -215,11 +203,11 @@ export default {
   methods: {
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id }});
+      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, status: this.$route.query.status }});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType, type: 'ctc' }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType, type: 'ctc', status: this.$route.query.status }});
     },
     // 获取事件详情
     getDetail () {

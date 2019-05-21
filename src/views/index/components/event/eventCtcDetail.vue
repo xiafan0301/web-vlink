@@ -228,11 +228,11 @@ export default {
     },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, type: 'event' }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, status: this.$route.query.status }});
     },
     // 获取事件详情
     getDetail () {
@@ -368,21 +368,6 @@ export default {
           border-bottom: 1px dashed #F2F2F2;
         }
       }
-      // .judge_result_content {
-      //   width: 100%;
-      //   .no_result {
-      //     height: 100px;
-      //     line-height: 100px;
-      //     display: flex;
-      //     align-items: center;
-      //     margin-left: 45%;
-      //     >span {
-      //       margin-left: 10px;
-      //       color: #999999;
-      //       font-size: 16px;
-      //     }
-      //   }
-      // }
       .process-box {
         width: 100%;
         padding: 20px;
