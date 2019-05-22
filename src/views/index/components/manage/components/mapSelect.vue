@@ -84,45 +84,89 @@ export default {
     }
   },
   watch: {
-    // finalDeviceList (val) {
-    //   console.log('val', val)
-    //   console.log(this.selectDeviceList);
-    //   let _this = this, checkedDeviceList = [];
-    //   if (val && val.length > 0) {
-    //     let deviceList = [], bayonetList = [];
-    //     val.map(item => {
-    //       if (item.isSxt) { // 摄像头
-    //         deviceList.push(item);
-    //       } else {
-    //         bayonetList.push(item);
-    //       }
-    //     });
-    //     console.log('deviceList', deviceList)
-    //     console.log('bayonetList', bayonetList)
-    //     // deviceList.map(item => {
-    //     //   let params = {
-    //     //     cname: item.parentName,
-    //     //     uid: item.parentId,
-    //     //     isChecked: false,
-    //     //     isOpenArrow: false,
-    //     //     isSXT: true,
-    //     //     deviceList: [],
-    //     //     bayonetList: []
-    //     //   }
-    //     //   bayonetList.map(val => {
-    //     //     if (item.parentId === val.parentId) {
-    //     //       params.deviceList.push(item);
-    //     //       params.bayonetList.push(val);
-    //     //     } else {
-    //     //       console.log(item)
-    //     //       console.log(val)
-    //     //       console.log('44444')
-    //     //     }
-    //     //   })
-    //     //   console.log('params', params)
-    //     // });
-    //   }
-    // }
+    finalDeviceList (val) {
+      
+      let checkedDeviceList = [], // 选中的设备
+        checkedDeviceNumber = 0,
+        currentDeviceList = []; // 选中的设备经过处理后
+      if (val && val.length > 0) {
+        let deviceList = [], bayonetList = [];
+        checkedDeviceNumber = val.length;
+        val.map(item => {
+          if (item.isSxt) { // 摄像头
+            deviceList.push(item);
+          } else {
+            bayonetList.push(item);
+          }
+        });
+        deviceList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            deviceList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          checkedDeviceList.push(params);
+        });
+        bayonetList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            bayonetList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          checkedDeviceList.push(params);
+        });
+        let deviceObj = {}, params = {}
+        checkedDeviceList.forEach(item => {
+          let a = checkedDeviceList.filter(c => {
+            return item.uid === c.uid;
+          })
+          if (!deviceObj.hasOwnProperty(a[0].cname)) {
+            deviceObj[a[0].cname] = a;
+          }
+        })
+        for (let i in deviceObj) {
+          let params = {
+            cname: i,
+            uid: deviceObj[i][0].uid,
+            isOpenArrow: false,
+            isChecked: false,
+            deviceList: [],
+            bayonetList: []
+          }
+          deviceObj[i].forEach(item => {
+            if (item.deviceList) {
+              item.deviceList.map(val => {
+                params.deviceList.push(val);
+              })
+            }
+            if (item.bayonetList) {
+              item.bayonetList.map(val => {
+                params.bayonetList.push(val);
+              })
+            }
+          })
+          currentDeviceList.push(params);
+        }
+        this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDevice, selectDeviceNumber);
+        console.log(currentDeviceList)
+      }
+    }
   },
   mounted () {
     this.initMap();

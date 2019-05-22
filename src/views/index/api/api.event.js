@@ -58,6 +58,17 @@ export const getEventDetail = (uid) => {
   });
 }
 /**
+ * 呈报上级----获取最近发送的7个接收者
+ * @param {*} data
+ */
+export const getSevenReceiver = () => {
+  return request({
+    url: 'event-service/receivers',
+    method: 'get',
+    mode: 'event'
+  });
+}
+/**
  * 获取调度指挥列表数据
  * @param {*} data
  */
@@ -179,9 +190,9 @@ export const addEventProcess = (data, uid) => {
  * 添加调度任务
  * @param {*} data 
  */
-export const addTaskInfo = (data, uid) => {
+export const addTaskInfo = (data, val) => {
   return request({
-    url: 'task-services/task/' + uid,
+    url: 'task-services/task/' + val.eventId + '?dispatchType=' + val.dispatchType,
     method: 'post',
     data,
     mode: 'ctc'

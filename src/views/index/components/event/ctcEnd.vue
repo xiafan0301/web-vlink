@@ -7,12 +7,14 @@
             <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
             <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
           </template>
+           <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
           <template v-else>
             <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
             <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
           </template>
-          <!-- <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId ,status: $route.query.status} }">调度详情</el-breadcrumb-item> -->
           <el-breadcrumb-item>结束调度</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -32,7 +34,7 @@
           <el-upload
             :action="uploadUrl"
             multiple
-            accept=".doc,.docx, .png, .jpg, .jpeg"
+            accept=".doc,.docx, .png, .jpg, .jpeg,.bmp"
             :show-file-list='true'
             :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
@@ -93,10 +95,23 @@ export default {
   methods: {
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
-      if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过10M');
+      const isWord = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、doc、docx格式',
+          customClass: 'upload_file_tip'
+        });
       }
-      return isLtTenM;
+      if (!isLtTenM) {
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
+      }
+      return isLtTenM && isWord;
     },
     // 移除文件
     handleRemove (file) {
@@ -104,7 +119,7 @@ export default {
       let type;
       if (fileName) {
         type = fileName.substring(fileName.lastIndexOf('.'));
-        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
           this.uploadImgList.map((item, index) => {
             if (item.cname === fileName) {
               this.uploadImgList.splice(index, 1);
@@ -128,7 +143,7 @@ export default {
           type = fileName.substring(fileName.lastIndexOf('.'));
           // let data;
           // res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,

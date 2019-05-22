@@ -27,7 +27,7 @@
             <el-upload
               :action="uploadUrl"
               multiple
-              accept='.png,.jpg,.bmp,.doc,.docx'
+              accept='.png,.jpg,.jpeg,.doc,.docx,.bmp'
               :before-upload='handleBeforeUpload'
               :on-success="handleSuccess"
               :on-remove="handleRemove"
@@ -111,7 +111,7 @@ export default {
       let type;
       if (fileName) {
         type = fileName.substring(fileName.lastIndexOf('.'));
-        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
           this.uploadImgList.map((item, index) => {
             if (item.cname === fileName) {
               this.uploadImgList.splice(index, 1);
@@ -139,7 +139,7 @@ export default {
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
           // res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,
@@ -172,28 +172,24 @@ export default {
     },
     handleBeforeUpload (file) { // 附件上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
-      if (!isLtTenM) {
-        this.$message.error('上传的附件大小不能超过10M');
+      const isWord = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、doc、docx格式',
+          customClass: 'upload_file_tip'
+        });
       }
-      return isLtTenM;
+      if (!isLtTenM) {
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
+      }
+      return isLtTenM && isWord;
     },
-    // 删除图片
-    // closeImgList (index, obj) {
-    //   this.imgList2.splice(index, 1);
-    //   this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-    //     if (item.cname === obj.cname) {
-    //       this.endForm.attachmentList.splice(idx, 1);
-    //     }
-    //   });
-    // },
-    // deleteFile (index, obj) { // 删除文件
-    //   this.fileList.splice(index, 1);
-    //   this.endForm.attachmentList && this.endForm.attachmentList.map((item, idx) => {
-    //     if (item.cname === obj.cname) {
-    //       this.endForm.attachmentList.splice(idx, 1);
-    //     }
-    //   });
-    // },
     // 返回
     back () {
       this.$router.back(-1);

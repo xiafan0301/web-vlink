@@ -214,7 +214,7 @@
             <li v-show="basicInfo.mutualFlag">
               <div>
                 <span class="title">民众互助：</span>
-                <span class="content" @click="skipCommentPage">5条评论</span>
+                <span class="content" @click="skipCommentPage">{{basicInfo.commentCount ? basicInfo.commentCount : 0}}条评论</span>
                 <span class="status">（已发布）</span>
               </div>
             </li>
@@ -241,20 +241,6 @@
                 </div>
               </template>
             </li>
-            <!-- <li>
-              <div>
-                <span class="title">调度指挥：</span>
-                <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
-                <span class="status">（已发布）</span>
-              </div>
-            </li>
-            <li>
-              <div>
-                <span class="title">向上呈报：</span>
-                <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
-                <span class="status">（已呈报）</span>
-              </div>
-            </li> -->
           </ul>
         </div>
       </div>
@@ -439,7 +425,12 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            this.basicInfo = res.data;            
+            this.basicInfo = res.data;
+            this.basicInfo.dealTypeList && this.basicInfo.dealTypeList.map((item, index) => {
+              if (item.dealType === 4) {
+                this.basicInfo.dealTypeList.splice(index, 1);
+              }
+            });
             if (res.data.eventCloseAttachmentList.length > 0) {
               res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
@@ -478,7 +469,13 @@ export default {
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      this.$router.push({path: '/control/manage', query: { pageType: 2, state: 1, controlId: this.basicInfo.surveillanceId }});
+      let state;
+      if (this.$route.query.status === 'handling') {
+        state = 1;
+      } else {
+        state = 3
+      }
+      this.$router.push({path: '/control/manage', query: { pageType: 2, state: state, controlId: this.basicInfo.surveillanceId }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
