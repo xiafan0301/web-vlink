@@ -310,4 +310,17 @@ export const taskProcess = (data,uid) => {
     mode: 'ctc'
   });
 }
+/**
+ * getCount
+ * 任务数量统计
+ * @param {object} params
+ */
+export function getCount(params) {
+  return request({
+    url: '/task-services/taskCount',
+    method: 'get',
+    mode: 'ctc',
+    params: params
+  })
+}
 /*-------------------------- 任务end -------------------------------*/
