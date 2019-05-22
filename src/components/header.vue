@@ -27,7 +27,7 @@
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
               <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
-                {{item.enumValue}}<span v-show="item.total">({{item.total}})</span>
+                {{item.enumValue}}<span>({{item.enumField == 1 ? taskCount.unread : taskCount.haveRead}})</span>
               </p>
               <!-- <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
               <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
@@ -52,7 +52,7 @@
             </div>
             </vue-scroll>
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_011" @click="getTaskData"></i>
+              <i class="vl_icon vl_icon_011" @click="getTaskCount"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -204,7 +204,7 @@
 <script>
 import { logout, updatePwd } from '@/views/index/api/api.user.js';
 import { getAlarmList } from "@/views/index/api/api.control.js";
-import { getTasks, markTask } from '@/views/index/api/api.event.js';
+import { getTasks, markTask, getCount } from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -261,6 +261,7 @@ export default {
       taskStatusList: [], // 任务状态数据
       taskType: dataList.taskType,
       taskListAll: [],
+      taskCount: {}
     }
   },
   mounted () {
@@ -268,6 +269,7 @@ export default {
     let taskStatusL = this.dicFormater(dataList.taskStatus)
     this.taskStatusList = taskStatusL[0].dictList
     this.getAlarm()
+    this.getTaskCount();
     this.getTaskData();
   },
   methods: {
@@ -327,6 +329,25 @@ export default {
         }
       })
     },
+    //任务数量统计
+    getTaskCount() {
+      let params = {
+        dispatchType: 1,       //调度类型：1事件、2告警
+        userId: this.userInfo.uid
+      }
+      getCount(params).then(res => {
+        if(res.data) {
+          this.taskCount = res.data;
+          if(!this.taskCount.haveRead) {
+            this.taskCount['haveRead'] = 0
+          }
+          if(!this.taskCount.unread) {
+            this.taskCount['unread'] = 0
+          }
+          this.sums.msg = res.data.total;
+        }
+      }).catch(()=>{})
+    },
     //告警
     getAlarm() {
       this.alarmList = [];
@@ -351,7 +372,8 @@ export default {
     changeTab(type) {
       this.type = type
       this.taskList = []
-      this.taskList = this.taskListAll.filter(key => this.type == key.readFlag).filter((item,index) => index < 10)
+      this.getTaskData()
+      /* this.taskList = this.taskListAll.filter(key => this.type == key.readFlag).filter((item,index) => index < 10) */
     },
     goSkipDetail(item) {
       console.log("----------",item)
@@ -370,8 +392,9 @@ export default {
     getTaskData () {
       this.taskList = [];
       let params = {
-        pageNum: -1,
-        pageSize: 0,
+        pageNum: 1,
+        pageSize: 10,
+        'where.isRead': this.type,
         orderBy: 'create_time',
         order: 'desc',
       }
@@ -379,12 +402,14 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.taskListAll = res.data.list;
-            this.sums.msg = res.data.total;
-            this.taskList  = res.data.list.filter(key=> this.type == key.readFlag).filter((item,index) => index < 10)
+            /* this.sums.msg = res.data.total; */
+            this.taskList = res.data.list;
+            /* this.taskList  = res.data.list.filter(key=> this.type == key.readFlag).filter((item,index) => index < 10) */
           }
-          for(let item of this.taskStatusList) {
-            item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length
-          }
+          // for(let item of this.taskStatusList) {
+          //   item['total'] = this.taskList.filter(key => item.enumField == key.readFlag).length
+          //   /* item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length */
+          // }
         })
         .catch(() => {})
     },
