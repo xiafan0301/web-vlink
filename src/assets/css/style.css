@@ -7,7 +7,7 @@
    display: inline-block;
    background-repeat: no-repeat;
    background-image: url(../img/icons.png);
-   transition: .4s ease-out;
+   /* transition: .4s ease-out; */
 }
 .vl_icon_logo { width: 170px; height: 48px; background-position: -96px -521px; }
 /* header */
@@ -52,6 +52,7 @@
 .vl_icon_v233 { width: 24px; height: 24px; background-position: -522px -257px; }
 .vl_icon_v24 { width: 24px; height: 24px; background-position: -200px -132px; }
 .vl_icon_v25 { width: 24px; height: 24px; background-position: -249px -131px; }
+.vl_icon_v25_2 { width: 24px; height: 24px; background-position: -481px -295px; }
 .vl_icon_v26 { width: 24px; height: 24px; background-position: -298px -132px; }
 .vl_icon_v27 { width: 24px; height: 24px; background-position: -349px -132px; }
 .vl_icon_v28 { width: 24px; height: 24px; background-position: -399px -133px; }

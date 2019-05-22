@@ -51,7 +51,10 @@
             <!-- 标记 (更新需求：取消所有回放画面（录像回放、智能查看-视频回放）的标记功能 2019.05.05)-->
             <span v-if="config.sign && oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v24 player_sign" title="标记" @click="addSign"></span>
             <!-- 录视频 回放无此功能 -->
-            <span v-if="oData.type === 1" class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录视频"></span>
+            <template v-if="config.tape && oData.type === 1">
+              <span v-if="!tape.active" @click="tapeStart" class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录像"></span>
+              <span v-else @click="tapeEnd" class="flvplayer_opt vl_icon vl_icon_v25_2 player_tran" title="停止录像"></span>
+            </template>
             <!-- 截屏 -->
             <span v-if="config.cut" @click="playerCut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
@@ -67,7 +70,7 @@
             </template>
           </span>
           <!-- 更多 -->
-          <span v-if="!fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
+          <span v-if="!fullScreen && !showFullScreen" class="flvpayer_opt vl_icon vl_icon_v28" title="更多" @click="playerFullScreen(true)"></span>
         </span>
       </div>
     </div>
@@ -103,11 +106,26 @@
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
+    <!-- 录像 dialog -->
+    <el-dialog v-if="config.tape && oData.type === 1" :title="tape.loading ? '正在完成录制' : '录像完成'" 
+      :visible.sync="tape.tapeEndDialogVisible" :center="false" :append-to-body="true" @closed="tapeClosed" width="800px">
+      <div style="text-align: center; width: 100%; padding: 20px 20px 0 20px;">
+        <div v-if="tape.loading" style="padding: 50px 0;">
+          正在完成录制，请稍后...
+        </div>
+        <video :src="tape.downloadUrl" controls style="width: 100%; max-width: 100%;" v-else></video>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="tape.tapeEndDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button type="primary" @click="tapeDownload">下 载</el-button>
+        <a :id="flvplayerId + '_tape_a'" style="display: none;">下载</a>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack } from "@/views/index/api/api.video.js";
+import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd} from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -127,7 +145,8 @@ export default {
    *    close: 是否可删除，默认为true
    *    fullscreen: 是否可全屏，默认为true
    *    fullscreen2: 否可全屏，默认为false, for 布控
-   *    cut: 是否可截屏，默认为true
+   *    cut: 是否可截屏，默认为true,
+   *    tape: 是否可录像，默认为true
    *    
    * bResize: 播放容器尺寸变化
    */
@@ -155,7 +174,8 @@ export default {
         close: true, // 是否可删除
         fullscreen: true, // 是否可全屏
         fullscreen2: false,
-        cut: true
+        cut: true, // 是否可截屏
+        tape: true // 是否可录像
       },
 
       startPlayTime: null,
@@ -184,7 +204,15 @@ export default {
       signSubmitLoading: false,
 
       cutDialogVisible: false,
-      cutTime: 0
+      cutTime: 0,
+      // 录像对象
+      tape: {
+        active: false, // 录像激活状态，激活了不一定在录像（ajax）
+        loading: false, // 正在开始/结束录像，此时，重复点击按钮不会触发事件
+        recordId: null,
+        downloadUrl: '',
+        tapeEndDialogVisible: false
+      }
     }
   },
   watch: {
@@ -244,6 +272,82 @@ export default {
     this.sizeHandler();
   },
   methods: {
+    /* 录像函数 */
+    tapeStart () {
+      if (this.tape.active) { return; }
+      console.log('tapeStart');
+      this.tape.active = true;
+      this.tape.loading  = true;
+      this.$message('开始录像。');
+      getVideoPlayRecordStart({
+        deviceId: this.oData.video.uid
+      }).then(res => {
+        if (res && res.data) {
+          console.log(res.data);
+          this.tape.recordId = res.data.recordId;
+          this.tape.loading  = false; // 此时才可以触发结束事件
+        }
+      }).catch(error => {
+        console.log("getVideoPlayRecordStart error：", error);
+      });
+    },
+    tapeEnd () {
+      if (this.tape.loading) { return; }
+      this.tape.tapeEndDialogVisible = true;
+      this.tape.loading = true;
+      getVideoPlayRecordEnd({
+        deviceId: this.oData.video.uid,
+        recordId: this.tape.recordId
+      }).then(res => {
+        if (res && res.data && this.tape.active) {
+          this.tape.downloadUrl = res.data.downUrl;
+          this.tape.active = false;
+          this.tape.loading = false;
+        }
+      }).catch(error => {
+        console.log("getVideoPlayRecordEnd error：", error);
+      });
+    },
+    tapeDownload () {
+			let $iframe = $('<iframe id="down-file-iframe" />');
+			let $form = $('<form target="down-file-iframe" method="post" />');
+			$form.attr('action', this.tape.downloadUrl);
+			/* for (var key in config.data) {
+
+			$form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+
+			} */
+			$iframe.append($form);
+			$(document.body).append($iframe);
+			$form[0].submit();
+			// $iframe.remove();
+    },
+    tapeDownload2 () {
+      const req = new XMLHttpRequest();
+      req.open('POST', this.tape.downloadUrl, true);
+      req.responseType = 'blob';
+      req.setRequestHeader('Content-Type', 'application/json');
+      req.onload = function() {
+        const data = req.response;
+        const blob = new Blob([data]);
+        const blobUrl = window.URL.createObjectURL(blob);
+        // download(blobUrl) ;
+
+        let saveLink = $('#' + this.flvplayerId + '_tape_a')[0];
+        saveLink.href = blobUrl;
+        saveLink.download = 'test.mp4';
+        saveLink.click();
+      };
+      req.send();
+    },
+    tapeClosed () {
+      this.tape.active = false;
+      this.tape.loading = false;
+      this.tape.downloadUrl = '';
+    },
+    tapeDestory () {
+    },
+
     // sizeHandler
     sizeHandler () {
       // console.log('miniHandler_' + this.index + '_' + $('#' + this.flvplayerId + '_container').width());
@@ -259,6 +363,7 @@ export default {
       this.videoLoadingFailed = false;
       let obj = {deviceId: this.oData.video.uid};
       if (this.oData.type === 1) {
+        // 直播
         apiVideoPlay(obj).then(res => {
           if (res && res.data) {
             this.initPlayerDo(res.data.liveFlvUrl);
@@ -270,7 +375,8 @@ export default {
         }).catch(error => {
           console.log("apiVideoPlay error：", error);
         });
-      } else if (this.oData.type === 2 || this.oData.type === 3) {
+      } else if (this.oData.type === 2) {
+        // 回放
         if (this.oData.startTime) {
           obj.startTime = formatDate(this.oData.startTime, 'yyyy-MM-dd HH:mm:ss');
         }
@@ -295,9 +401,13 @@ export default {
         }).catch(error => {
           console.log("apiVideoPlayBack error：", error);
         });
+      } else if (this.oData.type === 3) {
+        // 录像
+        this.initPlayerDoForNormal(this.oData.video.downUrl);
       }
       
     },
+    // 直播播放（播放/回放）
     initPlayerDo (surl) {
       if (window.flvjs.isSupported()) {
         this.videoLoading = true;
@@ -386,11 +496,37 @@ export default {
         this.player = flvPlayer;
         this.video = videoElement;
 
-        if (this.oData.type != 1) {
-          // 回放/录像的时候需要添加ended事件
+        if (this.oData.type === 2) {
+          // 回放 的时候需要添加ended事件
           videoElement.addEventListener('ended', this.playNext, false);
         }
       }
+    },
+    // 普通播放（录像）
+    initPlayerDoForNormal (surl) {
+      this.videoLoading = true;
+      var videoElement = document.getElementById(this.flvplayerId);
+      videoElement.src = this.oData.video.downUrl;
+      // 真正处于播放的状态，这个时候我们才是真正的在观看视频。
+      // 暂停后再播放也会触发 this.config.pause影响
+      videoElement.onplaying = () => {
+        this.videoLoading = false;
+        this.videoLoadingFailed = false;
+        if (this.config.pause) {
+          this.playActive = false;
+          videoElement.pause();
+        }
+      };
+      videoElement.onended = () => {
+        console.log('播放结束');
+        this.playActive = false;
+        videoElement.pause();
+      };
+      videoElement.onerror = () => {
+        this.videoLoadingFailed = true;
+        console.log('player video error: ', videoElement.error);
+      };
+      this.video = videoElement;
     },
     // 回放/录像 播放下一个视频
     playNext () {
@@ -425,20 +561,24 @@ export default {
     // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
-      if (this.player) {
+      console.log('playerPlay', flag)
+      if (this.oData.type === 1) {
         if (flag) {
-          if (this.oData.type === 1) {
-            // 直播 播放的时候需要重新加载
-            this.destroyPlayer();
-            this.playActive = true; // 去掉暂停按钮
-            this.config.pause = false;
-            this.initPlayer();
-          } else {
-            // 回放/录像 播放的时候直接play
-            this.player.play();
-          }
+          // 直播 播放的时候需要重新加载
+          this.destroyPlayer();
+          this.playActive = true; // 去掉暂停按钮
+          this.config.pause = false;
+          this.initPlayer();
         } else {
           this.player.pause();
+        }
+      } else if (this.oData.type === 2 || this.oData.type === 3) {
+        // 回放/录像
+        if (flag) {
+          this.config.pause = false;
+          this.video.play();
+        } else {
+          this.video.pause();
         }
       }
     },
@@ -575,8 +715,6 @@ export default {
           // video canvas 必须为原生对象
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
-          let _i = $video[0];
-          // console.log(_i.width, _i.height);
           ctx.drawImage($video[0], 0, 0, w, h);
         }
       });
@@ -663,13 +801,6 @@ export default {
         }
       });
     },
-    /* addSignSubmitAble () {
-      let flag = false;
-      if (!this.signForm.addSignContent) {
-
-      }
-      return flag;
-    }, */
     addSignSubmit (formName) {
       this.$refs[formName].validateField("addSignContent", (errorMessage) => {
         // errorMessage 为空就是验证成功了
@@ -776,6 +907,7 @@ export default {
     cursor: pointer;
   }
   > .flvplayer_bot {
+    /* position: absolute; left: 0; bottom: -48px; */
     position: absolute; left: 0; bottom: -48px;
     width: 100%; height: 48px;
     background-color: #000;
@@ -851,7 +983,7 @@ export default {
   display: block;
 }
 .player_cut { cursor: default; }
-.player_tran { cursor: not-allowed; }
+.player_tran { cursor: default; }
 .player_add_sign {
   display: inline-block;
   position: relative; bottom: -3px; left: 10px;
