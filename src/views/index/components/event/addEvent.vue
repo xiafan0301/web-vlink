@@ -29,7 +29,7 @@
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
-                    accept=".png,.jpg,.jpeg,.mp4"
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
                     multiple
                     :disabled="imgDisabled"
                     :before-upload='handleBeforeUpload'
@@ -189,7 +189,7 @@ export default {
         eventDetail: '', // 事件情况
         eventType: '', // 事件类型
         eventLevel: '', // 事件等级
-        casualties: '', // 伤亡人员
+        casualties: '不确定', // 伤亡人员 --默认不确定
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
@@ -404,18 +404,30 @@ export default {
     },
     handleBeforeUpload (file) { // 图片上传之前
       let isLtTenM;
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      const isPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'video/mp4' || file.type === 'image/bmp';
+      if (!isPng) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、mp4格式',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp') {
         isLtTenM = file.size / 1024 / 1024 < 2;
       } else {
         isLtTenM = file.size / 1024 / 1024 < 10;
       }
       if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过2M,视频大小不能超过10M');
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过2M,视频大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
       }
-      
       if (this.isShowErrorTip) {
         return;
       }
+      return isPng && isLtTenM;
     },
     // 移除图片
     removeImg (index) {
@@ -435,7 +447,7 @@ export default {
           let type, data;
           if (fileName) {
             type = fileName.substring(fileName.lastIndexOf('.'));
-            if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            if (type === '.png' || type === '.jpg' || type === '.jpeg' || type === '.bmp') {
               data = {
                 contentUid: 0,
                 fileType: dataList.imgId,

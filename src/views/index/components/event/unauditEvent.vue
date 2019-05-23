@@ -52,7 +52,7 @@
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
-                    accept=".png,.jpg,.jpeg,.mp4"
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
                     multiple
                     :before-upload='handleBeforeUpload'
                     :on-success='handleSuccess'
@@ -544,17 +544,30 @@ export default {
     // 在图片上传之前
     handleBeforeUpload (file) {
       let isLtTenM;
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      const isPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'video/mp4' || file.type === 'image/bmp';
+      if (!isPng) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、mp4格式',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp') {
         isLtTenM = file.size / 1024 / 1024 < 2;
       } else {
         isLtTenM = file.size / 1024 / 1024 < 10;
       }
       if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过2M,视频大小不能超过10M');
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过2M,视频大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
       }
       if (this.isShowErrorTip) { // 上传错误提示
         return;
       }
+      return isPng && isLtTenM;
     },
     // 关闭图片放大
     emitCloseImgDialog(value){
@@ -585,7 +598,7 @@ export default {
           let type, data;
           if (fileName) {
             type = fileName.substring(fileName.lastIndexOf('.'));
-            if (type === '.png' || type === '.jpg' || type === '.bmp') {
+            if (type === '.png' || type === '.jpg' || type === '.jpeg' || type === '.bmp') {
               data = {
                 contentUid: 0,
                 fileType: dataList.imgId,
@@ -664,7 +677,7 @@ export default {
     // 驳回原因change
     changeCloseReason (val) {
       this.rejectForm.rejectReasonDesci = null;
-      if (val ===   '4') {
+      if (val === '4') {
         this.isShowRejectRemark = true;
       } else {
         this.isShowRejectRemark = false;
@@ -764,7 +777,7 @@ export default {
       const obj = document.getElementById('add_video');
       if (obj) {
         obj.addEventListener('ended', () => { // 当视频播放结束后触发
-          this.isPlaying = false;
+          _this.isPlaying = false;
         });
       }
     }

@@ -234,10 +234,10 @@ export default {
 
       } else { // 告警
         if (obj.dispatchStatusName === '进行中') {
-          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid, objType: 1 }});
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid, objType: obj.surveillanceType}});
         }
         if (obj.dispatchStatusName === '已结束') {
-          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.uid, objType: 1 }});
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.uid, objType: obj.surveillanceType}});
         }
       }
     }

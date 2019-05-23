@@ -212,7 +212,18 @@ export default {
     },
     // 在上传之前
     beforeUpload (file) {
+      console.log(file)
       const isLt = file.size / 1024 / 1024 < 10;
+      const isWord = file.type === 'text/plain' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        || file.type === 'application/pdf';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是txt、pdf、word格式!',
+          customClass: 'upload_file_tip'
+        });
+      }
       if (!isLt) {
         this.$message({
           type: 'warning',
@@ -220,7 +231,7 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
-      return isLt;
+      return isLt && isWord;
     },
     addTask () {
       const value = {

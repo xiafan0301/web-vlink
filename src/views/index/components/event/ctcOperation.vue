@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <template v-if="$route.query.type === 'ctc'">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status }}">调度详情</el-breadcrumb-item>
         </template>
         <template v-else>
@@ -203,6 +203,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            this.departmentData.map((item, index) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.departmentData.splice(index, 1);
+              }
+            });
           }
         })
     },
@@ -254,7 +259,11 @@ export default {
             });
           });
           this.isLoading = true;
-          addTaskInfo(this.taskList, this.$route.query.eventId)
+          const params = {
+            dispatchType: 2, // 1--事件 2--告警
+            eventId: this.$route.query.eventId
+          }
+          addTaskInfo(this.taskList, params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -263,7 +272,6 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
-                // this.$router.back(-1);
                 this.isLoading = false;
               } else {
                 this.$message({
@@ -330,7 +338,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box, {
+    .ctc-plan-box {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -536,5 +544,3 @@ export default {
   }
 }
 </style>
-
-
