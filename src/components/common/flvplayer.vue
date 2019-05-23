@@ -55,6 +55,8 @@
               <span v-if="!tape.active" @click="tapeStart" class="flvplayer_opt vl_icon vl_icon_v25 player_tran" title="录像"></span>
               <span v-else @click="tapeEnd" class="flvplayer_opt vl_icon vl_icon_v25_2 player_tran" title="停止录像"></span>
             </template>
+            <!-- 下载 (回放才有) -->
+            <span v-if="oData.type === 2 && config.download" @click="playerDownload" class="flvplayer_opt vl_icon vl_icon_v32 player_download" title="下载"></span>
             <!-- 截屏 -->
             <span v-if="config.cut" @click="playerCut" class="flvplayer_opt vl_icon vl_icon_v26 player_cut" title="截屏"></span>
             <!-- 全屏 -->
@@ -117,15 +119,50 @@
       </div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="tape.tapeEndDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button type="primary" @click="tapeDownload">下 载</el-button>
-        <a :id="flvplayerId + '_tape_a'" style="display: none;">下载</a>
+        <!-- <el-button :disabled="tape.loading" type="primary" @click="tapeDownload">下 载</el-button> -->
+        <!-- http://10.16.1.142:3550/file-down-stream.do?id=f234cf41-042f-4e15-ad53-15181566ecb0 -->
+        <a v-if="!tape.loading" class="vid_dowload_btn" :href="tape.downloadUrl" download>下 载</a>
+        <el-button v-else :disabled="true" type="primary">下 载</el-button>
+      </div>
+    </el-dialog>
+    <!-- 下载 dialog -->
+    <el-dialog v-if="oData.type === 2 && config.download" :title="'下载'" @closed="downloadClosed"
+      :visible.sync="download.downloadDialogVisible" :append-to-body="true" width="800px">
+      <div style="text-align: center; width: 100%; padding: 20px 50px 10px 50px;">
+        <p style="text-align: left; padding-bottom: 10px; font-size: 14px;">
+          请选择下载范围：({{download.downlaodVal[0] + 's' + ' ~ ' + download.downlaodVal[1] + 's'}})
+        </p>
+        <div>
+          <el-slider
+            v-model="download.downlaodVal"
+            range
+            :max="180"
+            :disabled="download.downlaodSliderDis"
+            :format-tooltip="downlaodFormatTooltip"
+            :marks="download.downlaodMarks">
+          </el-slider>
+        </div>
+        <div style="padding-top: 40px;" v-if="download.downloadBtnLoading">
+          <el-progress type="circle" :percentage="download.progressVal"></el-progress>
+          <p style="padding-top: 10px;" v-if="download.progressVal >= 100">下载完成！</p>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="download.downloadDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button v-if="download.progressVal < 100" :loading="download.downloadBtnLoading" type="primary" @click="playerDownloadSubmit">
+          <template v-if="download.downloadBtnLoading">正在下载</template>
+          <template v-else>开始下载</template>
+        </el-button>
+        <a v-else class="vid_dowload_btn" :href="download.downloadUrl" download>保 存</a>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import {random14, formatDate} from '@/utils/util.js';
-import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord, apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd} from "@/views/index/api/api.video.js";
+import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
+  apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
+  getVideoFileDownStart, getVideoFileDownProgress } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -147,6 +184,7 @@ export default {
    *    fullscreen2: 否可全屏，默认为false, for 布控
    *    cut: 是否可截屏，默认为true,
    *    tape: 是否可录像，默认为true
+   *    download: 是否可下载(回放)，默认为true
    *    
    * bResize: 播放容器尺寸变化
    */
@@ -175,7 +213,8 @@ export default {
         fullscreen: true, // 是否可全屏
         fullscreen2: false,
         cut: true, // 是否可截屏
-        tape: true // 是否可录像
+        tape: true, // 是否可录像
+        download: true // 是否可下载(回放)
       },
 
       startPlayTime: null,
@@ -212,6 +251,26 @@ export default {
         recordId: null,
         downloadUrl: '',
         tapeEndDialogVisible: false
+      },
+      // 下载对象
+      download: {
+        recordId: '',
+        downloadUrl: '',
+        progressVal: 0,
+        downloadDialogVisible: false,
+        downlaodVal: [0, 30],
+        downloadBtnLoading: false,
+        downlaodMarks: {
+          0: '0s',
+          30: '30s',
+          60: '60s',
+          90: '90s',
+          120: '120s',
+          150: '150s',
+          180: '180s'
+        },
+        downlaodSliderDis: false,
+        downlaodInval: null // 下载进度定时器
       }
     }
   },
@@ -309,36 +368,7 @@ export default {
       });
     },
     tapeDownload () {
-			let $iframe = $('<iframe id="down-file-iframe" />');
-			let $form = $('<form target="down-file-iframe" method="post" />');
-			$form.attr('action', this.tape.downloadUrl);
-			/* for (var key in config.data) {
-
-			$form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
-
-			} */
-			$iframe.append($form);
-			$(document.body).append($iframe);
-			$form[0].submit();
-			// $iframe.remove();
-    },
-    tapeDownload2 () {
-      const req = new XMLHttpRequest();
-      req.open('POST', this.tape.downloadUrl, true);
-      req.responseType = 'blob';
-      req.setRequestHeader('Content-Type', 'application/json');
-      req.onload = function() {
-        const data = req.response;
-        const blob = new Blob([data]);
-        const blobUrl = window.URL.createObjectURL(blob);
-        // download(blobUrl) ;
-
-        let saveLink = $('#' + this.flvplayerId + '_tape_a')[0];
-        saveLink.href = blobUrl;
-        saveLink.download = 'test.mp4';
-        saveLink.click();
-      };
-      req.send();
+      this.saveFile(this.tape.downloadUrl);
     },
     tapeClosed () {
       this.tape.active = false;
@@ -542,13 +572,16 @@ export default {
       }
     },
     destroyPlayer () {
+      if (this.download.downlaodInval) {
+        window.clearInterval(this.download.downlaodInval);
+      }
       if (this.player) {
         this.player.unload();
         this.player.destroy();
         this.player.detachMediaElement();
         this.player = null;
         // 回放/录像的时候需要清除ended事件
-        if (this.oData.type != 1) {
+        if (this.oData.type === 1) {
           this.video.removeEventListener('ended', this.playNext);
         }
       }
@@ -558,6 +591,65 @@ export default {
       this.initPlayer();
     },
     /***** 视频事件 *****/
+    // 下载
+    playerDownload () {
+      this.downloadClosed();
+      this.download.downloadDialogVisible = true;
+    },
+    playerDownloadSubmit () {
+      this.download.downloadBtnLoading = true;
+      this.download.downlaodSliderDis = true;
+      getVideoFileDownStart({
+        deviceId: this.oData.video.uid,
+        fileId: this.playBackList[this.playBackIndex].fileId,
+        offset: this.download.downlaodVal[0],
+        duration: this.download.downlaodVal[1] - this.download.downlaodVal[0]
+      }).then(res => {
+        if (res && res.data) {
+          this.download.recordId = res.data.recordId;
+          if (this.download.downlaodInval) {
+            window.clearInterval(this.download.downlaodInval);
+          }
+          this.download.downlaodInval = window.setInterval(() => {
+            this.playerDownloadProgress();
+          }, 1000);
+        } else {
+        }
+      }).catch(error => {
+        console.log("getVideoFileDownStart error：", error);
+      });
+    },
+    playerDownloadProgress () {
+      // getVideoFileDownProgress
+      getVideoFileDownProgress({
+        deviceId: this.oData.video.uid,
+        recordId: this.download.recordId
+      }).then(res => {
+        if (res && res.data) {
+          if (res.data.progress >= 100 && this.download.downlaodInval) {
+            this.download.progressVal = 100;
+            this.download.downloadUrl = res.data.downUrl;
+            window.clearInterval(this.download.downlaodInval);
+          } else {
+            this.download.progressVal = res.data.progress;
+          }
+        } else {
+        }
+      }).catch(error => {
+        console.log("getVideoFileDownStart error：", error);
+      });
+    },
+    downloadClosed () {
+      this.download.downloadBtnLoading = false;
+      this.download.downlaodSliderDis = false;
+      this.download.progressVal = 0;
+      if (this.download.downlaodInval) {
+        window.clearInterval(this.download.downlaodInval);
+      }
+    },
+    downlaodFormatTooltip (val) {
+      return val + 's';
+    },
     // 播放/暂停
     playerPlay (flag) {
       this.playActive = flag;
@@ -853,6 +945,20 @@ export default {
     videoUnloadSave () {
       this.saveVideoRecord();
     },
+
+    // 保存到本地函数
+    saveFile (sUrl) {
+			let $iframe = $('<iframe id="down-file-iframe" />');
+			let $form = $('<form target="down-file-iframe" method="post" />');
+			$form.attr('action', sUrl);
+			/* for (var key in config.data) {
+			  $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+			} */
+			$iframe.append($form);
+			$(document.body).append($iframe);
+			$form[0].submit();
+			$iframe.remove();
+    }
   },
   beforeDestroy () {
     if (this.player) {
@@ -864,6 +970,10 @@ export default {
       this.video = null;
     }
     this.saveVideoRecord();
+
+    if (this.download.downlaodInval) {
+      window.clearInterval(this.download.downlaodInval);
+    }
     // $(window).off('unload', this.videoUnloadSave);
   }
 }
@@ -992,11 +1102,17 @@ export default {
     text-decoration: none;
   }
 }
+.player_download {
+  transform: scale(0.85)
+}
 </style>
 <style>
 .player_box {
   position: absolute;
   border: 1px solid red;
+}
+.el-slider__marks-text {
+  word-break:keep-all; white-space:nowrap;
 }
 </style>
 
