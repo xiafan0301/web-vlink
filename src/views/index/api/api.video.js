@@ -366,3 +366,29 @@ export const delVideoTranscribe = (data) => {
     mode: videoModeName
   })
 }
+
+/**
+ * 开始后端录像下载任务
+ * @param {Object} data 接口入参
+ */
+export const getVideoFileDownStart = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-start',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 后端录像下载任务进度查询
+ * @param {Object} data 接口入参
+ */
+export const getVideoFileDownProgress = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-progress',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
