@@ -259,6 +259,7 @@ export default {
         'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
         'where.reporterUserRole': userName,
+        'where.dealOrgId': this.userInfo.organList[0].uid,
         'where.keyword': this.eventForm.phoneOrNumber,
         'where.acceptFlag': 2, // 审核通过
         pageNum: this.pagination.pageNum,
