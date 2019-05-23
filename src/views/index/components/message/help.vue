@@ -87,7 +87,7 @@
               </el-table-column>
               <el-table-column  
                 label="状态"
-                prop=""
+                prop="eventStatusName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -102,8 +102,10 @@
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
                   <span class="operation_wire">|</span>
                   <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">结束</span>
+                  <template v-if="scope.row.eventStatus !== 3">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="popEndDialog(scope.row.uid)">结束</span>
+                  </template>
                 </template>
               </el-table-column>
               <div class="not_content" slot="empty">
@@ -125,6 +127,20 @@
         </div>
       </div>
     </div>
+    <div class="end_dialog">
+      <el-dialog
+        :visible.sync="delDialog"
+        :close-on-click-modal="false"
+        width="482px"
+        top="40vh"
+        title="结束互助">
+        <h4>是否确定结束该次互助？</h4>
+        <div slot="footer">
+          <el-button @click="delDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" type="primary" @click="endEvent">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
     <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :helpId="helpId" :pageType="pageType" @changePage="skip" @getMutualHelpList="getMutualHelpList"></div>
     <div is="helpDetail" v-if="pageType === 3" :helpId="helpId" @changePage="skip"></div>
   </div>
@@ -132,7 +148,7 @@
 <script>
 import helpAdd from './helpAdd.vue';
 import helpDetail from './helpDetail.vue';  
-import {getEventList} from '@/views/index/api/api.event.js';
+import {getEventList, endEvent} from '@/views/index/api/api.event.js';
 import {dataList} from '@/utils/data.js';
 export default {
   components: {helpAdd, helpDetail},
@@ -143,12 +159,14 @@ export default {
       helpForm: {
         helpDate: null,
         content: null,
-        helpRadius: null
+        helpRadius: null,
+        helpState: null
       },
       lastHelpForm: {
         helpDate: null,
         content: null,
-        helpRadius: null
+        helpRadius: null,
+        helpState: null
       },
       helpRadiusList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
         return {
@@ -168,7 +186,11 @@ export default {
       pageSize: 10,
       pageNum: 1,
       currentPage: 1,
-      loading: false
+      loading: false,
+      // 弹窗参数
+      delDialog: false,
+      loadingBtn: false,
+      listHelpId: null
     }
   },
   mounted () {
@@ -210,7 +232,9 @@ export default {
         'where.reportTimeEnd': this.helpForm.helpDate && this.helpForm.helpDate[1],
         'where.keyWord': this.helpForm.content,
         'where.radius': this.helpForm.helpRadius,
-        'where.mutualFlag': 1
+        'where.mutualFlag': 1,
+        'where.eventFlag': 0,
+        'where.eventStatus': this.helpForm.helpState
       }
       this.loading = true;
       getEventList(params).then(res => {
@@ -219,6 +243,35 @@ export default {
         }
       }).finally(() => {
         this.loading = false;
+      })
+    },
+    // 弹出结束互助弹窗
+    popEndDialog (uid) {
+      this.listHelpId = uid;
+      this.delDialog = true;
+    },
+    // 结束互助
+    endEvent () {
+      const data = {
+        eventId: this.listHelpId,
+        isCloseEvent: 1
+      }
+      this.loadingBtn = true;
+      endEvent(data).then(res => {
+        if (res) {
+          this.$message.success('互助结束成功');
+          // 手动隐藏结束按钮
+          for (let item of this.helpList.list) {
+            if (item.uid === this.listHelpId) {
+              item.eventStatus = 3;
+              item.eventStatusName = '已结束';
+              this.delDialog = false;
+              break;
+            }
+          }
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
       })
     },
     indexMethod (index) {
@@ -266,6 +319,11 @@ export default {
       padding-top: 10px;
     }
   }
-  
+  .end_dialog{
+    h4{
+      font-size: 16px;
+      color: #333333;
+    }
+  }
 }
 </style>

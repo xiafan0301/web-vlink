@@ -15,7 +15,7 @@ export default {
   props: ['tipMsg', 'btn', 'btnText', 'btn2', 'btnText2'],
   data () {
     return {
-      msg: '点击或拖拽设备列表图标至此'
+      msg: '拖拽设备列表图标至此'
     }
   },
   /* watch: {

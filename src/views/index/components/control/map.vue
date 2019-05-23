@@ -755,13 +755,11 @@ export default {
       this.$refs['mapForm'].resetFields();
     }
   },
-  // destroyed () {
-  //   if (this.map) {
-  //     console.log(this.map, '1111')
-  //     this.map.destroy( );
-  //     console.log(this.map, '2222')
-  //   }
-  // }
+  destroyed () {
+    if (this.map) {
+      this.map.destroy();
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
