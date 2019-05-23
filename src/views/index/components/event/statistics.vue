@@ -384,7 +384,7 @@ export default {
             this.departmentData = res.data.list;
             this.departmentData.map((item, index) => {
               if (item.uid === this.userInfo.organList[0].uid) {
-                this.departmentData.splice(index, 1);
+                this.searchForm.dealOrgId = item.uid;
               }
             });
           }

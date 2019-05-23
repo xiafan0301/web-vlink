@@ -38,6 +38,8 @@
                   >
                     <i class="el-icon-plus"></i>
                     <span class='add-img-text'>添加</span>
+                    <!-- <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
+                    <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p> -->
                   </el-upload>
                   <template v-if="uploadImgList.length > 0">
                     <div 

@@ -56,6 +56,9 @@
               @emitOpenLeftArrow="emitOpenLeftArrow"
               @emitLeftParentChecked="emitLeftParentChecked"
               @emitLeftChildChecked="emitLeftChildChecked"
+              @emitFinalDevice="emitFinalDevice"
+              @emitRemoveFinalDevice="emitRemoveFinalDevice"
+              @emitChangeLDeviceType="emitChangeLDeviceType"
             ></mapSelect>
           </template>
           <template v-if="tabState === 2">
@@ -446,6 +449,7 @@ export default {
         return;
       }
       let vehicleIds = [], bayonetIds = [];
+      console.log('aaaacurrentDeviceList', this.currentDeviceList)
       this.currentDeviceList.map(item => {
         if (item.deviceList.length > 0) {
           item.deviceList.map(itm => {
@@ -453,7 +457,7 @@ export default {
           });
         }
         if (item.bayonetList.length > 0) {
-          item.bayonetIds.map(itm => {
+          item.bayonetList.map(itm => {
             bayonetIds.push(itm.uid);
           });
         }
