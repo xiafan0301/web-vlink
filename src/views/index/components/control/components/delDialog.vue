@@ -43,7 +43,7 @@ export default {
 </script>
 <style lang="scss">
 .del_manage_dialog{
-  h3{
+  h4{
     font-size: 16px;
     color: #333333;
   }

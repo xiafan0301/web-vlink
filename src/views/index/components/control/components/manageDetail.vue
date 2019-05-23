@@ -703,7 +703,8 @@ export default {
     // 获取所有布控设备
     getControlDevice (query) {
       const params = {
-        name: query
+        name: query,
+        uid: this.controlId
       }
       getControlDevice(params).then(res => {
         if (res && res.data) {

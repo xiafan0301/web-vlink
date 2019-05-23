@@ -1978,7 +1978,6 @@ export default {
   },
   // destroyed () {
   //   if (this.map) {
-  //     console.log('销毁')
   //     this.map.destroy();
   //   }
   // },
