@@ -811,3 +811,25 @@
 .vl_vid_sdater > input { 
   padding: 0 2px 0 30px !important;
  }
+
+ /* 下载按钮样式 */
+ .vid_dowload_btn {
+  display: inline-block;
+  margin-left: 20px;
+  width: 140px; height: 40px; line-height: 40px;
+  font-weight: 500; font-size: 14px; color: #FFF;
+  background-color: #409EFF;
+  border-color: #409EFF;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: .1s;
+  transition: .1s;
+  -ms-user-select: none;
+  border-radius: 4px;
+ }
+ .vid_dowload_btn:hover { text-decoration: none; }
+ .vid_dowload_btn:link { text-decoration: none; }
