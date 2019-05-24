@@ -25,6 +25,21 @@ export const random14 = () => {
 
 /**
  * @summary 根据时间及格式获取时间的字符串
+ * @param {int|string} mDate 时间戳或格式化时间（yyyy-MM-dd HH:mm:ss）
+ * @return {date} 时间
+ * @example
+ *    formatDate(new Date(),'yyyy-MM-dd HH:mm:ss SSS');// 2017-6-6 11:11:11
+ */
+export const getDate = (mDate) => {
+  if (!mDate) { return ''; }
+  if (typeof iDate === 'string') {
+    mDate = mDate.replace(/-/g, '/');
+  }
+  return new Date(mDate);
+}
+
+/**
+ * @summary 根据时间及格式获取时间的字符串
  * @param {int} iDate 时间
  * @param {string} sFormat 格式，默认：yyyy-MM-dd HH:mm:ss
  * @return {string} 格式化后的日期字符串

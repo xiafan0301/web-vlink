@@ -128,15 +128,15 @@
     <!-- 下载 dialog -->
     <el-dialog v-if="oData.type === 2 && config.download" :title="'下载'" @closed="downloadClosed"
       :visible.sync="download.downloadDialogVisible" :append-to-body="true" width="800px">
-      <div style="text-align: center; width: 100%; padding: 20px 50px 10px 50px;">
+      <div style="text-align: center; width: 100%; padding: 20px 100px 10px 100px;">
         <p style="text-align: left; padding-bottom: 10px; font-size: 14px;">
-          请选择下载范围：({{download.downlaodVal[0] + 's' + ' ~ ' + download.downlaodVal[1] + 's'}})
+          请选择下载范围：
         </p>
         <div>
           <el-slider
             v-model="download.downlaodVal"
             range
-            :max="180"
+            :max="download.downlaodMaxVal"
             :disabled="download.downlaodSliderDis"
             :format-tooltip="downlaodFormatTooltip"
             :marks="download.downlaodMarks">
@@ -159,7 +159,7 @@
   </div>
 </template>
 <script>
-import {random14, formatDate} from '@/utils/util.js';
+import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
   getVideoFileDownStart, getVideoFileDownProgress } from "@/views/index/api/api.video.js";
@@ -258,17 +258,14 @@ export default {
         downloadUrl: '',
         progressVal: 0,
         downloadDialogVisible: false,
-        downlaodVal: [0, 30],
+        downlaodVal: [0, 600],
+        downlaodMaxVal: 1800,
         downloadBtnLoading: false,
         downlaodMarks: {
           0: '0s',
-          30: '30s',
-          60: '60s',
-          90: '90s',
-          120: '120s',
-          150: '150s',
-          180: '180s'
+          1800: '1800s'
         },
+        file: null,
         downlaodSliderDis: false,
         downlaodInval: null // 下载进度定时器
       }
@@ -367,15 +364,10 @@ export default {
         console.log("getVideoPlayRecordEnd error：", error);
       });
     },
-    tapeDownload () {
-      this.saveFile(this.tape.downloadUrl);
-    },
     tapeClosed () {
       this.tape.active = false;
       this.tape.loading = false;
       this.tape.downloadUrl = '';
-    },
-    tapeDestory () {
     },
 
     // sizeHandler
@@ -595,13 +587,21 @@ export default {
     playerDownload () {
       this.downloadClosed();
       this.download.downloadDialogVisible = true;
+      this.download.file = this.playBackList[this.playBackIndex];
+      this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
+      this.download.downlaodVal = [0, this.download.downlaodMaxVal];
+      let _marks = {
+        0: this.download.file.startTime
+      }
+      _marks[this.download.downlaodMaxVal] = this.download.file.endTime;
+      this.download.downlaodMarks = _marks;
     },
     playerDownloadSubmit () {
       this.download.downloadBtnLoading = true;
       this.download.downlaodSliderDis = true;
       getVideoFileDownStart({
         deviceId: this.oData.video.uid,
-        fileId: this.playBackList[this.playBackIndex].fileId,
+        fileId: this.download.file.fileId,
         offset: this.download.downlaodVal[0],
         duration: this.download.downlaodVal[1] - this.download.downlaodVal[0]
       }).then(res => {
@@ -648,7 +648,7 @@ export default {
       }
     },
     downlaodFormatTooltip (val) {
-      return val + 's';
+      return formatDate(getDate(this.download.file.startTime).getTime() + val * 1000, 'yyyy-MM-dd HH:mm:ss');
     },
     // 播放/暂停
     playerPlay (flag) {
@@ -944,20 +944,6 @@ export default {
     // 浏览器unload事件
     videoUnloadSave () {
       this.saveVideoRecord();
-    },
-
-    // 保存到本地函数
-    saveFile (sUrl) {
-			let $iframe = $('<iframe id="down-file-iframe" />');
-			let $form = $('<form target="down-file-iframe" method="post" />');
-			$form.attr('action', sUrl);
-			/* for (var key in config.data) {
-			  $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
-			} */
-			$iframe.append($form);
-			$(document.body).append($iframe);
-			$form[0].submit();
-			$iframe.remove();
     }
   },
   beforeDestroy () {
