@@ -595,6 +595,12 @@ export default {
         }
       })
     }
+  },
+  destroyed () {
+    this.$refs['mapOne'].isDestroyed();
+    this.$refs['mapTwo'].isDestroyed();
+    this.$refs['mapThree'].isDestroyed();
+    this.$refs['mapFour'].isDestroyed();
   }
 }
 </script>
