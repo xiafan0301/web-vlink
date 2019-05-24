@@ -18,8 +18,6 @@
         <div class="end-body">
           <el-form class="end-content" :model="endForm">
             <el-form-item class="limit_parent" label="事件总结:" label-width="100px;" prop="eventSummary" :rules="[{max: 10000, message: '最多输入1000个字', trigger: 'blur'}]">
-              <!-- <p class="limit_number">(<span style="color: red">10000</span>/10000)</p> -->
-              <!-- <p class="limit_number">(<span style="color: red">{{endForm.eventSummary && endForm.eventSummary.length || 0}}</span>/10000)</p> -->
               <el-input type="textarea" rows="7" style="width: 50%;" v-model="endForm.eventSummary" size="small" placeholder="请填写或者上传事件总结"></el-input>
             </el-form-item> 
           </el-form>
@@ -35,6 +33,7 @@
               >
               <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
               <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+              <div slot="tip" class="el-upload__tip number-upload-tip" v-show="isNumberTip">最多上传3张图片</div>
             </el-upload>
             <!-- <div class="img_list">
               <div v-for="(item, index) in imgList2" :key="'item' + index">
@@ -87,6 +86,16 @@ export default {
       fileList: [], // 要上传的文件列表
       uploadImgList: [], //要上传的图片列表
       isEndLoading: false, // 结束事件加载中
+      isNumberTip: false // 图片上传错误提示
+    }
+  },
+  watch: {
+    uploadImgList () { // 监听上传图片列表
+      if (this.uploadImgList.length > 3) {
+        this.isNumberTip = true;
+      } else {
+        this.isNumberTip = false;
+      }
     }
   },
   mounted () {
@@ -138,7 +147,6 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          // res.fileName = file.name;
           if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
@@ -188,6 +196,9 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
+      if (this.isNumberTip) {
+        return false;
+      }
       return isLtTenM && isWord;
     },
     // 返回
@@ -211,7 +222,6 @@ export default {
     },
     // 结束事件
     submitData () {
-      // this.endForm.eventLevel = this.basicInfo.eventLevel;
       if (!this.endForm.eventSummary && this.endForm.addList.length === 0) {
         this.$message({
           type: 'warning',
@@ -219,13 +229,16 @@ export default {
           customClass: 'request_tip'
         })
       } else {
-        if (this.uploadImgList.length > 3) {
-          this.$message({
-            type: 'warning',
-            message: '最多上传3张图片',
-            customClass: 'request_tip'
-          });
-          return false;
+        // if (this.uploadImgList.length > 3) {
+        //   this.$message({
+        //     type: 'warning',
+        //     message: '最多上传3张图片',
+        //     customClass: 'request_tip'
+        //   });
+        //   return false;
+        // }
+        if (this.isNumberTip) {
+          return;
         }
         this.isEndLoading = true;
         updateEvent(this.endForm)
@@ -289,6 +302,11 @@ export default {
         }
         .end-upload-tip {
           color: #999999;
+          margin: 10px 0;
+          font-size: 14px;
+        }
+        .number-upload-tip {
+          color: #F94539;
           margin: 10px 0;
           font-size: 14px;
         }

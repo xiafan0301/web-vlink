@@ -25,7 +25,7 @@
                   v-for="(item, index) in eventTypeList"
                   :key="index"
                   :label="item.enumValue"
-                  :value="item.uid"
+                  :value="item.enumField"
                 >
                 </el-option>
               </el-select>
@@ -37,7 +37,7 @@
                   v-for="(item, index) in eventLevelList"
                   :key="index"
                   :label="item.enumValue"
-                  :value="item.uid"
+                  :value="item.enumField"
                 >
                 </el-option>
               </el-select>
@@ -172,12 +172,12 @@ export default {
     getPlanList () {
       let planLevel, planType;
       if (this.planForm.planLevel === '全部等级') {
-        planLevel = '';
+        planLevel = null;
       } else {
         planLevel = this.planForm.planLevel;
       }
       if (this.planForm.planType === '全部类型') {
-        planType = '';
+        planType = null;
       } else {
         planType = this.planForm.planType;
       }

@@ -35,8 +35,8 @@
               <span>任务内容：</span>
               <span>{{item.taskContent}}</span>
             </div>
+            <div class="divide-list"></div>
           </li>
-          <div class="divide-list"></div>
         </ul>
       </div>
       <div class="ctc-plan-box">
@@ -260,7 +260,7 @@ export default {
           });
           this.isLoading = true;
           const params = {
-            dispatchType: 2, // 1--事件 2--告警
+            dispatchType: 1, // 1--事件 2--告警
             eventId: this.$route.query.eventId
           }
           addTaskInfo(this.taskList, params)
@@ -503,14 +503,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
           &:last-child {
-            display: none;
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }
