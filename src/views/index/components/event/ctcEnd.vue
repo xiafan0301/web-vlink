@@ -42,6 +42,7 @@
           >
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
             <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+            <div slot="tip" class="el-upload__tip number-upload-tip" v-show="isNumberTip">最多上传3张图片</div>
           </el-upload>
           <!-- <div class="img_list">
             <div v-for="(item, index) in imgList2" :key="'item' + index">
@@ -87,10 +88,18 @@ export default {
       },
       uploadImgList: [], // 要上传的图片列表
       fileList: [], // 要上传文件列表
-      isEndLoading: false
+      isEndLoading: false,
+      isNumberTip: false // 图片上传错误提示
     }
   },
-  mounted () {
+  watch: {
+    uploadImgList () { // 监听上传图片列表
+      if (this.uploadImgList.length > 3) {
+        this.isNumberTip = true;
+      } else {
+        this.isNumberTip = false;
+      }
+    }
   },
   methods: {
     handleBeforeUpload (file) { // 图片上传之前
@@ -110,6 +119,9 @@ export default {
           message: '上传的图片大小不能超过10M',
           customClass: 'upload_file_tip'
         });
+      }
+      if (this.isNumberTip) {
+        return false;
       }
       return isLtTenM && isWord;
     },
@@ -141,8 +153,6 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          // let data;
-          // res.fileName = file.name;
           if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
@@ -170,7 +180,6 @@ export default {
             }
             this.fileList.push(data);
           }
-          // this.endForm.attachmentList.push(data);
         }
       }
     },
@@ -179,13 +188,16 @@ export default {
       this.$refs[form].validate(valid => {
         let params, attachmentList = [];
         if (valid) {
-          if (this.uploadImgList.length > 3) {
-            this.$message({
-              type: 'warning',
-              message: '最多上传3张图片',
-              customClass: 'request_tip'
-            });
-            return false;
+          // if (this.uploadImgList.length > 3) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '最多上传3张图片',
+          //     customClass: 'request_tip'
+          //   });
+          //   return false;
+          // }
+          if (this.isNumberTip) {
+            return;
           }
           this.fileList && this.fileList.map(item => {
             attachmentList.push(item);
@@ -260,6 +272,11 @@ export default {
       }
       .end-upload-tip {
         color: #999999;
+        margin: 10px 0;
+        font-size: 14px;
+      }
+      .number-upload-tip {
+        color: #F94539;
         margin: 10px 0;
         font-size: 14px;
       }

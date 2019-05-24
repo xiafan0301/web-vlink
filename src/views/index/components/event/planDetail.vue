@@ -41,14 +41,14 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <template v-if="planDetailInfo.attachmentName">
+              <template v-if="planDetailInfo.sysAppendixInfo">
                 <i class="vl_icon vl_icon_event_5"></i>
-                {{planDetailInfo.attachmentName}}
+                {{planDetailInfo.sysAppendixInfo.cname}}
               </template>
               <template v-else>
                 无
               </template>
-              <i class="vl_icon vl_icon_event_6" v-show="planDetailInfo.url" @click="downloadFile(planDetailInfo.url)" style="margin-left:5px;cursor:pointer;"></i>
+              <i class="vl_icon vl_icon_event_6" v-show="planDetailInfo.sysAppendixInfo.path" @click="downloadFile(planDetailInfo.sysAppendixInfo.path)" style="margin-left:5px;cursor:pointer;"></i>
             </span>
           </li>
           <li>

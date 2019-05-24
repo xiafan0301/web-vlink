@@ -22,17 +22,14 @@
       <div class='basic-list'>
         <div>
           <span class='title'>事件类型：</span>
-          <!-- <span class='content'>火灾阿萨达萨达萨达萨达</span> -->
           <span class='content'>{{basicInfo.eventTypeName}}</span>
         </div>
         <div>
           <span class='title'>事件等级：</span>
-          <!-- <span class='content'>I级（特大）</span> -->
           <span class='content'>{{basicInfo.eventLevelName}}</span>
         </div>
         <div>
           <span class='title'>报案时间：</span>
-          <!-- <span class='content'>2018-06-07 15:00</span> -->
           <span class='content'>{{basicInfo.reportTime}}</span>
         </div>
       </div>
@@ -60,14 +57,12 @@
         </div>
         <div style='width: 65%'>
           <span class='title'>事发地点：</span>
-          <!-- <span class='content'>长沙市创谷工业园，地址如果文字过多，可以多行显示</span> -->
           <span class='content'>{{basicInfo.eventAddress}}</span>
         </div>
       </div>
       <div class='basic-list'>
         <div>
           <span class='title'>人员伤亡：</span>
-          <!-- <span class='content'>不确定</span> -->
           <template v-if='basicInfo.casualties == -1'>
             <span class='content'>不确定</span>
           </template>
@@ -86,13 +81,13 @@
         </div>
       </div>
       <div class='upload_box'>
-        <div class="img-content" v-for="(item, index) in uploadImgList" :key="index">
+        <div class="img-box" v-for="(item, index) in uploadImgList" :key="index">
           <img
             :src="item.path"
             @click="handleBigImg(index)"
           />
         </div>
-        <div class='video-content' v-for="(item, index) in uplaodVideoList" :key="index">
+        <div class='video-box' v-for="(item, index) in uplaodVideoList" :key="index">
           <video
             :src="item.path"
           />
@@ -281,11 +276,11 @@ export default {
       }
     }
     .upload_box {
-      width: 100%;
+      width: 415px;
       padding-left: 80px;
       display: flex;
       flex-wrap: wrap;
-      .img-content, .video-content {
+      .img-box, .video-box {
         position: relative;
         .play_icon {
           position: absolute;

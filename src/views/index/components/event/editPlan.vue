@@ -51,7 +51,7 @@
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
             </el-upload>
           </el-form-item>
-          <el-form-item label="响应处置:" label-width="120px">
+          <el-form-item label="响应处置:" label-width="120px" class="response_handle">
             <div class="response_box" v-for="(item, index) in editPlanForm.taskList" :key="index">
               <div class="plan_form_box">
                 <div class="title">
@@ -403,6 +403,13 @@ export default {
     .edit-plan-form {
       width: 100%;
       padding: 10px 0;
+      .response_handle {
+        /deep/ .el-form-item__label:before {
+          content: '*';
+          color: #F56C6C;
+          margin-right: 4px;
+        }
+      }
       /deep/ .el-form-item__label {
         color: #666666;
       }
