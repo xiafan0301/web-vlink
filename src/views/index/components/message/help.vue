@@ -100,9 +100,9 @@
               <el-table-column label="操作" width="140">
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
                   <template v-if="scope.row.eventStatus !== 3">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
                     <span class="operation_wire">|</span>
                     <span class="operation_btn" @click="popEndDialog(scope.row.uid)">结束</span>
                   </template>
@@ -230,7 +230,7 @@ export default {
         order: 'desc',
         'where.reportTimeStart': this.helpForm.helpDate && this.helpForm.helpDate[0],
         'where.reportTimeEnd': this.helpForm.helpDate && this.helpForm.helpDate[1],
-        'where.keyWord': this.helpForm.content,
+        'where.keywordLocDesci': this.helpForm.content,
         'where.radius': this.helpForm.helpRadius,
         'where.mutualFlag': 1,
         'where.eventFlag': 0,
