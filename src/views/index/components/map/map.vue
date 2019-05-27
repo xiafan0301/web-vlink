@@ -139,7 +139,12 @@
     <!--全屏视频监控-->
     <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
     <!--语音视频通话-->
-    <!--<div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>-->
+    <!--<div :is="isPc ? 'Pc' : 'Phone'" :curCall="curCall" :myNo="telNo"></div>-->
+    <div is="webrtc" @wrStateEmit="wrStateEmit" @wrClose="wrClose" @wrSwitchCall="wrSwitchCall" :oAdd="oAdd" :oDel="oDel"></div>
+    <!--通话时长-->
+    <p :class="'vl_map_time_' + item._id" v-for="item in isCalling"  :key="item.id">
+      {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
+    </p>
   </div>
 </template>
 <script>
@@ -210,10 +215,21 @@ export default {
       markEditWindow: null,
       // 报警
       snapMarks: [],
-      // 语音，视频
-      oDel: null,
-      oAdd: {}
+      // 视频通话
+//      isPc: false,
+//      telNo: null,
+//      curCall: {}
+      oAdd: {},
+      oDel: {},
+      callingList: [] // 通话状态下的人员列表，{}包含
     }
+  },
+  computed: {
+    isCalling () {
+      return this.callingList.filter(x => x.isTime)
+    }
+  },
+  created () {
   },
   watch: {
     mapInfoVal (val) {
@@ -523,6 +539,11 @@ export default {
             this.clearSign(false, this.curSignObj.dataType, _i);
             if (this.hoverWindow ){this.hoverWindow.close()}
             this.markList = this.markList.filter(x => x.uid !== this.curSignObj.uid);
+            this.marks[4].forEach(x => {
+              if (x.Le.extData.uid === this.curSignObj.uid) {
+                this.map.remove(x)
+              }
+            })
           }
           this.delLoading = false;
           this.deleteMarkDialog = false;
@@ -774,6 +795,10 @@ export default {
       })
     },
     switchTab (node, dataType, event) {
+      // 判断 当前dataType是否在mapTypeLit里，
+      if (!this.mapTypeList.includes(dataType)) {
+        return false;
+      }
       if (event.target.classList.contains('active')) {
        event.target.classList.remove('active')
       } else {
@@ -794,7 +819,13 @@ export default {
           }
         } else {
           // '重置'
-          let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
+          let oldArr = []
+          console.log(this.mapTypeList)
+          this.mapTypeList.forEach(x => {
+            oldArr.push(...curData[this.key2Type[x]])
+          })
+          console.log(oldArr)
+          // let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
           let ss;
           if (this.selAreaPolygon) {
             ss = objDeepCopy(oldArr.filter(y => y.isInArea && y.isShow))
@@ -873,6 +904,7 @@ export default {
           data[i].infoList.forEach(obj => {
             if (obj.longitude > 0 && obj.latitude > 0) {
               let offSet = [-15, -16], sId = 'mapMark' + i + random14(), sDataType;
+              obj['markSid'] = sId;
               if (obj.dataType === 0 && obj.deviceStatus !== 1) {
                 sDataType = 6;
               } else {
@@ -951,6 +983,12 @@ export default {
                     })
                     return false
                   }
+                } else if (obj.dataType === 3) {
+                  let sysIndex = _this.callingList.findIndex(j => j.uid === obj.uid + '')
+                  if (sysIndex !== -1) {
+                    console.log(sysIndex);
+                    return false;
+                  }
                 }
                 let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
                 _this.hoverWindow = new window.AMap.InfoWindow({
@@ -1001,6 +1039,7 @@ export default {
       } else if (data.dataType === 1) {
         str += '<li><span>卡口名称：</span>' + data.infoName + '</li>';
         str += '<li><span>卡口编号：</span>' + data.bayonetNo + '</li>';
+        str += '<li><span>地理位置：</span>' + data.bayonetAddress + '</li>';
         str += '<li><span>设备数量：</span>' + data.devNum + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 2) {
@@ -1011,8 +1050,8 @@ export default {
         str += '<li><span>姓名：</span>' + data.infoName + '</li>';
         str += '<li><span>手机号码：</span>' + data.userMobile + '</li>';
         str += '<li style="text-align: center;">' +
-            `<i dataId="${data.infoName}" dataType="${data.dataType}" class="vl_map_hover_btn hover_btn_voice">语音通话</i>` +
-            `<i dataId="${data.infoName}" dataType="${data.dataType}" class="vl_map_hover_btn hover_btn_video">视频通话</i>` +
+            `<i dataId="${data.userMobile}" dataType="0" dataName="${data.infoName}" dataUid="${data.uid}" dataLng="${data.longitude}" dataLat="${data.latitude}" dataMid="${data.markSid}" class="vl_map_hover_btn hover_btn_voice">语音通话</i>` +
+            `<i dataId="${data.userMobile}" dataType="1" dataName="${data.infoName}" dataUid="${data.uid}" dataLng="${data.longitude}" dataLat="${data.latitude}" dataMid="${data.markSid}" class="vl_map_hover_btn hover_btn_video">视频通话</i>` +
           '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 4){
@@ -1056,14 +1095,43 @@ export default {
       let _this = this;
       $('body').on('click', '.vl_map_hover', function (e) {
         if (e.target.classList.contains('vl_map_hover_btn')) {
-          let url = _this.$router.resolve({
-            name: 'map_communication',
-            params: {
-              userId: e.target.getAttribute('dataId'),
-              type: e.target.getAttribute('dataType')
-            }
-          })
-          window.open(url.href, '_blank')
+          if (_this.hoverWindow ){_this.hoverWindow.close()}
+          let _id = 'mapCall' + random14();
+          let _obj = {
+            uid: e.target.getAttribute('dataUid'),
+            longitude: e.target.getAttribute('dataLng'),
+            latitude: e.target.getAttribute('dataLat'),
+            remoteId: e.target.getAttribute('dataId'),
+            remoteName: e.target.getAttribute('dataName'),
+            type: e.target.getAttribute('dataType'),
+            _id: _id,
+            _mid: e.target.getAttribute('dataMid'),
+            isTime: false,
+            minute: 0,
+            second: 0,
+            timer: null,
+            mark: null
+          }
+          let _m = _this.markCalling(_obj);
+          _obj.mark = _m;
+          _this.oAdd = _obj;
+          _this.callingList.push(_obj)
+          console.log(_this.callingList);
+          $('#' + e.target.getAttribute('dataMid')).addClass('vl_icon_map_mark_calling')
+          // 模拟通话成功，开始计时
+          _obj.countTime = _this.countTime;
+          _obj.clearTime = _this.clearTime;
+          setTimeout(() => {
+            _obj.isTime = true;
+            // _obj.isTime = true;
+            _obj.countTime(_obj);
+            let domT = document.getElementsByClassName('vl_map_time_' + _obj._id)
+            console.log(document.getElementsByClassName('vl_map_time_' + _obj._id), document.getElementsByClassName('vl_map_time_' + _obj._id)[0])
+            setTimeout(() => {
+              console.log(document.getElementsByClassName('vl_map_time_' + _obj._id), document.getElementsByClassName('vl_map_time_' + _obj._id)[0])
+              $('#' + _obj._id).append(domT[0])
+            }, 1000)
+          }, 3000)
         }
         // textarea tap event
         $('.sign_text').bind('keyup', function () {
@@ -1176,6 +1244,44 @@ export default {
     setElementText (el, content) {
       el.text(content)
     },
+    markCalling (obj) {
+      let _this = this, marker;
+      if (obj.longitude > 0 && obj.latitude > 0) {
+        let offSet = [-15, -16];
+        let content = `<div id="${obj._id}" class="vl_map_call">`
+        content += '<div class="vl_icon vl_icon_map_calling' + obj.type + '"></div>'
+        content += '<p></p>'
+        content += '</div>'
+        marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: content
+        });
+        setTimeout(()=> {
+          obj.type = 5;
+        }, 5000)
+      }
+      return marker;
+    },
+    countTime (data) {
+      data.timer = setInterval(() => {
+        if (data.second < 59) {
+          data.second += 1;
+        } else {
+          data.second = 0;
+          data.minute += 1;
+        }
+      }, 1000)
+    },
+    clearTime (data) {
+      if (data.timer) {
+        clearInterval(data.timer)
+        data.timer = null;
+      }
+    },
     // 清除地图标注
     clearSign (isAll, dataType, _index) {
       if (isAll) {
@@ -1199,6 +1305,7 @@ export default {
           if (this.delSelAreaIcon) {this.map.remove(this.delSelAreaIcon);}
           this.selAreaPolygon = null;
           this.mouseTool.close(true);
+          this.updateNumberss(false, '', false, true);
           this.mapTypeList.forEach(x => {
             this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
           })
@@ -1679,6 +1786,23 @@ export default {
     },
     wrStateEmit (oData) {
       console.log('状态EMIT oData: ', oData);
+      if (oData.state > 20) {
+        this.wrClose(oData);
+      }
+    },
+    wrClose (data) {
+      $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
+      let o = this.callingList.find(x => x.uid === data.uid);
+      if (o) {
+        this.map.remove(o.mark);
+        o.clearTime(o);
+      }
+      this.callingList.splice(this.callingList.findIndex(x => x.uid === data.uid), 1);
+    },
+    wrSwitchCall (data) {
+      let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
+      $('#' + data._id + ' div').removeClass(_sclass);
+      $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
     }
   },
   beforeDestroy () {
@@ -1880,36 +2004,35 @@ export default {
       height: 100%;
     }
   }
-  .vl_map_hover1 {
-    right: -220px;
-    top: 132px;
-  }
-  .vl_map_hover2 {
-    right: 0px;
-    top: 268px;
-  }
-  .vl_map_hover3 {
-    right: 220px;
-    top: 134px;
-  }
-  .vl_map_hover4 {
-    right: 220px;
-    top: 134px;
-  }
-  .vl_map_hover5 {
-    right: -220px;
-    top: 0px;
-  }
-  .vl_map_hover6 {
-    right: -220px;
-    top: 268px;
-  }
-  .vl_map_hover7 {
-    right: 220px;
-    top: 268px;
-  }
-  .vl_map_hover0 {
-    right: 0px;
-    top: 0px;
+  .vl_map_call {
+    background: #0C70F8;
+    width: 60px;
+    height: 64px;
+    position: absolute;
+    top: -79px;
+    left: -5px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+    &:after {
+      content: "";
+      display: inline-block;
+      position: absolute;
+      left: 42%;
+      margin-left: -5px;
+      bottom: -10px;
+      border-top: 10px solid #0C70F8;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+    }
+    > div {
+      display: block;
+      margin: 7px auto;
+    }
+    > p {
+      color: #FFFFFF;
+      text-align: center;
+    }
   }
 </style>

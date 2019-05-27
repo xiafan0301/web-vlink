@@ -75,13 +75,9 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/webrtc',
-      name: 'webrtc',
+      path: '/pc',
+      name: 'pc',
       component: () => import('@/views/index/components/webrtcTest.vue')
-    }, {
-      path: '/webrtcTri',
-      name: 'webrtcTri',
-      component: () => import('@/views/index/components/webrtcTerminal.vue')
     }
   ]
 })
