@@ -85,6 +85,9 @@
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -619px -1160px;}
 .vl_icon_map_hover_mark2 { width: 47px;  height: 68px; background-position: -787px -1163px;}
 .vl_icon_map_hover_mark3 { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_mark_calling { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_calling0 { width: 32px;  height: 26px; background-position: -805px -1532px;}
+.vl_icon_map_calling1 { width: 32px;  height: 26px; background-position: -853px -1532px;}
 /* 地图板块 工具栏 */
 .vl_icon_041 { width: 20px; height: 20px; background-position: -97px -375px; }
 .vl_icon_sed .vl_icon_041 { background-position: -97px -347px; }
