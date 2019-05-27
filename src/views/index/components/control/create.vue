@@ -21,6 +21,7 @@
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select
+                :disabled="($route.query.eventId ? true : false) || pageType === 2"
                 v-model="createForm.event"
                 filterable
                 remote
@@ -150,7 +151,7 @@
 <script>
 import model from './components/model.vue';
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
-import {getEventList, getEventDetail} from '@/views/index/api/api.event.js';
+import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {dataList} from '@/utils/data.js';
@@ -269,16 +270,19 @@ export default {
     getEventList (query) {
       const params = {
         'where.eventCode': query,
+        'where.isSurveillance': false,//没有关联布控的事件
         pageSize: 1000000,
         orderBy: 'report_time',
         order: 'desc'
       }
       getEventList(params).then(res => {
         if (res && res.data) {
-          this.eventList = res.data.list.map(m => {
+          // 过滤掉事件状态为已结束的关联事件
+          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
             return {
               label: m.eventCode,
-              value: m.uid
+              value: m.uid,
+              eventStatus: m.eventStatus
             }
           });
         }
@@ -408,6 +412,11 @@ export default {
                 this.$router.push({ name: 'control_manage' });
               }
             }).finally(() => {
+              // 新增布控后，状态为待开始的事件，改为进行中
+              const obj = this.eventList.find(f => f.value === this.createForm.event);
+              if (obj && obj.eventStatus === 1) {
+                updateEvent({uid: obj.value, type: 6});
+              }
               this.loadingBtn = false;
             })
           }
@@ -586,6 +595,12 @@ export default {
         }
       })
     }
+  },
+  destroyed () {
+    this.$refs['mapOne'].isDestroyed();
+    this.$refs['mapTwo'].isDestroyed();
+    this.$refs['mapThree'].isDestroyed();
+    this.$refs['mapFour'].isDestroyed();
   }
 }
 </script>

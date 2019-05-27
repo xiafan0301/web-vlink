@@ -3,7 +3,7 @@
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件管理</el-breadcrumb-item>
         <el-breadcrumb-item>事件详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -15,7 +15,7 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <template v-if="eventFile && eventFile.length > 0">
+          <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
             <p>事件总结附件</p>
             <div class="content-icon">
               <ul class="clearfix" style="clear:both">
@@ -55,7 +55,7 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <template v-if="ctcFile && ctcFile.length > 0">
+          <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
             <p>调度总结附件</p>
             <div class="content-icon">
               <ul class="clearfix" style="clear:both">
@@ -192,10 +192,10 @@
                     <div style="width:100%;margin-top:10px;">
                       <img
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        :src="itm.path"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
@@ -204,40 +204,42 @@
           </div>
         </div>
       </div>
-      <div class="event-handle event-end">
+      <div class="event-handle event-end" v-show="basicInfo.dealTypeList && basicInfo.dealTypeList.length > 0">
         <div class="handle-header">
           <span>事件处理</span>
         </div>
         <div class="divide"></div>
         <div class="handle-content">
           <ul class="clearfix">
-            <li>
+            <li v-show="basicInfo.mutualFlag">
               <div>
                 <span class="title">民众互助：</span>
-                <span class="content" @click="skipCommentPage">5条评论</span>
+                <span class="content" @click="skipCommentPage">{{basicInfo.commentCount ? basicInfo.commentCount : 0}}条评论</span>
                 <span class="status">（已发布）</span>
               </div>
             </li>
-            <li>
-              <div>
-                <span class="title">智能布控：</span>
-                <span class="content" @click="skipControlPage">查看布控方案</span>
-                <span class="status">（已设置）</span>
-              </div>
-            </li>
-            <li>
-              <div>
-                <span class="title">调度指挥：</span>
-                <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
-                <span class="status">（已发布）</span>
-              </div>
-            </li>
-            <li>
-              <div>
-                <span class="title">向上呈报：</span>
-                <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
-                <span class="status">（已呈报）</span>
-              </div>
+            <li v-for="(item, index) in basicInfo.dealTypeList" :key="'item' + index">
+              <template v-if="item.dealType === 1">
+                <div>
+                  <span class="title">智能布控：</span>
+                  <span class="content" @click="skipControlPage">查看布控方案</span>
+                  <span class="status">（已设置）</span>
+                </div>
+              </template>
+              <template v-if="item.dealType === 2">
+                <div>
+                  <span class="title">调度指挥：</span>
+                  <span class="content" @click="skipEventCtcDetailPage">查看调度方案</span>
+                  <span class="status">（已发布）</span>
+                </div>
+              </template>
+              <template v-if="item.dealType === 3">
+                <div>
+                  <span class="title">向上呈报：</span>
+                  <span class="content" @click="skipReportDetailPage">查看呈报的内容和上级指示</span>
+                  <span class="status">（已呈报）</span>
+                </div>
+              </template>
             </li>
           </ul>
         </div>
@@ -423,10 +425,16 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            this.basicInfo = res.data;            
+            this.basicInfo = res.data;
+            this.basicInfo.dealTypeList && this.basicInfo.dealTypeList.map((item, index) => {
+              if (item.dealType === 4) {
+                this.basicInfo.dealTypeList.splice(index, 1);
+              }
+            });
             if (res.data.eventCloseAttachmentList.length > 0) {
               res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  console.log('11111')
                   this.eventImg.push(item);
                 } else {
                   this.eventFile.push(item);
@@ -454,7 +462,7 @@ export default {
     },
     // 跳至结束事件页面
     skipEventEndPage () {
-      this.$router.push({name: 'event_end', query: {id: this.$route.query.eventId}});
+      this.$router.push({name: 'event_end', query: {id: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至查看互助页面
     skipCommentPage () {
@@ -462,7 +470,13 @@ export default {
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      this.$router.push({path: '/control/manage', query: { pageType: 2, state: 1, controlId: 1 }});
+      let state;
+      if (this.$route.query.status === 'handling') {
+        state = 1;
+      } else {
+        state = 3
+      }
+      this.$router.push({path: '/control/manage', query: { pageType: 2, state: state, controlId: this.basicInfo.surveillanceId }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
@@ -470,7 +484,7 @@ export default {
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {
-      this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'report_detail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至再次处理页面
     skipAgainHandlePage () {
@@ -687,6 +701,7 @@ export default {
             border-radius: 4px;
             margin: 0 5px;
             cursor: pointer;
+            border:1px solid #cccccc;
           }
         }
         .content_detail {

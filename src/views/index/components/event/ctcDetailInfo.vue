@@ -32,52 +32,44 @@
             </li>
           </ul>
         </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div>
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <p>事件总结附件</p>
-            <div class="content-icon">
-              <ul class="clearfix" style="clear:both">
-                <li v-for="(item, index) in eventFile" :key="'item' + index">
-                  <i class="vl_icon vl_icon_event_1"></i>
-                  <div class="operation_btn">
-                    <div class="arrow"></div>
-                    <p>
-                      <i class="vl_icon vl_icon_manage_17"></i>
-                      <a :href="item.path">下载</a>
-                    </p>
-                    <p>
-                      <i class="vl_icon vl_icon_event_25"></i>
-                      <a>预览</a>
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              <img v-for="(item, index) in eventImg" :src="item.path" :key="index" @click="openBigImg(index, eventImg)" />
-            </div>
-            <div class="divide"></div>
-            <p style="margin-top: 5px;">事件总结内容</p>
-            <div class="content_detail">
-              <p>
-                {{basicInfo.eventSummary}}
-                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
-              </p>
-            </div>
+            <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
+              <p>事件总结附件</p>
+              <div class="content-icon">
+                <ul class="clearfix" style="clear:both">
+                  <li v-for="(item, index) in eventFile" :key="'item' + index">
+                    <i class="vl_icon vl_icon_event_1"></i>
+                    <div class="operation_btn">
+                      <div class="arrow"></div>
+                      <p>
+                        <i class="vl_icon vl_icon_manage_17"></i>
+                        <a :href="item.path">下载</a>
+                      </p>
+                      <p>
+                        <i class="vl_icon vl_icon_event_25"></i>
+                        <a>预览</a>
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+                <img v-for="(item, index) in eventImg" :src="item.path" :key="index" @click="openBigImg(index, eventImg)" />
+              </div>
+              <div class="divide"></div>
+            </template>
+            <template v-if="basicInfo.eventSummary">
+              <p style="margin-top: 5px;">事件总结内容</p>
+              <div class="content_detail">
+                <p>
+                  {{basicInfo.eventSummary}}
+                  <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+                </p>
+              </div>
+            </template>
           </div>
         </div>
         <div class="summary" v-show="basicInfo.dispatchSummary">
@@ -86,34 +78,38 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <p>调度总结附件</p>
-            <div class="content-icon">
-              <ul class="clearfix" style="clear:both">
-                <li v-for="(item, index) in ctcFile" :key="'item' + index">
-                  <i class="vl_icon vl_icon_event_1"></i>
-                  <div class="operation_btn">
-                    <div class="arrow"></div>
-                    <p>
-                      <i class="vl_icon vl_icon_manage_17"></i>
-                      <a :href="item.path">下载</a>
-                    </p>
-                    <p>
-                      <i class="vl_icon vl_icon_event_25"></i>
-                      <a>预览</a>
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              <img v-for="(item, index) in ctcImg" :src="item.path" :key="index" @click="openBigImg(index, ctcImg)" />
-            </div>
-            <div class="divide"></div>
-            <p style="margin-top: 5px;">调度总结内容</p>
-            <div class="content_detail">
-              <p>
-                {{basicInfo.dispatchSummary}}
-                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
-              </p>
-            </div>
+            <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
+              <p>调度总结附件</p>
+              <div class="content-icon">
+                <ul class="clearfix" style="clear:both">
+                  <li v-for="(item, index) in ctcFile" :key="'item' + index">
+                    <i class="vl_icon vl_icon_event_1"></i>
+                    <div class="operation_btn">
+                      <div class="arrow"></div>
+                      <p>
+                        <i class="vl_icon vl_icon_manage_17"></i>
+                        <a :href="item.path">下载</a>
+                      </p>
+                      <p>
+                        <i class="vl_icon vl_icon_event_25"></i>
+                        <a>预览</a>
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+                <img v-for="(item, index) in ctcImg" :src="item.path" :key="index" @click="openBigImg(index, ctcImg)" />
+              </div>
+              <div class="divide"></div>
+            </template>
+            <template v-if="basicInfo.dispatchSummary">
+              <p style="margin-top: 5px;">调度总结内容</p>
+              <div class="content_detail">
+                <p>
+                  {{basicInfo.dispatchSummary}}
+                  <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+                </p>
+              </div>
+            </template>
           </div>
         </div>
         <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
@@ -147,11 +143,11 @@
                     <div class='time'>{{item.createTime}}</div>
                     <div style="width:100%;margin-top:10px;">
                       <img
-                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;border:1px solid #ccc;"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        :src="itm.path"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
@@ -215,11 +211,11 @@ export default {
   methods: {
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id }});
+      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, status: this.$route.query.status }});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType, type: 'ctc' }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType, type: 'ctc', status: this.$route.query.status }});
     },
     // 获取事件详情
     getDetail () {
@@ -522,6 +518,7 @@ export default {
             border-radius: 4px;
             margin: 0 5px;
             cursor: pointer;
+            border: 1px solid #cccccc;
           }
         }
         .content_detail {

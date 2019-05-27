@@ -315,3 +315,80 @@ export const mdfVideoRoundState = (data) => {
     mode: videoModeName
   })
 }
+
+/**
+ * 视频录像开始接口
+ * @param {Object} data 接口入参
+ */
+export const getVideoPlayRecordStart = (data) => {
+  return request({
+    url: '/video-patrol-service/video-play-record-start',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 视频录像结束接口
+ * @param {Object} data 接口入参
+ */
+export const getVideoPlayRecordEnd = (data) => {
+  return request({
+    url: '/video-patrol-service/video-play-record-end',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 视频录像记录分页查询接口-支持按天查询
+ * @param {Object} data 接口入参
+ */
+export const getVideoTranscribeDatePageList = (data) => {
+  return request({
+    url: '/video-transcribe-service/video-transcribe-date-page-list',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 删除视频记录接口
+ * @param {Object} data 接口入参
+ */
+export const delVideoTranscribe = (data) => {
+  return request({
+    url: '/video-transcribe-service/video-transcribe/' + data,
+    method: 'delete',
+    mode: videoModeName
+  })
+}
+
+/**
+ * 开始后端录像下载任务
+ * @param {Object} data 接口入参
+ */
+export const getVideoFileDownStart = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-start',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 后端录像下载任务进度查询
+ * @param {Object} data 接口入参
+ */
+export const getVideoFileDownProgress = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-progress',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}

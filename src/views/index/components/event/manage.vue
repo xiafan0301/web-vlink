@@ -259,6 +259,7 @@ export default {
         'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
         'where.reporterUserRole': userName,
+        'where.dealOrgId': this.userInfo.organList[0].uid,
         'where.keyword': this.eventForm.phoneOrNumber,
         'where.acceptFlag': 2, // 审核通过
         pageNum: this.pagination.pageNum,
@@ -297,11 +298,11 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      if (obj.eventStatus === 1) {
+      if (!obj.surveillanceResult) {
         this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
       } 
-      if (obj.eventStatus === 2) {
-        this.$router.push({path: '/control/manage', query: {controlId: obj.uid, pageType: 2, state: 1}});
+      if (obj.surveillanceResult) {
+        this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});
       }
     },
     getOneMonth () { // 设置默认一个月

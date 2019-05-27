@@ -703,7 +703,8 @@ export default {
     // 获取所有布控设备
     getControlDevice (query) {
       const params = {
-        name: query
+        name: query,
+        uid: this.controlId
       }
       getControlDevice(params).then(res => {
         if (res && res.data) {
@@ -775,7 +776,7 @@ export default {
       }
     }, 
     mapMark () {
-      let _this = this, hoverWindow = null, data = null;
+      let _this = this, hoverWindow = null, data = null, markerList = [];
       if (!_this.trackPointList) {
         return false;
       }
@@ -866,9 +867,10 @@ export default {
             }
             _this.devIdOrBayId = obj.uid;//左侧列表高亮
           });
-          marker.setMap(_this.map);
+          markerList.push(marker);
         }
       }
+      _this.map.add(markerList);
       _this.map.setFitView();
     },
     // 地图缩放

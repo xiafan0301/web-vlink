@@ -3,8 +3,18 @@
     <div class="ctc_end">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo' }">调度详情</el-breadcrumb-item>
+          <template v-if="$route.query.type === 'ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+           <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
+          </template>
           <el-breadcrumb-item>结束调度</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -24,7 +34,7 @@
           <el-upload
             :action="uploadUrl"
             multiple
-            accept=".doc,.docx, .png, .jpg, .jpeg"
+            accept=".doc,.docx, .png, .jpg, .jpeg,.bmp"
             :show-file-list='true'
             :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
@@ -32,6 +42,7 @@
           >
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
             <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+            <div slot="tip" class="el-upload__tip number-upload-tip" v-show="isNumberTip">最多上传3张图片</div>
           </el-upload>
           <!-- <div class="img_list">
             <div v-for="(item, index) in imgList2" :key="'item' + index">
@@ -77,18 +88,42 @@ export default {
       },
       uploadImgList: [], // 要上传的图片列表
       fileList: [], // 要上传文件列表
-      isEndLoading: false
+      isEndLoading: false,
+      isNumberTip: false // 图片上传错误提示
     }
   },
-  mounted () {
+  watch: {
+    uploadImgList () { // 监听上传图片列表
+      if (this.uploadImgList.length > 3) {
+        this.isNumberTip = true;
+      } else {
+        this.isNumberTip = false;
+      }
+    }
   },
   methods: {
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
-      if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过10M');
+      const isWord = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、doc、docx格式',
+          customClass: 'upload_file_tip'
+        });
       }
-      return isLtTenM;
+      if (!isLtTenM) {
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (this.isNumberTip) {
+        return false;
+      }
+      return isLtTenM && isWord;
     },
     // 移除文件
     handleRemove (file) {
@@ -96,7 +131,7 @@ export default {
       let type;
       if (fileName) {
         type = fileName.substring(fileName.lastIndexOf('.'));
-        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
           this.uploadImgList.map((item, index) => {
             if (item.cname === fileName) {
               this.uploadImgList.splice(index, 1);
@@ -118,9 +153,7 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          // let data;
-          // res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,
@@ -147,7 +180,6 @@ export default {
             }
             this.fileList.push(data);
           }
-          // this.endForm.attachmentList.push(data);
         }
       }
     },
@@ -156,13 +188,16 @@ export default {
       this.$refs[form].validate(valid => {
         let params, attachmentList = [];
         if (valid) {
-          if (this.uploadImgList.length > 3) {
-            this.$message({
-              type: 'warning',
-              message: '最多上传3张图片',
-              customClass: 'request_tip'
-            });
-            return false;
+          // if (this.uploadImgList.length > 3) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '最多上传3张图片',
+          //     customClass: 'request_tip'
+          //   });
+          //   return false;
+          // }
+          if (this.isNumberTip) {
+            return;
           }
           this.fileList && this.fileList.map(item => {
             attachmentList.push(item);
@@ -237,6 +272,11 @@ export default {
       }
       .end-upload-tip {
         color: #999999;
+        margin: 10px 0;
+        font-size: 14px;
+      }
+      .number-upload-tip {
+        color: #F94539;
         margin: 10px 0;
         font-size: 14px;
       }

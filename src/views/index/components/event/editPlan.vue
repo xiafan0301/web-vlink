@@ -18,7 +18,7 @@
               v-for="(item, index) in planTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.enumField"
+              :value="item.enumValue"
             >
             </el-option>
           </el-select>
@@ -40,6 +40,7 @@
           <el-form-item label="附件：" label-width="120px">
             <el-upload
               style="width: 500px;"
+              accept='.txt,.pdf,.doc,.docx'
               :action="uploadUrl"
               :on-success="handSuccess"
               :on-remove="handleRemove"
@@ -50,7 +51,7 @@
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
             </el-upload>
           </el-form-item>
-          <el-form-item label="响应处置:" label-width="120px">
+          <el-form-item label="响应处置:" label-width="120px" class="response_handle">
             <div class="response_box" v-for="(item, index) in editPlanForm.taskList" :key="index">
               <div class="plan_form_box">
                 <div class="title">
@@ -113,9 +114,6 @@ export default {
         planName: null,
         planDetail: null,
         sysAppendixInfo: {},
-        // path: null,
-        // cname: null,
-        // attachmentType: null,
         uid: null,
       },
       rules: {
@@ -123,7 +121,7 @@ export default {
           { required: true, message: '请输入预案名称', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
-        eventType: [
+        editEventType: [
           { required: true, message: '请输入或选择预案类型', trigger: 'blur' },
           { max: 50, message: '最多输入50字'}
         ],
@@ -191,8 +189,6 @@ export default {
     // 删除附件
     handleRemove (file) {
       if (file) {
-        // this.editPlanForm.path = null;
-        // this.editPlanForm.cname = null;
         this.editPlanForm.sysAppendixInfo = null;
       }
     },
@@ -220,6 +216,16 @@ export default {
     // 在上传之前
     beforeUpload (file) {
       const isLt = file.size / 1024 / 1024 < 10;
+      const isWord = file.type === 'text/plain' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        || file.type === 'application/pdf';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是txt、pdf、word格式!',
+          customClass: 'upload_file_tip'
+        });
+      }
       if (!isLt) {
         this.$message({
           type: 'warning',
@@ -227,7 +233,7 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
-      return isLt;
+      return isLt && isWord;
     },
     addTask () {
       const value = {
@@ -256,6 +262,7 @@ export default {
             this.editPlanForm.planDetail = res.data.planDetail;
             this.editPlanForm.sysAppendixInfo = JSON.parse(JSON.stringify(res.data.sysAppendixInfo));
             this.editPlanForm.editEventType =  res.data.eventTypeName;
+
             if (res.data.taskList) {
               res.data.taskList.map(item => {
                 const params = {
@@ -396,6 +403,13 @@ export default {
     .edit-plan-form {
       width: 100%;
       padding: 10px 0;
+      .response_handle {
+        /deep/ .el-form-item__label:before {
+          content: '*';
+          color: #F56C6C;
+          margin-right: 4px;
+        }
+      }
       /deep/ .el-form-item__label {
         color: #666666;
       }

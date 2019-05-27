@@ -399,7 +399,11 @@ export default {
               }
             })
           }) 
-          addTaskInfo(this.taskList, this.$route.query.eventId)
+          const params = {
+            dispatchType: 2, // 1--事件 2--告警
+            eventId: this.$route.query.eventId
+          }
+          addTaskInfo(this.taskList, params)
             .then(res => {
               if (res) {
                 this.$message({

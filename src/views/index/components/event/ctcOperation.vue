@@ -3,12 +3,13 @@
   <div class="ctc-operation">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
         <template v-if="$route.query.type === 'ctc'">
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: this.$route.query.eventId }}">调度详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status }}">调度详情</el-breadcrumb-item>
         </template>
         <template v-else>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: this.$route.query.eventId }}">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status }}">事件详情</el-breadcrumb-item>
         </template>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
@@ -34,8 +35,8 @@
               <span>任务内容：</span>
               <span>{{item.taskContent}}</span>
             </div>
+            <div class="divide-list"></div>
           </li>
-          <div class="divide-list"></div>
         </ul>
       </div>
       <div class="ctc-plan-box">
@@ -71,11 +72,13 @@
                   </el-table-column>
                   <el-table-column
                     label="适用事件等级"
-                    prop="levelNameList"
+                    prop="levelList"
                     show-overflow-tooltip
                     >
                     <template slot-scope="scope">
-                      <span>{{scope.row.levelNameList.join('、')}}</span>
+                      <span v-for="(item, index) in scope.row.levelList" :key="index">
+                        {{item.planLevelName + ' '}}
+                      </span>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="150">
@@ -200,6 +203,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            this.departmentData.map((item, index) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.departmentData.splice(index, 1);
+              }
+            });
           }
         })
     },
@@ -251,7 +259,11 @@ export default {
             });
           });
           this.isLoading = true;
-          addTaskInfo(this.taskList, this.$route.query.eventId)
+          const params = {
+            dispatchType: 1, // 1--事件 2--告警
+            eventId: this.$route.query.eventId
+          }
+          addTaskInfo(this.taskList, params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -260,7 +272,6 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
-                // this.$router.back(-1);
                 this.isLoading = false;
               } else {
                 this.$message({
@@ -288,15 +299,15 @@ export default {
       this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 返回
     back () {
@@ -327,7 +338,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box, {
+    .ctc-plan-box {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -492,14 +503,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
           &:last-child {
-            display: none;
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }
@@ -533,5 +546,3 @@ export default {
   }
 }
 </style>
-
-

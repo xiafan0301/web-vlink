@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>向上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -56,7 +56,7 @@
           <p class="submit-tip">上级有新的指示后，将会在页面顶部 “任务”栏中提示。</p>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">我知道了</el-button>
+          <el-button @click="$router.push({name: 'event_manage'})">我知道了</el-button>
         </span>
       </el-dialog>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -65,7 +65,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, addEventProcess } from '@/views/index/api/api.event.js';
+import { getEventDetail, addEventProcess, getSevenReceiver } from '@/views/index/api/api.event.js';
 import { getUserList} from '@/views/index/api/api.manage.js';
 import { proccessEventType } from '@/utils/data.js';
 import BigImg from '@/components/common/bigImg.vue';
@@ -105,8 +105,19 @@ export default {
   mounted () {
     this.getDetail();
     this.getList();
+    this.getCurrentSevenUser();
   },
   methods: {
+    // 获取最近发送的7个用户
+    getCurrentSevenUser () {
+      getSevenReceiver()
+        .then (res => {
+          if (res.data && res.data.length > 0) {
+            this.reportUserList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取所有的用户
     getList () {
       const params = {
@@ -118,6 +129,12 @@ export default {
         .then(res => {
           if (res) {
             this.userList = res.data.list;
+            this.reportUserLists = res.data.list;
+            this.userList.map((item, index) => {
+              if (item.uid === this.userInfo.uid) {
+                this.userList.splice(index, 1);
+              }
+            });
           }
         })
     },

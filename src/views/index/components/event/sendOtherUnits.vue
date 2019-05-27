@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>转到其他单位</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -81,13 +81,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
-            if (this.basicInfo && this.basicInfo) {
               this.departmentData.map((item, index) => {
-                if (item.uid === this.basicInfo.dealOrgId) {
+                if (item.uid === this.userInfo.organList[0].uid) {
                   this.departmentData.splice(index, 1);
                 }
               });
-            }
           }
         })
     },

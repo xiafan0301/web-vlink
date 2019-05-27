@@ -29,11 +29,11 @@
                 <span>任务内容：</span>
                 <span>{{item.taskContent}}</span>
               </div>
+              <div class="divide-list"></div>
             </li>
-            <div class="divide-list"></div>
           </ul>
         </div>
-        <div class="judge_result">
+        <!-- <div class="judge_result">
           <div class="header">
             <p class="ctc-title">研判结果</p>
           </div>
@@ -44,14 +44,14 @@
               <span>暂无数据</span>
             </div>
           </div>
-        </div>
+        </div> -->
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="eventFile && eventFile.length > 0">
+            <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
               <p>事件总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -91,7 +91,7 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="ctcFile && ctcFile.length > 0">
+            <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
               <p>调度总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -125,7 +125,7 @@
             </template>
           </div>
         </div>
-        <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
+        <!-- <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
           </div>
@@ -168,7 +168,7 @@
               </ul>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="operation-footer">
         <template v-if="$route.query.status !== 'ending'">
@@ -228,11 +228,11 @@ export default {
     },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, type: 'event' }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, status: this.$route.query.status }});
     },
     // 获取事件详情
     getDetail () {
@@ -300,7 +300,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .event-ctc-content, .judge_result, .event-process, .summary {
+    .event-ctc-content, .event-process, .summary {
       width: 100%;
       margin-bottom: 20px;
       background-color: #ffffff;
@@ -360,26 +360,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
-        }
-      }
-      .judge_result_content {
-        width: 100%;
-        .no_result {
-          height: 100px;
-          line-height: 100px;
-          display: flex;
-          align-items: center;
-          margin-left: 45%;
-          >span {
-            margin-left: 10px;
-            color: #999999;
-            font-size: 16px;
+          &:last-child {
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }
