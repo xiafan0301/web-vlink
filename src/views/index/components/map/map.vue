@@ -91,7 +91,21 @@
           <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].bayonetListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>
         </el-checkbox>
         <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
-          <el-checkbox v-for="(item, index) in constObj" :key="item.id" :label="index">{{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span></el-checkbox>
+          <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll" v-for="(item, index) in constObj" :key="item.id" :label="index">
+            {{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span>
+            <el-dropdown v-if="index !== 1"  :hide-on-click="false">
+              <span class="el-dropdown-link">
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-checkbox-group v-model="item.supTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
+                  <el-dropdown-item v-for="sItem in item.supOptions" :key="sItem.id">
+                    <el-checkbox :label="sItem.name">{{sItem.name}}</el-checkbox>
+                  </el-dropdown-item>
+                </el-checkbox-group>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </el-checkbox>
         </el-checkbox-group>
       </div>
       <!-- 右侧工具栏 -->
@@ -170,7 +184,12 @@ export default {
       oData: null,
       bResize: null,
       timer: null,
-      constObj: [{name:'摄像头', _key: 'deviceBasicListNum'}, {name:'卡口', _key: 'bayonetListNum'}, {name: '车辆', _key: 'carListNum'}, {name: '人员', _key: 'sysUserExtendListNum'}],
+      constObj: [
+        {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [{name: '部门范围'},{name: '其他范围'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
+        {name:'卡口', _key: 'bayonetListNum', isIndeterminate: false, checkAll: true},
+        {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1, 2, 3, 4]},
+        {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
+        ],
       map: null, // 地图对象
       isIndeterminate: false,
       mapTypeCheckAll: true,
@@ -1101,7 +1120,9 @@ export default {
             uid: e.target.getAttribute('dataUid'),
             longitude: e.target.getAttribute('dataLng'),
             latitude: e.target.getAttribute('dataLat'),
-            remoteId: e.target.getAttribute('dataId'),
+//            remoteId: e.target.getAttribute('dataId'),
+            //  先写死对方id
+            remoteId: '57042',
             remoteName: e.target.getAttribute('dataName'),
             type: e.target.getAttribute('dataType'),
             _id: _id,

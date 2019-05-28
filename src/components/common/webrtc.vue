@@ -110,7 +110,7 @@ export default {
     if (this.oConfig && this.oConfig.localId) {
       this.localId = this.oConfig.localId;
     } else {
-      this.localId = this.$store.state.loginUser.userMobile;
+      this.localId = this.$store.state.loginUser.uid;
     }
     console.log('webrtc localId', this.localId);
     // 初始化websocket
@@ -257,7 +257,7 @@ export default {
     wrWsMessageHandler (message) {
       let _this = this;
       let oMsg = JSON.parse(message);
-      console.log(message)
+      console.log('--------------->', message)
       if (oMsg.type === 'CANDIDATE') {
         // 收到 CANDIDATE 候选
         let oData = JSON.parse(oMsg.data);
@@ -501,12 +501,12 @@ export default {
         }
       };
       // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
-      _pc.ontrack = function (event) {
+      _pc.onaddstream = function (event) {
         console.log('终端流', event)
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.streams[0]);
       };
       // 向PeerConnection中加入需要发送的流
-      // _pc.addStream(_this.wrObj.mediaStream);
+      _pc.addStream(_this.wrObj.mediaStream);
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {

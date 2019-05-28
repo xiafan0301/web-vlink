@@ -88,13 +88,13 @@ const oDomains = {
     // test-video服务
     live: {
       dev: 'http://apidev.aorise.org/vlink-link',
-      test: 'http://apidev.aorise.org/vlink-link',
+      test: 'http://apirel.aorise.org/vlink-link',
       prod: 'http://apidev.aorise.org/vlink-link'
     },
     // 视频播放服务 gis
     gis: {
       dev: 'http://apidev.aorise.org/vlink-gis',
-      test: 'http://apidev.aorise.org/vlink-gis',
+      test: 'http://apirel.aorise.org/vlink-gis',
       prod: 'http://apidev.aorise.org/vlink-gis'
     }
 };
@@ -112,7 +112,7 @@ export {ajaxCtx};
 // 视频通讯相关配置
 export const webrtcConfig = {
   wsUrl: 'ws://apidev.aorise.org/visual-video/ws/signaling', // websocket地址
-  turnUrl: '222.244.147.121:3480', // turn地址
+  turnUrl: '222.244.147.121:3479', // turn地址
   turnUsername: 'test', // turn name
   turnCredential: 'test', // turn credential
   // websocket 信息
