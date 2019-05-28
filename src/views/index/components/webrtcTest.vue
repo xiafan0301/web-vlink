@@ -14,7 +14,6 @@
         <div style="width: 400px; height: 300px;">
           <video id="localVideo" style="width: 100%; height: 100%; object-fit: fill;" autoplay></video>
         </div>
-        
       </li>
     </ul>
     <div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>

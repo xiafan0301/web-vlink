@@ -1616,7 +1616,7 @@ export default {
               }
               // 计算追踪点到设备的距离km
               const p1 = [_obj.longitude, _obj.latitude];
-              const distance = AMap.GeometryUtil.distance(_this.lnglat, p1);
+              const distance = window.AMap.GeometryUtil.distance(_this.lnglat, p1);
               _obj.distance = parseFloat((distance / 1000).toFixed(1));
               _this.trackPointList[_index].devList.push(_obj);
             }, 10)
@@ -1975,12 +1975,13 @@ export default {
       }, 1050)
     },
     /******************************* 范围分析方法end ****************************/
-  },
-  // destroyed () {
-  //   if (this.map) {
-  //     this.map.destroy();
-  //   }
-  // },
+    // 销毁地图实例
+    isDestroyed () {
+      if (this.map) {
+        this.map.destroy();
+      }
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

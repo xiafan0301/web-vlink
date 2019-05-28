@@ -38,18 +38,6 @@
             </div>
           </div>
         </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div>
         <div class="event-process">
           <div class="header">
             <p class="ctc-title">事件进展</p>
