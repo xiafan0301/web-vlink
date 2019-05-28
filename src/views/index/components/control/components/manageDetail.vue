@@ -374,7 +374,7 @@ import {getEventDetail} from '@/views/index/api/api.event.js';
 import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {delDialog, stopDialog, flvplayer},
-  props: ['state', 'controlId'],
+  props: ['controlId'],
   data () {
     return {
       controlState: null,//布控详情状态
@@ -429,17 +429,9 @@ export default {
       curVideoUrl: null,
     }
   },
-  created () {
-    this.$nextTick(() => {
-      this.controlState = this.state;
-    })
-  },
   mounted () {
     this.resetMap();
     this.getControlDetail();
-    if (this.state !== 2) {
-      this.getAlarmSnap();
-    }
   },
   methods: {
     // 预览图片
@@ -533,9 +525,14 @@ export default {
     },
     // 获取布控详情
     getControlDetail () {
+      console.log(this.controlId, 'this.controlId')
       getControlDetail(this.controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
+          this.controlState = this.controlDetail.surveillanceStatus === '待开始' ? 2 : this.controlDetail.surveillanceStatus === '进行中' ? 1 : 3;
+          if (this.controlState !== 2) {
+            this.getAlarmSnap();
+          }
         }
       })
     },

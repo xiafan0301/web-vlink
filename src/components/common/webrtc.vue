@@ -211,8 +211,9 @@ export default {
     /**
      * 添加WR
      * @param {object} obj webrtcObj
+     * @param {m} desc
      */
-    wrAdd (obj) {
+    wrAdd (obj, desc) {
       if (obj && obj.remoteId) {
         if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
           this.$message({
@@ -244,7 +245,7 @@ export default {
             remoteName: obj.remoteName,
             uid: obj.uid,
             _mid: obj._mid
-          });
+          }, desc);
         });
       } else {
         console.log('wrAdd >>> remoteId为空！');
@@ -346,7 +347,7 @@ export default {
           type: t,
           remoteId: oMsg.sender,
           remoteName: oMsg.sender
-        });
+        }, oMsg.data);
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {

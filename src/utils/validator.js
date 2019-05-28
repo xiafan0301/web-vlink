@@ -91,4 +91,14 @@ export const validateName = (rule, value, callback) => {
     callback();
   }
 };
-
+/**
+ * 支持10-120之间的正整数
+ */
+export const validateDurationTime = (rule, value, callback) => {
+  let reg = /^[1-9]+$/;
+  if (!reg.test(value) || parseInt(value) < 10 || parseInt(value) > 120) {
+    callback(new Error('请正确输入10-120之间的整数'));
+  } else {
+    callback();
+  }
+};
