@@ -1142,17 +1142,6 @@ export default {
           // 模拟通话成功，开始计时
           _obj.countTime = _this.countTime;
           _obj.clearTime = _this.clearTime;
-          setTimeout(() => {
-            _obj.isTime = true;
-            // _obj.isTime = true;
-            _obj.countTime(_obj);
-            let domT = document.getElementsByClassName('vl_map_time_' + _obj._id)
-            console.log(document.getElementsByClassName('vl_map_time_' + _obj._id), document.getElementsByClassName('vl_map_time_' + _obj._id)[0])
-            setTimeout(() => {
-              console.log(document.getElementsByClassName('vl_map_time_' + _obj._id), document.getElementsByClassName('vl_map_time_' + _obj._id)[0])
-              $('#' + _obj._id).append(domT[0])
-            }, 1000)
-          }, 3000)
         }
         // textarea tap event
         $('.sign_text').bind('keyup', function () {
@@ -1809,6 +1798,14 @@ export default {
       console.log('状态EMIT oData: ', oData);
       if (oData.state > 20) {
         this.wrClose(oData);
+      } else if (oData.state === 20) {
+        oData.isTime = true;
+          // _obj.isTime = true;
+        oData.countTime(oData);
+          let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
+          setTimeout(() => {
+            $('#' + oData._id).append(domT[0])
+          }, 1000)
       }
     },
     wrClose (data) {
