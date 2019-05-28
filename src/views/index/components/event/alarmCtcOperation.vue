@@ -81,12 +81,15 @@
             </template>
           </div>
           <div class="event-status-img">
-            <template v-if="$route.query.status === 'ctc_end'">
+            <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
               <i class="vl_icon vl_icon_event_11"></i>
             </template>
-            <template v-if="$route.query.status === 'ctc_ing'">
+            <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 1">
               <i class="vl_icon vl_icon_event_13"></i>
-            </template>     
+            </template>
+            <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
+              <i class="vl_icon vl_icon_event_12"></i>
+            </template>
           </div>
         </div>
         <div class="card-info right-info">

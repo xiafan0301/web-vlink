@@ -298,10 +298,10 @@ export default {
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      if (!obj.surveillanceResult) {
+      if (!obj.surveillanceId) {
         this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
       } 
-      if (obj.surveillanceResult) {
+      if (obj.surveillanceId) {
         this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});
       }
     },
