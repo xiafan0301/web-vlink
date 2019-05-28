@@ -19,10 +19,9 @@
                 multiple
                 filterable
                 remote
-                allow-create
                 reserve-keyword
                 :multiple-limit="50"
-                placeholder="请输入或选择接收者"
+                placeholder="请选择接收者"
                 :remote-method="remoteMethod"
                 :loading="loading">
                 <el-option

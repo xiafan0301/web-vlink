@@ -29,12 +29,6 @@
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form">
               <el-form-item>
-                <el-select  style="width: 200px;" v-model="searchForm.eventType" placeholder="行政区划">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
                 <el-select  style="width: 200px;" v-model="searchForm.eventStatus" placeholder="智能特性">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
@@ -42,6 +36,12 @@
               </el-form-item>
               <el-form-item>
                 <el-select  style="width: 200px;" v-model="searchForm.userName" placeholder="自定义组">
+                  <el-option label="区域一" value="shanghai"></el-option>
+                  <el-option label="区域二" value="beijing"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-select  style="width: 200px;" v-model="searchForm.eventType" placeholder="责任部门">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>

@@ -672,6 +672,17 @@ export function addGroupDevice (data) {
     data
   });
 }
+/**
+ * 修改分组
+ * @param {*} data
+ */
+export function updateGroupDevice (data) {
+  return request({
+    url: '/group-device-service/group-info',
+    method: 'put',
+    data
+  });
+}
 /* ========== 设备授权 ========== */
 /** ==== 临时授权 ==== */
 /**

@@ -27,7 +27,7 @@
             >
               <span>{{item.groupName}}</span>
               <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
-              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid)"></i>
+              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid, item.groupName)"></i>
             </li>
           </ul>
         </vue-scroll>
@@ -90,7 +90,7 @@ export default {
     // 获取所有的分组
     getGroupList () {
       const params = {
-        keyWord: this.keyWord
+        keyword: this.keyWord
       };
       getCusGroup(params)
         .then(res => {
@@ -128,8 +128,8 @@ export default {
       this.$router.push({name: 'add_group'});
     },
     // 编辑分组
-    skipEditGroupPage (id) {
-      this.$router.push({name: 'add_group', query: {groupId: id}});
+    skipEditGroupPage (id, name) {
+      this.$router.push({name: 'add_group', query: {groupId: id, name: name}});
     },
     // change  tab
     changeTab (val) {
