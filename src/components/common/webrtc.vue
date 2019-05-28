@@ -237,7 +237,7 @@ export default {
           this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           return;
         }
-        this.aWRData.push(obj);
+        // this.aWRData.push(obj);
         this.$nextTick(() => {
           this.wrMediaStream(obj.type, {
             remoteId: obj.remoteId,
@@ -379,14 +379,20 @@ export default {
     wrMediaStream (type, obj, desc) {
       let _this = this;
       if (!_this.wrObj.mediaStream) {
-        console.log('----------------11111')
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+        if (!navigator.getMedia) {
+          alert('对不起，您的浏览器不支持视频通话。');
+          return;
+        }
         navigator.getMedia({
           'audio': true,
-          'video': false
+          'video': type === 1 ? true : false
         }, function (stream) {
           console.log('getUserMedia success');
+          _this.aWRData.push(Object.assign({}, obj, {
+            type: type
+          }));
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
@@ -405,6 +411,9 @@ export default {
       } else {
         console.log('----------------222222')
         // 设备已经被唤醒
+        _this.aWRData.push(Object.assign({}, obj, {
+          type: type
+        }));
         _this.wrCreatConnection(type, obj, desc);
         _this.wrStateHandler({
           remoteId: obj.remoteId,
@@ -506,7 +515,7 @@ export default {
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.streams[0]);
       };
       // 向PeerConnection中加入需要发送的流
-      // _pc.addStream(_this.wrObj.mediaStream);
+      _pc.addStream(_this.wrObj.mediaStream);
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {
