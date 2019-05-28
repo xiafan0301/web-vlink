@@ -168,7 +168,7 @@
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
-                <span class="operation_btn" @click="skipIsDetail(scope.row.surveillanceStatus, scope.row.uid)">查看</span>
+                <span class="operation_btn" @click="skipIsDetail(scope.row.uid)">查看</span>
                 <!-- 待开始 -->
                 <template v-if="scope.row.surveillanceStatus === '待开始'">
                   <span class="operation_wire">|</span>
@@ -210,7 +210,7 @@
       <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
       <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
     </div>
-    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
+    <div v-if="pageType === 2" is="manageDetail" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
     <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
@@ -226,7 +226,7 @@ export default {
   data () {
     return {
       pageType: 1,//页面类型：1-列表页，2-详情页，3-修改页
-      state: null,//布控详情状态，0-待开始 1-进行中 2-已结束                                                           
+      // state: null,//布控详情状态，0-待开始 1-进行中 2-已结束                                                           
       // 顶部搜索参数
       manageForm: {
         type: null,
@@ -275,10 +275,9 @@ export default {
     this.getControlList();
     const data = this.$route.query;
     // 外部跳转到详情页
-    if (data.pageType && data.state && data.controlId) {
+    if (data.pageType && data.controlId) {
       this.$nextTick(() => {
         this.pageType = parseInt(data.pageType);
-        this.state = parseInt(data.state);
         this.controlId = data.controlId;
       })
     }
@@ -306,12 +305,11 @@ export default {
       this.controlId = uid;
     },
     // 跳转至布控详情
-    skipIsDetail (state, uid) {
-      this.state = state === '待开始' ? 2 : state === '进行中' ? 1 : 3;
+    skipIsDetail (uid) {
       this.controlId = uid;
       this.pageType = 2;
     },
-    // 跳转至布控编辑
+    // 跳转至布控编辑页
     skipIsEditor (uid) {
       this.pageType = 3;
       this.controlId = uid;

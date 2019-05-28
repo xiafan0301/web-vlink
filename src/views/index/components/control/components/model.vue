@@ -266,6 +266,7 @@ export default {
       allBayMarker: {},//每次选择的行政区对应的卡口点标记列表集合
       lastLimitationNum: 0,
       lastSelList: [],
+      markerPolygonList: [],//多边形覆盖物列表
       // 测距
       rangingAcitve: false,
       rangingObj: null,
@@ -907,6 +908,7 @@ export default {
         map.on('mouseout', function() {
           if (_hoverWindow) { _hoverWindow.close(); }
         })
+        // 新增时
         if (_this.operateType === 1 || (_this.modelType === '1' && (!_this.modelDataOne || _this.modelDataOne === 1)) || (_this.modelType === '2' && (!_this.modelDataTwo || _this.modelDataTwo === 1)) || (_this.modelType === '4' && (!_this.modelDataFour || _this.modelDataFour === 1))) {
           _this.mapMark(_this.modelDevData);
         }
@@ -1079,7 +1081,8 @@ export default {
           markerList.push(_marker);
         }
       }
-      if ((_this.operateType === 2 || _this.operateType === 3) && type) {
+      // 修改和复用时
+      if (type && (_this.operateType === 2 || _this.operateType === 3)) {
        
         if (_this.modelType === '1') {
           _this.modelDataOne.pointDtoList.forEach((m, index) => {
@@ -1096,57 +1099,120 @@ export default {
         if (_this.modelType === '4') {
           _this.modelDataFour.pointDtoList.forEach((f) => {
             // 回填范围分析
-            let polygon = new window.AMap.Polygon({
-              map: _this.map,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2, 
-              path: _this.getLngLatList(f),
-              zIndex: 12
-            });
-            // 移入覆盖物生成删除小图标
-            let offSet = [-10, -10], _marker = null;
-            polygon.on('mouseover', function(e) {
-              // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-              if (_marker) return;
-              _marker = new window.AMap.Marker({ // 添加自定义点标记
-                map: _this.map,
-                position: [e.lnglat.lng, e.lnglat.lat],
-                offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-                draggable: false, // 是否可拖动
-                extData: '',
-                // 自定义点标记覆盖物内容
-                content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-              });
-              // 点击小图标移除覆盖物和删除小图标
-              _marker.on('click', function() {
-                _this.map.remove(polygon);
-                _this.map.remove(_marker);
-                // 移除覆盖物内对应的设备
-                const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == f.latitude && p.longitude == f.longitude);
-                console.log(_this.trackPointList)
-                _this.trackPointList.splice(delObjIndex, 1);
-              })
-              _marker.setMap(_this.map);
-            })
-            polygon.on('mouseout', function() {
-              // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-              setTimeout(() => {
-                _this.map.remove(_marker);//移除删除小图标
-                _marker = null;
-              }, 100)
-            })
-            _this.polygonLnglat = _this.getLngLatList(f);
-            if (_this.polygonLnglat) {
-              _this.getScopeEquList(polygon, f.devList);
-            }
+            _this.drawPolygonCommon(f, 2);
           })
         }
       }
+      // 切换设备特性时
+      if (!type && (_this.modelType === '1' || _this.modelType === '2')) {
+        setTimeout(() => {
+          _this.trackPointData.forEach(f => {
+            _this.markLocation(f.marker.C.position.lng, f.marker.C.position.lat, f.address, f.index);
+          })
+        }, 50)
+      }
+      // 切换设备组时
+      if (!type && this.modelType === '4') {
+        this.markerPolygonList.forEach(obj => {
+          this.drawPolygonCommon({obj}, 1);
+        })
+      }
       _this.map.add(markerList);
       _this.map.setFitView();
+    },
+    // 范围分析公用方法, data:新增数据/回填数据。type:1-新增，2-回填。
+    drawPolygonCommon (data, type) {
+      let _this = this;
+      _this.polygonLnglat = null;
+      if (type === 1 && this.mouseTool) {
+        _this.selAreaRest(true);
+      }
+      let polygon = new window.AMap.Polygon({
+        map: _this.map,
+        strokeColor: '#FA453A',
+        strokeOpacity: 1,
+        strokeWeight: 1,
+        fillColor: '#FA453A',
+        fillOpacity: 0.2, 
+        path: type === 2 ? _this.getLngLatList(data) : data.obj.getPath(),
+        zIndex: 12
+      });
+      // 移入覆盖物生成删除小图标
+      let offSet = [-10, -10], _marker = null;
+      polygon.on('mouseover', function(e) {
+        // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+        if (_marker) return;
+        _marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [e.lnglat.lng, e.lnglat.lat],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          extData: '',
+          // 自定义点标记覆盖物内容
+          content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+        });
+        // 点击小图标移除覆盖物和删除小图标
+        _marker.on('click', function() {
+          // 过滤掉相同的marker
+          _this.markerPolygonList = _this.markerPolygonList.filter(f => {
+            for (let key in f.getPath()) {
+              if (f.getPath()[key] !== polygon.getPath()[key]) return true;
+              return false;
+            }
+          });
+          _this.map.remove(polygon);
+          _this.map.remove(_marker);
+          // 移除覆盖物内对应的设备
+          let delObjIndex = null;
+          if (type === 2) {
+            delObjIndex = _this.trackPointList.findIndex(p => p.latitude == data.latitude && p.longitude == data.longitude);
+          } else {
+            delObjIndex = _this.trackPointList.findIndex(p => p.latitude == data.obj.getPath()[0].lat && p.longitude == data.obj.getPath()[0].lng);
+          }
+          const _obj = _this.trackPointList.splice(delObjIndex, 1);
+          // 把覆盖物内的设备置为未选中
+          for (let f of _obj[0].devList) {
+            // 如果该设备还存在于其他覆盖物中，跳过此操作
+            if (_this.trackPointList.some(t => t.devList.some(d => d.uid === f.uid))) {
+              continue;
+            }
+            if (f.isSelected) {
+              f.isSelected = !f.isSelected;
+              _this.changeSelectedStatus(f, 1);
+            }
+          }
+        })
+        _marker.setMap(_this.map);
+      })
+      polygon.on('mouseout', function(e) {
+        // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+        setTimeout(() => {
+          if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
+            return;
+          }
+          _this.map.remove(_marker);//移除删除小图标
+          _marker = null;
+        }, 100)
+      })
+      if (type === 2) {
+        _this.polygonLnglat = _this.getLngLatList(data);
+        if (_this.polygonLnglat) {
+          _this.getScopeEquList(polygon, data.devList);
+        }
+      } else {
+        _this.polygonLnglat = data.obj.getPath();
+        _this.selAreaPolygon = polygon;
+        _this.selAreaAble = true;
+        _this.getScopeEquList(polygon);
+      }
+      // 过滤掉相同的marker
+      _this.markerPolygonList = _this.markerPolygonList.filter(f => {
+        for (let key in f.getPath()) {
+          if (f.getPath()[key] !== polygon.getPath()[key]) return true;
+          return false;
+        }
+      });
+      _this.markerPolygonList.push(polygon);
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
     changeSelectedStatus (_obj, type) {
@@ -1272,12 +1338,8 @@ export default {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 1);
           });
-          if (!type) {
-            this.modelForm.points = [{point: null}];
-          }
           if (this.modelType === '1' || this.modelType === '2') {
             this.selAreaCircle = [];
-            this.trackPointData = [];
           }
           this.trackPointList = [];
           this.map.clearMap();
@@ -1451,8 +1513,8 @@ export default {
           }
         });
         marker.setMap(_this.map);
-        _this.trackPointData.splice(index, 0, {marker, index});
-        console.log(_this.trackPointData, '_this.trackPointData')
+        _this.trackPointData = _this.trackPointData.filter(f => f.address !== address);// 切换设备特性筛选时，过滤掉相同的追踪点marker
+        _this.trackPointData.splice(index, 0, {marker, index, address});
         _this.lnglat = [lng, lat];
         _this.map.setCenter([lng, lat]);
         // 画圆形覆盖物
@@ -1502,8 +1564,12 @@ export default {
           // 移除追踪点的点标记
           const delMakerObjIndex = _this.trackPointData.findIndex(f => f.marker.C.position.lat == e.target.C.center.lat && f.marker.C.position.lng == e.target.C.center.lng);
           if (delMakerObjIndex !== -1) {
+            
             const delMakerObj = _this.trackPointData.splice(delMakerObjIndex, 1);
-            _this.map.remove(delMakerObj[0].marker);
+            console.log(delMakerObj, 'aaaaaaaaaaaaaa')
+            _this.$nextTick(() => {
+              _this.map.remove(delMakerObj[0].marker);
+            })
             // 删除后重新排序
             _this.trackPointData.forEach((f, index) => {
               f.index = index;
@@ -1727,7 +1793,7 @@ export default {
       // 修改回填时
       } else {
         params = {
-          areaId: selBayList.value
+          areaId: selBayList && selBayList.value
         }
       }
       getAllBayontListByAreaId(params).then(res => {
@@ -1755,7 +1821,7 @@ export default {
       if (selBayList instanceof Array) {
         obj.trackPointName = _this.modelForm.limitation[this.modelForm.limitation.length - 1].label;
         obj.address = _this.modelForm.limitation[this.modelForm.limitation.length - 1].label;
-      } else {
+      } else if (selBayList) {
         obj.trackPointName = selBayList.label;
         obj.address = selBayList.label;
       }
@@ -1816,69 +1882,7 @@ export default {
       _this.mouseTool = mouseTool;
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        _this.polygonLnglat = null;
-        setTimeout(() => {
-          _this.selAreaRest(true);
-          let polygon = new window.AMap.Polygon({
-            map: _this.map,
-            strokeColor: '#FA453A',
-            strokeOpacity: 1,
-            strokeWeight: 1,
-            fillColor: '#FA453A',
-            fillOpacity: 0.2, 
-            path: e.obj.getPath(),
-            zIndex: 12
-          });
-          // 移入覆盖物生成删除小图标
-          let offSet = [0, 0], _marker = null;
-          polygon.on('mouseover', function(p) {
-            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-            if (_marker) return;
-            _marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.map,
-              position: [p.lnglat.lng, p.lnglat.lat],
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: '',
-              // 自定义点标记覆盖物内容
-              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-            });
-            // 点击小图标移除覆盖物和删除小图标
-            _marker.on('click', function() {
-              _this.map.remove(polygon);
-              _this.map.remove(_marker);
-              // 移除覆盖物内对应的设备
-              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.obj.getPath()[0].lat && p.longitude == e.obj.getPath()[0].lng);
-              const _obj = _this.trackPointList.splice(delObjIndex, 1);
-              // 把覆盖物内的设备置为未选中
-              for (let f of _obj[0].devList) {
-                // 如果该设备还存在于其他覆盖物中，跳过此操作
-                if (_this.trackPointList.some(t => t.devList.some(d => d.uid === f.uid))) {
-                  continue;
-                }
-                if (f.isSelected) {
-                  f.isSelected = !f.isSelected;
-                  _this.changeSelectedStatus(f, 1);
-                }
-              }
-            })
-            _marker.setMap(_this.map);
-          })
-          polygon.on('mouseout', function(e) {
-            // if (_this.trackPointList.length === 1) return;//只有一个范围时，不生成删除小图标
-            setTimeout(() => {
-              if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-                return;
-              }
-              _this.map.remove(_marker);//移除删除小图标
-              _marker = null;
-            }, 100)
-          })
-          _this.selAreaPolygon = polygon;
-          _this.selAreaAble = true;
-          _this.getScopeEquList(polygon);
-        }, 100);
-        _this.polygonLnglat = e.obj.getPath();
+        _this.drawPolygonCommon(e, 1);
       });
       _this.selArea();
     },
