@@ -3,7 +3,7 @@
     <div class="select_map_left">
       <div class="select_top">
         <span>已有设备 ({{leftDeviceNumber}})</span>
-        <p>移除设备</p>
+        <p @click="removeDevice">移除设备</p>
       </div>
       <div class="detail_list">
         <vue-scroll>
@@ -18,12 +18,18 @@
                 </div>
                 <div class="child_temp" v-show="item.isOpenArrow === true">
                   <div class="temp_tab">
-                    <span class="active_span">摄像头</span>
-                    <span>卡口</span>
+                    <span :class="[item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, true)">摄像头</span>
+                    <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, false)">卡口</span>
                   </div>
-                  <ul class="child_temp_detail">
+                  <ul class="child_temp_detail" v-show="item.isSXT">
                     <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked)"></el-checkbox>
+                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
+                  <ul class="child_temp_detail" v-show="!item.isSXT">
+                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
+                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
                       <span>{{itm.deviceName}}</span>
                     </li>
                   </ul>
@@ -55,6 +61,9 @@
         </ul>
       </div>
     </div>
+    <!-- <div class="close_arrow">
+      <i class="el-icon-error"></i>
+    </div> -->
   </div>
 </template>
 <script>
@@ -68,6 +77,7 @@ export default {
       map: null, // 地图对象
       // 选择区域
       selAreaAcitve: false,
+      selAreaPolygon: null,
       mouseTool: null,
       selAreaAble: false,
       mapTypeList: ['sxt', 'kk'],
@@ -80,24 +90,51 @@ export default {
 
       finalDeviceList: [], // 最终选择的设备
 
-      unCheckDevice: [] // 没有在多边形中的设备--没有选中的设备
+      unCheckDeviceList: [], // 没有在多边形中的设备--没有选中的设备
+
+      lastCurrDeviceLength: 0, // 上一次已有设备数量
+      // lastSelectDeviceLength: 0, // 上一次可选设备数量
     }
   },
   watch: {
     finalDeviceList (val) {
-      
+      console.log('val', val)
       let checkedDeviceList = [], // 选中的设备
-        checkedDeviceNumber = 0,
-        currentDeviceList = []; // 选中的设备经过处理后
-      if (val && val.length > 0) {
-        let deviceList = [], bayonetList = [];
-        checkedDeviceNumber = val.length;
+        currentDeviceList = [], // 选中的设备经过处理后
+        deviceList = [], bayonetList = [];
+
+      let unCheckedDeviceList = [], // 没有选中的设备
+        willRemoveDeviceList = [], // 没有选中的设备经过处理后
+        unselectDeviceList = [], unselectBayonetList = [];
+
+      this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
+
+      let selectDeviceNumber = this.unCheckDeviceList.length;
+      let checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
+
+      if (val && val.length > 0) {  // 多边形存在且在多边形中的设备
         val.map(item => {
           if (item.isSxt) { // 摄像头
             deviceList.push(item);
           } else {
             bayonetList.push(item);
           }
+          
+          // 在可选的设备中移除已经选中的设备
+          if (item.isSxt) {
+            this.sxtList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.sxtList.splice(index, 1);
+              }
+            })
+          } else {
+            this.kkList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.kkList.splice(index, 1);
+              }
+            })
+          }
+
         });
         deviceList.map(item => {
           const params = {
@@ -131,7 +168,7 @@ export default {
           };
           checkedDeviceList.push(params);
         });
-        let deviceObj = {}, params = {}
+        let deviceObj = {};
         checkedDeviceList.forEach(item => {
           let a = checkedDeviceList.filter(c => {
             return item.uid === c.uid;
@@ -146,6 +183,7 @@ export default {
             uid: deviceObj[i][0].uid,
             isOpenArrow: false,
             isChecked: false,
+            isSXT: true,
             deviceList: [],
             bayonetList: []
           }
@@ -163,9 +201,89 @@ export default {
           })
           currentDeviceList.push(params);
         }
-        this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDevice, selectDeviceNumber);
-        console.log(currentDeviceList)
       }
+      // 多边形存在但不在多边形中的设备
+      if (this.unCheckDeviceList.length > 0) {
+        this.unCheckDeviceList.map(item => {
+          if (item.isSxt) { // 摄像头
+            unselectDeviceList.push(item);
+          } else {
+            unselectBayonetList.push(item);
+          }
+        });
+        unselectDeviceList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            deviceList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          unCheckedDeviceList.push(params);
+        });
+        unselectBayonetList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            bayonetList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          unCheckedDeviceList.push(params);
+        });
+        let deviceObj = {};
+        unCheckedDeviceList.forEach(item => {
+          let a = unCheckedDeviceList.filter(c => {
+            return item.uid === c.uid;
+          })
+          if (!deviceObj.hasOwnProperty(a[0].cname)) {
+            deviceObj[a[0].cname] = a;
+          }
+        })
+        for (let i in deviceObj) {
+          let params = {
+            cname: i,
+            uid: deviceObj[i][0].uid,
+            isOpenArrow: false,
+            isSXT: true,
+            isChecked: false,
+            deviceList: [],
+            bayonetList: []
+          }
+          deviceObj[i].forEach(item => {
+            if (item.deviceList) {
+              item.deviceList.map(val => {
+                params.deviceList.push(val);
+              })
+            }
+            if (item.bayonetList) {
+              item.bayonetList.map(val => {
+                params.bayonetList.push(val);
+              })
+            }
+          })
+          willRemoveDeviceList.push(params);
+        }
+      console.log('willRemoveDeviceList', willRemoveDeviceList)
+      }
+      this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDeviceList, selectDeviceNumber);
+      // 保留上一次已有设备的数量
+      this.lastCurrDeviceLength = val.length;
+      // this.lastSelectDeviceLength = this.unCheckDeviceList.length;
+
+      this.unCheckDeviceList = []; // 清空可选设备列表
     }
   },
   mounted () {
@@ -203,14 +321,48 @@ export default {
           _this.selAreaPolygon = polygon;
           _this.selAreaAble = true;
           _this.mapMarkHandler();
+
+          // 移入覆盖物生成删除小图标
+          let offSet = [0, 0], _marker = null;
+          polygon.on('mouseover', function(p) {
+            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+            if (_marker) return;
+            _marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [p.lnglat.lng, p.lnglat.lat],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '',
+              // 自定义点标记覆盖物内容
+              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+            });
+            // 点击小图标移除覆盖物和删除小图标
+            _marker.on('click', function() {
+              _this.map.remove(polygon);
+              _this.selAreaPolygon = null;
+              _this.map.remove(_marker);
+
+              _this.mapMarkHandler();
+              
+            })
+            _marker.setMap(_this.map);
+          })
+
+          
         }, 100);
       });
     },
     // 获取地图数据
-    getMapData () {
+    getMapData (obj) {
       setTimeout(() => {
-        if (this.selectDeviceList && this.selectDeviceList.length > 0) {
-          this.selectDeviceList.map(item => {
+        let selectDeviceList = [];
+        if (obj && obj.length > 0) {
+          selectDeviceList = obj;
+        } else {
+          selectDeviceList = this.selectDeviceList;
+        }
+        if (selectDeviceList && selectDeviceList.length > 0) {
+          selectDeviceList.map(item => {
             item.deviceList.map(itm => {
               const params = {
                 parentName: item.cname,
@@ -244,7 +396,6 @@ export default {
     },
     // 地图标记处理
     mapMarkHandler () {
-      // console.log(this.sxtList)
       // 摄像头
       this.mapClearMarkers(this.sxtMapMarkers);
       if (this.mapTypeList.indexOf('sxt') >= 0) {
@@ -264,15 +415,15 @@ export default {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
           if (obj.longitude > 0 && obj.latitude > 0) {
+            console.log('22222222222')
             let offSet = [-20.5, -48], selClass = '';
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
-              // this.unCheckDevice.push(obj); // 没有选中的设备
+              this.unCheckDeviceList.push(obj); // 没有选中的设备
             }
-            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
+            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
               _this.finalDeviceList.push(obj);
-              console.log('obj', obj)
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -286,6 +437,8 @@ export default {
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
+            _this.map.setCenter([obj.longitude, obj.latitude]);
+
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
           }
@@ -347,9 +500,8 @@ export default {
       }
     },
     // 左侧---子级多选框change
-    handleLeftChildChecked (index, idx, val) {
-      this.$emit('emitLeftChildChecked', index, idx, val);
-      
+    handleLeftChildChecked (index, idx, val, isSxt) {
+      this.$emit('emitLeftChildChecked', index, idx, val, isSxt);
     },
     // 左侧---展开左侧列表
     openLeftArrow (index) {
@@ -358,6 +510,110 @@ export default {
     // 左侧--父级多选框
     handleLeftParentChecked (index, val) {
       this.$emit('emitLeftParentChecked', index, val);
+    },
+    // 切换摄像头和卡口----left
+    changeLDeviceType (index, val) {
+      this.$emit('emitChangeLDeviceType', index, val);
+    },
+    // 移除设备
+    removeDevice () {
+      let currDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
+      console.log('currDeviceList', currDeviceList)
+      let checkedDeviceNumber = 0, selectDeviceNumber = 0, checkedDeviceList = [], params;
+      if (currDeviceList && currDeviceList.length > 0) {
+        for (let len = currDeviceList.length, i = len - 1; i >= 0; i --) {
+           if (currDeviceList[i].isChecked === true) {
+              checkedDeviceList.push(currDeviceList[i]);
+              currDeviceList.splice(i, 1);
+            } else {
+              params = {
+                cname: currDeviceList[i].cname,
+                uid: currDeviceList[i].uid,
+                isSXT: true,
+                deviceList: [],
+                bayonetList: []
+              }
+              for (let length = currDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
+                if (currDeviceList[i].deviceList[j].isChildChecked == true) {
+                  params.deviceList.push(currDeviceList[i].deviceList[j]);
+                  currDeviceList[i].deviceList.splice(j, 1);
+                }
+              }
+              for (let length = currDeviceList[i].bayonetList.length, j = length - 1; j >= 0; j --) {
+                if (currDeviceList[i].bayonetList[j].isChildChecked == true) {
+                  params.bayonetList.push(currDeviceList[i].bayonetList[j]);
+                  currDeviceList[i].bayonetList.splice(j, 1);
+
+                }
+              }
+              if (params.deviceList.length !== 0 || params.bayonetList.length !== 0) {
+                checkedDeviceList.push(params);
+              }
+            }
+        }
+        if (currDeviceList && currDeviceList.length > 0) {
+          currDeviceList.map(item => {
+            checkedDeviceNumber += item.deviceList.length;
+            checkedDeviceNumber += item.bayonetList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
+            item.bayonetList.map(itm => {
+              itm.isChildChecked = false;
+            });
+          });
+        }
+        if (checkedDeviceList && checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            selectDeviceNumber += item.deviceList.length;
+            selectDeviceNumber += item.bayonetList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
+             item.bayonetList.map(itm => {
+              itm.isChildChecked = false;
+            });
+          });
+        }
+        console.log('checkedDeviceList', checkedDeviceList)
+        console.log('currDeviceList', currDeviceList)
+        if (checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            item.deviceList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: true, // 摄像头
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.sxtList.push(params);
+            });
+            item.bayonetList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: false, // 卡口
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.kkList.push(params);
+            })
+          });
+        }
+        this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
+        this.mapMarkHandler();
+      }
     },
   }
 }
@@ -400,6 +656,7 @@ export default {
           line-height: 26px;
           color: #333333;
           .parent_temp_li {
+            width: 100%;
             padding: 0 10px;
             >span {
               margin-left: 5px;
@@ -466,7 +723,7 @@ export default {
                 display: flex;
                 align-items: center;
                 >span {
-                  margin: 0 80px 0 15px;
+                  margin: 0 80px 0 0;
                 }
               }
             }
@@ -536,6 +793,16 @@ export default {
           }
         }
       }
+    }
+  }
+  .el-checkbox {
+    margin-right: 10px;
+  }
+  .close_arrow {
+    position: absolute;
+    i {
+      color: #F94439;
+      font-size: 20px;
     }
   }
 }

@@ -15,7 +15,7 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <template v-if="eventFile && eventFile.length > 0">
+          <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
             <p>事件总结附件</p>
             <div class="content-icon">
               <ul class="clearfix" style="clear:both">
@@ -55,7 +55,7 @@
         </div>
         <div class="divide"></div>
         <div class="summary-content">
-          <template v-if="ctcFile && ctcFile.length > 0">
+          <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
             <p>调度总结附件</p>
             <div class="content-icon">
               <ul class="clearfix" style="clear:both">
@@ -192,10 +192,10 @@
                     <div style="width:100%;margin-top:10px;">
                       <img
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        :src="itm.path"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
@@ -434,6 +434,7 @@ export default {
             if (res.data.eventCloseAttachmentList.length > 0) {
               res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+                  console.log('11111')
                   this.eventImg.push(item);
                 } else {
                   this.eventFile.push(item);
@@ -700,6 +701,7 @@ export default {
             border-radius: 4px;
             margin: 0 5px;
             cursor: pointer;
+            border:1px solid #cccccc;
           }
         }
         .content_detail {

@@ -163,6 +163,19 @@ export const ctcTasks = (data, uid) =>{
   });
 }
 /**
+ * 获取事件处理过程
+ * @param {*} data
+ */
+export const getEventProcess = (params, uid) => {
+  return request({
+    url: 'task-services/task/process/' + uid,
+    method: 'get',
+    // data,
+    params,
+    mode: 'ctc'
+  });
+}
+/**
  * 修改事件过程状态
  * @param {*} data
  */

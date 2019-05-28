@@ -29,8 +29,8 @@
                 <span>任务内容：</span>
                 <span>{{item.taskContent}}</span>
               </div>
+              <div class="divide-list"></div>
             </li>
-            <div class="divide-list"></div>
           </ul>
         </div>
         <!-- <div class="judge_result">
@@ -51,7 +51,7 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="eventFile && eventFile.length > 0">
+            <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
               <p>事件总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -91,7 +91,7 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="ctcFile && ctcFile.length > 0">
+            <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
               <p>调度总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -125,7 +125,7 @@
             </template>
           </div>
         </div>
-        <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
+        <!-- <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
           </div>
@@ -168,7 +168,7 @@
               </ul>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="operation-footer">
         <template v-if="$route.query.status !== 'ending'">
@@ -360,12 +360,17 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
+          &:last-child {
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
+          }
         }
       }
       .process-box {

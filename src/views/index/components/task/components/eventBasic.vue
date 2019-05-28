@@ -1,5 +1,5 @@
 <template>
-  <div class="basic-info">
+  <div class="basic-info-task">
     <div class="header">
       <i class="vl_icon vl_icon_event_4"></i>
       <span>事件编号：{{basicInfo.eventCode}}</span>
@@ -85,13 +85,43 @@
           <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
         </div>
       </div>
-      <div class='basic-list img-content'>
+      <div class='upload_box'>
+        <div class="img-box" v-for="(item, index) in uploadImgList" :key="index">
+          <img
+            :src="item.path"
+            @click="handleBigImg(index)"
+          />
+        </div>
+        <div class='video-box' v-for="(item, index) in uplaodVideoList" :key="index">
+          <video
+            :src="item.path"
+          />
+          <div class="play_icon">
+            <i v-show="!isSmallPlaying" class="play_btn vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
+          </div>
+        </div>
+      </div>
+      <!-- <div class='basic-list img-content'>
         <img
           v-for="(item, index) in basicInfo.attachmentList"
           :key="index"
           :src="item.path"
           @click="handleBigImg(index)"
         />
+      </div> -->
+    </div>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen_task: showLarge}">
+      <video id="eventVideo" :src="videoDetail.path"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.cname}}</div>
+        <div>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
       </div>
     </div>
   </div>
@@ -101,12 +131,66 @@ export default {
   props: [ 'status', 'basicInfo' ],
   data () {
     return {
+      uploadImgList: [],
+      uplaodVideoList: [],
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
+      isSmallPlaying: false, // 小屏显示
     }
   },
   mounted () {
-    console.log(this.basicInfo)
+    setTimeout(() => {
+      if (this.basicInfo.attachmentList && this.basicInfo.attachmentList.length > 0) {
+        this.basicInfo.attachmentList.map(item => {
+          if (item.fileType === 1) {
+            this.uploadImgList.push(item);
+          } else {
+            this.uplaodVideoList.push(item);
+          }
+        });
+      }
+    }, 500)
   },
   methods: {
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      document.getElementById('eventVideo').pause();
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('eventVideo').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('eventVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('eventVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
+    },
+    // 截屏
+    cutScreen () {},
     // 图片放大
     handleBigImg (index) {
       const isShowImg = true;
@@ -118,7 +202,7 @@ export default {
 </script>
 
 <style lang="scss">
-.basic-info{
+.basic-info-task{
   width: 100%;
   margin-bottom: 20px;
   background-color: #ffffff;
@@ -204,6 +288,38 @@ export default {
         }
       }
     }
+    .upload_box {
+      width: 415px;
+      padding-left: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      .img-box, .video-box {
+        position: relative;
+        .play_icon {
+          position: absolute;
+          cursor: pointer;
+          top: 25%;
+          left: 28%;
+          border-radius: 50%;
+          background: #000;
+          opacity: 0.6;
+          width: 40px;
+          height: 40px;
+          .play_btn {
+            margin-left: 37%;
+            margin-top: 22%;
+          }
+        }
+        img, video {
+          border: 1px solid #ccc;
+          width: 100px;
+          height: 100px;
+          border-radius: 4px;
+          margin: 0 5px 5px 0;
+          cursor: pointer;
+        }
+      }
+    }
     .img-content {
       width: 100%;
       padding-left: 80px;
@@ -216,6 +332,66 @@ export default {
       }
     }
   }
+}
+.vl_j_fullscreen_task {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
 

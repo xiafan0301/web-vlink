@@ -281,6 +281,7 @@ export default {
   },
   created () {
     this.userInfo = this.$store.state.loginUser;
+    this.searchForm.dealOrgId = this.userInfo.organList[0].uid;
   },
   mounted () {
     this.getDepartList();
@@ -382,11 +383,12 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
-            this.departmentData.map((item, index) => {
-              if (item.uid === this.userInfo.organList[0].uid) {
-                this.departmentData.splice(index, 1);
-              }
-            });
+            // this.departmentData.map((item, index) => {
+            //   if (item.uid === this.userInfo.organList[0].uid) {
+            //     console.log('aaaaa')
+            //     this.searchForm.dealOrgId = item.uid;
+            //   }
+            // });
           }
         })
     },
@@ -809,7 +811,7 @@ export default {
           if (res && res.data) {
             // console.log('事件高发地点分析', res);
             this.polygons = res.data;
-            console.log('polygons', this.polygons)
+            // console.log('polygons', this.polygons)
             this.setsonPolygons(res.data);
           }
         })
