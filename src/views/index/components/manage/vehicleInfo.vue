@@ -174,6 +174,11 @@
                 prop="albumList"
                 :show-overflow-tooltip='true'
               >
+                <template slot-scope="scope">
+                  <span v-for="(item, index) in scope.row.albumList" :key="index">
+                    {{item.title + '、'}}
+                  </span>
+                </template>
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -232,6 +237,11 @@
                 prop="groupList"
                 :show-overflow-tooltip='true'
               >
+                <template slot-scope="scope">
+                  <span v-for="(item, index) in scope.row.groupList" :key="index">
+                    {{item.groupName + '、'}}
+                  </span>
+                </template>
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -308,11 +318,25 @@
           </li>
           <li>
             <span>底库信息：</span>
-            <span>{{vehicleDetailInfo.albumList}}</span>
+            <div class="group_box">
+              <template v-if="vehicleDetailInfo.albumList && vehicleDetailInfo.albumList.length > 0">
+                <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span>
+              </template>
+              <template v-else>
+                <span>无</span>
+              </template>
+            </div>
           </li>
           <li>
             <span>分组信息：</span>
-            <span>{{vehicleDetailInfo.groupList}}</span>
+            <div class="group_box">
+              <template v-if="vehicleDetailInfo.groupList && vehicleDetailInfo.groupList.length > 0">
+                <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span>
+              </template>
+              <template v-else>
+                <span>无</span>
+              </template>
+            </div>
           </li>
           <li>
             <span>备注：</span>
@@ -425,6 +449,7 @@ export default {
   },
   mounted () {
     this.getVeGroupInfo();
+    this.getVelBottomNameInfo();
   },
   methods: {
     // 列表查询
@@ -440,14 +465,14 @@ export default {
     },
     // 获取车辆列表数据
     getVehicleInfoList () {
-      let type;
-      if (this.activeSelect === -1) {
-        type = null;
-      } else {
-        type = this.selectMethod;
-      }
+      // let type;
+      // if (this.activeSelect === -1) {
+      //   type = null;
+      // } else {
+      //   type = this.selectMethod;
+      // }
       const params = {
-        'where.type': type,
+        // 'where.type': type,
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -796,6 +821,7 @@ export default {
           align-items: center;
           color: #333333;
           cursor: pointer;
+          // .group_box {}
           i {
             display: none;
             margin-left: 5px;
@@ -949,14 +975,20 @@ export default {
           width: 100%;
           padding: 8px 0;
           display: flex;
-          span:first-child {
+          .group_box {
+            width: calc(100% - 100px);
+            span {
+              width: auto;
+            }
+          }
+          >span:first-child {
             display: inline-block;
             width: 100px;
             color: #666666;
             text-align: right;
           }
           span:last-child {
-            width: calc(100% - 100px);
+            // width: calc(100% - 100px);
             color: #333333;
           }
         }

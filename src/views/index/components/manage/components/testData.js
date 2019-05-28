@@ -81,7 +81,7 @@ export const testData = [
     ],
     bayonetList: [
       {
-        uid: 2,
+        uid: 4,
         deviceName: '天心区芙蓉路888',
         isChildChecked: false,
         latitude: 27.910563,

@@ -13,10 +13,14 @@
             </div>
           </div>
           <div class="wr_video_opts">
+            <p v-if="item.isTime" style="margin-bottom: 20px;">
+              {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
+            </p>
             <div class="wr_video_opts_l">
               <span>
-                <span class="vl_icon vl_icon_vc_023"></span>
-                <p>切换语音</p>
+                <span @click="wrSwitchCall(item)" class="vl_icon vl_icon_vc_023"></span>
+                <p v-if="item.type === '0'">切到视频聊天</p>
+                <p v-else>切换到语音</p>
               </span>
               <span @click="wrClose(item, true)">
                 <span class="vl_icon vl_icon_vc_021"></span>
@@ -35,7 +39,6 @@
 </template>
 <script>
 import {webrtcConfig} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
 import {oWRMsgs} from './webrtc.data.js';
 export default {
   /** 
@@ -95,7 +98,7 @@ export default {
     // 添加通话
     oAdd () {
       console.log('watch oAdd:', this.oAdd);
-      this.wrAdd(Object.assign({}, this.oAdd));
+      this.wrAdd(this.oAdd);
     },
     // 删除通话
     oDel () {
@@ -107,7 +110,7 @@ export default {
     if (this.oConfig && this.oConfig.localId) {
       this.localId = this.oConfig.localId;
     } else {
-      this.localId = random14();
+      this.localId = this.$store.state.loginUser.userMobile;
     }
     console.log('webrtc localId', this.localId);
     // 初始化websocket
@@ -129,7 +132,7 @@ export default {
       });
       this.wsObj.stompHeaders = stompHeaders;
       let stompClient = window.Stomp.client(webrtcConfig.wsUrl + '?r=' + Math.random() + '&' + $.param(stompHeaders));
-      stompClient.connect(stompHeaders, function (data) {
+      stompClient.connect(stompHeaders, function () {
         _this.wsObj.stompClient = stompClient;
         console.log('websocket 连接成功！');
         // subscribe 接收到消息
@@ -216,6 +219,7 @@ export default {
             message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人就行通话！',
             type: 'warning'
           });
+          this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           return;
         }
         let flag = false; // 是否已经在通话中
@@ -230,13 +234,16 @@ export default {
             message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
             type: 'warning'
           });
+          this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           return;
         }
-        this.aWRData.push(obj);
+        // this.aWRData.push(obj);
         this.$nextTick(() => {
           this.wrMediaStream(obj.type, {
             remoteId: obj.remoteId,
-            remoteName: obj.remoteName
+            remoteName: obj.remoteName,
+            uid: obj.uid,
+            _mid: obj._mid
           });
         });
       } else {
@@ -280,7 +287,7 @@ export default {
           let oData = null;
           try {
             oData = JSON.parse(oMsg.data);
-          } catch (e) {}
+          } catch (e) {console.log(e)}
           if (oData) {
             // 设置对方的Description
             _this.wrObj.pcs[oMsg.sender].setRemoteDescription(new RTCSessionDescription(oData));
@@ -372,14 +379,20 @@ export default {
     wrMediaStream (type, obj, desc) {
       let _this = this;
       if (!_this.wrObj.mediaStream) {
-        console.log('----------------11111')
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+        if (!navigator.getMedia) {
+          alert('对不起，您的浏览器不支持视频通话。');
+          return;
+        }
         navigator.getMedia({
           'audio': true,
-          'video': false
+          'video': type === 1 ? true : false
         }, function (stream) {
           console.log('getUserMedia success');
+          _this.aWRData.push(Object.assign({}, obj, {
+            type: type
+          }));
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
@@ -387,7 +400,8 @@ export default {
           _this.wrCreatConnection(type, obj, desc);
           _this.wrStateHandler({
             remoteId: obj.remoteId,
-            state: 11 // 等待对方接听
+            state: 11, // 等待对方接听
+            uid: obj.uid
           });
         }, function (error) {
           // 媒体流创建失败错误
@@ -397,9 +411,13 @@ export default {
       } else {
         console.log('----------------222222')
         // 设备已经被唤醒
+        _this.aWRData.push(Object.assign({}, obj, {
+          type: type
+        }));
         _this.wrCreatConnection(type, obj, desc);
         _this.wrStateHandler({
           remoteId: obj.remoteId,
+          uid: obj.uid,
           state: 11 // 等待对方接听
         });
       }
@@ -423,6 +441,7 @@ export default {
           console.log('wr >>>>> 新建连接');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            uid: obj.uid,
             state: 12 // 正在建立连接
           });
         } else if (_state === 'connecting') {
@@ -430,6 +449,7 @@ export default {
           console.log('wr >>>>> 连接中');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            uid: obj.uid,
             state: 13 // 正在连接中
           });
         } else if (_state === 'connected') {
@@ -437,6 +457,7 @@ export default {
           console.log('wr >>>>> 已连接');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            uid: obj.uid,
             state: 20 // 已连接
           });
         } else if (_state === 'disconnected') {
@@ -444,6 +465,8 @@ export default {
           console.log('wr >>>>> 断开连接');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            _mid: obj._mid,
+            uid: obj.uid,
             state: 32 // 断开连接
           });
         } else if (_state === 'failed') {
@@ -451,6 +474,8 @@ export default {
           console.log('wr >>>>> 连接失败');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            _mid: obj._mid,
+            uid: obj.uid,
             state: 31 // 连接失败
           });
         } else if (_state === 'closed') {
@@ -458,6 +483,8 @@ export default {
           console.log('wr >>>>> 连接关闭');
           _this.wrStateHandler({
             remoteId: obj.remoteId,
+            _mid: obj._mid,
+            uid: obj.uid,
             state: 33 // 连接关闭
           });
         }
@@ -483,12 +510,12 @@ export default {
         }
       };
       // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
-      _pc.onaddstream = function (event) {
+      _pc.ontrack = function (event) {
         console.log('终端流', event)
-        _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
+        _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.streams[0]);
       };
       // 向PeerConnection中加入需要发送的流
-      // _pc.addStream(_this.wrObj.mediaStream);
+      _pc.addStream(_this.wrObj.mediaStream);
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {
@@ -567,6 +594,7 @@ export default {
     },
     // 关闭窗口
     wrClose (item) {
+      this.$emit('wrClose', {uid: item.uid, _mid: item._mid});
       // 自己构造 oMsg
       this.wrOff({
         sender: item.remoteId
@@ -629,6 +657,7 @@ export default {
      * @param {int} state 状态
      */
     wrStateHandler (obj) {
+      console.log(obj)
       // 消息提示
       this.wrMsgHandler({
         remoteId: obj.remoteId,
@@ -644,7 +673,9 @@ export default {
       this.$emit('wrStateEmit', {
         remoteId: obj.remoteId,
         state: obj.state,
-        info: {}
+        info: {},
+        uid: obj.uid,
+        _mid: obj._mid
       });
     },
     /**
@@ -677,6 +708,11 @@ export default {
           // $(_node).parent().html('<video id="' + nid + '" autoplay></video>');
         }
       }
+    },
+    // 切换语音
+    wrSwitchCall (item) {
+      item.type === '0' ? item.type = '1' : item.type = '0';
+      this.$emit('wrSwitchCall', item);
     }
   }
 }
@@ -684,6 +720,7 @@ export default {
 <style lang="scss" scoped>
 .wr_main {
   position: absolute; left: 10px; bottom: 10px;
+  z-index: 2;
   > ul {
     overflow: hidden;
     > li {
@@ -725,6 +762,15 @@ export default {
     > span {
       display: inline-block;
       margin: 0 10px;
+      cursor: pointer;
+      > span {
+        &:hover {
+          background-color: rgba(255, 255, 255, .2);
+        }
+        -webkit-border-radius: 24px;
+        -moz-border-radius: 24px;
+        border-radius: 24px;
+      }
       > p {
         color: #fff;
         font-size: 12px;

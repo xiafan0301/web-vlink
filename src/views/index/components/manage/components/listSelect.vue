@@ -114,6 +114,7 @@ export default {
     }
   },
   mounted () {
+    console.log('selectDeviceList', this.selectDeviceList)
   },
   methods: {
     // 清空搜索框
