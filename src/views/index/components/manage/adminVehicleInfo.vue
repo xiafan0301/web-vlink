@@ -96,7 +96,7 @@
             </el-table-column>
             <el-table-column
               label="备注"
-              prop="albumList"
+              prop="desci"
               :show-overflow-tooltip='true'
             >
             </el-table-column>
@@ -172,13 +172,27 @@
               <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
             </li>
             <li>
-              <span>底库信息：</span>
-              <span>{{vehicleDetailInfo.albumList}}</span>
-            </li>
-            <li>
-              <span>分组信息：</span>
-              <span>{{vehicleDetailInfo.groupList}}</span>
-            </li>
+            <span>底库信息：</span>
+            <div class="group_box">
+              <template v-if="vehicleDetailInfo.albumList && vehicleDetailInfo.albumList.length > 0">
+                <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span>
+              </template>
+              <template v-else>
+                <span>无</span>
+              </template>
+            </div>
+          </li>
+          <li>
+            <span>分组信息：</span>
+            <div class="group_box">
+              <template v-if="vehicleDetailInfo.groupList && vehicleDetailInfo.groupList.length > 0">
+                <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span>
+              </template>
+              <template v-else>
+                <span>无</span>
+              </template>
+            </div>
+          </li>
             <li>
               <span>备注：</span>
               <span>{{vehicleDetailInfo.desci}}</span>
@@ -341,7 +355,7 @@ export default {
     // 获取车辆列表数据
     getList () {
       const params = {
-        'where.type': parseInt(this.$route.query.type),
+        // 'where.type': parseInt(this.$route.query.type),
         'where.keyWord': this.searchForm.keyWord,
         'where.groupId': this.groupId,
         'where.albumId': this.albumId,
@@ -454,11 +468,6 @@ export default {
               this.getVeGroupInfo(parseInt(this.groupId));
             }
              else {
-              // this.$message({
-              //   type: 'error',
-              //   message: '修改失败',
-              //   customClass: 'request_tip'
-              // })
               this.editGroupDialog = false;
             }
           })
@@ -760,7 +769,13 @@ export default {
           width: 100%;
           padding: 8px 0;
           display: flex;
-          span:first-child {
+          .group_box {
+            width: calc(100% - 100px);
+            span {
+              width: auto;
+            }
+          }
+          >span:first-child {
             display: inline-block;
             width: 100px;
             color: #666666;

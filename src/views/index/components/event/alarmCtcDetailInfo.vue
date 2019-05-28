@@ -231,7 +231,7 @@
             </div>
           </div>
         </div>
-        <div class="event-process" v-if="(sturcDetail.taskList && sturcDetail.taskList.length > 0) || (sturcDetail.eventInfo && sturcDetail.eventInfo.processingList && sturcDetail.eventInfo.processingList.length > 0)">
+        <div class="event-process" v-if="(sturcDetail.taskList && sturcDetail.taskList.length > 0) || (sturcDetail && sturcDetail.processingList && sturcDetail.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
           </div>
@@ -250,7 +250,7 @@
             <div class="process-list">
               <p>事件过程</p>
               <ul>
-                <li v-for="(item, index) in sturcDetail.eventInfo.processingList" :key="index">
+                <li v-for="(item, index) in sturcDetail.processingList" :key="index">
                   <div class='circle-left'>
                     <div class='big-circle'>
                       <div class='small-circle'></div>
@@ -263,10 +263,10 @@
                     <div style="width:100%;margin-top:10px;">
                       <img
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
                         :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
