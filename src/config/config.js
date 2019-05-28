@@ -112,12 +112,12 @@ export {ajaxCtx};
 // 视频通讯相关配置
 export const webrtcConfig = {
   wsUrl: 'ws://apidev.aorise.org/visual-video/ws/signaling', // websocket地址
-  turnUrl: '222.244.147.121:3480', // turn地址
+  turnUrl: '222.244.147.121:3479', // turn地址
   turnUsername: 'test', // turn name
   turnCredential: 'test', // turn credential
   // websocket 信息
   stompHeaders: {
-    token: 'dde675aad8a64049894e10f9f65fe291',
+    token: 'eee675aad8a64049894e10f9f65fe123',
     username: '',
     name: ''
   },
