@@ -117,7 +117,7 @@ export const webrtcConfig = {
   turnCredential: 'test', // turn credential
   // websocket 信息
   stompHeaders: {
-    token: 'dde675aad8a64049894e10f9f65fe291',
+    token: 'eee675aad8a64049894e10f9f65fe123',
     username: '',
     name: ''
   },

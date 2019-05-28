@@ -129,10 +129,47 @@
     <el-dialog v-if="oData.type === 2 && config.download" :title="'下载'" @closed="downloadClosed"
       :visible.sync="download.downloadDialogVisible" :append-to-body="true" width="800px">
       <div style="text-align: center; width: 100%; padding: 20px 100px 10px 100px;">
-        <p style="text-align: left; padding-bottom: 10px; font-size: 14px;">
-          请选择下载范围：
-        </p>
+        <div style="padding-bottom: 14px;">
+          <span>下载开始时间：&nbsp;&nbsp;</span>
+          <el-select style="width: 150px;" v-model="download.startDate" placeholder="请选择日期">
+            <el-option
+              v-for="item in download.startDates"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>&nbsp;&nbsp;&nbsp;&nbsp;
+          <el-time-picker
+            style="width: 150px;"
+            v-model="download.startTime"
+            :arrow-control="true"
+            :picker-options="{
+              selectableRange: '18:30:00 - 20:30:00'
+            }"
+            :prefix-icon="'aa'"
+            placeholder="选择开始时间">
+          </el-time-picker>
+        </div>
         <div>
+          <span>下载结束时间：&nbsp;&nbsp;</span>
+          <el-select style="width: 150px;" v-model="download.startDate" placeholder="请选择日期">
+            <el-option
+              v-for="item in download.startDates"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>&nbsp;&nbsp;&nbsp;&nbsp;
+          <el-time-picker
+            style="width: 150px;"
+            v-model="download.startTime"
+            :arrow-control="true"
+            :picker-options="{
+              selectableRange: '18:30:00 - 20:30:00'
+            }"
+            :prefix-icon="'aa'"
+            placeholder="选择开始时间">
+          </el-time-picker>
           <el-slider
             v-model="download.downlaodVal"
             range
@@ -254,6 +291,23 @@ export default {
       },
       // 下载对象
       download: {
+        startDate: '',
+        startDates: ['2019-05-26', '2019-05-27'],
+        startTime: '',
+        startTimeOptions: {
+          disabledDate: (val) => {
+            if (this.playBackList && this.playBackList.length > 0) {
+              // console.log('val.getTime()', val.getTime());
+              // console.log('startTime.getTime()', getDate(this.playBackList[0].startTime).getTime());
+              if (val < getDate(this.playBackList[0].startTime) || val > getDate(this.playBackList[this.playBackList.length - 1].endTime)) {
+                console.log(formatDate(val.getTime()));
+                return true;
+              }
+            }
+            return false;
+          }
+        },
+
         recordId: '',
         downloadUrl: '',
         progressVal: 0,
