@@ -627,9 +627,9 @@ export default {
       // 新增人像参数
       portraitForm: {
         name: '',
-        sex: '',
-        nation: null,
-        idType: '',
+        sex: 0,
+        nation: 1,
+        idType: '1',
         idNo: '',
         birthDate: null,
         groupIds: [],
@@ -660,10 +660,10 @@ export default {
           {required: true, message: '请填写姓名', trigger: 'blur'},
           {validator: checkName, trigger: 'blur'}
         ],
-        sex: [{required: true, message: '请选择性别类型', trigger: 'change'}],
-        nation: [{required: true, message: '请选择民族类型', trigger: 'change'}],
+        // sex: [{required: true, message: '请选择性别类型', trigger: 'change'}],
+        // nation: [{required: true, message: '请选择民族类型', trigger: 'change'}],
         idType: [{required: true, message: '请选择证件类型', trigger: 'change'}],
-        birthDate: [{required: true, message: '请填写出生日期', trigger: 'change'}],
+        // birthDate: [{required: true, message: '请填写出生日期', trigger: 'change'}],
         idNo: [
           {required: true, message: '请填写证件号码', trigger: 'blur'},
           {validator: checkIdCard, trigger: 'blur'}
@@ -867,7 +867,7 @@ export default {
       }
       this.portraitForm.groupIds = [];
       this.carForm.groupIds = [];
-      this.portraitForm.sex = '';
+      this.portraitForm.sex = 0;
       this.isShowDpList = false;
       this.addPortraitDialog = !this.addPortraitDialog;
       this.isAddDisabled = false;
@@ -943,6 +943,7 @@ export default {
             return;
           }
           this.loadingBtn = true;
+          console.log(this.portraitForm)
           let data = objDeepCopy(this.portraitForm);
           if (data.uid !== undefined) {
             delete data['uid'];

@@ -246,6 +246,7 @@ export default {
       endTime: '',
       startTimeOptions: {
         disabledDate: (d) => {
+          console.log('d', d);
           // d > new Date() || d > this.endTime
           if (d > new Date()) {
             return true;

@@ -29,7 +29,8 @@
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
-                :loading="loading">
+                :loading="loading"
+                @change="eventCode = eventList.find(f => f.value === createForm.event).label">
                 <el-option
                   v-for="item in eventList"
                   :key="item.value"
@@ -191,6 +192,7 @@ export default {
           }
         ],
       },
+      eventCode: null,
       eventList: [],
       // 分析模型数据
       allDevData: [],//传给分析模型的所有设备点位
@@ -223,7 +225,6 @@ export default {
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
-      this.getEventList();
     // 新增页-1
     } else {
       this.pageType = 1;
@@ -232,7 +233,6 @@ export default {
     if (this.$route.query.createType) {
       this.pageType = parseInt(this.$route.query.createType);
       this.getControlDetailIsEditor(this.$route.query.controlId);
-      this.getEventList();
     }
     // 事件管理模块通过路由跳转过来
     if (this.$route.query.eventId) {
@@ -394,6 +394,7 @@ export default {
             let data = {
               alarmLevel: this.createForm.controlAlarmId,// 告警级别
               eventId: this.createForm.event,// 事件id
+              eventCode: this.eventCode,// 事件code
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
@@ -467,7 +468,14 @@ export default {
         if (res && res.data) {
           this.controlDetail = res.data;
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
-          this.createForm.event = this.controlDetail.eventId;
+          // 编辑布控时
+          if (this.pageType === 2) {
+            this.eventList = [{
+              label: this.controlDetail.eventCode,
+              value: this.controlDetail.eventId
+            }]
+            this.createForm.event = this.controlDetail.eventId;
+          }
           this.createForm.controlType = this.controlDetail.surveillanceType;
           this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
           this.createForm.controlAlarmId = this.controlDetail.alarmLevel;
@@ -566,7 +574,6 @@ export default {
               }
             })
             this.controlDetail.alarmLevel = this.createForm.controlAlarmId;
-            this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
             this.controlDetail.modelList = modelList;
@@ -596,11 +603,19 @@ export default {
       })
     }
   },
-  destroyed () {
-    this.$refs['mapOne'].isDestroyed();
-    this.$refs['mapTwo'].isDestroyed();
-    this.$refs['mapThree'].isDestroyed();
-    this.$refs['mapFour'].isDestroyed();
+  beforeDestroy () {
+    if (this.$refs['mapOne']) {
+      this.$refs['mapOne'].isDestroyed();
+    }
+    if (this.$refs['mapTwo']) {
+      this.$refs['mapTwo'].isDestroyed();
+    }
+    if (this.$refs['mapThree']) {
+      this.$refs['mapThree'].isDestroyed();
+    }
+    if (this.$refs['mapFour']) {
+      this.$refs['mapFour'].isDestroyed();
+    }
   }
 }
 </script>
