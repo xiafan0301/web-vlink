@@ -154,7 +154,7 @@
     <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
     <!--语音视频通话-->
     <!--<div :is="isPc ? 'Pc' : 'Phone'" :curCall="curCall" :myNo="telNo"></div>-->
-    <div is="webrtc" @wrStateEmit="wrStateEmit" @wrClose="wrClose" @wrSwitchCall="wrSwitchCall" :oAdd="oAdd" :oDel="oDel"></div>
+    <div is="webrtc" @wrStateEmit="wrStateEmit" @wrClose="wrClose" @wrSwitchCall="wrSwitchCall" @exceptCalling="exceptCalling" :oAdd="oAdd" :oDel="oDel"></div>
     <!--通话时长-->
     <p :class="'vl_map_time_' + item._id" v-for="item in isCalling"  :key="item.id">
       {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
@@ -700,6 +700,7 @@ export default {
             this.mapMark(this.mapTreeData[0].infoList)
             this.updateDom();
             this.moveDom();
+            console.log(this.mapTreeData[0].infoList)
           }
         })
     },
@@ -745,7 +746,6 @@ export default {
         return x;
       })
       this.objSetItem([data], numObj)
-      console.log(data)
       return [data];
     },
     objSetItem (list, obj) {
@@ -753,6 +753,8 @@ export default {
         for (let key in obj) {
           z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
         }
+        // 都加上markSid , 方便处理移动端发起的通话
+        z['markSid'] = 'mapMark' + random14();
         return z;
       })
       return list;
@@ -922,8 +924,7 @@ export default {
         for (let i = 0; i < data.length; i++) {
           data[i].infoList.forEach(obj => {
             if (obj.longitude > 0 && obj.latitude > 0) {
-              let offSet = [-15, -16], sId = 'mapMark' + i + random14(), sDataType;
-              obj['markSid'] = sId;
+              let offSet = [-15, -16], sDataType;
               if (obj.dataType === 0 && obj.deviceStatus !== 1) {
                 sDataType = 6;
               } else {
@@ -936,7 +937,7 @@ export default {
                 draggable: false, // 是否可拖动
                 extData: obj,
                 // 自定义点标记覆盖物内容
-                content: '<div id="' + sId + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+                content: '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
               });
               _this.marks[obj.dataType].push(marker);
               // 点击地图上的摄像头播放视频
@@ -984,7 +985,7 @@ export default {
               // hover
               marker.on('mouseover', function () {
                 // 判断是否已经打开视频
-                $('#' + sId).addClass('vl_icon_map_hover_mark' + obj.dataType)
+                $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
                 if (obj.dataType === 0) {
                   let _index = _this.videoMarker.curObj.findIndex(x => x.uid === obj.uid);
                   if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
@@ -1003,7 +1004,9 @@ export default {
                     return false
                   }
                 } else if (obj.dataType === 3) {
+                  console.log(obj.uid, _this.callingList)
                   let sysIndex = _this.callingList.findIndex(j => j.uid === obj.uid + '')
+                  console.log(sysIndex);
                   if (sysIndex !== -1) {
                     console.log(sysIndex);
                     return false;
@@ -1037,7 +1040,7 @@ export default {
                     })
                   }
                 }
-                $('#' + sId).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+                $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
               })
             }
           })
@@ -1114,34 +1117,23 @@ export default {
       let _this = this;
       $('body').on('click', '.vl_map_hover', function (e) {
         if (e.target.classList.contains('vl_map_hover_btn')) {
-          if (_this.hoverWindow ){_this.hoverWindow.close()}
-          let _id = 'mapCall' + random14();
           let _obj = {
             uid: e.target.getAttribute('dataUid'),
             longitude: e.target.getAttribute('dataLng'),
             latitude: e.target.getAttribute('dataLat'),
             remoteId: e.target.getAttribute('dataUid'),
-            //  先写死对方id
-//            remoteId: '57042',
             remoteName: e.target.getAttribute('dataName'),
             type: e.target.getAttribute('dataType'),
-            _id: _id,
+            _id: 'mapCall' + random14(),
             _mid: e.target.getAttribute('dataMid'),
             isTime: false,
             minute: 0,
             second: 0,
             timer: null,
-            mark: null
+            mark: null,
+            mute: false
           }
-          let _m = _this.markCalling(_obj);
-          _obj.mark = _m;
-          _this.oAdd = _obj;
-          _this.callingList.push(_obj)
-          console.log(_this.callingList);
-          $('#' + e.target.getAttribute('dataMid')).addClass('vl_icon_map_mark_calling')
-          // 模拟通话成功，开始计时
-          _obj.countTime = _this.countTime;
-          _obj.clearTime = _this.clearTime;
+          _this.addCalling(_obj)
         }
         // textarea tap event
         $('.sign_text').bind('keyup', function () {
@@ -1253,6 +1245,17 @@ export default {
     },
     setElementText (el, content) {
       el.text(content)
+    },
+    addCalling (_obj) {
+      if (this.hoverWindow ){this.hoverWindow.close()}
+      let _m = this.markCalling(_obj);
+      _obj.mark = _m;
+      this.oAdd = _obj;
+      this.callingList.push(_obj)
+      $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
+      // 模拟通话成功，开始计时
+      _obj.countTime = this.countTime;
+      _obj.clearTime = this.clearTime;
     },
     markCalling (obj) {
       let _this = this, marker;
@@ -1791,6 +1794,7 @@ export default {
         }
       })
     },
+    // 语音视频通话
     wrStateEmit (oData) {
       console.log('状态EMIT oData: ', oData);
       if (oData.state > 20) {
@@ -1818,6 +1822,49 @@ export default {
       let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
       $('#' + data._id + ' div').removeClass(_sclass);
       $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
+    },
+        // 收到手机端发送的视频请求
+    exceptCalling (data) {
+      let _obj, infoList = this.mapTreeData[0].infoList;
+      for (let i = 0; i < infoList.length; i++) {
+        if (parseFloat(infoList[i].uid) === parseFloat(data.remoteId) && infoList[i].dataType === 3) {
+          _obj = infoList[i];
+          break;
+        } else {
+          for (let j = 0; j < infoList[i].infoList.length; j++) {
+            if (parseFloat(infoList[i].infoList[j].uid) === parseFloat(data.remoteId) && infoList[i].infoList[j].dataType === 3) {
+              _obj = infoList[i].infoList[j];
+              break;
+            }
+          }
+          if (_obj) {
+            break;
+          }
+        }
+      }
+      if (!_obj) {
+        this.$message.error('来自非地图上人物的来电')
+      } else {
+        // 增加通话对象到webrtc
+        let cObj = {
+          uid: _obj.uid + '',
+          longitude: _obj.longitude,
+          latitude: _obj.latitude,
+          remoteId: _obj.uid + '',
+          remoteName: _obj.infoName,
+          type: data.type,
+          _id: 'mapCall' + random14(),
+          _mid: _obj.markSid,
+          isTime: false,
+          minute: 0,
+          second: 0,
+          timer: null,
+          mark: null,
+          mute: false,
+          oMsData: data.oMsData
+        }
+        this.addCalling(cObj)
+      }
     }
   },
   beforeDestroy () {

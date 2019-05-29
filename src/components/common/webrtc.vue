@@ -3,8 +3,8 @@
     <ul>
       <li v-for="(item, index) in aWRData" :key="'wr_list_' + index">
         <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId">
-          <video :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
-          <span class="vl_icon vl_icon_vc_011 wr_video_scale"></span>
+          <video :muted="item.mute" :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
+          <div class="vl_icon vl_icon_vc_011 wr_video_scale"></div>
           <div class="wr_video_user">
             <img src="../../assets/img/wr_photo.png" alt="">
             <div>
@@ -26,12 +26,13 @@
                 <span class="vl_icon vl_icon_vc_021"></span>
                 <p>取消</p>
               </span>
-              <span v-if="item.isTime">
-                <span class="vl_icon vl_icon_vc_022"></span>
+              <span @click="wrMute(item)" v-if="item.isTime">
+                <span class="vl_icon"  :class="{'vl_icon_vc_024': item.mute, 'vl_icon_vc_022': !item.mute}"></span>
                 <p>静音</p>
               </span>
             </div>
           </div>
+          <span class="wr_video_mask" v-show="item.type === '0'"></span>
         </div>
       </li>
     </ul>
@@ -62,7 +63,8 @@ export default {
    *
    *  emits:
    *   wrStateEmit(oData) // 通话状态改变的emit
-   *
+   *  exceptCalling // 收到移动端的通话请求，
+   *  wrSwitchCall // 视频切换到语音通话
    */
   props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
   data () {
@@ -98,7 +100,7 @@ export default {
     // 添加通话
     oAdd () {
       console.log('watch oAdd:', this.oAdd);
-      this.wrAdd(this.oAdd);
+      this.wrAdd(this.oAdd, this.oAdd.oMsData);
     },
     // 删除通话
     oDel () {
@@ -339,11 +341,19 @@ export default {
         type: 'warning'
       }).then(() => {
         let t = oMsg.audioFlag ? '2' : '1';
-        _this.wrAdd({
+//        _this.wrAdd({
+//          type: t,
+//          remoteId: oMsg.sender,
+//          remoteName: oMsg.sender
+//        }, oMsg.data);
+        // 把接受到的参数传给地图
+        let eC = {
           type: t,
           remoteId: oMsg.sender,
-          remoteName: oMsg.sender
-        }, oMsg.data);
+          remoteName: oMsg.sender,
+          oMsData: oMsg.data
+        }
+        _this.$emit('exceptCalling', eC)
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -701,6 +711,10 @@ export default {
     wrSwitchCall (item) {
       item.type === '0' ? item.type = '1' : item.type = '0';
       this.$emit('wrSwitchCall', item);
+    },
+    // 静音
+    wrMute (item) {
+      item.mute = !item.mute;
     }
   },
   beforeDestroy () {
@@ -710,7 +724,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .wr_main {
-  position: absolute; left: 10px; bottom: 10px;
+  position: absolute; left: 260px; bottom: 10px;
   z-index: 2;
   > ul {
     overflow: hidden;
@@ -723,6 +737,18 @@ export default {
         background-color: #000;
         color: #fff;
         > video { width: 100%; height: 100%; }
+        > div {
+          z-index: 4;
+        }
+        > .wr_video_mask {
+          z-index: 3;
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+        }
       }
     }
   }
