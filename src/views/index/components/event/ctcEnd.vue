@@ -20,12 +20,22 @@
       </div>
       <div class="content_box">
         <el-form class="end_form" :model="endForm" :rules="rules" ref="endForm" label-width="100px">
-          <el-form-item label="关闭事件:" prop="isCloseEvent">
-            <el-radio-group v-model="endForm.isCloseEvent">
-              <el-radio :label="1">是</el-radio>
-              <el-radio :label="2">否</el-radio>
-            </el-radio-group>
-          </el-form-item>
+          <template v-if="$route.query.type === 'alarm_ctc'">
+            <el-form-item label="关闭事件:" prop="isCloseEvent" v-show="$route.query.isRelation === 1">
+              <el-radio-group v-model="endForm.isCloseEvent">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </template>
+          <template v-else>
+            <el-form-item label="关闭事件:" prop="isCloseEvent">
+              <el-radio-group v-model="endForm.isCloseEvent">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </template>
           <el-form-item label="总结内容:" prop="summary">
             <el-input :placeholder="[endForm.isCloseEvent === 2 ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
@@ -44,22 +54,6 @@
             <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
             <div slot="tip" class="el-upload__tip number-upload-tip" v-show="isNumberTip">最多上传3张图片</div>
           </el-upload>
-          <!-- <div class="img_list">
-            <div v-for="(item, index) in imgList2" :key="'item' + index">
-              <img
-                :src="item.path"
-                @click="openBigImg(index, imgList2)"
-              >
-              <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
-            </div>
-          </div>
-          <div class="file_list">
-            <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
-              <i class="vl_icon vl_icon_event_5"></i>
-              <span>{{item.cname}}</span>
-              <i class='el-icon-close' @click="deleteFile(index, item)"></i>
-            </div>
-          </div> -->
         </div>
       </div>
       <div class="operation-footer">
@@ -78,7 +72,7 @@ export default {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       endForm: {
-        isCloseEvent: 2, // 1--结束事件  2---结束调度
+        isCloseEvent: false, // 1--结束事件  2---结束调度 3---告警的调度结束
         summary: null,
       },
       rules: {
@@ -188,14 +182,6 @@ export default {
       this.$refs[form].validate(valid => {
         let params, attachmentList = [];
         if (valid) {
-          // if (this.uploadImgList.length > 3) {
-          //   this.$message({
-          //     type: 'warning',
-          //     message: '最多上传3张图片',
-          //     customClass: 'request_tip'
-          //   });
-          //   return false;
-          // }
           if (this.isNumberTip) {
             return;
           }
@@ -205,17 +191,23 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
-          if (this.endForm.isCloseEvent === 1) { // 关闭事件
+          if (this.endForm.isCloseEvent === true) { // 关闭事件
             params = {
               eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
+              isCloseEvent: 1,
               eventSummary: this.endForm.summary,
               attachmentList: attachmentList
             }
           } else { // 不关闭事件
+            let isCloseEvent;
+            if (this.$route.query.type === 'alarm_ctc') {
+              isCloseEvent = 3;
+            } else {
+              isCloseEvent = 2;
+            }
             params = {
               eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
+              isCloseEvent: isCloseEvent,
               dispatchSummary: this.endForm.summary,
               dispatchAttachmentList: attachmentList
             }

@@ -37,7 +37,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="间隔时间:" style="width: 49%;" prop="roundInterval">
-            <el-input style="width: 100%;" v-model="addForm.roundInterval" placeholder="5-120秒"></el-input>
+            <el-input style="width: 100%;" v-model="addForm.roundInterval" placeholder="10-120秒"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -123,6 +123,7 @@ import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
 // import { testData } from './components/testData.js';
 import { formatDate } from '@/utils/util.js';
+import { validateDurationTime } from '@/utils/validator.js';
 import { getAllDevices } from '@/views/index/api/api.manage.js';
 import { addVideoRound, getVideoRoundDetail } from '@/views/index/api/api.video.js';
 export default {
@@ -151,9 +152,7 @@ export default {
         ],
         roundInterval: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          // { min: 5, message: '请正确输入5-120之间的整数', trigger: 'blur' },
-          // { max: 150, message: '请正确输入5-120之间的整数', trigger: 'blur' },
-          // { type: 'number', message: '请正确输入5-120之间的整数', trigger: 'blur' }
+          { validator: validateDurationTime, trigger: 'blur' }
         ],
         frameNum: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
