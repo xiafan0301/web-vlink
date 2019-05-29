@@ -176,9 +176,10 @@
               >
                 <template slot-scope="scope">
                   <span v-for="(item, index) in scope.row.albumList" :key="index">
-                    {{item.title + '、'}}
+                    {{item.title + ' '}}
                   </span>
                 </template>
+                <!-- <span>{{albumList.join('、')}}</span> -->
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -239,9 +240,10 @@
               >
                 <template slot-scope="scope">
                   <span v-for="(item, index) in scope.row.groupList" :key="index">
-                    {{item.groupName + '、'}}
+                    {{item.groupName + ' '}}
                   </span>
                 </template>
+                <!-- <span>{{groupList.join('、')}}</span> -->
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -319,8 +321,9 @@
           <li>
             <span>底库信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.albumList && vehicleDetailInfo.albumList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span>
+              <template v-if="albumDetailList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
+                <span>{{albumDetailList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -330,8 +333,9 @@
           <li>
             <span>分组信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.groupList && vehicleDetailInfo.groupList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span>
+              <template v-if="groupDetailList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span> -->
+                <span>{{groupDetailList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -431,6 +435,10 @@ export default {
         ]
       },
       vehicleList: [],
+      albumList: [], // 底库列表
+      groupList: [], // 分组列表
+      albumDetailList: [], // 详情底库列表
+      groupDetailList: [], // 分详情组列表
       showGroup: false,
       vehicleDetailInfoDialog: false, // 查看车辆信息弹出框
       addGroupDialog: false, // 新增分组弹出框
@@ -465,12 +473,6 @@ export default {
     },
     // 获取车辆列表数据
     getVehicleInfoList () {
-      // let type;
-      // if (this.activeSelect === -1) {
-      //   type = null;
-      // } else {
-      //   type = this.selectMethod;
-      // }
       const params = {
         // 'where.type': type,
         'where.keyWord': this.searchForm.keyWord,
@@ -484,6 +486,14 @@ export default {
           if (res) {
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
+            // this.vehicleList.map(val => {
+            //   val.albumList.map(item => {
+            //     this.albumList.push(item.title);
+            //   });
+            //   val.groupList.map(item => {
+            //     this.groupList.push(item.name);
+            //   });
+            // })
           }
         })
         .catch(() => {})
@@ -557,6 +567,13 @@ export default {
           .then(res => {
             if (res) {
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.albumList.map(item => {
+                this.albumDetailList.push(item.title);
+              });
+              this.vehicleDetailInfo.groupList.map(item => {
+                this.groupDetailList.push(item.groupName);
+              });
+              console.log(this.groupDetailList)
             }
           })
           .catch(() => {})

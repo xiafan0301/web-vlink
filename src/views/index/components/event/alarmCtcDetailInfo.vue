@@ -79,7 +79,7 @@
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
               </template>
             </div>
-            <div class="event-status-img">
+            <!-- <div class="event-status-img">
               <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
                 <i class="vl_icon vl_icon_event_11"></i>
               </template>
@@ -89,7 +89,7 @@
               <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
                 <i class="vl_icon vl_icon_event_12"></i>
               </template>
-            </div>
+            </div> -->
           </div>
           <div class="card-info right-info">
             <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -331,11 +331,11 @@ export default {
       } else {
         isRelationEvent = 0;
       }
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, type: 'alarm_ctc', isRelation: isRelationEvent}});
+      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'alarm_ctc_operation', query: { eventId: this.$route.query.id, eventType: this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
+      this.$router.push({name: 'alarm_ctc_operation', query: { eventId: this.$route.query.id, status: this.$route.query.status, eventType: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
     },
     //告警详情
     toAlarmDetail() {

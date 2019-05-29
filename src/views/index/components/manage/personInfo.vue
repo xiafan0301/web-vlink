@@ -189,10 +189,11 @@
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                  <span v-for="(item, index) in scope.row.albumList" :key="index">
-                    {{item.name + '、'}}
-                  </span>
-                  </template>
+                    <span v-for="(item, index) in scope.row.albumList" :key="index">
+                      {{item.title + ' '}}
+                    </span>
+                    </template>
+                  <!-- <span>{{albumList.join('、')}}</span> -->
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -254,9 +255,10 @@
                 >
                   <template slot-scope="scope">
                     <span v-for="(item, index) in scope.row.groupList" :key="index">
-                      {{item.name + '、'}}
+                      {{item.name + ' '}}
                     </span>
                   </template>
+                  <!-- <span>{{groupList.join('、')}}</span> -->
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -319,8 +321,9 @@
             <li>
               <span>底库信息：</span>
               <div class="group_box">
-                <template v-if="personDetailInfo.albumList && personDetailInfo.albumList.length > 0">
-                  <span v-for="(item, index) in personDetailInfo.albumList" :key="index">{{item.name + '、'}}</span>
+                <template v-if="albumDetailList.length > 0">
+                  <!-- <span v-for="(item, index) in personDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
+                  <span>{{albumDetailList.join('、')}}</span>
                 </template>
                 <template v-else>
                   <span>无</span>
@@ -330,8 +333,9 @@
             <li>
               <span>分组信息：</span>
               <div class="group_box">
-                <template v-if="personDetailInfo.groupList && personDetailInfo.groupList.length > 0">
-                  <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span>
+                <template v-if="groupDetailList.length > 0">
+                  <!-- <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span> -->
+                  <span>{{groupDetailList.join('、')}}</span>
                 </template>
                 <template v-else>
                   <span>无</span>
@@ -434,6 +438,10 @@ export default {
         groupId: null
       },
       personGroupList: [],
+      // albumList: [], // 底库列表
+      // groupList: [], // 分组列表
+      albumDetailList: [], // 详情底库列表
+      groupDetailList: [], // 分详情组列表
       isShowError: false,
       showGroup: false,
       personDetailInfo: {}, // 人员详细信息
@@ -482,9 +490,6 @@ export default {
           if (res) {
             this.perBottomBankList = res.data.albumNumQueryDtoList;
             this.allPerBottomNameNumber = res.data.total;
-            //  this.perBottomBankList.map(item => {
-            //   this.allPerBottomNameNumber += item.portraitNum;
-            // })
           }
         })
         .catch(() => {})
@@ -507,6 +512,14 @@ export default {
           if (res) {
             this.personGroupList = res.data.list;
             this.pagination.total = res.data.total;
+            // this.personGroupList.map(val => {
+            //   val.albumList.map(item => {
+            //     this.albumList.push(item.title);
+            //   });
+            //   val.groupList.map(item => {
+            //     this.groupList.push(item.name);
+            //   });
+            // })
           }
         })
         .catch(() => {})
@@ -763,6 +776,12 @@ export default {
           .then(res => {
             if (res) {
               this.personDetailInfo = res.data;
+              this.personDetailInfo.albumDetailList.map(item => {
+                this.albumList.push(item.title);
+              });
+              this.personDetailInfo.groupDetailList.map(item => {
+                this.groupList.push(item.name);
+              });
             }
           })
           .catch(() => {})

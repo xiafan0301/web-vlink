@@ -46,9 +46,8 @@
         <span>可选设备 ({{selectDeviceNumber}})</span>
         <p @click="addDeviceToLeft">添加设备</p>
       </div>
-      <template v-if="selectDeviceList && selectDeviceList.length > 0">
         <div class="search_box">
-          <el-input placeholder="请输入设备名称" size="small">
+          <el-input placeholder="请输入设备名称" size="small" v-model="searchDeviceName">
             <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;"></i>
             <i
               v-show="!closeShow"
@@ -58,43 +57,44 @@
             </i>
           </el-input>
         </div>
-        <div class="all_select_checkbox">
-          <el-checkbox :value="rightAllChecked" @change="handleAllCheckd">全选</el-checkbox>
-        </div>
-        <div class="detail_list">
-          <vue-scroll>
-            <ul class="temp_detail_info">
-              <li v-for="(item, index) in selectDeviceList" :key="'item' + index">
-                <div style="display: flex; padding: 0 10px;">
-                  <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleParentChecked(index, item.isChecked)"></el-checkbox>
-                  <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openRightArrow(index)">
-                    <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                    <span>{{item.cname}}</span>
+        <template v-if="selectDeviceList && selectDeviceList.length > 0">
+          <div class="all_select_checkbox">
+            <el-checkbox :value="rightAllChecked" @change="handleAllCheckd">全选</el-checkbox>
+          </div>
+          <div class="detail_list">
+            <vue-scroll>
+              <ul class="temp_detail_info">
+                <li v-for="(item, index) in selectDeviceList" :key="'item' + index">
+                  <div style="display: flex; padding: 0 10px;">
+                    <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleParentChecked(index, item.isChecked)"></el-checkbox>
+                    <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openRightArrow(index)">
+                      <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                      <span>{{item.cname}}</span>
+                    </div>
                   </div>
-                </div>
-                <div class="child_temp" v-show="item.isOpenArrow === true">
-                  <div class="temp_tab">
-                    <span :class="[item.isSXT ? 'active_span' : '']" @click="changeRDeviceType(index, true)">摄像头</span>
-                    <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeRDeviceType(index, false)">卡口</span>
+                  <div class="child_temp" v-show="item.isOpenArrow === true">
+                    <div class="temp_tab">
+                      <span :class="[item.isSXT ? 'active_span' : '']" @click="changeRDeviceType(index, true)">摄像头</span>
+                      <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeRDeviceType(index, false)">卡口</span>
+                    </div>
+                    <ul class="child_temp_detail" v-show="item.isSXT">
+                      <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
+                    <ul class="child_temp_detail" v-show="!item.isSXT">
+                      <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
                   </div>
-                  <ul class="child_temp_detail" v-show="item.isSXT">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                  <ul class="child_temp_detail" v-show="!item.isSXT">
-                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </vue-scroll>
-        </div>
-      </template>
+                </li>
+              </ul>
+            </vue-scroll>
+          </div>
+        </template>
     </div>
   </div>
 </template>
@@ -109,6 +109,7 @@ export default {
       // leftDeviceList: [], // 左侧的设备列表
       // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
+      searchDeviceName: null // 设备名称
       // changeRightTab: 1, // 右侧摄像头和卡口切换  1--摄像头  2---卡口
       // changeLeftTab: 1, // 左侧摄像头和卡口切换  1--摄像头  2---卡口
     }
@@ -120,10 +121,13 @@ export default {
     // 清空搜索框
     onClear () {
       this.closeShow = false;
+      this.searchDeviceName = null;
+      this.$emit('emitSearchData', this.searchDeviceName);
     },
     // 搜索设备
     searchData () {
       this.closeShow = true;
+      this.$emit('emitSearchData', this.searchDeviceName);
     },
     // 全选
     handleAllCheckd (val) {

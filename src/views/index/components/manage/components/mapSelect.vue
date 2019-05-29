@@ -276,7 +276,6 @@ export default {
           })
           willRemoveDeviceList.push(params);
         }
-      console.log('willRemoveDeviceList', willRemoveDeviceList)
       }
       this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDeviceList, selectDeviceNumber);
       // 保留上一次已有设备的数量
@@ -288,7 +287,9 @@ export default {
   },
   mounted () {
     this.initMap();
-    this.getMapData();
+    setTimeout(() => {
+      this.getMapData();
+    }, 1500)
   },
   methods: {
     initMap () {
@@ -318,9 +319,10 @@ export default {
             path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
             zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
           });
+
           _this.selAreaPolygon = polygon;
           _this.selAreaAble = true;
-          _this.mapMarkHandler();
+          // _this.mapMarkHandler();
 
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
@@ -347,52 +349,43 @@ export default {
             })
             _marker.setMap(_this.map);
           })
-
-          
         }, 100);
       });
     },
     // 获取地图数据
-    getMapData (obj) {
-      setTimeout(() => {
-        let selectDeviceList = [];
-        if (obj && obj.length > 0) {
-          selectDeviceList = obj;
-        } else {
-          selectDeviceList = this.selectDeviceList;
-        }
-        if (selectDeviceList && selectDeviceList.length > 0) {
-          selectDeviceList.map(item => {
-            item.deviceList.map(itm => {
-              const params = {
-                parentName: item.cname,
-                parentId: item.uid,
-                uid: itm.uid,
-                isSxt: true, // 摄像头
-                deviceName: itm.deviceName,
-                isChildChecked: false,
-                latitude: itm.latitude,
-                longitude: itm.longitude
-              }
-              this.sxtList.push(params);
-            });
-            item.bayonetList.map(itm => {
-              const params = {
-                parentName: item.cname,
-                parentId: item.uid,
-                uid: itm.uid,
-                isSxt: false, // 卡口
-                deviceName: itm.deviceName,
-                isChildChecked: false,
-                latitude: itm.latitude,
-                longitude: itm.longitude
-              }
-              this.kkList.push(params);
-            })
+    getMapData () {
+      let selectDeviceList = this.selectDeviceList;
+      if (selectDeviceList && selectDeviceList.length > 0) {
+        selectDeviceList.map(item => {
+          item.deviceList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: true, // 摄像头
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.sxtList.push(params);
+          });
+          item.bayonetList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: false, // 卡口
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.kkList.push(params);
           })
-        }
+        })
         this.mapMarkHandler();
-      }, 200);
+      }
     },
     // 地图标记处理
     mapMarkHandler () {
@@ -415,7 +408,8 @@ export default {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
           if (obj.longitude > 0 && obj.latitude > 0) {
-            console.log('22222222222')
+            _this.map && _this.map.setCenter([obj.longitude, obj.latitude]);
+
             let offSet = [-20.5, -48], selClass = '';
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
@@ -437,7 +431,6 @@ export default {
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
-            _this.map.setCenter([obj.longitude, obj.latitude]);
 
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);

@@ -177,12 +177,14 @@ export default {
   mounted () {
     this.getDepartList();
     this.getDetail();
-    this.getReplanList();
+    if (this.$route.query.eventType) {
+      this.getReplanList();
+    }
   },
   methods: {
     getReplanList () { // 获取预案列表
       const params = {
-        pageNum: -1,
+        pageNum: 0,
         'where.planType': this.$route.query.eventType
       }
       getPlanData(params)
