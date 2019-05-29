@@ -3,8 +3,8 @@
     <ul>
       <li v-for="(item, index) in aWRData" :key="'wr_list_' + index">
         <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId">
-          <video :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
-          <span class="vl_icon vl_icon_vc_011 wr_video_scale"></span>
+          <video :muted="item.mute" :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
+          <div class="vl_icon vl_icon_vc_011 wr_video_scale"></div>
           <div class="wr_video_user">
             <img src="../../assets/img/wr_photo.png" alt="">
             <div>
@@ -17,8 +17,8 @@
               {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
             </p>
             <div class="wr_video_opts_l">
-              <span>
-                <span @click="wrSwitchCall(item)" class="vl_icon vl_icon_vc_023"></span>
+              <span v-if="item.type === '1'" :class="{'wr_video_on_connect': !item.isTime}">
+                <span @click="wrSwitchCall(item)" class="vl_icon" :class="{'vl_icon_vc_025': !item.isTime, 'vl_icon_vc_023': item.isTime}"></span>
                 <p v-if="item.type === '0'">切到视频聊天</p>
                 <p v-else>切换到语音</p>
               </span>
@@ -26,12 +26,13 @@
                 <span class="vl_icon vl_icon_vc_021"></span>
                 <p>取消</p>
               </span>
-              <span>
-                <span class="vl_icon vl_icon_vc_022"></span>
+              <span @click="wrMute(item)" v-if="item.isTime">
+                <span class="vl_icon"  :class="{'vl_icon_vc_024': item.mute, 'vl_icon_vc_022': !item.mute}"></span>
                 <p>静音</p>
               </span>
             </div>
           </div>
+          <span class="wr_video_mask" v-show="item.type === '0'"></span>
         </div>
       </li>
     </ul>
@@ -41,7 +42,7 @@
 import {webrtcConfig} from '@/config/config.js';
 import {oWRMsgs} from './webrtc.data.js';
 export default {
-  /** 
+  /**
    *  // 初始化的时候webrt对象
    *  aInit: [webrtcObj, ...],
    *  // 需要新增webrtc对象
@@ -52,17 +53,18 @@ export default {
    *  oConfig: {
    *    localId: '', // 本地ID
    *  }
-   *  
+   *
    *  webrtcObj: {
    *    // localId: '', // 本地ID (在oConfig中)
    *    remoteId: '', // 对方ID
    *    remoteName: '', // 对方名称
    *    type: 1, // 1视频 / 2语音
    *  }
-   *  
+   *
    *  emits:
    *   wrStateEmit(oData) // 通话状态改变的emit
-   *    
+   *  exceptCalling // 收到移动端的通话请求，
+   *  wrSwitchCall // 视频切换到语音通话
    */
   props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
   data () {
@@ -98,7 +100,7 @@ export default {
     // 添加通话
     oAdd () {
       console.log('watch oAdd:', this.oAdd);
-      this.wrAdd(this.oAdd);
+      this.wrAdd(this.oAdd, this.oAdd.oMsData);
     },
     // 删除通话
     oDel () {
@@ -110,7 +112,8 @@ export default {
     if (this.oConfig && this.oConfig.localId) {
       this.localId = this.oConfig.localId;
     } else {
-      this.localId = this.$store.state.loginUser.userMobile;
+       this.localId = this.$store.state.loginUser.uid;
+//      this.localId = this.$store.state.loginUser.userMobile;
     }
     console.log('webrtc localId', this.localId);
     // 初始化websocket
@@ -190,7 +193,7 @@ export default {
     /**
      * websocket 发送信令
      * @param {string} signal 信令
-     * @param {object} obj 
+     * @param {object} obj
           { type: 'CANDIDATE',  // 信令类型
             data: JSON.stringify(event.candidate), // 传输的数据
             recipient: obj.userId,  // 接收人ID
@@ -240,12 +243,7 @@ export default {
         }
         // this.aWRData.push(obj);
         this.$nextTick(() => {
-          this.wrMediaStream(obj.type, {
-            remoteId: obj.remoteId,
-            remoteName: obj.remoteName,
-            uid: obj.uid,
-            _mid: obj._mid
-          }, desc);
+          this.wrMediaStream(obj.type, obj, desc);
         });
       } else {
         console.log('wrAdd >>> remoteId为空！');
@@ -342,12 +340,20 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let t = oMsg.audioFlag ? 2 : 1;
-        _this.wrAdd({
+        let t = oMsg.audioFlag ? '2' : '1';
+//        _this.wrAdd({
+//          type: t,
+//          remoteId: oMsg.sender,
+//          remoteName: oMsg.sender
+//        }, oMsg.data);
+        // 把接受到的参数传给地图
+        let eC = {
           type: t,
           remoteId: oMsg.sender,
-          remoteName: oMsg.sender
-        }, oMsg.data);
+          remoteName: oMsg.sender,
+          oMsData: oMsg.data
+        }
+        _this.$emit('exceptCalling', eC)
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -386,14 +392,13 @@ export default {
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
+        console.log(type === '1' ? true : false)
         navigator.getMedia({
           'audio': true,
-          'video': type === 1 ? true : false
+          'video': type === '1' ? true : false
         }, function (stream) {
           console.log('getUserMedia success');
-          _this.aWRData.push(Object.assign({}, obj, {
-            type: type
-          }));
+          _this.aWRData.push(obj);
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
@@ -456,11 +461,9 @@ export default {
         } else if (_state === 'connected') {
           // 已连接
           console.log('wr >>>>> 已连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            uid: obj.uid,
-            state: 20 // 已连接
-          });
+          obj.state = 20;
+          _this.wrStateHandler(obj);
+
         } else if (_state === 'disconnected') {
           // 断开连接
           console.log('wr >>>>> 断开连接');
@@ -511,9 +514,9 @@ export default {
         }
       };
       // 如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
-      _pc.ontrack = function (event) {
+      _pc.onaddstream = function (event) {
         console.log('终端流', event)
-        _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.streams[0]);
+        _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
       };
       // 向PeerConnection中加入需要发送的流
       _pc.addStream(_this.wrObj.mediaStream);
@@ -665,19 +668,13 @@ export default {
         state: obj.state
       });
       // emmit
-      /* 
+      /*
         通话状态改变emit
         remoteId: 通讯方ID remoteId
-        state: 状态 
+        state: 状态
         {}：其它信息
        */
-      this.$emit('wrStateEmit', {
-        remoteId: obj.remoteId,
-        state: obj.state,
-        info: {},
-        uid: obj.uid,
-        _mid: obj._mid
-      });
+      this.$emit('wrStateEmit', obj);
     },
     /**
      * 通话消息提示处理器 oWRMsgs
@@ -714,13 +711,20 @@ export default {
     wrSwitchCall (item) {
       item.type === '0' ? item.type = '1' : item.type = '0';
       this.$emit('wrSwitchCall', item);
+    },
+    // 静音
+    wrMute (item) {
+      item.mute = !item.mute;
     }
+  },
+  beforeDestroy () {
+    this.wsObj.stompClient.disconnect();
   }
 }
 </script>
 <style lang="scss" scoped>
 .wr_main {
-  position: absolute; left: 10px; bottom: 10px;
+  position: absolute; left: 260px; bottom: 10px;
   z-index: 2;
   > ul {
     overflow: hidden;
@@ -733,6 +737,18 @@ export default {
         background-color: #000;
         color: #fff;
         > video { width: 100%; height: 100%; }
+        > div {
+          z-index: 4;
+        }
+        > .wr_video_mask {
+          z-index: 3;
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+        }
       }
     }
   }
@@ -764,6 +780,7 @@ export default {
       display: inline-block;
       margin: 0 10px;
       cursor: pointer;
+      vertical-align: top;
       > span {
         &:hover {
           background-color: rgba(255, 255, 255, .2);
@@ -771,10 +788,24 @@ export default {
         -webkit-border-radius: 24px;
         -moz-border-radius: 24px;
         border-radius: 24px;
+        font-size: 30px;
+        padding: 8px;
       }
       > p {
         color: #fff;
         font-size: 12px;
+      }
+    }
+    > .wr_video_on_connect {
+      position: absolute;
+      top: -80px;
+      left: 87px;
+      > span {
+        border-color: #000000;
+        border-width: 5px;
+        &:hover {
+          background-color: rgba(255, 255, 255, 0);
+        }
       }
     }
   }
