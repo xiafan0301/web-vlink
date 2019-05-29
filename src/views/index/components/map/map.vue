@@ -1120,9 +1120,9 @@ export default {
             uid: e.target.getAttribute('dataUid'),
             longitude: e.target.getAttribute('dataLng'),
             latitude: e.target.getAttribute('dataLat'),
-//            remoteId: e.target.getAttribute('dataId'),
+            remoteId: e.target.getAttribute('dataUid'),
             //  先写死对方id
-            remoteId: '57042',
+//            remoteId: '57042',
             remoteName: e.target.getAttribute('dataName'),
             type: e.target.getAttribute('dataType'),
             _id: _id,
@@ -1270,9 +1270,6 @@ export default {
           // 自定义点标记覆盖物内容
           content: content
         });
-        setTimeout(()=> {
-          obj.type = 5;
-        }, 5000)
       }
       return marker;
     },

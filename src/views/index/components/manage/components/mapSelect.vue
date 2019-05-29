@@ -61,6 +61,9 @@
         </ul>
       </div>
     </div>
+    <!-- <div class="close_arrow">
+      <i class="el-icon-error"></i>
+    </div> -->
   </div>
 </template>
 <script>
@@ -74,6 +77,7 @@ export default {
       map: null, // 地图对象
       // 选择区域
       selAreaAcitve: false,
+      selAreaPolygon: null,
       mouseTool: null,
       selAreaAble: false,
       mapTypeList: ['sxt', 'kk'],
@@ -86,7 +90,10 @@ export default {
 
       finalDeviceList: [], // 最终选择的设备
 
-      unCheckDeviceList: [] // 没有在多边形中的设备--没有选中的设备
+      unCheckDeviceList: [], // 没有在多边形中的设备--没有选中的设备
+
+      lastCurrDeviceLength: 0, // 上一次已有设备数量
+      // lastSelectDeviceLength: 0, // 上一次可选设备数量
     }
   },
   watch: {
@@ -100,8 +107,10 @@ export default {
         willRemoveDeviceList = [], // 没有选中的设备经过处理后
         unselectDeviceList = [], unselectBayonetList = [];
 
+      this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
+
       let selectDeviceNumber = this.unCheckDeviceList.length;
-      let checkedDeviceNumber = val.length;
+      let checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
 
       if (val && val.length > 0) {  // 多边形存在且在多边形中的设备
         val.map(item => {
@@ -110,6 +119,22 @@ export default {
           } else {
             bayonetList.push(item);
           }
+          
+          // 在可选的设备中移除已经选中的设备
+          if (item.isSxt) {
+            this.sxtList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.sxtList.splice(index, 1);
+              }
+            })
+          } else {
+            this.kkList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.kkList.splice(index, 1);
+              }
+            })
+          }
+
         });
         deviceList.map(item => {
           const params = {
@@ -143,7 +168,7 @@ export default {
           };
           checkedDeviceList.push(params);
         });
-        let deviceObj = {}, params = {};
+        let deviceObj = {};
         checkedDeviceList.forEach(item => {
           let a = checkedDeviceList.filter(c => {
             return item.uid === c.uid;
@@ -218,7 +243,7 @@ export default {
           };
           unCheckedDeviceList.push(params);
         });
-        let deviceObj = {}, params = {};
+        let deviceObj = {};
         unCheckedDeviceList.forEach(item => {
           let a = unCheckedDeviceList.filter(c => {
             return item.uid === c.uid;
@@ -251,8 +276,14 @@ export default {
           })
           willRemoveDeviceList.push(params);
         }
+      console.log('willRemoveDeviceList', willRemoveDeviceList)
       }
       this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDeviceList, selectDeviceNumber);
+      // 保留上一次已有设备的数量
+      this.lastCurrDeviceLength = val.length;
+      // this.lastSelectDeviceLength = this.unCheckDeviceList.length;
+
+      this.unCheckDeviceList = []; // 清空可选设备列表
     }
   },
   mounted () {
@@ -290,6 +321,34 @@ export default {
           _this.selAreaPolygon = polygon;
           _this.selAreaAble = true;
           _this.mapMarkHandler();
+
+          // 移入覆盖物生成删除小图标
+          let offSet = [0, 0], _marker = null;
+          polygon.on('mouseover', function(p) {
+            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+            if (_marker) return;
+            _marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [p.lnglat.lng, p.lnglat.lat],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '',
+              // 自定义点标记覆盖物内容
+              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+            });
+            // 点击小图标移除覆盖物和删除小图标
+            _marker.on('click', function() {
+              _this.map.remove(polygon);
+              _this.selAreaPolygon = null;
+              _this.map.remove(_marker);
+
+              _this.mapMarkHandler();
+              
+            })
+            _marker.setMap(_this.map);
+          })
+
+          
         }, 100);
       });
     },
@@ -337,7 +396,6 @@ export default {
     },
     // 地图标记处理
     mapMarkHandler () {
-      // console.log(this.sxtList)
       // 摄像头
       this.mapClearMarkers(this.sxtMapMarkers);
       if (this.mapTypeList.indexOf('sxt') >= 0) {
@@ -357,15 +415,15 @@ export default {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
           if (obj.longitude > 0 && obj.latitude > 0) {
+            console.log('22222222222')
             let offSet = [-20.5, -48], selClass = '';
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
               this.unCheckDeviceList.push(obj); // 没有选中的设备
             }
-            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
+            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
               _this.finalDeviceList.push(obj);
-              console.log('obj', obj)
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -379,6 +437,8 @@ export default {
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
+            _this.map.setCenter([obj.longitude, obj.latitude]);
+
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
           }
@@ -519,9 +579,40 @@ export default {
             });
           });
         }
-        // console.log('checkedDeviceList', this.checkedDeviceList)
+        console.log('checkedDeviceList', checkedDeviceList)
+        console.log('currDeviceList', currDeviceList)
+        if (checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            item.deviceList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: true, // 摄像头
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.sxtList.push(params);
+            });
+            item.bayonetList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: false, // 卡口
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.kkList.push(params);
+            })
+          });
+        }
         this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
-        // this.getMapData(this.selectDeviceList);
+        this.mapMarkHandler();
       }
     },
   }
@@ -706,6 +797,13 @@ export default {
   }
   .el-checkbox {
     margin-right: 10px;
+  }
+  .close_arrow {
+    position: absolute;
+    i {
+      color: #F94439;
+      font-size: 20px;
+    }
   }
 }
 </style>

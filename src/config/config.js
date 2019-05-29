@@ -99,6 +99,7 @@ const oDomains = {
     }
 };
 let ENV_API = process.env.VUE_APP_API;
+console.log(ENV_API)
 if (!ENV_API) { ENV_API = 'dev'; }
 console.log('config.js env', ENV_API);
 // ajax default

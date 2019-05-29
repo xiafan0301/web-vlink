@@ -17,8 +17,8 @@
               {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
             </p>
             <div class="wr_video_opts_l">
-              <span>
-                <span @click="wrSwitchCall(item)" class="vl_icon vl_icon_vc_023"></span>
+              <span v-if="item.type === '1'" :class="{'wr_video_on_connect': !item.isTime}">
+                <span @click="wrSwitchCall(item)" class="vl_icon" :class="{'vl_icon_vc_025': !item.isTime, 'vl_icon_vc_023': item.isTime}"></span>
                 <p v-if="item.type === '0'">切到视频聊天</p>
                 <p v-else>切换到语音</p>
               </span>
@@ -26,7 +26,7 @@
                 <span class="vl_icon vl_icon_vc_021"></span>
                 <p>取消</p>
               </span>
-              <span>
+              <span v-if="item.isTime">
                 <span class="vl_icon vl_icon_vc_022"></span>
                 <p>静音</p>
               </span>
@@ -212,8 +212,9 @@ export default {
     /**
      * 添加WR
      * @param {object} obj webrtcObj
+     * @param {m} desc
      */
-    wrAdd (obj) {
+    wrAdd (obj, desc) {
       if (obj && obj.remoteId) {
         if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
           this.$message({
@@ -240,7 +241,7 @@ export default {
         }
         // this.aWRData.push(obj);
         this.$nextTick(() => {
-          this.wrMediaStream(obj.type, obj);
+          this.wrMediaStream(obj.type, obj, desc);
         });
       } else {
         console.log('wrAdd >>> remoteId为空！');
@@ -253,7 +254,7 @@ export default {
     wrWsMessageHandler (message) {
       let _this = this;
       let oMsg = JSON.parse(message);
-      console.log('--------------->', message)
+      console.log(message)
       if (oMsg.type === 'CANDIDATE') {
         // 收到 CANDIDATE 候选
         let oData = JSON.parse(oMsg.data);
@@ -337,12 +338,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let t = oMsg.audioFlag ? 2 : 1;
+        let t = oMsg.audioFlag ? '2' : '1';
         _this.wrAdd({
           type: t,
           remoteId: oMsg.sender,
           remoteName: oMsg.sender
-        });
+        }, oMsg.data);
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -373,7 +374,6 @@ export default {
      * @param {string} desc: 接收时收到的Description字符串，为空则是发送
      * */
     wrMediaStream (type, obj, desc) {
-      console.log(type)
       let _this = this;
       if (!_this.wrObj.mediaStream) {
         // 设备还没被唤醒
@@ -382,6 +382,7 @@ export default {
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
+        console.log(type === '1' ? true : false)
         navigator.getMedia({
           'audio': true,
           'video': type === '1' ? true : false
@@ -452,6 +453,7 @@ export default {
           console.log('wr >>>>> 已连接');
           obj.state = 20;
           _this.wrStateHandler(obj);
+
         } else if (_state === 'disconnected') {
           // 断开连接
           console.log('wr >>>>> 断开连接');
@@ -697,10 +699,12 @@ export default {
     },
     // 切换语音
     wrSwitchCall (item) {
-      console.log('----------->sss', item)
       item.type === '0' ? item.type = '1' : item.type = '0';
       this.$emit('wrSwitchCall', item);
     }
+  },
+  beforeDestroy () {
+    this.wsObj.stompClient.disconnect();
   }
 }
 </script>
@@ -750,6 +754,7 @@ export default {
       display: inline-block;
       margin: 0 10px;
       cursor: pointer;
+      vertical-align: top;
       > span {
         &:hover {
           background-color: rgba(255, 255, 255, .2);
@@ -757,10 +762,24 @@ export default {
         -webkit-border-radius: 24px;
         -moz-border-radius: 24px;
         border-radius: 24px;
+        font-size: 30px;
+        padding: 8px;
       }
       > p {
         color: #fff;
         font-size: 12px;
+      }
+    }
+    > .wr_video_on_connect {
+      position: absolute;
+      top: -80px;
+      left: 87px;
+      > span {
+        border-color: #000000;
+        border-width: 5px;
+        &:hover {
+          background-color: rgba(255, 255, 255, 0);
+        }
       }
     }
   }

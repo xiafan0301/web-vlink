@@ -173,11 +173,25 @@
             </li>
             <li>
               <span>底库信息：</span>
-              <span></span>
+              <div class="group_box">
+                <template v-if="personDetailInfo.albumList && personDetailInfo.albumList.length > 0">
+                  <span v-for="(item, index) in personDetailInfo.albumList" :key="index">{{item.name + '、'}}</span>
+                </template>
+                <template v-else>
+                  <span>无</span>
+                </template>
+              </div>
             </li>
             <li>
               <span>分组信息：</span>
-              <span></span>
+              <div class="group_box">
+                <template v-if="personDetailInfo.groupList && personDetailInfo.groupList.length > 0">
+                  <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span>
+                </template>
+                <template v-else>
+                  <span>无</span>
+                </template>
+              </div>
             </li>
             <li>
               <span>备注：</span>
@@ -743,14 +757,20 @@ export default {
           width: 100%;
           padding: 8px 0;
           display: flex;
-          span:first-child {
+          .group_box {
+            width: calc(100% - 100px);
+            span {
+              width: auto;
+            }
+          }
+          >span:first-child {
             display: inline-block;
             width: 100px;
             color: #666666;
             text-align: right;
           }
           span:last-child {
-            width: calc(100% - 100px);
+            // width: calc(100% - 100px);
             color: #333333;
           }
         }
