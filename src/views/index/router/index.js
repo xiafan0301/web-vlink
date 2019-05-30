@@ -18,7 +18,7 @@ import routerControl from './router.control.js'
 import routerMessage from './router.message.js'
 // 告警板块 router
 import routerAlarm from './router.alarm.js'
-// 事件板块 router
+// 管理板块 router
 import routerManage from './router.manage.js'
 // 任务板块 router
 import routerTask from './router.task.js'

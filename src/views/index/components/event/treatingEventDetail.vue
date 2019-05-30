@@ -434,7 +434,6 @@ export default {
             if (res.data.eventCloseAttachmentList.length > 0) {
               res.data.eventCloseAttachmentList.map(item => {
                 if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
-                  console.log('11111')
                   this.eventImg.push(item);
                 } else {
                   this.eventFile.push(item);
@@ -470,13 +469,13 @@ export default {
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      let state;
-      if (this.$route.query.status === 'handling') {
-        state = 1;
-      } else {
-        state = 3
-      }
-      this.$router.push({path: '/control/manage', query: { pageType: 2, state: state, controlId: this.basicInfo.surveillanceId }});
+      // let state;
+      // if (this.$route.query.status === 'handling') {
+      //   state = 1;
+      // } else {
+      //   state = 3
+      // }
+      this.$router.push({path: '/control/manage', query: { pageType: 2, controlId: this.basicInfo.surveillanceId }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
