@@ -326,9 +326,9 @@ export const markTask = (data) => {
  * 新增事件处理过程
  * @param {*} data 
  */
-export const taskProcess = (data,uid) => {
+export const taskProcess = (data,uid,dispatchType) => {
   return request({
-    url: '/task-services/task/process/' + uid,
+    url: '/task-services/task/process/' + uid + '?dispatchType=' + dispatchType,
     method: 'post',
     data,
     mode: 'ctc'
