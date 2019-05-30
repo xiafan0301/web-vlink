@@ -980,10 +980,14 @@ export default {
       if (!_data) { _data = this.oData; }
       if ((_data.type === 2 || _data.type === 1) && _data.record) {
         let playBack = {};
-        // if (this.oData.type === 2) {
-        playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
-        playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
-        // }
+        if (_data.type === 1) {
+          playBack.playBackStartTime = formatDate(this.startPlayTime ? this.startPlayTime : new Date()); // 回放开始时间
+          playBack.playBackEndTime = formatDate(new Date().getTime()); // 回放结束时间
+        }
+        if (_data.type === 2) {
+          playBack.playBackStartTime =formatDate( _data.startTime); // 回放开始时间
+          playBack.playBackEndTime = formatDate(_data.endTime); // 回放结束时间
+        }
         apiVideoRecord(Object.assign({
           deviceId: _data.video.uid, // 设备id
           playTime: formatDate(this.startPlayTime ? this.startPlayTime : new Date()), // 播放结束时间
