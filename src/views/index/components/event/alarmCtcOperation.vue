@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status }}">调度详情</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -80,7 +80,7 @@
               <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
             </template>
           </div>
-          <div class="event-status-img">
+          <!-- <div class="event-status-img">
             <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
               <i class="vl_icon vl_icon_event_11"></i>
             </template>
@@ -90,7 +90,7 @@
             <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
               <i class="vl_icon vl_icon_event_12"></i>
             </template>
-          </div>
+          </div> -->
         </div>
         <div class="card-info right-info">
           <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -306,12 +306,14 @@ export default {
   mounted () {
     this.getDepartList();
     this.toAlarmDetail();
-    this.getReplanList();
+    if (this.$route.query.eventType) {
+      this.getReplanList();
+    }
   },
   methods: {
     getReplanList () { // 获取预案列表
       const params = {
-        pageNum: -1,
+        pageNum: 0,
         'where.planType': this.$route.query.eventType
       }
       getPlanData(params)
@@ -369,26 +371,9 @@ export default {
             }
           })
         }
-        // this.$nextTick(()=> {
-        //   this.isLoading = false;
-        // })
       }).catch(() => {
-        // this.isLoading = false;
       })
     },
-    // 获取事件详情
-    // getDetail () {
-    //   const eventId = this.$route.query.eventId;
-    //   if (eventId) {
-    //     getEventDetail(eventId)
-    //       .then(res => {
-    //         if (res) {
-    //           this.basicInfo = res.data;
-    //         }
-    //       })
-    //       .catch(() => {})
-    //   }
-    // },
     // 判断taskList是否都填写完
     judgeData () {
       let _this = this;
@@ -465,15 +450,15 @@ export default {
       this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: this.$route.query.type, status: this.$route.query.status}});
+      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 返回
     back () {
@@ -749,7 +734,7 @@ export default {
         }
       }
     }
-    .ctc-plan-box{
+    .ctc-plan-box {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {

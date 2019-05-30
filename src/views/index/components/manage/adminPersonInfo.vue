@@ -25,7 +25,7 @@
                     <li
                       v-for="(item, index) in copyGroupList"
                       :key="index"
-                      @click="handleCopyGroup(item.uid)"
+                      @click="handleCopyGroup(item.id)"
                     >{{item.name}}</li>
                   </ul>
                 </vue-scroll>
@@ -91,8 +91,6 @@
               >
               <template slot-scope="scope">
                 <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
-                <!-- <span v-show="scope.row.sex == 1">男</span>
-                <span v-show="scope.row.sex == 2">女</span> -->
               </template>
             </el-table-column>
             <el-table-column
@@ -174,8 +172,11 @@
             <li>
               <span>底库信息：</span>
               <div class="group_box">
-                <template v-if="personDetailInfo.albumList && personDetailInfo.albumList.length > 0">
-                  <span v-for="(item, index) in personDetailInfo.albumList" :key="index">{{item.name + '、'}}</span>
+                <template v-if="albumList && albumList.length > 0">
+                  <!-- <span v-for="(item, index) in personDetailInfo.albumList" :key="index">
+                    {{item.title.concat('、')}}
+                  </span> -->
+                  <span>{{albumList.join('、')}}</span>
                 </template>
                 <template v-else>
                   <span>无</span>
@@ -185,8 +186,9 @@
             <li>
               <span>分组信息：</span>
               <div class="group_box">
-                <template v-if="personDetailInfo.groupList && personDetailInfo.groupList.length > 0">
-                  <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span>
+                <template v-if="groupList && groupList.length > 0">
+                  <!-- <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span> -->
+                  <span>{{groupList.join('、')}}</span>
                 </template>
                 <template v-else>
                   <span>无</span>
@@ -279,7 +281,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getPerGroupList, getPersonData, getPersonDetail, editVeGroup, copyPersonGroup,
-moveoutPerson, deletePersonGroup, addGroupCopyPerson, judgePerson } from '@/views/index/api/api.manage.js';
+moveoutPerson, deletePersonGroup, addGroupCopyPerson, judgePerson, getPerBottomBankList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -302,6 +304,8 @@ export default {
         sex: null
       },
       personInfoList: [],
+      albumList: [], // 底库列表
+      groupList: [], // 分组列表
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
@@ -323,16 +327,35 @@ export default {
     }
   },
   mounted () {
-    this.groupId = parseInt(this.$route.query.id);
     if (this.$route.query.type == 1) { // 分组查看
       this.isGroup = true;
+      this.groupId = parseInt(this.$route.query.id);
     } else { // 底库查看
       this.isGroup = false;
+      this.albumId = parseInt(this.$route.query.id);
+      this.getBottomBankList(parseInt(this.$route.query.id));
     }
-    this.getPersonList();
     this.getGroupList(parseInt(this.$route.query.id));
+    this.getPersonList();
   },
   methods: {
+    // 获取底库列表
+    getBottomBankList (uid) {
+      const params = {
+        type: 1 // 1--人像库
+      }
+      getPerBottomBankList(params)
+        .then(res => {
+          if (res) {
+            res.data.albumNumQueryDtoList.map(item => {
+              if (item.id === uid) {
+                this.groupName = item.title;
+              }
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 获取分组列表
     getGroupList (uid) {
       const params = {
@@ -341,16 +364,20 @@ export default {
       getPerGroupList(params)
         .then(res => {
           if (res) {
-            res.data.groupNumList.map(item => {
-              if (item.id === uid) {
-                this.groupName = item.name;
-              } else {
-                this.copyGroupList.push({
-                  uid: item.id,
-                  name: item.name
-                })
-              }
-            });
+            if (this.groupId) {
+              res.data.groupNumList.map(item => {
+                if (item.id === uid) {
+                  this.groupName = item.name;
+                } else {
+                  this.copyGroupList.push({
+                    uid: item.id,
+                    name: item.name
+                  })
+                }
+              });
+            } else {
+              this.copyGroupList = res.data.groupNumList;
+            }
           }
         })
         .catch(() => {})
@@ -432,6 +459,12 @@ export default {
           .then(res => {
             if (res) {
               this.personDetailInfo = res.data;
+              this.personDetailInfo.albumList.map(item => {
+                this.albumList.push(item.title);
+              });
+              this.personDetailInfo.groupList.map(item => {
+                this.groupList.push(item.name);
+              });
             }
           })
           .catch(() => {})

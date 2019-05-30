@@ -46,7 +46,7 @@
               v-for="(item, index) in identityList"
               :key="index"
               :label="item.organName"
-              :value="item.uid"
+              :value="item.organName"
             >
             </el-option>
           </el-select>

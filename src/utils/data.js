@@ -20,6 +20,7 @@ const dataList = {
   taskStatus: 24, // 任务状态,
   alarmLevel: 11, //告警级别
   sourceType: 5, //资源来源
+  intelCharac: 38 // 智能特性
 }
 // 处理方式
 const handeMethods = {

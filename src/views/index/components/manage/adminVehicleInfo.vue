@@ -174,8 +174,9 @@
             <li>
             <span>底库信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.albumList && vehicleDetailInfo.albumList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span>
+              <template v-if="albumList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
+                <span>{{albumList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -185,8 +186,9 @@
           <li>
             <span>分组信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.groupList && vehicleDetailInfo.groupList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span>
+              <template v-if="groupList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span> -->
+                <span>{{groupList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -307,6 +309,8 @@ export default {
         ]
       },
       vehicleList: [],
+      albumList: [], // 底库列表
+      groupList: [], // 分组列表
       vehicleDetailInfoDialog: false, // 查看车辆信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
@@ -407,6 +411,12 @@ export default {
           .then(res => {
             if (res) {
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.albumList.map(item => {
+                this.albumList.push(item.title);
+              });
+              this.vehicleDetailInfo.groupList.map(item => {
+                this.groupList.push(item.groupName);
+              });
             }
           })
           .catch(() => {})
