@@ -37,14 +37,14 @@
           <el-upload
             :action="uploadUrl"
             multiple
-            accept=".doc,.docx, .png, .jpg, .jpeg"
+            accept=".png, .jpg, .jpeg"
             :show-file-list='true'
             :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
             :on-success='handleSuccess'
           >
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.png .jpg .jpeg，最多上传9张图片）</div>
           </el-upload>
         </div>
       </div>
@@ -59,7 +59,7 @@
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { taskProcess } from '@/views/index/api/api.event.js';
-import { getUserList } from '@/views/index/api/api.manage.js';
+import { getUserMember } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -165,11 +165,16 @@ export default {
     },
     // 获取所有的用户
     getList () {
+      let uid = null ;
+      if(this.userInfo.organList && this.userInfo.organList.length >0) {
+        uid = this.userInfo.organList[0].uid
+      }
       const params = {
+        'where.uid': uid,
         'where.proKey': this.userInfo.proKey,
         pageSize: 0
       }
-      getUserList(params)
+      getUserMember(params)
         .then(res => {
           if (res) {
             res.data.list.map(item => {
@@ -186,12 +191,12 @@ export default {
     // 提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        let attachmentList = [], taskProcessDto = {};
+        let attachmentList = [], taskProcessDto = {}, dispatchType = null;
         if (valid) {
-          if (this.uploadImgList.length > 3) {
+          if (this.uploadImgList.length > 9) {
             this.$message({
               type: 'warning',
-              message: '最多上传3张图片',
+              message: '最多上传9张图片',
               customClass: 'request_tip'
             });
             return false;
@@ -217,8 +222,13 @@ export default {
               eventId: this.$route.query.eventId,
               taskProcessDto: taskProcessDto
             } */
+          if(this.processType == 2 || this.processType == 3) {
+            dispatchType = 1
+          }else {
+            dispatchType = 2
+          }
           this.isEndLoading = true;
-          taskProcess(taskProcessDto,this.$route.query.eventId)
+          taskProcess(taskProcessDto,this.$route.query.eventId,dispatchType )
             .then(res => {
               if (res) {
                 this.$message({
