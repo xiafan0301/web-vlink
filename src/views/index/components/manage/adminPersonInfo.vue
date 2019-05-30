@@ -329,18 +329,18 @@ export default {
   mounted () {
     if (this.$route.query.type == 1) { // 分组查看
       this.isGroup = true;
-      this.groupId = parseInt(this.$route.query.id);
+      this.groupId = this.$route.query.id;
     } else { // 底库查看
       this.isGroup = false;
-      this.albumId = parseInt(this.$route.query.id);
-      this.getBottomBankList(parseInt(this.$route.query.id));
+      this.albumId = this.$route.query.id;
+      this.getBottomBankList();
     }
-    this.getGroupList(parseInt(this.$route.query.id));
+    this.getGroupList();
     this.getPersonList();
   },
   methods: {
     // 获取底库列表
-    getBottomBankList (uid) {
+    getBottomBankList () {
       const params = {
         type: 1 // 1--人像库
       }
@@ -348,7 +348,7 @@ export default {
         .then(res => {
           if (res) {
             res.data.albumNumQueryDtoList.map(item => {
-              if (item.id === uid) {
+              if (item.id == this.albumId) {
                 this.groupName = item.title;
               }
             })
@@ -357,7 +357,7 @@ export default {
         .catch(() => {})
     },
     // 获取分组列表
-    getGroupList (uid) {
+    getGroupList () {
       const params = {
         type: 4 // 4---人像
       }
@@ -366,7 +366,7 @@ export default {
           if (res) {
             if (this.groupId) {
               res.data.groupNumList.map(item => {
-                if (item.id === uid) {
+                if (item.id == this.groupId) {
                   this.groupName = item.name;
                 } else {
                   this.copyGroupList.push({

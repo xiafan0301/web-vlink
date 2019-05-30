@@ -374,9 +374,9 @@ export default {
       })
     },
     // 图片放大传参
-    emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.sturcDetail.eventInfo.attachmentList);
-    },
+    // emitHandleImg (isShow, index) {
+    //   this.openBigImg(index, this.sturcDetail.eventInfo.attachmentList);
+    // },
     // 关闭图片放大
     emitCloseImgDialog(data){
       this.imgList1 = [];
