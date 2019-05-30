@@ -718,3 +718,15 @@ export function getASelectDevice (data) {
     params: data
   });
 }
+
+/**
+ * 区域信息分层查询接口
+ * @param {*} data
+ */
+export function getAreaList (pid) {
+  return request({
+    url: 'area-service/area-list/'+ pid,
+    mode: 'user',
+    method: 'get'
+  });
+}

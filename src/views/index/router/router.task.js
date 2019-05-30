@@ -20,6 +20,10 @@
         path: 'handle',
         name: 'task_handle',
         component: () => import('@/views/index/components/task/taskHandle.vue')
+      },{
+        path: 'alarm-detail',
+        name: 'task_alarm_detail',
+        component: () => import('@/views/index/components/task/alarmCtcDetail.vue')
       },
       {
         path: 'default',
