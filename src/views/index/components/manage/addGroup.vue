@@ -52,6 +52,7 @@
           <template v-if="tabState === 1">
             <mapSelect
               v-show="tabState === 1"
+              :groupId="groupId"
               :selectDeviceList="selectDeviceList"
               :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
@@ -151,6 +152,7 @@ export default {
       getDiciData(intelCharacId)
         .then(res => {
           if (res) {
+            console.log('this.intelCharacList', res)
             this.intelCharacList = res.data;
           }
         })
@@ -450,6 +452,11 @@ export default {
       if (list) {
         let arr = [];
         if (list.length > 0) {
+          if (this.groupId) { // 如果是编辑分组
+            this.currentDeviceList = [];
+            this.leftDeviceNumber = 0;
+          }
+          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
@@ -471,12 +478,15 @@ export default {
           this.currentDeviceList = [];
         }
       }
-      if (selectList) {
+      if (selectList && selectList.length > 0) {
+        console.log('selectList', selectList)
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
         });
-        this.selectDeviceNumber = selectNum && selectNum;
+        // if (!this.groupId) { // 如果是新增分组
+          this.selectDeviceNumber = selectNum && selectNum;
+        // }
       }
     },
     // 从移除设备接受要提交的设备
@@ -532,16 +542,6 @@ export default {
     },
     // 新增分组 
     addGroup () {
-      // if (!this.groupName) {
-      //   this.errorText = '该项内容不可为空';
-      //   this.isShowError = true;
-      //   return;
-      // }
-      // if (this.groupNamele) {
-      //   this.errorText = '该项内容不可为空';
-      //   this.isShowError = true;
-      //   return;
-      // }
       if (this.isShowError) {
         return;
       }

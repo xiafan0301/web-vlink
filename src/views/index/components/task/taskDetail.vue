@@ -7,7 +7,7 @@
           <el-breadcrumb-item>{{ dicFormater( taskType, processType)}}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
-      <div class="content-box" >
+      <div class="content-box" v-if="basicInfo">
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
@@ -70,10 +70,10 @@
                     <div style="width:100%;margin-top:10px;">
                       <img
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        :src="itm.thumbnailPath"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export default {
     },
     //修改事件处理过程状态
     editProcessStatus() {
-      const uid = this.$route.query.uid;
+      const uid = this.$route.query.id;
       updateProcess(uid).then((res)=>{
         console.log(res)
       }).catch(()=>{})

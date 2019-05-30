@@ -349,7 +349,6 @@ export default {
     //任务数量统计
     getTaskCount() {
       let params = {
-        dispatchType: 1,       //调度类型：1事件、2告警
         userId: this.userInfo.uid
       }
       getCount(params).then(res => {
@@ -403,7 +402,7 @@ export default {
       }
     },
     goSkipTaskDetail(item) {
-      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid}});
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType}});
     },
     // 获取任务列表数据
     getTaskData () {

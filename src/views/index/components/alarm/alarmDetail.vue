@@ -355,10 +355,10 @@ export default {
       }
       if(this.type === 'history') {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime}});
+                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime, id: item.eventInfo.uid}});
       }else {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType}});
+                                                    objType: this.$route.query.objType, id: item.eventInfo.uid}});
       }
     },
     //撤销告警

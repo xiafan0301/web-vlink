@@ -70,7 +70,7 @@
 // import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
-  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList' ],
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList', 'groupId' ],
   data () {
     return {
       arrowActiveTemp: false,
@@ -110,7 +110,12 @@ export default {
       this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
 
       let selectDeviceNumber = this.unCheckDeviceList.length;
-      let checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
+      let checkedDeviceNumber;
+      if (this.groupId) { // 编辑分组
+        checkedDeviceNumber = val.length;
+      } else {
+        checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
+      }
 
       if (val && val.length > 0) {  // 多边形存在且在多边形中的设备
         val.map(item => {
@@ -202,6 +207,7 @@ export default {
           currentDeviceList.push(params);
         }
       }
+      console.log('unCheckDeviceList', this.unCheckDeviceList)
       // 多边形存在但不在多边形中的设备
       if (this.unCheckDeviceList.length > 0) {
         this.unCheckDeviceList.map(item => {
@@ -280,7 +286,6 @@ export default {
       this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDeviceList, selectDeviceNumber);
       // 保留上一次已有设备的数量
       this.lastCurrDeviceLength = val.length;
-      // this.lastSelectDeviceLength = this.unCheckDeviceList.length;
 
       this.unCheckDeviceList = []; // 清空可选设备列表
     }
@@ -289,6 +294,9 @@ export default {
     this.initMap();
     setTimeout(() => {
       this.getMapData();
+      if (this.groupId) {
+        this.handleCurrentDeviceData();
+      }
     }, 1500)
   },
   methods: {
@@ -322,7 +330,7 @@ export default {
 
           _this.selAreaPolygon = polygon;
           _this.selAreaAble = true;
-          // _this.mapMarkHandler();
+          _this.mapMarkHandler();
 
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
@@ -385,7 +393,44 @@ export default {
           })
         })
         this.mapMarkHandler();
+        // this.finalDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList)); 
       }
+    },
+    // 编辑  处理最开始已有的设备
+    handleCurrentDeviceData () {
+      console.log('33333')
+      let currentDeviceList = this.currentDeviceList;
+      if (currentDeviceList && currentDeviceList.length > 0) {
+        currentDeviceList.map(item => {
+          item.deviceList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: true, // 摄像头
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.finalDeviceList.push(params);
+          });
+          item.bayonetList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: false, // 卡口
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.finalDeviceList.push(params);
+          })
+        })
+      }
+      console.log('finalDeviceList', this.finalDeviceList)
     },
     // 地图标记处理
     mapMarkHandler () {
@@ -403,11 +448,13 @@ export default {
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
+        
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
           if (obj.longitude > 0 && obj.latitude > 0) {
+
             _this.map && _this.map.setCenter([obj.longitude, obj.latitude]);
 
             let offSet = [-20.5, -48], selClass = '';
@@ -417,6 +464,7 @@ export default {
               this.unCheckDeviceList.push(obj); // 没有选中的设备
             }
             if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
+              
               _this.finalDeviceList.push(obj);
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记

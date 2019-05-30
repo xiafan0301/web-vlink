@@ -3,7 +3,7 @@
     <div class="ctc-detail-info">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/task/list' }">全部任务</el-breadcrumb-item>
           <el-breadcrumb-item>调度详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -79,17 +79,14 @@
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
               </template>
             </div>
-            <!-- <div class="event-status-img">
-              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
+            <div class="event-status-img">
+              <template v-if="$route.query.status === 'ctc_end'">
                 <i class="vl_icon vl_icon_event_11"></i>
               </template>
-              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 1">
+              <template v-if="$route.query.status === 'ctc_ing'">
                 <i class="vl_icon vl_icon_event_13"></i>
-              </template>
-              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
-                <i class="vl_icon vl_icon_event_12"></i>
-              </template>
-            </div> -->
+              </template>     
+            </div>
           </div>
           <div class="card-info right-info">
             <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -268,7 +265,7 @@
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
                         v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
-                        :src="itm.src"
+                        :src="itm.thumbnailPath"
                         @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
@@ -280,10 +277,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <template v-if="$route.query.status === 'ctc_ing'">
-          <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
-          <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
-        </template>
+        <el-button class="operation_btn back_btn" @click="skipCtcEndPage">反馈情况</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -293,6 +287,7 @@
 <script>
 // import { getEventDetail } from '@/views/index/api/api.event.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
+import { updateProcess } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -321,21 +316,19 @@ export default {
   mounted () {
     // this.getDetail();
     this.toAlarmDetail();
+    this.editProcessStatus();
   },
   methods: {
-    // 跳至结束调度页面
+    // 跳至反馈情况页面
     skipCtcEndPage () {
-      let isRelationEvent;
-      if (this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid) {
-        isRelationEvent = 1;
-      } else {
-        isRelationEvent = 0;
-      }
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType }});
     },
-    // 跳至再次调度页面
-    skipAgainCtcPage () {
-      this.$router.push({name: 'alarm_ctc_operation', query: { eventId: this.$route.query.id, status: this.$route.query.status, eventType: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
+    //修改事件处理过程状态
+    editProcessStatus() {
+      const uid = this.$route.query.id;
+      updateProcess(uid).then((res)=>{
+        console.log(res)
+      }).catch(()=>{})
     },
     //告警详情
     toAlarmDetail() {
@@ -374,9 +367,9 @@ export default {
       })
     },
     // 图片放大传参
-    // emitHandleImg (isShow, index) {
-    //   this.openBigImg(index, this.sturcDetail.eventInfo.attachmentList);
-    // },
+    emitHandleImg (isShow, index) {
+      this.openBigImg(index, this.sturcDetail.eventInfo.attachmentList);
+    },
     // 关闭图片放大
     emitCloseImgDialog(data){
       this.imgList1 = [];

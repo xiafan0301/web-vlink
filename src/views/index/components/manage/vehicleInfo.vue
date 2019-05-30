@@ -486,14 +486,6 @@ export default {
           if (res) {
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
-            // this.vehicleList.map(val => {
-            //   val.albumList.map(item => {
-            //     this.albumList.push(item.title);
-            //   });
-            //   val.groupList.map(item => {
-            //     this.groupList.push(item.name);
-            //   });
-            // })
           }
         })
         .catch(() => {})
@@ -543,8 +535,8 @@ export default {
     },
     // 查询车辆底库
     getVelBottomNameInfo () {
-      this.allVelBottomNameNumber = 0;
-      this.pagination.pageNum = 1;
+      // this.allVelBottomNameNumber = 0;
+      // this.pagination.pageNum = 1;
       const params = {
         bankName: this.searchGroupName
       }
@@ -555,7 +547,7 @@ export default {
             // this.vehicleBottomNameList.map(item => {
               this.allVelBottomNameNumber = res.data.total;
             // })
-            this.getVehicleInfoList();
+            // this.getVehicleInfoList();
           }
         })
         .catch(() => {})

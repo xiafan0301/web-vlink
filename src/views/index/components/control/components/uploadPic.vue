@@ -1,8 +1,9 @@
 <template>
   <vue-scroll>
-    <div class="upload_pic_components" :class="{hidden: maxSize === picNum}">
+    <div class="upload_pic_components" :class="{'hidden': maxSize === picNum, 'is_disabled': isDisabled}">
       <el-upload
         ref="uploadPic"
+        :disabled="isDisabled"
         multiple
         accept="image/*"
         :limit="maxSize"
@@ -29,7 +30,7 @@
 import { ajaxCtx } from '@/config/config.js';
 export default {
   name: 'uploadPic',
-  props: ['maxSize', 'fileList'],
+  props: ['maxSize', 'fileList', 'isDisabled'],
   data () {
     return {
       // 插入图片
@@ -89,6 +90,13 @@ export default {
     }
     &.hidden .el-upload--picture-card{
       display: none;
+    }
+    &.is_disabled .el-upload--picture-card:hover, &.is_disabled .el-upload--picture-card:focus{
+      cursor: default;
+      color: #333333;
+      > i{
+        color: #9F9F9F;
+      }
     }
     .dialog_pic{
       position: fixed;
