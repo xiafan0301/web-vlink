@@ -38,12 +38,15 @@
             :action="uploadUrl"
             multiple
             accept=".png, .jpg, .jpeg"
-            :show-file-list='true'
             :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
             :on-success='handleSuccess'
+             list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
           >
-            <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
+            <!-- <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button> -->
+            <i class="el-icon-plus"></i>
+            <span class='add-img-text'>添加</span>
             <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.png .jpg .jpeg，最多上传9张图片）</div>
           </el-upload>
         </div>
@@ -52,6 +55,9 @@
         <el-button class="operation_btn function_btn" :loading="isEndLoading" @click="submitData('endForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+      <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="dialogImageUrl" alt="">
+          </el-dialog>
     </div>
   </vue-scroll>
 </template>
@@ -82,6 +88,8 @@ export default {
       taskType: dataList.taskType,
       userList: [],
       userInfo: {},
+      dialogImageUrl: '',
+        dialogVisible: false
     }
   },
   mounted () {
@@ -98,6 +106,10 @@ export default {
     // 关闭事件change
     handleEventChange () {
     },
+     handlePictureCardPreview(file) {
+        this.dialogImageUrl = file.url;
+        this.dialogVisible = true;
+      },
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
@@ -111,7 +123,7 @@ export default {
       let type;
       if (fileName) {
         type = fileName.substring(fileName.lastIndexOf('.'));
-        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
           this.uploadImgList.map((item, index) => {
             if (item.cname === fileName) {
               this.uploadImgList.splice(index, 1);
@@ -133,7 +145,7 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,
@@ -279,9 +291,6 @@ export default {
         color: #999999;
         margin: 10px 0;
         font-size: 14px;
-      }
-      /deep/ .el-upload-list__item {
-        width: 80%;
       }
       .img_list {
           display: flex;

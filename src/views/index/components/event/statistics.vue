@@ -382,7 +382,7 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
-            this.departmentData.map((item, index) => {
+            this.departmentData.map((item) => {
               if (item.uid === this.userInfo.organList[0].uid) {
                 this.searchForm.dealOrgId = item.uid;
               }
