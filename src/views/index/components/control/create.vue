@@ -21,7 +21,7 @@
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select
-                :disabled="($route.query.eventId ? true : false) || pageType === 2"
+                :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
                 v-model="createForm.event"
                 filterable
                 remote
@@ -29,8 +29,7 @@
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
-                :loading="loading"
-                @change="eventCode = eventList.find(f => f.value === createForm.event).label">
+                :loading="loading">
                 <el-option
                   v-for="item in eventList"
                   :key="item.value"
@@ -192,7 +191,6 @@ export default {
           }
         ],
       },
-      eventCode: null,
       eventList: [],
       // 分析模型数据
       allDevData: [],//传给分析模型的所有设备点位
@@ -394,7 +392,6 @@ export default {
             let data = {
               alarmLevel: this.createForm.controlAlarmId,// 告警级别
               eventId: this.createForm.event,// 事件id
-              eventCode: this.eventCode,// 事件code
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
               modelList: modelList,// 布控分析模型
@@ -576,6 +573,7 @@ export default {
             this.controlDetail.alarmLevel = this.createForm.controlAlarmId;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
+            this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.modelList = modelList;
             this.controlDetail.surveillancTimeList = time;
             // 为短期布控时才需要传布控日期
