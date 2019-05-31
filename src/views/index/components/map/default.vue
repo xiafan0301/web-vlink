@@ -115,12 +115,13 @@ export default {
               padding: 0 .15rem;
             }
             .map_lc_dc_mark {
-              width: 100%;
+              width: 2.6rem;
               padding: .2rem;
               border-bottom: 1px dashed #D3D3D3;
               .dc_mark_c {
                 color: #333333;
                 margin-bottom: .15rem;
+                word-wrap: break-word;
               }
               > p {
                 color: #999999;
@@ -232,9 +233,23 @@ export default {
       > li {
         float: left;
       }
+      > .vl_map_rt_cks {
+        .el-button-group {
+          button {
+            border: none;
+            padding: 0 0.1rem;
+            &:hover {
+              background: #ffffff;
+            }
+            &:focus {
+              background: #ffffff;
+            }
+          }
+        }
+      }
     }
     > .map_rrt {
-      position: absolute; right: .2rem; top: 50%;
+      position: absolute; right: .2rem; top: 45%;
       height: 5.1rem;
       margin-top: -2.55rem;
       transition: right .3s ease-out;

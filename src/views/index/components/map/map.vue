@@ -35,9 +35,9 @@
                     <span>{{ node.label }}</span>
                     <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_002 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_001': data.deviceStatus === 1}"></span>
                     <span class="change_node_pos" v-else-if="!data.infoList"></span>
-                    <div class="map_tree_tab" v-if="data['isFirst']">
-                      <span v-for="(item, index) in constObj"  @click.stop="switchTab(data, index, $event)" :key="item.id">{{item.name}}</span>
-                    </div>
+                    <!--<div class="map_tree_tab" v-if="data['isFirst']">-->
+                      <!--<span v-for="(item, index) in constObj"  @click.stop="switchTab(data, index, $event)" :key="item.id">{{item.name}}</span>-->
+                    <!--</div>-->
                   </span>
                 </el-tree>
               </vue-scroll>
@@ -90,24 +90,31 @@
         <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
           <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].bayonetListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>
         </el-checkbox>
-        <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
-          <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll" v-for="(item, index) in constObj" :key="item.id" :label="index">
-            {{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span>
-            <el-dropdown v-if="index !== 1"  :hide-on-click="false">
-              <span class="el-dropdown-link">
-                <i class="el-icon-arrow-down el-icon--right"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-checkbox-group v-model="item.supTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
-                  <el-dropdown-item v-for="sItem in item.supOptions" :key="sItem.id">
-                    <el-checkbox :label="sItem.name">{{sItem.name}}</el-checkbox>
-                  </el-dropdown-item>
-                </el-checkbox-group>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </el-checkbox>
+        <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
+          <el-dropdown :split-button="index !== 1" trigger="click" v-for="(item, index) in constObj" :key="item.id" :hide-on-click="false">
+            <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll"  :label="index">
+              {{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span>
+            </el-checkbox>
+            <el-dropdown-menu slot="dropdown">
+              <el-checkbox-group v-model="item.supTypeList" class="vl_map_rt_cks" @change="supCheckedTypeChange(item)">
+                <el-dropdown-item v-for="(sItem, sIndex) in item.supOptions" :key="sItem.id">
+                  <el-checkbox :label="sIndex">{{sItem.name}}</el-checkbox>
+                </el-dropdown-item>
+              </el-checkbox-group>
+            </el-dropdown-menu>
+          </el-dropdown>
         </el-checkbox-group>
       </div>
+      <!--<div class="map_rt">-->
+        <!--<el-tree-->
+          <!--class="test_tree"-->
+          <!--:data="testObj"-->
+          <!--show-checkbox-->
+          <!--node-key="id"-->
+          <!--:default-expanded-keys="[10]"-->
+          <!--:default-checked-keys="[10]"-->
+        <!--&gt;</el-tree>-->
+      <!--</div>-->
       <!-- 右侧工具栏 -->
       <div class="map_rrt">
         <ul class="map_rrt_u1">
@@ -133,6 +140,7 @@
           </li>
         </ul>
         <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
         </ul>
@@ -187,9 +195,9 @@ export default {
       constObj: [
         {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [{name: '部门范围'},{name: '其他范围'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
         {name:'卡口', _key: 'bayonetListNum', isIndeterminate: false, checkAll: true},
-        {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1, 2, 3, 4]},
+        {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
         {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
-        ],
+      ],
       map: null, // 地图对象
       isIndeterminate: false,
       mapTypeCheckAll: true,
@@ -294,6 +302,8 @@ export default {
       }
     },
     mapTypeList (newValue, oldValue) {
+      console.log(newValue, oldValue)
+      this.checkedTypeChange(newValue);
       let arr = [], bool = false;
       if (oldValue.length > newValue.length) { // 隐藏
         arr = oldValue.filter(x => !newValue.includes(x))
@@ -309,8 +319,16 @@ export default {
           this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
         }, 0)
       })
-      // 更新地图
-      // this.operClassToEL(this.marks[arr[0]], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
+      // 更新子菜单勾选状态
+      console.log(arr)
+      arr.forEach(x => {
+        this.constObj[x].isIndeterminate = false;
+        if (bool) {
+          this.constObj[x].supTypeList = this.constObj[x].supTypeListAll;
+        } else {
+          this.constObj[x].supTypeList = [];
+        }
+      })
     }
   },
   mounted () {
@@ -397,6 +415,11 @@ export default {
   methods: {
     filterMapTree () {
       if (this.mapInfoVal) {
+        if (this.mapTreeData[0].infoName.indexOf(this.mapInfoVal) !== -1) {
+          let allNode = this.$refs.mapLeftTree.store._getAllNodes();
+          this.objSetItem(allNode, {expanded: true})
+          return;
+        }
         // 如果过滤前已经有checkbox未被勾选，需要先把对应原始数据的数据置为 false
         // let _arr = this.mapTypeListAll.filter(x => !this.mapTypeList.includes(x))
         this.mapTreeData[0].infoList.forEach(x => {
@@ -431,17 +454,17 @@ export default {
             _arr.forEach(m => {
               if (this.selAreaPolygon) {
                 if (m.isInArea && m.isShow) {
-                  x.infoList.unshift(m)
+                  x.infoList.push(m)
                 }
               } else {
                 if (m.isShow) {
-                  x.infoList.unshift(m)
+                  x.infoList.push(m)
                 }
               }
             })
             // x.infoList有数据了之后，把“无相关数据”清除
-            if (x.infoList.length > 1 && x.infoList[x.infoList.length - 1].infoName === '无相关数据') {
-              x.infoList.pop();
+            if (x.infoList.length > 1 && x.infoList[0].infoName === '无相关数据') {
+              x.infoList.shift();
             }
           } else {
             x.infoList.forEach(t => {
@@ -699,7 +722,7 @@ export default {
             this.$_hideLoading();
             this.mapMark(this.mapTreeData[0].infoList)
             this.updateDom();
-            this.moveDom();
+            // this.moveDom();
             console.log(this.mapTreeData[0].infoList)
           }
         })
@@ -801,7 +824,7 @@ export default {
         ss = Array.from(ss);
         ss.forEach(x => {
           $(x).parent().siblings().css('display', 'none');
-          $(x).parent().parent().css('padding-left', '26px');
+          $(x).parent().parent().css('padding-left', '40px');
         })
       })
     },
@@ -1082,7 +1105,7 @@ export default {
           <div class="sign_info">
             <span>标注人：${data.opUserName}</span><span>${data.createTime ? formatDate(data.createTime) : '无具体时间'}</span>
           </div>
-          <div class="sign_content">${data.markContent}</div>
+          <div class="sign_content" style="word-wrap: break-word;">${data.markContent}</div>
           <div class="sign_show_edit">
             <textarea class="sign_text" maxlength="50" cols="30" rows="4"></textarea>
             <div class="byte_num"><span class="sign_text_num">${data.markContent.length}</span>/50</div>
@@ -1429,7 +1452,7 @@ export default {
         });
         _this.markEditMarker = marker;
         _this.getPosition(e.lnglat);
-        let obj = {position: '', markContent: '', opUserName: '黄某', unit: '美国情报局', longitude: e.lnglat.lng, latitude: e.lnglat.lat, createTime: new Date().getTime()}
+        let obj = {position: '', markContent: '', opUserName: _this.$store.state.loginUser.userName, unit: '美国情报局', longitude: e.lnglat.lng, latitude: e.lnglat.lat, createTime: new Date().getTime()}
         let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
         let infoWindow = new window.AMap.Marker({
           map: _this.map,
@@ -1701,14 +1724,47 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(12);
+      }
+    },
     mapTypeCheckAllChange (val) {
       this.isIndeterminate = false;
-      this.mapTypeList = val ? this.mapTypeListAll : [];
+      if (val) {
+        this.mapTypeList = this.mapTypeListAll;
+        this.constObj.forEach(x => {
+          x.supTypeList = x.supTypeListAll;
+        })
+      } else {
+        this.mapTypeList =[];
+        this.constObj.forEach(x => {
+          x.supTypeList = []
+        })
+      }
     },
     checkedTypeChange (value) {
       let checkedCount = value.length;
-      this.mapTypeCheckAll = checkedCount === this.mapTypeListAll.length;
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.mapTypeListAll.length;
+      this.mapTypeCheckAll = checkedCount === this.mapTypeListAll.length && this.constObj.findIndex(x => !x.checkAll) === -1;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.mapTypeListAll.length || this.constObj.findIndex(x => !x.checkAll) !== -1;
+    },
+    supCheckedTypeChange (item) {
+      item.checkAll = item.supTypeList.length === item.supTypeListAll.length;
+      item.isIndeterminate = item.supTypeList.length > 0 && item.supTypeList.length < item.supTypeListAll.length;
+      this.isIndeterminate = this.mapTypeList.length && this.constObj.findIndex(x => x.isIndeterminate) !== -1;
+      let _i = this.constObj.findIndex(x => x === item);
+      let _j = this.mapTypeList.findIndex(x => x === _i);
+      if (item.supTypeList.length === 0 && _j !== -1) {
+        let _arr = this.mapTypeList.filter((x, index) => index !== _j)
+        this.mapTypeList = Object.assign([], _arr);
+      }
+      if (item.checkAll) {
+        if (_j !== -1) {
+          this.mapTypeList = this.mapTypeList.includes(_j) ? this.mapTypeList.concat([]) : this.mapTypeList.concat([_j])
+        } else {
+          this.mapTypeList = this.mapTypeList.includes(_i) ? this.mapTypeList.concat([]) : this.mapTypeList.concat([_i])
+        }
+      }
     },
 
     // 视频播放
@@ -1865,9 +1921,29 @@ export default {
         }
         this.addCalling(cObj)
       }
+    },
+
+
+    // 模拟假车辆数据
+    getVehicel () {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          let arr = []
+          for(let i = 0; i < 6; i++) {
+            let _obj = {
+              vehicelType: i + 1,
+              infoName: '车辆号码' + i,
+              gpsLongitude: 112.935227 + Math.random() / 30,
+              gpsLatitude: 28.099869 + Math.random() / 30
+            }
+            arr.push(_obj)
+          }
+          resolve(arr)
+        }, 1000)
+      })
     }
   },
-  beforeDestroy () {
+  destroy () {
     if (this.map) {
       this.map.destroy();
       this.geocoder = null
@@ -2095,6 +2171,15 @@ export default {
     > p {
       color: #FFFFFF;
       text-align: center;
+    }
+  }
+  .test_tree {
+    > .el-tree-node {
+      > .el-tree-node__content {
+       > .el-tree-node__expand-icon{
+          display: none;
+        }
+      }
     }
   }
 </style>

@@ -412,7 +412,22 @@ export default {
         }, function (error) {
           // 媒体流创建失败错误
           console.log('getUserMedia error: ' + error);
-          alert('对不起，您的电脑上没有摄像头或摄像头不可用。');
+          navigator.getMedia({
+            'audio': true,
+            'video': false
+          }, function (_stream) {
+            _this.aWRData.push(obj);
+            _this.wrObj.mediaStream = _stream;
+            _this.wrCreatConnection(type, obj, desc);
+            _this.wrStateHandler({
+              remoteId: obj.remoteId,
+              state: 11, // 等待对方接听
+              uid: obj.uid
+            });
+          }, function (_error) {
+            console.log(_error)
+            alert('您的设备没有摄像头也没有麦，无法通话')
+          })
         });
       } else {
         console.log('----------------222222')
@@ -519,7 +534,7 @@ export default {
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
       };
       // 向PeerConnection中加入需要发送的流
-      _pc.addStream(_this.wrObj.mediaStream);
+      _this.wrObj.mediaStream ? _pc.addStream(_this.wrObj.mediaStream) : _pc.addStream(new MediaStream());
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {
