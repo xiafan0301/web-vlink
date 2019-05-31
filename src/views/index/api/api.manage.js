@@ -619,7 +619,7 @@ export function deletePersonGroup (uid, data) {
 /*** =======================视频设置=========================== */
 /**===== 自定义组 ===== */
 /**
- * 获取所有分组
+ * 获取所有分组及分组下的设备
  * @param {*} data
  */
 export function getCusGroup (params) {
@@ -647,6 +647,17 @@ export function getAllDevices (params) {
 export function getCurrentDevices (params) {
   return request({
     url: '/group-device-service/devices',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 获取所有的分组
+ * @param {*} data
+ */
+export function getAllGroups (params) {
+  return request({
+    url: '/groups',
     params,
     method: 'get'
   });
@@ -727,5 +738,17 @@ export function getASelectDevice (data) {
     url: '/dev-auth-temp-service/auth-devices',
     method: 'get',
     params: data
+  });
+}
+
+/**
+ * 区域信息分层查询接口
+ * @param {*} data
+ */
+export function getAreaList (pid) {
+  return request({
+    url: 'area-service/area-list/'+ pid,
+    mode: 'user',
+    method: 'get'
   });
 }

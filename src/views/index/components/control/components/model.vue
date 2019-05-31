@@ -2,13 +2,14 @@
   <el-form :ref="mapId" :model="modelForm" class="control_model">
     <!-- 图片上传 -->
     <el-form-item :label="changeObj" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
-      <div class="pic_format">
+      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :isDisabled="isDisabled"></div>
+      <div class="pic_format" v-show="!isDisabled">
         <div @click="popSel">从库中选择</div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
       <el-select
+        :disabled="isDisabled"
         v-model="modelForm.licenseNum"
         filterable
         remote
@@ -29,7 +30,7 @@
       </el-select>
     </el-form-item>
     <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
-      <el-select value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getAllBayontListByAreaId">
+      <el-select :disabled="isDisabled" value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getAllBayontListByAreaId">
         <el-option
           v-for="item in areaList"
           :key="item.value"
@@ -41,6 +42,7 @@
     <template v-if="modelType === '1' || modelType === '2'">
       <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
         <el-autocomplete
+          :disabled="isDisabled"
           style="width: 490px;"
           v-model="item.point"
           :trigger-on-focus="false"
@@ -53,7 +55,7 @@
         <i class="vl_icon vl_icon_control_28" @click="removePoint(item)" v-if="modelForm.points.length > 1"></i>
       </el-form-item>
       <el-form-item style="width: calc(50% - 30px);padding-left: 20px;">
-        <div class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
+        <div v-show="!isDisabled" class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
       </el-form-item>
     </template>
     <!-- 地图 -->
@@ -138,7 +140,7 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="area top" v-if="modelType === '4'" @click="bindDraw" :class="{'active': selAreaAcitve}">
+        <div class="area top" v-if="modelType === '4' && !isDisabled" @click="bindDraw" :class="{'active': selAreaAcitve}">
           <i class="vl_icon vl_icon_041"></i>
           <p>选中区域</p>
         </div>
@@ -346,6 +348,25 @@ export default {
         })
         return bayList.length;
       }
+    },
+    // 分析模块是否禁用
+    isDisabled () {
+      if (this.modelType === '1') {
+        if (this.checkListCommon('人员追踪')) return false;
+        return true;
+      }
+      if (this.modelType === '2') {
+        if (this.checkListCommon('车辆追踪')) return false;
+        return true;
+      }
+      if (this.modelType === '3') {
+        if (this.checkListCommon('越界分析')) return false;
+        return true;
+      }
+      if (this.modelType === '4') {
+        if (this.checkListCommon('范围分析')) return false;
+        return true;
+      }
     }
   },
   mounted () {
@@ -372,6 +393,10 @@ export default {
     }
   },
   methods: {
+    // 公共方法
+    checkListCommon (type) {
+      return this.checkList.some(s => s === type);
+    },
     // 上传方法
     uploadPicDel (fileList) {
       this.fileList = fileList;
@@ -493,7 +518,7 @@ export default {
 
     // 验证人员追踪的必填项
     validateModelOne () {
-      if (this.checkList.some(s => s === '人员追踪')) {
+      if (this.checkListCommon('人员追踪')) {
         this.$refs[this.mapId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
@@ -558,7 +583,7 @@ export default {
     },
     // 验证车辆追踪的必填项
     validateModelTwo () {
-      if (this.checkList.some(s => s === '车辆追踪')) {
+      if (this.checkListCommon('车辆追踪')) {
         console.log('车辆追踪')
         this.$refs[this.mapId].validate((valid) => {
           if (valid) {
@@ -622,7 +647,7 @@ export default {
     },
     // 验证越界分析的必填项
     validateModelThree () {
-      if (this.checkList.some(s => s === '越界分析')) {
+      if (this.checkListCommon('越界分析')) {
         console.log('越界分析')
         if (this.fileList.length === 0) {
           this.$emit('sendModelDataThree', null);
@@ -680,7 +705,7 @@ export default {
     },
     // 验证范围分析的必填项
     validateModelFour () {
-      if (this.checkList.some(s => s === '范围分析')) {
+      if (this.checkListCommon('范围分析')) {
         console.log('范围分析')
         if (this.fileList.length === 0) {
           this.$emit('sendModelDataFour', null);

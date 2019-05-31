@@ -25,8 +25,8 @@
                     <li
                       v-for="(item, index) in copyGroupList"
                       :key="index"
-                      @click="handleCopyGroup(item.groupName)"
-                    >{{item.groupName}}</li>
+                      @click="handleCopyGroup(item.name)"
+                    >{{item.name}}</li>
                   </ul>
                 </vue-scroll>
               </div>
@@ -174,8 +174,9 @@
             <li>
             <span>底库信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.albumList && vehicleDetailInfo.albumList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span>
+              <template v-if="albumList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
+                <span>{{albumList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -185,8 +186,9 @@
           <li>
             <span>分组信息：</span>
             <div class="group_box">
-              <template v-if="vehicleDetailInfo.groupList && vehicleDetailInfo.groupList.length > 0">
-                <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span>
+              <template v-if="groupList.length > 0">
+                <!-- <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span> -->
+                <span>{{groupList.join('、')}}</span>
               </template>
               <template v-else>
                 <span>无</span>
@@ -279,7 +281,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup,
-  copyGroup, checkVelRename } from '@/views/index/api/api.manage.js';
+  copyGroup, checkVelRename, getVehicleBottomName } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -307,6 +309,8 @@ export default {
         ]
       },
       vehicleList: [],
+      albumList: [], // 底库列表
+      groupList: [], // 分组列表
       vehicleDetailInfoDialog: false, // 查看车辆信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
@@ -322,32 +326,52 @@ export default {
     }
   },
   mounted () {
-    this.groupId = parseInt(this.$route.query.id);
     if (this.$route.query.type == 1) { // 分组查看
       this.isGroup = true;
+      this.groupId = this.$route.query.id;
     } else { // 底库查看
       this.isGroup = false;
+      this.albumId = this.$route.query.id;
+      this.getVelBottomNameInfo();
     }
     this.getList();
-    this.getVeGroupInfo(parseInt(this.$route.query.id));
+    this.getVeGroupInfo();
   },
   methods: {
+    // 查询车辆底库
+    getVelBottomNameInfo () {
+      getVehicleBottomName()
+        .then(res => {
+          if (res) {
+            res.data.albumNumQueryDtoList.map(item => {
+              if (item.id == this.albumId) {
+                this.groupName = item.title;
+              }
+            })
+          }
+        })
+        .catch(() => {})
+    },
     // 获取所有的车辆分组
-    getVeGroupInfo (uid) {
+    getVeGroupInfo () {
       getVehicleGroup()
         .then(res => {
           if (res && res.data) {
             // this.allGroupList = res.data;
-            res.data.groupNumList.map(item => {
-              if (item.id === uid) {
-                this.groupName = item.name;
-              } else {
-                this.copyGroupList.push({
-                  uid: item.id,
-                  groupName: item.name
-                })
-              }
-            });
+            if (this.groupId) {
+              res.data.groupNumList.map(item => {
+                if (item.id == this.groupId) {
+                  this.groupName = item.name;
+                } else {
+                  this.copyGroupList.push({
+                    uid: item.id,
+                    name: item.name
+                  })
+                }
+              });
+            } else {
+              this.copyGroupList = res.data.groupNumList;
+            }
           }
         })
         .catch(() => {})
@@ -355,7 +379,6 @@ export default {
     // 获取车辆列表数据
     getList () {
       const params = {
-        // 'where.type': parseInt(this.$route.query.type),
         'where.keyWord': this.searchForm.keyWord,
         'where.groupId': this.groupId,
         'where.albumId': this.albumId,
@@ -407,6 +430,12 @@ export default {
           .then(res => {
             if (res) {
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.albumList.map(item => {
+                this.albumList.push(item.title);
+              });
+              this.vehicleDetailInfo.groupList.map(item => {
+                this.groupList.push(item.groupName);
+              });
             }
           })
           .catch(() => {})

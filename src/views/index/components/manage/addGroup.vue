@@ -11,7 +11,7 @@
     <div class="content_box">
       <div class="content_new_group">
         <span>分组名称:</span>
-        <el-input style="width: 300px;" @change="changeGroupName" v-model="groupName" placeholder="请输入分组名称，例：案件频发区域1"></el-input>
+        <el-input style="width: 300px;" @input="changeGroupName" v-model="groupName" placeholder="请输入分组名称"></el-input>
         <p v-show="isShowError" style="color: #F94539;margin-left: 10px;">{{errorText}}</p>
       </div>
       <div class="content_main_box">
@@ -23,22 +23,24 @@
           </ul>
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-              <!-- <el-form-item prop="areaId">
-                <el-select  style="width: 240px;" v-model="searchForm.areaId" placeholder="行政区划">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
-                </el-select>
-              </el-form-item> -->
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+                  <el-option
+                    v-for="(item, index) in intelCharacList"
+                    :key="index"
+                    :label="item.enumValue"
+                    :value="item.enumField"
+                    ></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item prop="dutyOrganId">
-                <el-select  style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+                <el-select style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option
+                    v-for="(item, index) in allDepartmentData"
+                    :key="index"
+                    :label="item.organName"
+                    :value="item.uid"
+                    ></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
@@ -47,9 +49,10 @@
               </el-form-item>
             </el-form>
           </div>
-          <!-- <template v-if="tabState === 1"> -->
+          <template v-if="tabState === 1">
             <mapSelect
               v-show="tabState === 1"
+              :groupId="groupId"
               :selectDeviceList="selectDeviceList"
               :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
@@ -61,10 +64,9 @@
               @emitRemoveFinalDevice="emitRemoveFinalDevice"
               @emitChangeLDeviceType="emitChangeLDeviceType"
             ></mapSelect>
-          <!-- </template>
-          <template v-if="tabState === 2"> -->
+          </template>
+          <template v-if="tabState === 2">
             <listSelect
-              v-show="tabState === 2"
               :leftDeviceNumber="leftDeviceNumber"
               :rightAllChecked="rightAllChecked"
               :selectDeviceList="selectDeviceList" 
@@ -81,9 +83,10 @@
               @emitRemoveFinalDevice="emitRemoveFinalDevice"
               @emitChangeRDeviceType="emitChangeRDeviceType"
               @emitChangeLDeviceType="emitChangeLDeviceType"
+              @emitSearchData="emitSearchData"
             >
             </listSelect>
-          <!-- </template> -->
+          </template>
         </div>
       </div>
     </div>
@@ -97,8 +100,9 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
-// import { testData } from './components/testData.js';
-import { getAllDevices, addGroupDevice, getCurrentDevices, updateGroupDevice } from '@/views/index/api/api.manage.js';
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import { getAllDevices, addGroupDevice, getCurrentDevices, updateGroupDevice, getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -107,9 +111,9 @@ export default {
       isShowError: false,
       errorText: null,
       searchForm: {
-        areaId: null, // 行政区域
         intelCharac: null, // 智能特性
-        dutyOrganId: null // 责任部门
+        dutyOrganId: null, // 责任部门
+        devName: null // 设备名称
       },
       groupName: null, // 新增分组名
       allDeviceList: [], // 所有设备列表数据
@@ -120,10 +124,15 @@ export default {
       rightAllChecked: false, // 右侧设备全部选中
       groupId: null, // 当前分组id
       leftDeviceNumber: 0, // 左侧设备数量
-      isLoading: false
+      isLoading: false,
+      userInfo: {}, // 用户信息
+      allDepartmentData: [], // 部门列表
+      intelCharacList: [], // 智能特性列表
     }
   },
   mounted () {
+    this.userInfo = this.$store.state.loginUser;
+    
     if (this.$route.query.groupId) {
       this.groupId = this.$route.query.groupId;
       this.groupName = this.$route.query.name;
@@ -132,8 +141,40 @@ export default {
     setTimeout(() => {
       this.getAllDevicesList();
     }, 1000)
+
+    this.getIntelCharacList();
+    this.getAllDepartList();
   },
   methods: {
+    // 获取智能特性列表
+    getIntelCharacList () {
+      const intelCharacId = dataList.intelCharac;
+      getDiciData(intelCharacId)
+        .then(res => {
+          if (res) {
+            console.log('this.intelCharacList', res)
+            this.intelCharacList = res.data;
+          }
+        })
+    },
+    // 获取部门列表
+    getAllDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.allDepartmentData = res.data.list;
+          }
+        })
+    },
+    // 根据设备名称搜索
+    emitSearchData (val) {
+      this.searchForm.devName = val;
+      this.getAllDevicesList();
+    },
     // 左侧切换摄像头和卡口
     emitChangeLDeviceType (index, val) {
       this.currentDeviceList[index].isSXT = val;
@@ -342,6 +383,7 @@ export default {
       //   this.selectDeviceNumber += item.deviceList.length;
       //   this.selectDeviceNumber += item.bayonetList.length;
       // });
+      this.selectDeviceNumber = 0;
       getAllDevices(this.searchForm)
         .then(res => {
           if (res) {
@@ -410,6 +452,11 @@ export default {
       if (list) {
         let arr = [];
         if (list.length > 0) {
+          if (this.groupId) { // 如果是编辑分组
+            this.currentDeviceList = [];
+            this.leftDeviceNumber = 0;
+          }
+          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
@@ -431,12 +478,15 @@ export default {
           this.currentDeviceList = [];
         }
       }
-      if (selectList) {
+      if (selectList && selectList.length > 0) {
+        console.log('selectList', selectList)
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
         });
-        this.selectDeviceNumber = selectNum && selectNum;
+        // if (!this.groupId) { // 如果是新增分组
+          this.selectDeviceNumber = selectNum && selectNum;
+        // }
       }
     },
     // 从移除设备接受要提交的设备
@@ -474,6 +524,9 @@ export default {
       if (!val) {
         this.errorText = '该项内容不可为空';
         this.isShowError = true;
+      } else if (val.length > 10){
+        this.errorText = '最多输入10个字';
+        this.isShowError = true;
       } else {
         this.errorText = '';
         this.isShowError = false;
@@ -489,9 +542,7 @@ export default {
     },
     // 新增分组 
     addGroup () {
-      if (!this.groupName) {
-        this.errorText = '该项内容不可为空';
-        this.isShowError = true;
+      if (this.isShowError) {
         return;
       }
       if (this.currentDeviceList.length === 0) {
@@ -539,17 +590,18 @@ export default {
     },
     // 编辑分组
     editGroup () {
-      if (!this.groupName) {
-        this.errorText = '该项内容不可为空';
-        this.isShowError = true;
+      // if (!this.groupName) {
+      //   this.errorText = '该项内容不可为空';
+      //   this.isShowError = true;
+      //   return;
+      // }
+      if (this.isShowError) {
         return;
       }
       let addIdList = [], delIdList = [];
       let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）
       if (this.currentDeviceList.length > 0) {
-        console.log('currentDeviceList', this.currentDeviceList)
-        console.log('alcurrentDeviceList', this.alcurrentDeviceList)
         this.currentDeviceList.map(item => {
           item.deviceList.map(a => {
             currDeviceIds.push(a.uid);

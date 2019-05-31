@@ -150,7 +150,7 @@ export default {
   mounted () {
     let taskTypeL = this.dicFormater(dataList.taskType)
     let taskStatusL = this.dicFormater(dataList.taskStatus)
-    this.taskTypeList = taskTypeL[0].dictList
+    this.taskTypeList = taskTypeL[0].dictList.filter(res => !(res.enumField == 4 || res.enumField == 6))
     this.taskStatusList = taskStatusL[0].dictList
     this.getOneMonth();
     this.getTaskData();
@@ -208,7 +208,11 @@ export default {
     },
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
-      this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid}});
+      if(obj.dispatchType == 2) {
+        this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, objType: obj.objType}});
+      }else {
+        this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid}});
+      }
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();

@@ -9,7 +9,7 @@
           </template>
            <template v-else-if="$route.query.type === 'alarm_ctc'">
             <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType} }">调度详情</el-breadcrumb-item>
           </template>
           <template v-else>
             <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
@@ -37,7 +37,7 @@
             </el-form-item>
           </template>
           <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[endForm.isCloseEvent === 2 ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+            <el-input :placeholder="[endForm.isCloseEvent === false ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">

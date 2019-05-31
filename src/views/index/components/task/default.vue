@@ -9,7 +9,11 @@ export default {
     }
   },
   mounted() {
-    this.$router.push({name: 'task_detail', query: {id: this.$route.query.id, processType: this.$route.query.processType, uid: this.$route.query.uid}});
+    if(this.$route.query.dispatchType == 2) {
+      this.$router.push({name: 'task_alarm_detail', query: {id: this.$route.query.id, processType: this.$route.query.processType, uid: this.$route.query.uid, objType: this.$route.query.objType}});
+    }else {
+      this.$router.push({name: 'task_detail', query: {id: this.$route.query.id, processType: this.$route.query.processType, uid: this.$route.query.uid}});
+    }
   },
   methods: {
   }
