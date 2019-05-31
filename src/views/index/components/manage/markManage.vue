@@ -17,26 +17,24 @@
         </el-form-item>
         <el-form-item prop="deptId">
           <el-select  style="width: 240px;" v-model="searchForm.deptId" placeholder="操作部门">
-            <el-option value='全部操作部门'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+            <!-- <el-option value='全部操作部门'></el-option> -->
+            <el-option
+              v-for="(item, index) in allDepartmentData"
               :key="index"
-              :label="item.enumValue"
+              :label="item.organName"
               :value="item.uid"
-            >
-            </el-option> -->
+              ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="userId">
           <el-select style="width: 240px;" v-model="searchForm.userId" placeholder="操作用户">
-            <el-option value='全部操作用户'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <!-- <el-option value='全部操作用户'></el-option> -->
+            <el-option
+              v-for="(item, index) in usersList"
               :key="index"
-              :label="item.enumValue"
+              :label="item.userRealName"
               :value="item.uid"
-            >
-            </el-option> -->
+              ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -171,6 +169,7 @@
 </template>
 <script>
 // import { formatDate } from '@/utils/util.js';
+import { getDepartmentList, getUserList } from '@/views/index/api/api.manage.js';
 import { apiVideoSignContent, apiGetVideoRecords, deleteVideoRecords, updateVideoRecords } from '@/views/index/api/api.video.js';
 export default {
   data () {
@@ -203,19 +202,63 @@ export default {
       markId: null, // 要编辑或删除的id
       isAddLoading: false, // 新增标记弹出框
       isEditLoading: false, // 编辑标记弹出框
-      isDeleteLoading: false // 删除标记探出头
+      isDeleteLoading: false, // 删除标记弹出框
+      userInfo: {}, // 用户信息
+      allDepartmentData: [], // 部门列表
+      usersList: [] // 用户列表
     }
   },
   mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.getUsersList();
+    this.getAllDepartList();
     this.getList();
   },
   methods: {
+    // 获取部门列表
+    getAllDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.allDepartmentData = res.data.list;
+          }
+        })
+    },
+    // 获取所有的用户
+    getUsersList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.usersList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取标记内容列表
     getList () {
-      console.log(this.searchForm.reportTime)
+      // let userId, deptId;
       if (this.searchForm.reportTime === null) {
         this.searchForm.reportTime = [];
       }
+      // if (this.searchForm.userId === '全部操作用户') {
+      //   userId = null;
+      // } else {
+      //   userId = this.searchForm.userId;
+      // }
+      // if (this.searchForm.deptId === '全部操作部门') {
+      //   deptId = null;
+      // } else {
+      //   deptId = this.searchForm.deptId;
+      // }
       const params = {
         'where.startDate': this.searchForm.reportTime[0],
         'where.endDate': this.searchForm.reportTime[1],

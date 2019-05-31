@@ -106,16 +106,9 @@ export default {
       arrowActiveLeft: false, // 左侧展开箭头
       closeShow: false,
       checkedDeviceList: [],
-      // leftDeviceList: [], // 左侧的设备列表
-      // leftDeviceNumber: 0, // 左侧设备数
       finalDeviceList: [], // 最终选择的设备
       searchDeviceName: null // 设备名称
-      // changeRightTab: 1, // 右侧摄像头和卡口切换  1--摄像头  2---卡口
-      // changeLeftTab: 1, // 左侧摄像头和卡口切换  1--摄像头  2---卡口
     }
-  },
-  mounted () {
-    console.log('selectDeviceList', this.selectDeviceList)
   },
   methods: {
     // 清空搜索框

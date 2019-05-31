@@ -555,6 +555,8 @@ export default {
     // 查看车辆详情
     getVehicleDetailInfo (id) {
       if (id) {
+        this.groupDetailList = [];
+        this.albumDetailList = [];
         getVehicleInfo(id)
           .then(res => {
             if (res) {

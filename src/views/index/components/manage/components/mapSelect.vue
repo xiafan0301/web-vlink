@@ -70,7 +70,7 @@
 // import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
-  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList', 'groupId' ],
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList', 'groupId', 'isInitalState' ],
   data () {
     return {
       arrowActiveTemp: false,
@@ -110,8 +110,10 @@ export default {
       this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
 
       let selectDeviceNumber = this.unCheckDeviceList.length;
-      let checkedDeviceNumber;
-      if (this.groupId) { // 编辑分组
+      let checkedDeviceNumber; 
+      if (this.groupId || this.isInitalState) { // 编辑分组
+      console.log('111111');
+      
         checkedDeviceNumber = val.length;
       } else {
         checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
@@ -288,13 +290,16 @@ export default {
       this.lastCurrDeviceLength = val.length;
 
       this.unCheckDeviceList = []; // 清空可选设备列表
+    },
+    selectDeviceList (val) {
+      console.log('7777777')
     }
   },
   mounted () {
     this.initMap();
     setTimeout(() => {
       this.getMapData();
-      if (this.groupId) {
+      if (this.groupId || this.isInitalState) {
         this.handleCurrentDeviceData();
       }
     }, 1500)
@@ -363,6 +368,7 @@ export default {
     // 获取地图数据
     getMapData () {
       let selectDeviceList = this.selectDeviceList;
+      // this.unCheckDeviceList = this.selectDeviceList;
       if (selectDeviceList && selectDeviceList.length > 0) {
         selectDeviceList.map(item => {
           item.deviceList.map(itm => {
@@ -398,7 +404,6 @@ export default {
     },
     // 编辑  处理最开始已有的设备
     handleCurrentDeviceData () {
-      console.log('33333')
       let currentDeviceList = this.currentDeviceList;
       if (currentDeviceList && currentDeviceList.length > 0) {
         currentDeviceList.map(item => {
@@ -430,7 +435,6 @@ export default {
           })
         })
       }
-      console.log('finalDeviceList', this.finalDeviceList)
     },
     // 地图标记处理
     mapMarkHandler () {
@@ -450,6 +454,7 @@ export default {
       if (data && data.length > 0) {
         
         let _this = this;
+        // _this.finalDeviceList = [];
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
@@ -464,6 +469,10 @@ export default {
               this.unCheckDeviceList.push(obj); // 没有选中的设备
             }
             if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
+              // if (!_this.isInitalState) {
+              //   _this.finalDeviceList = [];
+
+              // }
               
               _this.finalDeviceList.push(obj);
             }
@@ -698,7 +707,7 @@ export default {
           color: #333333;
           .parent_temp_li {
             width: 100%;
-            padding: 0 10px;
+            // padding: 0 10px;
             >span {
               margin-left: 5px;
             }

@@ -51,8 +51,8 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
-              v-show="tabState === 1"
               :groupId="groupId"
+              :isInitalState="isInitalState"
               :selectDeviceList="selectDeviceList"
               :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
@@ -107,7 +107,7 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 1, // 地图选择
+      tabState: 2, // 地图选择
       isShowError: false,
       errorText: null,
       searchForm: {
@@ -128,6 +128,14 @@ export default {
       userInfo: {}, // 用户信息
       allDepartmentData: [], // 部门列表
       intelCharacList: [], // 智能特性列表
+      isInitalState: false // 判断是否点击过列表选择
+    }
+  },
+  watch: {
+    tabState (val) {
+      if (val && val === 2) {
+        this.isInitalState = true;
+      }
     }
   },
   mounted () {
@@ -152,7 +160,6 @@ export default {
       getDiciData(intelCharacId)
         .then(res => {
           if (res) {
-            console.log('this.intelCharacList', res)
             this.intelCharacList = res.data;
           }
         })
@@ -452,10 +459,11 @@ export default {
       if (list) {
         let arr = [];
         if (list.length > 0) {
-          if (this.groupId) { // 如果是编辑分组
+          if ((this.groupId || this.isInitalState) && this.tabState === 1) { // 如果是编辑分组
             this.currentDeviceList = [];
             this.leftDeviceNumber = 0;
           }
+          // this.leftDeviceNumber = 0;
           console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
@@ -479,7 +487,6 @@ export default {
         }
       }
       if (selectList && selectList.length > 0) {
-        console.log('selectList', selectList)
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
@@ -487,6 +494,8 @@ export default {
         // if (!this.groupId) { // 如果是新增分组
           this.selectDeviceNumber = selectNum && selectNum;
         // }
+      } else {
+
       }
     },
     // 从移除设备接受要提交的设备
@@ -542,7 +551,9 @@ export default {
     },
     // 新增分组 
     addGroup () {
-      if (this.isShowError) {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
         return;
       }
       if (this.currentDeviceList.length === 0) {
@@ -590,14 +601,14 @@ export default {
     },
     // 编辑分组
     editGroup () {
-      // if (!this.groupName) {
-      //   this.errorText = '该项内容不可为空';
-      //   this.isShowError = true;
-      //   return;
-      // }
-      if (this.isShowError) {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
         return;
       }
+      // if (this.isShowError) {
+      //   return;
+      // }
       let addIdList = [], delIdList = [];
       let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）
