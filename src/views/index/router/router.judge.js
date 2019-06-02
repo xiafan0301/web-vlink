@@ -1,6 +1,6 @@
  /* 研判模块 */
 export default {
-  path: 'judge',
+  path: '/judge',
   name: 'judge',
   component: () => import('@/views/index/components/judge/judge.vue'),
   redirect: {

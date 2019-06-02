@@ -3,67 +3,61 @@
     <div class="ctc_end">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo' }">调度详情</el-breadcrumb-item>
+          <template v-if="$route.query.type === 'ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+           <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType} }">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
+          </template>
           <el-breadcrumb-item>结束调度</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content_box">
         <el-form class="end_form" :model="endForm" :rules="rules" ref="endForm" label-width="100px">
-          <el-form-item label="关闭事件:" prop="isCloseEvent">
-            <el-radio-group v-model="endForm.isCloseEvent" @change="handleEventChange">
-              <el-radio :label="1">是</el-radio>
-              <el-radio :label="0">否</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <template v-if="endForm.isCloseEvent">
-            <el-form-item label="事件等级:" prop="eventLevel">
-              <el-select v-model="endForm.eventLevel" style="width: 100%;">
-                <el-option
-                  v-for="(item, index) in eventLevelList"
-                  :key="index"
-                  :label="item.enumValue"
-                  :value="item.uid"
-                >
-                </el-option>
-              </el-select>
+          <template v-if="$route.query.type === 'alarm_ctc'">
+            <el-form-item label="关闭事件:" prop="isCloseEvent" v-show="$route.query.isRelation === 1">
+              <el-radio-group v-model="endForm.isCloseEvent">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </template>
+          <template v-else>
+            <el-form-item label="关闭事件:" prop="isCloseEvent">
+              <el-radio-group v-model="endForm.isCloseEvent">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
             </el-form-item>
           </template>
           <el-form-item label="总结内容:" prop="summary">
-            <el-input :placeholder="[!isEventLevel ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
+            <el-input :placeholder="[endForm.isCloseEvent === false ? '请输入调度指挥总结' : '请输入事件总结']" v-model="endForm.summary" type="textarea" rows="7"></el-input>
           </el-form-item>
         </el-form>
         <div class="end-upload">
           <el-upload
             :action="uploadUrl"
-            accept=".doc,.docx,.pdf,.txt, .png, .jpg, .jpeg"
-            :show-file-list='false'
+            multiple
+            accept=".doc,.docx, .png, .jpg, .jpeg,.bmp"
+            :show-file-list='true'
+            :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
             :on-success='handleSuccess'
           >
             <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .pdf .txt .png .jpg .jpeg）</div>
+            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+            <div slot="tip" class="el-upload__tip number-upload-tip" v-show="isNumberTip">最多上传3张图片</div>
           </el-upload>
-          <div class="img_list">
-            <div v-for="(item, index) in imgList2" :key="'item' + index">
-              <img
-                :src="item.path"
-                @click="openBigImg(index, imgList2)"
-              >
-              <i class="vl_icon vl_icon_event_24 close_btn" @click="closeImgList(index, item)"></i>
-            </div>
-          </div>
-          <div class="file_list">
-            <div class='show-file-div-list' v-for="(item, index) in fileList" :key="'item'+index">
-              <i class="vl_icon vl_icon_event_5"></i>
-              <span>{{item.cname}}</span>
-              <i class='el-icon-close' @click="deleteFile(index, item)"></i>
-            </div>
-          </div>
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData('endForm')">确定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEndLoading" @click="submitData('endForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
     </div>
@@ -72,77 +66,88 @@
 <script>
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
-import { getDiciData, endEvent } from '@/views/index/api/api.js';
+import { endEvent } from '@/views/index/api/api.event.js';
 export default {
   data () {
     return {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      isEventLevel: false, // 是否显示事件等级
       endForm: {
-        isCloseEvent: 0, // 1--是  0---否
-        eventLevel: null,
-        summary: null
+        isCloseEvent: false, // 1--结束事件  2---结束调度 3---告警的调度结束
+        summary: null,
       },
       rules: {
-        eventLevel: [
-          { required: true, message: '请选择事件等级', trigger: 'blur' }
-        ],
         summary: [
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      imgList2: [],
-      fileList: [], // 文件列表
-      eventLevelList: [], // 事件等级列表
+      uploadImgList: [], // 要上传的图片列表
+      fileList: [], // 要上传文件列表
+      isEndLoading: false,
+      isNumberTip: false // 图片上传错误提示
     }
   },
-  mounted () {
-    this.getEventLevelList();
+  watch: {
+    uploadImgList () { // 监听上传图片列表
+      if (this.uploadImgList.length > 3) {
+        this.isNumberTip = true;
+      } else {
+        this.isNumberTip = false;
+      }
+    }
   },
   methods: {
-    // 获取事件等级
-    getEventLevelList () {
-      const level = dataList.eventLevel;
-      getDiciData(level)
-        .then(res => {
-          if (res) {
-            this.eventLevelList = res.data;
-          }
-        })
-        .catch(() => {})
-    },
-    // 关闭事件change
-    handleEventChange (val) {
-      if (val) {
-        this.isEventLevel = true;
-      } else {
-        this.isEventLevel = false;
-      }
-    },
     handleBeforeUpload (file) { // 图片上传之前
-      // this.isImgDisabled = true;
-      // const isImg = file.type === 'image/jpeg' || file.type === 'image/png';
       const isLtTenM = file.size / 1024 / 1024 < 10;
-      // if (!isImg) {
-      //   this.$message.error('上传的图片只能是jpeg、jpg、png格式!');
-      //   this.isImgDisabled = false;
-      // }
-      if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过10M');
-        this.isImgDisabled = false;
+      const isWord = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、doc、docx格式',
+          customClass: 'upload_file_tip'
+        });
       }
-      return isLtTenM;
+      if (!isLtTenM) {
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (this.isNumberTip) {
+        return false;
+      }
+      return isLtTenM && isWord;
+    },
+    // 移除文件
+    handleRemove (file) {
+      const fileName = file.response.data.fileName;
+      let type;
+      if (fileName) {
+        type = fileName.substring(fileName.lastIndexOf('.'));
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
+          this.uploadImgList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.uploadImgList.splice(index, 1);
+            }
+          });
+        } else {
+          this.fileList.map((item, index) => {
+            if (item.cname === fileName) {
+              this.fileList.splice(index, 1);
+            }
+          });
+        }
+      }
     },
     // 文件上传成功
-    handleSuccess (res, file) {
+    handleSuccess (res) {
       if (res && res.data) {
         const fileName = res.data.fileName;
-        let type;
+        let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          let data;
-          res.fileName = file.name;
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,
@@ -154,7 +159,7 @@ export default {
               imgHeight: res.data.fileHeight,
               thumbnailPath: res.data.thumbnailFileFullPath,
             }
-            this.imgList2.push(data);
+            this.uploadImgList.push(data);
           } else {
             data = {
               contentUid: 0,
@@ -169,8 +174,6 @@ export default {
             }
             this.fileList.push(data);
           }
-          // this.endForm.attachmentList.push(data);
-          this.isImgDisabled = false;
         }
       }
     },
@@ -179,29 +182,38 @@ export default {
       this.$refs[form].validate(valid => {
         let params, attachmentList = [];
         if (valid) {
+          if (this.isNumberTip) {
+            return;
+          }
           this.fileList && this.fileList.map(item => {
             attachmentList.push(item);
           });
-          this.imgList2 && this.imgList2.map(item => {
+          this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
-          if (this.endForm.isCloseEvent) { // 关闭事件
+          if (this.endForm.isCloseEvent === true) { // 关闭事件
             params = {
               eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
-              eventLevel: this.endForm.eventLevel,
+              isCloseEvent: 1,
               eventSummary: this.endForm.summary,
               attachmentList: attachmentList
             }
           } else { // 不关闭事件
+            let isCloseEvent;
+            if (this.$route.query.type === 'alarm_ctc') {
+              isCloseEvent = 3;
+            } else {
+              isCloseEvent = 2;
+            }
             params = {
               eventId: this.$route.query.eventId,
-              isCloseEvent: this.endForm.isCloseEvent,
+              isCloseEvent: isCloseEvent,
               dispatchSummary: this.endForm.summary,
               dispatchAttachmentList: attachmentList
             }
           }
-          endEvent(params, this.$route.query.eventId)
+          this.isEndLoading = true;
+          endEvent(params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -210,9 +222,12 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
+                this.isEndLoading = false;
+              } else {
+                this.isEndLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEndLoading = false;})
         }
       })
     },
@@ -252,8 +267,13 @@ export default {
         margin: 10px 0;
         font-size: 14px;
       }
+      .number-upload-tip {
+        color: #F94539;
+        margin: 10px 0;
+        font-size: 14px;
+      }
       /deep/ .el-upload-list__item {
-        width: 40%;
+        width: 80%;
       }
       .img_list {
           display: flex;

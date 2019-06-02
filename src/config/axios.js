@@ -1,30 +1,23 @@
 /*
  * axios定义
  * */
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 import axios from 'axios';
 import ElementUI from 'element-ui';
 // import store from '@/store/store.js';
 import { ajaxCtx } from '@/config/config.js';
+import store from '@/store/store.js'
 // axios支持跨域cookie
-// axios.defaults.withCredentials = true;er
+// axios.defaults.withCredentials = true;
 // create an axios instance
 let service = axios.create({
   baseURL: ajaxCtx.base, // api的base_url
   timeout: 30000, // request timeout
   withCredentials: true
 })
-// const service = axios.create({
-// 	baseURL: ajaxCtx.base, // api的base_url
-// 	timeout: 30000, // request timeout
-//   withCredentials: true,
-//   headers: {
-//     'Auth-Session-Id': userInfo.sessionId && userInfo.sessionId
-//   },
-// })
 // axios添加一个请求拦截器
 service.interceptors.request.use((config) => {
-
+  // 用户信息
   const userInfo = localStorage.getItem('as_vlink_user_info');
   if (userInfo) {
     config.headers['Auth-Session-Id'] = JSON.parse(userInfo).sessionId;
@@ -55,7 +48,11 @@ service.interceptors.response.use(function (response) {
     if (_data.code === '00000000') {
       return _data;
     } else if (_data.code === '10060002') {
+      store.commit('setLoginToken', {
+        loginToken: false
+      });
       // 未登录
+      // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
       let msg = '访问出错';
       if (_data.viewMsg) {

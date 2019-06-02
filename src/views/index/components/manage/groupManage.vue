@@ -44,6 +44,9 @@
           width="200"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createTime | fmTimestamp}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="成员数"
@@ -87,8 +90,9 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -106,7 +110,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteUserGroup">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteUserGroup">确认</el-button>
       </div>
     </el-dialog>
     <!--新增用户组弹出框-->
@@ -126,7 +130,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelAdd('userForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="addUserGroup('userForm')">保存</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addUserGroup('userForm')">保存</el-button>
       </div>
     </el-dialog>
     <!--编辑用户组弹出框-->
@@ -146,7 +150,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('userForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserGroups('userForm')">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editUserGroups('userForm')">确认</el-button>
       </div>
     </el-dialog>
     <!--管理成员弹出框-->
@@ -168,7 +172,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeMembers">移除所选成员</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveMemberLoading" @click="removeMembers">移除所选成员</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">
@@ -191,7 +195,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addMembers">添加所选成员</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddMemberLoading" @click="addMembers">添加所选成员</el-button>
         </div>
       </div>
     </el-dialog>
@@ -214,7 +218,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeRoles">移除所选角色</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveRoleLoading" @click="removeRoles">移除所选角色</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
@@ -234,7 +238,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addSelectRoles">添加所选角色</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddRoleLoading" @click="addSelectRoles">添加所选角色</el-button>
         </div>
       </div>
     </el-dialog>
@@ -263,7 +267,7 @@
 <script>
 // import { checkUserName } from '@/utils/validator.js';
 import { getUserGroups, createUserGroups, updateUserGroups, delUserGroup, getUserList, getRoleList,
- addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles, judgeUserGroup } from '@/views/index/api/api.js';
+ addMemberInfo, delMemberInfo, addUserGroupRoles, delUserGroupRoles, judgeUserGroup } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -312,6 +316,13 @@ export default {
       delGroupId: null, // 要删除用户组的id
       selectGroupData: {}, // 要查看的组成员数据
       storageInfo: {}, // 存储的用户信息
+      isAddLoading: false, // 新增组加载中
+      isEditLoading: false, // 编辑组加载中
+      isDeleteLoading: false, // 删除组加载中
+      isRemoveRoleLoading: false, // 移除角色加载中
+      isAddRoleLoading: false, // 添加角色加载中
+      isRemoveMemberLoading: false, // 移除成员加载中
+      isAddMemberLoading: false, // 添加成员加载中
     }
   },
   created () {
@@ -343,7 +354,7 @@ export default {
     searchRole () {
       let reg = new RegExp(this.userRoleName);
       let arr = [];
-      this.searchSelectRoles.map((item, index) => {
+      this.searchSelectRoles.map((item) => {
         let name = item.roleName;
         if (name.match(reg)) {
           arr.push(item);
@@ -362,7 +373,7 @@ export default {
     searchMember () {
       let reg = new RegExp(this.memberName);
       let arr = [];
-      this.searchSelectMembers.map((item, index) => {
+      this.searchSelectMembers.map((item) => {
         let name = item.userName;
         if (name.match(reg)) {
           arr.push(item);
@@ -409,6 +420,7 @@ export default {
     addUserGroup (form) {
       let _this = this;
       this.$refs[form].validate(valid => {
+        _this.isShowOrganError = false;
         if (valid) {
            const params = {
             proKey: _this.storageInfo.proKey,
@@ -428,6 +440,7 @@ export default {
       })
     },
     handleAddGroup (obj) {
+      this.isAddLoading = true;
       createUserGroups(obj)
         .then(res => {
           if (res) {
@@ -435,18 +448,20 @@ export default {
               type: 'success',
               message: '添加成功',
               customClass: 'request_tip'
-            })
+            });
             this.addUserGroupDialog = false;
             this.getList();
+            this.isAddLoading = false;
           } else {
             this.$message({
               type: 'error',
               message: '添加失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isAddLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isAddLoading = false;})
     },
     // 取消添加
     cancelAdd (form) {
@@ -462,10 +477,11 @@ export default {
     // 删除用户组
     deleteUserGroup () {
       if (this.delGroupId) {
+        this.isDeleteLoading = true;
         const params = {
           uid: this.delGroupId,
           proKey: this.storageInfo.proKey
-        }
+        };
         delUserGroup(params)
           .then(res => {
             if (res) {
@@ -473,26 +489,28 @@ export default {
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
               this.delUserGroupDialog = false;
               this.getList();
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示管理成员弹出框
     showAdminMember (obj) {
       console.log(obj);
       this.currentMembers = [];
-      let searchSelectMembers = [];
-      let selectMembers = [];
+      this.searchSelectMembers = [];
+      this.selectMembers = [];
       this.adminMemberDialog = true;
       this.currentGroupId = obj.uid;
       let allMembers; // 所有的用户
@@ -539,6 +557,7 @@ export default {
         this.checkCurrMember.map(item => {
           params.userIdList.push(item.uid);
         });
+        this.isRemoveMemberLoading = true;
         delMemberInfo(params)
           .then(res => {
             if (res) {
@@ -555,9 +574,13 @@ export default {
               });
               this.getList();
               this.checkCurrMember = [];
+              this.adminMemberDialog = false;
+              this.isRemoveMemberLoading = false;
+            } else {
+              this.isRemoveMemberLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveMemberLoading = false;})
       }
     },
     // 添加所选成员
@@ -571,6 +594,7 @@ export default {
         this.checkSelectMember.map(item => {
           params.uids.push(item.uid);
         });
+        this.isAddMemberLoading = true;
         addMemberInfo(params)
           .then(res => {
             if (res) {
@@ -587,9 +611,13 @@ export default {
               });
               this.getList();
               this.checkSelectMember = [];
+              this.adminMemberDialog = false;
+              this.isAddMemberLoading = false;
+            } else {
+              this.isAddMemberLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddMemberLoading = false;})
       }
     },
     // 显示配置角色弹出框
@@ -611,7 +639,7 @@ export default {
       const params = {
         'where.proKey': this.storageInfo.proKey,
         pageSize: 0,
-      }
+      };
       getRoleList(params)
         .then(res => {
           if (res) {
@@ -641,6 +669,7 @@ export default {
         this.checkSelectRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isAddRoleLoading = true;
         addUserGroupRoles(params)
           .then(res => {
             if (res) {
@@ -657,9 +686,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.configRoleDialog = false;
+              this.isAddRoleLoading = false;
+            } else {
+              this.isAddRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddRoleLoading = false;})
       }
     },
     // 移除所选角色
@@ -673,6 +706,7 @@ export default {
         this.checkCurrRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isRemoveRoleLoading = true;
         delUserGroupRoles(params)
           .then(res => {
             if (res) {
@@ -689,9 +723,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.configRoleDialog = false;
+              this.isRemoveRoleLoading = false;
+            } else {
+              this.isRemoveRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveRoleLoading = false;})
       }
     },
     // 显示查看组成员弹出框
@@ -701,7 +739,6 @@ export default {
     },
     // 显示编辑信息弹出框
     showEditDialog (obj) {
-      console.log(obj);
       this.editGroupId = obj.uid;
       this.isShowOrganError = false;
       this.userForm.groupName = obj.groupName;
@@ -711,6 +748,7 @@ export default {
     editUserGroups (form) {
       let _this = this;
       this.$refs[form].validate(valid => {
+        _this.isShowOrganError = false;
         if(valid) {
           const params = {
             proKey: _this.storageInfo.proKey,
@@ -730,11 +768,12 @@ export default {
       })
     },
     handleEditGroups () {
+      this.isEditLoading = true;
       const params = {
         proKey: this.storageInfo.proKey,
         uid: this.editGroupId,
         groupName: this.userForm.groupName
-      }
+      };
       updateUserGroups(params)
         .then(res => {
           if (res) {
@@ -742,18 +781,20 @@ export default {
               type: 'success',
               message: '修改成功',
               customClass: 'request_tip'
-            })
+            });
             this.editUserGroupDialog = false;
+            this.isEditLoading = false;
             this.getList();
           } else {
             this.$message({
               type: 'error',
               message: '修改失败',
               customClass: 'request_tip'
-            })
+            });
+            this.isEditLoading = false;
           }
         })
-        .catch(() => {})
+        .catch(() => {this.isEditLoading = false;})
     },
     // 取消编辑
     cancelEdit (form) {
@@ -854,12 +895,12 @@ export default {
           }
         }
         .group_btn {
-          text-align: center;
-          line-height: 40px;
+          // text-align: center;
+          // line-height: 40px;
           width: 220px;
           height: 40px;
-          border-radius: 4px;
-          cursor: pointer;
+          // border-radius: 4px;
+          // cursor: pointer;
         }
         .group_number {
           color: #999999;
@@ -873,6 +914,9 @@ export default {
         /deep/ .el-checkbox {
           padding-right: 20px;
           height: 25px;
+        }
+        /deep/ .el-checkbox:last-child {
+          margin-right: 30px;
         }
         /deep/ .el-checkbox+.el-checkbox {
           margin-left: 0;
@@ -930,3 +974,4 @@ export default {
   }
 }
 </style>
+

@@ -39,9 +39,30 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-input v-show="searchData.targetType === 1" v-model="searchData.name" placeholder="输入姓名搜索"></el-input>
-        <el-input v-show="searchData.targetType === 1" v-model="searchData.cardId" placeholder="输入证件号码搜索"></el-input>
-        <el-input v-show="searchData.targetType === 2" v-model="searchData.carNum" placeholder="输入车牌号码搜索"></el-input>
+        <el-autocomplete
+          v-show="searchData.targetType === 1"
+          v-model="searchData.name"
+          :fetch-suggestions="autoEvent1"
+          value-key="name"
+          placeholder="输入姓名搜索">
+        </el-autocomplete>
+        <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.name" placeholder="输入姓名搜索"></el-input>-->
+        <el-autocomplete
+          v-show="searchData.targetType === 1"
+          v-model="searchData.cardId"
+          :fetch-suggestions="autoEvent2"
+          value-key="idNo"
+          placeholder="输入证件号码搜索">
+        </el-autocomplete>
+        <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.cardId" placeholder="输入证件号码搜索"></el-input>-->
+        <el-autocomplete
+          v-show="searchData.targetType === 2"
+          v-model="searchData.carNum"
+          :fetch-suggestions="autoEvent3"
+          value-key="vehicleNumber"
+          placeholder="输入车牌号码搜索">
+        </el-autocomplete>
+        <!--<el-input v-show="searchData.targetType === 2" v-model="searchData.carNum" placeholder="输入车牌号码搜索"></el-input>-->
         <el-date-picker
           v-model="searchData.time"
           type="daterange"
@@ -80,7 +101,7 @@
       </div>
     </el-dialog>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" src="../../../../assets/video/demo.mp4"></video>
+      <video id="vlJtcLargeV" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{mapData[curVideo.indexNum] ? mapData[curVideo.indexNum].deviceName : ''}}</div>
@@ -103,7 +124,8 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder} from '../../api/api';
+import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder, MapGetPortraitsByName} from '../../api/api.judge.js';
+import {getPortraitByIdNo, getVehicleByVehicleNumber} from '../../api/api.control.js'
 export default {
   data() {
     return {
@@ -179,6 +201,33 @@ export default {
     this.amap = map;
   },
   methods: {
+    autoEvent1 (queryString, cb) {
+      if (!queryString) {
+        cb([])
+      } else {
+        MapGetPortraitsByName({'name': queryString}).then(result => {
+          cb(result.data);
+        })
+      }
+    },
+    autoEvent2 (queryString, cb) {
+      if (!queryString) {
+        cb([])
+      } else {
+        getPortraitByIdNo({'idNo': queryString}).then(result => {
+          cb(result.data);
+        })
+      }
+    },
+    autoEvent3 (queryString, cb) {
+      if (!queryString) {
+        cb([])
+      } else {
+        getVehicleByVehicleNumber({'vehicleNumber': queryString}).then(result => {
+          cb(result.data);
+        })
+      }
+    },
     // 上传图片
     uploadPicExceed () {
       this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
@@ -398,7 +447,7 @@ export default {
           let _idPoint = 'vlJtcPoint' + obj._key;
           let _sContent = `
             <div class="vl_jtc_mk" >
-              <video id="${_id}" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+              <video preload="auto" id="${_id}" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
               <p>${obj.shotTime}<i id="${_idBtn}" class="vl_icon vl_icon_control_09"></i></p>
               <div class="vl_jtc_mk_check">
                 <input id="${_idCheck}" checked type="checkbox">

@@ -3,10 +3,10 @@
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
         <el-autocomplete
-          v-model="searchData.eventNo"
+          v-model="searchData.uid"
           :fetch-suggestions="autoEvent"
           @select="showChoose"
-          value-key="eventDetail"
+          value-key="eventCode"
           placeholder="关联事件编号搜索">
         </el-autocomplete>
         <el-date-picker
@@ -68,15 +68,16 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
-import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api';
+import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api.judge.js';
 export default {
   data() {
     return {
       testData: testData,
       evData: [],
       searchData: {
-        eventNo: '',
-        time: null
+        uid: '',
+        time: null,
+        curNum: ''
       },
       pickerOptions: {
         disabledDate (time) {
@@ -117,7 +118,6 @@ export default {
     }
   },
   mounted () {
-    this.setDTime();
     let map = new AMap.Map('tcMap', {
       center: [112.974691, 28.093846],
       zoom: 16
@@ -127,32 +127,39 @@ export default {
   },
   methods: {
     setDTime () {
-      let date = new Date();
+      let date = new Date(this.curEvent.createTime);
       let curDate = date.getTime();
-      let curS = 15 * 24 * 3600 * 1000;
-      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+      let curS = 15 * 24 * 3600 * 1000;let _s;
+      if (new Date().getTime() > new Date(curDate + curS)) {
+        _s = new Date(curDate + curS).getFullYear() + '-' + (new Date(curDate + curS).getMonth() + 1) + '-' + new Date(curDate + curS).getDate();
+      } else {
+        _s = new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate();
+      }
       let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-      this.searchData.time = [_s, _e]
+      this.searchData.time = [_e, _s]
     },
     resetSearch () {
-      this.searchData.eventNo = '';
+      this.searchData.uid = '';
+      this.searchData.carNum = '';
+      this.searchData.time = null;
     },
     autoEvent (queryString, cb) {
-      if (queryString === '') {
+      if (!queryString) {
         cb([])
       } else {
-        JigGETEvent({'where.otherQuery': queryString, 'where.eventFlag': 1}).then(result => {
+        JigGETEvent({'where.eventCode': queryString, 'where.eventFlag': 1}).then(result => {
           cb(result.data.list);
         })
       }
     },
     showChoose (e) {
       this.curEvent = e;
+      this.setDTime();
     },
     beginSearch () {
       this.searching = true;
       let params = {
-        eventId: this.curEvent.eventId,
+        eventId: this.curEvent.uid,
         // eventId: 103,
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
@@ -209,7 +216,7 @@ export default {
     },
     addListen (el, evType,key ,obj = {}) {
       let self = this;
-      let _key = self.curVideo.indexNum;
+      let _key;
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
@@ -223,6 +230,7 @@ export default {
             }
             break;
           case 'click':
+            _key  = self.curVideo.indexNum;
             self.evData.forEach(z => {
               z.checked = false;
             })
@@ -239,6 +247,7 @@ export default {
       })
     },
     showVideo (data) {
+      console.log(this.curSXT)
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;

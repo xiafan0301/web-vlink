@@ -1,6 +1,9 @@
 <template>
 <!-- 全部人像列表 -->
   <div class="set_list">
+    <div class="bread_crumbs">
+      <span @click="skipIsList">布控库</span><i class="el-icon-arrow-right"></i><span @click="skipIsList">人像库</span><i class="el-icon-arrow-right"></i><span>组设置</span>
+    </div>
     <div class="member_title">
       <div>
         <div><span class="vl_f_333">全部人像</span></div>
@@ -11,24 +14,26 @@
         <el-button @click="judgeIsSelectedRemove">删除人像</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
-            <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
-            <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
+            <vue-scroll>
+              <li @click="copyPortrait(item.uid)" v-for="item in groupListPortrait" :key="item.uid">{{item.groupName}}</li>
+              <li class="group_copy_add" @click="popGroupDialog"><i class="el-icon-circle-plus vl_f_999"></i><span class="vl_f_333">添加分组</span></li>
+            </vue-scroll>
           </ul>
         </el-collapse-transition>
       </div>
     </div>
     <div class="list_box">
       <div class="list_info" v-for="item in memberList" :key="item.uid">
-        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;"></div>
+        <div class="list_img"><img :src="item.photoUrl" alt="" style="width: 100%;height: 100%;"></div>
         <div class="list_data">
           <div class="data_title">
             <span class="vl_f_999">详情资料</span>
             <el-checkbox v-model="item.isChecked" @change="operateRadio()"></el-checkbox>
           </div>
           <div class="data_list">
-            <span>{{item.name}}</span>
-            <span>{{item.sex}}</span>
-            <span>{{item.nation}}</span>
+            <span :title="item.name">{{item.name}}</span>
+            <span :title="item.sex">{{item.sex}}</span>
+            <span :title="item.nation">{{item.nation}}</span>
           </div>
           <div class="data_list">
             <span>{{item.idNo}}<i class="vl_icon vl_icon_control_29"></i></span>
@@ -38,16 +43,23 @@
               <span v-if="index <= 1" :title="gN" :key="index + gN">{{gN}}</span>
             </template>
             <div class="more" v-if="item.groupNames.split(',').length >= 3">
-              <span @mouseenter="showMoreId = item.uid" @mouseleave="showMoreId = null">更多组</span>
-              <template v-if="showMoreId === item.uid">
-                <div>
-                  <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
-                </div>
-                <i></i>
-              </template>
+              <el-popover
+                placement="top-start"
+                width="220"
+                popper-class="more_popover_box"
+                trigger="hover">
+                <vue-scroll>
+                  <template>
+                    <div class="more_popover">
+                      <span :title="gN" v-for="(gN, index) in item.groupNames.split(',')" :key="index + gN">{{gN}}</span>
+                    </div>
+                  </template>
+                </vue-scroll>
+                <span slot="reference" class="more_hover">更多组</span>
+              </el-popover>
             </div>
           </div>
-          <div class="data_list">
+          <div class="data_list" v-if="item.remarks">
             <span>{{item.remarks}}</span>
           </div>
         </div>
@@ -55,12 +67,11 @@
       <div style="width: 100%;">
         <el-pagination
           style="text-align: center;"
-          @size-change="handleSizeChange"
+          background
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="protraitMemberList.pageSzie"
-          layout="total, prev, pager, next, jumper"
+          :page-size="protraitMemberList.pageSize"
+          layout="prev, pager, next"
           :total="protraitMemberList.total">
         </el-pagination>
       </div>
@@ -86,14 +97,12 @@
 </template>
 <script>
 import groupDialog from './groupDialog.vue';
-import {delPortrait, copyPortrait, getGroupListIsPortrait} from '@/views/index/api/api.js';
+import {delPortrait, copyPortrait, getGroupListIsPortrait} from '@/views/index/api/api.control.js';
 export default {
   components: {groupDialog},
-  props: ['protraitMemberList', 'tabType'],
+  props: ['protraitMemberList', 'tabType', 'currentPage'],
   data () {
     return {
-      // 翻页数据
-      currentPage: 1,
       allChecked: false,
       memberList: [],//成员列表数据
       isShowGroupCopy: false,//点击复制按钮是否显示组下拉列表
@@ -130,6 +139,9 @@ export default {
     this.getGroupListIsPortrait();
   },
   methods: {
+    skipIsList () {
+      this.$emit('changePage');
+    },
     popGroupDialog () {
       this.$refs['groupDialog'].reset();
     },
@@ -138,6 +150,9 @@ export default {
       console.log(this.memberList)
       this.$nextTick(() => {
         this.allChecked = !this.memberList.some(s => s.isChecked === false);
+        if (!this.allChecked) {
+          this.isShowGroupCopy = false;
+        }
       })
     },
     // 全选
@@ -148,6 +163,7 @@ export default {
           this.memberList.map(m => {
             m.isChecked = false;
           })
+          this.isShowGroupCopy = false;
           console.log(this.memberList)
         } else {
           this.memberList.map(m => {
@@ -156,16 +172,13 @@ export default {
         }
       })
     },
-    handleSizeChange () {
-
-    },
-    handleCurrentChange () {
-
+    handleCurrentChange (page) {
+      this.$emit('getPortraitList', page);//重新通知父组件获取人像列表
     },
     // 判断是否选择了复制对象
     judgeIsSelectedCopy () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择复制对象!');
+        this.$message.error('请先勾选复制对象!');
       } else {
         this.isShowGroupCopy = !this.isShowGroupCopy;
       }
@@ -173,28 +186,35 @@ export default {
     // 判断是否选择了删除对象
     judgeIsSelectedRemove () {
       if (this.memberList.every(e => e.isChecked === false)) {
-        this.$message.error('请选择删除对象!');
+        this.$message.error('请先勾选删除对象!');
       } else {
         this.delPortraitDialog = true;
       }
     },
     // 获取人像组列表
-    getGroupListIsPortrait () {
+    getGroupListIsPortrait (data) {
       getGroupListIsPortrait().then(res => {
         if (res && res.data) {
           this.groupListPortrait = res.data.filter(f => f.uid !== null);
         }
       })
+      if (data) {
+        setTimeout(() => {
+          this.copyPortrait(data);
+        }, 2000)
+      }
     },
     // 批量删除人像
     delPortrait () {
       this.loadingBtn = true;
       const member = this.memberList.filter(f => f.isChecked === true).map(m => m.uid).join(',');
       const params = {ids: member};
-      delPortrait(params).then(() => {
-        this.delPortraitDialog = false;
-        this.$message.success('删除成功！');
-        this.$emit('getPortraitList');//重新通知父组件获取人像列表
+      delPortrait(params).then((res) => {
+        if (res) {
+          this.delPortraitDialog = false;
+          this.$message.success('删除成功！');
+          this.$emit('getPortraitList', this.currentPage);//重新通知父组件获取人像列表
+        }
       }).finally(() => {
         this.loadingBtn = false;
       })
@@ -206,10 +226,12 @@ export default {
         groupId: groupId,
         ids: member
       }
-      copyPortrait(data).then(() => {
-        this.isShowGroupCopy = false;
-        this.$message.success('复制成功');
-        this.$emit('getPortraitList');//重新通知父组件获取人像列表
+      copyPortrait(data).then((res) => {
+        if (res) {
+          this.isShowGroupCopy = false;
+          this.$message.success('复制成功');
+          this.$emit('getPortraitList', this.currentPage);//重新通知父组件获取人像列表
+        }
       })
     }
   }

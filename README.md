@@ -17,7 +17,7 @@ npm run serve:prod
 ```
 npm run build
 npm run build:dev
-npm run build:test
+npm run build:test  
 npm run build:prod
 ```
 

@@ -8,6 +8,7 @@
             style="width: 260px;"
             v-model="eventForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -21,7 +22,7 @@
               v-for="(item, index) in eventTypeList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -33,7 +34,7 @@
               v-for="(item, index) in eventStatusList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
@@ -45,12 +46,12 @@
               v-for="(item, index) in identityList"
               :key="index"
               :label="item.organName"
-              :value="item.uid"
+              :value="item.organName"
             >
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="phoneOrNumber">
           <el-input style="width: 240px;" type="text" placeholder="请输入上报者手机号或事件编号" v-model="eventForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
@@ -66,7 +67,6 @@
         :data="eventList"
         >
         <el-table-column
-          fixed
           label="事件编号"
           prop="eventCode"
           :show-overflow-tooltip='true'
@@ -108,6 +108,7 @@
         <el-table-column
           label="事件地点"
           prop="eventAddress"
+          width="200"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -116,24 +117,27 @@
           prop="eventStatusName"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatusName === '待处理' ? 'untreated_event' : scope.row.eventStatusName === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
+            <span class="event_status" :class="[scope.row.eventStatus === 1 ? 'untreated_event' : scope.row.eventStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
           </template>
         </el-table-column>
         <el-table-column
           label="上报内容"
           prop="eventDetail"
+          width="200"
           :show-overflow-tooltip='true'
         >
         </el-table-column>
         <el-table-column
-          label="是否有研判结果"
-          width="150"
-          prop="isResult"
+          label="是否有布控结果"
+          prop="surveillanceResult"
           show-overflow-tooltip
           align="center"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.surveillanceResult ? '是' : '否'}}</span>
+          </template>
         </el-table-column>
-        <el-table-column label="操作" width="140">
+        <el-table-column label="操作" width="140" fixed="right">
           <template slot-scope="scope">
             <span class="operation_btn" @click="skipEventDetailPage(scope.row)">查看</span>
             <span style="color: #f2f2f2">|</span>
@@ -148,9 +152,10 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -162,7 +167,9 @@
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getEventList, getDiciData, getDepartmentList } from '@/views/index/api/api.js';
+import { getEventList } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -229,7 +236,7 @@ export default {
     },
     // 获取事件列表数据
     getEventData () {
-      let eventType, eventStatus;
+      let eventType, eventStatus, userName;
       if (this.eventForm.eventType === '全部类型') {
         eventType = null;
       } else {
@@ -240,16 +247,24 @@ export default {
       } else {
         eventStatus = this.eventForm.eventStatus;
       }
+      if (this.eventForm.userName === '全部上报者') {
+        userName = null;
+      } else {
+        userName = this.eventForm.userName;
+      }
       const params = {
         'where.reportTimeStart': this.eventForm.reportTime[0],
         'where.reportTimeEnd': this.eventForm.reportTime[1],
         'where.eventStatus': eventStatus,
+        'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
-        'where.otherQuery': this.eventForm.phoneOrNumber,
-        'where.acceptFlag': 25, // 审核通过
+        'where.reporterUserRole': userName,
+        'where.dealOrgId': this.userInfo.organList[0].uid,
+        'where.keyword': this.eventForm.phoneOrNumber,
+        'where.acceptFlag': 2, // 审核通过
         pageNum: this.pagination.pageNum,
-        // orderBy: 'create_time',
-        // order: 'desc'
+        orderBy: 'report_time',
+        order: 'asc'
       }
       getEventList(params)
         .then(res => {
@@ -271,20 +286,24 @@ export default {
     },
     // 跳至事件详情页
     skipEventDetailPage (obj) {
-      if (obj.eventStatusName === '待处理') {
-        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.eventId}});
+      if (obj.eventStatus === 1) {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '处理中') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.eventId}});
+      if (obj.eventStatus === 2) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '已结束') {
-        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.eventId}});
+      if (obj.eventStatus === 3) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.uid}});
       }
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      console.log(obj);
-      this.$router.push({path: '/control/create'});
+      if (!obj.surveillanceId) {
+        this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
+      } 
+      if (obj.surveillanceId) {
+        this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});
+      }
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();

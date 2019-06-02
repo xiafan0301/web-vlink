@@ -1,5 +1,5 @@
-import Vue from 'vue/dist/vue.js'
-import Router from 'vue-router'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import store from '../../../store/store'
 /* import routers */
 // 视频模块 router
@@ -18,11 +18,13 @@ import routerControl from './router.control.js'
 import routerMessage from './router.message.js'
 // 告警板块 router
 import routerAlarm from './router.alarm.js'
-// 事件板块 router
+// 管理板块 router
 import routerManage from './router.manage.js'
+// 任务板块 router
+import routerTask from './router.task.js'
 
-Vue.use(Router)
-const router = new Router({
+Vue.use(VueRouter)
+const router = new VueRouter({
   // mode: 'history',
   base: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : '',
   routes: [{
@@ -47,7 +49,8 @@ const router = new Router({
         routerControl,
         routerMessage,
         routerAlarm,
-        routerManage
+        routerManage,
+        routerTask
       ]
     }, {
       path: '/login',
@@ -72,9 +75,9 @@ const router = new Router({
         unrequireLogin: true
       }
     }, {
-      path: '/player',
-      name: 'player',
-      component: () => import('@/components/common/rtmpplayer.vue')
+      path: '/pc',
+      name: 'pc',
+      component: () => import('@/views/index/components/webrtcTest.vue')
     }
   ]
 })
@@ -86,14 +89,14 @@ router.beforeEach((to, from, next) => {
   } else {
     // 需要登陆
     // 通过vuex state获取当前的token是否存在
-    if (store.state.loginUser) {
+    if (store.state.loginToken) {
       next()
     } else {
       next({
         name: 'login',
         // query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
       })
-    }
+    } 
   }
 })
 export default router

@@ -27,7 +27,7 @@
             >
               <span>{{item.groupName}}</span>
               <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
-              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
+              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid, item.groupName)"></i>
             </li>
           </ul>
         </vue-scroll>
@@ -42,8 +42,11 @@
           <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头</li>
           <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
         </ul>
-        <div class="data_list">
+        <div class="data_list" v-show="arrowActive === 1">
           <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+        </div>
+        <div class="data_list" v-show="arrowActive === 2">
+          <p v-for="(item, index) in bayonetList" :key="index">{{item.bayonetName}}</p>
         </div>
       </div>
     </div>
@@ -65,7 +68,7 @@
   </div>
 </template>
 <script>
-import { getCusGroup, delGroupDevice } from '@/views/index/api/api.js';
+import { getCusGroup, delGroupDevice } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -76,6 +79,7 @@ export default {
       closeShow: false,
       groupList: [], // 所有的分组
       deviceList: [], // 设备列表
+      bayonetList: [], // 卡口列表
       deleteId: null, // 要删除的分组设备id
     }
   },
@@ -86,7 +90,7 @@ export default {
     // 获取所有的分组
     getGroupList () {
       const params = {
-        keyWord: this.keyWord
+        keyword: this.keyWord
       };
       getCusGroup(params)
         .then(res => {
@@ -115,12 +119,17 @@ export default {
       this.groupList.map(item => {
         if (item.uid === id) {
           this.deviceList = JSON.parse(JSON.stringify(item.deviceList));
+          this.bayonetList = JSON.parse(JSON.stringify(item.bayonetList));
         }
       })
     },
     // 跳至新增分组页面
     skipAddGroupPage () {
       this.$router.push({name: 'add_group'});
+    },
+    // 编辑分组
+    skipEditGroupPage (id, name) {
+      this.$router.push({name: 'add_group', query: {groupId: id, name: name}});
     },
     // change  tab
     changeTab (val) {

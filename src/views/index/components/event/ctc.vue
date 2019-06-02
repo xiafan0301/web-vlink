@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="ctc-list">
     <div class="search_box">
       <el-form :inline="true" :model="ctcForm" class="ctc_form" ref="ctcForm">
@@ -7,6 +8,7 @@
             style="width: 260px;"
             v-model="ctcForm.reportTime"
             type="daterange"
+            :clearable="false"
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -20,13 +22,13 @@
               v-for="(item, index) in ctcStatusList"
               :key="index"
               :label="item.enumValue"
-              :value="item.uid"
+              :value="item.enumField"
             >
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item >
-          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或事件编号" v-model="ctcForm.phoneOrNumber" />
+        <el-form-item prop="phoneOrNumber">
+          <el-input style="width: 240px;" type="text" placeholder="请输入提交者手机号或编号" v-model="ctcForm.phoneOrNumber" />
         </el-form-item>
         <el-form-item>
           <el-button class="select_btn" @click="selectDataList">查询</el-button>
@@ -42,14 +44,14 @@
         >
         <el-table-column
           fixed
-          label="事件编号"
-          prop="eventCode"
+          label="编号"
+          prop="code"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
         <el-table-column
           label="手机号"
-          prop="reportUser"
+          prop="reporterPhone"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -80,13 +82,14 @@
         </el-table-column>
         <el-table-column
           label="调度时间"
-          prop="acceptTime"
+          prop="dispatchTime"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
-          label="事件地点"
+          label="地点"
           prop="eventAddress"
+          width="250"
           :show-overflow-tooltip='true'
           >
         </el-table-column>
@@ -107,19 +110,22 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
     </el-pagination>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { formatDate } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
-import { getDiciData, getEventList, updateProcess } from '@/views/index/api/api.js';
+import { getAllCtcList, updateProcess } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -134,7 +140,7 @@ export default {
         eventFlag: 1, // 1--true 0--false
         mutualFlag: 0,
         reportTime: [], // 日期
-        eventStatus: '全部状态', // 事件状态
+        eventStatus: '1', // 事件状态--默认进行中
         phoneOrNumber: null // 手机号或事件编号
       },
       ctcList: [], // 表格数据
@@ -153,11 +159,7 @@ export default {
       getDiciData(status)
         .then(res => {
           if (res) {
-            res.data.map(item => {
-              if (item.uid !== 27) {
-                this.ctcStatusList.push(item);
-              }
-            })
+            this.ctcStatusList = res.data;
           }
         })
         .catch(() => {})
@@ -171,14 +173,15 @@ export default {
         eventStatus = this.ctcForm.eventStatus;
       }
       const params = {
-        'where.eventFlag': this.ctcForm.eventFlag,
-        'where.mutualFlag': this.ctcForm.mutualFlag,
-        'where.reportTimeStart': this.ctcForm.reportTime[0],
-        'where.reportTimeEnd': this.ctcForm.reportTime[1],
-        'where.dispatchStatus': eventStatus,
-        pageNum: this.pagination.pageNum
+        'where.startTime': this.ctcForm.reportTime[0],
+        'where.endTime': this.ctcForm.reportTime[1],
+        'where.keyword': this.ctcForm.phoneOrNumber,
+        'where.status': eventStatus,
+        pageNum: this.pagination.pageNum,
+        orderBy: 'dispatch_time',
+        order: 'asc'
       }
-      getEventList(params)
+      getAllCtcList(params)
         .then(res => {
           if(res) {
             this.ctcList = res.data.list;
@@ -213,19 +216,29 @@ export default {
     // 跳至调度指挥详情页
     skipCtcDetailPage (obj) {
       // 在点击查看的时候将新反馈数量清零
-      if (obj.reportContent > 0) {
-        const params = {
-          'read_flag': true
-        }
-        updateProcess(obj.uid, params)
+      if (obj.feedbackNumber > 0) {
+        // const params = {
+        //   'read_flag': true
+        // }
+        updateProcess(obj.uid)
           .then(res => {console.log(res);})
           .catch(() => {})
       }
-      if (obj.dispatchStatusName === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
-      }
-      if (obj.dispatchStatusName === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
+      if (obj.objType === 1) { // 事件
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
+        }
+
+      } else { // 告警
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid, objType: obj.surveillanceType}});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.uid, objType: obj.surveillanceType}});
+        }
       }
     }
   }

@@ -1,5 +1,5 @@
 // 全局过滤器
-import Vue from 'vue/dist/vue.js';
+import Vue from 'vue';
 import {formatDate} from './util.js';
 /*
  * 求百分比

@@ -24,6 +24,9 @@
         <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">{{helpDetail.reportTime}}</span></div>
         <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{helpDetail.eventDetail}}</span></div>
         <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
+        <div class="help_det_img_list" v-if="helpDetail.attachmentList.length > 0" id="imgsOne">
+          <!-- <img :src="item.path" alt="" v-for="item in helpDetail.attachmentList" :key="item.uid"> -->
+        </div>
       </div>
       <div class="det_list" v-if="commentList.length > 0">
         <div class="list_title">
@@ -33,15 +36,20 @@
           <img src="//via.placeholder.com/32x32" alt="">
           <ul>
             <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserName}}）</span></li>
-            <li class="con_two"><span class="vl_f_999 vl_f_12">{{item.createTime}}</span><span class="vl_f_999 vl_f_12">来源 {{item.eventSource}}</span></li>
-            <li class="con_three">{{item.participateType}}</li>
+            <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{dicFormater(sourceType, String(item.eventSource))}}</span></li>
+            <li class="con_three">{{dicFormater(participateType, String(item.participateType))}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
-            <li class="con_five" v-if="item.sysAppendixInfoList.length > 0">
-              <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid">
+            <li class="con_five" v-if="item.sysAppendixInfoList.length > 0" :id="'imgsTwo_' + item.uid">
+              <!-- <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid"> -->
             </li>
-            <li class="con_six" v-if="!item.replayContent">
+            <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
               <div><i class="vl_icon vl_icon_message_4"></i><span class="vl_f_666" @click="popShield(item, index)">屏蔽该评论</span></div>
+            </li>
+            <li class="reply_content" v-if="item.replayList.length > 0 || (commentId === item.uid && isConfirmation)">
+              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
+              <p>回复内容：</p>
+              <p v-for="_item in item.replayList" :key="_item.uid" v-html="_item.replayContent ? _item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion) : ''" class="vl_f_333"></p>
             </li>
             <el-collapse-transition>
               <li class="con_seven" v-if="commentId === item.uid && !isConfirmation">
@@ -57,12 +65,10 @@
                 </div>
               </li>
             </el-collapse-transition>
-            <li class="reply_content" v-if="item.replayContent || (commentId === item.uid && isConfirmation)">
-              <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
-              <p>回复内容：</p>
-              <p v-html="item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion)" class="vl_f_333"></p>
-            </li>
           </ul>
+        </div>
+        <div class="list_more">
+          <el-button @click="getCommentInfoList">加载更多...</el-button>
         </div>
       </div>
     </div>
@@ -84,12 +90,20 @@
 </template>
 <script>
 import emotion from './emotion/index.vue';
-import {getMutualHelpDetail, getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.js';
+import {objDeepCopy} from '../../../../utils/util.js';
+import {getEventDetail} from '@/views/index/api/api.event.js';
+import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {emotion},
   props: ['helpId'],
   data () {
     return {
+      pageNum: 0,
+      pageSize: 5,
+      total: 0,
+      participateType: dataList.participateType,
+      sourceType: dataList.sourceType,
       helpDetail: null,//民众互助详情
       commentList: [],//评论列表内容
       content: '',//评论内容,
@@ -98,7 +112,6 @@ export default {
       commentId: null,//评论id
       shieldId: null,//屏蔽id
       shieldUserId: null,//被屏蔽用户id
-      userId: null,//用户id
       commentIndex: null,//评论下标
       // 屏蔽弹窗参数
       shieldDialog: null,
@@ -113,28 +126,79 @@ export default {
   methods: {
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
-      getMutualHelpDetail(this.helpId).then(res => {
+      getEventDetail(this.helpId).then(res => {
         if (res && res.data) {
           this.helpDetail = res.data;
+          // 生产可供预览的图片
+          if (this.helpDetail.attachmentList && this.helpDetail.attachmentList.length > 0) {
+            this.previewPictures('imgsOne', this.helpDetail.attachmentList);
+          }
         }
       })
     },
+    // 预览图片
+    previewPictures (id, data) {
+      setTimeout(() => {
+        let imgs = data.map(m => m.path);
+        // 图片数组2
+        let imgs2 = []
+        // 获取图片列表容器
+        let $el = document.getElementById(id);
+        let html = '';
+        // 创建img dom
+        imgs.forEach(function (src) {
+          // 拼接html结构
+          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;border-radius:4px;"></div>';
+          // 生成imgs2数组
+          imgs2.push({
+            url: src,
+            angle: 0
+          })
+        })
+        // 将图片添加至图片容器中
+        $el.innerHTML = html;
+        // 使用方法
+        let ziv = new ZxImageView(null, imgs2);
+        // console.log(ziv);
+        // 查看第几张
+        let $images = $el.querySelectorAll('.item');
+        for (let i = 0; i < $images.length; i++) {
+          (function (index) {
+            $images[i].addEventListener('click', function () {
+              ziv.view(index);
+            })
+          }(i))
+        }
+      }, 50)
+    },
     // 获取评论列表数据
     getCommentInfoList () {
-      // const params = {
-      //   eventId: 1//this.helpId
-      // }
-      getCommentInfoList(1).then(res => {
+      this.pageNum += 1;
+      if (this.pageNum > Math.ceil(this.total/5) && this.pageNum > 1) {
+        this.$message.warning('没有更多数据了');
+        return;
+      }
+      const params = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        'where.eventId': this.helpId
+      }
+      getCommentInfoList(params).then(res => {
         if (res && res.data) {
-          this.commentList = res.data;
+          this.total = res.data.total;
+          this.commentList = this.commentList.concat(res.data.list);
+          for (let item of res.data.list) {
+            if (item.sysAppendixInfoList && item.sysAppendixInfoList.length === 0) continue;
+            this.previewPictures('imgsTwo_' + item.uid, item.sysAppendixInfoList);
+          }
         }
       })
     },
     // 回复评论
     replyComment () {
       const data = {
-        replyContent: this.content,
-        uid: this.commentId
+        replayContent: this.content,
+        commentId: this.commentId
       }
       this.loadingBtn = true;
       replyComment(data).then(res => {
@@ -144,7 +208,10 @@ export default {
           this.isShowEmoji = false;
           this.commentList.forEach(f => {
             if (this.commentId === f.uid) {
-              f.replayContent = this.content;
+              const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
+              obj.uid++;
+              obj.replayContent = this.content;
+              f.replayList.push(obj);
             }
           })
           this.content = null;
@@ -153,8 +220,8 @@ export default {
         this.loadingBtn = false;
       })
     },
+    // 弹出屏蔽弹窗
     popShield (item, index) {
-      this.userId = item.replayUserId;//暂时取这个
       this.shieldUserId = item.commentUserId;
       this.isConfirmation = true;
       this.shieldId = item.uid;
@@ -164,7 +231,7 @@ export default {
     // 屏蔽评论
     shieldComment () {
       const data = {
-        userId: this.userId,//操作的用户id
+        userId: this.$store.state.loginUser.uid,//操作的用户id
         shieldId: this.shieldChecked ? this.shieldUserId : this.shieldId,
         opType: this.shieldChecked ? 2 : 1,//屏蔽操作类型
         shieldType: 1
@@ -229,6 +296,19 @@ export default {
           flex: 1;
         }
       }
+      .help_det_img_list{
+        width: 428px;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        // >img{
+        //   width: 32%;
+        //   height: 117px;
+        //   padding-right: 20px;
+        //   margin-bottom: 20px;
+        //   border-radius:4px;
+        // }
+      }
     }
     .det_list{
       .list_title{
@@ -277,14 +357,17 @@ export default {
             border:1px solid rgba(211,211,211,1);
           }
           .con_five{
+            width: 428px;
             padding: 20px 0;
-            > img{
-              width:117px;
-              height:117px;
-              margin-right: 20px;
-              border-radius:4px;
-              border:1px solid rgba(211,211,211,1);
-            }
+            display: flex;
+            flex-wrap: wrap;
+            // > img{
+            //   width:117px;
+            //   height:117px;
+            //   margin-right: 20px;
+            //   border-radius:4px;
+            //   border:1px solid rgba(211,211,211,1);
+            // }
           }
           .con_six{
             display: flex;
@@ -337,6 +420,18 @@ export default {
               vertical-align: text-bottom;
             }
           }
+        }
+      }
+      .list_more{
+        width: 100%;
+        height: 72px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        >button{
+          width: 166px;
+          height: 32px;
+          line-height: 6px;
         }
       }
     }

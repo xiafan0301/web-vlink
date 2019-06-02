@@ -1,7 +1,9 @@
 /*
 * 通用引入，包含element-ui等
 * */
-import Vue from 'vue/dist/vue.js';
+// standalone   vue/dist/vue.js
+// runtime      vue/dist/vue.common.js
+import Vue from 'vue';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'; // 2.0
 import VueAwesomeSwiper from 'vue-awesome-swiper'
@@ -27,5 +29,8 @@ const loginInfo = localStorage.getItem('as_vlink_user_info');
 if (loginInfo) {
   store.commit('setLoginUser', {
     loginUser: JSON.parse(loginInfo)
+  });
+  store.commit('setLoginToken', {
+    loginToken: true
   });
 }

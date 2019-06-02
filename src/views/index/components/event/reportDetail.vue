@@ -4,79 +4,48 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}}">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content-box">
         <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
-        <div class="receive_box">
+        <div class="receive_box" v-show="lowerlevelReportList && lowerlevelReportList.length > 0">
           <div class="divide"></div>
-          <ul>
+          <ul v-for="(item, index) in lowerlevelReportList" :key="index">
             <li>
               <span>接收者:</span>
-              <span>王冬冬、李沁</span>
+              <span>{{item.receiverName}}</span>
             </li>
             <li>
               <span>情况说明:</span>
-              <span>由于情况复杂，已无法控制影响范围，请上级指示！由于情况复杂，已无法控制影响范围，
-                请上级指示！由于情况复杂，已无法控制影响范围，请上级指示！
-                由于情况复杂，已无法控制影响范围，请上级指示！由于情况复杂，已无法控制影响范围，请上级指示！</span>
+              <span>{{item.processContent}}</span>
             </li>
+            <div class="divide" style="width: 250%"></div>
           </ul>
         </div>
-        <div class="report-content">
+        <div class="report-content" v-show="superPointList && superPointList.length > 0">
           <div class="header">
             <p class="ctc-title">上级指示</p>
           </div>
           <div class="divide"></div>
           <ul class="report-list">
-            <li>
+            <li v-for="(item, index) in superPointList" :key="'item' + index">
               <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
+                <span>{{item.opUserName}}</span>
+                <span>{{item.createTime}}</span>
               </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
+              <div>{{item.processContent}}</div>
+              <div style="width:100%;margin-top:10px;">
+                <img
+                  style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;border:1px solid #ccc;"
+                  v-for="(itm, index) in item.attachmentList"
+                  :key="'item' + index"
+                  :src="itm.path"
+                  @click="openBigImg(index, item.attachmentList)"
+                >
               </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
+              <div class="content-divide"></div>
             </li>
           </ul>
         </div>
@@ -93,8 +62,9 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, getEventProcess } from '@/views/index/api/api.event.js';
+import { proccessEventType } from '@/utils/data.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -102,40 +72,20 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
+      superPointList: [], // 上级指示列表
+      lowerlevelReportList: [] // 下级呈报列表
     }
+  },
+  mounted () {
+    this.getDetail();
+    this.getSuperPointList();
+    this.getLowerlevelReportList();
   },
   methods: {
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -144,9 +94,35 @@ export default {
         })
         .catch(() => {})
     },
+    // 获取上级指示列表
+    getSuperPointList () {
+      const params= {
+        processType: proccessEventType.directiveId,
+        dispatchType: 1 // 1--事件  2--告警
+      }
+      getEventProcess(params, this.$route.query.eventId) 
+        .then(res => {
+          if (res) {
+            this.superPointList = res.data;
+          }
+        })
+    },
+    // 获取下级呈报列表
+    getLowerlevelReportList () {
+      const params= {
+        processType: proccessEventType.reportSuperId,
+        dispatchType: 1 // 1--事件  2--告警
+      }
+      getEventProcess(params, this.$route.query.eventId) 
+        .then(res => {
+          if (res) {
+            this.lowerlevelReportList = res.data;
+          }
+        })
+    },
     // 跳至向上级呈报页面
     skipReportPage () {
-      this.$router.push({name: 'event_report'});
+      this.$router.push({name: 'event_report', query: { eventId: this.$route.query.eventId }});
     },
     // 返回
     back () {
@@ -154,9 +130,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -183,13 +157,21 @@ export default {
       width: 100%;
       margin-top: -20px;
       margin-bottom: 20px;
-      background: #ffffff;
+      background: #fff;
+      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       .divide {
         border: 1px dashed #F2F2F2;
+       
       }
       >ul {
         padding: 10px 20px;
         width: 700px;
+        &:last-child {
+          .divide {
+            display: none;
+          }
+        }
+        
         >li {
           display: flex;
           width: 100%;
@@ -247,13 +229,19 @@ export default {
               width: 50%;
             }
           }
+          .content-divide {
+            width: 100%;
+            height: 1px;
+            margin: 5px 0;
+            border-bottom: 1px dashed #F2F2F2;
+          }
+          &:last-child { 
+            .content-divide {
+              display: none;
+            }
+          }
         }
-        .content-divide {
-          width: 100%;
-          height: 1px;
-          margin: 5px 0;
-          border-bottom: 1px dashed #F2F2F2;
-        }
+        
       }
     }
   }

@@ -41,7 +41,7 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="user_btn function_btn" @click="submitForm('addUser')">新增</el-button>
+              <el-button class="user_btn function_btn" :loading="isAddLoading" @click="submitForm('addUser')">新增</el-button>
               <el-button class="user_btn back_btn" @click="resetForm('addUser')">返回</el-button>
             </el-form-item>
           </el-form>
@@ -74,7 +74,7 @@
             </li>
             <li>
               <div class="main_content">
-                <el-button class="user_btn function_btn">批量新增</el-button>
+                <el-button class="user_btn function_btn" :loading="isMuliAddLoading">批量新增</el-button>
                 <el-button class="user_btn back_btn">返回</el-button>
               </div>
             </li>
@@ -86,7 +86,7 @@
 </template>
 <script>
 import { validatePhone, checkIdCard, checkEmail } from '@/utils/validator.js';
-import { createUser, getDepartmentList } from '@/views/index/api/api.js';
+import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -115,7 +115,9 @@ export default {
         ]
       },
       userInfo: {},
-      departmentData: []
+      departmentData: [],
+      isAddLoading: false, // 单个添加加载中
+      isMuliAddLoading: false, // 批量添加加载中
     }
   },
   mounted () {
@@ -141,6 +143,7 @@ export default {
     submitForm (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isAddLoading = true;
           createUser(this.addUser)
             .then(res => {
               if (res) {
@@ -148,17 +151,19 @@ export default {
                   type: 'success',
                   message: '新建成功',
                   customClass: 'request_tip'
-                })
+                });
+                this.isAddLoading = false;
                 this.$router.push({name: 'user'});
               } else {
                 this.$message({
                   type: 'error',
                   message: '新建失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isAddLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isAddLoading = false;})
         }
       })
     },

@@ -7,7 +7,7 @@
    display: inline-block;
    background-repeat: no-repeat;
    background-image: url(../img/icons.png);
-   transition: .4s ease-out;
+   /* transition: .4s ease-out; */
 }
 .vl_icon_logo { width: 170px; height: 48px; background-position: -96px -521px; }
 /* header */
@@ -50,9 +50,10 @@
 .vl_icon_v23 { width: 24px; height: 24px; background-position: -149px -133px; }
 .vl_icon_v232 { width: 24px; height: 24px; background-position: -480px -257px; }
 .vl_icon_v233 { width: 24px; height: 24px; background-position: -522px -257px; }
-.vl_icon_v24 { width: 24px; height: 24px; background-position: -199px -132px; }
+.vl_icon_v24 { width: 24px; height: 24px; background-position: -200px -132px; }
 .vl_icon_v25 { width: 24px; height: 24px; background-position: -249px -131px; }
-.vl_icon_v26 { width: 24px; height: 24px; background-position: -299px -132px; }
+.vl_icon_v25_2 { width: 24px; height: 24px; background-position: -481px -295px; }
+.vl_icon_v26 { width: 24px; height: 24px; background-position: -298px -132px; }
 .vl_icon_v27 { width: 24px; height: 24px; background-position: -349px -132px; }
 .vl_icon_v28 { width: 24px; height: 24px; background-position: -399px -133px; }
 .vl_icon_v29 { width: 24px; height: 24px; background-position: -872px -259px; }
@@ -71,6 +72,23 @@
 .vl_icon_zzd { width: 41px; height: 48px; background-position: -700px -188px; }
 .vl_icon_sxt_uncheck { width: 41px; height: 48px; background-position: -760px -188px; }
 .vl_icon_kk_uncheck { width: 41px; height: 48px; background-position: -820px -188px; }
+/* 地图板块 侧边栏*/
+.vl_icon_map_002 { width: 20px; height: 19px; background-position: -365px -376px; }
+.vl_icon_map_001 { width: 20px; height: 19px; background-position: -321px -350px; }
+.vl_icon_map_mark6 { width: 43px; height: 68px; background-position: -340px -174px; }
+.vl_icon_map_mark3 { width: 43px;  height: 68px; background-position: -84px -171px; }
+.vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; }
+.vl_icon_map_mark2 { width: 43px;  height: 68px; background-position: -214px -171px; }
+.vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; }
+.vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
+.vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
+.vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -534px -1160px;}
+.vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -619px -1160px;}
+.vl_icon_map_hover_mark2 { width: 47px;  height: 68px; background-position: -787px -1163px;}
+.vl_icon_map_hover_mark3 { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_mark_calling { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_calling0 { width: 32px;  height: 26px; background-position: -805px -1532px;}
+.vl_icon_map_calling1 { width: 32px;  height: 26px; background-position: -853px -1532px;}
 /* 地图板块 工具栏 */
 .vl_icon_041 { width: 20px; height: 20px; background-position: -97px -375px; }
 .vl_icon_sed .vl_icon_041 { background-position: -97px -347px; }
@@ -89,6 +107,8 @@
 .vl_icon_vc_021 { width: 48px; height: 48px; background-position: -253px -1083px; }
 .vl_icon_vc_022 { width: 48px; height: 48px; background-position: -174px -1083px; }
 .vl_icon_vc_023 { width: 48px; height: 48px; background-position: -98px -1083px; }
+.vl_icon_vc_024 { width: 48px; height: 48px; background-position: -844px -1373px; }
+.vl_icon_vc_025 { width: 48px; height: 48px; background-position: -908px -1366px; }
 /* 布控板块图标 */
 .vl_icon_control_01 { width: 41px; height: 48px; background-position: -570px -188px; }
 .vl_icon_control_02 { width: 41px; height: 48px; background-position: -634px -188px; }
@@ -104,7 +124,7 @@
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
 .vl_icon_control_13{width: 28px; height: 28px; background-position: -504px -132px;}
 /* 研判 */
-.vl_icon_judge_01{width: 20px; height: 28px; background-position: -62px -134px;} /* 暂停*/
+.vl_icon_judge_01{width: 19px; height: 24px; background-position: -62px -134px;} /* 暂停*/
 .vl_icon_judge_03{width: 56px;  height: 68px;  background-position: -300px -1150px;} /* 次数1*/
 .vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -455px -1150px;} /* 次数2*/
 .vl_icon_judge_05{width: 56px;  height: 68px;  background-position: -377px -1150px;} /* 次数3*/
@@ -119,14 +139,9 @@
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
 /* 布控状态 */
-.vl_control_state{
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-image: url(../img/temp/con_state.png);
-}
-.vl_control_s{width: 120px; height: 120px; background-position: -18px -10px;}
-.vl_control_o{width: 120px; height: 120px; background-position: -18px -130px;}
-.vl_control_e{width: 120px; height: 120px; background-position: -18px -250px;}
+.vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
+.vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
+.vl_control_e{width: 120px; height: 120px; background-position: -802px -716px;}
 
 .vl_icon_control_14{width: 96px; height: 100px; background-position: -86px -570px;}
 .vl_icon_control_15{width: 96px; height: 100px; background-position: -208px -570px;}
@@ -152,6 +167,9 @@
 .vl_icon_control_35{width: 48px; height: 70px; background-position: -620px -1158px;}
 .vl_icon_control_36{width: 48px; height: 70px; background-position: -704px -1158px;}
 .vl_icon_control_37{width: 48px; height: 70px; background-position: -320px -260px;}
+.vl_icon_control_38{width: 24px; height: 48px; background-position: -496px -1520px;}
+.vl_icon_control_39{width: 24px; height: 48px; background-position: -547px -1520px;}
+.vl_icon_control_40{width: 18px; height: 18px; background-position: -712px -530px;}
 /**消息图标***/
 .vl_icon_message_1{width: 20px; height: 20px; background-position: -278px -992px;}
 .vl_icon_message_2{width: 20px; height: 20px; background-position: -323px -990px;}
@@ -162,8 +180,13 @@
 .vl_icon_message_7{width: 50px; height: 70px; background-position: -320px -260px;}
 /**告警图标***/
 .vl_icon_alarm_1{width: 114px; height: 32px; background-position: -548px -882px;}
+.vl_icon_alarm_2{width: 26px; height: 25px; background-position: -695px -888px;}
+.vl_icon_alarm_3{width: 26px; height: 25px; background-position: -741px -888px;}
+.vl_icon_alarm_4{width: 26px; height: 25px; background-position: -787px -888px;}
+.vl_icon_alarm_5{width: 26px; height: 25px; background-position: -832px -888px;}
+.vl_icon_alarm_6{width: 26px; height: 25px; background-position: -877px -888px;}
 /**事件图标***/
-.vl_icon_event_1{width: 56px; height: 71px; background-position: -580px -428px;}
+.vl_icon_event_1{width: 72px; height: 72px; background-position: -572px -426px;}
 .vl_icon_event_2{width: 16px; height: 16px; background-position: -754px -375px;}
 .vl_icon_event_3{width: 16px; height: 16px; background-position: -785px -375px;}
 .vl_icon_event_4{width: 28px; height: 28px; background-position: -664px -428px;}
@@ -171,11 +194,11 @@
 .vl_icon_event_6{width: 18px; height: 18px; background-position: -664px -465px;} /* 事件--文件上传下载图标 */
 .vl_icon_event_7{width: 23px; height: 22px; background-position: -903px -375px;}
 .vl_icon_event_8{width: 21px; height: 21px; background-position: -872px -375px;}
-.vl_icon_event_9{width: 124px; height: 124px; background-position: -91px -718px;} /*事件---未处理*/
-.vl_icon_event_10{width: 124px; height: 124px; background-position: -227px -718px;} /*事件---处理中*/
-.vl_icon_event_11{width: 124px; height: 124px; background-position: -364px -718px;} /*事件---已结束*/
-.vl_icon_event_12{width: 124px; height: 124px; background-position: -525px -718px;} /*事件---待开始*/
-.vl_icon_event_13{width: 124px; height: 124px; background-position: -667px -718px;} /*事件---进行中*/
+.vl_icon_event_9{width: 117px; height: 117px; background-position: -91px -718px;} /*事件---未处理*/
+.vl_icon_event_10{width: 117px; height: 117px; background-position: -227px -718px;} /*事件---处理中*/
+.vl_icon_event_11{width: 117px; height: 117px; background-position: -364px -718px;} /*事件---已结束*/
+.vl_icon_event_12{width: 117px; height: 117px; background-position: -525px -718px;} /*事件---待开始*/
+.vl_icon_event_13{width: 117px; height: 117px; background-position: -667px -718px;} /*事件---进行中*/
 .vl_icon_event_14{width: 22px; height: 18px; background-position: -809px -1093px;} /*事件---语音通话*/
 .vl_icon_event_15{width: 20px; height: 23px; background-position: -105px -135px;} /*事件---视频暂停*/
 .vl_icon_event_16{width: 24px; height: 26px; background-position: -820px -428px;} /*事件---暂无数据--表情*/
@@ -187,6 +210,8 @@
 .vl_icon_event_22{width: 70px; height: 70px; background-position: -370px -863px;} /*事件---图片切换-不可用-右*/
 .vl_icon_event_23{width: 35px; height: 35px; background-position: -554px -293px;} /*事件---图片放大-关闭*/
 .vl_icon_event_24{width: 20px; height: 20px; background-position: -615px -309px;} /*事件---图片--关闭*/
+.vl_icon_event_25{width: 18px; height: 12px; background-position: -693px -486px;} /*事件---预览文件*/
+.vl_icon_event_26{width: 22px; height: 22px; background-position: -725px -481px;} /*事件---下载视频*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/
@@ -204,7 +229,7 @@
 .vl_icon_manage_3{width: 20px; height: 20px; background-position: -368px -376px;} /*管理组信息--基础信息库*/
 .vl_icon_manage_4{width: 23px; height: 23px; background-position: -499px -373px;} /*添加--视频设置*/
 .vl_icon_manage_5{width: 28px; height: 28px; background-position: -714px -428px;} /*可用设备--视频设置--临时授权*/
-.vl_icon_manage_6{width: 18px; height: 22px; background-position: -325px -376px;} /*摄像头--视频设置--临时授权*/
+.vl_icon_manage_6{width: 15px; height: 17px; background-position: -325px -376px;} /*摄像头--视频设置--临时授权*/
 .vl_icon_manage_7{width: 20px; height: 19px; background-position: -584px -377px;} /*编辑--视频设置--自定义组*/
 .vl_icon_manage_8{width: 20px; height: 19px; background-position: -694px -377px;} /*删除--视频设置--自定义组*/
 .vl_icon_manage_9{width: 186px; height: 196px; background-position: -98px -1255px;} /*无数据图标--视频设置--自定义组*/
@@ -217,6 +242,10 @@
 .vl_icon_manage_16{width: 16px; height: 16px; background-position: -482px -671px;} /*视频设置--临时授权--终止*/
 .vl_icon_manage_17{width: 16px; height: 16px; background-position: -713px -585px;} /* 文件下载 */
 .vl_icon_manage_18{width: 16px; height: 16px; background-position: -744px -585px;} /* 文件上传 */
+/**告警图标***/
+.vl_icon_task_1{width: 46px; height: 46px; background-position: -592px -1522px;}
+.vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
+.vl_icon_task_3{width: 46px; height: 46px; background-position: -731px -1522px;}
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -233,6 +262,15 @@
   display: inline-block;
   padding: 0 5px;
   color: #F2F2F2;
+}
+/* 全局表格或者列表无内容样式 */
+.not_content{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 /* ========== element ui reset ========== */
 .el-badge__content {
@@ -261,6 +299,7 @@
   text-decoration: none !important;
   border-left: 4px solid #fff;
   transition: all .4s ease-out;
+  cursor: pointer;
 }
 .vl_smenu > li > a.router-link-active {
   color: #0C70F8;
@@ -299,7 +338,7 @@
    cursor: default;
  }
  .vl_map_hover_main {
-   position: absolute; bottom: 59px; left: -103px;
+   position: absolute; bottom: 38px; left: -103px;
    width: 200px;
    background-color: #fff;
    color: #666;
@@ -479,11 +518,11 @@
 }
 
 /** 分页样式 **/
-.el-pagination {
+.cum_pagination {
   text-align: right;
   padding: 20px;
 }
-.el-pagination .btn-prev, .el-pagination .btn-next {
+.cum_pagination  .btn-prev, .el-pagination .btn-next {
   width: 32px;
   height: 32px;
   padding: 0;
@@ -491,14 +530,14 @@
   border-radius: 5px;
   color: #333333;
 }
-.el-pager li.active {
+.cum_pagination .el-pager li.active {
   color: #ffffff;
   width: 32px;
   height: 32px;
   background-color: #0C70F8;
   border-radius: 5px;
 }
-.el-pager li {
+.cum_pagination .el-pager li {
   width: 32px;
   height: 32px;
   line-height: 32px;
@@ -673,6 +712,8 @@
   border: 1px solid #F2F2F2;
   background-color: #fff;
   padding: 5px 10px;
+  box-shadow: 0px 1px 12px 0px rgba(114,114,114,0.1);
+  border-radius: 3px;
 }
 .e_stat_tb_ld1 .g2-legend-list-item > div > div {
   font-weight: bold;
@@ -769,3 +810,31 @@
   border-color: #0C70F8;
   background: #0C70F8;
 }
+
+/* s */
+.vl_vid_sdater {  }
+.vl_vid_sdater > input { 
+  padding: 0 2px 0 30px !important;
+ }
+
+ /* 下载按钮样式 */
+ .vid_dowload_btn {
+  display: inline-block;
+  margin-left: 20px;
+  width: 140px; height: 40px; line-height: 40px;
+  font-weight: 500; font-size: 14px; color: #FFF;
+  background-color: #409EFF;
+  border-color: #409EFF;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: .1s;
+  transition: .1s;
+  -ms-user-select: none;
+  border-radius: 4px;
+ }
+ .vid_dowload_btn:hover { text-decoration: none; }
+ .vid_dowload_btn:link { text-decoration: none; }

@@ -4,12 +4,39 @@ export const km2 = (m) => {
   return (m / 1000).fixed(2);
 };
 /**
+ * 零点的时间戳
+ * @param {boolean} flag true: 结束，false：开始
+ * @param {date} date 时间
+ * */
+export const dateOrigin = (flag, date) => {
+  if (!date) { date = new Date(); }
+  date.setHours(flag ? 23 : 0);
+  date.setMinutes(flag ? 59 : 0);
+  date.setSeconds(flag ? 59 : 0);
+  date.setMilliseconds(flag ? 999 : 0);
+  return date;
+};
+/**
  * 随机数，10位时间戳 连接4位随机整数 e.g. 1428910956 + "" +3482
- * @example $.zUtils.random14(newTime);
  * */
 export const random14 = () => {
   return Math.round(new Date().getTime() / 1000) + '' + Math.floor(Math.random() * 9000 + 1000);
 };
+
+/**
+ * @summary 根据时间及格式获取时间的字符串
+ * @param {int|string} mDate 时间戳或格式化时间（yyyy-MM-dd HH:mm:ss）
+ * @return {date} 时间
+ * @example
+ *    formatDate(new Date(),'yyyy-MM-dd HH:mm:ss SSS');// 2017-6-6 11:11:11
+ */
+export const getDate = (mDate) => {
+  if (!mDate) { return ''; }
+  if (typeof iDate === 'string') {
+    mDate = mDate.replace(/-/g, '/');
+  }
+  return new Date(mDate);
+}
 
 /**
  * @summary 根据时间及格式获取时间的字符串
@@ -38,6 +65,7 @@ export const formatDate = (iDate, sFormat = 'yyyy-MM-dd HH:mm:ss') => {
   if (second < 10) { second = '0' + second; }
   let millisecond = dDate.getMilliseconds();// 毫秒
   if (sFormat.indexOf('yyyy') >= 0) { sFormat = sFormat.replace('yyyy', year + ''); }
+  if (sFormat.indexOf('yy') >= 0) { sFormat = sFormat.replace('yy', (year + '').slice(2, 4)); }
   if (sFormat.indexOf('MM') >= 0) { sFormat = sFormat.replace('MM', month + ''); }
   if (sFormat.indexOf('dd') >= 0) { sFormat = sFormat.replace('dd', date + ''); }
   if (sFormat.indexOf('HH') >= 0) { sFormat = sFormat.replace('HH', hour + ''); }
@@ -222,21 +250,16 @@ export const objDeepCopy = (source) => {
 }
 
 // 数组去重
-export const uniq = (array) => {
-  let temp = [];
-  let index = [];
-  let l = array.length;
-  for(var i = 0; i < l; i++) {
-      for(let j = i + 1; j < l; j++){
-          if (array[i] === array[j]){
-              i++;
-              j = i;
-          }
-      }
-      temp.push(array[i]);
-      index.push(i);
-  }
-  return temp;
+export const unique = (array) => {
+  let obj = {}, resultArray = [];
+  resultArray = array.reduce((item, next) => {
+    if (!obj[next.uid]) {
+      obj[next.uid] = true;
+      item.push(next);
+    }
+    return item;
+  }, []);
+  return resultArray;
 }
 
 // 数组转树结构方法
@@ -258,3 +281,6 @@ export const translateDataToTree = (data) => {
   translator(parents, children)
   return parents
 }
+// html2canvas
+import html2canvas from 'html2canvas';
+export const h2canvas = html2canvas;

@@ -143,8 +143,9 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
+      :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
@@ -177,7 +178,7 @@
       <span style="color: #999999;">删除后数据不可恢复。</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="delUserDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="deleteUser">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteUser">确认</el-button>
       </div>
     </el-dialog>
     <!--编辑信息弹出框-->
@@ -222,7 +223,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelEdit('editUser')">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="editUserInfo('editUser')">保存</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editUserInfo('editUser')">保存</el-button>
       </div>
     </el-dialog>
     <!--修改所属组弹出框-->
@@ -244,7 +245,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeCurrGroup">移除所选组</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveGroupLoading" @click="removeCurrGroup">移除所选组</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选组 (已选{{checkSelectGroups.length > 0 ? checkSelectGroups.length : 0}}个/共{{searchSelectGroups.length > 0 ? searchSelectGroups.length : 0}}个)</p>
@@ -264,7 +265,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addSelectGroup">加入所选组</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddGroupLoading" @click="addSelectGroup">加入所选组</el-button>
         </div>
       </div>
     </el-dialog>
@@ -287,7 +288,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_left" @click="removeRolesData">移除所选角色</div>
+          <el-button class="group_btn group_btn_left" :loading="isRemoveRoleLoading" @click="removeRolesData">移除所选角色</el-button>
         </div>
         <div class="group_right">
           <p class="group_number">可选角色 (已选{{checkSelectRoles.length > 0 ? checkSelectRoles.length : 0}}个/共{{searchSelectRoles.length > 0 ? searchSelectRoles.length : 0}}个)</p>
@@ -307,7 +308,7 @@
               </el-checkbox-group>
             </vue-scroll>
           </div>
-          <div class="group_btn group_btn_right" @click="addRolesData">添加所选角色</div>
+          <el-button class="group_btn group_btn_right" :loading="isAddRoleLoading" @click="addRolesData">添加所选角色</el-button>
         </div>
       </div>
     </el-dialog>
@@ -319,7 +320,7 @@ import { getUserList, delUser, isForceUser, updateUser,
   getDepartmentList, getUserGroups, addUserBatchGroups,
   delUserBatchGroups, getRoleList, addUserBatchRoles, delUserBatchRoles,
   resetPwd
-} from '@/views/index/api/api.js';
+} from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -381,6 +382,12 @@ export default {
       groupUserId: null, // 用户组id
       roleUserId: null, // 角色组id
       resetPwdInfo: {}, // 重置密码所需要的信息
+      isEditLoading: false, // 编辑用户加载中
+      isDeleteLoading: false, // 删除用户加载中
+      isRemoveRoleLoading: false, // 移除角色加载中
+      isAddRoleLoading: false, // 添加角色加载中
+      isRemoveGroupLoading: false, // 移除所属组加载中
+      isAddGroupLoading: false, // 加入所属组加载中
     }
   },
   created () {
@@ -467,7 +474,7 @@ export default {
     searchGroup () {
       let reg = new RegExp(this.userGroupName);
       let arr = [];
-      this.searchSelectGroups.map((item, index) => {
+      this.searchSelectGroups.map((item) => {
         let name = item.groupName;
         if (name.match(reg)) {
           arr.push(item);
@@ -486,7 +493,7 @@ export default {
     searchRole () {
       let reg = new RegExp(this.userRoleName);
       let arr = [];
-      this.searchSelectRoles.map((item, index) => {
+      this.searchSelectRoles.map((item) => {
         let name = item.roleName;
         if (name.match(reg)) {
           arr.push(item);
@@ -557,6 +564,7 @@ export default {
     editUserInfo (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isEditLoading = true;
           updateUser(this.editUser)
             .then(res => {
               if (res) {
@@ -564,18 +572,20 @@ export default {
                   type: 'success',
                   message: '修改成功',
                   customClass: 'request_tip'
-                })
+                });
                 this.editUserInfoDialog = false;
                 this.getList();
+                this.isEditLoading = false;
               } else {
                 this.$message({
                   type: 'error',
                   message: '修改失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isEditLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isEditLoading = false;})
         }
       })
     },
@@ -592,10 +602,11 @@ export default {
     // 删除用户
     deleteUser () {
       if (this.deleteId) {
+        this.isDeleteLoading = true;
         const params = {
           proKey: this.userInfo.proKey,
           uid: this.deleteId
-        }
+        };
         delUser(params)
           .then(res => {
             if (res) {
@@ -603,18 +614,20 @@ export default {
                 type: 'success',
                 message: '删除成功',
                 customClass: 'request_tip'
-              })
+              });
               this.delUserDialog = false;
               this.getList();
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
+              });
+              this.isDeleteLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
     // 显示修改所属组弹出框
@@ -643,6 +656,7 @@ export default {
         this.checkSelectGroups.map(item => {
           params.uids.push(item.uid);
         });
+        this.isAddGroupLoading = true;
         addUserBatchGroups(params)
           .then(res => {
             if (res) {
@@ -659,9 +673,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.editUserGroupDialog = false;
+              this.isAddGroupLoading = false;
+            } else {
+              this.isAddGroupLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddGroupLoading = false;})
       }
     },
     // 移除所选组
@@ -675,6 +693,7 @@ export default {
         this.checkCurrGroups.map(item => {
           params.uids.push(item.uid);
         });
+        this.isRemoveGroupLoading = true;
         delUserBatchGroups(params)
           .then(res => {
             if (res) {
@@ -691,9 +710,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.editUserGroupDialog = false;
+              this.isRemoveGroupLoading = false;
+            } else {
+              this.isRemoveGroupLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveGroupLoading = false;})
       }
     },
     // 显示配置角色弹出框
@@ -749,6 +772,7 @@ export default {
         this.checkCurrRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isRemoveRoleLoading = true;
         delUserBatchRoles(params)
           .then(res => {
             if (res) {
@@ -765,9 +789,13 @@ export default {
               });
               this.getList();
               this.checkCurrRoles = [];
+              this.configRoleDialog = false;
+              this.isRemoveRoleLoading = false;
+            } else {
+              this.isRemoveRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRemoveRoleLoading = false;})
       }
     },
     // 加入所选角色
@@ -781,6 +809,7 @@ export default {
         this.checkSelectRoles.map(item => {
           params.roleIdList.push(item.uid);
         });
+        this.isAddRoleLoading = true;
         addUserBatchRoles(params)
           .then(res => {
             if (res) {
@@ -797,9 +826,13 @@ export default {
               });
               this.getList();
               this.checkSelectRoles = [];
+              this.configRoleDialog = false;
+              this.isAddRoleLoading = false;
+            } else {
+              this.isAddRoleLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isAddRoleLoading = false;})
       }
     },
     // 禁用用户
@@ -977,12 +1010,12 @@ export default {
           }
         }
         .group_btn {
-          text-align: center;
-          line-height: 40px;
+          // text-align: center;
+          // line-height: 40px;
           width: 220px;
           height: 40px;
-          border-radius: 4px;
-          cursor: pointer;
+          // border-radius: 4px;
+          // cursor: pointer;
         }
         .group_number {
           color: #999999;
@@ -999,6 +1032,9 @@ export default {
         }
         /deep/ .el-checkbox+.el-checkbox {
           margin-left: 0;
+        }
+        /deep/ .el-checkbox:last-child {
+          margin-right: 30px;
         }
         /deep/ .el-checkbox__label {
           float: left;

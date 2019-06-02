@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mes_note" v-if="pageType === 1">
+    <div class="mes_note" v-show="pageType === 1">
       <div class="note_box">
         <div class="note_form">
           <el-form ref="noteForm" :model="noteForm" class="note_form">
@@ -45,6 +45,9 @@
                 prop="createTime"
                 show-overflow-tooltip
                 >
+                <!-- <template slot-scope="scope">
+                  {{scope.row.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template> -->
               </el-table-column>
               <el-table-column
                 label="短信类型"
@@ -67,10 +70,15 @@
                   {{scope.row.sendSuccCount}}/{{scope.row.sendTotal}}
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
+            class="cum_pagination"
+            v-if="noteList && noteList.list && noteList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -86,7 +94,7 @@
 </template>
 <script>
 import noteAdd from './noteAdd.vue';
-import {getSmsList, getSmsTemplate} from '@/views/index/api/api.js';
+import {getSmsList, getSmsTemplate} from '@/views/index/api/api.message.js';
 export default {
   components: {noteAdd},
   data () {
@@ -94,6 +102,11 @@ export default {
       pageType: 1,//页面类型 1-列表，2-新增
       // 顶部筛选参数
       noteForm: {
+        noteDate: null,
+        content: null,
+        noteState: null
+      },
+      lastNoteForm: {
         noteDate: null,
         content: null,
         noteState: null
@@ -116,6 +129,21 @@ export default {
     // 获取短信列表
     getSmsList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.noteForm);
+      const lastArr = Object.values(this.lastNoteForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastNoteForm = Object.assign({}, this.noteForm);
       const params = {
         pageSize: this.pageSize,
         pageNum: this.pageNum,
@@ -154,10 +182,6 @@ export default {
         }
       })
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getSmsList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -168,6 +192,7 @@ export default {
     },
     resetForm () {
       this.$refs['noteForm'].resetFields();
+      this.getSmsList();
     }
   }
 }

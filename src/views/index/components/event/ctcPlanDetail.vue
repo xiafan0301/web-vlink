@@ -20,8 +20,10 @@
           <li>
             <span>适用事件等级:</span>
             <span>
-              <template v-if='planDetail.levelNameList'>
-                {{planDetail.levelNameList.join()}}
+              <template v-if='planDetail.levelList'>
+                <span v-for="(item, index) in planDetail.levelList" :key="index">
+                  {{item.planLevelName + ' '}}
+                </span>
               </template>
             </span>
           </li>
@@ -32,17 +34,17 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <template v-if="planDetail.cname">
+              <template v-if="planDetail.sysAppendixInfo && planDetail.sysAppendixInfo.cname">
                 <i class="vl_icon vl_icon_event_5"></i>
-                {{planDetail.cname}}
-                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.path)"></i>
+                {{planDetail.sysAppendixInfo.cname}}
+                <i class="vl_icon vl_icon_event_6" style="margin-left:5px;cursor:pointer;" @click="downloadFile(planDetail.sysAppendixInfo.path)"></i>
               </template>
               <template v-else>无</template>
             </span>
           </li>
           <li>
             <span>响应处置:</span>
-            <div class="res-list">
+            <div class="res-list" v-show="planDetail.taskList && planDetail.taskList.length > 0">
               <div
                 class="list-detail"
                 v-for="(item, index) in planDetail.taskList"
@@ -75,6 +77,9 @@
       </div>
       <div class="operation-footer">
         <el-button class="operation_btn function_btn" @click="skipEditPage">修改</el-button>
+        <a target="_blank" :href="previewUrl.ctc + '/plan-services/plans/preview/' + this.$route.query.planId">
+          <el-button class="operation_btn function_btn">预览</el-button>
+        </a>
         <el-button class="operation_btn delete_btn" @click="showDeleteDialog">删除</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
@@ -90,20 +95,26 @@
         <span style="color: #999999;">删除后调度指挥时将不能再执行此预案。</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="delPlanDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="sureDeletePlan">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeletePlan">确认</el-button>
         </div>
       </el-dialog>
     </div>
   </vue-scroll>
 </template>
 <script>
-import { getPlanDetail, delPlan } from '@/views/index/api/api.js';
+import { getPlanDetail, delPlan } from '@/views/index/api/api.event.js';
+import { ajaxCtx } from '@/config/config.js';
 export default {
   data () {
     return {
+      previewUrl: null,
       delPlanDialog: false, // 删除预案弹出框
       planDetail: {}, // 预案详情
+      isDeleteLoading: false, // 删除加载中
     }
+  },
+  created () {
+    this.previewUrl = ajaxCtx;
   },
   mounted () {
     this.getPlanDetail();
@@ -116,7 +127,6 @@ export default {
         getPlanDetail(planId)
          .then(res => {
            if (res) {
-             console.log('res', res.data)
              this.planDetail = res.data;
            }
          })
@@ -138,6 +148,7 @@ export default {
     sureDeletePlan () {
       const delPlanId = this.$route.query.planId;
       if (delPlanId) {
+        this.isDeleteLoading = true;
         delPlan(delPlanId)
           .then(res => {
             if (res) {
@@ -148,15 +159,17 @@ export default {
               })
               this.delPlanDialog = false;
               this.$router.push({name: 'event_ctcplan'});
+              this.isDeleteLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '删除失败',
                 customClass: 'request_tip'
-              })
-          }
+              });
+              this.isDeleteLoading = false;
+            }
           })
-          .catch(() => {})
+          .catch(() => {this.isDeleteLoading = false;})
       }
     },
      // 下载文件
@@ -164,7 +177,7 @@ export default {
       if (url) {
         window.open(url);
       }
-    },
+    }
   }
 }
 </script>

@@ -5,6 +5,8 @@
         <router-link :to="{name: 'video_patrol'}">视频巡逻</router-link>
       </li>
       <li>
+        <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
+        <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
         <router-link :to="{name: 'video_playback'}">录像回放</router-link>
       </li>
       <li>
@@ -52,6 +54,11 @@ export default {
       cursor: default;
     }
   }
+  &.vid_show_type_dis {
+    > li {
+      cursor: default !important;
+    }
+  }
 }
 .vid_show_menu {
   position: absolute; top: 0; left: 20px; z-index: 20;
@@ -88,7 +95,7 @@ export default {
         width: 100%;
         > .show_title_li {
           float: left;
-          width: 50%; height: 48px; line-height: 48px;
+          width: 33.33%; height: 48px; line-height: 48px;
           color: #999;
           border-bottom: 1px solid #ddd;
           text-align: center;
@@ -103,9 +110,17 @@ export default {
           height: 2px;
           background-color: #186DFB;
           overflow: hidden;
-          width: 50%;
+          width: 33.33%;
           transition: left 0.3s ease-out;
-          &.show_title_line2 { left: 50%; }
+          &.show_title_line2 { left: 33.33%; }
+          &.show_title_line3 { left: 66.67%; }
+        }
+        &.show_title_2 {
+          > .show_title_li { width: 50%; }
+          > .show_title_line {
+            width: 50%;
+            &.show_title_line2 { left: 50%; }
+          }
         }
       }
       .show_content {
@@ -168,22 +183,27 @@ export default {
           }
           > .show_his {
             > li {
-              position: relative;
-              padding-right: 40px;
-              padding: 10px 40px 10px 20px;
-              border-bottom: 1px dotted #ddd;
-              cursor: default;
-              &:hover { 
-                color: #186DFB;
-                background-color: #E0F3FF;
-              }
-              > h3 { height: 20px; line-height: 20px; }
-              > p { color: #999; height: 20px; line-height: 20px; }
-              > i {
-                position: absolute; top: 50%; right: 25px;
-                font-size: 16px;
-                margin: -8px;
-                cursor: pointer;
+              > div {
+                position: relative;
+                padding-right: 40px;
+                padding: 10px 40px 10px 20px;
+                border-bottom: 1px dotted #ddd;
+                cursor: default;
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                }
+                > h3 { height: 20px; line-height: 20px; }
+                > p { color: #999; height: 20px; line-height: 20px; }
+                > i {
+                  position: absolute; top: 50%; right: 25px;
+                  font-size: 16px;
+                  margin: -8px;
+                  cursor: pointer;
+                }
+                &.show_his_dis {
+                  > h3 { color: #999; }
+                }
               }
             }
           }
@@ -275,6 +295,7 @@ export default {
       width: 100%; height: 100%;
       overflow: hidden;
       background-color: #000;
+      box-shadow: 0 0 5px #f1f1f1;
       > video {
         position: absolute;
         display: block;
@@ -290,10 +311,10 @@ export default {
   &.vid_list_st1 > li {
     width: 100%; height: 100%;
   }
-  &.vid_list_st2 > li {
+  &.vid_list_st4 > li {
     width: 50%; height: 50%;
   }
-  &.vid_list_st3 > li {
+  &.vid_list_st5 > li {
     width: 33.33%; height: 40%;
     &:nth-child(1) {
       width: 50%; height: 60%;
@@ -302,13 +323,14 @@ export default {
       width: 50%; height: 60%;
     }
   }
-  &.vid_list_st4 > li {
+  &.vid_list_st9 > li {
     width: 33.33%; height: 33.33%;
   }
-  &.vid_list_st5 > li {
+  &.vid_list_st16 > li {
     width: 25%; height: 25%;
   }
 }
+.show_list_empty { padding: 0 20px; color: #999; text-align: center; }
 </style>
 <style lang="scss" scoped>
 .vl_video {

@@ -6,20 +6,26 @@
           <div class="show_search_ti">
             <span>开始</span>
             <el-date-picker
+              class="vl_vid_sdater"
               style="width: 175px"
               size="small"
               v-model="startTime"
               type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="startTimeOptions"
               placeholder="选择开始时间">
             </el-date-picker>
           </div>
           <div class="show_search_ti">
             <span>结束</span>
             <el-date-picker
+              class="vl_vid_sdater"
               style="width: 175px"
               size="small"
               v-model="endTime"
               type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="endTimeOptions"
               placeholder="选择结束时间">
             </el-date-picker>
           </div>
@@ -49,7 +55,7 @@
           </div>
         </div>
         <div class="sign_content_list">
-          <ul>
+          <ul v-if="signList && signList.length > 0">
             <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
               <!-- 过期 -->
               <div v-if="item.signFlag" class="content_list_dis">
@@ -61,8 +67,8 @@
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
               <div v-else-if="deviceIsPlaying(item)">
@@ -74,8 +80,8 @@
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.deviceConstructTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
+                <i class="el-icon-delete" style="cursor: not-allowed;" title="播放中，无法删除"></i>
               </div>
               <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
                 <h3 :title="item.content" class="com_ellipsis">
@@ -86,10 +92,25 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete"></i>
+                <i class="el-icon-delete" @click="delSign(item)"></i>
               </div>
             </li>
           </ul>
+          <div class="sign_content_list_empty" v-else>
+            暂无
+          </div>
+          <div class="sign_content_pager">
+            <el-pagination
+              :small="true"
+              :background="false"
+              :pager-count="5"
+              layout="pager"
+              @current-change="handleCurrentChange"
+              :current-page="pagination.currentPage"
+              :page-size="pagination.pageSize"
+              :total="pagination.total">
+            </el-pagination>
+          </div>
         </div>
       </div>
     </div>
@@ -98,7 +119,8 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item"
+              :oConfig="{signEmit: true}" @signEmit="signEmit"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" :tipMsg="tipMsg"></div>
@@ -109,8 +131,8 @@
   </div>
 </template>
 <script>
-import { apiVideoList, apiVideoSignPeopleList, apiSignContentList } from "@/views/index/api/api.video.js";
-import { formatDate } from "@/utils/util.js";
+import { apiVideoList, apiVideoSignPeopleList, apiSignContentList, apiVideoSignDel } from "@/views/index/api/api.video.js";
+import { formatDate, dateOrigin } from "@/utils/util.js";
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
@@ -123,13 +145,38 @@ export default {
 
       searchLoading: false,
       signList: [],
+      pagination: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
+      },
       searchVal: '',
-      startTime: new Date(new Date() - 3600 * 1000 * 24 * 7),
-      endTime: new Date(),
+      startTime: new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6),
+      endTime: dateOrigin(true),
       signPeople: '',
       signContent: '',
       signPeopleList: [],
-      signContentList: []
+      signContentList: [],
+
+      startTimeOptions: {
+        disabledDate: (d) => {
+          // d > new Date() || d > this.endTime
+          if (d > new Date() || d > this.endTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      },
+      endTimeOptions: {
+        disabledDate: (d) => {
+          if (d > new Date() || d < this.startTime) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   mounted () {
@@ -167,13 +214,17 @@ export default {
     },
     dragDrop (item, index) {
       if (this.dragActiveObj) {
-        let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        console.log('deviceSip', deviceSip);
+        let _endTime = this.dragActiveObj.signTime + 1000 * 60 * 60 * 24;
+        if (_endTime > new Date().getTime()) {
+          _endTime = new Date().getTime();
+        }
         this.videoList.splice(index, 1, {
+          type: 2, // 标记，暂定为回放
           title: this.dragActiveObj.deviceName,
+          startTime: this.dragActiveObj.signTime,
+          endTime: _endTime,
           video: Object.assign({}, this.dragActiveObj, {
-            uid: this.dragActiveObj.deviceUid,
-            deviceSip: deviceSip
+            uid: this.dragActiveObj.deviceUid
           })
         });
       }
@@ -184,10 +235,11 @@ export default {
     },
 
     searchReset () {
-      this.startTime = new Date(new Date() - 3600 * 1000 * 24 * 7);
-      this.endTime = new Date();
+      this.startTime = new Date(dateOrigin().getTime() - 3600 * 1000 * 24 * 6);
+      this.endTime = dateOrigin(true);
       this.signPeople = '';
       this.signContent = '';
+      this.searchSubmit();
     },
     searchSubmit () {
       this.getData();
@@ -199,10 +251,11 @@ export default {
         'where.endTime': formatDate(this.endTime),
         'where.userId': this.signPeople,
         'where.contentId': this.signContent,
-        pageNum: 1,
-        pageSize: 50
+        pageNum: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize
       }).then(res => {
         if (res && res.data) {
+          this.pagination.total = res.data.total;
           this.signList = res.data.list;
         }
         this.searchLoading = false;
@@ -210,6 +263,10 @@ export default {
         this.searchLoading = false;
         console.log("apiVideoList error：", error);
       });
+    },
+    handleCurrentChange (val) {
+      this.pagination.currentPage = val;
+      this.searchSubmit();
     },
     getSignPeopleList () {
       apiVideoSignPeopleList().then(res => {
@@ -228,6 +285,44 @@ export default {
       }).catch(error => {
         console.log("apiSignContentList error：", error);
       });
+    },
+    delSign (item) {
+      this.$msgbox({
+        title: '提示',
+        message: '确定删除该视频标记吗？',
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = '执行中...';
+            apiVideoSignDel(item.id).then(() => {
+              this.searchSubmit();
+              this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+              done();
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            }).catch(error => {
+              console.log("apiVideoSignDel error：", error);
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            });
+          } else {
+            done();
+          }
+        }
+      }).then(action => {
+      });
+    },
+    signEmit () {
+      console.log('标记成功');
+      this.searchSubmit();
     }
   }
 }
@@ -253,7 +348,7 @@ export default {
   }
 }
 .show_search {
-  position: absolute; top: 24px; left: 0;
+  position: absolute; top: 24px; left: 0; z-index: 2;
   width: 100%;
   padding-top: 15px; padding-bottom: 5px;
   border-bottom: 1px solid #f6f6f6;
@@ -282,7 +377,8 @@ export default {
   }
 }
 .sign_content_list {
-  height: 100%; padding-top: 240px;
+  position: relative;
+  height: 100%; padding-top: 240px; padding-bottom: 30px;
   > ul {
     height: 100%;
     overflow: auto;
@@ -342,5 +438,17 @@ export default {
       }
     }
   }
+  .sign_content_pager {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    padding-top: 2px;
+    text-align: center;
+    border-top: 1px solid #f6f6f6;
+  }
+}
+.sign_content_list_empty {
+  color: #999;
+  text-align: center;
+  padding: 20px 20px 0 0;
 }
 </style>

@@ -19,8 +19,18 @@
             <el-form-item prop="titleOrPublisher">
               <el-input v-model="noticeForm.titleOrPublisher" placeholder="请输入标题或者发布者"></el-input>
             </el-form-item>
+            <el-form-item prop="department">
+              <el-select value-key="uid" v-model="noticeForm.department" filterable placeholder="请选择发布部门">
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="noticeState">
-              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择">
+              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择是否置顶">
                 <el-option
                   v-for="item in noticeStateList"
                   :key="item.uid"
@@ -61,6 +71,12 @@
                 >
               </el-table-column>
               <el-table-column
+                label="发布部门"
+                prop="publishUnitName"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
                 label="发布者"
                 prop="publishUserName"
                 show-overflow-tooltip
@@ -80,20 +96,32 @@
                 prop="publishTime"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  {{scope.row.publishTime | fmTimestamp('yyyy-MM-dd HH:mm')}}
+                </template>
               </el-table-column>
               <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  <template v-if="scope.row.publishState !== 2 && scope.row.messageType !== 1">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                  </template>
+                  <template v-if="scope.row.publishState === 2">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="putMsgNote(scope.row.uid, scope.row.isTop)">{{scope.row.isTop ? '取消置顶' : '置顶'}}</span>
+                  </template>
                 </template>
               </el-table-column>
+              <div class="not_content" slot="empty">
+                <img src="../../../../assets/img/not-content.png" alt="">
+                <p>暂无相关数据</p>
+              </div>
             </el-table>
           </div>
           <el-pagination
-            @size-change="handleSizeChange"
+            class="cum_pagination"
+            v-if="noticeList && noticeList.list && noticeList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[100, 200, 300, 400]"
@@ -111,7 +139,7 @@
 <script>
 import noticeAdd from './noticeAdd.vue';
 import noticeDetail from './noticeDetail.vue';
-import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.js';
+import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.message.js';
 export default {
   components: {noticeAdd, noticeDetail},
   data () {
@@ -121,8 +149,16 @@ export default {
       noticeForm: {
         noticeDate: null,
         titleOrPublisher: null,
+        department: null,
         noticeState: null
       },
+      lastNoticeForm: {
+        noticeDate: null,
+        titleOrPublisher: null,
+        department: null,
+        noticeState: null
+      },
+      departmentList: [],
       noticeStateList: [
         {value: '0', label: '未置顶'},
         {value: '1', label: '已置顶'}
@@ -143,16 +179,31 @@ export default {
     // 获取公告消息列表
     getMsgNoteList () {
       this.pageType = 1;
+      // 筛选参数有变化时，当前置为第一页
+      const arr = Object.values(this.noticeForm);
+      const lastArr = Object.values(this.lastNoticeForm);
+      let isReset = false;
+      for (let i = 0; i < arr.length ; i++) {
+        if (arr[i] !== lastArr[i]) {
+          isReset = true;
+          break;
+        }
+      }
+      if (isReset) {
+        this.pageNum = 1;
+        this.currentPage = 1;
+      }
+      this.lastNoticeForm = Object.assign({}, this.noticeForm);
       const params = {
         pageSize: this.pageSize,
         pageNum: this.pageNum,
         orderBy: null,
         order: null,
+        'where.messageType': 2,
         'where.startDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[0],
         'where.endDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[1],
         'where.titleOrPublisher': this.noticeForm.titleOrPublisher,
-        'where.isTop': this.noticeForm.noticeState,
-        'where.messageType': null
+        'where.isTop': this.noticeForm.noticeState
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {
@@ -183,10 +234,6 @@ export default {
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
-    handleSizeChange (size) {
-      this.pageSize = size;
-      this.getMsgNoteList();
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -197,7 +244,10 @@ export default {
       this.msgNoteId = uid;
     },
     resetForm () {
-      this.$refs['noticeForm'].resetFields();
+      for (let key in this.noticeForm) {
+        this.noticeForm[key] = null;
+      }
+      this.getMsgNoteList();
     }
   }
 }

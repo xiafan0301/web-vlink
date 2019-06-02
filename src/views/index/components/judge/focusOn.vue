@@ -140,7 +140,7 @@
                 label="上报时间"
                 min-width="120">
                 <template slot-scope="scope">
-                  {{scope.row.createTime.split(' ')[0]}}
+                  {{scope.row.reportTime.split(' ')[0]}}
                 </template>
               </el-table-column>
               <el-table-column
@@ -199,8 +199,7 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
-import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList} from '../../api/api.js';
+import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList} from '../../api/api.judge.js';
 export default {
   data() {
     return {
@@ -209,7 +208,6 @@ export default {
         pageSize: 6,
         total: 0
       },
-      testData: testData,
       evData: [],
       searchData: {
         type: null, // 1：人， 2： 车,0 无限
@@ -426,7 +424,7 @@ export default {
     },
     addListen (el, evType,key ,obj = {}) {
       let self = this;
-      let _key = self.curVideo.indexNum;
+      let _key;
       el.bind(evType, function () {
         switch (evType) {
           case 'mouseover':
@@ -440,6 +438,7 @@ export default {
             }
             break;
           case 'click':
+            _key  = self.curVideo.indexNum;
             self.evData.forEach(z => {
               z.checked = false;
             })
@@ -456,11 +455,12 @@ export default {
       })
     },
     showVideo (data) {
+      console.log(data)
       this.curVideo.indexNum = this.evData.indexOf(data);
       this.curSXT = data;
       this.showVideoList = true;
       const params = {
-        surveillanceId: this.curSXT.surveillanceId,
+        surveillanceId: this.curSXT.surveillanceId ? this.curSXT.surveillanceId : '',
         deviceId: this.curSXT.deviceId
       }
       this.$_showLoading({target: '.__vuescroll'});
@@ -555,7 +555,7 @@ export default {
         })
       }
       let params = {
-        'where.surveillanceIds': this.surveillanceIds.join(','),
+        'where.surveillanceIds': [...new Set(this.surveillanceIds.join(',').split(','))].join(','),
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
         // surveillanceIds: '23, 11'

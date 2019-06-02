@@ -2,104 +2,39 @@
   <div class="select_map_area" :class="{'vl_map_selarea_ctl': selAreaAble}">
     <div class="select_map_left">
       <div class="select_top">
-        <span>已有设备 (12)</span>
-        <p>移除设备</p>
+        <span>已有设备 ({{leftDeviceNumber}})</span>
+        <p @click="removeDevice">移除设备</p>
       </div>
       <div class="detail_list">
         <vue-scroll>
           <ul class="temp_detail_info">
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-                <i class="del_btn operation_btn vl_icon vl_icon_manage_8"></i>
-                <i class="edit_btn operation_btn vl_icon vl_icon_manage_7"></i>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+            <li v-for="(item, index) in currentDeviceList" :key="'item' + index">
+                <div style="display: flex; padding: 0 10px;">
+                  <el-checkbox v-model="item.isChecked" style="margin-right: 10px;" @change="handleLeftParentChecked(index, item.isChecked)"></el-checkbox>
+                  <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openLeftArrow(index)">
+                    <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                    <span>{{item.cname}}</span>
+                  </div>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
+                <div class="child_temp" v-show="item.isOpenArrow === true">
+                  <div class="temp_tab">
+                    <span :class="[item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, true)">摄像头</span>
+                    <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, false)">卡口</span>
+                  </div>
+                  <ul class="child_temp_detail" v-show="item.isSXT">
+                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
+                  <ul class="child_temp_detail" v-show="!item.isSXT">
+                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
+                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                      <span>{{itm.deviceName}}</span>
+                    </li>
+                  </ul>
                 </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            <li>
-              <div class="parent_temp_li" :class="{'temp_active': arrowActiveTemp === true}" @click="arrowActiveTemp = !arrowActiveTemp">
-                <el-checkbox style="margin-right: 10px;"></el-checkbox>
-                <i :class="[arrowActiveTemp === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                <span>重点场所</span>
-              </div>
-              <div class="child_temp" v-show="arrowActiveTemp">
-                <div class="temp_tab">
-                  <span class="active_span">摄像头</span>
-                  <span>卡口</span>
-                </div>
-                <ul class="child_temp_detail">
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                  <li>
-                    <el-checkbox></el-checkbox>
-                    <span>广场监控点1-300</span>
-                    <i class="vl_icon vl_icon_manage_6"></i>
-                  </li>
-                </ul>
-              </div>
-            </li>
+              </li>
           </ul>
         </vue-scroll>
       </div>
@@ -107,7 +42,7 @@
     <div class="select_map_right">
       <div class="select_map_right_title">
         <span>可选设备</span>
-        <span>(300)</span>
+        <span>({{selectDeviceNumber}})</span>
       </div>
       <div id="mapMap"></div>
       <div class="right-flag">
@@ -118,7 +53,7 @@
           </li>
         </ul>
         <ul class="map-rrt">
-          <li><i class="vl_icon vl_icon_control_23" @click="mapZoomSet(1)"></i></li>
+          <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
         </ul>
         <ul class="map-rrt map_rrt_u2">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -126,82 +61,376 @@
         </ul>
       </div>
     </div>
+    <!-- <div class="close_arrow">
+      <i class="el-icon-error"></i>
+    </div> -->
   </div>
 </template>
 <script>
-import { testData } from './testData.js';
+// import { testData } from './testData.js';
 import { random14 } from '@/utils/util.js';
 export default {
+  props: [ 'selectDeviceList', 'selectDeviceNumber', 'leftDeviceNumber', 'currentDeviceList', 'groupId' ],
   data () {
     return {
       arrowActiveTemp: false,
       map: null, // 地图对象
       // 选择区域
       selAreaAcitve: false,
+      selAreaPolygon: null,
       mouseTool: null,
       selAreaAble: false,
-      mapTypeList: ['sxt', 'kk', 'cl', 'ry'],
-      mapTypeListAll: ['sxt', 'kk', 'cl', 'ry'],
+      mapTypeList: ['sxt', 'kk'],
+      mapTypeListAll: ['sxt', 'kk'],
 
       sxtList: [], // 摄像头
       sxtMapMarkers: [],
       kkList: [], // 卡口
       kkMapMarkers: [],
-      clList: [], // 车辆
-      clMapMarkers: [],
-      ryList: [],  // 人员
-      ryMapMarkers: [],
+
+      finalDeviceList: [], // 最终选择的设备
+
+      unCheckDeviceList: [], // 没有在多边形中的设备--没有选中的设备
+
+      lastCurrDeviceLength: 0, // 上一次已有设备数量
+      // lastSelectDeviceLength: 0, // 上一次可选设备数量
+    }
+  },
+  watch: {
+    finalDeviceList (val) {
+      console.log('val', val)
+      let checkedDeviceList = [], // 选中的设备
+        currentDeviceList = [], // 选中的设备经过处理后
+        deviceList = [], bayonetList = [];
+
+      let unCheckedDeviceList = [], // 没有选中的设备
+        willRemoveDeviceList = [], // 没有选中的设备经过处理后
+        unselectDeviceList = [], unselectBayonetList = [];
+
+      this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
+
+      let selectDeviceNumber = this.unCheckDeviceList.length;
+      let checkedDeviceNumber;
+      if (this.groupId) { // 编辑分组
+        checkedDeviceNumber = val.length;
+      } else {
+        checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
+      }
+
+      if (val && val.length > 0) {  // 多边形存在且在多边形中的设备
+        val.map(item => {
+          if (item.isSxt) { // 摄像头
+            deviceList.push(item);
+          } else {
+            bayonetList.push(item);
+          }
+          
+          // 在可选的设备中移除已经选中的设备
+          if (item.isSxt) {
+            this.sxtList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.sxtList.splice(index, 1);
+              }
+            })
+          } else {
+            this.kkList.map((value, index) => {
+              if (item.uid === value.uid) {
+                this.kkList.splice(index, 1);
+              }
+            })
+          }
+
+        });
+        deviceList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            deviceList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          checkedDeviceList.push(params);
+        });
+        bayonetList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            bayonetList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          checkedDeviceList.push(params);
+        });
+        let deviceObj = {};
+        checkedDeviceList.forEach(item => {
+          let a = checkedDeviceList.filter(c => {
+            return item.uid === c.uid;
+          })
+          if (!deviceObj.hasOwnProperty(a[0].cname)) {
+            deviceObj[a[0].cname] = a;
+          }
+        })
+        for (let i in deviceObj) {
+          let params = {
+            cname: i,
+            uid: deviceObj[i][0].uid,
+            isOpenArrow: false,
+            isChecked: false,
+            isSXT: true,
+            deviceList: [],
+            bayonetList: []
+          }
+          deviceObj[i].forEach(item => {
+            if (item.deviceList) {
+              item.deviceList.map(val => {
+                params.deviceList.push(val);
+              })
+            }
+            if (item.bayonetList) {
+              item.bayonetList.map(val => {
+                params.bayonetList.push(val);
+              })
+            }
+          })
+          currentDeviceList.push(params);
+        }
+      }
+      console.log('unCheckDeviceList', this.unCheckDeviceList)
+      // 多边形存在但不在多边形中的设备
+      if (this.unCheckDeviceList.length > 0) {
+        this.unCheckDeviceList.map(item => {
+          if (item.isSxt) { // 摄像头
+            unselectDeviceList.push(item);
+          } else {
+            unselectBayonetList.push(item);
+          }
+        });
+        unselectDeviceList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            deviceList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          unCheckedDeviceList.push(params);
+        });
+        unselectBayonetList.map(item => {
+          const params = {
+            cname: item.parentName,
+            uid: item.parentId,
+            bayonetList: [
+              {
+                uid: item.uid,
+                deviceName: item.deviceName,
+                isChildChecked: false,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }
+            ]
+          };
+          unCheckedDeviceList.push(params);
+        });
+        let deviceObj = {};
+        unCheckedDeviceList.forEach(item => {
+          let a = unCheckedDeviceList.filter(c => {
+            return item.uid === c.uid;
+          })
+          if (!deviceObj.hasOwnProperty(a[0].cname)) {
+            deviceObj[a[0].cname] = a;
+          }
+        })
+        for (let i in deviceObj) {
+          let params = {
+            cname: i,
+            uid: deviceObj[i][0].uid,
+            isOpenArrow: false,
+            isSXT: true,
+            isChecked: false,
+            deviceList: [],
+            bayonetList: []
+          }
+          deviceObj[i].forEach(item => {
+            if (item.deviceList) {
+              item.deviceList.map(val => {
+                params.deviceList.push(val);
+              })
+            }
+            if (item.bayonetList) {
+              item.bayonetList.map(val => {
+                params.bayonetList.push(val);
+              })
+            }
+          })
+          willRemoveDeviceList.push(params);
+        }
+      }
+      this.$emit('emitFinalDevice', currentDeviceList, checkedDeviceNumber, willRemoveDeviceList, selectDeviceNumber);
+      // 保留上一次已有设备的数量
+      this.lastCurrDeviceLength = val.length;
+
+      this.unCheckDeviceList = []; // 清空可选设备列表
     }
   },
   mounted () {
-    let _this = this;
-    let map = new window.AMap.Map('mapMap', {
-      zoom: 18, // 级别
-      center: [110.596015, 27.907662], // 中心点坐标
-      // viewMode: '3D' // 使用3D视图
-    });
-    map.setMapStyle('amap://styles/whitesmoke');
-    this.map = map;
-    // 在地图中添加MouseTool插件
-    let mouseTool = new window.AMap.MouseTool(map);
-    _this.mouseTool = mouseTool;
-    // 添加事件
-    window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
-      setTimeout(() => {
-        _this.selAreaRest(true);
-        let polygon = new window.AMap.Polygon({ // 构造多边形对象
-          map: map, // 地图对象
-          strokeColor: '#FA453A', // 线条颜色
-          strokeOpacity: 1, // 轮廓线透明度 [0,1]
-          strokeWeight: 1, // 轮廓线宽度
-          fillColor: '#FA453A', //多边形填充颜色
-          fillOpacity: 0.2, // 多边形填充透明度
-          path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
-          zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
-        });
-        _this.selAreaPolygon = polygon;
-        _this.selAreaAble = true;
-        _this.mapMarkHandler();
-      }, 100);
-    });
-
-    _this.getMapData();
+    this.initMap();
+    setTimeout(() => {
+      this.getMapData();
+      if (this.groupId) {
+        this.handleCurrentDeviceData();
+      }
+    }, 1500)
   },
   methods: {
-    mapZoomSet (val) {
-      if (this.map) {
-        this.map.setZoom(this.map.getZoom() + val);
-      }
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('mapMap', {
+        zoom: 18, // 级别
+        // center: [112.974691, 28.093846], // 中心点坐标
+        center: [110.596015, 27.907662], // 中心点坐标
+        // viewMode: '3D' // 使用3D视图
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      this.map = map;
+      // 在地图中添加MouseTool插件
+      let mouseTool = new window.AMap.MouseTool(map);
+      _this.mouseTool = mouseTool;
+      // 添加事件
+      window.AMap.event.addListener(mouseTool, 'draw', function (e) { // 画
+        setTimeout(() => {
+          _this.selAreaRest(true);
+          let polygon = new window.AMap.Polygon({ // 构造多边形对象
+            map: map, // 地图对象
+            strokeColor: '#FA453A', // 线条颜色
+            strokeOpacity: 1, // 轮廓线透明度 [0,1]
+            strokeWeight: 1, // 轮廓线宽度
+            fillColor: '#FA453A', //多边形填充颜色
+            fillOpacity: 0.2, // 多边形填充透明度
+            path: e.obj.getPath(), // 多边形轮廓线的节点坐标数组
+            zIndex: 12 // 多边形覆盖物的叠加顺序,级别高的在上层显示
+          });
+
+          _this.selAreaPolygon = polygon;
+          _this.selAreaAble = true;
+          _this.mapMarkHandler();
+
+          // 移入覆盖物生成删除小图标
+          let offSet = [0, 0], _marker = null;
+          polygon.on('mouseover', function(p) {
+            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+            if (_marker) return;
+            _marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.map,
+              position: [p.lnglat.lng, p.lnglat.lat],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '',
+              // 自定义点标记覆盖物内容
+              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+            });
+            // 点击小图标移除覆盖物和删除小图标
+            _marker.on('click', function() {
+              _this.map.remove(polygon);
+              _this.selAreaPolygon = null;
+              _this.map.remove(_marker);
+
+              _this.mapMarkHandler();
+              
+            })
+            _marker.setMap(_this.map);
+          })
+        }, 100);
+      });
     },
     // 获取地图数据
     getMapData () {
-      setTimeout(() => {
-        this.sxtList = testData.sxt;
-        this.kkList = testData.kakou;
-        this.clList = testData.cheliang;
-        this.ryList = testData.renyuan;
+      let selectDeviceList = this.selectDeviceList;
+      if (selectDeviceList && selectDeviceList.length > 0) {
+        selectDeviceList.map(item => {
+          item.deviceList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: true, // 摄像头
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.sxtList.push(params);
+          });
+          item.bayonetList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: false, // 卡口
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.kkList.push(params);
+          })
+        })
         this.mapMarkHandler();
-      }, 200);
+        // this.finalDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList)); 
+      }
+    },
+    // 编辑  处理最开始已有的设备
+    handleCurrentDeviceData () {
+      console.log('33333')
+      let currentDeviceList = this.currentDeviceList;
+      if (currentDeviceList && currentDeviceList.length > 0) {
+        currentDeviceList.map(item => {
+          item.deviceList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: true, // 摄像头
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.finalDeviceList.push(params);
+          });
+          item.bayonetList.map(itm => {
+            const params = {
+              parentName: item.cname,
+              parentId: item.uid,
+              uid: itm.uid,
+              isSxt: false, // 卡口
+              deviceName: itm.deviceName,
+              isChildChecked: false,
+              latitude: itm.latitude,
+              longitude: itm.longitude
+            }
+            this.finalDeviceList.push(params);
+          })
+        })
+      }
+      console.log('finalDeviceList', this.finalDeviceList)
     },
     // 地图标记处理
     mapMarkHandler () {
@@ -215,30 +444,28 @@ export default {
       if (this.mapTypeList.indexOf('kk') >= 0) {
         this.mapMark(this.kkList, this.kkMapMarkers, 'kk');
       }
-      // 车辆
-      this.mapClearMarkers(this.clMapMarkers);
-      if (this.mapTypeList.indexOf('cl') >= 0) {
-        this.mapMark(this.clList, this.clMapMarkers, 'cl');
-      }
-      // 人员
-      this.mapClearMarkers(this.ryMapMarkers);
-      if (this.mapTypeList.indexOf('ry') >= 0) {
-        this.mapMark(this.ryList, this.ryMapMarkers, 'ry');
-      }
     },
     // 地图标记
     mapMark (data, aMarkers, keyWord) {
       if (data && data.length > 0) {
-        let hoverWindow = null;
+        
         let _this = this;
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
           obj.sid = keyWord + '_' + i + '_' + random14();
           if (obj.longitude > 0 && obj.latitude > 0) {
+
+            _this.map && _this.map.setCenter([obj.longitude, obj.latitude]);
+
             let offSet = [-20.5, -48], selClass = '';
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
+              this.unCheckDeviceList.push(obj); // 没有选中的设备
+            }
+            if (_this.selAreaPolygon && _this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) { // 在多边形中且选中的设备
+              
+              _this.finalDeviceList.push(obj);
             }
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.map,
@@ -251,63 +478,13 @@ export default {
               // 自定义点标记覆盖物内容
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
-            console.log('marker', marker);
             // myAMap.hoverMarkerHandler(map, marker, obj);
+
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
-
-            // 点击地图上的摄像头/卡口播放视频
-            if (keyWord === 'sxt' || keyWord === 'kk') {
-              marker.on('click', function () {
-                _this.testAddSxt();
-              });
-            }
-            // hover
-            marker.on('mouseover', function () {
-              let sContent = '<div class="vl_map_hover">' +
-                '<div class="vl_map_hover_main">' + _this.mapHoverInfo(obj, keyWord) + '</div>';
-              hoverWindow = new window.AMap.InfoWindow({ // 创建一个信息窗体对象
-                isCustom: true, // 是否可以自定义内容
-                closeWhenClickMap: true,
-                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-                content: sContent
-              });
-              // aCenter = mEvent.target.F.position
-              hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-              hoverWindow.on('close', function () {
-                // console.log('infoWindow close')
-              });
-            });
-            marker.on('mouseout', function () {
-              // if (hoverWindow) { hoverWindow.close(); }
-            });
           }
         }
       }
-    },
-    mapHoverInfo (data, type) {
-      let str = '<ul>';
-      if (type === 'sxt') {
-        str += '<li><span>设备名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'kk') {
-        str += '<li><span>卡口名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'cl') {
-        str += '<li><span>车辆名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-      } else if (type === 'ry') {
-        str += '<li><span>人员名称：</span>' + data.name + '</li>';
-        str += '<li><span>设备地址：</span>' + data.addr + '</li>';
-        str += '<li style="text-align: center;">' +
-            '<i class="vl_map_hover_btn hover_btn_voice">语音通话</i>' +
-            '<i class="vl_map_hover_btn hover_btn_video">视频通话</i>' +
-          '</li>';
-      } else {
-        str += '<li>未知数据</li>';
-      }
-      str += '</ul>';
-      return str;
     },
     // 清除所有
     resetTools () {
@@ -354,6 +531,131 @@ export default {
         this.selAreaAble = false;
       }
     },
+     // 重置地图
+    resetMap () {
+      this.initMap();
+    },
+    mapZoomSet (val) {
+      if (this.map) {
+        this.map.setZoom(this.map.getZoom() + val);
+      }
+    },
+    // 左侧---子级多选框change
+    handleLeftChildChecked (index, idx, val, isSxt) {
+      this.$emit('emitLeftChildChecked', index, idx, val, isSxt);
+    },
+    // 左侧---展开左侧列表
+    openLeftArrow (index) {
+      this.$emit('emitOpenLeftArrow', index);
+    },
+    // 左侧--父级多选框
+    handleLeftParentChecked (index, val) {
+      this.$emit('emitLeftParentChecked', index, val);
+    },
+    // 切换摄像头和卡口----left
+    changeLDeviceType (index, val) {
+      this.$emit('emitChangeLDeviceType', index, val);
+    },
+    // 移除设备
+    removeDevice () {
+      let currDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
+      console.log('currDeviceList', currDeviceList)
+      let checkedDeviceNumber = 0, selectDeviceNumber = 0, checkedDeviceList = [], params;
+      if (currDeviceList && currDeviceList.length > 0) {
+        for (let len = currDeviceList.length, i = len - 1; i >= 0; i --) {
+           if (currDeviceList[i].isChecked === true) {
+              checkedDeviceList.push(currDeviceList[i]);
+              currDeviceList.splice(i, 1);
+            } else {
+              params = {
+                cname: currDeviceList[i].cname,
+                uid: currDeviceList[i].uid,
+                isSXT: true,
+                deviceList: [],
+                bayonetList: []
+              }
+              for (let length = currDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
+                if (currDeviceList[i].deviceList[j].isChildChecked == true) {
+                  params.deviceList.push(currDeviceList[i].deviceList[j]);
+                  currDeviceList[i].deviceList.splice(j, 1);
+                }
+              }
+              for (let length = currDeviceList[i].bayonetList.length, j = length - 1; j >= 0; j --) {
+                if (currDeviceList[i].bayonetList[j].isChildChecked == true) {
+                  params.bayonetList.push(currDeviceList[i].bayonetList[j]);
+                  currDeviceList[i].bayonetList.splice(j, 1);
+
+                }
+              }
+              if (params.deviceList.length !== 0 || params.bayonetList.length !== 0) {
+                checkedDeviceList.push(params);
+              }
+            }
+        }
+        if (currDeviceList && currDeviceList.length > 0) {
+          currDeviceList.map(item => {
+            checkedDeviceNumber += item.deviceList.length;
+            checkedDeviceNumber += item.bayonetList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
+            item.bayonetList.map(itm => {
+              itm.isChildChecked = false;
+            });
+          });
+        }
+        if (checkedDeviceList && checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            selectDeviceNumber += item.deviceList.length;
+            selectDeviceNumber += item.bayonetList.length;
+            item.isChecked = false;
+            item.isOpenArrow = false;
+            item.deviceList.map(itm => {
+              itm.isChildChecked = false;
+            });
+             item.bayonetList.map(itm => {
+              itm.isChildChecked = false;
+            });
+          });
+        }
+        console.log('checkedDeviceList', checkedDeviceList)
+        console.log('currDeviceList', currDeviceList)
+        if (checkedDeviceList.length > 0) {
+          checkedDeviceList.map(item => {
+            item.deviceList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: true, // 摄像头
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.sxtList.push(params);
+            });
+            item.bayonetList.map(itm => {
+              const params = {
+                parentName: item.cname,
+                parentId: item.uid,
+                uid: itm.uid,
+                isSxt: false, // 卡口
+                deviceName: itm.deviceName,
+                isChildChecked: false,
+                latitude: itm.latitude,
+                longitude: itm.longitude
+              }
+              this.kkList.push(params);
+            })
+          });
+        }
+        this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
+        this.mapMarkHandler();
+      }
+    },
   }
 }
 </script>
@@ -395,6 +697,7 @@ export default {
           line-height: 26px;
           color: #333333;
           .parent_temp_li {
+            width: 100%;
             padding: 0 10px;
             >span {
               margin-left: 5px;
@@ -461,7 +764,7 @@ export default {
                 display: flex;
                 align-items: center;
                 >span {
-                  margin: 0 80px 0 15px;
+                  margin: 0 80px 0 0;
                 }
               }
             }
@@ -493,8 +796,8 @@ export default {
     }
     .right-flag {
       position: absolute;
-      right: 60px;
-      bottom: 100px;
+      right: 30px;
+      bottom: 10px;
       transition: right .3s ease-out;
       animation: fadeInRight .4s ease-out .4s both;
       .map-rrt {
@@ -531,6 +834,16 @@ export default {
           }
         }
       }
+    }
+  }
+  .el-checkbox {
+    margin-right: 10px;
+  }
+  .close_arrow {
+    position: absolute;
+    i {
+      color: #F94439;
+      font-size: 20px;
     }
   }
 }

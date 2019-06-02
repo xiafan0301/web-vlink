@@ -3,8 +3,18 @@
     <div class="plan-detail">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+         <template v-if="$route.query.type === 'ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
+          </template>
           <el-breadcrumb-item>预案详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -21,8 +31,10 @@
           <li>
             <span>适用事件等级:</span>
             <span>
-              <template v-if='planDetailInfo.levelNameList'>
-                {{planDetailInfo.levelNameList.join()}}
+              <template v-if='planDetailInfo.levelList'>
+                <span v-for="(item, index) in planDetailInfo.levelList" :key="index">
+                  {{item.planLevelName + ' '}}
+                </span>
               </template>
             </span>
           </li>
@@ -33,14 +45,14 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <i class="vl_icon vl_icon_event_5"></i>
-              <template v-if="planDetailInfo.attachmentName">
-                {{planDetailInfo.attachmentName}}
+              <template v-if="planDetailInfo.sysAppendixInfo">
+                <i class="vl_icon vl_icon_event_5"></i>
+                {{planDetailInfo.sysAppendixInfo.cname}}
+                <i class="vl_icon vl_icon_event_6" @click="downloadFile(planDetailInfo.sysAppendixInfo.path)" style="margin-left:5px;cursor:pointer;"></i>
               </template>
               <template v-else>
                 无
               </template>
-              <i class="vl_icon vl_icon_event_6" v-show="planDetailInfo.url" @click="downloadFile(planDetailInfo.url)" style="margin-left:5px;cursor:pointer;"></i>
             </span>
           </li>
           <li>
@@ -80,38 +92,20 @@
   </vue-scroll>
 </template>
 <script>
-import { getPlanDetail } from '@/views/index/api/api.js';
+import { getPlanDetail } from '@/views/index/api/api.event.js';
 export default {
   data () {
     return {
-      planDetailInfo: {
-        planName: '救火救火救火救火救火',
-        eventTypeName: '事故灾难',
-        levelNameList: ['V级','IV级'],
-        planDetail: '任务内容示意：调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，段落文字多行显示，这段文字是样式参考。调度指挥方案任务内容填写，',
-        attachmentName: '公共区域消防安全应急预案.docx',
-        url: 'http://baidu.com',
-        taskList: [
-          {
-            departmentName: '协同部门',
-            taskName: '灭火',
-            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
-          },
-          {
-            departmentName: '协同部门',
-            taskName: '灭火',
-            taskContent: '任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名称：第一时间赶往火灾现场处理，完成后及时上报任务名'
-          }
-        ],
-        createUserName: '张三',
-        createTime: '2019-03-12'
-      } // 预案详情
+      planDetailInfo: {} // 预案详情
     }
+  },
+  mounted () {
+    this.getPlanDetailInfo();
   },
   methods: {
     // 获取预案详情
     getPlanDetailInfo () {
-      const planId = this.$router.query.planId;
+      const planId = this.$route.query.planId;
       if (planId) {
         getPlanDetail(planId)
           .then(res => {
@@ -130,7 +124,7 @@ export default {
     },
     // 跳至启用预案页面
     skipReplanPage () {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: this.$route.query.planId}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: this.$route.query.planId, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 返回
     back () {

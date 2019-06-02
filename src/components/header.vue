@@ -5,6 +5,7 @@
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
+        popper-class="person_info"
         placement="bottom"
         trigger="click">
         <ul class="hd_user_pl">
@@ -16,44 +17,90 @@
       </el-popover>
       <ul>
         <li>
-          <el-badge :value="sums.msg" class="item" :max="99">
-            <i class="vl_icon vl_icon_011"></i>
-          </el-badge>
+          <el-popover
+            ref="popoverTask"
+            placement="bottom"
+            width="378"
+            trigger="click"
+            popper-class="task_popover">
+            <vue-scroll>
+            <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
+            <div class="vl_info vl_t_b_header">
+              <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
+                {{item.enumValue}}<span>({{item.enumField == 1 ? taskCount.unread : taskCount.haveRead}})</span>
+              </p>
+              <!-- <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
+              <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
+              <p class="h_menu"><span @click="mark">全部标记为已读</span></p>
+            </div>
+            <ul class="vl_t_b_content">
+              <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
+                  <div class="col_content">
+                    <i :class="item.processType == 2 ? 'vl_icon vl_icon_task_3' : item.processType == 3 ? 'vl_icon vl_icon_task_2': 'vl_icon vl_icon_task_1'"></i>
+                  </div>
+                  <div class="col_content">
+                    <h2>{{ dicFormater( taskType, item.processType)}}</h2>
+                    <p>您收到一个{{ dicFormater( taskType, item.processType)}}</p>
+                  </div>
+                  <div class="col_content">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</div>
+              </li>
+              <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
+            </ul>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
+            </div>
+            </div>
+            </vue-scroll>
+            <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
+              <i class="vl_icon vl_icon_011" @click="getTaskCount"></i>
+            </el-badge>
+          </el-popover>
         </li>
         <li>
           <el-popover
             ref="popover"
             placement="bottom"
             width="397"
-            trigger="click">
-            <div class="vl_hd_alarm" v-for="item in '123'" :key="item">
+            trigger="click"
+            popper-class="alarm_popover">
+            <vue-scroll>
+            <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
+            <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
                 <div>
-                  <h1>布控人员</h1>
-                  <p>摄像头0011</p>
-                  <p>11:12</p>
+                  <h1>{{item.surveillanceName}}</h1>
+                  <p>{{item.devName}}</p>
+                  <p>{{item.snapTime}}</p>
                 </div>
-                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
-                  <span>70</span>
+                  <span>{{item.semblance}}</span>
                   <p>匹配度</p>
-                  <el-progress :percentage="70" color="#0C70F8"></el-progress>
+                  <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
-                <div><img src="//via.placeholder.com/70x70" alt=""></div>
+                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
               <div class="hd_alarm_b">
-                <div class="alarm_b_list">李某某</div>
-                <div class="alarm_b_list">女</div>
-                <div class="alarm_b_list">汉族</div>
-                <div class="alarm_b_list">430903199009256265</div>
-                <div class="alarm_b_list">失联事件</div>
+                <template v-if="item.objType == 1">
+                  <div class="alarm_b_list">{{item.name}}</div>
+                  <div class="alarm_b_list">{{item.sex}}</div>
+                  <div class="alarm_b_list">{{item.nation}}</div>
+                </template>
+                <template v-if="item.objType == 2">
+                  <div class="alarm_b_list">{{item.vehicleNumber}}</div>
+                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <div class="alarm_b_list">{{item.vehicleType}}</div>
+                </template>
+                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
             <div style="width: 100%;text-align: center;padding: 10px 0;">
               <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
             </div>
+            </div>
+            </vue-scroll>
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}"></i>
+              <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -137,13 +184,13 @@
         <p>如果忘记旧密码，请在登录页使用“忘记密码”功能重设密码。</p>
         <el-form :model="updateForm" ref="updateForm" :rules="rules" label-width="20px">
           <el-form-item label=" " prop="oldPwd">
-            <el-input type="password" placeholder="请输入旧密码" v-model="updateForm.oldPwd"></el-input>
+            <el-input :type="inputType.oldType" placeholder="请输入旧密码" v-model="updateForm.oldPwd" @focus="changeFocus(1)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="newPwd">
-            <el-input type="password" placeholder="请设置新密码" v-model="updateForm.newPwd"></el-input>
+            <el-input :type="inputType.newType" placeholder="请设置新密码" v-model="updateForm.newPwd" @focus="changeFocus(2)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="sureNewPwd">
-            <el-input type="password" placeholder="请确认密码" v-model="updateForm.sureNewPwd"></el-input>
+            <el-input :type="inputType.sureType" placeholder="请确认密码" v-model="updateForm.sureNewPwd" @focus="changeFocus(3)"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -155,7 +202,11 @@
   </div>
 </template>
 <script>
-import { logout, updatePwd } from '@/views/index/api/api.js';
+import { logout, updatePwd } from '@/views/index/api/api.user.js';
+import { getAlarmList } from "@/views/index/api/api.control.js";
+import { getTasks, markTask, getCount } from '@/views/index/api/api.event.js';
+import {formatDate} from '@/utils/util';
+import { dataList } from '@/utils/data.js';
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
@@ -178,8 +229,8 @@ export default {
     };
     return {
       sums: {
-        msg: 109,
-        events: 212
+        msg: 0,
+        events: 0
       },
       updateForm: {
         newPwd: null,
@@ -202,12 +253,43 @@ export default {
       userInfo: null,
       loginoutDialog: false, // 退出登录弹出框
       updatePwdDialog: false, // 修改密码弹出框
+      pageNum: 1,
+      pageSize: 10,
+      alarmList: [],
+      type: 1,
+      taskList: [], // 任务数据
+      taskStatusList: [], // 任务状态数据
+      taskType: dataList.taskType,
+      taskListAll: [],
+      inputType: {
+        oldType: 'text',
+        newType: 'text',
+        sureType: 'text'
+      }, // 输入框类型
+      taskCount: {}
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    let taskStatusL = this.dicFormater(dataList.taskStatus)
+    this.taskStatusList = taskStatusL[0].dictList
+    this.getAlarm()
+    this.getTaskCount();
+    this.getTaskData();
   },
   methods: {
+    // 将输入框的type改为password
+    changeFocus (val) {
+      if (val === 1) {
+        this.inputType.oldType = 'password';
+      }
+      if (val === 2) {
+        this.inputType.newType = 'password';
+      }
+      if (val === 3) {
+        this.inputType.sureType = 'password';
+      }
+    },
     // 显示退出登录弹出框
     showLoginOutDialog () {
       this.loginoutDialog = true;
@@ -263,6 +345,101 @@ export default {
             .catch(() => {})
         }
       })
+    },
+    //任务数量统计
+    getTaskCount() {
+      let params = {
+        userId: this.userInfo.uid
+      }
+      getCount(params).then(res => {
+        if(res.data) {
+          this.taskCount = res.data;
+          if(!this.taskCount.haveRead) {
+            this.taskCount['haveRead'] = 0
+          }
+          if(!this.taskCount.unread) {
+            this.taskCount['unread'] = 0
+          }
+          this.sums.msg = res.data.total;
+        }
+      }).catch(()=>{})
+    },
+    //告警
+    getAlarm() {
+      this.alarmList = [];
+      let params = {
+        "where.startTime": formatDate(new Date().getTime() - 3600 * 1000 * 24 * 90, 'yyyy-MM-dd'),
+        "where.endTime": formatDate(new Date(), 'yyyy-MM-dd'),
+        "where.sortType": 2,
+        "pageNum": this.pageNum,
+        "pageSize": this.pageSize
+      };
+      getAlarmList(params).then( res => {
+        if(res.data.list && res.data.list.length > 0) {
+          this.alarmList = [...res.data.list]
+          for(let item of this.alarmList) {
+            let alarmTimeD = formatDate(item.alarmTime, 'yyyy-MM-dd')
+            item['alarmTimeD'] = new Date(alarmTimeD).getTime()
+          }
+          this.sums.events = res.data.total;
+        }
+      })
+    },
+    changeTab(type) {
+      this.type = type
+      this.taskList = []
+      this.getTaskData()
+      /* this.taskList = this.taskListAll.filter(key => this.type == key.readFlag).filter((item,index) => index < 10) */
+    },
+    goSkipDetail(item) {
+      console.log("----------",item)
+      let nowTime = formatDate(new Date(), 'yyyy-MM-dd')
+      let newTime = new Date(nowTime).getTime()
+      if(item.alarmTimeD == newTime) {
+        this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'today'}});
+      }else {
+        this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
+      }
+    },
+    goSkipTaskDetail(item) {
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType}});
+    },
+    // 获取任务列表数据
+    getTaskData () {
+      this.taskList = [];
+      let params = {
+        pageNum: 1,
+        pageSize: 10,
+        'where.isRead': this.type,
+        orderBy: 'create_time',
+        order: 'desc',
+      }
+      getTasks(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.taskListAll = res.data.list;
+            /* this.sums.msg = res.data.total; */
+            this.taskList = res.data.list;
+            /* this.taskList  = res.data.list.filter(key=> this.type == key.readFlag).filter((item,index) => index < 10) */
+          }
+          // for(let item of this.taskStatusList) {
+          //   item['total'] = this.taskList.filter(key => item.enumField == key.readFlag).length
+          //   /* item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length */
+          // }
+        })
+        .catch(() => {})
+    },
+    //标记全部已读
+    mark() {
+      let params = {
+        userId: this.userInfo.uid,
+        departmentId: null,
+      }
+      markTask(params).then(res => {
+        console.log(res)
+        this.$message.success('全部标记为已读成功')
+        this.getTaskData();
+      }).catch(()=>{})
     }
   }
 }
@@ -378,71 +555,185 @@ export default {
     }
   }
 }
+
 </style>
 <style lang="scss">
-.vl_hd_alarm{
-  padding: 10px;
-  border-bottom: 1px solid #F2F2F2;
-  .hd_alarm_t{
-    display: flex;
-    justify-content: space-between;
-    > div{
-      flex: 0 0 25%;
-    }
-    > div:nth-child(1){
+.vl_hd_box {
+  max-height: 456px;
+  .vl_hd_alarm{
+    padding: 10px 22px;
+    border-bottom: 1px solid #F2F2F2;
+    cursor: pointer;
+    .hd_alarm_t{
+      display: flex;
+      justify-content: space-between;
       > div{
-        margin-bottom: 10px;
-        color: #333333;
-        font-size: 16px;
+        flex: 0 0 25%;
       }
-      > p{
-        font-size: 12px;
-        color: #999999;
-      }
-    }
-    > div:nth-child(3){
-      text-align: center;
-      padding-top: 15px;
-      > span{
-        color: #0C70F8;
-        font-size: 24px;
-        font-weight:bold;
-      }
-      > p{
-        color: #333333;
-        font-size: 12px;
-      }
-      .el-progress{
-        text-align: left;
-        .el-progress-bar{
-          padding-right: 5px!important;
-          padding-left: 5px;
+      > div:nth-child(1){
+        > div{
+          margin-bottom: 10px;
+          color: #333333;
+          font-size: 16px;
         }
-        .el-progress__text{
-          display: none;
+        > p{
+          font-size: 12px;
+          color: #999999;
         }
       }
-    }
-    > div:nth-child(2), > div:nth-child(4){
-      text-align: center;
-      > img{
-        width: 70px;
+      > div:nth-child(3){
+        text-align: center;
+        padding-top: 15px;
+        > span{
+          color: #0C70F8;
+          font-size: 24px;
+          font-weight:bold;
+        }
+        > p{
+          color: #333333;
+          font-size: 12px;
+        }
+        .el-progress{
+          text-align: left;
+          .el-progress-bar{
+            padding-right: 5px!important;
+            padding-left: 5px;
+          }
+          .el-progress__text{
+            display: none;
+          }
+        }
+      }
+      > div:nth-child(2), > div:nth-child(4){
+        text-align: center;
+        > img{
+          width: 70px;
+          height: 70px;
+        }
       }
     }
-  }
-  .hd_alarm_b{
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    > div{
-      padding: 5px;
-      font-size: 12px;
-      background:rgba(250,250,250,1);
-      border:1px solid rgba(242,242,242,1);
-      border-radius:3px;
-      color: #666;
+    .hd_alarm_b{
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      > div{
+        padding: 5px;
+        font-size: 12px;
+        background:rgba(250,250,250,1);
+        border:1px solid rgba(242,242,242,1);
+        border-radius:3px;
+        color: #666;
+      }
+      .alarm_b_list {
+        span {
+          padding-left: 9px;
+          color: #999;
+          &:first-of-type {
+            color: #F2F2F2;
+          }
+        }
+      }
     }
   }
 }
+.vl_task_box {
+  max-height: 456px;
+  padding: 0 30px;
+  .vl_t_b_header {
+    height: 48px;
+    line-height: 48px;
+  }
+  .vl_info {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    border-bottom: 1px solid #F2F2F2;
+    cursor: pointer;
+    .h_menu {
+      color: #333333;
+      font-size: 16px;
+      cursor: pointer;
+      span {
+        color: #999999;  
+      }
+      &:nth-child(2-n) {
+        width: 30%;
+      }
+      &:nth-child(3) {
+        width: 40%;
+        text-align: right;
+        font-size: 12px;
+      }
+    }
+    .active {
+      color: #0C70F8;
+      border-bottom: 2px solid #0C70F8;
+      span {
+        color: #0C70F8;
+      }
+    }
+    .col_content {
+        &:nth-child(1) {
+          width: 15%;
+        }
+        &:nth-child(2) {
+          padding-left: 8px;
+          padding-right: 10px;
+          width: 52%;
+          h2 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1; //行数
+            -webkit-box-orient: vertical;
+            color: #333;
+            font-size: 14px;
+            line-height: 24px;
+            margin-bottom: 4px;
+          }
+          p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; //行数
+            -webkit-box-orient: vertical;
+            color: #999;
+            font-size: 12px;
+          }
+        }
+        &:nth-child(3) {
+          font-size: 10px;
+          color: #656565;
+          text-align: right;
+          line-height: 24px;
+        }
+      }
+  }
+  .vl_t_b_list {
+      padding-top: 18px;
+      height: 85px;
+  }
+  .no_data {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #F2F2F2;
+  }
+}
+.task_popover {
+  max-height: 476px;
+  padding: 12px 0;
+}
+.alarm_popover {
+  max-height: 476px;
+  padding: 12px 0;
+}
+.person_info {
+  height: auto !important;
+}
+/* .el-popover {
+  max-height: 476px;
+  padding: 12px 0;
+} */
 </style>
 

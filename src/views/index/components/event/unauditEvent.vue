@@ -48,26 +48,50 @@
                 <el-form-item label="事件情况:" label-width="85px" prop="eventDetail">
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
-                <el-form-item label-width="85px" class="img-form-item">
+                <div class="img-form-item">
                   <el-upload
                     :action="uploadUrl"
                     list-type="picture-card"
-                    accept=".png,.jpg,.jpeg"
-                    :limit='9'
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
+                    multiple
                     :before-upload='handleBeforeUpload'
-                    :on-remove="handleRemove"
                     :on-success='handleSuccess'
-                    :on-exceed="handleImgNumber"
+                    :show-file-list='false'
                   >
                     <i class="el-icon-plus"></i>
                     <span class='add-img-text'>添加</span>
-                    <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span>
+                    <!-- <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span> -->
                   </el-upload>
+                  <template v-if="uploadImgList.length > 0">
+                    <div 
+                      class="img_list"
+                      v-for="(item, index) in uploadImgList"
+                      :key="'item' + index"
+                    >
+                      <img :src="item.path" @click="openBigImg(index, uploadImgList)" />
+                      <div class="close_icon" @click="removeImg(index)">
+                        <i class="vl_icon vl_icon_event_24 "></i>
+                      </div>
+                    </div>
+                  </template>
+                  <template v-if="uplaodVideoList.length > 0">
+                    <div class="video_box" v-for="(item ,index) in uplaodVideoList" :key="index">
+                      <video :src="item.path" id="add_video"></video>
+                      <div class="close_icon" @click="removeVideo(index)">
+                        <i class="vl_icon vl_icon_event_24"></i>
+                      </div>
+                      <div class="play_icon">
+                        <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
+                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                <el-form-item label-width="85px" class="upload_tip">
+                  <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
+                  <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p>
                 </el-form-item>
-                <el-form-item label-width="85px">
-                  <div style="color: #999999;">（最多传9张 支持JPEG、JPG、PNG、文件，大小不超过2M）</div>
-                </el-form-item>
-                <!-- <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
+                <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in handleUnitList"
@@ -77,14 +101,14 @@
                     >
                     </el-option>
                   </el-select>
-                </el-form-item> -->
+                </el-form-item>
                 <el-form-item  label="事件类型:" prop="eventType" label-width="85px">
                   <el-select v-model="addEventForm.eventType" style='width: 95%'>
                     <el-option
                       v-for="(item, index) in eventTypeList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -95,7 +119,7 @@
                       v-for="(item, index) in eventLevelList"
                       :key="index"
                       :label="item.enumValue"
-                      :value="item.uid"
+                      :value="item.enumField"
                     >
                     </el-option>
                   </el-select>
@@ -132,10 +156,11 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="submitData('addEventForm')">通过</el-button>
+      <el-button class="operation_btn function_btn" :loading="isPassLoading" @click="submitData('addEventForm')">通过</el-button>
       <el-button class="operation_btn back_btn" @click="showRejectDialog">驳回</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
+    <!-- 驳回弹出框 -->
     <el-dialog
       title="驳回"
       :visible.sync="rejectDialogVisible"
@@ -151,37 +176,76 @@
                 v-for="(item, index) in rejectReasonList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.uid"
+                :value="item.enumField"
               >
               </el-option>
             </el-select>
           </el-form-item>
           <template v-if="isShowRejectRemark">
-            <el-form-item label=" " prop="closeRemark" :rules="{ required: true, message: '请简述驳回原因', trigger: 'blur' }">
-              <el-input style="width: 90%" v-model="rejectForm.closeRemark" type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
+            <el-form-item label=" " prop="rejectReasonDesci" :rules="{ required: true, message: '请简述驳回原因', trigger: 'blur' }">
+              <el-input style="width: 90%" v-model="rejectForm.rejectReasonDesci" type="textarea" rows="6" placeholder="请简要描述驳回的原因。140字"></el-input>
             </el-form-item>
           </template>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelReject('rejectForm')">取 消</el-button>
-        <el-button class="operation_btn function_btn" @click="rejectEvent('rejectForm')">确 定</el-button>
+        <el-button class="operation_btn function_btn" :loading="isRejectLoading" @click="rejectEvent('rejectForm')">确 定</el-button>
       </div>
-    </el-dialog>  
+    </el-dialog>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
+    <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
-import { dataList } from '@/utils/data.js';
+import { dataList, operationType } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
-import { getEventDetail, updateEvent, getDiciData, getDepartmentList  } from '@/views/index/api/api.js';
+import BigImg from '@/components/common/bigImg.vue';
+import { getEventDetail, updateEvent } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
+  components: { BigImg },
   data () {
     return {
+      imgIndex: 0, // 点击的图片索引
+      isShowImg: false, // 是否放大图片
+      imgList1: [], // 要放大的图片
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       rejectDialogVisible: false, // 驳回弹出框
+      backDialog: false, // 返回提示弹出框
       isImgNumber: false,
       newMarker: null,
-      addEventForm: {},
+      addEventForm: {
+        uid: '',
+        type: operationType.auditEvent, // 1-事件审核 2-事件处理 3-转到其他单位 4-结束事件
+        reporterPhone: '', // 报案人  手机号码
+        reportTime: '', // 上报时间
+        eventAddress: '', // 事发地点
+        eventDetail: '', // 事件情况
+        eventType: '', // 事件类型
+        eventLevel: '', // 事件等级
+        casualties: '', // 伤亡人员
+        longitude: '', // 经度
+        latitude: '', // 纬度
+        dealOrgId: '', // 处理单位
+        acceptFlag: 2, // 证明是通过
+        addList: [], // 图片文件
+      },
       rules: {
         eventAddress: [
           { required: true, message: '请输入或选择事发地址', trigger: 'blur' }
@@ -199,7 +263,7 @@ export default {
       },
       rejectForm: {
         rejectReason: null,
-        closeRemark: null
+        rejectReasonDesci: null
       },
       isShowRejectRemark: false, // 是否显示驳回原因备注
       map: null,
@@ -210,7 +274,42 @@ export default {
       eventTypeList: [], // 事件类型列表数据
       handleUnitList: [], // 处理单位列表数据
       rejectReasonList: [], // 驳回原因列表数据
-      userInfo: {}
+      userInfo: {},
+      uploadImgList: [], // 要上传的图片列表
+      uplaodVideoList: [], // 要上传的视频列表
+      isRejectLoading: false, // 驳回加载中
+      isPassLoading: false, // 通过加载中
+      isPlaying: false, // 是否播放视频
+      isShowErrorTip: false, // 是否显示图片上传错误提示
+      errorText: null, // 图片上传错误提示
+    }
+  },
+  watch: {
+    uplaodVideoList (val) {
+      if (this.uploadImgList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uploadImgList.length > 9 || val.length > 1) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
+    },
+    uploadImgList (val) {
+      if (this.uplaodVideoList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uplaodVideoList.length > 1 || val.length > 9) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
     }
   },
   created () {
@@ -221,10 +320,27 @@ export default {
     this.getRejectReasonList();
   },
   mounted () {
-    this.getDetail();
     this.initMap();
+    setTimeout(() => {
+      this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
+    }, 1000);
+    this.getDetail();
   },
   methods: {
+    // 返回
+    back () {
+      const data = JSON.stringify(this.addEventForm);
+      if (this.dataStr === data) {
+        this.$router.back(-1);
+      } else {
+        this.backDialog = true;
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
+      this.$router.back(-1);
+    },
     // 获取驳回原因
     getRejectReasonList () {
       const reason = dataList.rejectReason;
@@ -277,17 +393,42 @@ export default {
       getEventDetail(eventId)
         .then(res => {
           if (res) {
-            console.log(res);
-            this.addEventForm = JSON.parse(JSON.stringify(res.data));
+            let eventType = res.data.eventType;
+            let eventLevel = res.data.eventLevel;
+           
+           
+            this.addEventForm.uid = res.data.uid;
+            this.addEventForm.eventCode = res.data.eventCode;
+            this.addEventForm.eventDetail = res.data.eventDetail;
+            this.addEventForm.longitude = res.data.longitude;
+            this.addEventForm.latitude = res.data.latitude;
+            this.addEventForm.reporterPhone = res.data.reporterPhone;
+            this.addEventForm.reportTime = res.data.reportTime;
+            this.addEventForm.eventAddress = res.data.eventAddress;
+            this.addEventForm.dealOrgId = res.data.dealOrgId;
+           
             if (res.data.casualties === -1) {
-                this.addEventForm.casualties = '不确定';
-              } else if (res.data.casualties === 0) {
-                this.addEventForm.casualties = '无';
-              } else if (res.data.casualties > 0) {
-                this.addEventForm.casualties = '有';
-                this.dieNumber = res.data.casualties;
-              }
+              this.addEventForm.casualties = '不确定';
+            } else if (res.data.casualties === 0) {
+              this.addEventForm.casualties = '无';
+            } else if (res.data.casualties > 0) {
+              this.addEventForm.casualties = '有';
+              this.dieNumber = res.data.casualties;
+            }
+            if (res.data.attachmentList && res.data.attachmentList.length > 0) {
+              res.data.attachmentList.map(item => {
+                if (item.fileType === 1) {
+                  this.uploadImgList.push(item);
+                } else {
+                  this.uplaodVideoList.push(item);
+                }
+              })
+            }
+
             this.mapMark(this.addEventForm);
+
+            this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
+            this.addEventForm.eventLevel = eventLevel.toString();
           }
         })
         .catch(() => {})
@@ -298,6 +439,7 @@ export default {
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+        // center: [_this.addEventForm.longitude, _this.addEventForm.latitude]
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
@@ -342,12 +484,12 @@ export default {
     // 地图标记
     mapMark (obj) {
       let _this = this;
-      console.log(_this.map);
       
       _this.map.clearMap();
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
+        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],
@@ -401,27 +543,91 @@ export default {
     },
     // 在图片上传之前
     handleBeforeUpload (file) {
-      console.log(file)
+      let isLtTenM;
+      const isPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'video/mp4' || file.type === 'image/bmp';
+      if (!isPng) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、mp4格式',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp') {
+        isLtTenM = file.size / 1024 / 1024 < 2;
+      } else {
+        isLtTenM = file.size / 1024 / 1024 < 10;
+      }
+      if (!isLtTenM) {
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过2M,视频大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (this.isShowErrorTip) { // 上传错误提示
+        return;
+      }
+      return isPng && isLtTenM;
     },
-    handleRemove () {},
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.imgList1 = [];
+      this.isShowImg = value;
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList1 = JSON.parse(JSON.stringify(data));
+    },
+    // 移除图片
+    removeImg (index) {
+      this.uploadImgList.splice(index, 1);
+    },
+    // 移除视频
+    removeVideo (index) {
+      this.uplaodVideoList.splice(index, 1);
+    },
     // 图片上传成功
     handleSuccess (res) {
-      const data = {
-        contentUid: 0,
-        fileType: dataList.imgId,
-        path: res.data.fileFullPath,
-        filePathName: res.data.filePath,
-        cname: res.data.fileName,
-        imgSize: res.data.fileSize,
-        imgWidth: res.data.fileWidth,
-        imgHeight: res.data.fileHeight,
-        thumbnailPath: res.data.thumbnailFileFullPath
+      if (this.isShowErrorTip) { // 上传错误提示
+        return;
+      } else {
+        if (res && res.data) {
+          const fileName = res.data.fileName;
+          let type, data;
+          if (fileName) {
+            type = fileName.substring(fileName.lastIndexOf('.'));
+            if (type === '.png' || type === '.jpg' || type === '.jpeg' || type === '.bmp') {
+              data = {
+                contentUid: 0,
+                fileType: dataList.imgId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath,
+              }
+              this.uploadImgList.push(data);
+            } else {
+              data = {
+                contentUid: 0,
+                fileType: dataList.videoId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath,
+              }
+              this.uplaodVideoList.push(data);
+            }
+          }
+        }
       }
-      this.addEventForm.attachmentList.push(data);
-    },
-    // 图片数量超出最大值限制
-    handleImgNumber () {
-      this.isImgNumber = true;
     },
     // 显示驳回弹出框
     showRejectDialog () {
@@ -430,14 +636,18 @@ export default {
     // 取消驳回
     cancelReject (form) {
       this.$refs[form].resetFields();
+      this.rejectDialogVisible = false;
     },
     // 驳回
     rejectEvent (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          this.isRejectLoading = true;
           const params = {
             uid: this.addEventForm.uid,
-            closeRemark: this.rejectForm.closeRemark,
+            acceptFlag: 3, // 证明是驳回
+            type: operationType.auditEvent, // 1--事件审核
+            rejectReasonDesci: this.rejectForm.rejectReasonDesci,
             rejectReason: this.rejectForm.rejectReason
           }
           updateEvent(params)
@@ -447,64 +657,91 @@ export default {
                 type: 'success',
                 message: '驳回成功',
                 customClass: 'request_tip'
-              })
+              });
               this.$router.push({name: 'event_audit'});
               this.rejectDialogVisible = false;
+              this.isRejectLoading = false;
             } else {
               this.$message({
                 type: 'error',
                 message: '驳回失败',
                 customClass: 'request_tip'
               })
+              this.isRejectLoading = false;
             }
           })
-          .catch(() => {})
+          .catch(() => {this.isRejectLoading = false;})
         }
       })
     },
     // 驳回原因change
     changeCloseReason (val) {
-      this.rejectForm.closeRemark = null;
-      if (val === 49) {
+      this.rejectForm.rejectReasonDesci = null;
+      if (val === '4') {
         this.isShowRejectRemark = true;
       } else {
         this.isShowRejectRemark = false;
       }
     },
-    // 处理要提交的数据
-    handleFormData () {
-      let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-      if (this.addEventForm.casualties === '无') {
-        this.addEventForm.casualties = 0;
-      } else if (this.addEventForm.casualties === '不确定') {
-        this.addEventForm.casualties = -1;
-      } else if (this.addEventForm.casualties === '有') {
-        if (!reg.test(this.dieNumber)) {
-          this.isDieError = true;
-          this.dieTip = '死亡人数只能为正整数';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        if (parseInt(this.dieNumber) > 9999) {
-          this.isDieError = true;
-          this.dieTip = '可输入的最大死亡人数为9999';
-          return false;
-        } else {
-          this.isDieError = false;
-          this.dieTip = '';
-        }
-        this.addEventForm.casualties = this.dieNumber;
-      }
-      this.addEventForm.eventSource = dataList.sourceWeb;
-      this.addEventForm.eventStatus = 21;
-      this.addEventForm.acceptFlag  = 25;
-    },
     submitData (form) { // 审核通过
       this.$refs[form].validate(valid => {
         if (valid) {
-          this.handleFormData();
+          this.addEventForm.addList = [];
+          let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
+          if (this.addEventForm.casualties === '无') {
+            this.addEventForm.casualties = 0;
+          } else if (this.addEventForm.casualties === '不确定') {
+            this.addEventForm.casualties = -1;
+          } else if (this.addEventForm.casualties === '有') {
+            if (!reg.test(this.dieNumber)) {
+              this.isDieError = true;
+              this.dieTip = '死亡人数只能为正整数';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            if (parseInt(this.dieNumber) > 9999) {
+              this.isDieError = true;
+              this.dieTip = '可输入的最大死亡人数为9999';
+              return false;
+            } else {
+              this.isDieError = false;
+              this.dieTip = '';
+            }
+            this.addEventForm.casualties = this.dieNumber;
+          }
+          // if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '图片和视频只能上传一种',
+          //     customClass: 'request_tip'
+          //   });
+          //   return;
+          // } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
+          //   this.$message({
+          //     type: 'warning',
+          //     message: '最多上传1个视频或9张图片',
+          //     customClass: 'request_tip'
+          //   });
+          //   return;
+          // }
+          if (this.isShowErrorTip) { // 上传错误提示
+            return;
+          }
+          this.uploadImgList.map(item => {
+            if (item.uid) {
+              item.uid = null;
+            }
+            this.addEventForm.addList.push(item);
+          });
+          this.uplaodVideoList.map(item => {
+            if (item.uid) {
+              item.uid = null;
+            }
+            this.addEventForm.addList.push(item);
+          });
+          this.isPassLoading = true;
           updateEvent(this.addEventForm)
             .then(res => {
               if (res) {
@@ -512,23 +749,37 @@ export default {
                   type: 'success',
                   message: '保存成功',
                   customClass: 'request_tip'
-                })
+                });
                 this.$router.push({name: 'event_audit'});
+                this.isPassLoading = false;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '保存失败',
-                  customClass: 'request_tip'
-                })
+                this.isPassLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isPassLoading = false;})
         }
       })
     },
-    // 返回
-    back () {
-      this.$router.back(-1);
+    // 播放视频
+    playVideo (val) {
+      if (val) {
+        this.isPlaying = true;
+        document.getElementById('add_video').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('add_video').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('add_video');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
     }
   }
 }
@@ -619,41 +870,71 @@ export default {
           }
         }
         .add_event_form {
-          width: 100%;
+          // width: 100%;
           /deep/ .el-form-item {
             margin-bottom: 20px;
           }
-          .imgTips {
-            width: 160px;
-            border-radius: 2px;
-            position: absolute;
-            color: #F94539;
-            padding-top: 0;
-            -ms-flex-item-align: center;
-            align-self: center;
-            left: 90px;
-            top: 35px;
-          }
-          .img-form-item /deep/ .el-form-item__content{
+          .img-form-item {
+            margin-left: 85px;
+            width: 400px;
             display: flex;
-            .img-list {
-              width: 104px;
-              height: 104px;
-              margin-left: 10px;
-              margin-bottom: 10px;
-              display: flex;
-              .error-item {
-                position: absolute;
-                top: -10px;
-                right: -8px;
-                font-size: 18px;
-                color: #666;
-                z-index: 1;
+            flex-wrap: wrap;
+            /deep/ .el-upload--picture-card {
+              margin-right: 5px;
+            }
+            .close_icon {
+              position: absolute;
+              right: 2px;
+              top: 4px;
+              cursor: pointer;
+            }
+            .play_icon {
+              position: absolute;
+              cursor: pointer;
+              top: 30%;
+              left: 30%;
+              background: #000;
+              opacity: 0.6;
+              width: 40px;
+              height: 40px;
+              /* line-height: 40px; */
+              /* text-align: center; */
+              border-radius: 50%;
+              .pause_btn {
+                margin-left: 30%;
+                margin-top: 22%;
+              }
+              .play_btn {
+                margin-left: 37%;
+                margin-top: 22%;
+              }
+            }
+            .img_list, .video_box {
+              width: 100px;
+              height: 100px;
+              margin: 0 5px 5px 0;
+              cursor: pointer;
+              position: relative;
+              img, video {
+                border: 1px solid #cccccc;
+                border-radius: 6px;
+                width: 100%;
+                height: 100%;
               }
             }
           }
           /deep/ .el-form-item__label {
             color: #666666;
+          }
+          .upload_tip {
+            /deep/ .el-form-item__content {
+              line-height: 20px;
+              .error_tip {
+                padding-left: 5px;
+                color: #F56C6C;
+                font-size: 12px;
+              }
+            }
           }
         }
       }

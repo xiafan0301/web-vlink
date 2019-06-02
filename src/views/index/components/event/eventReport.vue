@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>向上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -15,20 +15,20 @@
             <el-form-item label="接收者:" label-width="100px" prop="reportUser" class="report_user">
               <el-select
                 style="width: 100%;"
-                v-model="value9"
+                v-model="reportForm.reportUser"
                 multiple
                 filterable
                 remote
-                allow-create
                 reserve-keyword
-                placeholder="请输入关键词"
+                :multiple-limit="50"
+                placeholder="请选择接收者"
                 :remote-method="remoteMethod"
                 :loading="loading">
                 <el-option
-                  v-for="item in options4"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in reportUserList"
+                  :key="item.uid"
+                  :label="item.userRealName"
+                  :value="item.uid">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn function_btn" @click="submitData">确定提交</el-button>
+        <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData('reportForm')">确定提交</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <!--提交弹出框-->
@@ -55,7 +55,7 @@
           <p class="submit-tip">上级有新的指示后，将会在页面顶部 “任务”栏中提示。</p>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">我知道了</el-button>
+          <el-button @click="$router.push({name: 'event_manage'})">我知道了</el-button>
         </span>
       </el-dialog>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -64,41 +64,22 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, addEventProcess, getSevenReceiver } from '@/views/index/api/api.event.js';
+import { getUserList} from '@/views/index/api/api.manage.js';
+import { proccessEventType } from '@/utils/data.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
     return {
-      options4: [],
-      value9: [],
-      list: [],
       loading: false,
-      states: ["Alabama", "Alaska", "Arizona",
-        "Arkansas", "California", "Colorado",
-        "Connecticut", "Delaware", "Florida",
-        "Georgia", "Hawaii", "Idaho", "Illinois",
-        "Indiana", "Iowa", "Kansas", "Kentucky",
-        "Louisiana", "Maine", "Maryland",
-        "Massachusetts", "Michigan", "Minnesota",
-        "Mississippi", "Missouri", "Montana",
-        "Nebraska", "Nevada", "New Hampshire",
-        "New Jersey", "New Mexico", "New York",
-        "North Carolina", "North Dakota", "Ohio",
-        "Oklahoma", "Oregon", "Pennsylvania",
-        "Rhode Island", "South Carolina",
-        "South Dakota", "Tennessee", "Texas",
-        "Utah", "Vermont", "Virginia",
-        "Washington", "West Virginia", "Wisconsin",
-        "Wyoming"
-      ],
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
       isMatchUser: false, // 输入接收者是否有匹配
       dialogVisible: false, // 提示弹出框
       reportForm: {
-        reportUser: null, // 接收者
+        reportUser: [], // 接收者
         explain: null // 情况说明
       },
       rules: {
@@ -110,79 +91,69 @@ export default {
           { max: 1000, message: '最多输入1000字' }
         ]
       },
-      userList: [
-        { userName: '张三' },
-        { userName: '里斯' },
-        { userName: '李四李四李四李四' },
-        { userName: '王李四五' },
-        { userName: '王李四五' },
-        { userName: '李四' },
-        { userName: '李敏' },
-      ],
+      userList: [],
       reportUserList: [], // 所有的接收者
-      basicInfo: {
-        eventCode: 'XD111111111111111',
-        eventTypeName: '自然灾害',
-        eventLevelName: 'V级',
-        reportTime: '2019-03-12',
-        reporterPhone: '18076543210',
-        eventAddress: '湖南省长沙市天心区创谷产业工业园',
-        casualties: -1,
-        imgList: [
-          {
-            uid: '001',
-            src: require('./img/1.jpg')
-          },
-          {
-            uid: '002',
-            src: require('./img/2.jpg')
-          },
-          {
-            uid: '003',
-            src: require('./img/3.jpg')
-          },
-          {
-            uid: '004',
-            src: require('./img/4.jpg')
-          }
-        ],
-        eventDetail: '爱丽丝的煎熬了就爱上邓丽君爱上了的就爱上了大家看ask啦撒赖扩大就阿斯顿卢卡斯爱上了卡盎司伦敦快乐打卡是卡拉卡斯底库；啊撒扩大；扩大卡的可撒赖打开撒爱上了打开奥昇卡是；啊撒扩大；爱上了底库；案例的伤口看了',
-      }, // 事件详情
+      basicInfo: {}, // 事件详情
+      isLoading: false,
+      userInfo: {}
     }
   },
-  // watch: {
-  //   'reportForm.reportUser': function () {
-  //     if (this.reportForm.reportUser) {
-  //       let reportUser = this.reportForm.reportUser;
-  //       $('.hidden_box').text(reportUser);
-  //       let width = $('.hidden_box').width();
-  //       $('.add_text').css('width', width + 'px');
-  //     }
-  //   }
-  // },
+  created () {
+    this.userInfo = this.$store.state.loginUser;
+  },
   mounted () {
-    this.list = this.states.map(item => {
-      return { value: item, label: item };
-    });
+    this.getDetail();
+    this.getList();
+    this.getCurrentSevenUser();
   },
   methods: {
+    // 获取最近发送的7个用户
+    getCurrentSevenUser () {
+      getSevenReceiver()
+        .then (res => {
+          if (res.data && res.data.length > 0) {
+            this.reportUserList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取所有的用户
+    getList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageNum: 1,
+        pageSize: 0,
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userList = res.data.list;
+            this.reportUserLists = res.data.list;
+            this.userList.map((item, index) => {
+              if (item.uid === this.userInfo.uid) {
+                this.userList.splice(index, 1);
+              }
+            });
+          }
+        })
+    },
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
         setTimeout(() => {
           this.loading = false;
-          this.options4 = this.list.filter(item => {
-            return item.label.toLowerCase()
+          this.reportUserList = this.userList.filter(item => {
+            return item.userRealName.toLowerCase()
               .indexOf(query.toLowerCase()) > -1;
           });
         }, 200);
       } else {
-        this.options4 = [];
+        this.reportUserList = [];
       }
     },
     // 获取事件详情
     getDetail () {
-      const eventId = '';
+      const eventId = this.$route.query.eventId;
       getEventDetail(eventId)
         .then(res => {
           if (res) {
@@ -192,30 +163,40 @@ export default {
         .catch(() => {})
     },
     // 提交数据
-    submitData () {
-      this.dialogVisible = true;
-    },
-    // 获取选中的用户姓名, 并添加到输入框中
-    getUserName (name) {
-      if (name) {
-        this.reportUserList.push(name);
-        this.reportForm.reportUser = null;
-        this.isMatchUser = false;
-      }
-    },
-    // 删除已选的接收者
-    closeUser (index) {
-      this.reportUserList.splice(index, 1);
-    },
-    // 输入框选择change
-    selectUser () {
-      if (this.reportForm.reportUser) {
-        let reportUser = this.reportForm.reportUser;
-        $('.hidden_box').text(reportUser); // 
-        let width = $('.hidden_box').width();
-        $('.add_text').css('width', width + 'px'); // 设置输入框的宽度
-        this.isMatchUser = true;
-      }
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const eventId = this.$route.query.eventId;
+          let reporterName = [];
+          this.reportForm.reportUser.map(item => {
+            this.userList.map(itm => {
+              if (item === itm.uid) {
+                reporterName.push(itm.userRealName);
+              }
+            });
+          });
+          const params = {
+            currentUid: this.userInfo.uid,
+            currentName: this.userInfo.userRealName,
+            processContent: this.reportForm.explain,
+            processType: proccessEventType.reportSuperId,
+            name: reporterName,
+            uid: this.reportForm.reportUser
+          }
+          this.isLoading = true;
+          addEventProcess(params, eventId)
+            .then(res => {
+              if (res) {
+                console.log(res)
+                this.isLoading = false;
+                this.dialogVisible = true;
+              } else {
+                this.isLoading = false;
+              }
+            })
+            .catch(() => {this.isLoading = false;})
+        }
+      });
     },
     // 返回
     back () {
@@ -223,9 +204,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      console.log(isShow);
-      console.log(index);
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){

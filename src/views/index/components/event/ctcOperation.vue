@@ -3,8 +3,14 @@
   <div class="ctc-operation">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+        <template v-if="$route.query.type === 'ctc'">
+          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status }}">调度详情</el-breadcrumb-item>
+        </template>
+        <template v-else>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status }}">事件详情</el-breadcrumb-item>
+        </template>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -29,8 +35,8 @@
               <span>任务内容：</span>
               <span>{{item.taskContent}}</span>
             </div>
+            <div class="divide-list"></div>
           </li>
-          <div class="divide-list"></div>
         </ul>
       </div>
       <div class="ctc-plan-box">
@@ -66,11 +72,13 @@
                   </el-table-column>
                   <el-table-column
                     label="适用事件等级"
-                    prop="levelNameList"
+                    prop="levelList"
                     show-overflow-tooltip
                     >
                     <template slot-scope="scope">
-                      <span>{{scope.row.levelNameList.join('、')}}</span>
+                      <span v-for="(item, index) in scope.row.levelList" :key="index">
+                        {{item.planLevelName + ' '}}
+                      </span>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="150">
@@ -129,7 +137,7 @@
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="onSubmit">确定</el-button>
+      <el-button class="operation_btn function_btn" :loading="isLoading" @click="onSubmit">确定</el-button>
       <el-button class="operation_btn back_btn" @click="back">返回</el-button>
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -138,8 +146,9 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail, addTaskInfo, getDepartmentList, getPlanData } from '@/views/index/api/api.js';
-import BigImg from './components/bigImg.vue';
+import { getEventDetail, addTaskInfo, getPlanData } from '@/views/index/api/api.event.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -156,25 +165,10 @@ export default {
             departmentId: null
           }
         ],
-        planList: [
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-          {
-            planName: '公共区域消防安全应急预案公共区域消防安全应急预案',
-            eventTypeName: '事故灾难',
-            levelNameList: ['IV级（一般）','V级（较大）']
-          },
-        ], // 表格数据
+        planList: [], // 表格数据
         userInfo: {},
         departmentData: [],
+        isLoading: false,
     }
   },
   created () {
@@ -183,12 +177,14 @@ export default {
   mounted () {
     this.getDepartList();
     this.getDetail();
+    if (this.$route.query.eventType) {
+      this.getReplanList();
+    }
   },
   methods: {
     getReplanList () { // 获取预案列表
-      console.log(this.$route.query.eventType)
       const params = {
-        pageNum: -1,
+        pageNum: 0,
         'where.planType': this.$route.query.eventType
       }
       getPlanData(params)
@@ -209,6 +205,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            this.departmentData.map((item, index) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.departmentData.splice(index, 1);
+              }
+            });
           }
         })
     },
@@ -257,9 +258,14 @@ export default {
               if (item.departmentId === itm.uid) {
                 this.taskList[index].departmentName = itm.organName;
               }
-            })
-          }) 
-          addTaskInfo(this.taskList, this.$route.query.eventId)
+            });
+          });
+          this.isLoading = true;
+          const params = {
+            dispatchType: 1, // 1--事件 2--告警
+            eventId: this.$route.query.eventId
+          }
+          addTaskInfo(this.taskList, params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -267,16 +273,18 @@ export default {
                   message: '添加任务成功',
                   customClass: 'request_tip'
                 })
-                this.$router.back(-1);
+                this.$router.push({name: 'event_ctc'});
+                this.isLoading = false;
               } else {
                 this.$message({
                   type:'error',
                   message: '添加任务失败',
                   customClass: 'request_tip'
-                })
+                });
+                this.isLoading = false;
               }
             })
-            .catch(() => {})
+            .catch(() => {this.isLoading = false;})
         }
       })
     },
@@ -293,15 +301,15 @@ export default {
       this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: scope.row.planId}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 返回
     back () {
@@ -309,7 +317,7 @@ export default {
     },
     // 图片放大传参
     emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.imgList);
+      this.openBigImg(index, this.basicInfo.attachmentList);
     },
     // 关闭图片放大
     emitCloseImgDialog(data){
@@ -332,7 +340,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box, {
+    .ctc-plan-box {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -497,14 +505,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
           &:last-child {
-            display: none;
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }
@@ -538,5 +548,3 @@ export default {
   }
 }
 </style>
-
-

@@ -1,19 +1,18 @@
-import Vue from 'vue/dist/vue.js'
+import Vue from 'vue'
 // import Vue from 'vue/dist/vue.js'
 import App from '@/components/App.vue'
-// axios
-import '@/config/axios.js';
-// router
-import router from './router/index.js'
 // include
 import '@/config/include.js'
+// router
+import router from '@/views/index/router/index.js'
 // 自定义滚动条
 import vuescroll from 'vuescroll/dist/vuescroll-native';
 import 'vuescroll/dist/vuescroll.css';
-
 // include
 // import '@/config/include.js';
 import store from '@/store/store.js';
+// axios
+import '@/config/axios.js';
 
 Vue.use(vuescroll, {
   ops: {
@@ -33,18 +32,18 @@ Vue.use(vuescroll, {
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
+// runtime模式（运行时）
 new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount("#app")
+
+// compiler（模板）模式
+/* new Vue({
     el: '#app',
     router,
     store,
     components: { App },
     template: '<App/>'
-});
-
-// var history = require('connect-history-api-fallback')
-// App.use(history({
-//     rewrites: [
-//         { from: 'index', to: '/index.html'}, // 默认入口
-//         { from: 'ecc', to: '/ecc.html'} // 其他入口
-//     ]
-// }))
+}); */

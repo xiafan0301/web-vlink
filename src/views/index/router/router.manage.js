@@ -1,6 +1,6 @@
  /* 管理板块 */
 export default {
-  path: 'manage',
+  path: '/manage',
   name: 'manage',
   redirect: {
     name: 'set_video'
@@ -127,6 +127,16 @@ export default {
       path: 'authorizeGrant',
       name: 'authorize_grant',
       component: () => import('@/views/index/components/manage/authorizeGrant.vue')
+    },
+    {
+      path: 'serviceBlacklist',
+      name: 'service_blacklist',
+      component: () => import('@/views/index/components/manage/serviceBlacklist.vue')
+    },
+    {
+      path: 'versionManage',
+      name: 'version_manage',
+      component: () => import('@/views/index/components/manage/versionManage.vue')
     },
   ]
 }

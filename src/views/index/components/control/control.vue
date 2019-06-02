@@ -36,7 +36,8 @@ export default {
   > .con_content {
     height: 100%;
     padding-left: 200px;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     // 布控模块地图公用样式
     .manage_d_s_m{
       width: 100%;
@@ -125,10 +126,9 @@ export default {
               }
             }
             ul{
-              margin-top: 10px;
               li{
                 width: 100%;
-                padding: 10px 30px;
+                padding: 10px 34px;
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: space-between;
@@ -155,6 +155,29 @@ export default {
                     bottom: 6px;
                   }
                 }
+              }
+            }
+            .bayonet_list > li{
+              display: block!important;
+              > div{
+                cursor: pointer;
+                > i{
+                  margin-right: 6px;
+                }
+                &.active{
+                  i, span{
+                    color: #0C70F8;
+                  }
+                }
+              }
+              li{
+                cursor: default;
+              }
+            }
+            .highlight{
+              cursor: pointer;
+              &:hover, &.active{
+                background: #ebeff2;
               }
             }
           }
@@ -231,7 +254,7 @@ export default {
         display: flex;
         flex-wrap: nowrap;
         justify-content: space-between;
-        padding: 10px 20px;
+        padding: 10px 20px 0 20px;
         line-height: 40px;
         > div:nth-child(1){
           display: flex;
@@ -259,6 +282,7 @@ export default {
           position: relative;
           .group_copy{
             width:152px;
+            height: 280px;
             position: absolute;
             left: 0;
             top: 50px;
@@ -266,7 +290,7 @@ export default {
             background:rgba(255,255,255,1);
             box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
             border-radius:4px;
-            > li{
+            li{
               padding: 0 10px;
               cursor: pointer;
               &:hover{
@@ -302,7 +326,6 @@ export default {
           box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
           display: flex;
           justify-content: space-between;
-          overflow: hidden;
           .list_img{
             width: 50%;
             padding-right: 20px;
@@ -337,37 +360,30 @@ export default {
               .more{
                 position: relative;
                 padding-top: 6px;
-                > span{
+                .more_hover{
                   margin-bottom: 10px;
                   cursor: pointer;
                   color: #0C70F8;
-                }
-                > div{
-                  width: 220px;
-                  padding: 20px 20px 10px;
-                  position: absolute;
-                  right: 72px;
-                  bottom: 0;
-                  background:rgba(255,255,255,1);
-                  box-shadow:0px 5px 18px 0px rgba(169,169,169,0.39);
-                  border-radius: 5px;
-                  display: flex;
-                  flex-wrap: wrap;
-                  > span{
-                    margin-bottom: 10px;
-                    margin-right: 2px;
-                  }
-                }
-                > i{
-                  position: absolute;
-                  left: -8px;
-                  top: 6px;
-                  display: inline-block;
-                  border: 6px solid transparent;
-                  border-left-color: #fff;
+                  border: none;
+                  padding: 0;
                 }
               }
             }
+          }
+        }
+      }
+      .bread_crumbs{
+        margin: 20px 20px 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(221,221,221,1);
+        > span:nth-child(5){
+          color: #666;
+        }
+        > span:not(:nth-child(5)){
+          color: #999;
+          cursor: pointer;
+          &:hover{
+            color: #666;
           }
         }
       }
@@ -472,6 +488,26 @@ export default {
         color: #B2B2B2;
       }
     }
+  }
+  .vl_map_hover_main{
+    bottom: 58px;
+  }
+}
+// 重置布控库popover
+.more_popover_box .more_popover{
+  max-height: 240px;
+  display: flex;
+  flex-wrap: wrap;
+  > span{
+    margin-bottom: 10px;
+    margin-right: 2px;
+    padding: 5px 10px;
+    background:rgba(250,250,250,1);
+    border:1px solid rgba(242,242,242,1);
+    border-radius: 3px;
+    white-space:nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden; 
   }
 }
 </style>
