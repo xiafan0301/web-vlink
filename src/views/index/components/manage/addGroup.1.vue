@@ -51,7 +51,6 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
-              :isSelected="isSelected"
               :groupId="groupId"
               :isInitalState="isInitalState"
               :selectDeviceList="selectDeviceList"
@@ -99,7 +98,6 @@
 </vue-scroll>
 </template>
 <script>
-import { random14 } from '@/utils/util.js';
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
 import { dataList } from '@/utils/data.js';
@@ -109,7 +107,6 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      isSelected: 0, // 查询--重置
       tabState: 1, // 地图选择
       isShowError: false,
       errorText: null,
@@ -430,9 +427,6 @@ export default {
                   })
                 });
               }
-            } else { // 新增---点击重置的时候将已有设备清零
-              this.currentDeviceList = [];
-              this.leftDeviceNumber = 0;
             }
             this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
@@ -447,7 +441,6 @@ export default {
               this.selectDeviceNumber += item.deviceList.length;
               this.selectDeviceNumber += item.bayonetList.length;
             });
-            // console.log('333', this.selectDeviceList)
           }
         })
         .catch(() => {})
@@ -455,17 +448,11 @@ export default {
     // 搜索框
     searchData () {
       this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
     },
     // 重置搜索框
     resetForm(form) {
       this.$refs[form].resetFields();
       this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
     },
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {
@@ -499,7 +486,6 @@ export default {
           this.currentDeviceList = [];
         }
       }
-      console.log('selectList111', selectList)
       if (selectList && selectList.length > 0) {
         this.selectDeviceList = [];
         selectList.map(item => {
@@ -509,7 +495,6 @@ export default {
           this.selectDeviceNumber = selectNum && selectNum;
         // }
       } else {
-        console.log('进来了')
         this.selectDeviceList = [];
         this.selectDeviceNumber = 0;
       }
