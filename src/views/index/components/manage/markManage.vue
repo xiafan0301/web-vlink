@@ -67,13 +67,13 @@
         </el-table-column>
         <el-table-column
           label="操作部门"
-          prop="departmentName"
+          prop="deptName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="操作用户"
-          prop="user"
+          prop="userName"
           show-overflow-tooltip
           >
         </el-table-column>
