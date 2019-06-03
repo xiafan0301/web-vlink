@@ -33,7 +33,7 @@
                   <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 1)">全部人像({{allPerGroupNumber}})</li>
                   <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
                     <span>{{item.name}}({{item.portraitNum}})</span>
-                    <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
+                    <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, $event)"></i>
                   </li>
                 </ul>
               </vue-scroll>
@@ -47,7 +47,7 @@
                 <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部人像({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
-                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
+                  <!-- <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i> -->
                 </li>
               </ul>
             </vue-scroll>
@@ -185,15 +185,14 @@
                 </el-table-column>
                 <el-table-column
                   label="底库信息"
-                  prop="albumList"
+                  prop="albumDataList"
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span v-for="(item, index) in scope.row.albumList" :key="index">
-                      {{item.title + ' '}}
+                    <span>
+                      {{scope.row.albumDataList.join('、')}}
                     </span>
-                    </template>
-                  <!-- <span>{{albumList.join('、')}}</span> -->
+                  </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -250,15 +249,14 @@
                 </el-table-column>
                 <el-table-column
                   label="分组信息"
-                  prop="groupList"
+                  prop="groupDataList"
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span v-for="(item, index) in scope.row.groupList" :key="index">
-                      {{item.name + ' '}}
+                    <span>
+                      {{scope.row.groupDataList.join('、')}}
                     </span>
                   </template>
-                  <!-- <span>{{groupList.join('、')}}</span> -->
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -512,14 +510,16 @@ export default {
           if (res) {
             this.personGroupList = res.data.list;
             this.pagination.total = res.data.total;
-            // this.personGroupList.map(val => {
-            //   val.albumList.map(item => {
-            //     this.albumList.push(item.title);
-            //   });
-            //   val.groupList.map(item => {
-            //     this.groupList.push(item.name);
-            //   });
-            // })
+            this.personGroupList.map(val => {
+              val.groupDataList = [];
+              val.albumDataList = [];
+              val.albumList.map(item => {
+                val.albumDataList.push(item.title);
+              });
+              val.groupList.map(item => {
+                val.groupDataList.push(item.name);
+              });
+            })
           }
         })
         .catch(() => {})
@@ -724,7 +724,6 @@ export default {
       this.$refs[form].validate(valid => {
         this.isShowError = false;
         if (valid) {
-          console.log('44444')
           const params = {
             name: this.addGroupForm.userGroupName
           };
@@ -790,9 +789,9 @@ export default {
       }
     },
     // 跳至管理人员组信息页面
-    skipAdminPersonPage (id, val, e) {
+    skipAdminPersonPage (id, e) {
       e.stopPropagation();
-      this.$router.push({name: 'admin_person_info', query: {type: val, id: id}});
+      this.$router.push({name: 'admin_person_info', query: {id: id}});
     }
   }
 }

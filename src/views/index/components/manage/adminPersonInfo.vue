@@ -52,7 +52,6 @@
               </el-form-item>
               <el-form-item prop="sex">
                 <el-select v-model="searchForm.sex" style="width: 240px;" placeholder="性别">
-                  <!-- <el-option label="全部" :value="0"></el-option> -->
                   <el-option label="男" :value="1"></el-option>
                   <el-option label="女" :value="2"></el-option>
                 </el-select>
@@ -173,9 +172,6 @@
               <span>底库信息：</span>
               <div class="group_box">
                 <template v-if="albumList && albumList.length > 0">
-                  <!-- <span v-for="(item, index) in personDetailInfo.albumList" :key="index">
-                    {{item.title.concat('、')}}
-                  </span> -->
                   <span>{{albumList.join('、')}}</span>
                 </template>
                 <template v-else>
@@ -187,7 +183,6 @@
               <span>分组信息：</span>
               <div class="group_box">
                 <template v-if="groupList && groupList.length > 0">
-                  <!-- <span v-for="(item, index) in personDetailInfo.groupList" :key="index">{{item.name + '、'}}</span> -->
                   <span>{{groupList.join('、')}}</span>
                 </template>
                 <template v-else>
@@ -281,7 +276,7 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getPerGroupList, getPersonData, getPersonDetail, editVeGroup, copyPersonGroup,
-moveoutPerson, deletePersonGroup, addGroupCopyPerson, judgePerson, getPerBottomBankList } from '@/views/index/api/api.manage.js';
+moveoutPerson, deletePersonGroup, addGroupCopyPerson, judgePerson } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -314,7 +309,6 @@ export default {
       perGroupList: [], // 人员分组列表
       groupId: null, // 分组id
       albumId: null, // 底库id
-      isGroup: false,
       groupName: null, // 组名
       copyGroupList: [],
       multipleSelection: [], // 表格多选
@@ -327,35 +321,11 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.query.type == 1) { // 分组查看
-      this.isGroup = true;
-      this.groupId = this.$route.query.id;
-    } else { // 底库查看
-      this.isGroup = false;
-      this.albumId = this.$route.query.id;
-      this.getBottomBankList();
-    }
+    this.groupId = this.$route.query.id;
     this.getGroupList();
     this.getPersonList();
   },
   methods: {
-    // 获取底库列表
-    getBottomBankList () {
-      const params = {
-        type: 1 // 1--人像库
-      }
-      getPerBottomBankList(params)
-        .then(res => {
-          if (res) {
-            res.data.albumNumQueryDtoList.map(item => {
-              if (item.id == this.albumId) {
-                this.groupName = item.title;
-              }
-            })
-          }
-        })
-        .catch(() => {})
-    },
     // 获取分组列表
     getGroupList () {
       const params = {
@@ -385,7 +355,6 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
-        // 'where.type': this.selectMethod,
         'where.albumId': this.albumId,
         'where.groupId': this.groupId,
         'where.idType': this.searchForm.idType,
