@@ -383,12 +383,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
-            // this.departmentData.map((item, index) => {
-            //   if (item.uid === this.userInfo.organList[0].uid) {
-            //     console.log('aaaaa')
-            //     this.searchForm.dealOrgId = item.uid;
-            //   }
-            // });
+            this.departmentData.map((item) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.searchForm.dealOrgId = item.uid;
+              }
+            });
           }
         })
     },

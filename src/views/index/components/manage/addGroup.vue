@@ -51,8 +51,9 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
-              v-show="tabState === 1"
+              :isSelected="isSelected"
               :groupId="groupId"
+              :isInitalState="isInitalState"
               :selectDeviceList="selectDeviceList"
               :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
@@ -98,6 +99,7 @@
 </vue-scroll>
 </template>
 <script>
+import { random14 } from '@/utils/util.js';
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
 import { dataList } from '@/utils/data.js';
@@ -107,6 +109,7 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
+      isSelected: 0, // 查询--重置
       tabState: 1, // 地图选择
       isShowError: false,
       errorText: null,
@@ -128,6 +131,14 @@ export default {
       userInfo: {}, // 用户信息
       allDepartmentData: [], // 部门列表
       intelCharacList: [], // 智能特性列表
+      isInitalState: false // 判断是否点击过列表选择
+    }
+  },
+  watch: {
+    tabState (val) {
+      if (val && val === 2) {
+        this.isInitalState = true;
+      }
     }
   },
   mounted () {
@@ -152,7 +163,6 @@ export default {
       getDiciData(intelCharacId)
         .then(res => {
           if (res) {
-            console.log('this.intelCharacList', res)
             this.intelCharacList = res.data;
           }
         })
@@ -420,6 +430,9 @@ export default {
                   })
                 });
               }
+            } else { // 新增---点击重置的时候将已有设备清零
+              this.currentDeviceList = [];
+              this.leftDeviceNumber = 0;
             }
             this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
@@ -434,6 +447,7 @@ export default {
               this.selectDeviceNumber += item.deviceList.length;
               this.selectDeviceNumber += item.bayonetList.length;
             });
+            // console.log('333', this.selectDeviceList)
           }
         })
         .catch(() => {})
@@ -441,21 +455,28 @@ export default {
     // 搜索框
     searchData () {
       this.getAllDevicesList();
+      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+        this.isSelected = 1 + random14();
+      }, 500)
     },
     // 重置搜索框
     resetForm(form) {
       this.$refs[form].resetFields();
       this.getAllDevicesList();
+      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+        this.isSelected = 1 + random14();
+      }, 500)
     },
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {
       if (list) {
         let arr = [];
         if (list.length > 0) {
-          if (this.groupId) { // 如果是编辑分组
+          if ((this.groupId || this.isInitalState) && this.tabState === 1) { // 如果是编辑分组
             this.currentDeviceList = [];
             this.leftDeviceNumber = 0;
           }
+          // this.leftDeviceNumber = 0;
           console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
@@ -478,8 +499,8 @@ export default {
           this.currentDeviceList = [];
         }
       }
+      console.log('selectList111', selectList)
       if (selectList && selectList.length > 0) {
-        console.log('selectList', selectList)
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
@@ -487,6 +508,10 @@ export default {
         // if (!this.groupId) { // 如果是新增分组
           this.selectDeviceNumber = selectNum && selectNum;
         // }
+      } else {
+        console.log('进来了')
+        this.selectDeviceList = [];
+        this.selectDeviceNumber = 0;
       }
     },
     // 从移除设备接受要提交的设备
@@ -542,7 +567,9 @@ export default {
     },
     // 新增分组 
     addGroup () {
-      if (this.isShowError) {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
         return;
       }
       if (this.currentDeviceList.length === 0) {
@@ -590,14 +617,14 @@ export default {
     },
     // 编辑分组
     editGroup () {
-      // if (!this.groupName) {
-      //   this.errorText = '该项内容不可为空';
-      //   this.isShowError = true;
-      //   return;
-      // }
-      if (this.isShowError) {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
         return;
       }
+      // if (this.isShowError) {
+      //   return;
+      // }
       let addIdList = [], delIdList = [];
       let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）

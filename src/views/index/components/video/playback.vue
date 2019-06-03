@@ -173,13 +173,13 @@
                   <!-- 过期 -->
                   <div class="show_his_dis" v-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                   <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
                     draggable="true" style="cursor: move;" v-else>
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                 </li>

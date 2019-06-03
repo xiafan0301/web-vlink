@@ -81,9 +81,7 @@
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
-            <span v-else-if='!scope.row.reporterUser'>市民</span>
-            <span v-else>-</span>
+            <span v-if='scope.row.senderDepartmentName'>{{scope.row.senderDepartmentName}}</span>
           </template>
         </el-table-column>
         <el-table-column
