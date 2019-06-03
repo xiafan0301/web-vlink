@@ -126,6 +126,12 @@
         </router-link>
       </li>
       <li>
+        <router-link :to="{name: 'control'}">
+          <i class="vl_icon vl_icon_006"></i>
+          <span>布控</span>
+        </router-link>
+      </li>
+      <li>
         <router-link :to="{name: 'judge'}">
           <i class="vl_icon vl_icon_004"></i>
           <span>研判</span>
@@ -135,12 +141,6 @@
         <router-link :to="{name: 'search'}">
           <i class="vl_icon vl_icon_005"></i>
           <span>检索</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'control'}">
-          <i class="vl_icon vl_icon_006"></i>
-          <span>布控</span>
         </router-link>
       </li>
       <li>
