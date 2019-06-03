@@ -5,7 +5,7 @@
       <router-view></router-view>
     </div>
     <!-- 登录提示dialog -->
-    <el-dialog
+    <!-- <el-dialog
       title="登录提示"
       :visible.sync="loginDialogVisible"
       :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false"
@@ -16,7 +16,7 @@
       <div style="padding: 30px 0 10px 0; text-align: center;">
         <el-button style="width: 80%;" type="primary" @click="reLogin">重&nbsp;新&nbsp;登&nbsp;录</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -25,9 +25,9 @@ export default {
   components: {vlinkHeader},
   data () {
     return {
-      loginDialogVisible: false,
+      /* loginDialogVisible: false,
       time: 10,
-      intval: null
+      intval: null */
     }
   },
   computed: {
@@ -38,7 +38,8 @@ export default {
   watch: {
     unLogin () {
       console.log('relogin: ', this.$store.state.loginToken);
-      this.loginDialogVisible = true;
+      this.reLogin();
+      /* this.loginDialogVisible = true;
       if (this.intval) {
         window.clearInterval(this.intval);
       }
@@ -48,7 +49,7 @@ export default {
           this.reLogin();
           window.clearInterval(this.intval);
         }
-      }, 1000);
+      }, 1000); */
     }
   },
   methods: {

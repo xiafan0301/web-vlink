@@ -180,6 +180,7 @@ export default {
       });
     },
     download (item) {
+      console.log('download item', item);
       let $iframe = $('<iframe id="down-file-iframe" />');
 			let $form = $('<form target="down-file-iframe" method="post" />');
 			$form.attr('action', item.video.downUrl);
