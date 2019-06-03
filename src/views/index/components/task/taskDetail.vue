@@ -129,7 +129,7 @@ export default {
     },
     //修改事件处理过程状态
     editProcessStatus() {
-      const uid = this.$route.query.id;
+      const uid = this.$route.query.uid;
       updateProcess(uid).then((res)=>{
         console.log(res)
       }).catch(()=>{})

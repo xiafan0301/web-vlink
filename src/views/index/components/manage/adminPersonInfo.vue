@@ -455,6 +455,8 @@ export default {
     showLookDetailInfo (obj) {
       this.perosnDetailInfoDialog = true;
       if (obj.id) {
+        this.albumList = [];
+        this.groupList = [];
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {

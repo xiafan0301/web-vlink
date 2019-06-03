@@ -1,26 +1,21 @@
 <template>
 <vue-scroll>
-  <div class="add_patrol">
+  <div class="add_group">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/manage/videoSetting/customGroup' }">视频设置</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/manage/videoSetting/deviceAuthorize' }">设备授权</el-breadcrumb-item>
-        <el-breadcrumb-item>管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/manage/videoSetting/customGroup' }">自定义组</el-breadcrumb-item>
+        <el-breadcrumb-item>{{this.$route.query.groupId ? '编辑分组' : '新增分组'}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content_box">
       <div class="content_new_group">
-        <el-form :inline="true" :model="addForm" class="search_form">
-          <el-form-item label="授权对象:">
-            <el-select  style="width: 500px;" v-model="addForm.eventType" placeholder="行政区划">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
+        <span>分组名称:</span>
+        <el-input style="width: 300px;" @input="changeGroupName" v-model="groupName" placeholder="请输入分组名称"></el-input>
+        <p v-show="isShowError" style="color: #F94539;margin-left: 10px;">{{errorText}}</p>
       </div>
       <div class="content_main_box">
-        <p>授权范围:</p>
+        <p>选择方式:</p>
         <div class="main_tab_box">
           <ul class="tab_list">
             <li :class="{'active_li': tabState === 1}" @click="tabState = 1">地图选择</li>
@@ -29,7 +24,7 @@
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
-                <el-select  style="width: 200px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -38,19 +33,8 @@
                     ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item prop="groupId">
-                <el-select  style="width: 200px;" v-model="searchForm.groupId" placeholder="自定义组">
-                  <el-option
-                    v-for="(item, index) in groupsList"
-                    :key="index"
-                    :label="item.groupName"
-                    :value="item.uid"
-                  >
-                  </el-option>
-                </el-select>
-              </el-form-item>
               <el-form-item prop="dutyOrganId">
-                <el-select  style="width: 200px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                <el-select style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -61,12 +45,14 @@
               </el-form-item>
               <el-form-item>
                 <el-button class="select_btn" @click="searchData">查询</el-button>
-                <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
+                <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
               </el-form-item>
             </el-form>
           </div>
           <template v-if="tabState === 1">
             <mapSelect
+              :groupId="groupId"
+              :isInitalState="isInitalState"
               :selectDeviceList="selectDeviceList"
               :currentDeviceList="currentDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
@@ -97,17 +83,18 @@
               @emitRemoveFinalDevice="emitRemoveFinalDevice"
               @emitChangeRDeviceType="emitChangeRDeviceType"
               @emitChangeLDeviceType="emitChangeLDeviceType"
-            ></listSelect>
+              @emitSearchData="emitSearchData"
+            >
+            </listSelect>
           </template>
         </div>
       </div>
     </div>
     <div class="operation-footer">
-      <el-button class="operation_btn function_btn" @click="submitData">保存</el-button>
-      <el-button class="operation_btn back_btn" @click="cancelSubmit">取消</el-button>
+      <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
   </div>
-
 </vue-scroll>
 </template>
 <script>
@@ -115,44 +102,56 @@ import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { getDepartmentList, getASelectDevice, getAllGroups, getAllDevices } from '@/views/index/api/api.manage.js';
+import { getAllDevices, addGroupDevice, getCurrentDevices, updateGroupDevice, getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
     return {
       tabState: 1, // 地图选择
-      addForm: {
-        eventType: null,
-        eventStatus: null,
-        reportTime: null,
-      },
+      isShowError: false,
+      errorText: null,
       searchForm: {
         intelCharac: null, // 智能特性
-        groupId: null, // 自定义组id
-        dutyOrganId: null, // 责任部门id
+        dutyOrganId: null, // 责任部门
         devName: null // 设备名称
       },
-      userInfo: {}, // 存储的用户信息
+      groupName: null, // 新增分组名
       allDeviceList: [], // 所有设备列表数据
       selectDeviceList: [], // 可选设备列表
       selectDeviceNumber: 0, // 可选设备数量
       alcurrentDeviceList: [],
       currentDeviceList: [], // 已有的设备数据
       rightAllChecked: false, // 右侧设备全部选中
+      groupId: null, // 当前分组id
       leftDeviceNumber: 0, // 左侧设备数量
+      isLoading: false,
+      userInfo: {}, // 用户信息
+      allDepartmentData: [], // 部门列表
       intelCharacList: [], // 智能特性列表
-      groupsList: [], // 所有的自定义分组列表
-      allDepartmentData: [], // 所有的责任部门列表
+      isInitalState: false // 判断是否点击过列表选择
     }
   },
-  created () {
-    this.userInfo =  this.$store.state.loginUser;
+  watch: {
+    tabState (val) {
+      if (val && val === 2) {
+        this.isInitalState = true;
+      }
+    }
   },
   mounted () {
-    this.getDepartList();
-    this.getAllDevicesList();
-    this.getGroups();
+    this.userInfo = this.$store.state.loginUser;
+    
+    if (this.$route.query.groupId) {
+      this.groupId = this.$route.query.groupId;
+      this.groupName = this.$route.query.name;
+      this.getCurrentDeviceList();
+    }
+    setTimeout(() => {
+      this.getAllDevicesList();
+    }, 1000)
+
     this.getIntelCharacList();
+    this.getAllDepartList();
   },
   methods: {
     // 获取智能特性列表
@@ -165,18 +164,8 @@ export default {
           }
         })
     },
-    // 获取所有的分组
-    getGroups () {
-      getAllGroups()
-        .then(res => {
-          if (res) {
-            this.groupsList = res.data;
-          }
-        })
-        .catch(() => {})
-    },
-    // 获取部门列表数据
-    getDepartList () {
+    // 获取部门列表
+    getAllDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
         pageSize: 0,
@@ -188,13 +177,9 @@ export default {
           }
         })
     },
-    // 查询数据
-    searchData () {
-      this.getAllDevicesList();
-    },
-    // 重置搜索条件
-    resetData (form) {
-      this.$refs[form].resetFields();
+    // 根据设备名称搜索
+    emitSearchData (val) {
+      this.searchForm.devName = val;
       this.getAllDevicesList();
     },
     // 左侧切换摄像头和卡口
@@ -356,50 +341,55 @@ export default {
         this.rightAllChecked = false;
       }
     },
-    // 从添加设备接收要提交的设备
-    emitFinalDevice (list, number, selectList, selectNum) {
-      if (list) {
-        let arr = [];
-        if (list.length > 0) {
-          // if (this.groupId) { // 如果是编辑分组
-          //   this.currentDeviceList = [];
-          //   this.leftDeviceNumber = 0;
-          // }
-          console.log('list', list)
-          list.map(item => {
-            arr = this.currentDeviceList.filter(itm => {
-              if (itm.uid === item.uid) {
-                item.deviceList.map(val => {
-                  itm.deviceList.push(val);
-                });
-                item.bayonetList.map(val => {
-                  itm.bayonetList.push(val);
-                });
-                return item;
-              }
-            });
-            if (arr.length === 0) {
-              this.currentDeviceList.push(item);
-            }
-          });
-          this.leftDeviceNumber += number;
-        } else {
-          this.currentDeviceList = [];
+    // 获取当前分组下的设备列表
+    getCurrentDeviceList () {
+      if (this.groupId) {
+        const params = {
+          groupId: this.groupId
         }
-      }
-      if (selectList && selectList.length > 0) {
-        console.log('selectList', selectList)
-        this.selectDeviceList = [];
-        selectList.map(item => {
-          this.selectDeviceList.push(item);
-        });
-        // if (!this.groupId) { // 如果是新增分组
-          this.selectDeviceNumber = selectNum && selectNum;
-        // }
+        getCurrentDevices(params)
+          .then(res => {
+            if (res) {
+              this.alcurrentDeviceList = JSON.parse(JSON.stringify(res.data)); // 保存一份原始的当前设备下的设备列表
+              this.currentDeviceList = JSON.parse(JSON.stringify(res.data));
+              this.currentDeviceList.map(item => {
+                item.isOrigin = true;
+                item.isOpenArrow = false; // 设置是否展开
+                item.isChecked = false; // 父级是否选中
+                item.isSXT = true; // 默认选中摄像头
+                this.leftDeviceNumber += item.deviceList.length;
+                this.leftDeviceNumber += item.bayonetList.length;
+                item.deviceList.map(itm => {
+                  item.isOrigin = true;
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+                item.bayonetList.map(itm => {
+                  item.isOrigin = true;
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+              });
+            }
+          })
+          .catch(() => {})
       }
     },
-    // 获取所有可选的设备
+     // 获取所有可选的设备
     getAllDevicesList () {
+      // this.allDeviceList = testData;
+      // this.selectDeviceList = testData;
+      // this.selectDeviceList.map(item => {
+      //   item.isOpenArrow = false; // 设置是否展开
+      //   item.isChecked = false; // 父级是否选中
+      //   item.isSXT = true; // 默认显示摄像头
+      //   item.deviceList.map(itm => {
+      //     itm.isChildChecked = false; // 子级是否选中
+      //   });
+      //   item.bayonetList.map(itm => {
+      //     itm.isChildChecked = false; // 子级是否选中
+      //   });
+      //   this.selectDeviceNumber += item.deviceList.length;
+      //   this.selectDeviceNumber += item.bayonetList.length;
+      // });
       this.selectDeviceNumber = 0;
       getAllDevices(this.searchForm)
         .then(res => {
@@ -469,10 +459,11 @@ export default {
       if (list) {
         let arr = [];
         if (list.length > 0) {
-          if (this.groupId) { // 如果是编辑分组
+          if ((this.groupId || this.isInitalState) && this.tabState === 1) { // 如果是编辑分组
             this.currentDeviceList = [];
             this.leftDeviceNumber = 0;
           }
+          // this.leftDeviceNumber = 0;
           console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
@@ -496,7 +487,6 @@ export default {
         }
       }
       if (selectList && selectList.length > 0) {
-        console.log('selectList', selectList)
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
@@ -504,6 +494,9 @@ export default {
         // if (!this.groupId) { // 如果是新增分组
           this.selectDeviceNumber = selectNum && selectNum;
         // }
+      } else {
+        this.selectDeviceList = [];
+        this.selectDeviceNumber = 0;
       }
     },
     // 从移除设备接受要提交的设备
@@ -536,57 +529,187 @@ export default {
         this.selectDeviceNumber += selectNum;
       }
     },
+    // change分组名称
+    changeGroupName (val) {
+      if (!val) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
+      } else if (val.length > 10){
+        this.errorText = '最多输入10个字';
+        this.isShowError = true;
+      } else {
+        this.errorText = '';
+        this.isShowError = false;
+      }
+    },
     // 提交数据
     submitData () {
-
+      if (this.$route.query.groupId) {
+        this.editGroup(); // 编辑分组
+      } else {
+        this.addGroup(); // 新增分组
+      }
     },
-    // 取消提交
-    cancelSubmit () {
+    // 新增分组 
+    addGroup () {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
+        return;
+      }
+      if (this.currentDeviceList.length === 0) {
+        this.$message({
+          type: 'warning',
+          message: '请先选择需要关联的设备',
+          customClass: 'request_tip'
+        });
+        return;
+      }
+      let vehicleIds = [], bayonetIds = [];
+      this.currentDeviceList.map(item => {
+        if (item.deviceList.length > 0) {
+          item.deviceList.map(itm => {
+            vehicleIds.push(itm.uid);
+          });
+        }
+        if (item.bayonetList.length > 0) {
+          item.bayonetList.map(itm => {
+            bayonetIds.push(itm.uid);
+          });
+        }
+      });
+      const params = {
+        groupName: this.groupName,
+        vehicleIds,
+        bayonetIds
+      };
+      this.isLoading = true;
+      addGroupDevice(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '保存成功',
+              customClass: 'request_tip'
+            });
+            this.isLoading = false;
+            this.$router.push({name: 'custom_group'});
+          } else {
+            this.isLoading = false;
+          }
+        })
+        .catch(() => { this.isLoading = false; })
+    },
+    // 编辑分组
+    editGroup () {
+      if (!this.groupName) {
+        this.errorText = '该项内容不可为空';
+        this.isShowError = true;
+        return;
+      }
+      // if (this.isShowError) {
+      //   return;
+      // }
+      let addIdList = [], delIdList = [];
+      let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
+      let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）
+      if (this.currentDeviceList.length > 0) {
+        this.currentDeviceList.map(item => {
+          item.deviceList.map(a => {
+            currDeviceIds.push(a.uid);
+          });
+          item.bayonetList.map(a => {
+            currDeviceIds.push(a.uid);
+          });
+        });
+        this.alcurrentDeviceList.map(item => {
+          item.deviceList.map(a => {
+            allDeviceIds.push(a.uid);
+          });
+          item.bayonetList.map(a => {
+            allDeviceIds.push(a.uid);
+          });
+        });
 
+        let newCurrDeviceIds = JSON.parse(JSON.stringify(currDeviceIds));
+        let newAllDeviceIds = JSON.parse(JSON.stringify(allDeviceIds));
+        // 筛选出新添加的设备
+        for (let len = currDeviceIds.length, i = len -1; i >= 0; i--) {
+          for (let length = allDeviceIds.length, j = length -1; j >= 0; j--) {
+            if (currDeviceIds[i] === allDeviceIds[j]) {
+              newCurrDeviceIds.splice(i, 1);
+            }
+          }
+        }
+        // 筛选出删除的设备
+        for (let len = allDeviceIds.length, i = len -1; i >= 0; i--) {
+          for (let length = currDeviceIds.length, j = length -1; j >= 0; j--) {
+            if (allDeviceIds[i] === currDeviceIds[j]) {
+              newAllDeviceIds.splice(i, 1);
+            }
+          }
+        }
+        addIdList = newCurrDeviceIds;
+        delIdList = newAllDeviceIds;
+      } else {
+        this.alcurrentDeviceList.map(item => {
+          item.deviceList.map(a => {
+            delIdList.push(a.uid);
+          });
+          item.bayonetList.map(a => {
+            delIdList.push(a.uid);
+          });
+        });
+      }
+      const params = {
+        groupId: this.groupId,
+        groupName: this.groupName,
+        addIdList: addIdList.join(',') || null,
+        delIdList: delIdList.join(',') || null
+      };
+      this.isLoading = false;
+      updateGroupDevice(params)
+        .then(res => {
+          if (res) {
+            console.log('res', res)
+            if (res) {
+               this.$message({
+                type: 'success',
+                message: '修改成功',
+                customClass: 'request_tip'
+              });
+              this.isLoading = false;
+              this.$router.push({name: 'set_video'});
+            } else {
+              this.isLoading = false;
+            }
+          }
+        })
+        .catch(() => {this.isLoading = false;})
+    },
+    // 取消添加
+    cancelAdd () {
+      this.$router.back(-1);
     }
   }
 }
 </script>
 <style lang="scss">
-.add_patrol {
+.add_group {
   height: 100%;
   .content_box {
     width: 98%;
     background-color: #ffffff;
     margin: 0 20px 60px 20px;
     padding-bottom: 5px;
-    .content_alert {
-      margin: 0 20px;
-      padding: 15px 0 0;
-      .alert_tip {
-        color: #333333;
-        background:rgba(230,247,255,1);
-        border-radius:4px;
-        border:1px solid rgba(186,231,255,1);
-        /deep/ .el-icon-info:before {
-          color: #0C70F8;
-        }
-      }
-    }
     .content_new_group {
-      padding: 20px 20px 0;
+      padding: 20px;
       display: flex;
       align-items: center;
-       .search_form {
-          width: 100%;
-          .select_btn, .reset_btn {
-            width: 80px;
-          }
-          .select_btn {
-            background-color: #0C70F8;
-            color: #ffffff;
-          }
-          .reset_btn {
-            background-color: #ffffff;
-            color: #666666;
-            border-color: #DDDDDD;
-          }
-        }
+      >span {
+        margin-right: 10px;
+        color: #666666;
+      }
     }
     .content_main_box {
       padding: 0 20px;
@@ -633,6 +756,9 @@ export default {
               border-color: #DDDDDD;
             }
           }
+          .divide {
+            border: 1px dashed #fafafa;
+          }
         }       
       }
     }
@@ -665,3 +791,5 @@ export default {
   }
 }
 </style>
+
+

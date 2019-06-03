@@ -94,8 +94,8 @@
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
-            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-if='scope.row.reporterUserRole'>{{scope.row.reporterUserRole}}</span>
+            <!-- <span v-else-if='!scope.row.reporterUser'>市民</span> -->
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -231,6 +231,10 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.identityList = res.data.list;
+            const params = {
+              organName: '市民'
+            };
+            this.identityList.push(params);
           }
         })
     },
