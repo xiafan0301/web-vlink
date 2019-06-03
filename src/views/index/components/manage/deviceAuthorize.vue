@@ -476,7 +476,7 @@ export default {
         }
       }
       .temp_content_box {
-        height: calc(100% - 40px);
+        height: calc(100% - 45px);
         ul {
           >li {
             color: #666666;

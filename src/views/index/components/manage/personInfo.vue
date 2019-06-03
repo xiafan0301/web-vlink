@@ -772,15 +772,17 @@ export default {
     showLookDetailInfo (obj) {
       this.perosnDetailInfoDialog = true;
       if (obj.id) {
+        this.groupDetailList = [];
+        this.albumDetailList = [];
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
               this.personDetailInfo = res.data;
-              this.personDetailInfo.albumDetailList.map(item => {
-                this.albumList.push(item.title);
+              this.personDetailInfo.albumList.map(item => {
+                this.albumDetailList.push(item.title);
               });
-              this.personDetailInfo.groupDetailList.map(item => {
-                this.groupList.push(item.name);
+              this.personDetailInfo.groupList.map(item => {
+                this.groupDetailList.push(item.name);
               });
             }
           })
