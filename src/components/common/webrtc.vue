@@ -2,9 +2,9 @@
   <div class="wr_main">
     <ul>
       <li v-for="(item, index) in aWRData" :key="'wr_list_' + index">
-        <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId">
+        <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId" v-show="item.isOpen">
           <video :muted="item.mute" :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
-          <div class="vl_icon vl_icon_vc_011 wr_video_scale"></div>
+          <div class="vl_icon vl_icon_vc_011 wr_video_scale" v-show="item.isTime" @click="item.isOpen = false"></div>
           <div class="wr_video_user">
             <img src="../../assets/img/wr_photo.png" alt="">
             <div>
@@ -33,6 +33,9 @@
             </div>
           </div>
           <span class="wr_video_mask" v-show="item.type === '0'"></span>
+        </div>
+        <div class="wr_video_mini"  @click="item.isOpen = true" v-show="!item.isOpen">
+          <p>{{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}</p>
         </div>
       </li>
     </ul>
@@ -218,9 +221,11 @@ export default {
      */
     wrAdd (obj, desc) {
       if (obj && obj.remoteId) {
+        // 添加isOpen字段，是否最小化
+        obj['isOpen'] = true;
         if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
           this.$message({
-            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人就行通话！',
+            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
             type: 'warning'
           });
           this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
@@ -238,7 +243,7 @@ export default {
             message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
             type: 'warning'
           });
-          this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+          // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           return;
         }
         // this.aWRData.push(obj);
@@ -276,8 +281,10 @@ export default {
         }
       } else if (oMsg.type === 'OFFERED') {
         // 收到OFFER
+        console.log('1')
         _this.wrRecipient(oMsg, false);
       } else if (oMsg.type === 'ADD_OFFERED') {
+        console.log('2')
         // 收到OFFER
         _this.wrRecipient(oMsg, true);
       } else if (oMsg.type === 'ANSWERED') {
@@ -330,6 +337,13 @@ export default {
       } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
         // 房间已满
         _this.wrOff(oMsg);
+      } else if (oMsg.type === 'CHANGE') {
+        // 切换
+        console.log('切换')
+        let _t = _this.aWRData.find(x => x.remoteId === oMsg.sender);
+        if (_t && _t.type === '1') {
+          _this.wrSwitchCall(_t)
+        }
       }
     },
     // 接收通话请求
@@ -432,9 +446,7 @@ export default {
       } else {
         console.log('----------------222222')
         // 设备已经被唤醒
-        _this.aWRData.push(Object.assign({}, obj, {
-          type: type
-        }));
+        _this.aWRData.push(obj);
         _this.wrCreatConnection(type, obj, desc);
         _this.wrStateHandler({
           remoteId: obj.remoteId,
@@ -559,8 +571,8 @@ export default {
         // 发送应答信令 ===========================
         _pc.createAnswer(function (desc) {
           _pc.setLocalDescription(desc);
-          _this.wsSend(webrtcConfig.apis.answer, {
-              type: 'ANSWERED',
+          _this.wsSend(desc ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
+              type: desc ? 'ADDANSWERED' : 'ANSWERED',
               data: JSON.stringify(desc),
               recipient: obj.remoteId,
               recipientName: obj.remoteName
@@ -638,12 +650,12 @@ export default {
             recipientName: oMsg.sender
           });
           // MEMBER_LEAVED
-          this.wsSend(webrtcConfig.apis.leave, {
-            type: 'MEMBER_LEAVED',
-            data: '',
-            recipient: oMsg.sender,
-            recipientName: oMsg.sender
-          });
+//          this.wsSend(webrtcConfig.apis.leave, {
+//            type: 'MEMBER_LEAVED',
+//            data: '',
+//            recipient: oMsg.sender,
+//            recipientName: oMsg.sender
+//          });
         }
       }
       // 显示提示信息
@@ -726,6 +738,11 @@ export default {
     wrSwitchCall (item) {
       item.type === '0' ? item.type = '1' : item.type = '0';
       this.$emit('wrSwitchCall', item);
+      this.wsSend(webrtcConfig.apis.change, {
+        type: 'CHANGE',
+        recipient: item.remoteId,
+        recipientName: item.remoteName
+      });
     },
     // 静音
     wrMute (item) {
@@ -739,13 +756,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 .wr_main {
-  position: absolute; left: 260px; bottom: 10px;
+  position: absolute; left: 260px; bottom: 0px;
   z-index: 2;
   > ul {
     overflow: hidden;
     > li {
       float: left;
       padding: 10px;
+      min-width: 120px;
       > div.wr_video_container {
         position: relative;
         width: 254px; height: 400px;
@@ -765,13 +783,28 @@ export default {
           background: #000000;
         }
       }
+      > div.wr_video_mini {
+        position: absolute;
+        bottom: -50px;
+        width: 100px;
+        height: 100px;
+        background: #0C70F8;
+        color: #ffffff;
+        border-radius: 50%;
+        padding-top: 19px;
+        text-align: center;
+        cursor: pointer;
+        &:hover {
+          background: #409eff;
+        }
+      }
     }
   }
 }
 .wr_video_scale {
   display: none;
   position: absolute; top: 15px; right: 8px; z-index: 2;
-  cursor: not-allowed;
+  cursor: pointer;
   animation: fadeIn .4s ease-out;
 }
 .wr_video_user {

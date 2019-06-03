@@ -134,7 +134,8 @@ export const webrtcConfig = {
     answer: '/signal/answer', // 答应
     addanswer: '/signal/addanswer', // 答应
     remove: '/signal/remove', // 挂断
-    leave: '/signal/leave' // 挂断
+    leave: '/signal/leave', // 挂断
+    change: '/signal/change' // 切换
   }
 };
 
