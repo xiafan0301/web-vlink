@@ -108,12 +108,15 @@ export default {
         unselectDeviceList = [], unselectBayonetList = [];
 
       this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
-
+      
+      console.log('unCheckDeviceList', this.unCheckDeviceList)
       let selectDeviceNumber = this.unCheckDeviceList.length;
       let checkedDeviceNumber; 
-      if (this.groupId || this.isInitalState) { // 编辑分组 
+      if (this.groupId || this.isInitalState) { // 编辑
+        console.log('可选数量')
         checkedDeviceNumber = val.length;
       } else {
+        console.log('可选数量99999')
         checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
       }
 
@@ -294,9 +297,7 @@ export default {
       this.unCheckDeviceList = []; // 清空可选设备列表
     },
     isSelected (val) {
-      console.log('val', val)
       if (val) {
-        console.log('666666')
         this.getMapData();
       }
     }
@@ -581,6 +582,14 @@ export default {
            if (currDeviceList[i].isChecked === true) {
               checkedDeviceList.push(currDeviceList[i]);
               currDeviceList.splice(i, 1);
+              // if (this.selAreaPolygon) {
+                // this.finalDeviceList.map((items, index) => {
+                //   if (items.parentId ===  currDeviceList[i].uid) {
+                //     this.finalDeviceList.splice(index, 1);
+                //   }
+                // });
+
+              // }
             } else {
               params = {
                 cname: currDeviceList[i].cname,
@@ -593,13 +602,22 @@ export default {
                 if (currDeviceList[i].deviceList[j].isChildChecked == true) {
                   params.deviceList.push(currDeviceList[i].deviceList[j]);
                   currDeviceList[i].deviceList.splice(j, 1);
+                  // this.finalDeviceList.map((items, index) => {
+                  //   if (items.uid ===  currDeviceList[i].deviceList[j].uid) {
+                  //     this.finalDeviceList.splice(index, 1);
+                  //   }
+                  // });
                 }
               }
               for (let length = currDeviceList[i].bayonetList.length, j = length - 1; j >= 0; j --) {
                 if (currDeviceList[i].bayonetList[j].isChildChecked == true) {
                   params.bayonetList.push(currDeviceList[i].bayonetList[j]);
                   currDeviceList[i].bayonetList.splice(j, 1);
-
+                  // this.finalDeviceList.map((items, index) => {
+                  //   if (items.uid ===  currDeviceList[i].bayonetList[j].uid) {
+                  //     this.finalDeviceList.splice(index, 1);
+                  //   }
+                  // });
                 }
               }
               if (params.deviceList.length !== 0 || params.bayonetList.length !== 0) {
@@ -637,6 +655,7 @@ export default {
         }
         console.log('checkedDeviceList', checkedDeviceList)
         console.log('currDeviceList', currDeviceList)
+        console.log('aaacccccc', this.unCheckDeviceList)
         if (checkedDeviceList.length > 0) {
           checkedDeviceList.map(item => {
             item.deviceList.map(itm => {
@@ -667,6 +686,7 @@ export default {
             })
           });
         }
+        // this.finalDeviceList = [];
         this.$emit('emitRemoveFinalDevice', currDeviceList, checkedDeviceNumber, checkedDeviceList, selectDeviceNumber);
         this.mapMarkHandler();
       }

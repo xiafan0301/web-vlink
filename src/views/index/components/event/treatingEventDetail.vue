@@ -479,7 +479,13 @@ export default {
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
-      this.$router.push({name: 'event_ctc_detail', query: {status: this.$route.query.status, eventId: this.$route.query.eventId}});
+      if (this.basicInfo.dispatchStatus) {
+        if (this.basicInfo.dispatchStatus === 1) { // 进行中  1--进行中  2---已结束
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_ing', eventId: this.$route.query.eventId}});
+        } else { // 已结束
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_end', eventId: this.$route.query.eventId}});
+        }
+      }
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {

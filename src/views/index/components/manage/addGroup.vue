@@ -378,21 +378,6 @@ export default {
     },
      // 获取所有可选的设备
     getAllDevicesList () {
-      // this.allDeviceList = testData;
-      // this.selectDeviceList = testData;
-      // this.selectDeviceList.map(item => {
-      //   item.isOpenArrow = false; // 设置是否展开
-      //   item.isChecked = false; // 父级是否选中
-      //   item.isSXT = true; // 默认显示摄像头
-      //   item.deviceList.map(itm => {
-      //     itm.isChildChecked = false; // 子级是否选中
-      //   });
-      //   item.bayonetList.map(itm => {
-      //     itm.isChildChecked = false; // 子级是否选中
-      //   });
-      //   this.selectDeviceNumber += item.deviceList.length;
-      //   this.selectDeviceNumber += item.bayonetList.length;
-      // });
       this.selectDeviceNumber = 0;
       getAllDevices(this.searchForm)
         .then(res => {
@@ -495,6 +480,7 @@ export default {
           });
           this.leftDeviceNumber += number;
         } else {
+          console.log('mmmmmmmmmmmmmmmmmm')
           this.currentDeviceList = [];
         }
       }
@@ -513,6 +499,8 @@ export default {
     },
     // 从移除设备接受要提交的设备
     emitRemoveFinalDevice (list, number, selectList, selectNum) {
+      console.log('aalist', list)
+      console.log('aaselectList', selectList)
       this.currentDeviceList = [];
       if (list) {
         list.map(item => {
@@ -539,6 +527,8 @@ export default {
           }
         });
         this.selectDeviceNumber += selectNum;
+        console.log('zz', this.selectDeviceList)
+        console.log('vv', this.currentDeviceList)
       }
     },
     // change分组名称
@@ -619,9 +609,6 @@ export default {
         this.isShowError = true;
         return;
       }
-      // if (this.isShowError) {
-      //   return;
-      // }
       let addIdList = [], delIdList = [];
       let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）

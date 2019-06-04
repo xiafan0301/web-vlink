@@ -180,8 +180,19 @@ export default {
             } else {
                if (type) {
                   if (type === 1) {
-                    // 跳至新增布控页面
-                    this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                    if (this.basicInfo.surveillanceId) { // surveillanceStatus：布控状态  1--进行中 2--待开始  3--已结束
+                      if (this.basicInfo.surveillanceStatus === 2 || this.basicInfo.surveillanceStatus === 1) {
+                        // 跳至布控详情页面
+                        this.$router.push({path: '/control/manage', query: { pageType: 2, controlId: this.basicInfo.surveillanceId }});
+                      } else {
+                        // 跳至新增布控页面
+                        this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                      }
+                    } else {
+                      // 跳至新增布控页面
+                      this.$router.push({path: '/control/create', query: { eventId: eventId }});
+                    }
+                    
                   }
                   if (type === 2) {
                     // 跳至事件管理调度指挥页面
