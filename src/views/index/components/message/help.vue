@@ -233,7 +233,6 @@ export default {
         'where.keywordLocDesci': this.helpForm.content,
         'where.radius': this.helpForm.helpRadius,
         'where.mutualFlag': 1,
-        'where.eventFlag': 0,
         'where.eventStatus': this.helpForm.helpState
       }
       this.loading = true;
