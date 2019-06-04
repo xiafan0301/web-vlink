@@ -378,21 +378,6 @@ export default {
     },
      // 获取所有可选的设备
     getAllDevicesList () {
-      // this.allDeviceList = testData;
-      // this.selectDeviceList = testData;
-      // this.selectDeviceList.map(item => {
-      //   item.isOpenArrow = false; // 设置是否展开
-      //   item.isChecked = false; // 父级是否选中
-      //   item.isSXT = true; // 默认显示摄像头
-      //   item.deviceList.map(itm => {
-      //     itm.isChildChecked = false; // 子级是否选中
-      //   });
-      //   item.bayonetList.map(itm => {
-      //     itm.isChildChecked = false; // 子级是否选中
-      //   });
-      //   this.selectDeviceNumber += item.deviceList.length;
-      //   this.selectDeviceNumber += item.bayonetList.length;
-      // });
       this.selectDeviceNumber = 0;
       getAllDevices(this.searchForm)
         .then(res => {
@@ -476,7 +461,6 @@ export default {
             this.leftDeviceNumber = 0;
           }
           // this.leftDeviceNumber = 0;
-          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
@@ -619,9 +603,6 @@ export default {
         this.isShowError = true;
         return;
       }
-      // if (this.isShowError) {
-      //   return;
-      // }
       let addIdList = [], delIdList = [];
       let allDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）

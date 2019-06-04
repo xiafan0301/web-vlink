@@ -193,6 +193,7 @@ export default {
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
+        areaCode: '', // 行政区代码
         // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
       },
@@ -292,7 +293,9 @@ export default {
           const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
 
           geocoder.getAddress(lnglatXY, function (status, result) {
+            console.log('result', result)
             if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.areaCode = result.regeocode.addressComponent.adcode;
               _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
               _this.mapMark(e.lnglat.getLng(), e.lnglat.getLat(), _this.addEventForm.eventAddress);
             }
@@ -387,7 +390,9 @@ export default {
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
+            console.log('44444', result)
             if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.areaCode = result.geocodes[0].adcode;
               _this.addEventForm.longitude = result.geocodes[0].location.lng;
               _this.addEventForm.latitude = result.geocodes[0].location.lat;
               _this.mapMark(_this.addEventForm);

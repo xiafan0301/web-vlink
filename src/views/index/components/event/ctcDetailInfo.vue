@@ -118,7 +118,7 @@
           </div>
           <div class="divide"></div>
           <div class="process-box">
-            <div class="department">
+            <div class="department" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
               <p>参与部门</p>
               <ul>
                 <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
@@ -128,7 +128,7 @@
                 </li>
               </ul>
             </div>
-            <div class="process-list">
+            <div class="process-list" v-show="basicInfo.processingList && basicInfo.processingList.length > 0">
               <p>事件过程</p>
               <ul>
                 <li v-for="(item, index) in basicInfo.processingList" :key="index">

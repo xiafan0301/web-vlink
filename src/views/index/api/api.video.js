@@ -317,6 +317,19 @@ export const mdfVideoRoundState = (data) => {
 }
 
 /**
+ * 修改轮巡接口
+ * @param {Object} data 接口入参
+ */
+export const updateVideoRoundState = (data) => {
+  return request({
+    url: '/round',
+    method: 'put',
+    data: data,
+    mode: videoModeName
+  })
+}
+
+/**
  * 视频录像开始接口
  * @param {Object} data 接口入参
  */

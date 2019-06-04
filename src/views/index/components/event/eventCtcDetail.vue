@@ -171,7 +171,7 @@
         </div> -->
       </div>
       <div class="operation-footer">
-        <template v-if="$route.query.status !== 'ending'">
+        <template v-if="$route.query.status !== 'ctc_end'">
           <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
           <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
         </template>
