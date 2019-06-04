@@ -580,16 +580,18 @@ export default {
       if (currDeviceList && currDeviceList.length > 0) {
         for (let len = currDeviceList.length, i = len - 1; i >= 0; i --) {
            if (currDeviceList[i].isChecked === true) {
+
+              if (this.groupId) { // 编辑
+                for (let length = this.finalDeviceList.length, m = length - 1; m >= 0; m--) {
+                  if (currDeviceList[i].uid === this.finalDeviceList[m].parentId) {
+                    this.finalDeviceList.splice(m, 1);
+                  }
+                }
+              }
+
               checkedDeviceList.push(currDeviceList[i]);
               currDeviceList.splice(i, 1);
-              // if (this.selAreaPolygon) {
-                // this.finalDeviceList.map((items, index) => {
-                //   if (items.parentId ===  currDeviceList[i].uid) {
-                //     this.finalDeviceList.splice(index, 1);
-                //   }
-                // });
 
-              // }
             } else {
               params = {
                 cname: currDeviceList[i].cname,
@@ -600,24 +602,32 @@ export default {
               }
               for (let length = currDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
                 if (currDeviceList[i].deviceList[j].isChildChecked == true) {
+                  
+                  if (this.groupId) {
+                    for (let length = this.finalDeviceList.length, k = length - 1; k >= 0; k--) {
+                      if (currDeviceList[i].deviceList[j].uid === this.finalDeviceList[j].parentId) {
+                        this.finalDeviceList.splice(k, 1);
+                      }
+                    }
+                  }
+
                   params.deviceList.push(currDeviceList[i].deviceList[j]);
                   currDeviceList[i].deviceList.splice(j, 1);
-                  // this.finalDeviceList.map((items, index) => {
-                  //   if (items.uid ===  currDeviceList[i].deviceList[j].uid) {
-                  //     this.finalDeviceList.splice(index, 1);
-                  //   }
-                  // });
                 }
               }
               for (let length = currDeviceList[i].bayonetList.length, j = length - 1; j >= 0; j --) {
                 if (currDeviceList[i].bayonetList[j].isChildChecked == true) {
+                  
+                  if (this.groupId) {
+                    for (let length = this.finalDeviceList.length, k = length - 1; k >= 0; k--) {
+                      if (currDeviceList[i].bayonetList[j].uid === this.finalDeviceList[j].parentId) {
+                        this.finalDeviceList.splice(k, 1);
+                      }
+                    }
+                  }
+
                   params.bayonetList.push(currDeviceList[i].bayonetList[j]);
                   currDeviceList[i].bayonetList.splice(j, 1);
-                  // this.finalDeviceList.map((items, index) => {
-                  //   if (items.uid ===  currDeviceList[i].bayonetList[j].uid) {
-                  //     this.finalDeviceList.splice(index, 1);
-                  //   }
-                  // });
                 }
               }
               if (params.deviceList.length !== 0 || params.bayonetList.length !== 0) {
@@ -656,6 +666,8 @@ export default {
         console.log('checkedDeviceList', checkedDeviceList)
         console.log('currDeviceList', currDeviceList)
         console.log('aaacccccc', this.unCheckDeviceList)
+         console.log('selectDeviceNumber', selectDeviceNumber)
+          console.log('checkedDeviceNumber', checkedDeviceNumber)
         if (checkedDeviceList.length > 0) {
           checkedDeviceList.map(item => {
             item.deviceList.map(itm => {

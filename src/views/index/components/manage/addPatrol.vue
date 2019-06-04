@@ -484,11 +484,9 @@ export default {
             this.leftDeviceNumber = 0;
           }
           // this.leftDeviceNumber = 0;
-          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
-                console.log('oooooo')
                 item.deviceList.map(val => {
                   itm.deviceList.push(val);
                 });
@@ -708,26 +706,54 @@ export default {
 
         let newCurrSxtDeviceIds = JSON.parse(JSON.stringify(currSxtDeviceIds));
         // let newAllDeviceIds = JSON.parse(JSON.stringify(allDeviceIds));
-        // 筛选出新添加的设备
-        // for (let len = currDeviceIds.length, i = len -1; i >= 0; i--) {
-        //   for (let length = allDeviceIds.length, j = length -1; j >= 0; j--) {
-        //     if (currDeviceIds[i] === allDeviceIds[j]) {
-        //       newCurrDeviceIds.splice(i, 1);
-        //     }
-        //   }
-        // }
-        // 筛选出删除的摄像头设备
+        // 筛选出新添加的设备 -- 摄像头
+        for (let len = currSxtDeviceIds.length, i = len -1; i >= 0; i--) {
+          for (let length = allSxtDeviceIds.length, j = length -1; j >= 0; j--) {
+            if (currSxtDeviceIds[i] === allSxtDeviceIds[j]) {
+              currSxtDeviceIds.splice(i, 1);
+            }
+          }
+        }
+        // 筛选出删除的摄像头设备 --- 摄像头
         for (let len = allSxtDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = currSxtDeviceIds.length, j = length -1; j >= 0; j--) {
             if (allSxtDeviceIds[i] === currSxtDeviceIds[j]) {
               // delSxtList.push()
-              delSxtList = newCurrSxtDeviceIds.splice(i, 1);
+              allSxtDeviceIds.splice(i, 1);
             }
           }
         }
-        console.log('delSxtList', delSxtList)
-        // addIdList = newCurrDeviceIds;
-        // delIdList = newCurrSxtDeviceIds;
+
+        // 筛选出新添加的设备 -- 卡口
+        for (let len = currKkDeviceIds.length, i = len -1; i >= 0; i--) {
+          for (let length = allKkDeviceIds.length, j = length -1; j >= 0; j--) {
+            if (currKkDeviceIds[i] === allKkDeviceIds[j]) {
+              currKkDeviceIds.splice(i, 1);
+            }
+          }
+        }
+        // 筛选出删除的摄像头设备 --- 卡口
+        for (let len = allKkDeviceIds.length, i = len -1; i >= 0; i--) {
+          for (let length = currKkDeviceIds.length, j = length -1; j >= 0; j--) {
+            if (allKkDeviceIds[i] === currKkDeviceIds[j]) {
+              // delSxtList.push()
+              allKkDeviceIds.splice(i, 1);
+            }
+          }
+        }
+        devList = currSxtDeviceIds;
+        allSxtDeviceIds.map(item => {
+          devList.push(item);
+        });
+
+        bayList = currKkDeviceIds;
+        allKkDeviceIds.map(item => {
+          bayList.push(item);
+        });
+
+
+        console.log('devList', devList);
+        console.log('bayList', bayList)
       } else {
         this.alcurrentDeviceList.map(item => {
           item.deviceList.map(a => {
@@ -738,31 +764,30 @@ export default {
           });
         });
       }
-      // const params = {
-      //   groupId: this.groupId,
-      //   groupName: this.groupName,
-      //   addIdList: addIdList.join(',') || null,
-      //   delIdList: delIdList.join(',') || null
-      // };
-      // this.isLoading = false;
-      // updateGroupDevice(params)
-      //   .then(res => {
-      //     if (res) {
-      //       console.log('res', res)
-      //       if (res) {
-      //          this.$message({
-      //           type: 'success',
-      //           message: '修改成功',
-      //           customClass: 'request_tip'
-      //         });
-      //         this.isLoading = false;
-      //         this.$router.push({name: 'set_video'});
-      //       } else {
-      //         this.isLoading = false;
-      //       }
-      //     }
-      //   })
-      //   .catch(() => {this.isLoading = false;})
+      const params = {
+        id: this.patrolId,
+        bayList,
+        devList
+      };
+      this.isLoading = false;
+      updateVideoRoundState(params)
+        .then(res => {
+          if (res) {
+            console.log('res', res)
+            if (res) {
+               this.$message({
+                type: 'success',
+                message: '修改成功',
+                customClass: 'request_tip'
+              });
+              this.isLoading = false;
+              this.$router.push({name: 'tirotation_setting'});
+            } else {
+              this.isLoading = false;
+            }
+          }
+        })
+        .catch(() => {this.isLoading = false;})
     },
     // 根据搜索条件查询可用设备
     searchData () {

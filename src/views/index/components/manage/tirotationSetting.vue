@@ -209,30 +209,6 @@
                       <span>{{itm.deviceName}}</span>
                     </li>
                   </ul>
-                  <ul class="child_temp_detail" v-show="item.isSXT">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                  <ul class="child_temp_detail" v-show="!item.isSXT">
-                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                  <ul class="child_temp_detail" v-show="item.isSXT">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                  <ul class="child_temp_detail" v-show="!item.isSXT">
-                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
                 </div>
               </li>
             </ul>
@@ -383,7 +359,6 @@ export default {
       if (obj.id) {
         getVideoRoundDetail(obj.id)
           .then(res => {
-            console.log(res);
             if (res.data) {
               this.allDeviceList = res.data.areaGroupList;
               this.selectDeviceDialog = true;

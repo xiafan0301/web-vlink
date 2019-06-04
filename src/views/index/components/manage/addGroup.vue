@@ -461,7 +461,6 @@ export default {
             this.leftDeviceNumber = 0;
           }
           // this.leftDeviceNumber = 0;
-          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
@@ -480,7 +479,6 @@ export default {
           });
           this.leftDeviceNumber += number;
         } else {
-          console.log('mmmmmmmmmmmmmmmmmm')
           this.currentDeviceList = [];
         }
       }
@@ -499,8 +497,6 @@ export default {
     },
     // 从移除设备接受要提交的设备
     emitRemoveFinalDevice (list, number, selectList, selectNum) {
-      console.log('aalist', list)
-      console.log('aaselectList', selectList)
       this.currentDeviceList = [];
       if (list) {
         list.map(item => {
@@ -527,8 +523,6 @@ export default {
           }
         });
         this.selectDeviceNumber += selectNum;
-        console.log('zz', this.selectDeviceList)
-        console.log('vv', this.currentDeviceList)
       }
     },
     // change分组名称
