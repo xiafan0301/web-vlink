@@ -166,7 +166,7 @@
         </div>
         <div class="divide"></div>
         <div class="process-box">
-          <div class="department">
+          <div class="department" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
             <p>参与部门</p>
             <ul>
               <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
@@ -176,7 +176,7 @@
               </li>
             </ul>
           </div>
-          <div class="process-list">
+          <div class="process-list" v-show="basicInfo.processingList && basicInfo.processingList.length > 0">
             <p>事件过程</p>
             <ul>
               <li v-for="(item, index) in basicInfo.processingList" :key="index">
@@ -479,7 +479,13 @@ export default {
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
-      this.$router.push({name: 'event_ctc_detail', query: {status: this.$route.query.status, eventId: this.$route.query.eventId}});
+      if (this.basicInfo.dispatchStatus) {
+        if (this.basicInfo.dispatchStatus === 1) { // 进行中  1--进行中  2---已结束
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_ing', eventId: this.$route.query.eventId}});
+        } else { // 已结束
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_end', eventId: this.$route.query.eventId}});
+        }
+      }
     },
     // 跳至查看呈报内容
     skipReportDetailPage () {

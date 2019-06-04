@@ -240,7 +240,7 @@
           </div>
           <div class="divide"></div>
           <div class="process-box">
-            <div class="department">
+            <div class="department" v-show="sturcDetail.taskList && sturcDetail.taskList.length > 0">
               <p>参与部门</p>
               <ul>
                 <li v-for="(item, index) in sturcDetail.taskList" :key="'item' + index">
@@ -250,7 +250,7 @@
                 </li>
               </ul>
             </div>
-            <div class="process-list">
+            <div class="process-list" v-show="sturcDetail.processingList && sturcDetail.processingList.length > 0">
               <p>事件过程</p>
               <ul>
                 <li v-for="(item, index) in sturcDetail.processingList" :key="index">
