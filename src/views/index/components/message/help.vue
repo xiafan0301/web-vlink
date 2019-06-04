@@ -72,7 +72,7 @@
               </el-table-column>
               <el-table-column
                 label="发布者"
-                prop="reportUserName"
+                prop="reporterUserName"
                 show-overflow-tooltip
                 >
               </el-table-column>

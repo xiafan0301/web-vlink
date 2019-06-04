@@ -430,7 +430,6 @@ export default {
     }
   },
   mounted () {
-    this.resetMap();
     this.getControlDetail();
   },
   methods: {
@@ -530,6 +529,9 @@ export default {
         if (res && res.data) {
           this.controlDetail = res.data;
           this.controlState = this.controlDetail.surveillanceStatus === '待开始' ? 2 : this.controlDetail.surveillanceStatus === '进行中' ? 1 : 3;
+          this.$nextTick(() => {
+            this.resetMap();
+          })
           if (this.controlState !== 2) {
             this.getAlarmSnap();
           }
