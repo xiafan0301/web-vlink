@@ -447,7 +447,6 @@ export default {
               this.selectDeviceNumber += item.deviceList.length;
               this.selectDeviceNumber += item.bayonetList.length;
             });
-            // console.log('333', this.selectDeviceList)
           }
         })
         .catch(() => {})
@@ -499,7 +498,6 @@ export default {
           this.currentDeviceList = [];
         }
       }
-      console.log('selectList111', selectList)
       if (selectList && selectList.length > 0) {
         this.selectDeviceList = [];
         selectList.map(item => {
@@ -509,7 +507,6 @@ export default {
           this.selectDeviceNumber = selectNum && selectNum;
         // }
       } else {
-        console.log('进来了')
         this.selectDeviceList = [];
         this.selectDeviceNumber = 0;
       }

@@ -49,19 +49,6 @@
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <div class="img-form-item">
-                  <el-upload
-                    :action="uploadUrl"
-                    list-type="picture-card"
-                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
-                    multiple
-                    :before-upload='handleBeforeUpload'
-                    :on-success='handleSuccess'
-                    :show-file-list='false'
-                  >
-                    <i class="el-icon-plus"></i>
-                    <span class='add-img-text'>添加</span>
-                    <!-- <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span> -->
-                  </el-upload>
                   <template v-if="uploadImgList.length > 0">
                     <div 
                       class="img_list"
@@ -86,6 +73,18 @@
                       </div>
                     </div>
                   </template>
+                  <el-upload
+                    :action="uploadUrl"
+                    list-type="picture-card"
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
+                    multiple
+                    :before-upload='handleBeforeUpload'
+                    :on-success='handleSuccess'
+                    :show-file-list='false'
+                  >
+                    <i class="el-icon-plus"></i>
+                    <span class='add-img-text'>添加</span>
+                  </el-upload>
                 </div>
                 <el-form-item label-width="85px" class="upload_tip">
                   <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>

@@ -204,7 +204,7 @@
           </div>
         </div>
       </div>
-      <div class="event-handle event-end" v-show="basicInfo.dealTypeList && basicInfo.dealTypeList.length > 0">
+      <div class="event-handle event-end" v-show="(basicInfo.dealTypeList && basicInfo.dealTypeList.length > 0) || basicInfo.mutualFlag">
         <div class="handle-header">
           <span>事件处理</span>
         </div>

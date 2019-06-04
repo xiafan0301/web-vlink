@@ -35,9 +35,10 @@
                     <span>{{ node.label }}</span>
                     <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_002 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_001': data.deviceStatus === 1}"></span>
                     <span class="change_node_pos" v-else-if="!data.infoList"></span>
-                    <div class="map_tree_tab" v-if="data['isFirst']">
-                      <span v-for="(item, index) in constObj"  @click.stop="switchTab(data, index, $event)" :key="item.id">{{item.name}}</span>
-                    </div>
+                    <!--<span class="change_node_pos" v-else-if="data.areaType === '5'"></span>-->
+                    <!--<div class="map_tree_tab" v-if="data['isFirst']">-->
+                      <!--<span v-for="(item, index) in constObj"  @click.stop="switchTab(data, index, $event)" :key="item.id">{{item.name}}</span>-->
+                    <!--</div>-->
                   </span>
                 </el-tree>
               </vue-scroll>
@@ -62,7 +63,7 @@
                 <p v-show="markList.length === 0 || signEmpty" style="text-indent: 20px;">无相关数据</p>
               </vue-scroll>
             </div>
-            <el-button class="dc_clear_mark" type="primary" @click="delMark('清除所有', 0)">清空标注</el-button>
+            <el-button class="dc_clear_mark" type="primary" @click="delMark('所有', 0)">清空标注</el-button>
           </div>
         </div>
       </div>
@@ -90,24 +91,31 @@
         <el-checkbox :indeterminate="isIndeterminate" v-model="mapTypeCheckAll" @change="mapTypeCheckAllChange">全部
           <span class="map_rt_ck_num" style="padding-right: 30px;">&nbsp;{{(mapTreeData[0] ? mapTreeData[0].deviceBasicListNum + mapTreeData[0].carListNum + mapTreeData[0].bayonetListNum + mapTreeData[0].sysUserExtendListNum : 0) | fmTenThousand}}</span>
         </el-checkbox>
-        <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
-          <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll" v-for="(item, index) in constObj" :key="item.id" :label="index">
-            {{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span>
-            <el-dropdown v-if="index !== 1"  :hide-on-click="false">
-              <span class="el-dropdown-link">
-                <i class="el-icon-arrow-down el-icon--right"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-checkbox-group v-model="item.supTypeList" class="vl_map_rt_cks"  @change="checkedTypeChange">
-                  <el-dropdown-item v-for="sItem in item.supOptions" :key="sItem.id">
-                    <el-checkbox :label="sItem.name">{{sItem.name}}</el-checkbox>
-                  </el-dropdown-item>
-                </el-checkbox-group>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </el-checkbox>
+        <el-checkbox-group v-model="mapTypeList" class="vl_map_rt_cks">
+          <el-dropdown :split-button="index !== 1" trigger="click" v-for="(item, index) in constObj" :key="item.id" :hide-on-click="false">
+            <el-checkbox :indeterminate="item.isIndeterminate" v-model="item.checkAll"  :label="index">
+              {{item.name}}<span class="map_rt_ck_num">&nbsp;{{(mapTreeData[0] ? mapTreeData[0][item._key] : 0) | fmTenThousand}}</span>
+            </el-checkbox>
+            <el-dropdown-menu slot="dropdown">
+              <el-checkbox-group v-model="item.supTypeList" class="vl_map_rt_cks" @change="supCheckedTypeChange(item)">
+                <el-dropdown-item v-for="(sItem, sIndex) in item.supOptions" :key="sItem.id">
+                  <el-checkbox :label="sIndex">{{sItem.name}}</el-checkbox>
+                </el-dropdown-item>
+              </el-checkbox-group>
+            </el-dropdown-menu>
+          </el-dropdown>
         </el-checkbox-group>
       </div>
+      <!--<div class="map_rt">-->
+        <!--<el-tree-->
+          <!--class="test_tree"-->
+          <!--:data="testObj"-->
+          <!--show-checkbox-->
+          <!--node-key="id"-->
+          <!--:default-expanded-keys="[10]"-->
+          <!--:default-checked-keys="[10]"-->
+        <!--&gt;</el-tree>-->
+      <!--</div>-->
       <!-- 右侧工具栏 -->
       <div class="map_rrt">
         <ul class="map_rrt_u1">
@@ -133,6 +141,7 @@
           </li>
         </ul>
         <ul class="map_rrt_u2">
+          <li @click="resetZoom"><i class="el-icon-aim"></i></li>
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
         </ul>
@@ -144,7 +153,7 @@
       :visible.sync="deleteMarkDialog"
       :show-close="false"
       width="400px">
-      <span>确定删除{{delMessage}}标注吗？</span>
+      <span>确定清除{{delMessage}}标注吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button :disabled="delLoading" @click="deleteMarkDialog = false">取 消</el-button>
         <el-button :loading="delLoading" type="primary" @click="comfirmDel">确 定</el-button>
@@ -187,9 +196,9 @@ export default {
       constObj: [
         {name:'摄像头', _key: 'deviceBasicListNum', supOptions: [{name: '部门范围'},{name: '其他范围'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]},
         {name:'卡口', _key: 'bayonetListNum', isIndeterminate: false, checkAll: true},
-        {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1, 2, 3, 4]},
+        {name: '车辆', _key: 'carListNum', supOptions: [{name: '公交车'},{name: '出租车'}, {name: '客运车'}, {name: '校车'}, {name: '危化车'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1, 2, 3, 4], supTypeListAll: [0, 1, 2, 3, 4]},
         {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
-        ],
+      ],
       map: null, // 地图对象
       isIndeterminate: false,
       mapTypeCheckAll: true,
@@ -204,6 +213,7 @@ export default {
       },
       markInfoVal: '', // 标注列表查询值
       markList: [], // 标注列表
+      vehicleTimer: null, // 查询车辆数据定时器
       deleteMarkDialog: false,
       delMessage: '',
       curSignObj: {},
@@ -232,6 +242,10 @@ export default {
       markListener: null,
       markEditMarker: null,
       markEditWindow: null,
+
+      // 测距
+      dbListener: null,
+      rightListener: null,
       // 报警
       snapMarks: [],
       // 视频通话
@@ -294,6 +308,8 @@ export default {
       }
     },
     mapTypeList (newValue, oldValue) {
+      console.log(newValue, oldValue)
+      this.checkedTypeChange(newValue);
       let arr = [], bool = false;
       if (oldValue.length > newValue.length) { // 隐藏
         arr = oldValue.filter(x => !newValue.includes(x))
@@ -309,8 +325,16 @@ export default {
           this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
         }, 0)
       })
-      // 更新地图
-      // this.operClassToEL(this.marks[arr[0]], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null, true)
+      // 更新子菜单勾选状态
+      console.log(arr)
+      arr.forEach(x => {
+        this.constObj[x].isIndeterminate = false;
+        if (bool) {
+          this.constObj[x].supTypeList = this.constObj[x].supTypeListAll;
+        } else {
+          this.constObj[x].supTypeList = [];
+        }
+      })
     }
   },
   mounted () {
@@ -384,6 +408,8 @@ export default {
         _this.mapTypeList.forEach(u => {
           _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
         })
+        _this.activeType = 0;
+        _this.resetTools(1)
       }
     });
     this.getMonitorList();
@@ -397,6 +423,11 @@ export default {
   methods: {
     filterMapTree () {
       if (this.mapInfoVal) {
+        if (this.mapTreeData[0].infoName.indexOf(this.mapInfoVal) !== -1) {
+          let allNode = this.$refs.mapLeftTree.store._getAllNodes();
+          this.objSetItem(allNode, {expanded: true})
+          return;
+        }
         // 如果过滤前已经有checkbox未被勾选，需要先把对应原始数据的数据置为 false
         // let _arr = this.mapTypeListAll.filter(x => !this.mapTypeList.includes(x))
         this.mapTreeData[0].infoList.forEach(x => {
@@ -431,17 +462,17 @@ export default {
             _arr.forEach(m => {
               if (this.selAreaPolygon) {
                 if (m.isInArea && m.isShow) {
-                  x.infoList.unshift(m)
+                  x.infoList.push(m)
                 }
               } else {
                 if (m.isShow) {
-                  x.infoList.unshift(m)
+                  x.infoList.push(m)
                 }
               }
             })
             // x.infoList有数据了之后，把“无相关数据”清除
-            if (x.infoList.length > 1 && x.infoList[x.infoList.length - 1].infoName === '无相关数据') {
-              x.infoList.pop();
+            if (x.infoList.length > 1 && x.infoList[0].infoName === '无相关数据') {
+              x.infoList.shift();
             }
           } else {
             x.infoList.forEach(t => {
@@ -636,17 +667,20 @@ export default {
           }, 1000 * _i)
         })
       } else {
-        let sContent = '<div class="vl_map_hover" >' + this.mapHoverInfo(objList) + '</div>';
-        let options = {
-          offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-          content: sContent,
-          closeWhenClickMap: true,isCustom: true
+        let sysIndex = this.callingList.findIndex(j => j.uid === objList.uid + '')
+        if (sysIndex === -1) {
+          let sContent = '<div class="vl_map_hover" >' + this.mapHoverInfo(objList) + '</div>';
+          let options = {
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: sContent,
+            closeWhenClickMap: true,isCustom: true
+          }
+          this.hoverWindow = new window.AMap[classType](options);
+          this.hoverWindow.on('open', function () { this.showInfoWin = true; })
+          this.hoverWindow.on('close', function () { this.showInfoWin = false; })
+          this.hoverWindow.open(this.map, new window.AMap.LngLat(objList.longitude, objList.latitude));
         }
         this.map.setZoomAndCenter(16, [objList.longitude, objList.latitude])
-        this.hoverWindow = new window.AMap[classType](options);
-        this.hoverWindow.on('open', function () { this.showInfoWin = true; })
-        this.hoverWindow.on('close', function () { this.showInfoWin = false; })
-        this.hoverWindow.open(this.map, new window.AMap.LngLat(objList.longitude, objList.latitude));
       }
     },
     getXY (i) {
@@ -695,17 +729,37 @@ export default {
       MapGETmonitorList(params)
         .then(res => {
           if (res) {
-            this.mapTreeData = this.switchData(res.data);
-            this.$_hideLoading();
-            this.mapMark(this.mapTreeData[0].infoList)
-            this.updateDom();
-            this.moveDom();
-            console.log(this.mapTreeData[0].infoList)
+            // 根据当前登录部门，做车辆组对象
+            let __obj = {
+              areaName: '车辆',
+              areaType: '4',
+              bayonetList: [], carList: [], deviceBasicList: [], sysUserExtendList: []
+            }
+            // 获取车辆数据
+            this.getVehicel().then(vData => {
+              __obj.carList = this.objSetItem(vData, {longitude: 'gpsLongitude',latitude: 'gpsLatitude'});
+              res.data.areaTreeList.push(__obj);
+              this.mapTreeData = this.switchData(res.data);
+              this.$_hideLoading();
+              this.mapMark(this.mapTreeData[0].infoList)
+              // this.moveDom();
+              this.updateDom();
+              console.log(this.mapTreeData[0])
+              // 定时查询车辆数据
+              this.vehicleTimer = setInterval(() => {
+                this.getVehicel().then(_supData => {
+                  _supData = this.objSetItem(_supData, {longitude: 'gpsLongitude',latitude: 'gpsLatitude'});
+                  this.map.remove(this.marks[2]);
+                  this.mapMark([{infoList: _supData}], true)
+                })
+              }, 5000)
+            })
           }
         })
     },
     // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
     switchData(data) {
+      console.log(data)
       let numObj= {'deviceBasicListNum': 0, 'carListNum': 0, 'bayonetListNum': 0, 'sysUserExtendListNum': 0};
       data['infoList'] = data.areaTreeList;
       data['infoName'] = data.areaName;
@@ -713,22 +767,20 @@ export default {
         // 假的卡口，车辆
         let carList;
         carList = [
-          {
-            name: x.areaName + '的假车辆',
-            addr: '长沙市天心区',
-            uid: random14(),
-            latitude: 28.099869 + Math.random() / 10,
-            longitude: 112.935227 + Math.random() / 10
-          }
         ];
         x['infoName'] = x.areaName;
         x['isShow'] = true;
-        // dataType = 0 摄像头，1车辆，2卡口，3人员,
+        // dataType = 0 摄像头，2车辆，1卡口，3人员,
         x['deviceBasicList'] = this.objSetItem(x['deviceBasicList'], {infoName: 'deviceName', areaType: '5', dataType: 0, isShow: true});
-        x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId, isShow: true});
+        if (x['carList']) {
+          x['carList'] = this.objSetItem(x['carList'], {infoName: 'vehicleNumber', areaType: '5', dataType: 2, areaUid: x.areaId, isShow: true});
+        } else {
+          x['carList'] = this.objSetItem(carList, {infoName: 'name', areaType: '5', dataType: 2, areaUid: x.areaId, isShow: true});
+        }
         x['bayonetList'] = this.objSetItem(x['bayonetList'], {infoName: 'bayonetName', areaType: '5', dataType: 1, areaUid: x.areaId, isShow: true});
         x['sysUserExtendList'] = this.objSetItem(x['sysUserExtendList'], {infoName: 'userName', areaType: '5', dataType: 3, areaUid: x.areaId, isShow: true});
-        let oldArr = [...x['deviceBasicList'], ...x['carList'], ...x['bayonetList'], ...x['sysUserExtendList']];
+
+        let oldArr = [...x['deviceBasicList'],...x['carList'], ...x['bayonetList'], ...x['sysUserExtendList']];
         let newArr = objDeepCopy(oldArr)
         x['infoList'] = newArr;
         // 给第一个元素加识别号
@@ -754,7 +806,9 @@ export default {
           z[key] = z[obj[key]] ? z[obj[key]] : obj[key]
         }
         // 都加上markSid , 方便处理移动端发起的通话
-        z['markSid'] = 'mapMark' + random14();
+        if (!z['markSid']) {
+          z['markSid'] = 'mapMark' + random14();
+        }
         return z;
       })
       return list;
@@ -801,7 +855,7 @@ export default {
         ss = Array.from(ss);
         ss.forEach(x => {
           $(x).parent().siblings().css('display', 'none');
-          $(x).parent().parent().css('padding-left', '26px');
+          $(x).parent().parent().css('padding-left', '40px');
         })
       })
     },
@@ -943,6 +997,9 @@ export default {
               // 点击地图上的摄像头播放视频
               if (obj.dataType === 0) {
                 marker.on('click', function () {
+                  if (_this.activeType) {
+                    return false;
+                  }
                   if (obj.deviceStatus === 1) {
                     _this.signListTap([obj], 'Marker', obj);
                   } else {
@@ -953,6 +1010,9 @@ export default {
               // 卡口视频
               if (obj.dataType === 1) {
                 marker.on('click', function () {
+                  if (_this.activeType) {
+                    return false;
+                  }
                   let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
                   if (bayIndex === -1) {
                     _this.$_showLoading({target: '.vl_map'})
@@ -1065,8 +1125,10 @@ export default {
         str += '<li><span>设备数量：</span>' + data.devNum + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 2) {
-        str += '<li><span>车辆名称：</span>' + data.infoName + '</li>';
-        str += '<li><span>设备地址：</span>' + data.infoName + '</li>';
+        str += '<li><span>车牌号码：</span>' + data.vehicleNumber + '</li>';
+        str += '<li><span>车辆类型：</span>' + '那个类型' + '</li>';
+        str += '<li><span>时速：</span>' + data.speed + '</li>';
+        str += '<li><span>方向：</span>' + data.direction + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 3) {
         str += '<li><span>姓名：</span>' + data.infoName + '</li>';
@@ -1082,7 +1144,7 @@ export default {
           <div class="sign_info">
             <span>标注人：${data.opUserName}</span><span>${data.createTime ? formatDate(data.createTime) : '无具体时间'}</span>
           </div>
-          <div class="sign_content">${data.markContent}</div>
+          <div class="sign_content" style="word-wrap: break-word;">${data.markContent}</div>
           <div class="sign_show_edit">
             <textarea class="sign_text" maxlength="50" cols="30" rows="4"></textarea>
             <div class="byte_num"><span class="sign_text_num">${data.markContent.length}</span>/50</div>
@@ -1133,7 +1195,7 @@ export default {
             mark: null,
             mute: false
           }
-          _this.addCalling(_obj)
+          _this.addCalling(objDeepCopy(_obj))
         }
         // textarea tap event
         $('.sign_text').bind('keyup', function () {
@@ -1180,7 +1242,9 @@ export default {
         }
         // cancel add sign
         if (e.target.classList.contains('add_sign_del')) {
-          _this.markRest(true)
+          _this.markRest()
+          _this.activeType = 0;
+          _this.resetTools(4);
         }
         // confirm add sign
         if (e.target.classList.contains('add_sign_edit')) {
@@ -1208,7 +1272,9 @@ export default {
               _this.markList.unshift(_this.addSignInfoWin);
               let obj = {}
               obj['infoList'] = [_this.addSignInfoWin];
-              _this.markRest(true);
+              _this.markRest();
+              _this.activeType = 0;
+              _this.resetTools(4);
               _this.mapMark([obj], true);
             }
           }).catch(err => {
@@ -1218,8 +1284,12 @@ export default {
         }
         // remove Selected area
         if (e.target.classList.contains('del_area_icon')) {
-          _this.map.remove(_this.delSelAreaIcon);
-          _this.map.remove(_this.selAreaPolygon);
+          if (_this.delSelAreaIcon) {
+            _this.map.remove(_this.delSelAreaIcon);
+          }
+          if (_this.selAreaPolygon) {
+            _this.map.remove(_this.selAreaPolygon);
+          }
           _this.map.emit('rightclick');
           _this.selAreaPolygon = null;
           _this.updateNumberss(false, '', false, true);
@@ -1327,6 +1397,8 @@ export default {
         case 2: // clear all tap event but ranging
           this.mouseTool.close(false);
           if (this.markListener) {window.AMap.event.removeListener(this.markListener);}
+          if (this.dbListener) {window.AMap.event.removeListener(this.dbListener); this.dbListener = null;}
+          if (this.rightListener) {window.AMap.event.removeListener(this.rightListener); this.rightListener = null;}
           break;
         case 3: // clear all tap event but cutscreen
           this.mouseTool.close(false);
@@ -1336,6 +1408,7 @@ export default {
           this.mouseTool.close(false);
           break;
       }
+      this.map.setDefaultCursor('');
     },
     // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
     operClassToEL (elList, className, boolean, isSetAera, path) {
@@ -1391,7 +1464,6 @@ export default {
       this.activeType === 1 ? this.activeType = 0 : this.activeType = 1;
       this.resetTools(1);
       if (this.activeType === 0) {
-        this.map.setDefaultCursor('');
         return false;
       }
       this.map.setDefaultCursor('crosshair');
@@ -1429,7 +1501,7 @@ export default {
         });
         _this.markEditMarker = marker;
         _this.getPosition(e.lnglat);
-        let obj = {position: '', markContent: '', opUserName: '黄某', unit: '美国情报局', longitude: e.lnglat.lng, latitude: e.lnglat.lat, createTime: new Date().getTime()}
+        let obj = {position: '', markContent: '', opUserName: _this.$store.state.loginUser.userName, unit: '美国情报局', longitude: e.lnglat.lng, latitude: e.lnglat.lat, createTime: new Date().getTime()}
         let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
         let infoWindow = new window.AMap.Marker({
           map: _this.map,
@@ -1477,6 +1549,7 @@ export default {
     },
     // 测距
     ranging () {
+      let _this = this;
       this.activeType === 2 ? this.activeType = 0 : this.activeType = 2;
       this.resetTools(2);
       if (this.activeType === 0) {
@@ -1508,7 +1581,23 @@ export default {
         endMarkerOptions: endMarkerOptions,
         lineOptions: lineOptions
       };
-      this.mouseTool.rule(rulerOptions)
+      this.mouseTool.rule(rulerOptions);
+      if (!this.dbListener) {
+        this.dbListener = window.AMap.event.addListener(this.map, 'dblclick', function () {
+          _this.activeType = 0;
+          setTimeout(() => {
+            _this.mouseTool.close(false);
+          }, 0)
+        })
+      }
+      if (!this.rightListener) {
+        this.rightListener = window.AMap.event.addListener(this.map, 'rightclick', function () {
+          _this.activeType = 0;
+          setTimeout(() => {
+            _this.mouseTool.close(false);
+          }, 0)
+        })
+      }
     },
     // 截屏
     cutScreen () {
@@ -1701,14 +1790,47 @@ export default {
         this.map.setZoom(this.map.getZoom() + val);
       }
     },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(12);
+      }
+    },
     mapTypeCheckAllChange (val) {
       this.isIndeterminate = false;
-      this.mapTypeList = val ? this.mapTypeListAll : [];
+      if (val) {
+        this.mapTypeList = this.mapTypeListAll;
+        this.constObj.forEach(x => {
+          x.supTypeList = x.supTypeListAll;
+        })
+      } else {
+        this.mapTypeList =[];
+        this.constObj.forEach(x => {
+          x.supTypeList = []
+        })
+      }
     },
     checkedTypeChange (value) {
       let checkedCount = value.length;
-      this.mapTypeCheckAll = checkedCount === this.mapTypeListAll.length;
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.mapTypeListAll.length;
+      this.mapTypeCheckAll = checkedCount === this.mapTypeListAll.length && this.constObj.findIndex(x => !x.checkAll) === -1;
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.mapTypeListAll.length || this.constObj.findIndex(x => !x.checkAll) !== -1;
+    },
+    supCheckedTypeChange (item) {
+      item.checkAll = item.supTypeList.length === item.supTypeListAll.length;
+      item.isIndeterminate = item.supTypeList.length > 0 && item.supTypeList.length < item.supTypeListAll.length;
+      this.isIndeterminate = this.mapTypeList.length && this.constObj.findIndex(x => x.isIndeterminate) !== -1;
+      let _i = this.constObj.findIndex(x => x === item);
+      let _j = this.mapTypeList.findIndex(x => x === _i);
+      if (item.supTypeList.length === 0 && _j !== -1) {
+        let _arr = this.mapTypeList.filter((x, index) => index !== _j)
+        this.mapTypeList = Object.assign([], _arr);
+      }
+      if (item.checkAll) {
+        if (_j !== -1) {
+          this.mapTypeList = this.mapTypeList.includes(_j) ? this.mapTypeList.concat([]) : this.mapTypeList.concat([_j])
+        } else {
+          this.mapTypeList = this.mapTypeList.includes(_i) ? this.mapTypeList.concat([]) : this.mapTypeList.concat([_i])
+        }
+      }
     },
 
     // 视频播放
@@ -1800,13 +1922,16 @@ export default {
       if (oData.state > 20) {
         this.wrClose(oData);
       } else if (oData.state === 20) {
-        oData.isTime = true;
-          // _obj.isTime = true;
+        this.$nextTick(() => {
+          this.$set(oData, 'isTime', true)
+        })
+        console.log(this.callingList)
+        // oData.isTime = true;
         oData.countTime(oData);
-          let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
-          setTimeout(() => {
-            $('#' + oData._id).append(domT[0])
-          }, 1000)
+        let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
+        setTimeout(() => {
+          $('#' + oData._id).append(domT[0])
+        }, 1000)
       }
     },
     wrClose (data) {
@@ -1814,9 +1939,13 @@ export default {
       let o = this.callingList.find(x => x.uid === data.uid);
       if (o) {
         this.map.remove(o.mark);
-        o.clearTime(o);
+         o.clearTime(o);
       }
-      this.callingList.splice(this.callingList.findIndex(x => x.uid === data.uid), 1);
+      let _index = this.callingList.findIndex(x => x.uid === data.uid);
+      if (_index !== -1) {
+        this.callingList.splice(_index, 1);
+      }
+      console.log(this.callingList)
     },
     wrSwitchCall (data) {
       let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
@@ -1865,6 +1994,31 @@ export default {
         }
         this.addCalling(cObj)
       }
+    },
+
+
+    // 模拟假车辆数据
+    getVehicel () {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          let arr = []
+          for(let i = 0; i < 5; i++) {
+            let _obj = {
+              uid: i + 1,
+              vehicelType: i + 2,
+              areaType: "5",
+              dataType: 2,
+              vehicleNumber: '车辆号码' + i,
+              direction: Math.random() > 0.5 ? '东南' : '西北',
+              speed: Math.random().toString().slice(2, 4),
+              gpsLongitude: 112.935227 + Math.random() / 30,
+              gpsLatitude: 28.099869 + Math.random() / 30
+            }
+            arr.push(_obj)
+          }
+          resolve(arr)
+        }, 1000)
+      })
     }
   },
   beforeDestroy () {
@@ -1878,6 +2032,11 @@ export default {
       x.detachMediaElement();
       x.destroy();
     })
+    console.log('----------->', this.vehicleTimer)
+    if (this.vehicleTimer) {
+      clearInterval(this.vehicleTimer);
+      this.vehicleTimer = null;
+    }
   }
 }
 </script>
@@ -2095,6 +2254,15 @@ export default {
     > p {
       color: #FFFFFF;
       text-align: center;
+    }
+  }
+  .test_tree {
+    > .el-tree-node {
+      > .el-tree-node__content {
+       > .el-tree-node__expand-icon{
+          display: none;
+        }
+      }
     }
   }
 </style>

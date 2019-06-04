@@ -15,7 +15,6 @@
             <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称"></el-input>
           </el-form-item>
            <el-form-item label="轮巡时间:" style="width: 49%;" prop="dateTime">
-            <!-- <el-date-picker type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions0" style='width: 100%;' placeholder="选择日期" v-model="addForm.dateTime" ></el-date-picker> -->
             <el-date-picker
               style="width: 100%;"
               v-model="addForm.dateTime"
@@ -23,6 +22,7 @@
               value-format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               :picker-options="pickerOptions0"
+              @change="handleChangeDate"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
             </el-date-picker>
@@ -89,6 +89,9 @@
           </div>
           <template v-if="tabState === 1">
             <mapSelect
+              :isSelected="isSelected"
+              :groupId="patrolId"
+              :isInitalState="isInitalState"
               :selectDeviceList="selectDeviceList"
               :selectDeviceNumber="selectDeviceNumber"
               :leftDeviceNumber="leftDeviceNumber"
@@ -135,7 +138,7 @@
 <script>
 import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
-import { formatDate } from '@/utils/util.js';
+import { formatDate, random14 } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { validateDurationTime } from '@/utils/validator.js';
@@ -145,7 +148,8 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
-      tabState: 2, // 地图选择
+      isSelected: 0, // 查询--重置
+      tabState: 1, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
         roundInterval: null, // 间隔时间
@@ -192,6 +196,14 @@ export default {
       userInfo: {}, // 用户信息
       allDepartmentData: [], // 部门列表
       intelCharacList: [], // 智能特性列表
+      isInitalState: false // 判断是否点击过列表选择
+    }
+  },
+  watch: {
+    tabState (val) {
+      if (val && val === 2) {
+        this.isInitalState = true;
+      }
     }
   },
   mounted () {
@@ -428,6 +440,12 @@ export default {
       if (list) {
         let arr = [];
         if (list.length > 0) {
+          if ((this.patrolId || this.isInitalState) && this.tabState === 1) { // 如果是编辑分组
+            this.currentDeviceList = [];
+            this.leftDeviceNumber = 0;
+          }
+          // this.leftDeviceNumber = 0;
+          console.log('list', list)
           list.map(item => {
             arr = this.currentDeviceList.filter(itm => {
               if (itm.uid === item.uid) {
@@ -448,30 +466,18 @@ export default {
         } else {
           this.currentDeviceList = [];
         }
-        // list.map(item => {
-        //   arr = this.currentDeviceList.filter(itm => {
-        //     if (itm.uid === item.uid) {
-        //       item.deviceList.map(val => {
-        //         itm.deviceList.push(val);
-        //       });
-        //       item.bayonetList.map(val => {
-        //         itm.bayonetList.push(val);
-        //       });
-        //       return item;
-        //     }
-        //   });
-        //   if (arr.length === 0) {
-        //     this.currentDeviceList.push(item);
-        //   }
-        // });
-        // this.leftDeviceNumber += number;
       }
-      if (selectList) {
+      if (selectList && selectList.length > 0) {
         this.selectDeviceList = [];
         selectList.map(item => {
           this.selectDeviceList.push(item);
         });
-        this.selectDeviceNumber = selectNum;
+        // if (!this.groupId) { // 如果是新增分组
+          this.selectDeviceNumber = selectNum && selectNum;
+        // }
+      } else {
+        this.selectDeviceList = [];
+        this.selectDeviceNumber = 0;
       }
     },
     // 从移除设备接受要提交的设备
@@ -521,14 +527,71 @@ export default {
       //   this.selectDeviceNumber += item.deviceList.length;
       //   this.selectDeviceNumber += item.bayonetList.length;
       // });
+      // this.selectDeviceNumber = 0;
+      // this.selectDeviceList = [];
+      // this.allDeviceList = [];
+      // getAllDevices(this.searchForm)
+      //   .then(res => {
+      //     if (res) {
+      //       this.allDeviceList = res.data;
+      //       this.selectDeviceList = res.data;
+      //       this.selectDeviceList.map(item => {
+      //         item.isOpenArrow = false; // 设置是否展开
+      //         item.isChecked = false; // 父级是否选中
+      //         item.isSXT = true; // 默认显示摄像头
+      //         item.deviceList.map(itm => {
+      //           itm.isChildChecked = false; // 子级是否选中
+      //         });
+      //         item.bayonetList.map(itm => {
+      //           itm.isChildChecked = false; // 子级是否选中
+      //         });
+      //         this.selectDeviceNumber += item.deviceList.length;
+      //         this.selectDeviceNumber += item.bayonetList.length;
+      //       });
+      //     }
+      //   })
+      //   .catch(() => {})
       this.selectDeviceNumber = 0;
-      this.selectDeviceList = [];
-      this.allDeviceList = [];
       getAllDevices(this.searchForm)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;
             this.selectDeviceList = res.data;
+            //在可选设备中删除已有的设备
+            if (this.$route.query.id) {
+              if (this.currentDeviceList.length > 0) {
+                this.currentDeviceList.map(item => {
+                  this.selectDeviceList.map((val) => {
+                    if (item.uid === val.uid) {
+                      item.deviceList.map(a => {
+                        val.deviceList.map((b, i) => {
+                          if (a.uid === b.uid) {
+                            val.deviceList.splice(i, 1);
+                          }
+                        });
+                      });
+                      item.bayonetList.map(a => {
+                        val.bayonetList.map((b, i) => {
+                          if (a.uid === b.uid) {
+                            val.bayonetList.splice(i, 1);
+                          }
+                        });
+                      });
+                    }
+                  });
+
+                  // 如果可选设备中卡口和摄像头都为空，则删除该设备
+                  this.selectDeviceList.map((value, index) => {
+                    if (value.deviceList.length === 0 && value.bayonetList.length === 0) {
+                      this.selectDeviceList.splice(index, 1);
+                    }
+                  })
+                });
+              }
+            } else { // 新增---点击重置的时候将已有设备清零
+              this.currentDeviceList = [];
+              this.leftDeviceNumber = 0;
+            }
             this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
               item.isChecked = false; // 父级是否选中
@@ -592,15 +655,25 @@ export default {
     // 根据搜索条件查询可用设备
     searchData () {
       this.getAllDevicesList();
+      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+        this.isSelected = 1 + random14();
+      }, 500)
     },
     // 重置搜索条件
     resetForm (form) {
       this.$refs[form].resetFields();
       this.getAllDevicesList();
+      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+        this.isSelected = 1 + random14();
+      }, 500)
     },
     // 返回
     cancelSubmit () {
       this.$router.back(-1);
+    },
+    // 轮巡时间change
+    handleChangeDate (val) {
+      console.log(val)
     }
   }
 }

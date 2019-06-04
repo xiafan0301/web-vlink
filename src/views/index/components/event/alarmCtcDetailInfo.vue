@@ -331,7 +331,7 @@ export default {
       } else {
         isRelationEvent = 0;
       }
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'ctc_end', query: { eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
