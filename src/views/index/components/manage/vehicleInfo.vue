@@ -32,7 +32,7 @@
                 <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 1)">全部车辆({{allVelGroupNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleGroupList" :key="'item' + index" @click="getVeDetailInfo(item, 1)">
                   <span>{{item.name}}({{item.portraitNum}})</span>
-                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 1, $event)"></i>
+                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, $event)"></i>
                 </li>
               </ul>
             </vue-scroll>
@@ -46,7 +46,6 @@
               <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getVeDetailInfo('', 2)">全部车辆({{allVelBottomNameNumber}})</li>
               <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in vehicleBottomNameList" :key="'item' + index" @click="getVeDetailInfo(item, 2)">
                 <span>{{item.title}}({{item.portraitNum}})</span>
-                <i class="vl_icon vl_icon_manage_10" @click="skipAdminVehiclePage(item.id, 2, $event)"></i>
               </li>
             </ul>
           </vue-scroll>
@@ -171,15 +170,14 @@
               </el-table-column>
               <el-table-column
                 label="底库信息"
-                prop="albumList"
+                prop="albumDetailList"
                 :show-overflow-tooltip='true'
               >
                 <template slot-scope="scope">
-                  <span v-for="(item, index) in scope.row.albumList" :key="index">
-                    {{item.title + ' '}}
+                  <span>
+                    {{scope.row.albumDetailList.join('、')}}
                   </span>
                 </template>
-                <!-- <span>{{albumList.join('、')}}</span> -->
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -235,15 +233,14 @@
               </el-table-column>
               <el-table-column
                 label="分组信息"
-                prop="groupList"
+                prop="groupDetailList"
                 :show-overflow-tooltip='true'
               >
                 <template slot-scope="scope">
-                  <span v-for="(item, index) in scope.row.groupList" :key="index">
-                    {{item.groupName + ' '}}
+                  <span>
+                    {{scope.row.groupDetailList.join('、')}}
                   </span>
                 </template>
-                <!-- <span>{{groupList.join('、')}}</span> -->
               </el-table-column>
               <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
@@ -322,7 +319,6 @@
             <span>底库信息：</span>
             <div class="group_box">
               <template v-if="albumDetailList.length > 0">
-                <!-- <span v-for="(item, index) in vehicleDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
                 <span>{{albumDetailList.join('、')}}</span>
               </template>
               <template v-else>
@@ -334,7 +330,6 @@
             <span>分组信息：</span>
             <div class="group_box">
               <template v-if="groupDetailList.length > 0">
-                <!-- <span v-for="(item, index) in vehicleDetailInfo.groupList" :key="index">{{item.groupName + '、'}}</span> -->
                 <span>{{groupDetailList.join('、')}}</span>
               </template>
               <template v-else>
@@ -486,6 +481,17 @@ export default {
           if (res) {
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
+            this.vehicleList.map(item => {
+              item.groupDetailList = [];
+              item.albumDetailList = [];
+              item.groupList.map(a => {
+                item.groupDetailList.push(a.groupName);
+              });
+              item.albumList.map(a => {
+                item.albumDetailList.push(a.title);
+              });
+            });
+            console.log('vehicleList', this.vehicleList)
           }
         })
         .catch(() => {})
@@ -535,8 +541,6 @@ export default {
     },
     // 查询车辆底库
     getVelBottomNameInfo () {
-      // this.allVelBottomNameNumber = 0;
-      // this.pagination.pageNum = 1;
       const params = {
         bankName: this.searchGroupName
       }
@@ -544,10 +548,7 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleBottomNameList = res.data.albumNumQueryDtoList;
-            // this.vehicleBottomNameList.map(item => {
-              this.allVelBottomNameNumber = res.data.total;
-            // })
-            // this.getVehicleInfoList();
+            this.allVelBottomNameNumber = res.data.total;
           }
         })
         .catch(() => {})
@@ -779,9 +780,9 @@ export default {
       this.getVehicleDetailInfo(obj.uid);
     },
     // 跳至管理车辆组信息页面
-    skipAdminVehiclePage (id, val, e) {
+    skipAdminVehiclePage (id, e) {
       e.stopPropagation();
-      this.$router.push({name: 'admin_vehicle_info', query: {type: val, id: id}});
+      this.$router.push({name: 'admin_vehicle_info', query: {id: id}});
     },
     // 显示加入组tankuang
     showGroupDialog () {
