@@ -22,7 +22,7 @@ export default {
 .main {
   padding: 20px;
   height: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
   > .ar-tab-nav {
     background-color: #ffffff;
     padding-top: 8px;
