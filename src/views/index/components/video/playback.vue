@@ -246,7 +246,7 @@ export default {
       endTime: '',
       startTimeOptions: {
         disabledDate: (d) => {
-          console.log('d', d);
+          console.log(d);
           // d > new Date() || d > this.endTime
           if (d > new Date()) {
             return true;
@@ -257,7 +257,7 @@ export default {
       },
       endTimeOptions: {
         disabledDate: (d) => {
-          if (d > new Date() || d < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
+          if (d > new Date() || d.getTime() < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
             return true;
           } else {
             return false;
