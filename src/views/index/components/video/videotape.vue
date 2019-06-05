@@ -53,7 +53,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import { getVideoTranscribeDatePageList, delVideoTranscribe, addVideoDownload, getServerTimestamp } from "@/views/index/api/api.video.js";
+import { getVideoTranscribeDatePageList, delVideoTranscribe, addVideoDownload } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   components: {flvplayer},
@@ -106,7 +106,6 @@ export default {
   },
   mounted () {
     this.searchSubmit();
-    console.log('user: ', this.$store.state.loginUser);
   },
   methods: {
     searchSubmit () {
@@ -181,7 +180,6 @@ export default {
       });
     },
     download (item) {
-      console.log('download item', item);
       let oUser = this.$store.state.loginUser;
       let dept = (oUser && oUser.organList && oUser.organList[0]) ? oUser.organList[0] : {};
       addVideoDownload({
