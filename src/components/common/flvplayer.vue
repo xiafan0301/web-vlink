@@ -135,6 +135,7 @@
             v-model="download.startTime"
             time-arrow-control
             type="datetime"
+            :disabled="download.downlaodSliderDis"
             :editable="false" :clearable="false"
             :picker-options="download.startTimeOptions"
             @change="downloadStartTimeChanged"
