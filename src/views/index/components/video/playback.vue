@@ -246,7 +246,7 @@ export default {
       endTime: '',
       startTimeOptions: {
         disabledDate: (d) => {
-          console.log(d);
+          // console.log(d);
           // d > new Date() || d > this.endTime
           if (d > new Date()) {
             return true;
@@ -477,7 +477,7 @@ export default {
         uid: item.deviceUid,
         _record: true
       });
-      console.log('this.dragActiveObj', this.dragActiveObj)
+      // console.log('this.dragActiveObj', this.dragActiveObj)
       // 设置属性dataTransfer   两个参数   1：key   2：value
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');
