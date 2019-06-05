@@ -308,6 +308,7 @@ export const getVideoCurrentRound = () => {
  * @param {Object} data 接口入参
  */
 export const mdfVideoRoundState = (data) => {
+  // console.log('mdfVideoRoundState', data);
   return request({
     url: '/round',
     method: 'put',
