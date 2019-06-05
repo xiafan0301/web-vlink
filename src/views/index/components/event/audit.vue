@@ -284,11 +284,14 @@ export default {
       getDepartmentList(params)
         .then(res => {
           if (res && res.data.list) {
-            this.identityList = res.data.list;
+            // this.identityList = res.data.list;
             const params = {
               organName: '市民'
             };
             this.identityList.push(params);
+            res.data.list.map(item => {
+              this.identityList.push(item)
+            });
           }
         })
     },

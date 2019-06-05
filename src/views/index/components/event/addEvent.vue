@@ -26,21 +26,6 @@
                   <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
                 </el-form-item>
                 <div class="img-form-item">
-                  <el-upload
-                    :action="uploadUrl"
-                    list-type="picture-card"
-                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
-                    multiple
-                    :disabled="imgDisabled"
-                    :before-upload='handleBeforeUpload'
-                    :on-success='handleSuccess'
-                    :show-file-list='false'
-                  >
-                    <i class="el-icon-plus"></i>
-                    <span class='add-img-text'>添加</span>
-                    <!-- <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
-                    <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p> -->
-                  </el-upload>
                   <template v-if="uploadImgList.length > 0">
                     <div 
                       class="img_list"
@@ -65,6 +50,19 @@
                       </div>
                     </div>
                   </template>
+                  <el-upload
+                    :action="uploadUrl"
+                    list-type="picture-card"
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
+                    multiple
+                    :disabled="imgDisabled"
+                    :before-upload='handleBeforeUpload'
+                    :on-success='handleSuccess'
+                    :show-file-list='false'
+                  >
+                    <i class="el-icon-plus"></i>
+                    <span class='add-img-text'>添加</span>
+                  </el-upload>
                 </div>
                 <el-form-item label-width="85px" class="upload_tip">
                   <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
@@ -195,6 +193,7 @@ export default {
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
+        areaCode: '', // 行政区代码
         // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
       },
@@ -294,7 +293,9 @@ export default {
           const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
 
           geocoder.getAddress(lnglatXY, function (status, result) {
+            console.log('result', result)
             if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.areaCode = result.regeocode.addressComponent.adcode;
               _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
               _this.mapMark(e.lnglat.getLng(), e.lnglat.getLat(), _this.addEventForm.eventAddress);
             }
@@ -389,7 +390,9 @@ export default {
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
+            console.log('44444', result)
             if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.areaCode = result.geocodes[0].adcode;
               _this.addEventForm.longitude = result.geocodes[0].location.lng;
               _this.addEventForm.latitude = result.geocodes[0].location.lat;
               _this.mapMark(_this.addEventForm);
@@ -725,6 +728,17 @@ export default {
                 height: 100%;
               }
             }
+            .upload_tip {
+            margin-left: 85px;
+            // /deep/ .el-form-item__content {
+              // line-height: 20px;
+              .error_tip {
+                padding-left: 5px;
+                color: #F56C6C;
+                font-size: 12px;
+              }
+            // }
+          }
           }
           .limit_parent {
             position: relative;
@@ -734,16 +748,7 @@ export default {
               top: 25px;
             }
           }
-          .upload_tip {
-            /deep/ .el-form-item__content {
-              line-height: 20px;
-              .error_tip {
-                padding-left: 5px;
-                color: #F56C6C;
-                font-size: 12px;
-              }
-            }
-          }
+          
         }
       }
     }

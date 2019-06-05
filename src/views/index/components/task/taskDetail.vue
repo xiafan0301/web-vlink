@@ -11,10 +11,14 @@
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">{{processType == 2 ? '任务内容' : processType == 3 ? '呈报内容' : '调度指挥方案'}}</p>
           </div>
           <div class="divide"></div>
-          <ul class="content-list" v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
+          <ul class="content-list" v-if="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
+            <template v-if="(processType == 2 || processType == 3) && (basicInfo.processingList && basicInfo.processingList.length > 0)">
+              <li class="task-row">{{processContent}}</li>
+            </template>
+            <template v-else>
             <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
               <div>
                 <span>调度部门：</span>
@@ -30,6 +34,7 @@
               </div>
               <div class="divide-list"></div>
             </li>
+            </template>
           </ul>
           <div class="judge_result_content" v-else>
             <div class="no_result">
@@ -115,6 +120,8 @@ export default {
       isLoading: false,
       processType: null,
       taskType: dataList.taskType,
+      processContent: '',
+      opUserId: null,
     }
   },
   mounted () {
@@ -125,7 +132,7 @@ export default {
   methods: {
     // 跳至反馈情况页面
     skipCtcEndPage () {
-      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType }});
+      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType, opUserId: this.opUserId }});
     },
     //修改事件处理过程状态
     editProcessStatus() {
@@ -140,8 +147,17 @@ export default {
       this.isLoading = true;
       getEventDetail(eventId)
         .then(res => {
-          if (res) {
+          if (res.data) {
             this.basicInfo = res.data;
+            if(this.basicInfo.processingList && this.basicInfo.processingList.length > 0) {
+              for(let item of this.basicInfo.processingList) {
+                if(item.uid == this.$route.query.uid) {
+                  this.opUserId = item.opUserId
+                  this.processContent = item.processContent
+                  break;
+                }
+              }
+            }
           }
           this.$nextTick(() => {
               this.isLoading = false
@@ -204,6 +220,9 @@ export default {
       }
       .content-list {
         padding: 10px 20px 10px 20px;
+        .task-row {
+          margin: 10px 0;
+        }
         > li {
           display: flex;
           flex-wrap: wrap;

@@ -33,7 +33,7 @@
                   <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 1)">全部人像({{allPerGroupNumber}})</li>
                   <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perGroupList" :key="'item' + index" @click="getPerDetailInfo(item, 1)">
                     <span>{{item.name}}({{item.portraitNum}})</span>
-                    <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 1, $event)"></i>
+                    <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, $event)"></i>
                   </li>
                 </ul>
               </vue-scroll>
@@ -47,7 +47,7 @@
                 <li :class="[activeSelect === -1 ? 'active_select' : '']" @click="getPerDetailInfo('', 2)">全部人像({{allPerBottomNameNumber}})</li>
                 <li :class="[activeSelect == item.id ? 'active_select' : '']" v-for="(item, index) in perBottomBankList" :key="'item' + index" @click="getPerDetailInfo(item, 2)">
                   <span>{{item.title}}({{item.portraitNum}})</span>
-                  <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i>
+                  <!-- <i class="vl_icon vl_icon_manage_10" @click="skipAdminPersonPage(item.id, 2, $event)"></i> -->
                 </li>
               </ul>
             </vue-scroll>
@@ -185,15 +185,14 @@
                 </el-table-column>
                 <el-table-column
                   label="底库信息"
-                  prop="albumList"
+                  prop="albumDataList"
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span v-for="(item, index) in scope.row.albumList" :key="index">
-                      {{item.title + ' '}}
+                    <span>
+                      {{scope.row.albumDataList.join('、')}}
                     </span>
-                    </template>
-                  <!-- <span>{{albumList.join('、')}}</span> -->
+                  </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -250,15 +249,14 @@
                 </el-table-column>
                 <el-table-column
                   label="分组信息"
-                  prop="groupList"
+                  prop="groupDataList"
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span v-for="(item, index) in scope.row.groupList" :key="index">
-                      {{item.name + ' '}}
+                    <span>
+                      {{scope.row.groupDataList.join('、')}}
                     </span>
                   </template>
-                  <!-- <span>{{groupList.join('、')}}</span> -->
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
                   <template slot-scope="scope">
@@ -316,7 +314,7 @@
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -466,7 +464,8 @@ export default {
     getGroupList () {
       const params = {
         type: 4, // 4---人像
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerGroupList(params)
         .then(res => {
@@ -483,7 +482,8 @@ export default {
     getBottomBankList () {
       const params = {
         type: 1, // 1--人像库
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerBottomBankList(params)
         .then(res => {
@@ -497,7 +497,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
-        // 'where.type': this.selectMethod,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -512,14 +512,16 @@ export default {
           if (res) {
             this.personGroupList = res.data.list;
             this.pagination.total = res.data.total;
-            // this.personGroupList.map(val => {
-            //   val.albumList.map(item => {
-            //     this.albumList.push(item.title);
-            //   });
-            //   val.groupList.map(item => {
-            //     this.groupList.push(item.name);
-            //   });
-            // })
+            this.personGroupList.map(val => {
+              val.groupDataList = [];
+              val.albumDataList = [];
+              val.albumList.map(item => {
+                val.albumDataList.push(item.title);
+              });
+              val.groupList.map(item => {
+                val.groupDataList.push(item.name);
+              });
+            })
           }
         })
         .catch(() => {})
@@ -724,7 +726,6 @@ export default {
       this.$refs[form].validate(valid => {
         this.isShowError = false;
         if (valid) {
-          console.log('44444')
           const params = {
             name: this.addGroupForm.userGroupName
           };
@@ -777,7 +778,10 @@ export default {
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
               this.personDetailInfo.albumList.map(item => {
                 this.albumDetailList.push(item.title);
               });
@@ -790,9 +794,9 @@ export default {
       }
     },
     // 跳至管理人员组信息页面
-    skipAdminPersonPage (id, val, e) {
+    skipAdminPersonPage (id, e) {
       e.stopPropagation();
-      this.$router.push({name: 'admin_person_info', query: {type: val, id: id}});
+      this.$router.push({name: 'admin_person_info', query: {id: id}});
     }
   }
 }

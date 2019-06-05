@@ -133,7 +133,7 @@ import mapSelect from './components/mapSelect.vue';
 // import { testData } from './components/testData.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { getUserList, getDepartmentList, getASelectDevice, getAllGroups, getAllDevices } from '@/views/index/api/api.manage.js';
+import { getUserList, getDepartmentList, getASelectDevice, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -191,7 +191,7 @@ export default {
     },
     // 获取所有的分组
     getGroups () {
-      getAllGroups()
+      getCusGroup()
         .then(res => {
           if (res) {
             this.groupsList = res.data;

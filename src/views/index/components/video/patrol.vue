@@ -210,7 +210,7 @@
     </el-dialog>
     <!-- 轮巡暂停提示 dialog -->
     <el-dialog title="是否暂停轮巡？" :visible.sync="patrolParseDialogVisible" :center="false" :append-to-body="true" width="500px">
-      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，如需要查看其它通路，请先暂停轮巡。</div>
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，不可改变布局，如需改变布局查看其它通路请先暂停轮巡。</div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="patrolParseDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="patrolParse">确定暂停轮巡</el-button>
@@ -325,7 +325,7 @@ export default {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
           let patrolData = res.data;
-          /* let patrolData =
+  /*         let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
@@ -437,7 +437,7 @@ export default {
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
       this.patrolNextCloseDis = true;
-      if (this.patrolHandlerData.currentRound) {
+      if (this.patrolHandlerData.currentRound && this.patrolHandlerData.currentRound.uid) {
         // 停止当前沦胥
         mdfVideoRoundState({
           id: this.patrolHandlerData.currentRound.uid,
@@ -527,6 +527,7 @@ export default {
         this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
           this.patrolCurrentGoOn();
         }, this.patrolHandlerData.currentRound.roundInterval * 1000);
+        // console.log('currentRoundRemain----------', this.patrolHandlerData.currentRoundRemain * 1000);
         this.patrolHandlerData.currentRoundRemainTimeout = window.setTimeout(() => {
           this.patrolClearCurrent();
           this.$message('轮巡时间已到。');

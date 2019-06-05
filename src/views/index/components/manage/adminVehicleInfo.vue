@@ -169,7 +169,7 @@
             </li>
             <li>
               <span>车主生日：</span>
-              <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
+              <span>{{vehicleDetailInfo.ownerBirth}}</span>
             </li>
             <li>
             <span>底库信息：</span>
@@ -281,19 +281,16 @@
 <script>
 import { validateName } from '@/utils/validator.js';
 import { getVehicleInfo, editVeGroup, getVehicleGroup, delVeGroup, getAdminVelList, moveoutGroup,
-  copyGroup, checkVelRename, getVehicleBottomName } from '@/views/index/api/api.manage.js';
+  copyGroup, checkVelRename } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
       delTitle: null,
       isShowError: false,
-      isGroup: true, // 是分组还是底库
       groupId: null, // 要删除或修改的组id
       albumId: null, // 要删除或修改的底库id
       groupName: null, // 组名
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      // userGroupName: null, // 编辑组名
-      // addGroupName: null, // 新增组名
       showGroup: false,
       searchForm: {
         keyWord: null
@@ -326,32 +323,11 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.query.type == 1) { // 分组查看
-      this.isGroup = true;
-      this.groupId = this.$route.query.id;
-    } else { // 底库查看
-      this.isGroup = false;
-      this.albumId = this.$route.query.id;
-      this.getVelBottomNameInfo();
-    }
+    this.groupId = this.$route.query.id;
     this.getList();
     this.getVeGroupInfo();
   },
   methods: {
-    // 查询车辆底库
-    getVelBottomNameInfo () {
-      getVehicleBottomName()
-        .then(res => {
-          if (res) {
-            res.data.albumNumQueryDtoList.map(item => {
-              if (item.id == this.albumId) {
-                this.groupName = item.title;
-              }
-            })
-          }
-        })
-        .catch(() => {})
-    },
     // 获取所有的车辆分组
     getVeGroupInfo () {
       getVehicleGroup()
@@ -379,6 +355,7 @@ export default {
     // 获取车辆列表数据
     getList () {
       const params = {
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.groupId': this.groupId,
         'where.albumId': this.albumId,
@@ -431,7 +408,10 @@ export default {
         getVehicleInfo(id)
           .then(res => {
             if (res) {
+              const birth = res.data.ownerBirth.substr(0, 10);
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.ownerBirth = birth;
+
               this.vehicleDetailInfo.albumList.map(item => {
                 this.albumList.push(item.title);
               });
@@ -483,27 +463,25 @@ export default {
         groupName: this.addGroupForm.userGroupName,
         groupType: 1
       };
-      if (this.isGroup) {
-        this.isEditLoading = true;
-        editVeGroup(params)
-          .then(res => {
-            if (res) {
-              this.getVeGroupInfo(parseInt(this.groupId));
-              this.$message({
-                type: 'success',
-                message: '修改成功',
-                customClass: 'request_tip'
-              })
-              this.editGroupDialog = false;
-              this.isEditLoading = false;
-              this.getVeGroupInfo(parseInt(this.groupId));
-            }
-             else {
-              this.editGroupDialog = false;
-            }
-          })
-          .catch(() => {this.editGroupDialog = false;})
-      }
+      this.isEditLoading = true;
+      editVeGroup(params)
+        .then(res => {
+          if (res) {
+            this.getVeGroupInfo(parseInt(this.groupId));
+            this.$message({
+              type: 'success',
+              message: '修改成功',
+              customClass: 'request_tip'
+            })
+            this.editGroupDialog = false;
+            this.isEditLoading = false;
+            this.getVeGroupInfo(parseInt(this.groupId));
+          }
+            else {
+            this.editGroupDialog = false;
+          }
+        })
+        .catch(() => {this.editGroupDialog = false;})
     },
     // 显示删除弹出框
     showDeleteDialog () {
@@ -645,11 +623,6 @@ export default {
             this.isAddCopyLoading = false;
           } else {
             this.isAddCopyLoading = false;
-            // this.$message({
-            //   type: 'error',
-            //   message: '新增失败',
-            //   customClass: 'request_tip'
-            // })
           }
         })
         .catch(() => {this.isAddCopyLoading = false;})
