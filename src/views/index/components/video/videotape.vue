@@ -53,7 +53,7 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import { getVideoTranscribeDatePageList, delVideoTranscribe } from "@/views/index/api/api.video.js";
+import { getVideoTranscribeDatePageList, delVideoTranscribe, addVideoDownload, getServerTimestamp } from "@/views/index/api/api.video.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   components: {flvplayer},
@@ -106,6 +106,7 @@ export default {
   },
   mounted () {
     this.searchSubmit();
+    console.log('user: ', this.$store.state.loginUser);
   },
   methods: {
     searchSubmit () {
@@ -115,7 +116,7 @@ export default {
     getVideoRecordList () {
       this.searchLoading = true;
       // 播放类型 1:视频巡逻 2:视频回放 3:录像记录
-      console.log('this.time', this.time);
+      // console.log('this.time', this.time);
       getVideoTranscribeDatePageList({
         'where.startDate': (this.time && this.time[0]) ? formatDate(this.time[0], 'yyyy-MM-dd 00:00:00') : '',
         'where.endDate': (this.time && this.time[1]) ? formatDate(this.time[1], 'yyyy-MM-dd 23:59:59') : '',
@@ -181,13 +182,26 @@ export default {
     },
     download (item) {
       console.log('download item', item);
+      let oUser = this.$store.state.loginUser;
+      let dept = (oUser && oUser.organList && oUser.organList[0]) ? oUser.organList[0] : {};
+      addVideoDownload({
+        deviceId: item.video.deviceUid,
+        startTime: formatDate(item.video.startTime),
+        endTime: formatDate(item.video.endTime),
+        oprDeptId: dept.uid,
+        oprDeptName: dept.organName,
+        ptUserId: oUser ? oUser.uid : '',
+        ptUserName: oUser ? oUser.userName : ''
+      }).then(() => {
+      }).catch(error => {
+        console.log("addVideoDownload error：", error);
+      });
+
       let $iframe = $('<iframe id="down-file-iframe" />');
 			let $form = $('<form target="down-file-iframe" method="post" />');
 			$form.attr('action', item.video.downUrl);
 			/* for (var key in config.data) {
-
-			$form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
-
+			  $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
 			} */
 			$iframe.append($form);
 			$(document.body).append($iframe);
