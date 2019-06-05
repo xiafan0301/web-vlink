@@ -72,7 +72,7 @@
               </el-table-column>
               <el-table-column
                 label="发布者"
-                prop="reportUserName"
+                prop="reporterUserName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -233,7 +233,6 @@ export default {
         'where.keywordLocDesci': this.helpForm.content,
         'where.radius': this.helpForm.helpRadius,
         'where.mutualFlag': 1,
-        'where.eventFlag': 0,
         'where.eventStatus': this.helpForm.helpState
       }
       this.loading = true;

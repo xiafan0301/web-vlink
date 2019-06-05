@@ -30,7 +30,7 @@
       </div>
       <div class="det_list" v-if="commentList.length > 0">
         <div class="list_title">
-          <span>{{commentList && commentList.length}}</span><span>条信息</span>
+          <span>{{total}}</span><span>条信息</span>
         </div>
         <div class="list_content" v-for="(item, index) in commentList" :key="item.uid">
           <img src="//via.placeholder.com/32x32" alt="">
@@ -67,7 +67,7 @@
             </el-collapse-transition>
           </ul>
         </div>
-        <div class="list_more">
+        <div class="list_more" v-if="total > 5">
           <el-button @click="getCommentInfoList">加载更多...</el-button>
         </div>
       </div>
@@ -209,11 +209,13 @@ export default {
           this.commentList.forEach(f => {
             if (this.commentId === f.uid) {
               const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
+              if (!obj.uid) obj.uid = 1;
               obj.uid++;
               obj.replayContent = this.content;
               f.replayList.push(obj);
             }
           })
+          console.log(this.commentList, 'this.commentList')
           this.content = null;
         }
       }).finally(() => {
