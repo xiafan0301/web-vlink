@@ -325,7 +325,7 @@ export default {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
           let patrolData = res.data;
-          /* let patrolData =
+  /*         let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
@@ -437,7 +437,7 @@ export default {
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
       this.patrolNextCloseDis = true;
-      if (this.patrolHandlerData.currentRound) {
+      if (this.patrolHandlerData.currentRound && this.patrolHandlerData.currentRound.uid) {
         // 停止当前沦胥
         mdfVideoRoundState({
           id: this.patrolHandlerData.currentRound.uid,
