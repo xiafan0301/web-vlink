@@ -313,7 +313,7 @@
           </li>
           <li>
             <span>车主生日：</span>
-            <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
+            <span>{{vehicleDetailInfo.ownerBirth}}</span>
           </li>
           <li>
             <span>底库信息：</span>
@@ -469,7 +469,7 @@ export default {
     // 获取车辆列表数据
     getVehicleInfoList () {
       const params = {
-        // 'where.type': type,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -491,7 +491,6 @@ export default {
                 item.albumDetailList.push(a.title);
               });
             });
-            console.log('vehicleList', this.vehicleList)
           }
         })
         .catch(() => {})
@@ -526,7 +525,8 @@ export default {
       this.allVelGroupNumber = 0;
       this.pagination.pageNum = 1;
       const params = {
-        groupName: this.searchGroupName
+        groupName: this.searchGroupName,
+        origin: 1
       }
       getVehicleGroup(params)
         .then(res => {
@@ -542,7 +542,8 @@ export default {
     // 查询车辆底库
     getVelBottomNameInfo () {
       const params = {
-        bankName: this.searchGroupName
+        bankName: this.searchGroupName,
+        origin: 1
       }
       getVehicleBottomName(params)
         .then(res => {
@@ -561,14 +562,16 @@ export default {
         getVehicleInfo(id)
           .then(res => {
             if (res) {
+              let birth = res.data.ownerBirth.substr(0, 10);
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.ownerBirth = birth;
+
               this.vehicleDetailInfo.albumList.map(item => {
                 this.albumDetailList.push(item.title);
               });
               this.vehicleDetailInfo.groupList.map(item => {
                 this.groupDetailList.push(item.groupName);
               });
-              console.log(this.groupDetailList)
             }
           })
           .catch(() => {})
