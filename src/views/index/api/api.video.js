@@ -85,7 +85,7 @@ export const getVideoRoundDetail = id => {
  */
 export const closeVideoRound = data => {
   return request({
-    url: '/round/' + data.id,
+    url: '/round',
     method: 'put',
     data,
     mode: videoModeName
@@ -308,8 +308,9 @@ export const getVideoCurrentRound = () => {
  * @param {Object} data 接口入参
  */
 export const mdfVideoRoundState = (data) => {
+  // console.log('mdfVideoRoundState', data);
   return request({
-    url: '/round/' + data.id,
+    url: '/round',
     method: 'put',
     data: data,
     mode: videoModeName
@@ -384,11 +385,11 @@ export const delVideoTranscribe = (data) => {
  * 开始后端录像下载任务
  * @param {Object} data 接口入参
  */
-export const getVideoFileDownStart = (data) => {
+export const getVideoFileDownStartBatch= (data) => {
   return request({
-    url: '/video-patrol-service/video-file-down-start',
-    method: 'get',
-    params: data,
+    url: '/video-patrol-service/video-file-down-start-batch',
+    method: 'post',
+    data: data,
     mode: videoModeName
   })
 }
@@ -397,11 +398,16 @@ export const getVideoFileDownStart = (data) => {
  * 后端录像下载任务进度查询
  * @param {Object} data 接口入参
  */
-export const getVideoFileDownProgress = (data) => {
+export const getVideoFileDownProgressBatch = (data) => {
   return request({
-    url: '/video-patrol-service/video-file-down-progress',
+    url: '/video-patrol-service/video-file-down-progress-batch' + data,
+    method: 'get',
+    mode: videoModeName
+  })
+  /* return request({
+    url: '/video-patrol-service/video-file-down-progress-batch',
     method: 'get',
     params: data,
     mode: videoModeName
-  })
+  }) */
 }
