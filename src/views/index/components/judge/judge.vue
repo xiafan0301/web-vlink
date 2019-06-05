@@ -51,6 +51,19 @@ export default {
   .vl_judge_tc {
     width: 100%;
     height: 100%;
+    .camera-select {
+      .el-select-dropdown {
+        display: none;
+      }
+      .el-select__tags {
+        >span {
+          white-space: nowrap;
+          display: block;
+          width: 100%;
+          overflow: hidden;
+        }
+      }
+    }
     .vl_j_left {
       float: left;
       width: 2.32rem;

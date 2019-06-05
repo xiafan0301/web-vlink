@@ -12,13 +12,13 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-select v-model="searchData.personGroupId">
+        <el-select v-model="searchData.personGroupId" placeholder="监控人群">
           <el-option v-for="item in personList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
-        <el-select v-model="searchData.deviceGroupId">
+        <el-select v-model="searchData.deviceGroupId" placeholder="设备分组">
           <el-option v-for="item in deviceList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
-        <el-select v-model="searchData.intelligentCharac">
+        <el-select v-model="searchData.intelligentCharac" placeholder="设备特性">
           <el-option v-for="item in CharacList" :key="item.value" :value="item.value" :label="item.label"></el-option>
         </el-select>
         <el-autocomplete
@@ -89,9 +89,9 @@ export default {
       evData: [],
       searchData: {
         time: null,
-        personType: null,
-        deviceType: null,
-        CharacType: null,
+        personGroupId: null,
+        intelligentCharac: null,
+        deviceGroupId: null,
         latitude: null,
         longitude: null
       },
@@ -220,14 +220,11 @@ export default {
       this.searchData.time = [_s, _e]
     },
     resetSearch () {
-      this.searchData = {
-        time: null,
-        personGroupId: null,
-        deviceGroupId: null,
-        intelligentCharac: null,
-        latitude: null,
-        longitude: null
-      }
+      this.searchData.personGroupId = null;
+      this.searchData.intelligentCharac = null;
+      this.searchData.deviceGroupId = null;
+      this.searchData.latitude = null;
+      this.searchData.longitude = null;
       this.searchAdress = '';
     },
     beginSearch () {
