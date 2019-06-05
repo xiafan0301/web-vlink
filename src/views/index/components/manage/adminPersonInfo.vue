@@ -166,7 +166,7 @@
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -355,6 +355,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.albumId': this.albumId,
         'where.groupId': this.groupId,
         'where.idType': this.searchForm.idType,
@@ -429,7 +430,10 @@ export default {
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
               this.personDetailInfo.albumList.map(item => {
                 this.albumList.push(item.title);
               });

@@ -438,18 +438,22 @@ export default {
     },
     // 搜索框
     searchData () {
-      this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
+       if (this.searchForm.intelCharac || this.searchForm.dutyOrganId) {
+         this.getAllDevicesList();
+         setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+           this.isSelected = 1 + random14();
+         }, 500)
+       }
     },
     // 重置搜索框
     resetForm(form) {
-      this.$refs[form].resetFields();
-      this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
+      if (this.searchForm.intelCharac || this.searchForm.dutyOrganId) {
+        this.$refs[form].resetFields();
+        this.getAllDevicesList();
+        setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+          this.isSelected = 1 + random14();
+        }, 500)
+      }
     },
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {

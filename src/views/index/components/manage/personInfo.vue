@@ -314,7 +314,7 @@
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -464,7 +464,8 @@ export default {
     getGroupList () {
       const params = {
         type: 4, // 4---人像
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerGroupList(params)
         .then(res => {
@@ -481,7 +482,8 @@ export default {
     getBottomBankList () {
       const params = {
         type: 1, // 1--人像库
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerBottomBankList(params)
         .then(res => {
@@ -495,7 +497,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
-        // 'where.type': this.selectMethod,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -776,7 +778,10 @@ export default {
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
               this.personDetailInfo.albumList.map(item => {
                 this.albumDetailList.push(item.title);
               });
