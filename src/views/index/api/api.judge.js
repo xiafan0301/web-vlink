@@ -74,6 +74,17 @@ export function JigGETEventAlarm(params) {
   })
 }
 /**
+ * JigGETEventAlarm 事件侦查检索接口
+ * @param {object} params
+ */
+export function JigGETEventAreas(params) {
+  return request({
+    url: '/events/' + params.eventId + '/areas',
+    method: 'get',
+    mode: 'user'
+  })
+}
+/**
  * JigGETAlarmSnapList 设备抓拍结果列表接口
  * @param {object} params
  */
