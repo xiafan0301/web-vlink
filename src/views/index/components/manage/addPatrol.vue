@@ -142,7 +142,7 @@ import { formatDate, random14 } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { validateDurationTime } from '@/utils/validator.js';
-import { getAllDevices, getAllGroups, getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getAllDevices, getCusGroup, getDepartmentList } from '@/views/index/api/api.manage.js';
 import { addVideoRound, getVideoRoundDetail, updateVideoRoundState } from '@/views/index/api/api.video.js';
 export default {
   components: {listSelect, mapSelect},
@@ -179,7 +179,6 @@ export default {
       },
       searchForm: {
         groupId: null, // 分组id
-        areaId: null, // 行政区划
         intelCharac: null, // 智能特性
         dutyOrganId: null, // 责任部门id
         devName: null // 设备名称
@@ -253,7 +252,7 @@ export default {
     },
     // 获取所有的分组
     getGroups () {
-      getAllGroups()
+      getCusGroup()
         .then(res => {
           if (res) {
             this.groupsList = res.data;
@@ -620,7 +619,7 @@ export default {
       })
     },
     // 新增轮巡
-    addPatrolInfo (form) {
+    addPatrolInfo () {
       // this.$refs[form].validate(valid => {
       //   if (valid) {
       if (this.currentDeviceList.length === 0) {
@@ -680,7 +679,7 @@ export default {
       let devList = [], bayList = [];
       let allSxtDeviceIds = [], allKkDeviceIds = []; // 当前分组下原始的所有的设备id（摄像头和卡口）
       let currSxtDeviceIds = [], currKkDeviceIds = []; // 当前分组下所有的设备id（摄像头和卡口）
-      let delSxtList = [], delKkList = []; // 删除的摄像头和卡口
+      // let delSxtList = [], delKkList = []; // 删除的摄像头和卡口
       if (this.currentDeviceList.length > 0) {
         this.currentDeviceList.map(item => {
           item.deviceList.map(a => {
@@ -699,12 +698,6 @@ export default {
           });
         });
 
-        console.log('currSxtDeviceIds', currSxtDeviceIds)
-        console.log('currKkDeviceIds', currKkDeviceIds)
-        console.log('allSxtDeviceIds', allSxtDeviceIds)
-        console.log('allKkDeviceIds', allKkDeviceIds)
-
-        let newCurrSxtDeviceIds = JSON.parse(JSON.stringify(currSxtDeviceIds));
         // let newAllDeviceIds = JSON.parse(JSON.stringify(allDeviceIds));
         // 筛选出新添加的设备 -- 摄像头
         for (let len = currSxtDeviceIds.length, i = len -1; i >= 0; i--) {
@@ -791,18 +784,22 @@ export default {
     },
     // 根据搜索条件查询可用设备
     searchData () {
-      this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
+      if (this.searchForm.intelCharac || this.searchForm.dutyOrganId || this.searchForm.groupId) {
+        this.getAllDevicesList();
+        setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+          this.isSelected = 1 + random14();
+        }, 500)
+      }
     },
     // 重置搜索条件
     resetForm (form) {
-      this.$refs[form].resetFields();
-      this.getAllDevicesList();
-      setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
-        this.isSelected = 1 + random14();
-      }, 500)
+      if (this.searchForm.intelCharac || this.searchForm.dutyOrganId || this.searchForm.groupId) {
+        this.$refs[form].resetFields();
+        this.getAllDevicesList();
+        setTimeout(() => { // 争对地图选择，每点一次查询或者重置，就更新一下isSelected，用来更新可用设备  sxtList --kkList
+          this.isSelected = 1 + random14();
+        }, 500)
+      }
     },
     // 返回
     cancelSubmit () {

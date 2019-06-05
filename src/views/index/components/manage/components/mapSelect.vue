@@ -109,14 +109,11 @@ export default {
 
       this.$emit('emitFinalDevice', currentDeviceList, 0); // 每次选中区域后将之前的已有设备清零
       
-      console.log('unCheckDeviceList', this.unCheckDeviceList)
       let selectDeviceNumber = this.unCheckDeviceList.length;
       let checkedDeviceNumber; 
       if (this.groupId || this.isInitalState) { // 编辑
-        console.log('可选数量')
         checkedDeviceNumber = val.length;
       } else {
-        console.log('可选数量99999')
         checkedDeviceNumber = val.length - this.lastCurrDeviceLength;
       }
 
@@ -297,6 +294,7 @@ export default {
       this.unCheckDeviceList = []; // 清空可选设备列表
     },
     isSelected (val) {
+      console.log('val', val)
       if (val) {
         this.getMapData();
       }
@@ -374,7 +372,11 @@ export default {
     },
     // 获取地图数据
     getMapData () {
-      // console.log('this.selectDeviceList', this.selectDeviceList)
+      console.log('this.selectDeviceList', this.selectDeviceList)
+      console.log(this.sxtList)
+      console.log(this.kkList)
+      this.sxtList = [];
+      this.kkList = [];
       let selectDeviceList = this.selectDeviceList;
       if (selectDeviceList && selectDeviceList.length > 0) {
         selectDeviceList.map(item => {
@@ -575,7 +577,6 @@ export default {
     // 移除设备
     removeDevice () {
       let currDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
-      console.log('currDeviceList', currDeviceList)
       let checkedDeviceNumber = 0, selectDeviceNumber = 0, checkedDeviceList = [], params;
       if (currDeviceList && currDeviceList.length > 0) {
         for (let len = currDeviceList.length, i = len - 1; i >= 0; i --) {
@@ -663,11 +664,6 @@ export default {
             });
           });
         }
-        console.log('checkedDeviceList', checkedDeviceList)
-        console.log('currDeviceList', currDeviceList)
-        console.log('aaacccccc', this.unCheckDeviceList)
-         console.log('selectDeviceNumber', selectDeviceNumber)
-          console.log('checkedDeviceNumber', checkedDeviceNumber)
         if (checkedDeviceList.length > 0) {
           checkedDeviceList.map(item => {
             item.deviceList.map(itm => {
@@ -810,9 +806,9 @@ export default {
                 color: #666666;
                 display: flex;
                 align-items: center;
-                >span {
-                  margin: 0 80px 0 0;
-                }
+                // >span {
+                //   margin: 0 80px 0 0;
+                // }
               }
             }
           }
