@@ -19,7 +19,19 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-input v-model="searchData.carNum" placeholder="选择范围"></el-input>
+        <el-select
+          v-model="searchData.areaIds"
+          class="camera-select"
+          multiple
+          collapse-tags
+          placeholder="选择范围">
+          <el-option
+            v-for="item in eventAreas"
+            :key="item.id"
+            :label="item.cname"
+            :value="item.uid">
+          </el-option>
+        </el-select>
         <el-button  @click="resetSearch">重置</el-button>
         <el-button  :loading="searching" :disabled="!curEvent" type="primary" @click="beginSearch">搜索</el-button>
       </div>
@@ -68,7 +80,7 @@
 <script>
 let AMap = window.AMap;
 import {testData} from './testData';
-import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList} from '../../api/api.judge.js';
+import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList, JigGETEventAreas} from '../../api/api.judge.js';
 export default {
   data() {
     return {
@@ -77,7 +89,7 @@ export default {
       searchData: {
         uid: '',
         time: null,
-        curNum: ''
+        areaIds: []
       },
       pickerOptions: {
         disabledDate (time) {
@@ -114,7 +126,8 @@ export default {
       showLarge: false,
       showCut: false,
       curVideoUrl: '',
-      demoImg: ''
+      demoImg: '',
+      eventAreas: []
     }
   },
   mounted () {
@@ -139,8 +152,9 @@ export default {
       this.searchData.time = [_e, _s]
     },
     resetSearch () {
+      this.curEvent = null;
       this.searchData.uid = '';
-      this.searchData.carNum = '';
+      this.searchData.areaIds = [];
       this.searchData.time = null;
     },
     autoEvent (queryString, cb) {
@@ -155,12 +169,22 @@ export default {
     showChoose (e) {
       this.curEvent = e;
       this.setDTime();
+      let params = {
+        eventId: e.uid
+      }
+      JigGETEventAreas(params)
+        .then(res => {
+          if(res) {
+            this.eventAreas = res.data;
+          }
+        })
     },
     beginSearch () {
       this.searching = true;
       let params = {
         eventId: this.curEvent.uid,
         // eventId: 103,
+        areaIds: this.searchData.areaIds.join(','),
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
       }

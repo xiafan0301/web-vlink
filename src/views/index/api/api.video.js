@@ -411,3 +411,27 @@ export const getVideoFileDownProgressBatch = (data) => {
     mode: videoModeName
   }) */
 }
+
+/**
+ * 新增视频下载记录接口
+ * @param {Object} data 接口入参
+ */
+export const addVideoDownload = (data) => {
+  return request({
+    url: '/video-download-service/video-download',
+    method: 'post',
+    data: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 当前服务器时间
+ */
+export const getServerTimestamp = () => {
+  return request({
+    url: '/video-patrol-service/server-timestamp',
+    method: 'get',
+    mode: videoModeName
+  })
+}
