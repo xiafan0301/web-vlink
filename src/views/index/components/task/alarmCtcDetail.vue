@@ -310,7 +310,8 @@ export default {
       eventType: dataList.eventType,
       eventLevel: dataList.eventLevel,
       sturcDetail: {},
-      isLoading: false
+      isLoading: false,
+      opUserId: null,
     }
   },
   mounted () {
@@ -321,7 +322,7 @@ export default {
   methods: {
     // 跳至反馈情况页面
     skipCtcEndPage () {
-      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType }});
+      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType, opUserId: this.opUserId }});
     },
     //修改事件处理过程状态
     editProcessStatus() {
@@ -358,6 +359,14 @@ export default {
               this.ctcFile.push(item);
             }
           })
+        }
+        if(this.basicInfo.processingList && this.basicInfo.processingList.length > 0) {
+          for(let item of this.basicInfo.processingList) {
+              if(item.uid == this.$route.query.uid) {
+                this.opUserId = item.opUserId
+                break;
+              }
+            }
         }
         this.$nextTick(()=> {
           this.isLoading = false;

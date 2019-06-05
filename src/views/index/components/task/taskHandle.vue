@@ -222,7 +222,8 @@ export default {
           let cProcessType = this.processType == 3 ? 2 : 5;
           taskProcessDto = {
               processContent: this.endForm.summary,
-              processType: cProcessType 
+              processType: cProcessType,
+              feedbackUserId: this.$route.query.opUserId
           }
           if(attachmentList && attachmentList.length > 0) {
               taskProcessDto['attachmentList'] = attachmentList

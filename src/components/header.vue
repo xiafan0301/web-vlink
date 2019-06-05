@@ -22,7 +22,8 @@
             placement="bottom"
             width="378"
             trigger="click"
-            popper-class="task_popover">
+            :popper-class="popoverClass"
+            >
             <vue-scroll>
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
@@ -62,7 +63,7 @@
             placement="bottom"
             width="397"
             trigger="click"
-            popper-class="alarm_popover">
+            :popper-class="alarmPopoverClass">
             <vue-scroll>
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
@@ -266,7 +267,9 @@ export default {
         newType: 'text',
         sureType: 'text'
       }, // 输入框类型
-      taskCount: {}
+      taskCount: {},
+      popoverClass: 'task_popover',
+      alarmPopoverClass: 'alarm_popover',
     }
   },
   mounted () {
@@ -361,6 +364,12 @@ export default {
             this.taskCount['unread'] = 0
           }
           this.sums.msg = res.data.total;
+          //是否展示任务盒子
+          this.$nextTick(()=>{
+            if(this.sums.msg <= 0 ) {
+              this.popoverClass = 'task_popover show_box'
+            }
+          })
         }
       }).catch(()=>{})
     },
@@ -382,6 +391,12 @@ export default {
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
           }
           this.sums.events = res.data.total;
+          //是否展示告警盒子
+          this.$nextTick(()=>{
+            if(this.sums.events <= 0 ) {
+              this.alarmPopoverClass = 'alarm_popover show_box'
+            }
+          })
         }
       })
     },
@@ -727,6 +742,9 @@ export default {
 .alarm_popover {
   max-height: 476px;
   padding: 12px 0;
+}
+.show_box {
+  display: none!important;
 }
 .person_info {
   height: auto !important;
