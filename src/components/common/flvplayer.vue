@@ -724,15 +724,20 @@ export default {
 
       getVideoFileDownStartBatch(params).then(res => {
         if (res && res.data && res.data.batchCamRealRecordDto) {
-          let _o = {};
-          for(var i in res.data.batchCamRealRecordDto) {
+          /* let _o = {};
+          for(let i in res.data.batchCamRealRecordDto) {
             if (this.download.recordData[i]) {
               _o[i] = Object.assign(this.download.recordData[i], {
                 recordId: res.data.batchCamRealRecordDto[i].recordId
               });
             }
           }
-          this.download.recordData = _o;
+          this.download.recordData = _o; */
+          for(let i in res.data.batchCamRealRecordDto) {
+            if (this.download.recordData[i]) {
+              this.download.recordData[i].recordId = res.data.batchCamRealRecordDto[i].recordId;
+            }
+          }
           if (this.download.downlaodInval) {
             window.clearInterval(this.download.downlaodInval);
           }
@@ -749,17 +754,20 @@ export default {
     playerDownloadProgress () {
       // getVideoFileDownProgress
       console.log('this.download.recordData', this.download.recordData);
-      let sparam = '?'; let aa = [];
+      let sparam = '?';
+      // let aa = [];
       sparam += 'deviceId=' + this.oData.video.uid;
       for(var i in this.download.recordData) {
         sparam += '&recordId=' + this.download.recordData[i].recordId;
-        aa.push(this.download.recordData[i].recordId);
+        // aa.push(this.download.recordData[i].recordId);
       }
      /*  sparam = {
         deviceId: this.oData.video.uid,
         recordId: aa
       } */
       getVideoFileDownProgressBatch(sparam).then(res => {
+        if (res && res.data && res.data.batchCamRealRecordDto) {
+        }
         window.clearInterval(this.download.downlaodInval);
         /* if (res && res.data) {
           if (res.data.progress >= 100 && this.download.downlaodInval) {
