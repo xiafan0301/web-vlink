@@ -1314,7 +1314,7 @@ export default {
       } else if (data.dataType === 2) {
         str += '<li><span>车牌号码：</span>' + data.vehicleNumber + '</li>';
         str += '<li><span>车辆类型：</span>' + this.car2Name[data.vehicleType] + '</li>';
-        str += '<li><span>时速：</span>' + data.speed + '</li>';
+        str += '<li><span>时速：</span>' + data.speed + '码</li>';
         str += '<li><span>方向：</span>' + data.direction + '</li>';
         str += '</ul></div>'
       } else if (data.dataType === 3) {
@@ -1339,7 +1339,6 @@ export default {
           <div class="sign_btn"><span class="sign_del">删除</span><span class="sign_edit">编辑</span></div>
         </div>`
       } else if (data.dataType === 5) {
-        console.log(data)
         str = `<div id="${data._id}" class="vl_map_hover_main map_video_box">`;
         str += `<video  style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted></video>`
         str += `<p>${data.deviceName}</p>`
