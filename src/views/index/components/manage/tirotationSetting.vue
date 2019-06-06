@@ -5,10 +5,10 @@
         <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
-              style="width: 260px;"
+              style="width: 400px;"
               v-model="searchForm.dateTime"
-              type="daterange"
-              value-format="yyyy-MM-dd"
+              type="datetimerange"
+              value-format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
@@ -39,7 +39,7 @@
           :data="dataList"
           >
           <el-table-column
-            fixed
+            fixed="left"
             label="预案编号"
             prop="roundNo"
             :show-overflow-tooltip='true'
@@ -112,7 +112,7 @@
               <span>{{scope.row.updateTime | fmTimestamp}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="240">
+          <el-table-column label="操作" width="240" fixed="right">
             <template slot-scope="scope">
               <template v-if="scope.row.roundStatus === 2">
                 <span class="operation_btn" @click="skipVideoPatrolPage">查看</span>
@@ -197,18 +197,22 @@
                     <span :class="[item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, true)">摄像头</span>
                     <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, false)">卡口</span>
                   </div>
-                  <ul class="child_temp_detail" v-show="item.isSXT">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
-                  <ul class="child_temp_detail" v-show="!item.isSXT">
-                    <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
-                      <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
+                  <template v-if="item.deviceList">
+                    <ul class="child_temp_detail" v-show="item.isSXT">
+                      <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
+                  </template>
+                  <template v-if="item.bayonetList">
+                    <ul class="child_temp_detail" v-show="!item.isSXT">
+                      <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
+                  </template>
                 </div>
               </li>
             </ul>
@@ -349,8 +353,8 @@ export default {
       const end = new Date();
       const start = new Date();
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-      const startDate = formatDate(start, 'yyyy-MM-dd');
-      const endDate = formatDate(end, 'yyyy-MM-dd');
+      const startDate = formatDate(start, 'yyyy-MM-dd HH:mm:ss');
+      const endDate = formatDate(end, 'yyyy-MM-dd HH:mm:ss');
       this.searchForm.dateTime.push(startDate);
       this.searchForm.dateTime.push(endDate);
     },
@@ -366,13 +370,12 @@ export default {
                 item.isOpenArrow = true;
                 item.isSXT = true; // 默认选中摄像头
 
-                item.deviceList.map(itm => {
+                item.deviceList && item.deviceList.map(itm => {
                   itm.isChildChecked = false; // 子级是否选中
                 });
-                item.bayonetList.map(itm => {
+                item.bayonetList && item.bayonetList.map(itm => {
                   itm.isChildChecked = false; // 子级是否选中
                 });
-
               });
             }
           })
@@ -386,12 +389,14 @@ export default {
     },
     changeLDeviceType (index, val) {
       this.allDeviceList[index].isSXT = val;
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .tirotation_setting {
+  width: 100%;
   background-color: #ffffff;
   padding: 20px;
   .search_box {

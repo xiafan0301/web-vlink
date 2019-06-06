@@ -252,6 +252,11 @@
 .vl_icon_task_1{width: 46px; height: 46px; background-position: -592px -1522px;}
 .vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
 .vl_icon_task_3{width: 46px; height: 46px; background-position: -731px -1522px;}
+/*****档案管理图标*****/
+.vl_icon_archives_1{width: 117px; height: 117px;background-position: -360px -1732px;} /*正常状态*/
+.vl_icon_archives_2{width: 117px; height: 117px;background-position: -100px -1732px;} /*出车状态*/
+.vl_icon_archives_3{width: 117px; height: 117px;background-position: -232px -1732px;} /*启用状态*/
+.vl_icon_archives_4{width: 17px; height: 25px;background-position: -520px -1732px;} /*地图图标*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -358,6 +363,9 @@
     color: #666;
     border-radius: 4px;
     box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+ }
+ .machine_map_hover:after, .vl_main_hover_address:after {
+  left: 40% !important;
  }
  .vl_map_hover_main:after, .vl_main_hover_address:after {
    border-bottom-color: rgba(0, 0, 0, 1);
