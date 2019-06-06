@@ -7,9 +7,9 @@
       <li>
         <router-link :to="{name: 'message_notice'}">公告管理</router-link>
       </li>
-      <li>
+      <!-- <li>
         <router-link :to="{name: 'message_note'}">短信通知</router-link>
-      </li>
+      </li> -->
       <li>
         <router-link :to="{name: 'message_system'}">系统消息</router-link>
       </li>

@@ -140,6 +140,7 @@
 import noticeAdd from './noticeAdd.vue';
 import noticeDetail from './noticeDetail.vue';
 import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.message.js';
+import {getDepartmentList} from '@/views/index/api/api.manage.js';
 export default {
   components: {noticeAdd, noticeDetail},
   data () {
@@ -172,10 +173,34 @@ export default {
       loading: false
     }
   },
+  computed: {
+    userInfo () {
+      return this.$store.state.loginUser;
+    }
+  },
   mounted () {
+    this.getDepartList();
     this.getMsgNoteList();
   },
   methods: {
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList = res.data.list.map(m => {
+              return {
+                value: m.uid,
+                label: m.organName
+              }
+            });
+          }
+        })
+    },
     // 获取公告消息列表
     getMsgNoteList () {
       this.pageType = 1;

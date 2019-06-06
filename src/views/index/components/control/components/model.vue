@@ -7,7 +7,7 @@
         <div @click="popSel">从库中选择</div>
       </div>
     </el-form-item>
-    <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
+    <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: calc(50% - 30px);padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
       <el-select
         :disabled="isDisabled"
         v-model="modelForm.licenseNum"
@@ -29,7 +29,7 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
+    <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: calc(50% - 30px);padding-left: 20px;">
       <el-select :disabled="isDisabled" value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getAllBayontListByAreaId">
         <el-option
           v-for="item in areaList"
@@ -40,10 +40,10 @@
       </el-select>
     </el-form-item>
     <template v-if="modelType === '1' || modelType === '2'">
-      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
+      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: calc(50% - 30px);padding-left: 20px;" class="point">
         <el-autocomplete
           :disabled="isDisabled"
-          style="width: 490px;"
+          style="width: 100%;"
           v-model="item.point"
           :trigger-on-focus="false"
           :fetch-suggestions="autoAdress"
@@ -144,7 +144,7 @@
           <i class="vl_icon vl_icon_041"></i>
           <p>选中区域</p>
         </div>
-        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
+        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom()"></i></div>
         <ul class="bottom">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -256,6 +256,7 @@ export default {
       // 地图数据
       modelDevData: this.allDevData,
       map: null,
+      zoomLevel: 10,
       mouseTool: null,
       selAreaAcitve: false,
       selAreaAble: false,
@@ -290,8 +291,8 @@ export default {
       ],//设备特性列表
       devGroupList: [],//设备组下拉列表
       devGroupId: null,//设备组id
-      scopeRadius: 20, // 范围半径
-      lastScopeRadius: 20,//记录最后一次输入的范围半径
+      scopeRadius: 3, // 范围半径
+      lastScopeRadius: 3,//记录最后一次输入的范围半径
       lnglat: [], // 圆形覆盖物圆心坐标
       polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
@@ -309,11 +310,11 @@ export default {
   computed: {
     changeObj () {
       if (this.modelType === '1') {
-        return '人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '人员图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       } else if (this.modelType === '2') {
-        return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       } else {
-        return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       }
     },
     changeRepertorySel () {
@@ -349,7 +350,7 @@ export default {
         return bayList.length;
       }
     },
-    // 分析模块是否禁用
+    // 分析模型是否禁用
     isDisabled () {
       if (this.modelType === '1') {
         if (this.checkListCommon('人员追踪')) return false;
@@ -890,6 +891,12 @@ export default {
       }
       return arr;
     },
+    // 初始化缩放等级
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(this.zoomLevel);
+      }
+    },
     // 地图缩放
     mapZoomSet (val) {
       if (this.map) {
@@ -901,7 +908,7 @@ export default {
       // 共有部分
       let _this = this, _hoverWindow = null;
       let map = new window.AMap.Map(_this.mapId, {
-        zoom: 10,
+        zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
@@ -913,7 +920,7 @@ export default {
       })
       _this.map = map;
       if (_this.modelType !== '3') {
-        map.on('mouseover', function() {
+        map.on('mouseover', function(e) {
           let   _sContent = `<div class="vl_map_hover">
             <div class="vl_map_hover_main">`
             if (_this.modelType === '1' || _this.modelType === '2') {
@@ -928,7 +935,7 @@ export default {
             offset: new window.AMap.Pixel(40, 40), // 相对于基点的偏移位置
             content: _sContent
           });
-          _hoverWindow.open(_this.map, new window.AMap.LngLat(112.97503, 28.09358));
+          _hoverWindow.open(_this.map, new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat));
         })
         map.on('mouseout', function() {
           if (_hoverWindow) { _hoverWindow.close(); }
@@ -1379,7 +1386,9 @@ export default {
       } else {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
-            console.log(result.tips, 'result.tips')
+            result.tips.forEach(f => {
+              f.name = `${f.name}(${f.district})`;
+            })
             cb(result.tips);
           } else {
             cb([]);
@@ -1390,6 +1399,10 @@ export default {
     // 获取追踪点
     chooseAddress (e) {
       console.log(e);
+      if (!e.location) {
+        this.$message.error('无法获取到经纬度！');
+        return;
+      }
       this.markLocation(e.location.lng, e.location.lat, e.address, this.pointIndex);
     },
      // 添加追踪点
@@ -1710,7 +1723,7 @@ export default {
               const distance = window.AMap.GeometryUtil.distance(_this.lnglat, p1);
               _obj.distance = parseFloat((distance / 1000).toFixed(1));
               _this.trackPointList[_index].devList.push(_obj);
-            }, 10)
+            }, 1000)
           }
         }
       }
@@ -1719,7 +1732,7 @@ export default {
         _this.trackPointList[_index].devList.sort((x, y) => {
           return x.distance - y.distance;
         })
-      }, 20)
+      }, 1020)
       
     },
     // 设备圆形覆盖物半径

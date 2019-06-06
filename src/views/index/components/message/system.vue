@@ -110,6 +110,7 @@
 import systemAdd from './systemAdd.vue';
 import systemDetail from './systemDetail.vue';
 import {getMsgNoteList} from '@/views/index/api/api.message.js';
+import {getDepartmentList} from '@/views/index/api/api.manage.js';
 export default {
   components: {systemAdd, systemDetail},
   data () {
@@ -137,10 +138,34 @@ export default {
       loading: false
     }
   },
+  computed: {
+    userInfo () {
+      return this.$store.state.loginUser;
+    }
+  },
   mounted () {
+    this.getDepartList();
     this.getMsgNoteList();
   },
   methods: {
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList = res.data.list.map(m => {
+              return {
+                value: m.uid,
+                label: m.organName
+              }
+            });
+          }
+        })
+    },
     // 获取系统消息列表
     getMsgNoteList () {
       this.pageType = 1;

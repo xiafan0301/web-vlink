@@ -47,8 +47,8 @@
             </el-input>
           </el-form-item>
           <el-form-item>
-            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M）</p>
+            <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :maxSize="9" :flag="1"></div>
+            <p class="vl_f_999">（只能上传视频或图片，视频最多1个，图片最多9张）</p>
           </el-form-item>
           <el-form-item label="推送消息:">
             <el-radio-group v-model="addForm.radius">
@@ -73,7 +73,7 @@
       <div class="add_map">
         <div id="mapBox"></div>
         <div class="map_r">
-          <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></div>
+          <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
           <ul class="bottom">
             <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -138,6 +138,7 @@ export default {
       hId: null,//民众互助id，用于修改
       // 地图参数
       map: null,
+      zoomLevel: 10,
       lngLat: null,//经纬度
       autoComplete: null,
       marker: null,
@@ -153,9 +154,6 @@ export default {
       this.$emit('changePage', pageType)
     },
     // 接收 到上传组件传过来的图片数据
-    uploadPicSubmit (file) {
-      console.log(file);
-    },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
       console.log(fileList)
@@ -167,7 +165,7 @@ export default {
     resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
-        zoom: 10,
+        zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
@@ -214,6 +212,9 @@ export default {
       } else {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
+            result.tips.forEach(f => {
+              f.name = `${f.name}(${f.district})`;
+            })
             cb(result.tips);
           } else {
             cb([]);
@@ -223,6 +224,10 @@ export default {
     },
     chooseAddress (e) {
       console.log(e);
+      if (!e.location) {
+        this.$message.error('无法获取到经纬度！');
+        return;
+      }
       this.markLocation(e.location.lng, e.location.lat, e.address);
     },
     // 输入追踪点定位圆形覆盖物的中心点
@@ -265,11 +270,19 @@ export default {
         _this.marker.setMap(_this.map);
       }
     },
-  
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(this.zoomLevel);
+      }
+    },
     mapZoomSet (val) {
       if (this.map) {
         this.map.setZoom(this.map.getZoom() + val);
       }
+    },
+    getImageVideoType () {
+      if (this.fileList.some(s => s.raw.type === 'video/mp4' || s.raw.type === 'video/bmp')) return 2;
+      return 1;
     },
      // 新增民众互助
     addMutualHelp (formName) {
@@ -279,6 +292,7 @@ export default {
           const data = {
             appendixInfoList: this.fileList.map(m => {
               delete m.response.data.sysAppendixInfo.uid;
+              m.response.data.sysAppendixInfo.fileType = this.getImageVideoType();
               return m.response.data.sysAppendixInfo;
             }),//附件信息列表
             eventAddress: this.addForm.place,//事发地点
@@ -336,6 +350,7 @@ export default {
           this.fileList.forEach(f => {
             if (f.response) {
               delete f.response.data.sysAppendixInfo.uid;
+              f.response.data.sysAppendixInfo.fileType = this.getImageVideoType();
               _fileList.push(f.response.data.sysAppendixInfo);
             } else {
               f.path = f.url;
