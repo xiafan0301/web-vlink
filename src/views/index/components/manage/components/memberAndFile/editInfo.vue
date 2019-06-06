@@ -1,0 +1,155 @@
+<template>
+<vue-scroll>
+  <div class="edit_member">
+    <div class="breadcrumb_heaer">
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/manage/archivesManage/memberFile'}">档案管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/manage/archivesManage/memberFile'}">一员一档</el-breadcrumb-item>
+        <el-breadcrumb-item>编辑</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <div class="edit_box">
+      <p class="title">编辑档案</p>
+      <div class="content-body">
+        <el-form :model="editUser" :rules="rules" ref="editUser" label-width="90px">
+          <el-form-item label="成员账户:" prop="memberNo">
+            <span style="color: #333333">13677777777</span>
+          </el-form-item>
+          <el-form-item label="姓名:" prop="userName">
+            <el-input style="width: 40%;" placeholder="请输入姓名" v-model="editUser.userName"></el-input>
+          </el-form-item>
+          <el-form-item label="性别:" prop="userSex">
+            <el-radio-group style="width: 40%;" v-model="editUser.userSex">
+              <el-radio :label="1">男</el-radio>
+              <el-radio :label="2">女</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="邮箱:" prop="userEmail">
+            <el-input style="width: 40%;" placeholder="请输入邮箱" v-model="editUser.userEmail"></el-input>
+          </el-form-item>
+          <el-form-item label="所属单位:" prop="organId">
+            <el-select style="width: 40%;" v-model="editUser.organId" placeholder="请选择所属单位">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+          </el-form-item>
+           <el-form-item label="成员编号:" prop="memberNum">
+            <el-input style="width: 40%;" placeholder="请输入成员的部门编号" v-model="editUser.memberNum"></el-input>
+          </el-form-item>
+          <el-form-item label="职位:" prop="job">
+            <el-select style="width: 40%;" v-model="editUser.job" placeholder="请选择职位">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+    <div class="operation-footer">
+      <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="submitData('editUser')">保存</el-button>
+      <el-button class="operation_btn back_btn" @click="cancelSubmit('editUser')">取消</el-button>
+    </div>
+  </div>
+</vue-scroll>
+</template>
+<script>
+export default {
+  data () {
+    return {
+      isEditLoading: false, // 编辑加载中
+      editUser: {
+        memberNo: null,
+        userName: null,
+        userSex: 1,
+        userEmail: null,
+        organId: null,
+        memberNum: null,
+        job: null
+      },
+      rules: {
+        userName: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' }
+        ],
+        userSex: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' }
+        ],
+        organId: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    // 取消提交
+    cancelSubmit (form) {
+      this.$refs[form].resetFields();
+      this.$router.back(-1);
+    },
+    // 确认提交
+    submitData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {}
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.edit_member {
+  .edit_box {
+    margin: 0 10px 20px;
+    background-color: #ffffff;
+    .title {
+      color: #333333;
+      font-size: 16px;
+      font-weight: bold;
+      height: 55px;
+      line-height: 55px;
+      padding-left: 20px;
+      border-bottom: 1px solid #F2F2F2;
+    }
+    .content-body {
+      padding: 10px;
+      >p {
+        color: #999999;
+        margin-bottom: 20px;
+      }
+    }
+  }
+  .operation-footer {
+    border-left: 1px solid #F2F2F2;
+    width: 100%;
+    height: 65px;
+    line-height: 65px;
+    position: fixed;
+    bottom: 0;
+    background: #ffffff;
+    padding-left: 20px;
+    .operation_btn {
+      padding: 0;
+      width: 100px;
+      height: 40px;
+      text-align: center;
+    }
+    .function_btn {
+      background: #0C70F8;
+      color: #ffffff;
+    }
+    .back_btn {
+      background: #ffffff;
+      border: 1px solid #DDDDDD;
+      color: #666666;
+    }
+  }
+}
+</style>
+
