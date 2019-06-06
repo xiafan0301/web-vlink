@@ -192,13 +192,14 @@
         <el-progress type="circle" 
           :width="200" 
           :stroke-width="16"
-          :percentage="patrolStartPercentage" 
-          color="#1073F8"
-          status="text">
-          <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
+          :percentage="patrolStartPercentage"
+          :format="patrolProgFormat"
+          :show-text="true"
+          color="#1073F8">
+          <!-- <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
             {{Math.ceil(patrolStartSecond / 10)}}
           </p>
-          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P>
+          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P> -->
         </el-progress>
       </div>
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
@@ -309,6 +310,10 @@ export default {
   },
   methods: {
     /* 轮巡控制事件 begin */
+    patrolProgFormat (percentage) {
+      // return Math.round(percentage) + '秒';
+      return Math.ceil(this.patrolStartSecond / 10)  + ' 秒';
+    },
     // 获取轮巡数据定时器
     patrolSetDataVal () {
       this.patrolDataVal = window.setInterval(() => {
