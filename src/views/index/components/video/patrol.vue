@@ -325,7 +325,7 @@ export default {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
           let patrolData = res.data;
-  /*         let patrolData =
+          /* let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
@@ -447,33 +447,32 @@ export default {
           console.log("mdfVideoRoundState error：", error);
         });
       }
+      this.patrolNextStart();
+    },
+    // 开始执行下一个轮巡
+    patrolNextStart () {
       this.patrolClearDataVal();
+      this.patrolClearCurrent();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
         status: 2
       }).then(() => {
-        // 开始执行下一个轮巡
-        this.patrolNextStart();
+        let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
+        if (iT > 0) {
+          iT = Math.round(iT / 1000);
+        }
+        let op = {
+          currentRound: this.patrolHandlerData.nextRound,
+          currentRoundRemain: iT
+        }
+        this.patrolClearNext();
+        this.patrolStart(op);
         // 获取轮巡数据
         this.patrolSetDataVal();
       }).catch(error => {
         this.patrolSetDataVal();
         console.log("mdfVideoRoundState error：", error);
       });
-    },
-    // 开始执行下一个轮巡
-    patrolNextStart () {
-      this.patrolClearCurrent();
-      let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
-      if (iT > 0) {
-        iT = Math.round(iT / 1000);
-      }
-      let op = {
-        currentRound: this.patrolHandlerData.nextRound,
-        currentRoundRemain: iT
-      }
-      this.patrolClearNext();
-      this.patrolStart(op);
     },
     // 关闭下一个轮巡
     patrolNextClose () {
