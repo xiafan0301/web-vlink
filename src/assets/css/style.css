@@ -388,7 +388,7 @@
  }
  .vl_map_hover_main > ul > li > span {
    display: inline-block;
-   width: 70px;
+   width: 50%;
    text-align: right;
    color: #666;
  }

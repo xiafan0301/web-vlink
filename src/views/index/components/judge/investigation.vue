@@ -184,9 +184,11 @@ export default {
       let params = {
         eventId: this.curEvent.uid,
         // eventId: 103,
-        areaIds: this.searchData.areaIds.join(','),
         dateStart: this.searchData.time[0],
         dateEnd: this.searchData.time[1]
+      }
+      if (this.searchData.areaIds.length) {
+        params.areaIds = this.searchData.areaIds.join(',');
       }
       JigGETEventAlarm(params)
         .then(res => {
