@@ -57,6 +57,50 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteChildLoading" @click="delChildDepart">确认</el-button>
       </div>
     </el-dialog>
+    <!--新增单位弹框-->
+    <el-dialog
+      title="新增单位"
+      :visible.sync="newDepartmentDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div style="margin-top: 10px;">
+        <el-form :model="addUnit" :rules="addRules" ref="addUnit" label-width="10px">
+          <el-form-item label=" " prop="organName" class="organ_name">
+            <el-input v-model="addUnit.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入单位名称"></el-input>
+            <p class="organ_error_tip" v-show="isShowOrganError">单位已存在</p>
+          </el-form-item>
+          <el-form-item label=" " prop="organPid">
+            <el-select style="width: 95%;" v-model="addUnit.organPid" placeholder="请选择上级单位">
+              <el-option
+                v-for="(item, index) in allDepartmentData"
+                :key="'item' + index"
+                :label="item.organName"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <!-- <el-form-item label=" " prop="chargeUserName">
+            <el-select style="width: 95%" filterable clearable v-model="addUnit.chargeUserName" placeholder="请搜索部门负责人姓名">
+              <el-option
+                v-for="(item, index) in userList"
+                :key="'item' + index"
+                :label="item.userName"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item> -->
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelAdd('addUnit')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addUnitInfo('addUnit')">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -66,10 +110,27 @@ export default {
       keyWord: null, // 根据部门名称搜索部门
       closeShow: false, // 显示清除输入框图标
       state: 1,
+      isAddLoading: false, // 添加单位加载中
+      isShowOrganError: false,
+      newDepartmentDialog: false, // 新增单位弹出框
       delDepartmentDialog: false, // 删除部门弹出框
       delChildDepartmentDialog: false, // 删除下级部门弹出框
       isDeleteLoading: false, // 删除部门加载中
       isDeleteChildLoading: false, // 删除子级部门加载中
+      addUnit: {
+        organName: null, // 单位名称
+        organPid: null, // 上级单位
+      },
+      addRules: {
+        organName: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { max: 10, message: '最多输入10个字', trigger: 'blur' }
+        ],
+        organPid: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ]
+      },
+      allDepartmentData: [], // 当前用户所属单位及下级单位
     }
   },
   methods: {
@@ -82,7 +143,23 @@ export default {
     //删除部门
     deleteDepartment () {},
     // 删除部门及子级部门
-    delChildDepart () {}
+    delChildDepart () {},
+    // 单位名称change
+    handleChangeOrganName (val) {
+      if (!val) {
+        this.isShowOrganError = false;
+      } 
+    },
+    // 添加单位
+    addUnitInfo (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {}
+      });
+    },
+    // 取消添加
+    cancelAdd (form) {
+      this.$refs[form].resetFields();
+    }
   }
 }
 </script>

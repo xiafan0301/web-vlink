@@ -19,7 +19,7 @@
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" id="address" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
+                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
                   <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
@@ -232,6 +232,7 @@ export default {
       imgList1: [], // 要放大的图片
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
+      autoInput: null, // 自动输入对象
     }
   },
   watch: {
@@ -282,6 +283,11 @@ export default {
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
+
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+
       map.on('click', function(e) {
         _this.addEventForm.longitude = e.lnglat.getLng();
         _this.addEventForm.latitude = e.lnglat.getLat();
@@ -382,10 +388,10 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
-      let autoInput = new window.AMap.Autocomplete({
-        input: 'address'
-      })
-      window.AMap.event.addListener(autoInput, 'select', function (e) {
+      // let autoInput = new window.AMap.Autocomplete({
+      //   input: 'inputAddress'
+      // });
+      window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
