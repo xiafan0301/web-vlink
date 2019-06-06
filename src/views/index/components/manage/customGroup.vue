@@ -43,10 +43,14 @@
           <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
         </ul>
         <div class="data_list" v-show="arrowActive === 1">
-          <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+          <vue-scroll>
+            <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+          </vue-scroll>
         </div>
         <div class="data_list" v-show="arrowActive === 2">
-          <p v-for="(item, index) in bayonetList" :key="index">{{item.bayonetName}}</p>
+          <vue-scroll>
+            <p v-for="(item, index) in bayonetList" :key="index">{{item.bayonetName}}</p>
+          </vue-scroll>
         </div>
       </div>
     </div>
@@ -248,6 +252,7 @@ export default {
   }
   .custom_group_right {
     width: calc(100% - 260px);
+    height: 100%;
     .no_data {
       display: none;
       width: 186px;
@@ -257,6 +262,7 @@ export default {
     }
     .detail_info_right {
       width: 100%;
+      height: 100%;
       .tab_ul {
         clear: both;
         padding: 10px 10px 0;
@@ -273,6 +279,7 @@ export default {
         }
       }
       .data_list {
+        height: calc(100% - 50px);
         p {
           padding: 10px 20px 0;
           color: #666666;

@@ -41,7 +41,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item label="描述:" prop="detailContent">
-            <el-input type="textarea" rows="5" style="width: 40%;" placeholder="请输入描述内容" v-model="editRoom.detailContent"></el-input>
+            <el-input type="textarea" rows="5" style="width: 40%;" placeholder="请输入描述内容，最多输入150个字" v-model="editRoom.detailContent"></el-input>
           </el-form-item>
           <!-- <el-form-item label="职位:" prop="job">
             <el-select style="width: 40%;" v-model="editRoom.job" placeholder="请选择职位">
@@ -69,16 +69,29 @@ export default {
     return {
       isEditLoading: false, // 添加加载中
       editRoom: {
-        detailContent: null,
-        userName: null,
-        status: 1,
-        phone: null,
-        organId: null,
-        roomNum: null,
-        roomName: 'ds20181212121212',
-        address: null
+        detailContent: null, // 描述
+        userName: null, // 责任人
+        status: 1, // 使用状况
+        phone: null, // 联系电话
+        organId: null, // 所属单位
+        roomNum: null, // 点室编号
+        roomName: 'ds20181212121212', // 点室名称
+        address: null // 所属地址
       },
       rules: {
+        roomName: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' },
+          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        userName: [
+          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        roomNum: [
+          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        phone: [
+          { validator: validatePhone, trigger: 'blur' }
+        ],
         address: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],

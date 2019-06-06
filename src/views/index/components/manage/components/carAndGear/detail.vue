@@ -15,51 +15,51 @@
       <div class="header member_header">
         <span>基本信息</span>
         <p>
-          创建于2018-12-12 12:12:12；
-          最近更新于2018-12-12 12:12:12
+          创建于{{detailInfo.createTime | fmTimestamp}}；
+          最近更新于{{detailInfo.updateTime | fmTimestamp}}
         </p>
       </div>
       <div class="divide"></div>
       <ul class="detail_info clearfix">
         <li>
           <span>车辆编号:</span>
-          <span>2018121212121</span>
+          <span>{{detailInfo.vehicleNumber}}</span>
         </li>
         <li>
           <span>车牌号码:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.transportNo}}</span>
         </li>
         <li>
           <span>识别代码:</span>
-          <span>张三</span>
+          <span>{{detailInfo.identityNo}}</span>
         </li>
         <li>
           <span>车辆类型:</span>
-          <span>1345555555</span>
+          <span>{{detailInfo.vehicleType}}</span>
         </li>
         <li>
           <span>核载人数:</span>
-          <span>4人</span>
+          <span>{{detailInfo.capacityPeople}}人</span>
         </li>
         <li>
           <span>车身颜色:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.vehicleColor}}</span>
         </li>
         <li>
           <span>所属单位:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.organName}}</span>
         </li>
         <li>
           <span>号牌:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.numberType}}</span>
         </li>
         <li>
           <span>设备账户:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.deviceNo}}</span>
         </li>
         <li>
           <span>访问密码:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.devicePassword}}</span>
         </li>
       </ul>
     </div>
@@ -185,14 +185,21 @@
           <div class="location_right">
             <div class="map_content">
               <div id="mapBox"></div>
-              <div class="right-flag">
-                <ul class="map-rrt">
-                  <li><i class="vl_icon vl_icon_control_23" @click="resetMap"></i></li>
-                </ul>
-                <ul class="map-rrt map_rrt_u2">
-                  <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
-                  <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
-                </ul>
+              <div class="control-box">
+                <div class="control-checkbox">
+                  <el-radio-group v-model="selectRadio" @change="buttonClick">
+                    <el-radio-button v-for="item in buttons" :label="item.name" :key="item.value"></el-radio-button>
+                  </el-radio-group>
+                </div>
+                <div class="control-slider">
+                  <div class="slider-left">
+                    <span class="label">时速：</span>
+                    <span class="value">{{ speed * 10 }}km/h</span>
+                  </div>
+                  <div class="slider-right">
+                    <el-slider v-model="speed" @change="setSpeed" :show-tooltip="false"></el-slider>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -223,6 +230,7 @@
 </vue-scroll>
 </template>
 <script>
+import { getVehicleDetail } from '@/views/index/api/api.archives.js';
 export default {
   data () {
     return {
@@ -270,22 +278,55 @@ export default {
           location: '凯文中学旁100米',
           speed: '40km/h'
         }
-      ]
+      ],
+      buttons: [
+        { name: '开始', value: 1 },
+        { name: '暂停', value: 2 },
+        { name: '恢复', value: 3 },
+        { name: '停止', value: 4 }
+      ],
+      selectRadio: '开始', // 选中的radio
+      speed: 4, // 时速
     }
   },
   mounted () {
-    this.initMap();
+    // this.initMap();
+    this.getDetail();
   },
   methods: {
+    // 获取车辆详情
+    getDetail () {
+      const vehicleId = this.$route.query.id;
+      if (vehicleId) {
+        getVehicleDetail(vehicleId)
+          .then(res => {
+            if (res) {
+              this.detailInfo = res.data;
+              // this.editCar.vehicleNumber = res.data.vehicleNumber;
+              // this.editCar.transportNo = res.data.transportNo;
+              // this.editCar.identityNo = res.data.identityNo;
+              // this.editCar.vehicleType = res.data.vehicleType;
+              // this.editCar.capacityPeople = res.data.capacityPeople;
+              // this.editCar.vehicleColor = res.data.vehicleColor;
+              // this.editCar.lnumberType = res.data.lnumberType;
+              // this.editCar.organId = res.data.organId;
+              // this.editCar.deviceNo = res.data.deviceNo;
+              // this.editCar.devicePassword = res.data.devicePassword;
+            }
+          })
+      }
+    },
+    // 设置播放速度
+    setSpeed () {
+
+    },
+    // 切换radio
+    buttonClick () {
+
+    },
     // 重置地图
     resetMap () {
       this.initMap();
-    },
-    // 地图放大缩小
-    mapZoomSet (val) {
-      if (this.map) {
-        this.map.setZoom(this.map.getZoom() + val);
-      }
     },
     // 初始化地图
     initMap () {
@@ -422,7 +463,7 @@ export default {
           width: calc(100% - 310px);
           height: 100%;
           .map_content {
-            // border:1px solid rgba(211,211,211,1);
+            position: relative;
             border-radius:4px 4px 0px 0px;
             width: 98%;
             height: 96%;
@@ -431,29 +472,53 @@ export default {
               width: 100%;
               height: 100%;
             }
-            .right-flag {
-              position: absolute; right:60px; bottom: 40px;
-              height: 220px;
-              transition: right .3s ease-out;
-              animation: fadeInRight .4s ease-out .4s both;
-              .map-rrt {
-                padding: 0 10px;
-                background-color: #fff;
-                box-shadow: 0 0 10px rgba(148,148,148,0.24);
-                >li {
-                  padding: 15px 5px;
-                  cursor: pointer;
-                  border-bottom: 1px solid #eee;
-                  text-align: center;
-                  >i {
-                    font-size: 20px;
-                    color: #0B6FF7;
-                  }
-                  &:last-child { border-bottom: 0; }
+            .control-box {
+              position: absolute;
+              z-index: 100000;
+              top: 10px;
+              right: 10px;
+              width: 210px;
+              height: 76px;
+              padding: 10px;
+              background:rgba(255,255,255,1);
+              border-radius:2px;
+              box-shadow:0px 0px 6px rgba(0,0,0,0.03);
+              .control-checkbox {
+                /deep/ .el-radio-button__inner {
+                  padding: 5px 8px;
+                }
+                /deep/ .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+                  background:#0C70F8;
+                  border-color: #0C70F8;
+                  box-shadow: -1px 0 0 0 #0C70F8;
+                }
+                /deep/ .el-radio-button__inner:hover {
+                  color: #0C70F8;
                 }
               }
-              .map_rrt_u2 {
-                margin-top: 20px;
+              .control-slider {
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+                .slider-left {
+                  width: 95px;
+                  .label, .value {
+                    color: #666666;
+                    font-size: 12px;
+                  }
+                }
+                .slider-right {
+                  flex: 1;
+                  margin-left: 5px;
+                  /deep/ .el-slider__bar {
+                    background:#0C70F8;
+                  }
+                  /deep/ .el-slider__button {
+                    width: 14px;
+                    height: 14px;
+                    border-color: #0C70F8;
+                  }
+                }
               }
             }
           }
@@ -522,7 +587,7 @@ export default {
     
   }
   .video_replay {
-    height: 550px;
+    height: 700px;
     // width: 100%;
     padding-bottom: 50px;
     .replay_box {

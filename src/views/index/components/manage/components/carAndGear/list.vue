@@ -5,29 +5,27 @@
         <el-form-item prop="vehicleType">
           <el-select  style="width: 240px;" v-model="searchForm.vehicleType" placeholder="车辆类型">
             <el-option value='全部车辆类型'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+            <el-option
+              v-for="(item, index) in vehicleTypeList"
               :key="index"
-              :label="item.enumValue"
-              :value="item.enumField"
-            >
-            </el-option> -->
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="companyName">
-          <el-select style="width: 240px;" v-model="searchForm.companyName" placeholder="单位">
+        <el-form-item prop="organId">
+          <el-select style="width: 240px;" v-model="searchForm.organId" placeholder="单位">
             <el-option value='全部单位'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <el-option
+              v-for="(item, index) in departmentList"
               :key="index"
-              :label="item.enumValue"
-              :value="item.enumField"
-            >
-            </el-option> -->
+              :label="item.organName"
+              :value="item.uid"
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="vehicleNo">
-          <el-input style="width: 240px;" type="text" placeholder="请输入车牌号码查找" v-model="searchForm.vehicleNo" />
+        <el-form-item prop="vehicleNumber">
+          <el-input style="width: 240px;" type="text" placeholder="请输入车牌号码查找" v-model="searchForm.vehicleNumber" />
         </el-form-item>
         <el-form-item>
           <el-button class="select_btn" @click="selectDataList">查询</el-button>
@@ -55,42 +53,42 @@
         </el-table-column>
         <el-table-column
           label="车辆编号"
-          prop="number"
+          prop="transportNo"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="车辆号码"
-          prop="vechileNo"
+          prop="vehicleNumber"
           >
         </el-table-column>
         <el-table-column
           label="车辆类型"
-          prop="type"
+          prop="vehicleType"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
-          label="号码种类"
-          prop="vechileType"
+          label="号牌种类"
+          prop="numberType"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="核载人数"
-          prop="personNum"
+          prop="capacityPeople"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="所属单位"
-          prop="company"
+          prop="organName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="出车状态"
-          prop="status"
+          prop="onlineState"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -132,6 +130,9 @@
   </div>
 </template>
 <script>
+import { getVehicleList, delVehicle } from '@/views/index/api/api.archives.js';
+import { vehicleTypeList } from '@/utils/data.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -139,9 +140,9 @@ export default {
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
       searchForm: {
-        vehicleType: null,
-        companyName: null,
-        vehicleNo: null
+        vehicleType: null, // 车辆类型
+        organId: null, // 所属单位
+        vehicleNumber: null // 车牌号码
       },
       dataList: [
         {
@@ -171,31 +172,115 @@ export default {
           company: '新能源公司',
           status: '出车'
         },
-      ]
+      ],
+      vehicleTypeList: [], // 车辆类型
+      userInfo: {}, // 用户信息
+      departmentList: [], // 部门列表
+      deleteId: null, // 要删除的车辆id
     }
   },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.vehicleTypeList = vehicleTypeList;
+
+    this.getDepartList();
+    this.getList();
+  },
   methods: {
-    selectDataList () {},
-    resetForm (form) {},
+    // 获取当前部门及子级部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.userInfo.organList[0].uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList.push(this.userInfo.organList[0]);
+            res.data.list.map(item => {
+              this.departmentList.push(item);
+            });
+          }
+        })
+    },
+    // 获取车辆列表
+    getList () {
+      if (this.searchForm.vehicleType === '全部车辆类型') {
+        this.searchForm.vehicleType = null;
+      }
+      if (this.searchForm.organId === '全部单位') {
+        this.searchForm.organId = null;
+      }
+      const params = {
+        'where.vehicleNumber': this.searchForm.vehicleNumber,
+        'where.vehicleType': this.searchForm.vehicleType,
+        'where.organId': this.searchForm.organId,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      };
+      getVehicleList(params)
+        .then(res => {
+          if (res) {
+            this.pagination.total = res.data.total;
+            this.dataList = res.data.list;
+          }
+        })
+    },
+    // 根据搜索条件进行搜索
+    selectDataList () {
+      this.getList();
+    },
+    // 重置搜索条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getList();
+    },
+    // 分页change
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 跳至查看详情页面
-    skipSelectDetail () {
-      this.$router.push({name: 'car_detail'});
+    skipSelectDetail (obj) {
+      this.$router.push({name: 'car_detail', query: { id: obj.uid }});
     },
     // 跳至新增车辆页面
     skipAddPage () {
       this.$router.push({name: 'car_add'});
     },
     // 跳至编辑页面
-    skipEditPage () {
-      this.$router.push({name: 'car_edit'});
+    skipEditPage (obj) {
+      this.$router.push({name: 'car_edit', query: { id: obj.uid }});
     },
     // 显示删除弹出框
-    showDeleteDialog () {
+    showDeleteDialog (obj) {
+      this.deleteId = obj.uid;
       this.deleteDialog = true;
     },
-    handleCurrentChange () {},
     // 确认删除
-    sureDelete () {}
+    sureDelete () {
+      if (this.deleteId) {
+        this.isDeleteLoading = true;
+        delVehicle(this.deleteId)
+          .then(res => {
+            if (res) {
+              this.isDeleteLoading = false;
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.getList();
+              this.deleteDialog = false;
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    }
   }
 }
 </script>

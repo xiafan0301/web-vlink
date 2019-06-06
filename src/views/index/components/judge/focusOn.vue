@@ -391,7 +391,9 @@ export default {
           params[key] = this.searchData[key];
         }
       }
-      params['areaIds'] = this.areaIds.join(',');
+      if (this.areaIds.length) {
+        params['areaIds'] = this.areaIds.join(',');
+      }
       JfoGETSurveillanceObject(params)
         .then(res => {
           this.searching = false;
