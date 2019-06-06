@@ -235,13 +235,13 @@ export default {
               eventId: this.$route.query.eventId,
               taskProcessDto: taskProcessDto
             } */
-          if(this.processType == 2 || this.processType == 3) {
+         /*  if(this.processType == 2 || this.processType == 3) {
             dispatchType = 1
           }else {
             dispatchType = 2
-          }
+          } */
           this.isEndLoading = true;
-          taskProcess(taskProcessDto,this.$route.query.eventId,dispatchType )
+          taskProcess(taskProcessDto,this.$route.query.eventId,this.$route.query.dispatchType )
             .then(res => {
               if (res) {
                 this.$message({
