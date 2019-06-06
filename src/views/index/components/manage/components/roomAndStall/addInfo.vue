@@ -15,8 +15,8 @@
           <el-form-item label="点室名称:" prop="roomName">
             <el-input style="width: 40%;" placeholder="请输入点室名称" v-model="addRoom.roomName"></el-input>
           </el-form-item>
-          <el-form-item label="点室编号:" prop="roomNum">
-            <el-input style="width: 40%;" placeholder="请输入点室编号" v-model="addRoom.roomNum"></el-input>
+          <el-form-item label="点室编号:" prop="roomNumber">
+            <el-input style="width: 40%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber"></el-input>
           </el-form-item>
           <el-form-item label="所属单位:" prop="organId">
             <el-select style="width: 40%;" v-model="addRoom.organId" placeholder="请选择所属单位">
@@ -28,31 +28,65 @@
               ></el-option> -->
             </el-select>
           </el-form-item>
-           <el-form-item label="责任人:" prop="userName">
-            <el-input style="width: 40%;" placeholder="请输入责任人姓名" v-model="addRoom.userName"></el-input>
+           <el-form-item label="责任人:" prop="dutyUserName">
+            <el-input style="width: 40%;" placeholder="请输入责任人姓名" v-model="addRoom.dutyUserName"></el-input>
           </el-form-item>
-          <el-form-item label="联系电话:" prop="phone">
-            <el-input style="width: 40%;" placeholder="请输入联系电话" v-model="addRoom.phone"></el-input>
+          <el-form-item label="联系电话:" prop="userMobile">
+            <el-input style="width: 40%;" placeholder="请输入联系电话" v-model="addRoom.userMobile"></el-input>
           </el-form-item>
-          <el-form-item label="使用状况:" prop="status">
-            <el-radio-group style="width: 40%;" v-model="addRoom.status">
-              <el-radio :label="1">启用</el-radio>
-              <el-radio :label="2">停用</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="描述:" prop="detailContent">
-            <el-input type="textarea" rows="5" style="width: 40%;" placeholder="请输入描述内容" v-model="addRoom.detailContent"></el-input>
-          </el-form-item>
-          <!-- <el-form-item label="职位:" prop="job">
-            <el-select style="width: 40%;" v-model="addRoom.job" placeholder="请选择职位">
-              <el-option
+          <el-form-item label="所属地址:" prop="address">
+            <el-select style="width: 40%;" v-model="addRoom.province" placeholder="省">
+              <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
                 :label="item.organName"
                 :value="item.uid"
-              ></el-option>
+              ></el-option> -->
             </el-select>
-          </el-form-item> -->
+            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="市">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="县">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="镇">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="区">
+              <!-- <el-option
+                v-for="(item, index) in departmentData"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option> -->
+            </el-select>
+            <el-input type="text" style="width: 40%;" placeholder="请输入详细地址" v-model="addRoom.address"></el-input>
+          </el-form-item>
+          <el-form-item label="使用状况:" prop="isEnable">
+            <el-radio-group style="width: 40%;" v-model="addRoom.isEnable">
+              <el-radio :label="1">启用</el-radio>
+              <el-radio :label="2">停用</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="描述:" prop="desci">
+            <el-input type="textarea" rows="5" style="width: 40%;" placeholder="请输入描述内容" v-model="addRoom.desci"></el-input>
+          </el-form-item>
+          
         </el-form>
       </div>
     </div>
@@ -64,24 +98,35 @@
 </vue-scroll>
 </template>
 <script>
+import { validatePhone } from '@/utils/validator.js';
 export default {
   data () {
     return {
       isAddLoading: false, // 添加加载中
       addRoom: {
-        detailContent: null,
-        userName: null,
-        status: 1,
-        phone: null,
-        organId: null,
-        roomNum: null,
-        roomName: null,
-        address: null
+        desci: null, // 描述
+        dutyUserName: null, // 责任人
+        staisEnabletus: 1, // 使用状况
+        userMobile: null, // 联系电话
+        organId: null, // 所属单位
+        roomNumber: null, // 点室编号
+        roomName: null, // 点室名称
+        province: null, // 省
+        address: null // 所属地址
       },
       rules: {
         roomName: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
           { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        dutyUserName: [
+          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        roomNumber: [
+          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        ],
+        userMobile: [
+          { validator: validatePhone, trigger: 'blur' }
         ],
         address: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
@@ -89,11 +134,13 @@ export default {
         organId: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
-        detailContent: [
+        desci: [
           { max: 150, message: '最多输入150个字', trigger: 'blur' }
         ]
       },
     }
+  },
+  mounted () {
   },
   methods: {
     // 取消提交

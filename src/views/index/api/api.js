@@ -277,6 +277,6 @@ export function getDicts() {
     url: '/dict-service/dicts',
     method: 'get',
     mode: 'base',
-  })
+  });
 }
 /*--------------------------  字典服务end  ---------------------------------*/

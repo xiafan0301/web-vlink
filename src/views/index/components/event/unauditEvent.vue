@@ -281,6 +281,7 @@ export default {
       isPlaying: false, // 是否播放视频
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
+      autoInput: null, // 自动输入对象
     }
   },
   watch: {
@@ -442,6 +443,11 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
+
+      _this.autoInput = new window.AMap.Autocomplete({
+        input: 'address'
+      })
+
       map.on('click', function(e) {
         console.log(e);  
         if (_this.newMarker) {
@@ -523,10 +529,8 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
-      let autoInput = new window.AMap.Autocomplete({
-        input: 'address'
-      })
-      window.AMap.event.addListener(autoInput, 'select', function (e) {
+      
+      window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
