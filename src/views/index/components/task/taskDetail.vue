@@ -11,7 +11,7 @@
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
-            <p class="ctc-title">{{processType == 2 ? '任务内容' : processType == 3 ? '呈报内容' : '调度指挥方案'}}</p>
+            <p class="ctc-title">{{processType == 2 ? '任务内容' : processType == 3 ? '呈报内容' : '调度方案'}}</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list" v-if="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">

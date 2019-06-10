@@ -160,7 +160,7 @@
             <div class="plan-list" v-for="(item, index) in taskList" :key="index">
               <div class="main-content">
                 <div class="title">
-                  <span>调度指挥方案</span>
+                  <span>调度方案</span>
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
                 </div>
                 <div class="divide"></div>

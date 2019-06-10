@@ -7,8 +7,8 @@
             <el-date-picker
               style="width: 400px;"
               v-model="searchForm.dateTime"
-              type="datetimerange"
-              value-format="yyyy-MM-dd HH:mm:ss"
+              type="daterange"
+              value-format="yyyy-MM-dd"
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
@@ -255,8 +255,8 @@ export default {
         status = this.searchForm.status;
       }
       const params = {
-        'where.startTime': this.searchForm.dateTime[0],
-        'where.endTime': this.searchForm.dateTime[1],
+        'where.startTime': this.searchForm.dateTime[0] + '00:00:00',
+        'where.endTime': this.searchForm.dateTime[1] + '23:59:59',
         'where.status': status,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,

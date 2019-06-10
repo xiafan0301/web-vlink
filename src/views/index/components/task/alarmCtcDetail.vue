@@ -138,7 +138,7 @@
         </div>
         <div class="event-ctc-content" v-if="sturcDetail.taskList && sturcDetail.taskList.length > 0">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">

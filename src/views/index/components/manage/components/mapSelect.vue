@@ -87,7 +87,7 @@ export default {
       sxtMapMarkers: [],
       kkList: [], // 卡口
       kkMapMarkers: [],
-
+      marker: null,
       finalDeviceList: [], // 最终选择的设备
 
       unCheckDeviceList: [], // 没有在多边形中的设备--没有选中的设备
@@ -294,7 +294,6 @@ export default {
       this.unCheckDeviceList = []; // 清空可选设备列表
     },
     isSelected (val) {
-      console.log('val', val)
       if (val) {
         this.getMapData();
       }
@@ -344,37 +343,34 @@ export default {
 
           // 移入覆盖物生成删除小图标
           let offSet = [0, 0], _marker = null;
-          polygon.on('mouseover', function(p) {
-            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-            if (_marker) return;
-            _marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.map,
-              position: [p.lnglat.lng, p.lnglat.lat],
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: '',
-              // 自定义点标记覆盖物内容
-              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-            });
-            // 点击小图标移除覆盖物和删除小图标
-            _marker.on('click', function() {
-              _this.map.remove(polygon);
-              _this.selAreaPolygon = null;
-              _this.map.remove(_marker);
+          // polygon.on('mouseover', function(p) {
+          //   // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
+          //   if (_marker) return;
+          //   _marker = new window.AMap.Marker({ // 添加自定义点标记
+          //     map: _this.map,
+          //     position: [p.lnglat.lng, p.lnglat.lat],
+          //     offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          //     draggable: false, // 是否可拖动
+          //     extData: '',
+          //     // 自定义点标记覆盖物内容
+          //     content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+          //   });
+          //   // 点击小图标移除覆盖物和删除小图标
+          //   _marker.on('click', function() {
+          //     _this.map.remove(polygon);
+          //     _this.selAreaPolygon = null;
+          //     _this.map.remove(_marker);
 
-              _this.mapMarkHandler();
+          //     _this.mapMarkHandler();
               
-            })
-            _marker.setMap(_this.map);
-          })
+          //   })
+          //   _marker.setMap(_this.map);
+          // })
         }, 100);
       });
     },
     // 获取地图数据
     getMapData () {
-      console.log('this.selectDeviceList', this.selectDeviceList)
-      console.log(this.sxtList)
-      console.log(this.kkList)
       this.sxtList = [];
       this.kkList = [];
       let selectDeviceList = this.selectDeviceList;
@@ -410,7 +406,6 @@ export default {
         })
         this.mapMarkHandler();
       } else {
-        console.log('hhhhhhh')
         this.sxtList = [];
         this.kkList = [];
         this.mapMarkHandler();
@@ -497,18 +492,27 @@ export default {
               content: '<div id="' + obj.sid + '" class="vl_icon vl_icon_' + keyWord + ' ' + selClass + '"></div>'
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
-
+            _this.marker = marker;
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
+            
           }
+        }
+        if ( _this.selAreaPolygon) {
+          setTimeout(() => {
+            _this.map.remove(_this.selAreaPolygon);
+            _this.selAreaPolygon = null;
+            _this.map.remove(_this.marker);
+
+            _this.mapMarkHandler();
+          }, 1000);
+
         }
       }
     },
     // 清除所有
     resetTools () {
       this.selAreaRest();
-      // this.markRest();
-      // this.rangingRest();
     },
     // 清除地图标记
     mapClearMarkers (aMarkers) {

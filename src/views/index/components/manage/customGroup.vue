@@ -25,7 +25,7 @@
               :key="'item' + index"
               @click="showGroupDeviceInfo(item.uid)"
             >
-              <span>{{item.groupName}}</span>
+              <span>{{item.groupName}}  ({{item.deviceList.length + item.bayonetList.length}}个)</span>
               <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
               <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid, item.groupName)"></i>
             </li>
@@ -39,17 +39,19 @@
       </div>
       <div class="detail_info_right">
         <ul class="tab_ul clearfix">
-          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头</li>
-          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
+          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头({{deviceList.length}}个)</li>
+          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口({{bayonetList.length}}个)</li>
         </ul>
         <div class="data_list" v-show="arrowActive === 1">
           <vue-scroll>
-            <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+            <p v-for="(item, index) in deviceList" :key="index" v-show="deviceList.length > 0">{{item.deviceName}}</p>
+            <p style="color: #999;" v-show="deviceList.length === 0">暂无数据</p>
           </vue-scroll>
         </div>
         <div class="data_list" v-show="arrowActive === 2">
           <vue-scroll>
-            <p v-for="(item, index) in bayonetList" :key="index">{{item.bayonetName}}</p>
+            <p v-for="(item, index) in bayonetList" :key="index" v-show="bayonetList.length > 0">{{item.bayonetName}}</p>
+            <p style="color: #999;" v-show="bayonetList.length === 0">暂无数据</p>
           </vue-scroll>
         </div>
       </div>
