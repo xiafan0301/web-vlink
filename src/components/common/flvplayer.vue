@@ -28,7 +28,7 @@
           <span class="flvplayer_opt vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
           <span class="flvplayer_opt vl_icon vl_icon_v22" v-show="!playActive" title="播放" @click="playerPlay(true)"></span>
           <!-- 音量 声音大小（0-1之间） myPlayer.volume(0.5); -->
-          <span class="flvplayer_opt player_volume">
+          <!-- <span class="flvplayer_opt player_volume">
             <div>
               <el-slider
                 v-model="volume"
@@ -44,7 +44,7 @@
                 'vl_icon_v232': !volumeAble || volume <= 0
               }" title="音量" @click="playerVolumeAble">
             </span>
-          </span>
+          </span> -->
         </span>
         <span class="flvplayer_bot_om" :class="{'flvplayer_bot_om_h': mini && !fullScreen}">
           <span class="flvplayer_bot_omh">
@@ -126,61 +126,67 @@
       </div>
     </el-dialog>
     <!-- 下载 dialog -->
-    <el-dialog v-if="oData.type === 2 && config.download" :title="'下载'" @closed="downloadClosed"
-      :visible.sync="download.downloadDialogVisible" :append-to-body="true" width="800px">
-      <div style="text-align: left; width: 100%; padding: 20px 100px 10px 100px;">
-        <div style="padding-bottom: 14px;">
-          <span>下载开始时间：&nbsp;&nbsp;</span>
-          <el-date-picker
-            v-model="download.startTime"
-            time-arrow-control
-            type="datetime"
-            :disabled="download.downlaodSliderDis"
-            :editable="false" :clearable="false"
-            :picker-options="download.startTimeOptions"
-            @change="downloadStartTimeChanged"
-            placeholder="选择开始时间">
-          </el-date-picker>
+    <el-dialog v-if="oData.type === 2 && config.download" :title="download.downloadBtnLoading ? '视频获取' : '下载'" @closed="downloadClosed"
+      :visible.sync="download.downloadDialogVisible" :append-to-body="true" width="600px">
+      <div style="text-align: left; width: 100%; padding: 20px 50px 0px 50px;">
+        <div v-show="!download.downloadBtnLoading">
+          <div style="padding-bottom: 14px; padding-left: 50px;">
+            <span style="display: inline-block; width: 85px; text-align: left;">开始时间：</span>
+            <el-date-picker
+              v-model="download.startTime"
+              time-arrow-control
+              type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="download.startTimeOptions"
+              @change="downloadStartTimeChanged"
+              placeholder="选择开始时间">
+            </el-date-picker>
+          </div>
+          <div style="padding-bottom: 10px; padding-left: 50px;">
+            <span style="display: inline-block; width: 85px; text-align: left;">结束时间：</span>
+            <el-date-picker
+              v-model="download.endTime"
+              time-arrow-control
+              type="datetime"
+              :editable="false" :clearable="false"
+              :picker-options="download.startTimeOptions"
+              @change="downloadEndTimeChanged"
+              placeholder="选择开始时间">
+            </el-date-picker>
+          </div>
+          <p  style="padding-left: 135px;"><span style="color: red;">*</span>最大时间间隔为30分钟</p>
+          <div style="padding-top: 30px; text-align: center;">您所设定的时间间隔为：<span style="font-size: 16px; color: #333;">{{download.durationTime}}</span></div>
+          <div style="text-align: center; padding-top: 30px; padding-bottom: 14px;">
+            <el-button style="width: 100px;" @click="download.downloadDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <el-button :title="download.downlaodLoadingDis ? '时间间隔不能为0' : '确定'" :disabled="download.downlaodLoadingDis" style="width: 100px;" type="primary" @click="playerDownloadSubmit">
+              确定
+            </el-button>
+          </div>
         </div>
-        <div style="padding-top: 10px;">
-          <span>下载时长（最长30分钟）：&nbsp;&nbsp;
-            <span style="color: #333; font-size: 14px;">{{download.downlaodVal | downloadTime}}</span></span>
-          <el-slider
-            v-model="download.downlaodVal"
-            :min="0"
-            :max="download.downlaodMaxVal"
-            :disabled="download.downlaodSliderDis"
-            :format-tooltip="downlaodFormatTooltip"
-            >
-          </el-slider>
-          <!-- :marks="download.downlaodMarks" -->
+        <div v-show="download.downloadBtnLoading">
+          <p style="text-align: center; font-size: 16px;">视频文件数量 <span style="color: #0C70F8; font-size: 18px;">{{download.recordDataSize}}</span> 个</p>
+          <ul style="padding-top: 0px; padding-bottom: 30px;">
+            <li v-for="(item, key, index) in download.recordData" :key="key"  style="padding-top: 20px;">
+              <div style="padding-bottom: 5px;">
+                <span>视频&nbsp;{{index + 1}}&nbsp;
+                  <span v-if="item.progress < 100">获取中...</span>
+                  <span v-else>获取完毕</span>
+                </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <el-button size="small" :disabled="item.progress < 100" @click="downloadFile(item)">下载文件</el-button>
+              </div>
+              <el-progress :text-inside="false" :stroke-width="10" :percentage="item.progress"></el-progress>
+            </li>
+          </ul>
         </div>
-        <div class="clearfix">
-          <span class="flvplayer_dl_tl">{{download.startTime | downloadStartTime}}</span>
-          <span class="flvplayer_dl_tr">{{download.startTime | downloadEndTime(download.allEndTime)}}</span>
-        </div>
-        <div v-if="download.downloadBtnLoading"></div>
-        <ul style="padding-top: 20px;" v-if="download.downloadBtnLoading">
-          <li v-for="(item, key, index) in download.recordData" :key="key"  style="padding-top: 20px;">
-            <div style="padding-bottom: 5px;">
-              <span>视频&nbsp;{{index + 1}}&nbsp;
-                <span v-if="item.progress < 100">获取中...</span>
-                <span v-else>获取完毕</span>
-              </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-button size="small" :disabled="item.progress < 100">下载文件</el-button>
-            </div>
-            <el-progress :text-inside="false" :stroke-width="20" :percentage="item.progress"></el-progress>
-          </li>
-        </ul>
       </div>
-      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+      <!-- <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="download.downloadDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
         <el-button v-if="download.progressVal < 100" :loading="download.downloadBtnLoading" type="primary" @click="playerDownloadSubmit">
           <template v-if="download.downloadBtnLoading">正在下载</template>
-          <template v-else>开始下载</template>
+          <template v-else>确定</template>
         </el-button>
         <a v-else class="vid_dowload_btn" :href="download.downloadUrl" download>保 存</a>
-      </div>
+      </div> -->
     </el-dialog>
   </div>
 </template>
@@ -281,7 +287,9 @@ export default {
       // 下载对象
       download: {
         downloadDialogVisible: false,
+        durationTime: '',
         startTime: '',
+        endTime: '',
         allStartTime: '',
         allEndTime: '',
         startTimeOptions: {
@@ -299,39 +307,16 @@ export default {
         recordDataSize: 1,
         downloadUrl: '',
         progressVal: 0,
-        downlaodVal: 100,
+        downlaodVal: 600,
         downlaodMaxVal: 1800,
         downloadBtnLoading: false,
         file: null,
-        downlaodSliderDis: false,
+        downlaodLoadingDis: false,
         downlaodInval: null // 下载进度定时器
       }
     }
   },
   filters: {
-    downloadTime (val) {
-      let m = 0, s = 0;
-      if (val && val > 0) {
-        m = Math.floor(val / 60);
-        s = val % 60;
-      }
-      return m + '分' + s + '秒';
-    },
-    downloadStartTime (val) {
-      return val ? formatDate(val) : '';
-    },
-    downloadEndTime (val, endT) {
-      if (!val) {
-        return '';
-      }
-      val = val.getTime() + 30 * 60 * 1000;
-      if (endT) {
-        if (val > endT) {
-          val = endT;
-        }
-      }
-      return formatDate(val);
-    }
   },
   watch: {
     oData (newData, oldData) {
@@ -654,15 +639,15 @@ export default {
       this.download.startTime = getDate(sT);
       this.download.allStartTime = getDate(sT).getTime();
       this.download.allEndTime = getDate(eT).getTime();
-
       // this.download.file = this.playBackList[this.playBackIndex];
       if ((this.download.allEndTime - this.download.allStartTime) / 1000 < this.download.downlaodMaxVal) {
         this.download.downlaodMaxVal = (this.download.allEndTime - this.download.allStartTime) / 1000;
       }
+      this.download.endTime = new Date(this.download.startTime.getTime() + this.download.downlaodMaxVal * 1000);
+      this.downloadDurationTime();
       // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
-      console.log('downloadStartTimeChanged', val)
       if (val) {
         val = val.getTime();
         if (val > this.download.allEndTime) {
@@ -670,16 +655,50 @@ export default {
         } else if ( val < this.download.allStartTime) {
           this.download.startTime = new Date(this.download.allStartTime);
         }
+        if (val === this.download.endTime.getTime()) { 
+          this.download.downlaodLoadingDis = true;
+        } else {
+          this.download.downlaodLoadingDis = false;
+        }
+        this.downloadDurationTime();
       }
     },
-
+    downloadEndTimeChanged (val) {
+      if (val) {
+        val = val.getTime();
+        let sTS = this.download.startTime.getTime();
+        if (val < sTS) {
+          this.download.endTime = this.download.startTime;
+        } else if ( val > (sTS + this.download.downlaodMaxVal * 1000)) {
+          this.download.endTime = new Date(sTS + this.download.downlaodMaxVal * 1000);
+        }
+        if (val === this.download.startTime.getTime()) { 
+          this.download.downlaodLoadingDis = true;
+        } else {
+          this.download.downlaodLoadingDis = false;
+        }
+        this.downloadDurationTime();
+      }
+    },
+    downloadDurationTime () {
+      let m = 0, s = 0;
+      if (this.download.endTime && this.download.startTime) {
+        let d = Math.floor((this.download.endTime.getTime() - this.download.startTime.getTime()) / 1000);
+        if ( d > 0) {
+          m = Math.floor(d / 60);
+          s = d % 60;
+        }
+      }
+      this.download.durationTime = (m > 0 ? (m + '分钟') : '') + (s > 0 ? (s + '秒') : '');
+    },
     playerDownloadSubmit () {
       this.download.downloadBtnLoading = true;
-      this.download.downlaodSliderDis = true;
       // 需要处理时间段
       console.log('下载开始时间：', this.download.startTime)
+      this.download.downlaodVal = Math.floor((this.download.endTime.getTime() - this.download.startTime.getTime()) / 1000);
       console.log('下载时长：', this.download.downlaodVal)
       let params = [], rData = {}, rDataSize = 0;
+      this.download.recordDataSize = 0;
       let iStartTime = this.download.startTime.getTime();
       let iEndTime = iStartTime + this.download.downlaodVal * 1000;
       for (let i = 0; i < this.playBackList.length; i++) {
@@ -719,10 +738,7 @@ export default {
       }
       this.download.recordData = rData;
       this.download.recordDataSize = rDataSize;
-
-      console.log('params', params);
-
-
+      // console.log('params', params);
       getVideoFileDownStartBatch(params).then(res => {
         if (res && res.data && res.data.batchCamRealRecordDto) {
           /* let _o = {};
@@ -742,10 +758,9 @@ export default {
           if (this.download.downlaodInval) {
             window.clearInterval(this.download.downlaodInval);
           }
-          this.playerDownloadProgress();
-          /* this.download.downlaodInval = window.setInterval(() => {
+          this.download.downlaodInval = window.setInterval(() => {
             this.playerDownloadProgress();
-          }, 100000); */
+          }, 1000);
         } else {
         }
       }).catch(error => {
@@ -754,7 +769,7 @@ export default {
     },
     playerDownloadProgress () {
       // getVideoFileDownProgress
-      console.log('this.download.recordData', this.download.recordData);
+      // console.log('this.download.recordData', this.download.recordData);
       let sparam = '?';
       // let aa = [];
       sparam += 'deviceId=' + this.oData.video.uid;
@@ -786,6 +801,8 @@ export default {
           if (flag) { // 下载完毕
             window.clearInterval(this.download.downlaodInval);
           }
+        } else {
+          window.clearInterval(this.download.downlaodInval);
         }
         /* if (res && res.data) {
           if (res.data.progress >= 100 && this.download.downlaodInval) {
@@ -800,9 +817,21 @@ export default {
         window.clearInterval(this.download.downlaodInval);
       });
     },
+    downloadFile (item) {
+      console.log(item);
+      let $iframe = $('<iframe id="down-file-iframe" />');
+			let $form = $('<form target="down-file-iframe" method="post" />');
+			$form.attr('action', item.downUrl);
+			/* for (var key in config.data) {
+			  $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+			} */
+			$iframe.append($form);
+			$(document.body).append($iframe);
+      $form[0].submit();
+      $iframe.remove();
+    },
     downloadClosed () {
       this.download.downloadBtnLoading = false;
-      this.download.downlaodSliderDis = false;
       this.download.progressVal = 0;
       if (this.download.downlaodInval) {
         window.clearInterval(this.download.downlaodInval);
