@@ -18,7 +18,7 @@
         <li v-for="(item, index) in videoRecordList" :key="'vrl_' + index">
           <div v-if="item">
             <div class="vt_ct">
-              <h3 title="录像时间 2018-12-25 10:25 - 2018-12-25 10:25">
+              <h3>
                 录像时间&nbsp;{{item.video.startTime | fmTimestamp('yyyy-MM-dd HH:mm:ss')}}
               </h3>
               <div>
@@ -203,7 +203,8 @@ export default {
 			} */
 			$iframe.append($form);
 			$(document.body).append($iframe);
-			$form[0].submit();
+      $form[0].submit();
+      $iframe.remove();
     },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;

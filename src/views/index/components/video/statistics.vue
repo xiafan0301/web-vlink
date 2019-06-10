@@ -260,12 +260,12 @@ export default {
     }
   },
   mounted () {
-    this.getDeviceTotalList();
+    // this.getDeviceTotalList();
 
     this.initContentSize();
     // this.getChar11Data(); // 设备智能化
     // this.getChar13Data(); // 设备类型
-    this.getChar2Data(); // 运行状况
+    // this.getChar2Data(); // 运行状况
     this.searchForm3Submit();
     this.searchForm4Submit();
     this.searchForm5Submit();

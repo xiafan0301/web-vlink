@@ -192,13 +192,14 @@
         <el-progress type="circle" 
           :width="200" 
           :stroke-width="16"
-          :percentage="patrolStartPercentage" 
-          color="#1073F8"
-          status="text">
-          <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
+          :percentage="patrolStartPercentage"
+          :format="patrolProgFormat"
+          :show-text="true"
+          color="#1073F8">
+          <!-- <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
             {{Math.ceil(patrolStartSecond / 10)}}
           </p>
-          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P>
+          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P> -->
         </el-progress>
       </div>
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
@@ -309,6 +310,10 @@ export default {
   },
   methods: {
     /* 轮巡控制事件 begin */
+    patrolProgFormat (percentage) {
+      // return Math.round(percentage) + '秒';
+      return Math.ceil(this.patrolStartSecond / 10)  + ' 秒';
+    },
     // 获取轮巡数据定时器
     patrolSetDataVal () {
       this.patrolDataVal = window.setInterval(() => {
@@ -325,7 +330,7 @@ export default {
       getVideoCurrentRound().then(res => {
         if (res && res.data) {
           let patrolData = res.data;
-  /*         let patrolData =
+          /* let patrolData =
           {
             currentRound: {
               uid: '111', // 轮巡记录标识
@@ -447,33 +452,32 @@ export default {
           console.log("mdfVideoRoundState error：", error);
         });
       }
+      this.patrolNextStart();
+    },
+    // 开始执行下一个轮巡
+    patrolNextStart () {
       this.patrolClearDataVal();
+      this.patrolClearCurrent();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
         status: 2
       }).then(() => {
-        // 开始执行下一个轮巡
-        this.patrolNextStart();
+        let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
+        if (iT > 0) {
+          iT = Math.round(iT / 1000);
+        }
+        let op = {
+          currentRound: this.patrolHandlerData.nextRound,
+          currentRoundRemain: iT
+        }
+        this.patrolClearNext();
+        this.patrolStart(op);
         // 获取轮巡数据
         this.patrolSetDataVal();
       }).catch(error => {
         this.patrolSetDataVal();
         console.log("mdfVideoRoundState error：", error);
       });
-    },
-    // 开始执行下一个轮巡
-    patrolNextStart () {
-      this.patrolClearCurrent();
-      let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
-      if (iT > 0) {
-        iT = Math.round(iT / 1000);
-      }
-      let op = {
-        currentRound: this.patrolHandlerData.nextRound,
-        currentRoundRemain: iT
-      }
-      this.patrolClearNext();
-      this.patrolStart(op);
     },
     // 关闭下一个轮巡
     patrolNextClose () {

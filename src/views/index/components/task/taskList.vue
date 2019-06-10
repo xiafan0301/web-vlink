@@ -207,9 +207,9 @@ export default {
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
       if(obj.dispatchType == 2) {
-        this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, objType: obj.objType}});
+        this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType, objType: obj.objType}});
       }else {
-        this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid}});
+        this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType}});
       }
     },
     getOneMonth () { // 设置默认一个月
