@@ -13,19 +13,19 @@
       <div class="content-body">
         <el-form :model="addRoom" :rules="rules" ref="addRoom" label-width="90px">
           <el-form-item label="点室名称:" prop="roomName">
-            <el-input style="width: 40%;" placeholder="请输入点室名称" v-model="addRoom.roomName"></el-input>
+            <el-input style="width: 600px;" placeholder="请输入点室名称" v-model="addRoom.roomName"></el-input>
           </el-form-item>
           <el-form-item label="点室编号:" prop="roomNumber">
             <el-input style="width: 40%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber"></el-input>
           </el-form-item>
           <el-form-item label="所属单位:" prop="organId">
             <el-select style="width: 40%;" v-model="addRoom.organId" placeholder="请选择所属单位">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+              <el-option
+                v-for="(item, index) in departmentList"
                 :key="index"
                 :label="item.organName"
                 :value="item.uid"
-              ></el-option> -->
+              ></el-option>
             </el-select>
           </el-form-item>
            <el-form-item label="责任人:" prop="dutyUserName">
@@ -35,7 +35,7 @@
             <el-input style="width: 40%;" placeholder="请输入联系电话" v-model="addRoom.userMobile"></el-input>
           </el-form-item>
           <el-form-item label="所属地址:" prop="address">
-            <el-select style="width: 40%;" v-model="addRoom.province" placeholder="省">
+            <el-select style="width: 200px;" v-model="addRoom.province" placeholder="省">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -43,7 +43,7 @@
                 :value="item.uid"
               ></el-option> -->
             </el-select>
-            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="市">
+            <el-select style="width: 100px;" v-model="addRoom.address" placeholder="市">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -51,7 +51,7 @@
                 :value="item.uid"
               ></el-option> -->
             </el-select>
-            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="县">
+            <el-select style="width: 100px;" v-model="addRoom.address" placeholder="县">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -59,7 +59,7 @@
                 :value="item.uid"
               ></el-option> -->
             </el-select>
-            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="镇">
+            <el-select style="width: 100px;" v-model="addRoom.address" placeholder="镇">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -67,7 +67,7 @@
                 :value="item.uid"
               ></el-option> -->
             </el-select>
-            <el-select style="width: 40%;" v-model="addRoom.address" placeholder="区">
+            <el-select style="width: 100px;" v-model="addRoom.address" placeholder="区">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -99,6 +99,7 @@
 </template>
 <script>
 import { validatePhone } from '@/utils/validator.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -138,11 +139,33 @@ export default {
           { max: 150, message: '最多输入150个字', trigger: 'blur' }
         ]
       },
+      userInfo: {}, // 用户信息
+      departmentList: [], // 部门列表
     }
   },
   mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.getDepartList();
   },
   methods: {
+    // 获取当前部门及子级部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.userInfo.organList[0].uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList.push(this.userInfo.organList[0]);
+            res.data.list.map(item => {
+              this.departmentList.push(item);
+            });
+          }
+        })
+    },
     // 取消提交
     cancelSubmit (form) {
       this.$refs[form].resetFields();

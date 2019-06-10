@@ -199,7 +199,7 @@
                     <el-form-item label="" v-if="taskList.length === (index + 1)">
                       <div class="add-ctc" @click="addTask('form' + index)">
                         <i class="vl_icon vl_icon_event_8"></i>
-                        <span>调度指挥任务添加</span>
+                        <span>添加调度任务</span>
                       </div>
                     </el-form-item>
                   </el-form>

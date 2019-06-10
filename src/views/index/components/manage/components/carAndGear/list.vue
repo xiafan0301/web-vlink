@@ -91,6 +91,9 @@
           prop="onlineState"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.onlineState === 1 ? '出车': '在库'}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="280" fixed="right">
           <template slot-scope="scope">
@@ -273,6 +276,7 @@ export default {
                 customClass: 'request_tip'
               });
               this.getList();
+              this.isDeleteLoading = false;
               this.deleteDialog = false;
             } else {
               this.isDeleteLoading = false;
