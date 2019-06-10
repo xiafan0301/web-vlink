@@ -24,10 +24,11 @@
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div v-else><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
-          <li>
+          <li style="width: 30%;">
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
-            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
@@ -310,17 +311,17 @@
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
     <div class="manage_f_box" v-if="controlState === 2">
-      <el-button type="primary" @click="skip(3)">编辑</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skip(3)">编辑</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
     <div class="manage_f_box" v-if="controlState === 1">
-      <el-button type="primary" @click="showDialog('stopDialog')">终止</el-button>
+      <el-button class="select_btn btn_100" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
     <div class="manage_f_box" v-if="controlState === 3">
-      <el-button type="primary" @click="skipIsCreate">复用</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skipIsCreate">复用</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog

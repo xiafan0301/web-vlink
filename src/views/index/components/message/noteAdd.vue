@@ -64,8 +64,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button type="primary" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
-        <el-button @click.native="skip(1)">返回</el-button>
+        <el-button class="select_btn btn_100" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
+        <el-button class="reset_btn btn_100" @click.native="skip(1)">返回</el-button>
       </div>
     </div>
     <div class="rec_dialog">
@@ -104,8 +104,8 @@
           </div>
         </div>
         <div slot="footer">
-          <el-button @click="recDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="getRecipient">确认</el-button>
+          <el-button @click="recDialog = false" class="reset_btn btn_100">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_100" @click="getRecipient">确认</el-button>
         </div>
       </el-dialog>
     </div>

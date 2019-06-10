@@ -81,9 +81,9 @@
         </div>
       </div>
       <div class="add_footer">
-        <el-button v-if="pageType === 2" type="primary" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
-        <el-button v-if="pageType === 4" type="primary" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
-        <el-button @click.native="skip(1)">返回</el-button>
+        <el-button v-if="pageType === 2" class="select_btn btn_100" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
+        <el-button v-if="pageType === 4" class="select_btn btn_100" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
+        <el-button @click.native="skip(1)" class="reset_btn btn_100">返回</el-button>
       </div>
     </div>
   </div>

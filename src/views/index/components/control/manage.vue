@@ -7,7 +7,7 @@
           <el-form :inline="true" ref="manageForm" :model="manageForm" class="manage_form">
             <el-form-item prop="type">
               <el-select v-model="manageForm.type" placeholder="布控类型">
-                <el-option label="全部" :value="null"></el-option>
+                <el-option label="全部类型" :value="null"></el-option>
                 <el-option
                   v-for="item in typeList"
                   :key="item.value"
@@ -18,7 +18,7 @@
             </el-form-item>
             <el-form-item prop="state">
               <el-select v-model="manageForm.state" placeholder="布控状态">
-                <el-option label="全部" :value="null"></el-option>
+                <el-option label="全部状态" :value="null"></el-option>
                 <el-option
                   v-for="item in stateList"
                   :key="item.value"
@@ -29,7 +29,7 @@
             </el-form-item>
             <el-form-item prop="alarmId">
               <el-select v-model="manageForm.alarmId" placeholder="告警级别">
-                <el-option label="全部" :value="null"></el-option>
+                <el-option label="全部告警等级" :value="null"></el-option>
                 <el-option
                   v-for="item in alarmLevelList"
                   :key="item.value"
@@ -87,8 +87,8 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" type="primary" @click="getControlList">查询</el-button>
-              <el-button class="reset_btn" type="primary" plain @click="resetForm">重置</el-button>
+              <el-button class="select_btn" @click="getControlList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
