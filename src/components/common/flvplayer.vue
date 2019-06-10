@@ -659,7 +659,7 @@ export default {
       if ((this.download.allEndTime - this.download.allStartTime) / 1000 < this.download.downlaodMaxVal) {
         this.download.downlaodMaxVal = (this.download.allEndTime - this.download.allStartTime) / 1000;
       }
-      this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
+      // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
       console.log('downloadStartTimeChanged', val)
@@ -710,7 +710,8 @@ export default {
             fileId: obj.fileId,
             offset: offset,
             duration: duration,
-            progress: 0
+            progress: 0,
+            downUrl: ''
             // startTime: formatDate();
           }
           rDataSize += 1;
@@ -757,7 +758,7 @@ export default {
       let sparam = '?';
       // let aa = [];
       sparam += 'deviceId=' + this.oData.video.uid;
-      for(var i in this.download.recordData) {
+      for(let i in this.download.recordData) {
         sparam += '&recordId=' + this.download.recordData[i].recordId;
         // aa.push(this.download.recordData[i].recordId);
       }
@@ -767,8 +768,25 @@ export default {
       } */
       getVideoFileDownProgressBatch(sparam).then(res => {
         if (res && res.data && res.data.batchCamRealRecordDto) {
+          let rd = res.data.batchCamRealRecordDto;
+          let flag = true;
+          for(let j in rd) {
+            for(let k in this.download.recordData) {
+              if (j === this.download.recordData[k].recordId) {
+                this.download.recordData[k].progress = rd[j].progress;
+                if (this.download.recordData[k].progress >= 100) {
+                  this.download.recordData[k].progress = 100;
+                  this.download.recordData[k].downUrl = rd[j].downUrl;
+                } else {
+                  flag = false;
+                }
+              }
+            }
+          }
+          if (flag) { // 下载完毕
+            window.clearInterval(this.download.downlaodInval);
+          }
         }
-        window.clearInterval(this.download.downlaodInval);
         /* if (res && res.data) {
           if (res.data.progress >= 100 && this.download.downlaodInval) {
             this.download.progressVal = 100;
