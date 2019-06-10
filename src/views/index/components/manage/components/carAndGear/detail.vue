@@ -230,7 +230,7 @@
 </vue-scroll>
 </template>
 <script>
-import { getVehicleDetail } from '@/views/index/api/api.archives.js';
+import { getVehicleDetail, delVehicle } from '@/views/index/api/api.archives.js';
 export default {
   data () {
     return {
@@ -399,14 +399,34 @@ export default {
     },
     // 跳至编辑页面
     skipEditPage () {
-      this.$router.push({name: 'room_edit'});
+      this.$router.push({name: 'car_edit', query: { id: this.detailInfo.uid }});
     },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteDialog = true;
     },
     // 确认删除
-    sureDelete () {},
+    sureDelete () {
+      if (this.detailInfo.uid) {
+        this.isDeleteLoading = true;
+        delVehicle(this.detailInfo.uid)
+          .then(res => {
+            if (res) {
+              this.isDeleteLoading = false;
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.$router.push({name: 'car_gear'});
+              this.deleteDialog = false;
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
     // 返回
     back () {
       this.$router.back(-1);

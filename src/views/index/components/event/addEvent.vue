@@ -101,13 +101,13 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
-                    <el-radio label="无"></el-radio>
-                    <el-radio label="不确定"></el-radio>
-                    <el-radio label="有"></el-radio>
+                <el-form-item label="伤亡人员:" prop="casualtieName" label-width="85px">
+                  <el-radio-group v-model="addEventForm.casualtieName" style='width: 230px'>
+                    <el-radio label="无" value="无"></el-radio>
+                    <el-radio label="不确定" value="不确定"></el-radio>
+                    <el-radio label="有" value="有"></el-radio>
                   </el-radio-group>
-                  <template v-if="addEventForm.casualties === '有'">
+                  <template v-if="addEventForm.casualtieName === '有'">
                     <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
                     <span style='margin-left:1%'>人</span>
                     <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
@@ -189,7 +189,8 @@ export default {
         eventDetail: '', // 事件情况
         eventType: '', // 事件类型
         eventLevel: '', // 事件等级
-        casualties: '不确定', // 伤亡人员 --默认不确定
+        casualtieName: '不确定', // 伤亡人员 --默认不确定
+        casualties: '',
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
@@ -299,7 +300,6 @@ export default {
           const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
 
           geocoder.getAddress(lnglatXY, function (status, result) {
-            console.log('result', result)
             if (status === 'complete' && result.info === 'OK') {
               _this.addEventForm.areaCode = result.regeocode.addressComponent.adcode;
               _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
@@ -396,12 +396,12 @@ export default {
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
-            console.log('44444', result)
             if (status === 'complete' && result.info === 'OK') {
               _this.addEventForm.areaCode = result.geocodes[0].adcode;
               _this.addEventForm.longitude = result.geocodes[0].location.lng;
               _this.addEventForm.latitude = result.geocodes[0].location.lat;
-              _this.mapMark(_this.addEventForm);
+
+              _this.mapMark(_this.addEventForm.longitude, _this.addEventForm.latitude, _this.addEventForm.eventAddress);
             }
           });
         })
@@ -495,11 +495,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg = /^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';
@@ -567,11 +567,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg =/^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';

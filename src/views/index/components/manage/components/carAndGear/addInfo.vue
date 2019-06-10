@@ -101,7 +101,7 @@ export default {
         vehicleType: null, // 车辆类型
         capacityPeople: null, // 核载人数
         vehicleColor: null, // 车身颜色
-        lnumberType: null, // 号牌种类
+        numberType: null, // 号牌种类
         numberColor: null, // 号牌颜色
         organId: null, // 所属单位
         deviceNo: null, // 设备账号
