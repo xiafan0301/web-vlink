@@ -203,7 +203,8 @@ export default {
 			} */
 			$iframe.append($form);
 			$(document.body).append($iframe);
-			$form[0].submit();
+      $form[0].submit();
+      $iframe.remove();
     },
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
