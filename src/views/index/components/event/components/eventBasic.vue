@@ -2,7 +2,7 @@
   <div class="basic-info">
     <div class="header">
       <i class="vl_icon vl_icon_event_4"></i>
-      <span>事件编号：{{basicInfo.eventCode}}</span>
+      <span>事件编号：{{basicInfo.eventCode ? basicInfo.eventCode : '无'}}</span>
     </div>
     <div class="event-status-img">
       <template v-if="status === 'unhandle'">
@@ -22,15 +22,15 @@
       <div class='basic-list'>
         <div>
           <span class='title'>事件类型：</span>
-          <span class='content'>{{basicInfo.eventTypeName}}</span>
+          <span class='content'>{{basicInfo.eventTypeName ? basicInfo.eventTypeName : '无'}}</span>
         </div>
         <div>
           <span class='title'>事件等级：</span>
-          <span class='content'>{{basicInfo.eventLevelName}}</span>
+          <span class='content'>{{basicInfo.eventLevelName ? basicInfo.eventLevelName : '无'}}</span>
         </div>
         <div>
           <span class='title'>报案时间：</span>
-          <span class='content'>{{basicInfo.reportTime}}</span>
+          <span class='content'>{{basicInfo.reportTime ? basicInfo.reportTime : '无'}}</span>
         </div>
       </div>
       <div class='basic-list'>
@@ -57,7 +57,7 @@
         </div>
         <div style='width: 65%'>
           <span class='title'>事发地点：</span>
-          <span class='content'>{{basicInfo.eventAddress}}</span>
+          <span class='content'>{{basicInfo.eventAddress ? basicInfo.eventAddress : '无'}}</span>
         </div>
       </div>
       <div class='basic-list'>
@@ -77,7 +77,7 @@
       <div class='basic-list'>
         <div style='width: 100%'>
           <span class='title'>事件情况：</span>
-          <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
+          <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail ? basicInfo.eventDetail : '无'}}</span>
         </div>
       </div>
       <div class='upload_box'>

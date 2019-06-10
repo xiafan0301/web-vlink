@@ -23,3 +23,14 @@ export const apiAreaServiceDeviceList = (data) => {
     mode: baseModeName
   })
 }
+/**
+ * 通过区域编码查询下级区域数据列表
+ */
+export const apiAreaList = (data) => {
+  return request({
+    url: '/area-service/subordinate-area-list',
+    method: 'get',
+    params: data,
+    mode: baseModeName
+  })
+}

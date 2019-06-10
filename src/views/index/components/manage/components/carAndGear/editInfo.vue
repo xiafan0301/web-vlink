@@ -39,13 +39,13 @@
               <el-option
                 v-for="(item, index) in vehicleColorList"
                 :key="index"
-                :label="item.label"
-                :value="item.value"
+                :label="item.enumValue"
+                :value="item.enumField"
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="号牌种类:" prop="lnumberType">
-            <el-select style="width: 40%;" v-model="editCar.lnumberType" placeholder="请选择号牌种类">
+          <el-form-item label="号牌种类:" prop="numberType">
+            <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -59,12 +59,12 @@
           </el-form-item>
           <el-form-item label="所属单位:" prop="organId">
             <el-select style="width: 40%;" v-model="editCar.organId" placeholder="请选择所在部门单位">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+              <el-option
+                v-for="(item, index) in departmentList"
                 :key="index"
                 :label="item.organName"
                 :value="item.uid"
-              ></el-option> -->
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="设备账号:" prop="deviceNo">
@@ -85,7 +85,8 @@
 </template>
 <script>
 import { validatePersonNum, checkPlateNumber } from '@/utils/validator.js';
-import { vehicleTypeList, vehicleColorList } from '@/utils/data.js';
+import { vehicleTypeList, dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getVehicleDetail, updateVehicle } from '@/views/index/api/api.archives.js';
 export default {
@@ -100,8 +101,8 @@ export default {
         vehicleType: null, // 车辆类型
         capacityPeople: null, // 核载人数
         vehicleColor: null, // 车身颜色
-        lnumberType: null, // 号牌种类
-        numberColor: '蓝底白色', // 号牌颜色
+        numberType: null, // 号牌种类
+        numberColor: null, // 号牌颜色
         organId: null, // 所属单位
         deviceNo: null, // 设备账号
         devicePassword: null // 访问密码
@@ -127,20 +128,34 @@ export default {
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ]
       },
+      userInfo: {}, // 用户信息
       vehicleTypeList: [], // 车辆类型
       vehicleColorList: [], // 车身颜色
       departmentList: [], // 部门列表
     }
   },
   mounted () {
+    this.userInfo = this.$store.state.loginUser;
     this.editCar.uid = this.$route.query.id;
 
     this.vehicleTypeList = vehicleTypeList;
-    this.vehicleColorList = vehicleColorList;
 
+    this.getVehicleColor();
     this.getDetail();
+    this.getDepartList();
   },
   methods: {
+    // 获取车身颜色
+    getVehicleColor () {
+      const color = dataList.vehicleColor;
+      getDiciData(color)
+        .then(res => {
+          if (res) {
+            this.vehicleColorList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取车辆详情
     getDetail () {
       const vehicleId = this.$route.query.id;
@@ -154,7 +169,7 @@ export default {
               this.editCar.vehicleType = res.data.vehicleType;
               this.editCar.capacityPeople = res.data.capacityPeople;
               this.editCar.vehicleColor = res.data.vehicleColor;
-              this.editCar.lnumberType = res.data.lnumberType;
+              this.editCar.numberType = res.data.numberType;
               this.editCar.organId = res.data.organId;
               this.editCar.deviceNo = res.data.deviceNo;
               this.editCar.devicePassword = res.data.devicePassword;

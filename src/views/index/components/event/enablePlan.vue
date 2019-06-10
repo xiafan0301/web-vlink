@@ -189,7 +189,7 @@
               <template v-if="!isInitial">
                 <div class="add-ctc" @click="addTask" v-if="taskList.length === (index + 1)">
                   <i class="vl_icon vl_icon_event_8"></i>
-                  <span>调度指挥任务添加</span>
+                  <span>添加调度任务</span>
                 </div>
               </template>
             </div>
@@ -197,7 +197,7 @@
               <div class="plan_add_box">
                 <div class="add-ctc" @click="initAddTask">
                   <i class="vl_icon vl_icon_event_8"></i>
-                  <span>调度指挥任务添加</span>
+                  <span>添加调度任务</span>
                 </div>
               </div>
             </template>
@@ -399,7 +399,13 @@ export default {
                   message: '启用成功',
                   customClass: 'request_tip'
                 });
-                this.$router.back(-1);
+                if (this.$route.query.type === 'ctc') {
+                  this.$router.push({name: 'ctc_detail_info', query: {id: this.$route.query.eventId, status: this.$route.query.status}});
+                } else if (this.$route.query.type === 'alarm_ctc') {
+                  this.$router.push({name: 'alarm_ctc_detail_info', query: { id: this.$route.query.eventId, status: this.$route.query.status, objType: this.$route.query.objType }});
+                } else {
+                  this.$router.push({name: 'treating_event_detail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
+                }
                 this.isEnableLoading = false;
               } else {
                 this.$message({
