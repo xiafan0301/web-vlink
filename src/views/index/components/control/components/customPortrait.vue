@@ -83,8 +83,7 @@
         :close-on-click-modal="false"
         width="482px"
         top="40vh">
-        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要删除该分组吗？</h1>
-        <p class="vl_f_12 vl_f_999">删除后该分组人像将找不到。</p>
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定删除该组？</h1>
         <div slot="footer">
           <el-button @click="delGroupDialog = false" class="reset_btn btn_140">取消</el-button>
           <el-button :loading="loadingBtn" class="select_btn btn_140" @click="delPortraitGroupById">确认</el-button>

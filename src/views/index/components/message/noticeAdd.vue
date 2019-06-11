@@ -3,7 +3,7 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">公共管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">公告管理</el-breadcrumb-item>
         <el-breadcrumb-item>{{pageType === 2 ? '新增': '修改' }}公告</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -17,14 +17,14 @@
             <el-input
               maxlength="200"
               type="textarea"
-              :rows="4"
+              :rows="5"
               placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
           </el-form-item>
           <el-form-item style="width: 736px;">
             <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M)</p>
+            <p class="vl_f_999" style="line-height: 20px;">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M)</p>
           </el-form-item>
         </el-form>
       </div>

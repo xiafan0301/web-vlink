@@ -17,7 +17,7 @@
             <el-input
               maxlength="200"
               type="textarea"
-              :rows="4"
+              :rows="5"
               placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>

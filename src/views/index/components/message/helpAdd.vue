@@ -48,7 +48,7 @@
           </el-form-item>
           <el-form-item>
             <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :maxSize="9" :flag="1"></div>
-            <p class="vl_f_999">（只能上传视频或图片，视频最多1个，图片最多9张）</p>
+            <p class="vl_f_999" style="line-height: 20px;">(只能上传视频或图片，视频最多1个，图片最多9张)</p>
           </el-form-item>
           <el-form-item label="推送消息:">
             <el-radio-group v-model="addForm.radius">
@@ -83,9 +83,20 @@
       <div class="add_footer">
         <el-button v-if="pageType === 2" class="select_btn btn_100" :loading="loadingBtn" @click="addMutualHelp('addForm')">确定发布</el-button>
         <el-button v-if="pageType === 4" class="select_btn btn_100" :loading="loadingBtn" @click="putMutualHelp('addForm')">确定发布</el-button>
-        <el-button @click.native="skip(1)" class="reset_btn btn_100">返回</el-button>
+        <el-button @click.native="toGiveUpDialog = true" class="reset_btn btn_100">返回</el-button>
       </div>
     </div>
+    <el-dialog
+      :visible.sync="toGiveUpDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否放弃本次操作？</h4>
+      <div slot="footer">
+        <el-button :loading="loadingBtn" @click="skip(1)" class="select_btn btn_140">放弃</el-button>
+        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -135,6 +146,7 @@ export default {
         }
       }),
       loadingBtn: false,
+      toGiveUpDialog: false,
       hId: null,//民众互助id，用于修改
       // 地图参数
       map: null,

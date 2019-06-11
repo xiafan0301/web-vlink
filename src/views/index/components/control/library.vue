@@ -26,14 +26,14 @@
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
           </div>
@@ -46,7 +46,7 @@
               v-model="libPortraitForm.perTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -104,7 +104,7 @@
               v-model="libVehicleForm.carTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -674,10 +674,10 @@ export default {
           {required: true, message: '请填写车牌号码', trigger: 'blur'},
           {validator: checkPlateNumber, trigger: 'blur'}
         ],
-        vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
-        vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
-        numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
-        numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
+        // vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
+        // vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
+        // numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
+        // numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
       },
       lastIdNo: null,
       lastCarIdNo: null,
@@ -1293,13 +1293,13 @@ export default {
           margin-left: 10px;
         }
         &.active{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
         }
         &:hover{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
@@ -1326,10 +1326,10 @@ export default {
             }
           }
           &.active{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
           &:hover{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
         }
       }
@@ -1501,13 +1501,14 @@ export default {
       .el-upload--picture-card{
         width: 160px;
         height: 160px;
-        background: rgba(67,140,238,1);
+        background: #F2F2F2;
         border-radius: 20px;
         i{
           width: 120px;
           height: 110px;
         }
         &:hover{
+          background: #0C70F8;
           i.vl_icon_control_14{
             background-position: -228px -570px;
           }

@@ -31,15 +31,15 @@
             filterable
             remote
             clearable
-            value-key="value"
+            value-key="uid"
             placeholder="请输入布控对象"
             :remote-method="getControlObject"
             :loading="loading">
             <el-option
               v-for="item in controlObjDropdownList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.uid"
+              :label="item.name"
+              :value="item">
             </el-option>
           </el-select>
         </el-form-item>
@@ -195,7 +195,11 @@ export default {
       mapForm: {
         name: null,
         event: null,
-        obj: null,
+        obj: {
+          objId: null,
+          objType: null,
+          name: null
+        },
         state: 1,
         type: null,
         alarmId: null,
@@ -278,12 +282,7 @@ export default {
       }
       getControlObject(params).then(res => {
         if (res && res.data) {
-          this.controlObjDropdownList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+          this.controlObjDropdownList = res.data;
         }
       })
     },
@@ -357,7 +356,9 @@ export default {
         surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
         eventId: this.mapForm.event,//事件Id
-        surveillanceObjectId: this.mapForm.obj//布控对象id
+        surveillanceObjectId: this.mapForm.obj.objId,//布控对象id
+        surveillanceObjectType: this.mapForm.obj.objType,//布控对象类型
+        surveillanceObjectName: this.mapForm.obj.name//布控对象名称
       }
       this.loadingBtn = true;
       getControlMap(params).then(res => {
@@ -367,7 +368,7 @@ export default {
             if (this.map) {
               this.map.remove(this.markerList);
             }
-            this.$message.error('无设备匹配');
+            this.$message.warning('无设备匹配');
             return;
           }
           let data = [];

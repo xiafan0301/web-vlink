@@ -61,6 +61,7 @@ export default {
         cursor: pointer;
       }
     }
+    // 重置按钮样式
     .select_btn, .reset_btn {
       width: 80px;
     }
@@ -81,6 +82,10 @@ export default {
       background-color: #ffffff;
       color: #666666;
       border-color: #DDDDDD;
+    }
+    // 重置日期选择框样式
+    .el-range__icon.el-icon-date{
+      display: none;
     }
   }
 }

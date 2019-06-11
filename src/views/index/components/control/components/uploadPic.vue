@@ -153,7 +153,10 @@ export default {
 </script>
 <style lang="scss">
   .upload_pic_components{
-    max-height: 232px;
+    height: 117px;
+    > div:first-child{
+      height: 100%;
+    }
     .el-upload-list__item{
       width:104px !important;
       height:104px !important;

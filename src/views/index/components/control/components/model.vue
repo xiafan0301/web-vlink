@@ -63,8 +63,15 @@
       <div :id="mapId"></div>
       <div class="manage_d_s_m_l">
         <!-- 人员追踪/车辆追踪 -->
-        <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
-          <el-input v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+        <div class="manage_t" style="height: 130px;padding: 20px 20px;position: relative;" v-if="modelType === '1' || modelType === '2'">
+          <el-popover
+            placement="right"
+            width="200"
+            trigger="hover"
+            content="输入追踪点后可以改变范围半径大小">
+            <el-input slot="reference" v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+          </el-popover>
+          <span v-show="scopeRadius" style="position: absolute;top: 30px;left: 52px;">km</span>
           <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option
               v-for="item in featuresTypeList"
@@ -140,10 +147,16 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="area top" v-if="modelType === '4' && !isDisabled" @click="bindDraw" :class="{'active': selAreaAcitve}">
-          <i class="vl_icon vl_icon_041"></i>
-          <p>选中区域</p>
-        </div>
+        <el-popover
+          placement="left"
+          width="200"
+          trigger="hover"
+          content="单击选择范围，双击完成">
+          <div slot="reference" class="area top" v-show="modelType === '4' && !isDisabled" @click="bindDraw" :class="{'active': selAreaAcitve}">
+            <i class="vl_icon vl_icon_041"></i>
+            <p>选中区域</p>
+          </div>
+        </el-popover>
         <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom()"></i></div>
         <ul class="bottom">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
@@ -259,7 +272,6 @@ export default {
       zoomLevel: 10,
       mouseTool: null,
       selAreaAcitve: false,
-      selAreaAble: false,
       selAreaCircle: [],
       trackPointData: [],
       selAreaPolygon: null,
@@ -281,7 +293,7 @@ export default {
       devId: null,//设备列表id
       featuresId: null,//设备特性
       featuresTypeList: [
-        {label: '不限', value: null},
+        {label: '不限特性', value: null},
         {label: '人脸识别', value: 1},
         {label: '结构分析', value: 2},
         {label: '车辆识别', value: 3},
@@ -910,28 +922,6 @@ export default {
       })
       _this.map = map;
       if (_this.modelType !== '3') {
-        map.on('mouseover', function() {
-          const currentCenter = map.getCenter(); 
-          let   _sContent = `<div class="vl_map_hover">
-            <div class="vl_map_hover_main">`
-            if (_this.modelType === '1' || _this.modelType === '2') {
-              _sContent += `<ul><li>输入追踪点后可以改变范围半径大小</li></ul>`;
-            } else if (_this.modelType === '4') {
-              _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
-            }
-            _sContent += `</div></div>`;
-          _hoverWindow = new window.AMap.InfoWindow({
-            isCustom: true,
-            closeWhenClickMap: true,
-            offset: new window.AMap.Pixel(40, 40), // 相对于基点的偏移位置
-            content: _sContent
-          });
-          _hoverWindow.open(_this.map, new window.AMap.LngLat(currentCenter.lng, currentCenter.lat));
-        })
-        map.on('mouseout', function() {
-          if (_hoverWindow) { _hoverWindow.close(); }
-        })
-        // 新增时
         if (_this.operateType === 1 || (_this.modelType === '1' && (!_this.modelDataOne || _this.modelDataOne === 1)) || (_this.modelType === '2' && (!_this.modelDataTwo || _this.modelDataTwo === 1)) || (_this.modelType === '4' && (!_this.modelDataFour || _this.modelDataFour === 1))) {
           _this.mapMark(_this.modelDevData);
         }
@@ -1142,14 +1132,14 @@ export default {
         })
       }
       
-      _this.map.setFitView();
+      // _this.map.setFitView();
     },
     // 范围分析公用方法, data:新增数据/回填数据。type:1-新增，2-回填。
     drawPolygonCommon (data, type) {
       let _this = this;
       _this.polygonLnglat = null;
       if (type === 1 && this.mouseTool) {
-        _this.selAreaRest(true);
+        _this.selAreaRest();
       }
       let polygon = new window.AMap.Polygon({
         map: _this.map,
@@ -1198,11 +1188,17 @@ export default {
         if (type === 2) {
           delObjIndex = _this.trackPointList.findIndex(p => p.latitude == data.latitude && p.longitude == data.longitude);
         } else {
-          delObjIndex = _this.trackPointList.findIndex(p => p.latitude == data.obj.getPath()[0].lat && p.longitude == data.obj.getPath()[0].lng);
+          const lngStr = data.obj.getPath().map(m => m.lng).join(',');
+          const latStr = data.obj.getPath().map(m => m.lat).join(',');
+          delObjIndex = _this.trackPointList.findIndex(p => p.latitude == latStr && p.longitude == lngStr);
         }
         const _obj = _this.trackPointList.splice(delObjIndex, 1);
-        console.log(delObjIndex, 'delObjIndex')
-        console.log(_obj, '_obj')
+        // 删除完任意范围时，对左侧的设备列表重新排序
+        _this.trackPointList.forEach((f, index) => {
+          f.tid = index + 1;
+          f.address = f.trackPointName = `范围00${index + 1}`;
+        })
+        console.log( _this.trackPointList)
         // 把覆盖物内的设备置为未选中
         for (let f of _obj[0].devList) {
           // 如果该设备还存在于其他覆盖物中，跳过此操作
@@ -1217,16 +1213,6 @@ export default {
       })
       _marker.setMap(_this.map);
       
-      // polygon.on('mouseout', function(e) {
-      //   // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-      //   setTimeout(() => {
-      //     if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-      //       return;
-      //     }
-      //     _this.map.remove(_marker);//移除删除小图标
-      //     _marker = null;
-      //   }, 100)
-      // })
       if (type === 2) {
         _this.polygonLnglat = _this.getLngLatList(data);
         if (_this.polygonLnglat) {
@@ -1235,7 +1221,6 @@ export default {
       } else {
         _this.polygonLnglat = data.obj.getPath();
         _this.selAreaPolygon = polygon;
-        _this.selAreaAble = true;
         _this.getScopeEquList(polygon);
       }
       // 过滤掉相同的marker
@@ -1901,6 +1886,10 @@ export default {
     // 绑定draw
     bindDraw () {
       let _this = this;
+      if (_this.mouseTool) {
+        _this.selAreaRest();
+        return false;
+      }
       // 在地图中添加MouseTool插件
       let mouseTool = new window.AMap.MouseTool(_this.map);
       _this.mouseTool = mouseTool;
@@ -1931,15 +1920,11 @@ export default {
       }
     },
     // 重置选择区域
-    selAreaRest (notClearPolygon) {
+    selAreaRest () {
       this.selAreaAcitve = false;
       this.mouseTool.close(true);
+      this.mouseTool = null;
       this.map.setDefaultCursor('');
-      if (!notClearPolygon && this.selAreaPolygon) {
-        this.map.remove(this.selAreaPolygon);
-        this.selAreaPolygon = null;
-        this.selAreaAble = false;
-      }
     },
     // 获取范围分析选取范围内的设备列表数据
     getScopeEquList (graphics, resDevList) {
@@ -2015,12 +2000,10 @@ export default {
 <style lang="scss" scoped>
 .control_model{
   .pic_format{
-    line-height: 40px;
     display: inline-block;
-    & > div{
+    > div{
+      line-height: 20px!important;
       white-space: nowrap;
-    }
-    & > div:nth-child(1){
       color: #0C70F8;
       cursor: pointer;
     }

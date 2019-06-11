@@ -522,7 +522,7 @@
   text-align: right;
   padding: 20px;
 }
-.cum_pagination  .btn-prev, .el-pagination .btn-next {
+.cum_pagination .btn-prev, .cum_pagination .btn-next {
   width: 32px;
   height: 32px;
   padding: 0;

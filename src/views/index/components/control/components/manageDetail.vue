@@ -167,7 +167,7 @@
                             @dragover="dragover"
                             :draggable="true"
                           >
-                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                            <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                           </li>
                         </vue-scroll>
                       </ul>
@@ -189,7 +189,7 @@
                                   @dragover="dragover"
                                   :draggable="true"
                                 >
-                                  <span>{{dev.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                  <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                                 </li>
                               </ul>
                             </el-collapse-transition>
@@ -928,7 +928,8 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
-      _this.mapMark();
+      // _this.mapMark();
+      _this.controlArea(1);
     }
   },
   destroyed () {

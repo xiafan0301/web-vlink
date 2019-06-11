@@ -451,6 +451,7 @@ export default {
           }
           .con_four{
             line-height: 20px;
+            margin-bottom: 20px;
           }
           .con_three{
             width: 106px;
@@ -465,7 +466,6 @@ export default {
           }
           .con_five{
             width: 428px;
-            padding: 20px 0;
             display: flex;
             flex-wrap: wrap;
             // > img{
