@@ -54,7 +54,7 @@ const oDomains = {
     ctc: {
       dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
       // dev: 'http://10.116.64.142:8083/api/vlink',
-      // dev: 'http://10.116.64.142:8083/api/vlink',
+      // dev: 'http://10.116.64.127:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },
