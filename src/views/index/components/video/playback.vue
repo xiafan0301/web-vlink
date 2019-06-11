@@ -29,6 +29,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -43,6 +44,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
@@ -106,6 +108,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -120,6 +123,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
