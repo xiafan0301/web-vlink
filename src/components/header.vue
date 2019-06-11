@@ -23,8 +23,8 @@
             width="378"
             trigger="click"
             :popper-class="popoverClass"
+            v-model="taskVisible"
             >
-            <vue-scroll>
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
               <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
@@ -34,6 +34,7 @@
               <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
               <p class="h_menu"><span @click="mark">全部标记为已读</span></p>
             </div>
+            <vue-scroll>
             <ul class="vl_t_b_content">
               <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
                   <div class="col_content">
@@ -47,11 +48,12 @@
               </li>
               <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
             </ul>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToTaskList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_011" @click="getTaskCount"></i>
             </el-badge>
@@ -63,9 +65,11 @@
             placement="bottom"
             width="397"
             trigger="click"
-            :popper-class="alarmPopoverClass">
-            <vue-scroll>
+            :popper-class="alarmPopoverClass"
+            v-model="alarmVisible">
+            
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
+            <vue-scroll>
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
                 <div>
@@ -95,11 +99,12 @@
                 <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToAlarmList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
             </el-badge>
@@ -270,6 +275,8 @@ export default {
       taskCount: {},
       popoverClass: 'task_popover',
       alarmPopoverClass: 'alarm_popover',
+      taskVisible: false,
+      alarmVisible: false,
     }
   },
   mounted () {
@@ -415,9 +422,19 @@ export default {
       }else {
         this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
       }
+      this.alarmVisible = false;
+    },
+    goToAlarmList() {
+      this.$router.push({name: 'alarm'});
+      this.alarmVisible = false;
+    },
+    goToTaskList() {
+      this.$router.push({name: 'task'});
+      this.taskVisible = false;
     },
     goSkipTaskDetail(item) {
-      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType}});
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType, dispatchStatus: item.dispatchStatus}});
+      this.taskVisible = false;
     },
     // 获取任务列表数据
     getTaskData () {
@@ -448,7 +465,6 @@ export default {
     mark() {
       let params = {
         userId: this.userInfo.uid,
-        departmentId: null,
       }
       markTask(params).then(res => {
         console.log(res)
@@ -574,7 +590,8 @@ export default {
 </style>
 <style lang="scss">
 .vl_hd_box {
-  max-height: 456px;
+  max-height: calc(100% - 40px);
+  height: calc(100% - 40px);
   .vl_hd_alarm{
     padding: 10px 22px;
     border-bottom: 1px solid #F2F2F2;
@@ -650,13 +667,20 @@ export default {
       }
     }
   }
+  a {
+    cursor: pointer;
+  }
 }
 .vl_task_box {
-  max-height: 456px;
-  padding: 0 30px;
+  max-height: calc(100% - 85px);
+  height: calc(100% - 85px);
   .vl_t_b_header {
     height: 48px;
     line-height: 48px;
+    padding: 0 30px;
+  }
+  .vl_t_b_content {
+    padding: 0 30px;
   }
   .vl_info {
     display: flex;
@@ -734,13 +758,18 @@ export default {
     padding: 20px 0;
     border-bottom: 1px solid #F2F2F2;
   }
+  a {
+    cursor: pointer;
+  }
 }
 .task_popover {
-  max-height: 476px;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
   padding: 12px 0;
 }
 .alarm_popover {
-  max-height: 476px;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
   padding: 12px 0;
 }
 .show_box {
