@@ -2,18 +2,6 @@
   <div class="machine_gear">
     <div class="search_box">
       <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-        <el-form-item prop="companyName">
-          <el-select  style="width: 240px;" v-model="searchForm.companyName" placeholder="所属单位">
-            <!-- <el-option value='全部车辆类型'></el-option> -->
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
-              :key="index"
-              :label="item.enumValue"
-              :value="item.enumField"
-            >
-            </el-option> -->
-          </el-select>
-        </el-form-item>
         <el-form-item prop="vehicleType">
           <el-select style="width: 240px;" v-model="searchForm.vehicleType" placeholder="类型">
             <el-option value='全部类型'></el-option>
@@ -168,6 +156,7 @@
   </div>
 </template>
 <script>
+// import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -226,6 +215,23 @@ export default {
     }
   },
   methods: {
+    // 获取当前部门及子级部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.userInfo.organList[0].uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList.push(this.userInfo.organList[0]);
+            res.data.list.map(item => {
+              this.departmentList.push(item);
+            });
+          }
+        })
+    },
     selectDataList () {},
     resetForm (form) {},
     // 跳至查看档案页面

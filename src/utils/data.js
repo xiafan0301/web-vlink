@@ -6,6 +6,8 @@ const dataList = {
   eventSource: 5, // 事件来源  中心端--1 app端--2
   participateType: 6, // 参与类型
   vehicleColor: 17, // 车身颜色
+  vehicleType: 31, // 车辆类型
+  numberType: 32, // 号牌种类
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员

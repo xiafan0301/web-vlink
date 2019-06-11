@@ -10,7 +10,12 @@
     </div>
     <div class="basic_info">
       <div class="status_img">
-        <i class="vl_icon vl_icon_archives_2"></i>
+        <template v-if="detailInfo.onlineState && detailInfo.onlineState == 1">
+          <i class="vl_icon vl_icon_archives_1"></i>
+        </template>
+        <template v-if="detailInfo.onlineState && detailInfo.onlineState == 2">
+          <i class="vl_icon vl_icon_archives_5"></i>
+        </template>
       </div>
       <div class="header member_header">
         <span>基本信息</span>
@@ -23,19 +28,19 @@
       <ul class="detail_info clearfix">
         <li>
           <span>车辆编号:</span>
-          <span>{{detailInfo.vehicleNumber}}</span>
+          <span>{{detailInfo.vehicleNumber ? detailInfo.vehicleNumber : '无'}}</span>
         </li>
         <li>
           <span>车牌号码:</span>
-          <span>{{detailInfo.transportNo}}</span>
+          <span>{{detailInfo.transportNo ? detailInfo.transportNo : '无'}}</span>
         </li>
         <li>
           <span>识别代码:</span>
-          <span>{{detailInfo.identityNo}}</span>
+          <span>{{detailInfo.identityNo ? detailInfo.identityNo : '无'}}</span>
         </li>
         <li>
           <span>车辆类型:</span>
-          <span>{{detailInfo.vehicleType}}</span>
+          <span>{{detailInfo.vehicleType ? detailInfo.vehicleTypeName : '无'}}</span>
         </li>
         <li>
           <span>核载人数:</span>
@@ -43,23 +48,23 @@
         </li>
         <li>
           <span>车身颜色:</span>
-          <span>{{detailInfo.vehicleColor}}</span>
+          <span>{{detailInfo.vehicleColor ? detailInfo.vehicleColorName : '无'}}</span>
         </li>
         <li>
           <span>所属单位:</span>
-          <span>{{detailInfo.organName}}</span>
+          <span>{{detailInfo.organName ? detailInfo.organName : '无'}}</span>
         </li>
         <li>
           <span>号牌:</span>
-          <span>{{detailInfo.numberType}}</span>
+          <span>{{detailInfo.numberType ? detailInfo.numberTypeName : '无'}}</span>
         </li>
         <li>
           <span>设备账户:</span>
-          <span>{{detailInfo.deviceNo}}</span>
+          <span>{{detailInfo.deviceNo ? detailInfo.deviceNo : '无'}}</span>
         </li>
         <li>
           <span>访问密码:</span>
-          <span>{{detailInfo.devicePassword}}</span>
+          <span>{{detailInfo.devicePassword ? detailInfo.devicePassword : '无'}}</span>
         </li>
       </ul>
     </div>
@@ -127,25 +132,27 @@
       <div class="location_box">
         <div class="location_body">
           <div class="location_left">
-            <el-form ref="searchForm" :model="searchForm"  size="middle" class="replay_form">
+            <el-form ref="searchForm" :model="tracksForm"  size="middle" class="replay_form">
               <el-form-item label="开始时间：" label-width="90px">
                 <el-date-picker
                   style="width: 200px;"
-                  v-model="searchForm.startDate"
+                  v-model="tracksForm.startDate"
                   type="datetime"
+                  clearable
                   placeholder="开始时间">
                 </el-date-picker>
               </el-form-item>
               <el-form-item label="结束时间：" label-width="90px">
                 <el-date-picker
                   style="width: 200px;"
-                  v-model="searchForm.endDate"
+                  v-model="tracksForm.endDate"
+                  clearable
                   type="datetime"
                   placeholder="结束时间">
                 </el-date-picker>
               </el-form-item>
               <el-form-item label-width="20px">
-                <el-button class="operation_btn function_btn">立即查询</el-button>
+                <el-button class="operation_btn function_btn" @click="getTracksInfo">立即查询</el-button>
               </el-form-item>
             </el-form>
             <div class="divide"></div>
@@ -230,7 +237,9 @@
 </vue-scroll>
 </template>
 <script>
-import { getVehicleDetail, delVehicle } from '@/views/index/api/api.archives.js';
+import { getVehicleDetail, delVehicle, getVehicleTracks } from '@/views/index/api/api.archives.js';
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -246,6 +255,10 @@ export default {
         startDate: null,
         endDate: null,
         passageway: null
+      },
+      tracksForm: {
+        startDate: null,
+        endDate: null
       },
       dataList: [
         {
@@ -287,13 +300,62 @@ export default {
       ],
       selectRadio: '开始', // 选中的radio
       speed: 4, // 时速
+      vehicleTypeList: [], // 车辆类型
+      numberTypeList: [], // 号牌种类
+      vehicleColorList: [], // 车身颜色
     }
   },
   mounted () {
     // this.initMap();
+    this.getVehicleColor();
+    this.getVehicleTypeList();
+    this.getNumberTypeList();
+
     this.getDetail();
   },
   methods: {
+    // 获取车身颜色
+    getVehicleColor () {
+      const color = dataList.vehicleColor;
+      getDiciData(color)
+        .then(res => {
+          if (res) {
+            this.vehicleColorList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.vehicleTypeList = res.data;
+          }
+        })
+    },
+    // 获取车辆轨迹数据
+    getTracksInfo () {
+      const params = {
+        startTime: this.tracksForm.startDate,
+        endTime: this.tracksForm.endDate
+      };
+      getVehicleTracks(params)
+        .then(res => {
+
+        })
+    },
     // 获取车辆详情
     getDetail () {
       const vehicleId = this.$route.query.id;
@@ -301,17 +363,23 @@ export default {
         getVehicleDetail(vehicleId)
           .then(res => {
             if (res) {
+              
               this.detailInfo = res.data;
-              // this.editCar.vehicleNumber = res.data.vehicleNumber;
-              // this.editCar.transportNo = res.data.transportNo;
-              // this.editCar.identityNo = res.data.identityNo;
-              // this.editCar.vehicleType = res.data.vehicleType;
-              // this.editCar.capacityPeople = res.data.capacityPeople;
-              // this.editCar.vehicleColor = res.data.vehicleColor;
-              // this.editCar.lnumberType = res.data.lnumberType;
-              // this.editCar.organId = res.data.organId;
-              // this.editCar.deviceNo = res.data.deviceNo;
-              // this.editCar.devicePassword = res.data.devicePassword;
+              this.vehicleTypeList.map(val => {
+                if (this.detailInfo.vehicleType == val.enumField) {
+                  this.detailInfo.vehicleTypeName = val.enumValue;
+                }
+              });
+              this.numberTypeList.map(val => {
+                if (this.detailInfo.numberType == val.enumField) {
+                  this.detailInfo.numberTypeName = val.enumValue;
+                }
+              });
+              this.vehicleColorList.map(val => {
+                if (this.detailInfo.vehicleColor == val.enumField) {
+                  this.detailInfo.vehicleColorName = val.enumValue;
+                }
+              });
             }
           })
       }
@@ -440,6 +508,7 @@ export default {
   width: 100%;
   margin-bottom: 80px;
   .location_info {
+    display: none;
     height: 600px;
     padding-bottom: 60px;
     .location_box {
@@ -607,6 +676,7 @@ export default {
     
   }
   .video_replay {
+    display: none;
     height: 700px;
     // width: 100%;
     padding-bottom: 50px;

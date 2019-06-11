@@ -186,7 +186,7 @@ export default {
           let params = {
             cname: i,
             uid: deviceObj[i][0].uid,
-            isOpenArrow: false,
+            isOpenArrow: true,
             isChecked: false,
             isSXT: true,
             deviceList: [],
@@ -261,7 +261,7 @@ export default {
           let params = {
             cname: i,
             uid: deviceObj[i][0].uid,
-            isOpenArrow: false,
+            isOpenArrow: true,
             isSXT: true,
             isChecked: false,
             deviceList: [],

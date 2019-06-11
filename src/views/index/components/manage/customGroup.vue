@@ -12,8 +12,8 @@
           </i>
         </el-input>
       </div>
-      <div class="add_btn">
-        <i class="vl_icon vl_icon_manage_4" @click="skipAddGroupPage"></i>
+      <div class="add_btn" @click="skipAddGroupPage">
+        <i class="vl_icon vl_icon_manage_4"></i>
         <span>新增分组</span>
       </div>
       <div class="content_box">
@@ -199,9 +199,8 @@ export default {
       display: flex;
       color: #333333;
       align-items: center;
-      i {
-        cursor: pointer;
-      }
+      width: 120px;
+      cursor: pointer;
       > span {
         margin-left: 5px;
       }

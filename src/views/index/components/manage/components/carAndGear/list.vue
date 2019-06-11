@@ -8,8 +8,8 @@
             <el-option
               v-for="(item, index) in vehicleTypeList"
               :key="index"
-              :label="item.label"
-              :value="item.value"
+              :label="item.enumValue"
+              :value="item.enumField"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -64,15 +64,21 @@
         </el-table-column>
         <el-table-column
           label="车辆类型"
-          prop="vehicleType"
+          prop="vehicleTypeName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.vehicleType && scope.row.vehicleType ? scope.row.vehicleTypeName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="号牌种类"
-          prop="numberType"
+          prop="numberTypeName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.numberType && scope.row.numberType ? scope.row.numberTypeName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="核载人数"
@@ -85,6 +91,9 @@
           prop="organName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.organName && scope.row.organName ? scope.row.organName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="出车状态"
@@ -134,8 +143,9 @@
 </template>
 <script>
 import { getVehicleList, delVehicle } from '@/views/index/api/api.archives.js';
-import { vehicleTypeList } from '@/utils/data.js';
+import { dataList } from '@/utils/data.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
     return {
@@ -143,40 +153,13 @@ export default {
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
       searchForm: {
-        vehicleType: null, // 车辆类型
-        organId: null, // 所属单位
+        vehicleType: '全部车辆类型', // 车辆类型
+        organId: '全部单位', // 所属单位
         vehicleNumber: null // 车牌号码
       },
-      dataList: [
-        {
-          number: 'D000001',
-          vechileNo: '湘N492933',
-          type: '执法车',
-          vechileType: '大型汽车号牌',
-          personNum: '4人',
-          company: '新能源公司',
-          status: '出车'
-        },
-        {
-          number: 'D000001',
-          vechileNo: '湘N492933',
-          type: '执法车',
-          vechileType: '大型汽车号牌',
-          personNum: '4人',
-          company: '新能源公司',
-          status: '出车'
-        },
-        {
-          number: 'D000001',
-          vechileNo: '湘N492933',
-          type: '执法车',
-          vechileType: '大型汽车号牌',
-          personNum: '4人',
-          company: '新能源公司',
-          status: '出车'
-        },
-      ],
+      dataList: [],
       vehicleTypeList: [], // 车辆类型
+      numberTypeList: [], // 号牌种类
       userInfo: {}, // 用户信息
       departmentList: [], // 部门列表
       deleteId: null, // 要删除的车辆id
@@ -185,12 +168,34 @@ export default {
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
-    this.vehicleTypeList = vehicleTypeList;
-
     this.getDepartList();
-    this.getList();
+    this.getVehicleTypeList();
+    this.getNumberTypeList();
+    setTimeout(() => {
+      this.getList();
+    }, 500)
   },
   methods: {
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.vehicleTypeList = res.data;
+          }
+        })
+    },
     // 获取当前部门及子级部门
     getDepartList () {
       const params = {
@@ -210,24 +215,48 @@ export default {
     },
     // 获取车辆列表
     getList () {
+      let vehicleType, organId;
       if (this.searchForm.vehicleType === '全部车辆类型') {
-        this.searchForm.vehicleType = null;
+        vehicleType = null;
+      } else {
+        vehicleType = this.searchForm.vehicleType;
       }
       if (this.searchForm.organId === '全部单位') {
-        this.searchForm.organId = null;
+        organId = null;
+      } else {
+        organId = this.searchForm.organId;
       }
       const params = {
         'where.vehicleNumber': this.searchForm.vehicleNumber,
-        'where.vehicleType': this.searchForm.vehicleType,
-        'where.organId': this.searchForm.organId,
+        'where.vehicleType': vehicleType,
+        'where.organId': organId,
         pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc'
       };
       getVehicleList(params)
         .then(res => {
           if (res) {
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
+            // if (this.vehicleTypeList.length > 0) {
+              this.dataList.map(item => {
+                item.vehicleTypeName = '';
+                item.numberTypeName = '';
+                this.vehicleTypeList.map(val => {
+                  if (item.vehicleType == val.enumField) {
+                    item.vehicleTypeName = val.enumValue;
+                  }
+                });
+                this.numberTypeList.map(val => {
+                  if (item.numberType == val.enumField) {
+                    item.numberTypeName = val.enumValue;
+                  }
+                });
+              });
+              console.log(this.dataList)
+            // }
           }
         })
     },

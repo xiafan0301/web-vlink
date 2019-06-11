@@ -74,8 +74,8 @@ const oDomains = {
     },
     // 车辆地址
     vehicle: {
-      dev: 'http://10.116.64.107:8081',
-      // dev: 'http://apidev.aorise.org/vlink-vehicle',
+      // dev: 'http://10.116.64.107:8081',
+      dev: 'http://apidev.aorise.org/vlink-vehicle',
       test: 'http://apirel.aorise.org/vlink-vehicle',
       prod: 'http://apirel.aorise.org/vlink-vehicle'
     },
