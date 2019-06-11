@@ -11,9 +11,15 @@
         <div class="basic_info">
           <div class="card-info">
             <div class="struc_c_d_qj struc_c_d_img">
-              <img :src="sturcDetail.basePortraitInfo.photoUrl" alt="布控图" v-if="sturcDetail.objType == 1">
-              <img :src="sturcDetail.vehicleInfo.vehicleImagePath" alt="布控图" v-if="sturcDetail.objType == 2">
-              <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
+              <template v-if = "sturcDetail.basePortraitInfo">
+                <img :src="sturcDetail.basePortraitInfo.photoUrl" alt="布控图" v-if="sturcDetail.objType == 1">
+              </template>
+              <template v-if = "sturcDetail.vehicleInfo">
+                <img :src="sturcDetail.vehicleInfo.vehicleImagePath" alt="布控图" v-if="sturcDetail.objType == 2">
+              </template>
+              <template v-if = "sturcDetail.appendixInfo">
+                <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
+              </template>
               <span>布控图</span>
             </div>
             <div class="struc_c_d_info">
@@ -24,6 +30,7 @@
                   <span>{{sturcDetail.basePortraitInfo.sexStr}}</span>
                   <span>{{sturcDetail.basePortraitInfo.nationStr}}</span>
                 </div>
+                <template v-if="sturcDetail.basePortraitInfo">
                 <div v-if="sturcDetail.basePortraitInfo.birthDate">
                   <div class="struc_cdu_line control_line">
                     <span>{{sturcDetail.basePortraitInfo.birthDate | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
@@ -39,6 +46,7 @@
                     <span>{{sturcDetail.basePortraitInfo.remarks}}</span><span>备注信息</span>
                   </div>
                 </div>
+                </template>
               </template>
               <template v-if="sturcDetail.objType == 2">
                 <div class="struc_cdi_line control_line" v-if="sturcDetail.vehicleInfo">
@@ -46,6 +54,7 @@
                   <span>{{sturcDetail.vehicleInfo.vehicleTypeStr}}</span>
                   <span v-if="sturcDetail.vehicleInfo.ownerName">{{sturcDetail.vehicleInfo.ownerName}}</span>
                 </div>
+                <template v-if="sturcDetail.vehicleInfo">
                 <div v-if="sturcDetail.vehicleInfo.ownerBirth">
                   <div class="struc_cdu_line control_line">
                     <span>{{sturcDetail.vehicleInfo.ownerBirth | fmTimestamp('yyyy-MM-dd')}}</span><span>出生日期</span>
@@ -61,6 +70,7 @@
                     <span>{{sturcDetail.vehicleInfo.desci}}</span><span>备注信息</span>
                   </div>
                 </div>
+                </template>
               </template>
               <template v-if="sturcDetail.surveillanceInfo">
                 <div class="control_line"><span class="left">布控编号：</span><span class="right">{{sturcDetail.surveillanceInfo.surveillanceNo || '无'}}</span></div>
@@ -80,10 +90,10 @@
               </template>
             </div>
             <div class="event-status-img">
-              <template v-if="$route.query.status === 'ctc_end'">
+              <template v-if="sturcDetail.dispatchStatus === 2">
                 <i class="vl_icon vl_icon_event_11"></i>
               </template>
-              <template v-if="$route.query.status === 'ctc_ing'">
+              <template v-if="sturcDetail.dispatchStatus === 1">
                 <i class="vl_icon vl_icon_event_13"></i>
               </template>     
             </div>
@@ -277,7 +287,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn back_btn" @click="skipCtcEndPage">反馈情况</el-button>
+        <el-button class="operation_btn back_btn" @click="skipCtcEndPage" v-if="sturcDetail.dispatchStatus !== 2">反馈情况</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
       <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
@@ -338,6 +348,15 @@ export default {
       getAlarmDetail(eventId).then( res => {
         this.sturcDetail = res.data;
         this.sturcDetail['objType'] = this.$route.query.objType;
+
+        if(this.sturcDetail.processingList && this.sturcDetail.processingList.length > 0) {
+          for(let item of this.sturcDetail.processingList) {
+              if(item.uid == this.$route.query.uid) {
+                this.opUserId = item.opUserId
+                break;
+              }
+            }
+        }
         
         this.eventSummaryLength = !!this.sturcDetail.eventInfo.eventSummary && this.sturcDetail.eventInfo.eventSummary.length;
         this.dispatchSummaryLength = !!this.sturcDetail.eventInfo.dispatchSummary && this.sturcDetail.eventInfo.dispatchSummary.length;
@@ -360,14 +379,7 @@ export default {
             }
           })
         }
-        if(this.basicInfo.processingList && this.basicInfo.processingList.length > 0) {
-          for(let item of this.basicInfo.processingList) {
-              if(item.uid == this.$route.query.uid) {
-                this.opUserId = item.opUserId
-                break;
-              }
-            }
-        }
+        
         this.$nextTick(()=> {
           this.isLoading = false;
         })
