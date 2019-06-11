@@ -655,7 +655,7 @@ export default {
         this.download.downlaodMaxVal = (this.download.allEndTime - this.download.allStartTime) / 1000;
       }
       this.download.endTime = new Date(this.download.startTime.getTime() + this.download.downlaodMaxVal * 1000);
-      this.downloadDurationTime();
+      this.downloadTimeRule();
       // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
@@ -709,9 +709,9 @@ export default {
     playerDownloadSubmit () {
       this.download.downloadBtnLoading = true;
       // 需要处理时间段
-      console.log('下载开始时间：', this.download.startTime)
+      // console.log('下载开始时间：', this.download.startTime)
       this.download.downlaodVal = Math.floor((this.download.endTime.getTime() - this.download.startTime.getTime()) / 1000);
-      console.log('下载时长：', this.download.downlaodVal)
+      // console.log('下载时长：', this.download.downlaodVal)
       let params = [], rData = {}, rDataSize = 0;
       this.download.recordDataSize = 0;
       let iStartTime = this.download.startTime.getTime();
