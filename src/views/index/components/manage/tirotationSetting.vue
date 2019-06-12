@@ -5,7 +5,7 @@
         <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
-              style="width: 400px;"
+              style="width: 260px;"
               v-model="searchForm.dateTime"
               type="daterange"
               value-format="yyyy-MM-dd"
@@ -255,8 +255,8 @@ export default {
         status = this.searchForm.status;
       }
       const params = {
-        'where.startTime': this.searchForm.dateTime[0] + '00:00:00',
-        'where.endTime': this.searchForm.dateTime[1] + '23:59:59',
+        'where.startTime': this.searchForm.dateTime[0] + ' 00:00:00',
+        'where.endTime': this.searchForm.dateTime[1] + ' 23:59:59',
         'where.status': status,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -353,8 +353,8 @@ export default {
       const end = new Date();
       const start = new Date();
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-      const startDate = formatDate(start, 'yyyy-MM-dd HH:mm:ss');
-      const endDate = formatDate(end, 'yyyy-MM-dd HH:mm:ss');
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
       this.searchForm.dateTime.push(startDate);
       this.searchForm.dateTime.push(endDate);
     },

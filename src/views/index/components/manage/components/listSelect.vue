@@ -3,7 +3,12 @@
     <div class="select_list_left">
       <div class="select_top">
         <span>已有设备 ({{leftDeviceNumber}})</span>
-        <p @click="removeDevice">移除设备</p>
+        <template v-if="hasCheckedLeft">
+          <p style="color: #0C70F8" @click="removeDevice">移除设备</p>
+        </template>
+        <template v-else>
+          <p style="cursor:default;">移除设备</p>
+        </template>
       </div>
       <template v-if="currentDeviceList && currentDeviceList.length > 0">
         <div class="detail_list">
@@ -44,7 +49,12 @@
     <div class="select_list_right">
       <div class="select_top">
         <span>可选设备 ({{selectDeviceNumber}})</span>
-        <p @click="addDeviceToLeft">添加设备</p>
+        <template v-if="hasCheckedRight">
+          <p style="color: #0C70F8" @click="addDeviceToLeft">添加设备</p>
+        </template>
+        <template v-else>
+          <p style="cursor:default;">添加设备</p>
+        </template>
       </div>
         <div class="search_box">
           <el-input placeholder="请输入设备名称" size="small" v-model="searchDeviceName">
@@ -105,9 +115,69 @@ export default {
     return {
       arrowActiveLeft: false, // 左侧展开箭头
       closeShow: false,
-      checkedDeviceList: [],
-      finalDeviceList: [], // 最终选择的设备
+      hasCheckedRight: false, // 右侧可选设备有选中的
+      hasCheckedLeft: false, // 左侧已有设备有选中的
       searchDeviceName: null // 设备名称
+    }
+  },
+  watch: {
+    selectDeviceList (val) {
+      let deviceCheckList = [], bayonetCheckList = [];
+      if (val) {
+        let checkedArr = val.filter(item => {
+          return item.isChecked === true;
+        });
+        if (checkedArr.length > 0) {
+          this.hasCheckedRight = true;
+        } else {
+          val.map(item => {
+            item.deviceList.filter(val => {
+              if (val.isChildChecked === true) {
+                deviceCheckList.push(val);
+              }
+            });
+            item.bayonetList.filter(val => {
+              if (val.isChildChecked === true) {
+                bayonetCheckList.push(val);
+              }
+            });
+          });
+          if (deviceCheckList.length > 0 || bayonetCheckList.length > 0) {
+            this.hasCheckedRight = true;
+          } else {
+            this.hasCheckedRight = false;
+          }
+        }
+      }
+    },
+    currentDeviceList (val) {
+      let deviceCheckList = [], bayonetCheckList = [];
+      if (val) {
+        let checkedArr = val.filter(item => {
+          return item.isChecked === true;
+        });
+        if (checkedArr.length > 0) {
+          this.hasCheckedLeft = true;
+        } else {
+          val.map(item => {
+            item.deviceList.filter(val => {
+              if (val.isChildChecked === true) {
+                deviceCheckList.push(val);
+              }
+            });
+            item.bayonetList.filter(val => {
+              if (val.isChildChecked === true) {
+                bayonetCheckList.push(val);
+              }
+            });
+          });
+          if (deviceCheckList.length > 0 || bayonetCheckList.length > 0) {
+            this.hasCheckedLeft = true;
+          } else {
+            this.hasCheckedLeft = false;
+          }
+        }
+      }
     }
   },
   methods: {
@@ -154,7 +224,6 @@ export default {
     addDeviceToLeft () {
       let willRemoveDevice = JSON.parse(JSON.stringify(this.selectDeviceList));
       let checkedDeviceList = [], checkedDeviceNumber = 0, selectDeviceNumber = 0, params;
-      // console.log('selectDeviceList', this.selectDeviceList);
       if (this.rightAllChecked) { // 全选
         checkedDeviceList = this.selectDeviceList;
         willRemoveDevice = [];
@@ -247,7 +316,6 @@ export default {
                 if (this.currentDeviceList[i].bayonetList[j].isChildChecked == true) {
                   params.bayonetList.push(this.currentDeviceList[i].bayonetList[j]);
                   currDeviceList[i].bayonetList.splice(j, 1);
-
                 }
               }
               if (params.deviceList.length !== 0 || params.bayonetList.length !== 0) {

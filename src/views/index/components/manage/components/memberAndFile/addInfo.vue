@@ -12,13 +12,13 @@
       <p class="title">新增成员</p>
       <div class="content-body">
         <el-form :model="addUser" :rules="rules" ref="addUser" label-width="90px">
-          <el-form-item label="成员账户:" prop="memberNo">
+          <el-form-item label="成员账户:" prop="userMobile">
             <el-select
               style="width: 40%;"
-              v-model="addUser.memberNo"
-              multiple
+              v-model="addUser.userMobile"
               filterable
               remote
+              allow-create
               reserve-keyword
               :multiple-limit="50"
               placeholder="请选择或输入成员账户"
@@ -45,20 +45,20 @@
             <el-input style="width: 40%;" placeholder="请输入邮箱" v-model="addUser.userEmail"></el-input>
           </el-form-item>
           <el-form-item label="所属单位:" prop="organId">
-            <el-select style="width: 40%;" v-model="addUser.organId" placeholder="请选择所属单位">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+            <el-select style="width: 40%;" v-model="addUser.organId" placeholder="请选择所属单位" @change="handleDepartment">
+              <el-option
+                v-for="(item, index) in departmentList"
                 :key="index"
                 :label="item.organName"
                 :value="item.uid"
-              ></el-option> -->
+              ></el-option>
             </el-select>
           </el-form-item>
-           <el-form-item label="成员编号:" prop="memberNum">
-            <el-input style="width: 40%;" placeholder="请输入成员的部门编号" v-model="addUser.memberNum"></el-input>
+           <el-form-item label="成员编号:" prop="memberNo">
+            <el-input style="width: 40%;" placeholder="请输入成员的部门编号" v-model="addUser.memberNo"></el-input>
           </el-form-item>
-          <el-form-item label="职位:" prop="job">
-            <el-select style="width: 40%;" v-model="addUser.job" placeholder="请选择职位">
+          <el-form-item label="职位:" prop="position">
+            <el-select style="width: 40%;" v-model="addUser.position" placeholder="请选择职位">
               <!-- <el-option
                 v-for="(item, index) in departmentData"
                 :key="index"
@@ -78,23 +78,27 @@
 </vue-scroll>
 </template>
 <script>
+import { validatePhone } from '@/utils/validator.js';
+import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
       loading: false,
       isAddLoading: false, // 添加加载中
       addUser: {
-        memberNo: null,
-        userName: null,
-        userSex: 1,
-        userEmail: null,
-        organId: null,
-        memberNum: null,
-        job: null
+        memberNo: null, // 成员编号
+        userName: null, // 姓名
+        userSex: 1, // 性别
+        userEmail: null, // 邮箱
+        organId: null, // 所属机构id
+        organName: null, // 所属机构名称
+        userMobile: null, // 成员账户
+        position: null // 职位
       },
       rules: {
-        memberNo: [
-          { required: true, message: '该项内容不能为空', trigger: 'blur' }
+        userMobile: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' },
+          { validator: validatePhone, trigger: 'blur' }
         ],
         userName: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
@@ -107,10 +111,41 @@ export default {
         ]
       },
       reportUserList: [],
-      userList: []
+      userList: [],
+      departmentList: [], // 部门列表
     }
   },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.getDepartList();
+  },
   methods: {
+    // 获取当前部门及子级部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.userInfo.organList[0].uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList.push(this.userInfo.organList[0]);
+            res.data.list.map(item => {
+              this.departmentList.push(item);
+            });
+          }
+        })
+    },
+    // 所属单位change
+    handleDepartment (val) {
+      this.departmentList.map(item => {
+        if (item.uid === val) {
+          this.addUser.organName = item.organName;
+        }
+      })
+    },
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
@@ -133,7 +168,24 @@ export default {
     // 确认提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        if (valid) {}
+        if (valid) {
+          this.isAddLoading = true;
+          createUser(this.addUser)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '新增成功',
+                  customClass: 'request_tip'
+                });
+                this.$router.push({name: 'member_file'});
+                this.isAddLoading = false;
+              } else {
+                this.isAddLoading = false;
+              }
+            })
+            .catch(() => {this.isAddLoading = false;})
+        }
       })
     }
   }

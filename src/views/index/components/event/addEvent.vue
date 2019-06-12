@@ -18,12 +18,13 @@
                 <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
-                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
+                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px" class="address_input">
+                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress">
+                  </el-input>
+                  <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
-                  <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" maxlength="140" />
                 </el-form-item>
                 <div class="img-form-item">
                   <template v-if="uploadImgList.length > 0">
@@ -118,7 +119,7 @@
           </vue-scroll>
         </div>
       </div>
-      <div class="content_right">
+      <div class="content_right" v-show="isShowMap">
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
@@ -129,6 +130,7 @@
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
         </div>
+        <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
     <div class="operation-footer">
@@ -166,6 +168,7 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isShowMap: false, // 是否显示地图
       isPlaying: false, // 是否播放视频
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
@@ -272,13 +275,20 @@ export default {
   },
   mounted () {
     this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
-    this.initMap();
+    // this.initMap();
   },
   methods: {
+    // 关闭地图
+    closeMap () {
+      if (this.map) {
+        this.map.destroy();
+        this.isShowMap = false;
+      }
+    },
     // 初始化地图
     initMap () {
       let _this = this;
-      // _this.resetMap();
+      _this.isShowMap = true;
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
@@ -309,6 +319,8 @@ export default {
         });
       });
       _this.map = map;
+
+      _this.mapMark(_this.addEventForm.longitude, _this.addEventForm.latitude, _this.addEventForm.eventAddress);
     },
     // 地图标记
     mapMark (longitude, latitude, eventAddress) {
@@ -388,9 +400,7 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
-      // let autoInput = new window.AMap.Autocomplete({
-      //   input: 'inputAddress'
-      // });
+
       window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
@@ -670,7 +680,6 @@ export default {
         width: 96%;
         margin: 20px 0 0 2%;
         .add_event_form {
-          // width: 100%;
           .img-form-item {
             margin-left: 85px;
             width: 400px;
@@ -739,19 +748,35 @@ export default {
               top: 25px;
             }
           }
-          
+          .address_input {
+            position: relative;
+            /deep/ .el-input__inner {
+              padding: 0 20px 0 15px;
+            }
+            .address_icon {
+              position: absolute;
+              right: 6%; 
+              top: 13px;
+            }
+          }
         }
       }
     }
     .content_right {
       width: 100%;
       height: 100%;
+      position: relative;
       #mapBox {
         width: 100%;
         height: 100%;
       }
+      .close_btn {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
       .right-flag {
-        position: absolute; right: 40px; bottom: 100px;
+        position: absolute; right: 20px; bottom: 0;
         height: 220px;
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
@@ -760,7 +785,7 @@ export default {
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 15px 10px;
+            padding: 10px 0;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;
@@ -777,6 +802,8 @@ export default {
       }
     }
   }
+    
+             
   .operation-footer {
     border-left: 1px solid #F2F2F2;
     width: 100%;

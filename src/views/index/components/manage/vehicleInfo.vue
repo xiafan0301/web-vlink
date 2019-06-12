@@ -355,7 +355,7 @@
       >
       <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
         <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-          <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+          <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
           <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
         </el-form-item>
       </el-form>
@@ -377,7 +377,7 @@
         <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
         <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+            <el-input placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>

@@ -14,10 +14,10 @@
         <div class="content_left">
           <el-form :model="addRoom" :rules="rules" ref="addRoom" label-width="90px" class="add_room_form">
             <el-form-item label="点室名称:" prop="roomName">
-              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="addRoom.roomName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="addRoom.roomName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="点室编号:" prop="roomNumber">
-              <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="所属单位:" prop="organId">
               <el-select style="width: 100%;" v-model="addRoom.organId" placeholder="请选择所属单位" @change="handleDepartment">
@@ -30,7 +30,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="责任人:" prop="dutyUserName">
-              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="addRoom.dutyUserName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="addRoom.dutyUserName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="联系电话:" prop="userMobile">
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="addRoom.userMobile"></el-input>
@@ -84,7 +84,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="描述:" prop="desci">
-              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="addRoom.desci"></el-input>
+              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="addRoom.desci" maxlength="150"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -205,6 +205,7 @@ export default {
       _this.map = map;
 
       _this.isShowClose = true;
+       _this.mapMark(_this.addRoom.longitude, _this.addRoom.latitude);
     },
     // 地图标记
     mapMark (longitude, latitude) {

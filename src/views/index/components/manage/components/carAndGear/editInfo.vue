@@ -13,13 +13,13 @@
       <div class="content-body">
         <el-form :model="editCar" :rules="rules" ref="editCar" label-width="90px">
           <el-form-item label="车牌号码:" prop="vehicleNumber">
-            <el-input style="width: 40%;" placeholder="请输入车牌号码" v-model="editCar.vehicleNumber"></el-input>
+            <el-input style="width: 40%;" placeholder="请输入车牌号码" v-model="editCar.vehicleNumber" maxlength="10"></el-input>
           </el-form-item>
           <el-form-item label="车辆编号:" prop="transportNo">
-            <el-input style="width: 40%;" placeholder="请输入车辆编号" v-model="editCar.transportNo"></el-input>
+            <el-input style="width: 40%;" placeholder="请输入车辆编号" v-model="editCar.transportNo" maxlength="50"></el-input>
           </el-form-item>
           <el-form-item label="识别代码:" prop="identityNo">
-            <el-input style="width: 40%;" placeholder="请输入识别代码" v-model="editCar.identityNo"></el-input>
+            <el-input style="width: 40%;" placeholder="请输入识别代码" v-model="editCar.identityNo" maxlength="17"></el-input>
           </el-form-item>
           <el-form-item label="车辆类型:" prop="vehicleType">
             <el-select style="width: 40%;" v-model="editCar.vehicleType" placeholder="请选择车辆类型">
@@ -32,7 +32,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="核载人数:" prop="capacityPeople">
-            <el-input style="width: 40%;" placeholder="请输入核载人数" v-model="editCar.capacityPeople"></el-input>
+            <el-input style="width: 40%;" placeholder="请输入核载人数" v-model="editCar.capacityPeople" maxlength="2"></el-input>
           </el-form-item>
           <el-form-item label="车身颜色:" prop="vehicleColor">
             <el-select style="width: 40%;" v-model="editCar.vehicleColor" placeholder="请选择车身颜色">
