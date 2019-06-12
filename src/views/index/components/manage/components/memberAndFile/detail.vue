@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="member_detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
@@ -162,9 +163,11 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
 import { getUserDetail, delUser } from '@/views/index/api/api.user.js';
+import { getEventList } from '@/views/index/api/api.event.js';
 export default {
   data () {
     return {
@@ -173,41 +176,7 @@ export default {
       isDelete: false, // 是否勾选删除成员账户
       isDeleteLoading: false, // 删除加载中
       detailInfo: {}, // 用户详情
-      dataList: [
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '待处理',
-          eventStatus: 1,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '处理中',
-          eventStatus: 2,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '已结束',
-          eventStatus: 3,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-      ]
+      dataList: []
     }
   },
   mounted () {
@@ -222,10 +191,29 @@ export default {
           .then(res => {
             if (res) {
               this.detailInfo = res.data;
-              // this.detailInfo.organName = res.data.organList[0].organName;
+              this.getEventData();
             }
           })
       }
+    },
+    // 获取事件列表数据
+    getEventData () {
+      const params = {
+        'where.eventFlag': 1, // 是否是事件  1--是 0-否
+        'where.keyword': this.detailInfo.userMobile,
+        'where.acceptFlag': 2, // 审核通过
+        pageNum: this.pagination.pageNum,
+        orderBy: 'report_time',
+        order: 'asc'
+      }
+      getEventList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
     // 跳至编辑信息页面
     skipEditInfoPage () {
@@ -239,7 +227,10 @@ export default {
     back () {
       this.$router.back(-1);
     },
-    handleCurrentChange () {},
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getEventData();
+    },
     // 确认删除
     sureDelete () {
       if (this.$route.query.id) {
@@ -265,7 +256,19 @@ export default {
           })
           .catch(() => {this.isDeleteLoading = false;})
       }
-    }
+    },
+    // 跳至事件详情页
+    skipSelectDetail (obj) {
+      if (obj.eventStatus === 1) {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
+      }
+      if (obj.eventStatus === 2) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.uid}});
+      }
+      if (obj.eventStatus === 3) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.uid}});
+      }
+    },
   }
 }
 </script>

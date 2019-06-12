@@ -8,6 +8,7 @@ const dataList = {
   vehicleColor: 17, // 车身颜色
   vehicleType: 31, // 车辆类型
   numberType: 32, // 号牌种类
+  memberJob: 42, // 成员职位
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员

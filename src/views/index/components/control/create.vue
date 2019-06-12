@@ -267,7 +267,7 @@ export default {
     // 获取关联事件列表
     getEventList (query) {
       const params = {
-        'where.eventCode': query,
+        'where.keword': query,
         'where.isSurveillance': false,//没有关联布控的事件
         pageSize: 1000000,
         orderBy: 'report_time',

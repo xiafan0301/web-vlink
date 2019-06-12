@@ -6,7 +6,6 @@
           <el-form ref="systemForm" :model="systemForm" class="system_form">
             <el-form-item prop="systemDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="systemForm.systemDate"
                 type="daterange"
                 range-separator="-"
@@ -29,7 +28,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
+            <el-form-item style="padding-right: 0;">
               <el-button class="select_btn" @click="getMsgNoteList">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
@@ -240,7 +239,8 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

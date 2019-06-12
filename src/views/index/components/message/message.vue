@@ -87,6 +87,9 @@ export default {
     .el-range__icon.el-icon-date{
       display: none;
     }
+    .el-date-editor, .el-select{
+      width: 100%;
+    }
   }
 }
 </style>

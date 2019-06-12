@@ -165,6 +165,16 @@ export default {
       deleteId: null, // 要删除的车辆id
     }
   },
+  watch: {
+    currentOrganId () {
+      this.getList();
+    }
+  },
+  computed: {
+    currentOrganId () {
+      return this.$store.state.currentOrganId;
+    }
+  },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
@@ -229,7 +239,7 @@ export default {
       const params = {
         'where.vehicleNumber': this.searchForm.vehicleNumber,
         'where.vehicleType': vehicleType,
-        'where.organId': organId,
+        'where.organId': this.$store.state.currentOrganId,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
