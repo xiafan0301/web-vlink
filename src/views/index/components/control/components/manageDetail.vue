@@ -87,7 +87,7 @@
                             <!-- 摄像头 -->
                             <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
                             <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
@@ -97,7 +97,7 @@
                             <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
                               <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
                                 <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
-                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
+                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
                                 </div>
                                 <el-collapse-transition>
                                   <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
@@ -158,7 +158,7 @@
                     </div>
                     <!-- 摄像头 -->
                     <el-collapse-transition>
-                      <ul v-if="tabTypeBySituation === '0'">
+                      <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
                         <vue-scroll>
                           <li
                             v-for="(item, index) in situList"
@@ -171,17 +171,20 @@
                           </li>
                         </vue-scroll>
                       </ul>
+                      <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
+                        <li>范围内无设备</li>
+                      </ul>
                     </el-collapse-transition>
                     <!-- 卡口 -->
                     <el-collapse-transition>
-                      <div v-if="tabTypeBySituation === '1'" class="bayone_list">
+                      <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
                         <vue-scroll>
                           <div v-for="bay in bayList" :key="bay.uid">
                             <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
-                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
+                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
                             </div>
                             <el-collapse-transition>
-                              <ul style="max-height: 346px;" v-show="bay.isDropdown">
+                              <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
                                 <li
                                   v-for="(dev, index) in bay.devList"
                                   :key="dev.uid"
@@ -192,10 +195,14 @@
                                   <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                                 </li>
                               </ul>
+                              <ul v-show="bay.devList.length === 0">
+                                <li>卡口内无设备</li>
+                              </ul>
                             </el-collapse-transition>
                           </div>
                         </vue-scroll>
                       </div>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">范围内无卡口</div>
                     </el-collapse-transition>
                   </div>
                 <div class="situ_right">
