@@ -59,12 +59,13 @@
           </el-form-item>
           <el-form-item label="职位:" prop="position">
             <el-select style="width: 40%;" v-model="addUser.position" placeholder="请选择职位">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+              <el-option
+                v-for="(item, index) in memberJobList"
                 :key="index"
-                :label="item.organName"
-                :value="item.uid"
-              ></el-option> -->
+                :label="item.enumValue"
+                :value="item.enumField"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -80,6 +81,8 @@
 <script>
 import { validatePhone } from '@/utils/validator.js';
 import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -112,15 +115,28 @@ export default {
       },
       reportUserList: [],
       userList: [],
+      memberJobList: [], // 成员职位
       departmentList: [], // 部门列表
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
+    this.getMemberJobList();
     this.getDepartList();
   },
   methods: {
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取当前部门及子级部门
     getDepartList () {
       const params = {

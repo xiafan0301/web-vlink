@@ -42,12 +42,13 @@
           </el-form-item>
           <el-form-item label="职位:" prop="position">
             <el-select style="width: 40%;" v-model="editUser.position" placeholder="请选择职位">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+              <el-option
+                v-for="(item, index) in memberJobList"
                 :key="index"
-                :label="item.organName"
-                :value="item.uid"
-              ></el-option> -->
+                :label="item.enumValue"
+                :value="item.enumField"
+              >
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -64,6 +65,8 @@
 import { validatePhone } from '@/utils/validator.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getUserDetail, updateUserInfo } from '@/views/index/api/api.user.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -92,6 +95,7 @@ export default {
         ]
       },
       userList: [],
+      memberJobList: [], // 成员职位
       departmentList: [], // 部门列表
     }
   },
@@ -99,10 +103,22 @@ export default {
     this.userInfo = this.$store.state.loginUser;
     this.editUser.proKey = this.userInfo.proKey;
     
+    this.getMemberJobList();
     this.getDepartList();
     this.getDetail();
   },
   methods: {
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取用户详情
     getDetail () {
       const userId = this.$route.query.id;
@@ -110,6 +126,8 @@ export default {
         getUserDetail(userId)
           .then(res => {
             if (res) {
+              let position = res.data.position;
+
               this.editUser.uid = res.data.uid;
               this.editUser.memberNo = res.data.memberNo;
               this.editUser.userName = res.data.userName;
@@ -118,7 +136,8 @@ export default {
               this.editUser.organId = res.data.organId;
               this.editUser.organName = res.data.organName;
               this.editUser.userMobile = res.data.userMobile;
-              this.editUser.position = res.data.position;
+
+              this.editUser.position = position.toString();
             }
           })
       }

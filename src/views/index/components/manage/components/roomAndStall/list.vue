@@ -143,6 +143,16 @@ export default {
       deleteId: null, // 要删除的点室id
     }
   },
+  watch: {
+    currentOrganId () {
+      this.getList();
+    }
+  },
+  computed: {
+    currentOrganId () {
+      return this.$store.state.currentOrganId;
+    }
+  },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
@@ -170,7 +180,7 @@ export default {
     // 获取列表数据
     getList () {
       const params = {
-        'where.organId': this.searchForm.organId,
+        'where.organId': this.$store.state.currentOrganId,
         'where.isEnable': this.searchForm.isEnable,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
