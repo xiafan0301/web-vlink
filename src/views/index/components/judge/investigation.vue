@@ -176,9 +176,8 @@ export default {
       JigGETEventAreas(params)
         .then(res => {
           if(res) {
-            res.data.splice(0, 0, {cname: '全部', uid: 0});
+            // res.data.splice(0, 0, {cname: '全部', uid: 0});
             this.eventAreas = res.data;
-            this.searchData.areaIds.push(0)
           }
         })
     },

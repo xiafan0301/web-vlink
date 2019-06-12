@@ -476,7 +476,7 @@ export default {
             this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
           }
         })
-        console.log(this.mapTreeData[0])
+        console.log(this.mapTreeData[0].infoList[9])
       }
     },
     // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
@@ -487,6 +487,7 @@ export default {
           let _arr = [];
           if (isAdd) {
             _arr = objDeepCopy(x[this.key2Type[key]]);
+            console.log(_arr)
             _arr.forEach(m => {
               if (this.selAreaPolygon) {
                 if (m.isInArea && m.isShow) {
@@ -824,6 +825,7 @@ export default {
                 strokeColor: "#28F",  //线颜色
                 strokeOpacity: 0,     //线透明度
                 strokeWeight: 6,      //线宽
+                bubble: true
                 // strokeStyle: "solid"  //线样式
               });
               // console.log('line------------', x, _carL.carList[oldDIndex])
@@ -867,11 +869,25 @@ export default {
               }
             })
           }
-          _carL.carList = _supData;
-          _carL.infoList = _supData;
+          _carL.carList = objDeepCopy(_supData);
+          console.log(this.mapTreeData[0].infoList[9])
+          // 判断顶部车辆有没有勾选
+          if (this.mapTypeList.includes(2)) {
+            _carL.infoList = [];
+            // 判断有没有搜索条件
+            _supData.forEach(d => {
+              if (this.mapInfoVal) {
+                if (d.infoName.indexOf(this.mapInfoVal) !== -1 || '车辆'.indexOf(this.mapInfoVal) !== -1) {
+                  _carL.infoList.push(d);
+                }
+              } else {
+                _carL.infoList.push(d);
+              }
+            })
+          }
           this.updateNumberss();
         })
-        this.carLoop();
+        // this.carLoop();
       }, 5000)
     },
     // 路线纠偏
@@ -1205,6 +1221,7 @@ export default {
                     strokeColor: "#61C772",  //线颜色
                     // strokeOpacity: 1,     //线透明度
                     strokeWeight: 6,      //线宽
+                    bubble: true
                     // strokeStyle: "solid"  //线样式
                   });
                   let curP = marker.getPosition();
@@ -1721,6 +1738,7 @@ export default {
       let _this = this;
       $('.add_sign_text').unbind('keyup');
       this.markListener = window.AMap.event.addListener(this.map, 'click', function (e) {
+        console.log('222')
         if (_this.markEditMarker) {return false;}
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
@@ -2113,9 +2131,11 @@ export default {
           stashInitialSize: 128
         });
         flvPlayer.attachMediaElement(videoElement);
-        this.$_hideLoading();
         flvPlayer.load();
         flvPlayer.play();
+        videoElement.onplaying = () => {
+          this.$_hideLoading();
+        }
         this.videoMarker.players.push(flvPlayer)
       }
     },
