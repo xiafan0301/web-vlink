@@ -419,7 +419,7 @@ export const getVideoFileDownProgressBatch = (data) => {
 export const addVideoDownload = (data) => {
   return request({
     url: '/video-download-service/video-download',
-    method: 'get',
+    method: 'post',
     data: data,
     mode: videoModeName
   })
