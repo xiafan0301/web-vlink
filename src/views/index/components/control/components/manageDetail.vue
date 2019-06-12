@@ -202,7 +202,11 @@
                           </div>
                         </vue-scroll>
                       </div>
-                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">范围内无卡口</div>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
+                        <ul>
+                          <li>范围内无卡口</li>
+                        </ul>
+                      </div>
                     </el-collapse-transition>
                   </div>
                 <div class="situ_right">
@@ -1169,7 +1173,7 @@ export default {
                   display: flex;
                   flex-wrap: nowrap;
                   justify-content: space-between;
-                  padding: 0 15px 0 40px;
+                  padding: 0 15px 0 35px;
                   color: #666666;
                   cursor: move;
                   > i{
