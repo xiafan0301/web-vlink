@@ -165,7 +165,7 @@ export default {
     return {
       isSelected: 0, // 查询--重置
       backDialog: false, // 返回提示弹出框
-      tabState: 1, // 地图选择
+      tabState: 2, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
         roundInterval: 60, // 间隔时间
@@ -709,12 +709,20 @@ export default {
           });
         });
 
-        // let newAllDeviceIds = JSON.parse(JSON.stringify(allDeviceIds));
+        // console.log('currSxtDeviceIds', currSxtDeviceIds)
+        // console.log('allSxtDeviceIds', allSxtDeviceIds)
+
+        let newCurrSxtDeviceIds = JSON.parse(JSON.stringify(currSxtDeviceIds));
+        let newAllSxtDeviceIds = JSON.parse(JSON.stringify(allSxtDeviceIds));
+
+        let newCurrKkDeviceIds = JSON.parse(JSON.stringify(currKkDeviceIds));
+        let newAllKkDeviceIds = JSON.parse(JSON.stringify(allKkDeviceIds));
+
         // 筛选出新添加的设备 -- 摄像头
         for (let len = currSxtDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = allSxtDeviceIds.length, j = length -1; j >= 0; j--) {
             if (currSxtDeviceIds[i] === allSxtDeviceIds[j]) {
-              currSxtDeviceIds.splice(i, 1);
+              newCurrSxtDeviceIds.splice(i, 1);
             }
           }
         }
@@ -722,8 +730,7 @@ export default {
         for (let len = allSxtDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = currSxtDeviceIds.length, j = length -1; j >= 0; j--) {
             if (allSxtDeviceIds[i] === currSxtDeviceIds[j]) {
-              // delSxtList.push()
-              allSxtDeviceIds.splice(i, 1);
+              newAllSxtDeviceIds.splice(i, 1);
             }
           }
         }
@@ -732,7 +739,7 @@ export default {
         for (let len = currKkDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = allKkDeviceIds.length, j = length -1; j >= 0; j--) {
             if (currKkDeviceIds[i] === allKkDeviceIds[j]) {
-              currKkDeviceIds.splice(i, 1);
+              newCurrKkDeviceIds.splice(i, 1);
             }
           }
         }
@@ -740,24 +747,22 @@ export default {
         for (let len = allKkDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = currKkDeviceIds.length, j = length -1; j >= 0; j--) {
             if (allKkDeviceIds[i] === currKkDeviceIds[j]) {
-              // delSxtList.push()
-              allKkDeviceIds.splice(i, 1);
+              newAllKkDeviceIds.splice(i, 1);
             }
           }
         }
-        devList = currSxtDeviceIds;
-        allSxtDeviceIds.map(item => {
+        // console.log('currSxtDeviceIds', newCurrSxtDeviceIds)
+        // console.log('allSxtDeviceIds', newAllSxtDeviceIds)
+        devList = newCurrSxtDeviceIds;
+        newAllSxtDeviceIds.map(item => {
           devList.push(item);
         });
 
-        bayList = currKkDeviceIds;
-        allKkDeviceIds.map(item => {
+        bayList = newCurrKkDeviceIds;
+        newAllKkDeviceIds.map(item => {
           bayList.push(item);
         });
 
-
-        console.log('devList', devList);
-        console.log('bayList', bayList)
       } else {
         this.alcurrentDeviceList.map(item => {
           item.deviceList.map(a => {
@@ -770,6 +775,11 @@ export default {
       }
       const params = {
         id: this.patrolId,
+        frameNum: this.addForm.frameNum,
+        roundInterval: parseInt(this.addForm.roundInterval),
+        roundName: this.addForm.roundName,
+        startTime: this.addForm.dateTime[0],
+        endTime: this.addForm.dateTime[1],
         bayList,
         devList
       };

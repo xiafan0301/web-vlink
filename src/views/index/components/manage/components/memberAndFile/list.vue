@@ -41,9 +41,12 @@
         </el-table-column>
         <el-table-column
           label="职位"
-          prop="job"
+          prop="positionName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.position ? scope.row.positionName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="手机号"
@@ -99,6 +102,8 @@
 </template>
 <script>
 import { getUserList, delUser } from '@/views/index/api/api.user.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -108,30 +113,9 @@ export default {
       isDelete: false, // 是否勾选删除成员账户
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
-      dataList: [
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        },
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        },
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        }
-      ],
+      dataList: [],
       userInfo: {}, // 存储的用户信息
+      memberJobList: [], // 成员职位
       deleteId: null, // 要删除的id
     }
   },
@@ -147,10 +131,21 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-
+    this.getMemberJobList();
     this.getList();
   },
   methods: {
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取列表数据
     getList () {
       const params = {
@@ -163,6 +158,15 @@ export default {
           if (res) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
+
+            this.dataList.map(item => {
+              item.positionName = '';
+              this.memberJobList.map(val => {
+                if (item.position == val.enumField) {
+                  item.positionName = val.enumValue;
+                }
+              });
+            });
           }
         })
         .catch(() => {})
