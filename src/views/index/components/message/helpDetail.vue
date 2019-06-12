@@ -58,7 +58,7 @@
             <template v-if="item.replayList.length > 0 || (commentId === item.uid && isConfirmation)">
               <li class="reply_content" v-for="_item in item.replayList" :key="_item.uid">
                 <!-- /\#[\u4E00-\u9FA5]{1,3}\;/gi 匹配出含 #XXX; 的字段 -->
-                <p>{{_item.organ || 'xxx'}}回复：</p>
+                <p>{{_item.replayOrganName}}回复：</p>
                 <p  v-html="_item.replayContent ? _item.replayContent.replace(/\#[\u4E00-\u9FA5]{1,3}\;/gi, emotion) : ''" class="vl_f_333"></p>
               </li>
             </template>
@@ -297,7 +297,7 @@ export default {
               const obj = objDeepCopy(f.replayList[f.replayList.length - 1]);
               if (!obj.uid) obj.uid = 1;
               obj.uid++;
-              obj.organ = this.$store.state.loginUser.organList.map( m => m.organName).join('');
+              obj.replayOrganName = this.$store.state.loginUser.organList[0].organName;
               obj.replayContent = this.content;
               f.replayList.push(obj);
             }
@@ -627,7 +627,7 @@ export default {
     position: absolute;
     top: 30px;
     right: 30px;
-    font-size: .3rem;
+    font-size: 14px;
     cursor: pointer;
     &:hover {
       color: #409EFF;

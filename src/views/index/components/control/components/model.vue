@@ -908,7 +908,7 @@ export default {
     // 初始化地图
     resetMap () {
       // 共有部分
-      let _this = this, _hoverWindow = null;
+      let _this = this;
       let map = new window.AMap.Map(_this.mapId, {
         zoom: this.zoomLevel,
         center: mapXupuxian.center

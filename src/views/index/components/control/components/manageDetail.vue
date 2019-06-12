@@ -204,8 +204,9 @@
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
-                    <div class="situ_r_img" v-if="!item.isShowVideo">
-                      <div>从左边拖拽设备播放</div>
+                    <div class="situ_r_box" v-if="!item.isShowVideo">
+                      <img src="../../../../../assets/img/video/vi_101.png" alt="">
+                      <div>拖拽设备列表图标至此</div>
                     </div>
                     <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
                       :oConfig="{sign: true}">
@@ -235,11 +236,11 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
               <el-select
+                class="select_box"
                 value-key="value"
                 v-model="devNameIsKey"
                 filterable
                 remote
-                reserve-keyword
                 placeholder="请输入设备名搜索"
                 size="small"
                 clearable
@@ -754,14 +755,14 @@ export default {
     },
     // 获取布控抓拍结果列表
     getAlarmSnap () {
-      const params = {
+      let params = {
         pageNum: this.pageNumObjRes,
         pageSize: this.pageSizeRes,
         'where.surveillanceId': this.controlId,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
-        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
-        'where.deviceName': this.devNameIsKey
+        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1]
       }
+      this.devNameIsKey && (params['where.deviceName'] = this.devNameIsKey);
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
           this.controlResList = res.data;
@@ -1103,6 +1104,7 @@ export default {
             justify-content: space-between;
             line-height: 44px;
             padding: 0 15px;
+            border-bottom: 1px solid #f2f2f2;
             background:rgba(250,250,250,1);
             cursor: pointer;
             i{
@@ -1211,23 +1213,26 @@ export default {
               height: 100%;
               display: flex;
               flex-flow: row wrap;
-              align-content: flex-start;
-              padding-top: 20px;
-              padding-right: 1%;
+              align-content: space-between;
+              justify-content: space-between;
+              padding: 0.8%;
+              background: #fafafa;
               .situ_r_video{
-                flex: 0 0 49%;
-                height: 47.5%;
+                width: 49.5%;
+                height: 49.2%;
                 position: relative;
                 overflow: hidden;
-                margin-bottom: 20px;
-                margin-left: 1%;
-                .situ_r_img{
+                .situ_r_box{
                   width: 100%;
                   height: 100%;
                   display: flex;
+                  flex-direction: column;
                   justify-content: center;
                   align-items: center;
-                  background: #e6e6e6;
+                  background: #fff;
+                  > img{
+                    width: 50%;
+                  }
                 }
               }
             }
@@ -1464,6 +1469,10 @@ export default {
       }
      
     }
+  }
+  .select_box .el-input__suffix-inner{
+    position: relative;
+    bottom: 3px;
   }
 }
 </style>
