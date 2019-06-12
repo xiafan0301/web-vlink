@@ -102,3 +102,16 @@ export const validateDurationTime = (rule, value, callback) => {
     callback();
   }
 };
+/**
+ * 支持0-99之间的整数
+ */
+export const validatePersonNum = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (value) {
+    if (!reg.test(value) || parseInt(value) > 99) {
+      callback(new Error('请正确输入0-99之间的整数'));
+    } else {
+      callback();
+    }
+  }
+};

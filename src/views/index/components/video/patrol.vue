@@ -47,7 +47,7 @@
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
-                        <div class="tree_li_dis" v-else>
+                        <div class="tree_li_dis" draggable="false" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>

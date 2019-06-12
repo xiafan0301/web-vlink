@@ -24,7 +24,7 @@
             <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
             <span>布控图</span>
           </div>
-          <div class="hover_info" v-show="isSeen">
+          <div class="hover_info" v-show="isSeen && !(sturcDetail.objType == 3 || sturcDetail.objType == 4)">
             <p class="hover_i_header">布控信息</p>
               <template v-if="sturcDetail.objType == 1">
                 <div v-if="sturcDetail.basePortraitInfo">
@@ -355,10 +355,10 @@ export default {
       }
       if(this.type === 'history') {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime, id: item.eventInfo.uid}});
+                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime, id: item.eventInfo ? item.eventInfo.uid : ''}});
       }else {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType, id: item.eventInfo.uid}});
+                                                    objType: this.$route.query.objType, id: item.eventInfo ? item.eventInfo.uid : ''}});
       }
     },
     //撤销告警

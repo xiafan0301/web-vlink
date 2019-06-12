@@ -206,8 +206,8 @@ export default {
     wsSend (signal, obj) {
       if (this.wsObj.stompClient) {
         this.wsObj.stompClient.send(signal, this.wsObj.stompHeaders, JSON.stringify(Object.assign({
-          sender: this.localId,
-          senderName: this.localId,
+          sender: obj.remoteId,
+          senderName: obj.remoteName,
           senderImgurl: '',
           limit: this.wsObj.wsLimit
         }, obj)));

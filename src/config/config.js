@@ -54,7 +54,7 @@ const oDomains = {
     ctc: {
       dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
       // dev: 'http://10.116.64.142:8083/api/vlink',
-      // dev: 'http://10.116.64.142:8083/api/vlink',
+      // dev: 'http://10.116.64.127:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },
@@ -71,6 +71,13 @@ const oDomains = {
       dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apirel.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apirel.aorise.org/vlink-auth/api/auth/'
+    },
+    // 车辆地址
+    vehicle: {
+      // dev: 'http://10.116.64.107:8081',
+      dev: 'http://apidev.aorise.org/vlink-vehicle',
+      test: 'http://apirel.aorise.org/vlink-vehicle',
+      prod: 'http://apirel.aorise.org/vlink-vehicle'
     },
     // 公共短信服务
     sms: {
@@ -155,5 +162,5 @@ export const cookieTime = 24;
 export const mapXupuxian = {
     adcode: '431224',
     name: '溆浦县',
-    center: [110.685133, 27.907633]
+    center: [110.594280, 27.908490]
 };

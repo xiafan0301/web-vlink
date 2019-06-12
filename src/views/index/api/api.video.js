@@ -419,8 +419,20 @@ export const getVideoFileDownProgressBatch = (data) => {
 export const addVideoDownload = (data) => {
   return request({
     url: '/video-download-service/video-download',
-    method: 'post',
+    method: 'get',
     data: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 当前服务器时间
+ */
+export const videoFileDownStartTime = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-start-time',
+    method: 'get',
+    params: data,
     mode: videoModeName
   })
 }

@@ -141,7 +141,7 @@
         <template v-if="sturcDetail.taskList && sturcDetail.taskList.length > 0">
         <div class="event-ctc-content" >
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <ul class="content-list">
             <li v-for="(item, index) in sturcDetail.taskList" :key="'item' + index">
@@ -166,14 +166,14 @@
                 <div class="title">
                   <template v-if="sturcDetail.eventInfo">
                     <template v-if="sturcDetail.eventInfo.taskList">
-                      <span>再次调度指挥方案</span>
+                      <span>再次调度方案</span>
                     </template>
                     <template v-else>
-                      <span>调度指挥方案</span>
+                      <span>调度方案</span>
                     </template>
                   </template>
                   <template v-else>
-                    <span>调度指挥方案</span>
+                    <span>调度方案</span>
                   </template>
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
                 </div>
@@ -199,7 +199,7 @@
                     <el-form-item label="" v-if="taskList.length === (index + 1)">
                       <div class="add-ctc" @click="addTask('form' + index)">
                         <i class="vl_icon vl_icon_event_8"></i>
-                        <span>调度指挥任务添加</span>
+                        <span>添加调度任务</span>
                       </div>
                     </el-form-item>
                   </el-form>

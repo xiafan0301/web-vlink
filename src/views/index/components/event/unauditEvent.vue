@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li>
+                <li style="align-items: center;margin-bottom:10px;">
                   <span class="audit-label">状态:</span>
                   <span class="audit-status">待审核</span>
                 </li>
@@ -123,13 +123,13 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="伤亡人员:" prop="casualtiesFlag" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
+                <el-form-item label="伤亡人员:" prop="casualtieName" label-width="85px">
+                  <el-radio-group v-model="addEventForm.casualtieName" style='width: 230px'>
                     <el-radio label="无"></el-radio>
                     <el-radio label="不确定"></el-radio>
                     <el-radio label="有"></el-radio>
                   </el-radio-group>
-                  <template v-if="addEventForm.casualties === '有'">
+                  <template v-if="addEventForm.casualtieName === '有'">
                     <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
                     <span style='margin-left:1%'>人</span>
                     <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
@@ -238,6 +238,7 @@ export default {
         eventDetail: '', // 事件情况
         eventType: '', // 事件类型
         eventLevel: '', // 事件等级
+        casualtieName: '', // 伤亡人员
         casualties: '', // 伤亡人员
         longitude: '', // 经度
         latitude: '', // 纬度
@@ -281,6 +282,7 @@ export default {
       isPlaying: false, // 是否播放视频
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
+      autoInput: null, // 自动输入对象
     }
   },
   watch: {
@@ -407,11 +409,11 @@ export default {
             this.addEventForm.dealOrgId = res.data.dealOrgId;
            
             if (res.data.casualties === -1) {
-              this.addEventForm.casualties = '不确定';
+              this.addEventForm.casualtieName = '不确定';
             } else if (res.data.casualties === 0) {
-              this.addEventForm.casualties = '无';
+              this.addEventForm.casualtieName = '无';
             } else if (res.data.casualties > 0) {
-              this.addEventForm.casualties = '有';
+              this.addEventForm.casualtieName = '有';
               this.dieNumber = res.data.casualties;
             }
             if (res.data.attachmentList && res.data.attachmentList.length > 0) {
@@ -442,6 +444,11 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
+
+      _this.autoInput = new window.AMap.Autocomplete({
+        input: 'address'
+      })
+
       map.on('click', function(e) {
         console.log(e);  
         if (_this.newMarker) {
@@ -523,10 +530,8 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
-      let autoInput = new window.AMap.Autocomplete({
-        input: 'address'
-      })
-      window.AMap.event.addListener(autoInput, 'select', function (e) {
+      
+      window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
@@ -687,11 +692,11 @@ export default {
         if (valid) {
           this.addEventForm.addList = [];
           let reg = /^([1-9]\d*|0)(\.\d*[1-9])?$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';
@@ -710,21 +715,6 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
-          // if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-          //   this.$message({
-          //     type: 'warning',
-          //     message: '图片和视频只能上传一种',
-          //     customClass: 'request_tip'
-          //   });
-          //   return;
-          // } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-          //   this.$message({
-          //     type: 'warning',
-          //     message: '最多上传1个视频或9张图片',
-          //     customClass: 'request_tip'
-          //   });
-          //   return;
-          // }
           if (this.isShowErrorTip) { // 上传错误提示
             return;
           }

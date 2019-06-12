@@ -19,7 +19,7 @@
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" id="address" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
+                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
                   <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
@@ -101,13 +101,13 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
-                    <el-radio label="无"></el-radio>
-                    <el-radio label="不确定"></el-radio>
-                    <el-radio label="有"></el-radio>
+                <el-form-item label="伤亡人员:" prop="casualtieName" label-width="85px">
+                  <el-radio-group v-model="addEventForm.casualtieName" style='width: 230px'>
+                    <el-radio label="无" value="无"></el-radio>
+                    <el-radio label="不确定" value="不确定"></el-radio>
+                    <el-radio label="有" value="有"></el-radio>
                   </el-radio-group>
-                  <template v-if="addEventForm.casualties === '有'">
+                  <template v-if="addEventForm.casualtieName === '有'">
                     <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
                     <span style='margin-left:1%'>人</span>
                     <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
@@ -189,7 +189,8 @@ export default {
         eventDetail: '', // 事件情况
         eventType: '', // 事件类型
         eventLevel: '', // 事件等级
-        casualties: '不确定', // 伤亡人员 --默认不确定
+        casualtieName: '不确定', // 伤亡人员 --默认不确定
+        casualties: '',
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
@@ -232,6 +233,7 @@ export default {
       imgList1: [], // 要放大的图片
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
+      autoInput: null, // 自动输入对象
     }
   },
   watch: {
@@ -282,6 +284,11 @@ export default {
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
+
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+
       map.on('click', function(e) {
         _this.addEventForm.longitude = e.lnglat.getLng();
         _this.addEventForm.latitude = e.lnglat.getLat();
@@ -293,7 +300,6 @@ export default {
           const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
 
           geocoder.getAddress(lnglatXY, function (status, result) {
-            console.log('result', result)
             if (status === 'complete' && result.info === 'OK') {
               _this.addEventForm.areaCode = result.regeocode.addressComponent.adcode;
               _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
@@ -382,20 +388,20 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
-      let autoInput = new window.AMap.Autocomplete({
-        input: 'address'
-      })
-      window.AMap.event.addListener(autoInput, 'select', function (e) {
+      // let autoInput = new window.AMap.Autocomplete({
+      //   input: 'inputAddress'
+      // });
+      window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
-            console.log('44444', result)
             if (status === 'complete' && result.info === 'OK') {
               _this.addEventForm.areaCode = result.geocodes[0].adcode;
               _this.addEventForm.longitude = result.geocodes[0].location.lng;
               _this.addEventForm.latitude = result.geocodes[0].location.lat;
-              _this.mapMark(_this.addEventForm);
+
+              _this.mapMark(_this.addEventForm.longitude, _this.addEventForm.latitude, _this.addEventForm.eventAddress);
             }
           });
         })
@@ -489,11 +495,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg = /^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';
@@ -561,11 +567,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg =/^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';

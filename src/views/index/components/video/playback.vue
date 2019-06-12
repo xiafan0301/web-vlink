@@ -29,6 +29,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -43,6 +44,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
@@ -62,16 +64,17 @@
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                       <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
                         <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem)"
                           @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
+                        <!-- 
+                        v-if="!deviceIsPlaying(sitem)"
                         <div class="tree_li_dis" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
-                        </div>
+                        </div> -->
                       </li>
                     </ul>
                     <ul class="tree_sli" v-else>
@@ -106,6 +109,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -120,6 +124,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
@@ -139,16 +144,17 @@
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                       <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list3_' + sindex">
                         <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem)"
                           @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
+                        <!-- 
+                          v-if="!deviceIsPlaying(sitem)"
                         <div class="tree_li_dis" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
-                        </div>
+                        </div> -->
                       </li>
                     </ul>
                     <ul class="tree_sli" v-else>

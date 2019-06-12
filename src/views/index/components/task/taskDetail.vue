@@ -8,10 +8,10 @@
         </el-breadcrumb>
       </div>
       <div class="content-box" v-if="basicInfo">
-        <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
+        <EventBasic :status="eventStatus === 1 ? 'unhandle' : eventStatus === 2 ? 'handling' : eventStatus === 3 ? 'ending' : ''" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content">
           <div class="header">
-            <p class="ctc-title">{{processType == 2 ? '任务内容' : processType == 3 ? '呈报内容' : '调度指挥方案'}}</p>
+            <p class="ctc-title">{{processType == 2 ? '任务内容' : processType == 3 ? '呈报内容' : '调度方案'}}</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list" v-if="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
@@ -95,7 +95,7 @@
         </div>
       </div>
       <div class="operation-footer">
-        <el-button class="operation_btn back_btn" @click="skipCtcEndPage">
+        <el-button class="operation_btn back_btn" @click="skipCtcEndPage" v-if="eventStatus !== 3">
             {{processType == 2 ? '去处理' : processType == 3 ? '去处理': '反馈情况'}}
         </el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
@@ -122,6 +122,7 @@ export default {
       taskType: dataList.taskType,
       processContent: '',
       opUserId: null,
+      eventStatus: null,   //事件状态
     }
   },
   mounted () {
@@ -149,6 +150,7 @@ export default {
         .then(res => {
           if (res.data) {
             this.basicInfo = res.data;
+            this.eventStatus = this.basicInfo.eventStatus
             if(this.basicInfo.processingList && this.basicInfo.processingList.length > 0) {
               for(let item of this.basicInfo.processingList) {
                 if(item.uid == this.$route.query.uid) {
