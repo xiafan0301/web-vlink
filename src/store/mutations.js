@@ -4,5 +4,8 @@ export default {
   },
   setLoginToken (state, options) {
     state.loginToken = options.loginToken;
+  },
+  setCurrentOrgan (state, options) {
+    state.currentOrganId = options.currentOrganId;
   }
 }

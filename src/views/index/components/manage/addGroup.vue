@@ -11,7 +11,7 @@
     <div class="content_box">
       <div class="content_new_group">
         <span>分组名称:</span>
-        <el-input style="width: 300px;" @input="changeGroupName" v-model="groupName" placeholder="请输入分组名称"></el-input>
+        <el-input style="width: 300px;" @input="changeGroupName" maxlength="10" v-model="groupName" placeholder="请输入分组名称"></el-input>
         <p v-show="isShowError" style="color: #F94539;margin-left: 10px;">{{errorText}}</p>
       </div>
       <div class="content_main_box">
@@ -95,6 +95,21 @@
       <el-button class="operation_btn function_btn" :loading="isLoading" @click="submitData">保存</el-button>
       <el-button class="operation_btn back_btn" @click="cancelAdd">取消</el-button>
     </div>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </vue-scroll>
 </template>
@@ -109,6 +124,7 @@ export default {
   components: {listSelect, mapSelect},
   data () {
     return {
+      backDialog: false, // 返回提示弹出框
       isSelected: 0, // 查询--重置
       tabState: 1, // 地图选择
       isShowError: false,
@@ -118,7 +134,7 @@ export default {
         dutyOrganId: null, // 责任部门
         devName: null // 设备名称
       },
-      groupName: null, // 新增分组名
+      groupName: '', // 新增分组名
       allDeviceList: [], // 所有设备列表数据
       selectDeviceList: [], // 可选设备列表
       selectDeviceNumber: 0, // 可选设备数量
@@ -152,6 +168,8 @@ export default {
     setTimeout(() => {
       this.getAllDevicesList();
     }, 1000)
+
+    this.dataStr =  JSON.stringify(this.groupName); // 将初始数据转成字符串
 
     this.getIntelCharacList();
     this.getAllDepartList();
@@ -290,7 +308,7 @@ export default {
           this.currentDeviceList[index].isChecked = false;
         }
       }
-
+      this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
     },
     // 右侧--子级多选框选中
     emitChildChecked (index, idx, val, isSxt) {
@@ -684,10 +702,28 @@ export default {
         })
         .catch(() => {this.isLoading = false;})
     },
-    // 取消添加
+    // 返回
     cancelAdd () {
+      const data = JSON.stringify(this.groupName);
+      if (!this.groupId) { // 新增
+        if (this.dataStr === data && this.currentDeviceList.length === 0) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      } else { // 修改
+        if (this.dataStr === data) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
       this.$router.back(-1);
-    }
+    },
   }
 }
 </script>

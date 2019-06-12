@@ -60,14 +60,14 @@ const oDomains = {
     },
     // 用户登录地址
     user: {
-      // dev: 'http://10.116.64.142:8084', // 江先琨
+      // dev: 'http://10.116.64.107:8082', // 熊日成
       dev: 'http://apidev.aorise.org/vlink-user',
       test: 'http://apirel.aorise.org/vlink-user',
       prod: 'http://apirel.aorise.org/vlink-user'
     },
     // 用户权限地址
     auth: {
-      // dev: 'http://10.116.64.142:8081/api/auth/', // 江先琨
+      // dev: 'http://10.116.64.107:8081/api/auth/', // 江先琨
       dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apirel.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apirel.aorise.org/vlink-auth/api/auth/'
