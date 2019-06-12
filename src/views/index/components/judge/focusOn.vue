@@ -359,8 +359,7 @@ export default {
       MapGETmonitorList(params)
           .then(res => {
             if (res) {
-              this.eventAreas = Object.assign([], res.data.areaTreeList, [{areaName: '全部', areaId: 0}]);
-              this.areaIds.push(0)
+              this.eventAreas = res.data.areaTreeList;
             }
           })
     },
