@@ -26,8 +26,8 @@
               <el-option
                 v-for="(item, index) in vehicleTypeList"
                 :key="index"
-                :label="item.label"
-                :value="item.value"
+                :label="item.enumValue"
+                :value="item.enumField"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -46,12 +46,12 @@
           </el-form-item>
           <el-form-item label="号牌种类:" prop="numberType">
             <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+              <el-option
+                v-for="(item, index) in numberTypeList"
                 :key="index"
-                :label="item.organName"
-                :value="item.uid"
-              ></el-option> -->
+                :label="item.enumValue"
+                :value="item.enumField"
+              ></el-option>
             </el-select>
           </el-form-item>
            <el-form-item label="号牌颜色:" prop="numberColor">
@@ -85,7 +85,7 @@
 </template>
 <script>
 import { validatePersonNum, checkPlateNumber } from '@/utils/validator.js';
-import { vehicleTypeList, dataList } from '@/utils/data.js';
+import {  dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
 import { getVehicleDetail, updateVehicle } from '@/views/index/api/api.archives.js';
@@ -132,19 +132,41 @@ export default {
       vehicleTypeList: [], // 车辆类型
       vehicleColorList: [], // 车身颜色
       departmentList: [], // 部门列表
+      numberTypeList: [], // 号牌种类
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
     this.editCar.uid = this.$route.query.id;
 
-    this.vehicleTypeList = vehicleTypeList;
 
     this.getVehicleColor();
+    this.getNumberTypeList();
+    this.getVehicleTypeList();
     this.getDetail();
     this.getDepartList();
   },
   methods: {
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.vehicleTypeList = res.data;
+          }
+        })
+    },
     // 获取车身颜色
     getVehicleColor () {
       const color = dataList.vehicleColor;
@@ -163,16 +185,24 @@ export default {
         getVehicleDetail(vehicleId)
           .then(res => {
             if (res) {
+              let vehicleType = res.data.vehicleType;
+              let numberType = res.data.numberType;
+              let vehicleColor = res.data.vehicleColor;
+
               this.editCar.vehicleNumber = res.data.vehicleNumber;
               this.editCar.transportNo = res.data.transportNo;
               this.editCar.identityNo = res.data.identityNo;
-              this.editCar.vehicleType = res.data.vehicleType;
               this.editCar.capacityPeople = res.data.capacityPeople;
-              this.editCar.vehicleColor = res.data.vehicleColor;
-              this.editCar.numberType = res.data.numberType;
               this.editCar.organId = res.data.organId;
               this.editCar.deviceNo = res.data.deviceNo;
               this.editCar.devicePassword = res.data.devicePassword;
+
+              console.log(typeof vehicleType)
+              this.editCar.vehicleType = vehicleType.toString();
+              console.log(typeof this.editCar.vehicleType)
+              this.editCar.vehicleColor = vehicleColor.toString();
+              this.editCar.numberType = numberType.toString();
+
             }
           })
       }

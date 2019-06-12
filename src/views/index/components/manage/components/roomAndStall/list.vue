@@ -2,28 +2,20 @@
   <div class="room_stall">
     <div class="search_box">
       <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-        <el-form-item prop="vehicleType">
-          <el-select  style="width: 240px;" v-model="searchForm.vehicleType" placeholder="所属单位">
-            <!-- <el-option value='全部车辆类型'></el-option> -->
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+        <el-form-item prop="organId">
+          <el-select  style="width: 240px;" v-model="searchForm.organId" placeholder="所属单位">
+            <el-option
+              v-for="(item, index) in departmentList"
               :key="index"
-              :label="item.enumValue"
-              :value="item.enumField"
-            >
-            </el-option> -->
+              :label="item.organName"
+              :value="item.uid"
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="companyName">
-          <el-select style="width: 240px;" v-model="searchForm.companyName" placeholder="使用状况">
-            <!-- <el-option value='全部单位'></el-option> -->
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
-              :key="index"
-              :label="item.enumValue"
-              :value="item.enumField"
-            >
-            </el-option> -->
+        <el-form-item prop="isEnable">
+          <el-select style="width: 240px;" v-model="searchForm.isEnable" placeholder="使用状况">
+            <el-option label="启用" :value='1'></el-option>
+            <el-option label="停用" :value='2'></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -52,44 +44,47 @@
         </el-table-column>
         <el-table-column
           label="点室编号"
-          prop="number"
+          prop="roomNumber"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="名称"
-          prop="vechileNo"
+          prop="roomName"
           >
         </el-table-column>
         <el-table-column
           label="地址"
-          prop="type"
+          prop="address"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="所属单位"
-          prop="vechileType"
+          prop="organName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="责任人"
-          prop="personNum"
+          prop="dutyUserName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="电话"
-          prop="company"
+          prop="userMobile"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="使用状况"
-          prop="status"
+          prop="isEnable"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.isEnable === 1 ? '启用' : '停用'}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="280" fixed="right">
           <template slot-scope="scope">
@@ -129,78 +124,119 @@
   </div>
 </template>
 <script>
+import { getRoomData, delRoom } from '@/views/index/api/api.archives.js';
+import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
+    // const oragnId = this.userInfo.organList[0].uid;
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
       searchForm: {
-        vehicleType: null,
-        companyName: null,
+        organId: null,
+        isEnable: null,
       },
-      dataList: [
-        {
-          number: '1',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '停用'
-        },
-        {
-          number: '2',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '停用'
-        },
-        {
-          number: '3',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '停用'
-        },
-        {
-          number: '4',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '停用'
-        },
-      ]
+      dataList: [], // 列表数据
+      userInfo: {}, // 用户信息
+      departmentList: [], // 部门列表
+      deleteId: null, // 要删除的点室id
     }
   },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.getDepartList();
+    this.getList();
+  },
   methods: {
-    selectDataList () {},
-    resetForm (form) {},
+    // 获取当前部门及子级部门
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': this.userInfo.organList[0].uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList.push(this.userInfo.organList[0]);
+            res.data.list.map(item => {
+              this.departmentList.push(item);
+            });
+          }
+        })
+    },
+    // 获取列表数据
+    getList () {
+      const params = {
+        'where.organId': this.searchForm.organId,
+        'where.isEnable': this.searchForm.isEnable,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc'
+      };
+      getRoomData(params)
+        .then(res => {
+          if (res) {
+            this.pagination.total = res.data.total;
+            this.dataList = res.data.list;
+          }
+        })
+    },
+    // 搜索
+    selectDataList () {
+      this.getList();
+    },
+    // 重置搜索条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getList();
+    },
     // 跳至详情页
-    skipSelectDetail () {
-      this.$router.push({name: 'room_detail'});
+    skipSelectDetail (obj) {
+      this.$router.push({name: 'room_detail', query: { id: obj.uid }});
     },
     // 跳至新增点室页面
     skipAddPage () {
       this.$router.push({name: 'room_add'});
     },
     // 跳至编辑页面
-    skipEditPage () {
-      this.$router.push({name: 'room_edit'});
+    skipEditPage (obj) {
+      this.$router.push({name: 'room_edit', query: { id: obj.uid }});
     },
     // 显示删除弹出框
-    showDeleteDialog () {
+    showDeleteDialog (obj) {
       this.deleteDialog = true;
+      this.deleteId = obj.uid;
     },
-    handleCurrentChange () {},
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
+    },
     // 确认删除
-    sureDelete () {}
+    sureDelete () {
+      if (this.deleteId) {
+        this.isDeleteLoading = true;
+        delRoom(this.deleteId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.deleteDialog = false;
+              this.getList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    }
   }
 }
 </script>

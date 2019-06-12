@@ -10,36 +10,41 @@
     </div>
     <div class="basic_info">
       <div class="status_img">
-        <i class="vl_icon vl_icon_archives_3"></i>
+        <template v-if="detailInfo.isEnable && detailInfo.isEnable === 1">
+          <i class="vl_icon vl_icon_archives_3"></i>
+        </template>
+        <template v-if="detailInfo.isEnable && detailInfo.isEnable === 2">
+          <i class="vl_icon vl_icon_archives_6"></i>
+        </template>
       </div>
       <div class="header member_header">
         <span>基本信息</span>
         <p>
-          创建于2018-12-12 12:12:12；
-          最近更新于2018-12-12 12:12:12
+          创建于{{detailInfo.createTime | fmTimestamp}}；
+          最近更新于{{detailInfo.updateTime | fmTimestamp}}
         </p>
       </div>
       <div class="divide"></div>
       <ul class="detail_info clearfix">
         <li>
           <span>点室编码:</span>
-          <span>2018121212121</span>
+          <span>{{detailInfo.roomNumber ? detailInfo.roomNumber : '无'}}</span>
         </li>
         <li>
           <span>所属单位:</span>
-          <span>见风使舵看风景</span>
+          <span>{{detailInfo.organName ? detailInfo.organName : '无'}}</span>
         </li>
         <li>
           <span>责任人:</span>
-          <span>张三</span>
+          <span>{{detailInfo.dutyUserName ? detailInfo.dutyUserName : '无'}}</span>
         </li>
         <li>
           <span>联系电话:</span>
-          <span>1345555555</span>
+          <span>{{detailInfo.userMobile ? detailInfo.userMobile : '无'}}</span>
         </li>
         <li>
           <span>描述:</span>
-          <span>XXXXXXXXXXXX单位撒赖扩大骄傲撒开了多久啊上课了巨大撒开绿灯就啊撒可怜见的拉萨空间的了的就拉萨空间的拉萨空间大撒开了多久啊数量啊斯卡拉大家啊斯卡拉大家拉斯就大量卡斯巨</span>
+          <span>{{detailInfo.desci ? detailInfo.desci : '无'}}</span>
         </li>
       </ul>
     </div>
@@ -85,23 +90,33 @@
 </vue-scroll>
 </template>
 <script>
+import { getRoomDetail, delRoom } from '@/views/index/api/api.archives.js';
 export default {
   data () {
     return {
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
       map: null, // 地图对象
-      detailInfo: {
-        eventAddress: '溆浦县第一中学',
-        latitude: 27.906875,
-        longitude: 110.609392
-      }
+      detailInfo: {}, // 详细信息
     }
   },
   mounted () {
-    this.initMap();
+    this.getDetail();
   },
   methods: {
+    // 获取点室详情
+    getDetail () {
+      const roomId = this.$route.query.id;
+      if (roomId) {
+        getRoomDetail(roomId)
+          .then(res => {
+            if (res) {
+              this.detailInfo = res.data;
+              this.initMap();
+            }
+          })
+      }
+    },
     // 重置地图
     resetMap () {
       this.initMap();
@@ -124,31 +139,14 @@ export default {
       _this.map = map;
 
       _this.mapMark( _this.detailInfo);
-      // map.on('click', function(e) {
-        
-      //   new window.AMap.service('AMap.Geocoder', function () { // 回调函数
-      //     let geocoder = null;
-      //     geocoder = new window.AMap.Geocoder({});
-      //     const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
 
-      //     geocoder.getAddress(lnglatXY, function (status, result) {
-      //       console.log('result', result)
-      //       if (status === 'complete' && result.info === 'OK') {
-      //         _this.mapMark( _this.detailInfo);
-      //       }
-      //     });
-      //   });
-      // });
     },
     // 地图标记
     mapMark (obj) {
-      console.log(obj)
       let _this = this;
       
-      // _this.map.clearMap();
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
-        console.log('nnnnnn')
         let offSet = [-20.5, -48];
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
@@ -164,7 +162,7 @@ export default {
         marker.on('mouseover', function () {
           let sContent = '<div class="vl_map_hover machine_map_hover" >' +
             '<div class="vl_main_hover_address" style="min-width: 380px;padding: 10px 70px 10px 10px">'
-            +'<p class="vl_map_hover_main_p">事发地点： ' + obj.eventAddress + '</p><p class="vl_map_hover_main_p">经纬度：经度' + obj.longitude + '；纬度：' + obj.latitude +'</p></div></div>';
+            +'<p class="vl_map_hover_main_p">事发地点： ' + obj.address + '</p><p class="vl_map_hover_main_p">经纬度：经度' + obj.longitude + '；纬度：' + obj.latitude +'</p></div></div>';
           hoverWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: true,
@@ -183,14 +181,35 @@ export default {
     },
     // 跳至编辑页面
     skipEditPage () {
-      this.$router.push({name: 'room_edit'});
+      this.$router.push({name: 'room_edit', query: { id: this.$route.query.id }});
     },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteDialog = true;
     },
     // 确认删除
-    sureDelete () {},
+    sureDelete () {
+      const deleteId = this.$route.query.id;
+      if (deleteId) {
+        this.isDeleteLoading = true;
+        delRoom(deleteId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.deleteDialog = false;
+              this.$router.push({name: 'room_stall'});
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
     // 返回
     back () {
       this.$router.back(-1);

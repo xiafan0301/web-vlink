@@ -197,7 +197,7 @@
           </li>
             <li>
               <span>备注：</span>
-              <span>{{vehicleDetailInfo.desci}}</span>
+              <span class="group_box">{{vehicleDetailInfo.desci}}</span>
             </li>
           </ul>
         </div>
@@ -569,7 +569,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getList();
@@ -615,7 +615,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.getList();

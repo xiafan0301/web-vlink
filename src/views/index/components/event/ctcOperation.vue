@@ -18,7 +18,7 @@
       <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
       <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
         <div class="header">
-          <p class="ctc-title">调度指挥方案</p>
+          <p class="ctc-title">调度方案</p>
         </div>
         <div class="divide"></div>
         <ul class="content-list">
@@ -96,10 +96,10 @@
             <div class="main-content">
               <div class="title">
                 <template v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
-                  <span>再次调度指挥方案</span>
+                  <span>再次调度方案</span>
                 </template>
                 <template v-else>
-                  <span>调度指挥方案</span>
+                  <span>调度方案</span>
                 </template>
                 <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
               </div>

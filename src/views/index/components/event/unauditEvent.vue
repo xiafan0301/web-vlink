@@ -715,21 +715,6 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
-          // if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-          //   this.$message({
-          //     type: 'warning',
-          //     message: '图片和视频只能上传一种',
-          //     customClass: 'request_tip'
-          //   });
-          //   return;
-          // } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-          //   this.$message({
-          //     type: 'warning',
-          //     message: '最多上传1个视频或9张图片',
-          //     customClass: 'request_tip'
-          //   });
-          //   return;
-          // }
           if (this.isShowErrorTip) { // 上传错误提示
             return;
           }
