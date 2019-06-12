@@ -228,7 +228,8 @@ export default {
         'where.startDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[0],
         'where.endDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[1],
         'where.titleOrPublisher': this.noticeForm.titleOrPublisher,
-        'where.isTop': this.noticeForm.noticeState
+        'where.isTop': this.noticeForm.noticeState,
+        'where.publishUnit': this.noticeForm.department
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {

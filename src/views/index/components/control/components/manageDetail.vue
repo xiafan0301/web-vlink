@@ -87,7 +87,7 @@
                             <!-- 摄像头 -->
                             <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
                             <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
@@ -97,7 +97,7 @@
                             <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
                               <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
                                 <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
-                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
+                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
                                 </div>
                                 <el-collapse-transition>
                                   <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
@@ -158,7 +158,7 @@
                     </div>
                     <!-- 摄像头 -->
                     <el-collapse-transition>
-                      <ul v-if="tabTypeBySituation === '0'">
+                      <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
                         <vue-scroll>
                           <li
                             v-for="(item, index) in situList"
@@ -171,17 +171,20 @@
                           </li>
                         </vue-scroll>
                       </ul>
+                      <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
+                        <li>范围内无设备</li>
+                      </ul>
                     </el-collapse-transition>
                     <!-- 卡口 -->
                     <el-collapse-transition>
-                      <div v-if="tabTypeBySituation === '1'" class="bayone_list">
+                      <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
                         <vue-scroll>
                           <div v-for="bay in bayList" :key="bay.uid">
                             <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
-                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
+                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
                             </div>
                             <el-collapse-transition>
-                              <ul style="max-height: 346px;" v-show="bay.isDropdown">
+                              <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
                                 <li
                                   v-for="(dev, index) in bay.devList"
                                   :key="dev.uid"
@@ -192,9 +195,17 @@
                                   <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                                 </li>
                               </ul>
+                              <ul v-show="bay.devList.length === 0">
+                                <li>卡口内无设备</li>
+                              </ul>
                             </el-collapse-transition>
                           </div>
                         </vue-scroll>
+                      </div>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
+                        <ul>
+                          <li>范围内无卡口</li>
+                        </ul>
                       </div>
                     </el-collapse-transition>
                   </div>
@@ -204,8 +215,9 @@
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
-                    <div class="situ_r_img" v-if="!item.isShowVideo">
-                      <div>从左边拖拽设备播放</div>
+                    <div class="situ_r_box" v-if="!item.isShowVideo">
+                      <img src="../../../../../assets/img/video/vi_101.png" alt="">
+                      <div>拖拽设备列表图标至此</div>
                     </div>
                     <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
                       :oConfig="{sign: true}">
@@ -235,11 +247,11 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
               <el-select
+                class="select_box"
                 value-key="value"
                 v-model="devNameIsKey"
                 filterable
                 remote
-                reserve-keyword
                 placeholder="请输入设备名搜索"
                 size="small"
                 clearable
@@ -754,14 +766,14 @@ export default {
     },
     // 获取布控抓拍结果列表
     getAlarmSnap () {
-      const params = {
+      let params = {
         pageNum: this.pageNumObjRes,
         pageSize: this.pageSizeRes,
         'where.surveillanceId': this.controlId,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
-        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
-        'where.deviceName': this.devNameIsKey
+        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1]
       }
+      this.devNameIsKey && (params['where.deviceName'] = this.devNameIsKey);
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
           this.controlResList = res.data;
@@ -1103,6 +1115,7 @@ export default {
             justify-content: space-between;
             line-height: 44px;
             padding: 0 15px;
+            border-bottom: 1px solid #f2f2f2;
             background:rgba(250,250,250,1);
             cursor: pointer;
             i{
@@ -1160,7 +1173,7 @@ export default {
                   display: flex;
                   flex-wrap: nowrap;
                   justify-content: space-between;
-                  padding: 0 15px 0 40px;
+                  padding: 0 15px 0 35px;
                   color: #666666;
                   cursor: move;
                   > i{
@@ -1211,23 +1224,26 @@ export default {
               height: 100%;
               display: flex;
               flex-flow: row wrap;
-              align-content: flex-start;
-              padding-top: 20px;
-              padding-right: 1%;
+              align-content: space-between;
+              justify-content: space-between;
+              padding: 0.8%;
+              background: #fafafa;
               .situ_r_video{
-                flex: 0 0 49%;
-                height: 47.5%;
+                width: 49.5%;
+                height: 49.2%;
                 position: relative;
                 overflow: hidden;
-                margin-bottom: 20px;
-                margin-left: 1%;
-                .situ_r_img{
+                .situ_r_box{
                   width: 100%;
                   height: 100%;
                   display: flex;
+                  flex-direction: column;
                   justify-content: center;
                   align-items: center;
-                  background: #e6e6e6;
+                  background: #fff;
+                  > img{
+                    width: 50%;
+                  }
                 }
               }
             }
@@ -1464,6 +1480,10 @@ export default {
       }
      
     }
+  }
+  .select_box .el-input__suffix-inner{
+    position: relative;
+    bottom: 3px;
   }
 }
 </style>
