@@ -3,7 +3,12 @@
     <div class="select_map_left">
       <div class="select_top">
         <span>已有设备 ({{leftDeviceNumber}})</span>
-        <p @click="removeDevice">移除设备</p>
+        <template v-if="hasCheckedLeft">
+          <p style="color: #0C70F8" @click="removeDevice">移除设备</p>
+        </template>
+        <template v-else>
+          <p style="cursor:default;">移除设备</p>
+        </template>
       </div>
       <div class="detail_list">
         <vue-scroll>
@@ -93,12 +98,12 @@ export default {
       unCheckDeviceList: [], // 没有在多边形中的设备--没有选中的设备
 
       lastCurrDeviceLength: 0, // 上一次已有设备数量
-      // lastSelectDeviceLength: 0, // 上一次可选设备数量
+
+      hasCheckedLeft: false, // 左侧已有设备有选中的
     }
   },
   watch: {
     finalDeviceList (val) {
-      console.log('val', val)
       let checkedDeviceList = [], // 选中的设备
         currentDeviceList = [], // 选中的设备经过处理后
         deviceList = [], bayonetList = [];
@@ -186,7 +191,7 @@ export default {
           let params = {
             cname: i,
             uid: deviceObj[i][0].uid,
-            isOpenArrow: true,
+            isOpenArrow: false,
             isChecked: false,
             isSXT: true,
             deviceList: [],
@@ -261,7 +266,7 @@ export default {
           let params = {
             cname: i,
             uid: deviceObj[i][0].uid,
-            isOpenArrow: true,
+            isOpenArrow: false,
             isSXT: true,
             isChecked: false,
             deviceList: [],
@@ -296,6 +301,35 @@ export default {
     isSelected (val) {
       if (val) {
         this.getMapData();
+      }
+    },
+    currentDeviceList (val) {
+      let deviceCheckList = [], bayonetCheckList = [];
+      if (val) {
+        let checkedArr = val.filter(item => {
+          return item.isChecked === true;
+        });
+        if (checkedArr.length > 0) {
+          this.hasCheckedLeft = true;
+        } else {
+          val.map(item => {
+            item.deviceList.filter(val => {
+              if (val.isChildChecked === true) {
+                deviceCheckList.push(val);
+              }
+            });
+            item.bayonetList.filter(val => {
+              if (val.isChildChecked === true) {
+                bayonetCheckList.push(val);
+              }
+            });
+          });
+          if (deviceCheckList.length > 0 || bayonetCheckList.length > 0) {
+            this.hasCheckedLeft = true;
+          } else {
+            this.hasCheckedLeft = false;
+          }
+        }
       }
     }
   },

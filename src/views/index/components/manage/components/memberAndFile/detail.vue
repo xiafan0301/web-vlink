@@ -11,8 +11,8 @@
       <div class="header member_header">
         <span>基本信息</span>
         <p>
-          创建于2018-12-12 12:12:12；
-          最近更新于2018-12-12 12:12:12
+          创建于{{detailInfo.createTime | fmTimestamp}}；
+          最近更新于{{detailInfo.updateTime | fmTimestamp}}
         </p>
       </div>
       <div class="divide"></div>
@@ -20,31 +20,31 @@
         <ul class="detail_info clearfix">
           <li>
             <span>成员编号:</span>
-            <span>D09774</span>
+            <span>{{detailInfo.memberNo ? detailInfo.memberNo : '无'}}</span>
           </li>
           <li>
             <span>成员姓名:</span>
-            <span>张安</span>
+            <span>{{detailInfo.userName}}</span>
           </li>
           <li>
             <span>性别:</span>
-            <span>女</span>
+            <span>{{detailInfo.userSex === 1 ? '女' : '男'}}</span>
           </li>
           <li>
             <span>手机号码:</span>
-            <span>17888888888</span>
+            <span>{{detailInfo.userMobile}}</span>
           </li>
           <li>
             <span>所属单位:</span>
-            <span>XXXXXXXXXXXX单位</span>
+            <span>{{detailInfo.organName}}</span>
           </li>
           <li>
             <span>职位:</span>
-            <span>主任</span>
+            <span>{{detailInfo.position ? detailInfo.position : '无'}}</span>
           </li>
           <li>
             <span>邮箱:</span>
-            <span>1136386227@qq.com</span>
+            <span>{{detailInfo.userEmail ? detailInfo.userEmail : '无'}}</span>
           </li>
         </ul>
       <!-- </div> -->
@@ -164,6 +164,7 @@
   </div>
 </template>
 <script>
+import { getUserDetail, delUser } from '@/views/index/api/api.user.js';
 export default {
   data () {
     return {
@@ -171,6 +172,7 @@ export default {
       deleteDialog: false, // 删除弹出框
       isDelete: false, // 是否勾选删除成员账户
       isDeleteLoading: false, // 删除加载中
+      detailInfo: {}, // 用户详情
       dataList: [
         {
           eventCode: '1111111111',
@@ -208,9 +210,27 @@ export default {
       ]
     }
   },
+  mounted () {
+    this.getDetail();
+  },
   methods: {
+    // 获取用户详情
+    getDetail () {
+      const userId = this.$route.query.id;
+      if (userId) {
+        getUserDetail(userId)
+          .then(res => {
+            if (res) {
+              this.detailInfo = res.data;
+              // this.detailInfo.organName = res.data.organList[0].organName;
+            }
+          })
+      }
+    },
     // 跳至编辑信息页面
-    skipEditInfoPage () {},
+    skipEditInfoPage () {
+      this.$router.push({name: 'member_edit', query: { id: this.$route.query.id }});
+    },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteDialog = true;
@@ -221,7 +241,31 @@ export default {
     },
     handleCurrentChange () {},
     // 确认删除
-    sureDelete () {}
+    sureDelete () {
+      if (this.$route.query.id) {
+        const params = {
+          uid: this.$route.query.id,
+          flag: this.isDelete ? 2 : 1 // 1--仅删除用户与机构之间的联系  2--删除用户
+        }
+        this.isDeleteLoading = true;
+        delUser(params)
+          .then (res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.deleteDialog = false;
+              this.$router.push({name: 'member_file'});
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    }
   }
 }
 </script>

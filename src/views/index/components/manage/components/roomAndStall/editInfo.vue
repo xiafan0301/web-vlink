@@ -18,7 +18,7 @@
               <!-- <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="editRoom.roomNumber"></el-input> -->
             </el-form-item>
             <el-form-item label="点室名称:" prop="roomName">
-              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="editRoom.roomName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="editRoom.roomName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="所属单位:" prop="organId">
               <el-select style="width: 100%;" v-model="editRoom.organId" placeholder="请选择所属单位" @change="handleDepartment">
@@ -31,7 +31,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="责任人:" prop="dutyUserName">
-              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="editRoom.dutyUserName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="editRoom.dutyUserName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="联系电话:" prop="userMobile">
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="editRoom.userMobile"></el-input>
@@ -85,7 +85,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="描述:" prop="desci">
-              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="editRoom.desci"></el-input>
+              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="editRoom.desci" maxlength="150"></el-input>
             </el-form-item>
           </el-form>
         </div>

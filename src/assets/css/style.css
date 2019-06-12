@@ -218,6 +218,7 @@
 .vl_icon_event_24{width: 20px; height: 20px; background-position: -615px -309px;} /*事件---图片--关闭*/
 .vl_icon_event_25{width: 18px; height: 12px; background-position: -693px -486px;} /*事件---预览文件*/
 .vl_icon_event_26{width: 22px; height: 22px; background-position: -725px -481px;} /*事件---下载视频*/
+.vl_icon_event_27{width: 14px; height: 15px; background-position: -689px -670px;} /*事件---添加事件--地图小图标*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/
@@ -855,3 +856,11 @@
  }
  .vid_dowload_btn:hover { text-decoration: none; }
  .vid_dowload_btn:link { text-decoration: none; }
+
+ .address_icon {
+   vertical-align: middle;
+   cursor: pointer;
+ }
+ /* .address_input .el-input__inner:hover .el-input-group__append {
+  border-color: #0C70F8 !important;
+} */

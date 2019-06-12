@@ -42,11 +42,12 @@
                 </li>
               </ul>
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-                <el-form-item label="事发地点:" label-width="85px" prop="eventAddress">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @input="changeAddress" />
+                <el-form-item label="事发地点:" label-width="85px" prop="eventAddress" class="address_input">
+                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @input="changeAddress" ></el-input>
+                  <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
                 <el-form-item label="事件情况:" label-width="85px" prop="eventDetail">
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" maxlength="140"></el-input>
                 </el-form-item>
                 <div class="img-form-item">
                   <template v-if="uploadImgList.length > 0">
@@ -140,7 +141,7 @@
           </vue-scroll>
         </div>
       </div>
-      <div class="content_right">
+      <div class="content_right" v-show="isShowMap">
         <!--地图-->
         <div id="mapBox"></div>
         <div class="right-flag">
@@ -152,6 +153,7 @@
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
         </div>
+        <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
     <div class="operation-footer">
@@ -221,6 +223,7 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isShowMap: false, // 是否显示地图
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [], // 要放大的图片
@@ -321,7 +324,7 @@ export default {
     this.getRejectReasonList();
   },
   mounted () {
-    this.initMap();
+    // this.initMap();
     setTimeout(() => {
       this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
     }, 1000);
@@ -425,17 +428,24 @@ export default {
                 }
               })
             }
-
-            this.mapMark(this.addEventForm);
-
+            
             this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
             this.addEventForm.eventLevel = eventLevel.toString();
           }
         })
         .catch(() => {})
     },
+    // 关闭地图
+    closeMap () {
+      if (this.map) {
+        this.map.destroy();
+        this.isShowMap = false;
+      }
+    },
     initMap () {
       let _this = this;
+      _this.isShowMap = true;
+
       _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
@@ -450,7 +460,6 @@ export default {
       })
 
       map.on('click', function(e) {
-        console.log(e);  
         if (_this.newMarker) {
           _this.map.remove(_this.newMarker);
           _this.newMarker = null;
@@ -471,6 +480,7 @@ export default {
           });
         });
       });
+      this.mapMark(this.addEventForm);
     },
     resetMap () {
       let _this = this;
@@ -860,6 +870,17 @@ export default {
         }
         .add_event_form {
           // width: 100%;
+          .address_input {
+            position: relative;
+            /deep/ .el-input__inner {
+              padding: 0 20px 0 15px;
+            }
+            .address_icon {
+              position: absolute;
+              right: 6%; 
+              top: 13px;
+            }
+          }
           /deep/ .el-form-item {
             margin-bottom: 20px;
           }
@@ -931,12 +952,18 @@ export default {
     .content_right {
       width: 100%;
       height: 100%;
+      position: relative;
       #mapBox{
         height: 100%;
         width: 100%;
       }
+      .close_btn {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
       .right-flag {
-        position: absolute; right: 40px; bottom: 100px;
+        position: absolute; right: 20px; bottom: 0;
         height: 220px;
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
