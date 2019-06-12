@@ -317,7 +317,7 @@ export function getTasks(params) {
  */
 export const markTask = (data) => {
   return request({
-    url: '/task-services/task/processes?userId=' + data.userId + '&departmentId=' + data.departmentId,
+    url: '/task-services/task/processes?userId=' + data.userId,
     method: 'put',
     mode: 'ctc'
   });

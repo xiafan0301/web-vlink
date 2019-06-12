@@ -65,7 +65,7 @@
       </div>
       <div class="add_footer">
         <el-button class="select_btn btn_100" :loading="loadingBtn" @click="sendMsg('addForm')">发送</el-button>
-        <el-button class="reset_btn btn_100" @click.native="skip(1)">返回</el-button>
+        <el-button class="reset_btn btn_100" @click.native="toGiveUpDialog = true">返回</el-button>
       </div>
     </div>
     <div class="rec_dialog">
@@ -109,6 +109,17 @@
         </div>
       </el-dialog>
     </div>
+    <el-dialog
+      :visible.sync="toGiveUpDialog"
+      :close-on-click-modal="false"
+      width="482px"
+      top="40vh">
+      <h4>是否放弃本次操作？</h4>
+      <div slot="footer">
+        <el-button :loading="loadingBtn" @click="skip(1)" class="select_btn btn_140">放弃</el-button>
+        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -148,6 +159,7 @@ export default {
       // 弹窗参数
       recDialog: false,
       loadingBtn: false,
+      toGiveUpDialog: false,
       keywords: null,
       // 左边机构 数结构数据
       organInfoList: [],

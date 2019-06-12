@@ -193,6 +193,7 @@ export default {
         'where.startDateStr': this.systemForm.systemDate && this.systemForm.systemDate[0],
         'where.endDateStr': this.systemForm.systemDate && this.systemForm.systemDate[1],
         'where.titleOrPublisher': this.systemForm.titleOrPublisher,
+        'where.publishUnit': this.systemForm.department
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {

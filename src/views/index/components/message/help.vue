@@ -39,7 +39,7 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
+            <el-form-item style="padding-right: 0;">
               <el-button class="select_btn" @click="getMutualHelpList">查询</el-button>
               <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
@@ -310,6 +310,7 @@ export default {
     .help_form{
       width: 100%;
       display: flex;
+      flex-wrap: wrap;
       .el-form-item{
         padding-right: 40px;
       }
