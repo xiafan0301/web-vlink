@@ -1160,7 +1160,7 @@ export default {
   }
   > .flvplayer_bot {
     /* position: absolute; left: 0; bottom: -48px; */
-    position: absolute; left: 0; bottom: 0;
+    position: absolute; left: 0; bottom: -48px;
     width: 100%; height: 48px;
     background-color: #000;
     background-color: rgba(34, 34, 34, 0.65);
