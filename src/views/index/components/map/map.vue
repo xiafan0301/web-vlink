@@ -887,7 +887,7 @@ export default {
           }
           this.updateNumberss();
         })
-        // this.carLoop();
+        this.carLoop();
       }, 5000)
     },
     // 路线纠偏
@@ -1851,7 +1851,7 @@ export default {
     // 截屏
     cutScreen () {
       this.resetTools(3);
-      h2canvas(document.querySelector('#app')).then(canvas => {
+      h2canvas(document.querySelector('.map_r')).then(canvas => {
         this.cutCanvas = canvas;
         this.activeType = 3;
         this.fullScreenUrl = canvas.toDataURL();
