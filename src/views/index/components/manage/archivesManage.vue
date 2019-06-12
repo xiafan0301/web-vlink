@@ -477,6 +477,7 @@ export default {
     // 取消添加
     cancelAdd (form) {
       this.$refs[form].resetFields();
+      this.newDepartmentDialog = false;
     },
     // 显示添加部门弹出框
     onAddDepart (obj) {
