@@ -25,7 +25,7 @@
                     <li
                       v-for="(item, index) in copyGroupList"
                       :key="index"
-                      @click="handleCopyGroup(item.id)"
+                      @click="handleCopyGroup(item.id, item.name)"
                     >{{item.name}}</li>
                   </ul>
                 </vue-scroll>
@@ -41,9 +41,6 @@
         <div class="table_box">
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-              <el-form-item prop="idNo">
-                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
-              </el-form-item>
               <el-form-item prop="idType">
                 <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
                   <el-option label="身份证" :value="1"></el-option>
@@ -55,6 +52,9 @@
                   <el-option label="男" :value="1"></el-option>
                   <el-option label="女" :value="2"></el-option>
                 </el-select>
+              </el-form-item>
+              <el-form-item prop="idNo">
+                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
               </el-form-item>
               <el-form-item>
                 <el-button class="select_btn" @click="searchData">查询</el-button>
@@ -166,7 +166,7 @@
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -192,7 +192,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span>{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks}}</span>
             </li>
           </ul>
         </div>
@@ -355,6 +355,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.albumId': this.albumId,
         'where.groupId': this.groupId,
         'where.idType': this.searchForm.idType,
@@ -397,7 +398,7 @@ export default {
       this.isShowError = false;
     },
     // 将人员复制到选择的组
-    handleCopyGroup (id) {
+    handleCopyGroup (id, name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
@@ -411,7 +412,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getPersonList();
@@ -429,7 +430,10 @@ export default {
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
               this.personDetailInfo.albumList.map(item => {
                 this.albumList.push(item.title);
               });
@@ -593,7 +597,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.groupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;

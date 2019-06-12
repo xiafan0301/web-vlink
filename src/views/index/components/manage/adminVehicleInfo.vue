@@ -169,7 +169,7 @@
             </li>
             <li>
               <span>车主生日：</span>
-              <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
+              <span>{{vehicleDetailInfo.ownerBirth}}</span>
             </li>
             <li>
             <span>底库信息：</span>
@@ -197,7 +197,7 @@
           </li>
             <li>
               <span>备注：</span>
-              <span>{{vehicleDetailInfo.desci}}</span>
+              <span class="group_box">{{vehicleDetailInfo.desci}}</span>
             </li>
           </ul>
         </div>
@@ -355,6 +355,7 @@ export default {
     // 获取车辆列表数据
     getList () {
       const params = {
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.groupId': this.groupId,
         'where.albumId': this.albumId,
@@ -407,7 +408,10 @@ export default {
         getVehicleInfo(id)
           .then(res => {
             if (res) {
+              const birth = res.data.ownerBirth.substr(0, 10);
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.ownerBirth = birth;
+
               this.vehicleDetailInfo.albumList.map(item => {
                 this.albumList.push(item.title);
               });
@@ -565,7 +569,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getList();
@@ -611,7 +615,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.getList();

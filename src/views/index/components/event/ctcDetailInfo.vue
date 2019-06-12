@@ -11,7 +11,7 @@
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">
@@ -184,7 +184,7 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, updateProcess } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -207,8 +207,18 @@ export default {
   },
   mounted () {
     this.getDetail();
+    if(this.$route.query.uid) {
+      this.editProcessStatus();
+    }
   },
   methods: {
+    //修改事件处理过程状态
+    editProcessStatus() {
+      const uid = this.$route.query.uid;
+      updateProcess(uid).then((res)=>{
+        console.log(res)
+      }).catch(()=>{})
+    },
     // 跳至结束调度页面
     skipCtcEndPage () {
       this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id, status: this.$route.query.status }});

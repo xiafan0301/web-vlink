@@ -22,8 +22,9 @@
             placement="bottom"
             width="378"
             trigger="click"
-            popper-class="task_popover">
-            <vue-scroll>
+            :popper-class="popoverClass"
+            v-model="taskVisible"
+            >
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
               <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
@@ -33,6 +34,7 @@
               <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
               <p class="h_menu"><span @click="mark">全部标记为已读</span></p>
             </div>
+            <vue-scroll>
             <ul class="vl_t_b_content">
               <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
                   <div class="col_content">
@@ -46,13 +48,14 @@
               </li>
               <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
             </ul>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToTaskList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_011" @click="getTaskCount"></i>
+              <i class="vl_icon vl_icon_011" @click="getTaskCountList"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -60,27 +63,29 @@
           <el-popover
             ref="popover"
             placement="bottom"
-            width="397"
+            width="428"
             trigger="click"
-            popper-class="alarm_popover">
-            <vue-scroll>
+            :popper-class="alarmPopoverClass"
+            v-model="alarmVisible">
+            
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
+            <vue-scroll>
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
-                <div>
+                <div class="uesr_info">
                   <h1>{{item.surveillanceName}}</h1>
                   <p>{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
-                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
+                <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
                   <span>{{item.semblance}}</span>
                   <p>匹配度</p>
                   <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
-                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
+                <div class="img_info"><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
-              <div class="hd_alarm_b">
+              <div class="hd_alarm_b" v-if="item.objType == 1 || item.objType == 2">
                 <template v-if="item.objType == 1">
                   <div class="alarm_b_list">{{item.name}}</div>
                   <div class="alarm_b_list">{{item.sex}}</div>
@@ -91,14 +96,15 @@
                   <div class="alarm_b_list">{{item.numberColor}}</div>
                   <div class="alarm_b_list">{{item.vehicleType}}</div>
                 </template>
-                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
+                <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToAlarmList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
             </el-badge>
@@ -116,7 +122,7 @@
       <li>
         <router-link :to="{name: 'map'}">
           <i class="vl_icon vl_icon_002"></i>
-          <span>地图</span>
+          <span>GIS</span>
         </router-link>
       </li>
       <li>
@@ -266,7 +272,11 @@ export default {
         newType: 'text',
         sureType: 'text'
       }, // 输入框类型
-      taskCount: {}
+      taskCount: {},
+      popoverClass: 'task_popover',
+      alarmPopoverClass: 'alarm_popover',
+      taskVisible: false,
+      alarmVisible: false,
     }
   },
   mounted () {
@@ -346,6 +356,10 @@ export default {
         }
       })
     },
+    getTaskCountList() {
+      this.getTaskCount();
+      this.getTaskData();
+    },
     //任务数量统计
     getTaskCount() {
       let params = {
@@ -361,6 +375,12 @@ export default {
             this.taskCount['unread'] = 0
           }
           this.sums.msg = res.data.total;
+          //是否展示任务盒子
+          this.$nextTick(()=>{
+            if(this.sums.msg <= 0 ) {
+              this.popoverClass = 'task_popover show_box'
+            }
+          })
         }
       }).catch(()=>{})
     },
@@ -382,6 +402,12 @@ export default {
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
           }
           this.sums.events = res.data.total;
+          //是否展示告警盒子
+          this.$nextTick(()=>{
+            if(this.sums.events <= 0 ) {
+              this.alarmPopoverClass = 'alarm_popover show_box'
+            }
+          })
         }
       })
     },
@@ -400,9 +426,19 @@ export default {
       }else {
         this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
       }
+      this.alarmVisible = false;
+    },
+    goToAlarmList() {
+      this.$router.push({name: 'alarm'});
+      this.alarmVisible = false;
+    },
+    goToTaskList() {
+      this.$router.push({name: 'task'});
+      this.taskVisible = false;
     },
     goSkipTaskDetail(item) {
-      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType}});
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType, dispatchStatus: item.dispatchStatus}});
+      this.taskVisible = false;
     },
     // 获取任务列表数据
     getTaskData () {
@@ -433,7 +469,6 @@ export default {
     mark() {
       let params = {
         userId: this.userInfo.uid,
-        departmentId: null,
       }
       markTask(params).then(res => {
         console.log(res)
@@ -559,18 +594,21 @@ export default {
 </style>
 <style lang="scss">
 .vl_hd_box {
-  max-height: 456px;
+  max-height: calc(100% - 40px);
+  height: calc(100% - 40px);
   .vl_hd_alarm{
-    padding: 10px 22px;
+    padding: 22px 0;
+    margin: 0 22px;
     border-bottom: 1px solid #F2F2F2;
     cursor: pointer;
     .hd_alarm_t{
       display: flex;
       justify-content: space-between;
-      > div{
+      /* > div{
         flex: 0 0 25%;
-      }
-      > div:nth-child(1){
+      } */
+      .uesr_info {
+        flex: 0 0 30%;
         > div{
           margin-bottom: 10px;
           color: #333333;
@@ -580,8 +618,21 @@ export default {
           font-size: 12px;
           color: #999999;
         }
+        h1,p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+          }
+        h1 {
+          -webkit-line-clamp: 1; //行数
+        }
+        p {
+          -webkit-line-clamp: 2; //行数
+        }
       }
       > div:nth-child(3){
+        flex: 0 0 16%;
         text-align: center;
         padding-top: 15px;
         > span{
@@ -604,18 +655,19 @@ export default {
           }
         }
       }
-      > div:nth-child(2), > div:nth-child(4){
+      .img_info {
+        flex: 0 0 27%;
         text-align: center;
         > img{
-          width: 70px;
-          height: 70px;
+          width: 90px;
+          height: 90px;
         }
       }
     }
     .hd_alarm_b{
       margin-top: 10px;
       display: flex;
-      justify-content: space-between;
+      /* justify-content: space-between; */
       > div{
         padding: 5px;
         font-size: 12px;
@@ -623,6 +675,7 @@ export default {
         border:1px solid rgba(242,242,242,1);
         border-radius:3px;
         color: #666;
+        margin-right: 8px;
       }
       .alarm_b_list {
         span {
@@ -634,14 +687,32 @@ export default {
         }
       }
     }
+    &:hover {
+      .uesr_info h1, .uesr_info p{
+        color: #0A6DF2;
+      }
+      .img_info img{
+        box-shadow: -3px 0px 8px rgba(0, 0, 0, 0.15),   /*左边阴影*/ 
+                    0px -3px 8px rgba(0, 0, 0, 0.15),  /*上边阴影*/ 
+                    3px 0px 8px rgba(0, 0, 0, 0.15),  /*右边阴影*/ 
+                    0px 8px 10px rgba(0, 0, 0, 0.15); /*下边阴影*/
+      }
+    }
+  }
+  a {
+    cursor: pointer;
   }
 }
 .vl_task_box {
-  max-height: 456px;
-  padding: 0 30px;
+  max-height: calc(100% - 85px);
+  height: calc(100% - 85px);
   .vl_t_b_header {
     height: 48px;
     line-height: 48px;
+    padding: 0 30px;
+  }
+  .vl_t_b_content {
+    padding: 0 30px;
   }
   .vl_info {
     display: flex;
@@ -719,14 +790,22 @@ export default {
     padding: 20px 0;
     border-bottom: 1px solid #F2F2F2;
   }
+  a {
+    cursor: pointer;
+  }
 }
 .task_popover {
-  max-height: 476px;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
   padding: 12px 0;
 }
 .alarm_popover {
-  max-height: 476px;
-  padding: 12px 0;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
+  padding: 0 0 12px 0;
+}
+.show_box {
+  display: none!important;
 }
 .person_info {
   height: auto !important;

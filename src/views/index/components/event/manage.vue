@@ -90,12 +90,11 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="reporterRole"
+          prop="reporterUserRole"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
             <span v-if='scope.row.reporterUserRole'>{{scope.row.reporterUserRole}}</span>
-            <!-- <span v-else-if='!scope.row.reporterUser'>市民</span> -->
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -365,27 +364,8 @@ export default {
   }
   .table_box {
     padding: 0 20px;
-    // .add_event_btn {
-    //   width: 108px;
-    //   height: 40px;
-    //   background-color: #0C70F8;
-    //   color: #ffffff;
-    //   font-size: 14px;
-    //   line-height: 40px;
-    //   text-align: center;
-    //   border-radius: 3px;
-    //   cursor: pointer;
-    //   span:nth-child(1) {
-    //     font-size: 16px;
-    //   }
-    //   span:nth-child(2) {
-    //     margin-left: 5px;
-    //   }
-    // }
     .event_table {
       margin-top: 8px;
-      // padding-bottom: 20px;
-      // width: 100%;
       .event_status {
         &:before {
           content: '.';

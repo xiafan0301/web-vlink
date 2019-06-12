@@ -405,6 +405,7 @@ export default {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         if (!navigator.getMedia) {
+          _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
@@ -442,7 +443,8 @@ export default {
             });
           }, function (_error) {
             console.log(_error)
-            alert('您的设备没有摄像头也没有麦，无法通话')
+            _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+            _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
           })
         });
       } else {

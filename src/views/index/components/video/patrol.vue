@@ -47,7 +47,7 @@
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
-                        <div class="tree_li_dis" v-else>
+                        <div class="tree_li_dis" draggable="false" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
@@ -192,13 +192,14 @@
         <el-progress type="circle" 
           :width="200" 
           :stroke-width="16"
-          :percentage="patrolStartPercentage" 
-          color="#1073F8"
-          status="text">
-          <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
+          :percentage="patrolStartPercentage"
+          :format="patrolProgFormat"
+          :show-text="true"
+          color="#1073F8">
+          <!-- <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
             {{Math.ceil(patrolStartSecond / 10)}}
           </p>
-          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P>
+          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P> -->
         </el-progress>
       </div>
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
@@ -210,7 +211,7 @@
     </el-dialog>
     <!-- 轮巡暂停提示 dialog -->
     <el-dialog title="是否暂停轮巡？" :visible.sync="patrolParseDialogVisible" :center="false" :append-to-body="true" width="500px">
-      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，如需要查看其它通路，请先暂停轮巡。</div>
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，不可改变布局，如需改变布局查看其它通路请先暂停轮巡。</div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="patrolParseDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="patrolParse">确定暂停轮巡</el-button>
@@ -309,6 +310,10 @@ export default {
   },
   methods: {
     /* 轮巡控制事件 begin */
+    patrolProgFormat (percentage) {
+      // return Math.round(percentage) + '秒';
+      return Math.ceil(this.patrolStartSecond / 10)  + ' 秒';
+    },
     // 获取轮巡数据定时器
     patrolSetDataVal () {
       this.patrolDataVal = window.setInterval(() => {
@@ -437,7 +442,7 @@ export default {
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
       this.patrolNextCloseDis = true;
-      if (this.patrolHandlerData.currentRound) {
+      if (this.patrolHandlerData.currentRound && this.patrolHandlerData.currentRound.uid) {
         // 停止当前沦胥
         mdfVideoRoundState({
           id: this.patrolHandlerData.currentRound.uid,
@@ -447,33 +452,32 @@ export default {
           console.log("mdfVideoRoundState error：", error);
         });
       }
+      this.patrolNextStart();
+    },
+    // 开始执行下一个轮巡
+    patrolNextStart () {
       this.patrolClearDataVal();
+      this.patrolClearCurrent();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
         status: 2
       }).then(() => {
-        // 开始执行下一个轮巡
-        this.patrolNextStart();
+        let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
+        if (iT > 0) {
+          iT = Math.round(iT / 1000);
+        }
+        let op = {
+          currentRound: this.patrolHandlerData.nextRound,
+          currentRoundRemain: iT
+        }
+        this.patrolClearNext();
+        this.patrolStart(op);
         // 获取轮巡数据
         this.patrolSetDataVal();
       }).catch(error => {
         this.patrolSetDataVal();
         console.log("mdfVideoRoundState error：", error);
       });
-    },
-    // 开始执行下一个轮巡
-    patrolNextStart () {
-      this.patrolClearCurrent();
-      let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
-      if (iT > 0) {
-        iT = Math.round(iT / 1000);
-      }
-      let op = {
-        currentRound: this.patrolHandlerData.nextRound,
-        currentRoundRemain: iT
-      }
-      this.patrolClearNext();
-      this.patrolStart(op);
     },
     // 关闭下一个轮巡
     patrolNextClose () {
@@ -527,6 +531,7 @@ export default {
         this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
           this.patrolCurrentGoOn();
         }, this.patrolHandlerData.currentRound.roundInterval * 1000);
+        // console.log('currentRoundRemain----------', this.patrolHandlerData.currentRoundRemain * 1000);
         this.patrolHandlerData.currentRoundRemainTimeout = window.setTimeout(() => {
           this.patrolClearCurrent();
           this.$message('轮巡时间已到。');

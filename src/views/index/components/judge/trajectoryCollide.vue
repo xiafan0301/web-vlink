@@ -73,7 +73,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-button @click="resetSearch">重置</el-button>
+        <el-button  @click="resetSearch">重置</el-button>
         <el-button type="primary" :loading="searching" @click="tcDiscuss">{{searching ? '碰撞' : '碰撞分析'}}</el-button>
       </div>
     </div>
@@ -418,6 +418,12 @@ export default {
         JtcGETTrail(params).then(res => {
           if (res) {
             console.log(res);
+            if (res.data.length === 0) {
+              this.$message.info('抱歉，没有找到匹配结果')
+              this.amap.clearMap();
+              this.searching = false;
+              return false;
+            }
             res.data.forEach((z, index) => {
               z['playing'] = false;
               z['checked'] = true;

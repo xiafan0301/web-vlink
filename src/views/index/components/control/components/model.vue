@@ -1749,7 +1749,7 @@ export default {
     // 获取所有行政区列表
     getAreas () {
       const params = {
-        parentUid: mapXupuxian.adcode
+        organPid: mapXupuxian.adcode
       }
       getAreas(params).then(res => {
         if (res && res.data) {

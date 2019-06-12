@@ -58,9 +58,6 @@
         <vue-scroll>
           <div class="search_right_box">
             <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-              <el-form-item style="width: 240px;" prop="idNo">
-                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
-              </el-form-item>
               <el-form-item prop="idType">
                 <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
                   <el-option label="身份证" :value="1"></el-option>
@@ -97,6 +94,9 @@
                   </el-select>
                 </el-form-item>
               </template>
+              <el-form-item style="width: 240px;" prop="idNo">
+                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
+              </el-form-item>
               <el-form-item>
                 <el-button class="select_btn" @click="searchPersonData">查询</el-button>
                 <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
@@ -118,14 +118,14 @@
                         <li
                           v-for="(item, index) in copyPerGroupInfoList"
                           :key="'item' + index"
-                          @click="handleCopyGroup(item.id)"
+                          @click="handleCopyGroup(item.id, item.name)"
                         >{{item.name}}</li>
                       </template>
                       <template v-else>
                         <li
                           v-for="(item, index) in perGroupList"
                           :key="'item' + index"
-                          @click="handleCopyGroup(item.id)"
+                          @click="handleCopyGroup(item.id, item.name)"
                         >{{item.name}}</li>
                       </template>
                     </ul>
@@ -314,7 +314,7 @@
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -342,7 +342,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span>{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks}}</span>
             </li>
           </ul>
         </div>
@@ -464,7 +464,8 @@ export default {
     getGroupList () {
       const params = {
         type: 4, // 4---人像
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerGroupList(params)
         .then(res => {
@@ -481,7 +482,8 @@ export default {
     getBottomBankList () {
       const params = {
         type: 1, // 1--人像库
-        name: this.searchGroupName
+        name: this.searchGroupName,
+        origin: 1
       }
       getPerBottomBankList(params)
         .then(res => {
@@ -495,7 +497,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
-        // 'where.type': this.selectMethod,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -630,7 +632,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;
@@ -670,7 +672,7 @@ export default {
       this.getPersonList();
     },
     // 将人员复制到选择的组
-    handleCopyGroup (id) {
+    handleCopyGroup (id, name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
@@ -684,7 +686,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getGroupList();
@@ -776,7 +778,10 @@ export default {
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
               this.personDetailInfo.albumList.map(item => {
                 this.albumDetailList.push(item.title);
               });

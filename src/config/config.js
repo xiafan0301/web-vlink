@@ -54,7 +54,7 @@ const oDomains = {
     ctc: {
       dev: 'http://apidev.aorise.org/vlink-dispatching/api/vlink',
       // dev: 'http://10.116.64.142:8083/api/vlink',
-      // dev: 'http://10.116.64.142:8083/api/vlink',
+      // dev: 'http://10.116.64.127:8081/api/vlink',
       test: 'http://apirel.aorise.org/vlink-dispatching/api/vlink',
       prod: 'http://apirel.aorise.org/vlink-dispatching/api/vlink'
     },
@@ -71,6 +71,13 @@ const oDomains = {
       dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apirel.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apirel.aorise.org/vlink-auth/api/auth/'
+    },
+    // 车辆地址
+    vehicle: {
+      // dev: 'http://10.116.64.107:8081',
+      dev: 'http://apidev.aorise.org/vlink-vehicle',
+      test: 'http://apirel.aorise.org/vlink-vehicle',
+      prod: 'http://apirel.aorise.org/vlink-vehicle'
     },
     // 公共短信服务
     sms: {
@@ -111,8 +118,14 @@ for (let _key in oDomains) {
 export {ajaxCtx};
 
 // 视频通讯相关配置
+let _wsEnv = '';
+if (ENV_API === 'dev') {
+  _wsEnv = 'apidev'
+} else {
+  _wsEnv = 'apidev'
+}
 export const webrtcConfig = {
-  wsUrl: 'ws://apidev.aorise.org/visual-video/ws/signaling', // websocket地址
+  wsUrl: 'ws://' + _wsEnv + '.aorise.org/visual-video/ws/signaling', // websocket地址
   turnUrl: '222.244.147.121:3479', // turn地址
   turnUsername: 'test', // turn name
   turnCredential: 'test', // turn credential

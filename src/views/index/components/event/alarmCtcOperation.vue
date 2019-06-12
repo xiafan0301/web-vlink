@@ -142,7 +142,7 @@
       </div>
       <div class="event-ctc-content" v-show="sturcDetail.taskList && sturcDetail.taskList.length > 0">
         <div class="header">
-          <p class="ctc-title">调度指挥方案</p>
+          <p class="ctc-title">调度方案</p>
         </div>
         <div class="divide"></div>
         <ul class="content-list">
@@ -220,10 +220,10 @@
             <div class="main-content">
               <div class="title">
                 <template v-if="sturcDetail.taskList && sturcDetail.taskList.length > 0">
-                  <span>再次调度指挥方案</span>
+                  <span>再次调度方案</span>
                 </template>
                 <template v-else>
-                  <span>调度指挥方案</span>
+                  <span>调度方案</span>
                 </template>
                 <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
               </div>
@@ -253,7 +253,7 @@
             <template v-if="taskList.length === (index + 1)">
               <div class="add-ctc" @click="addTask('form' + index)">
                 <i class="vl_icon vl_icon_event_8"></i>
-                <span>调度指挥任务添加</span>
+                <span>添加调度任务</span>
               </div>
             </template>
           </div>

@@ -141,7 +141,7 @@
         </div>
         <div class="event-ctc-content" v-if="sturcDetail.taskList && sturcDetail.taskList.length > 0">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">
@@ -293,6 +293,7 @@
 <script>
 // import { getEventDetail } from '@/views/index/api/api.event.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
+import { updateProcess } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -321,8 +322,18 @@ export default {
   mounted () {
     // this.getDetail();
     this.toAlarmDetail();
+    if(this.$route.query.uid) {
+      this.editProcessStatus();
+    }
   },
   methods: {
+    //修改事件处理过程状态
+    editProcessStatus() {
+      const uid = this.$route.query.uid;
+      updateProcess(uid).then((res)=>{
+        console.log(res)
+      }).catch(()=>{})
+    },
     // 跳至结束调度页面
     skipCtcEndPage () {
       let isRelationEvent;

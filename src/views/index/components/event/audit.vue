@@ -94,6 +94,9 @@
           prop="eventTypeName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventTypeName ? scope.row.eventTypeName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报者"

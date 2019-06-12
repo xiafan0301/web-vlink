@@ -401,9 +401,9 @@ export default {
                 color: #666666;
                 display: flex;
                 align-items: center;
-                >span {
-                  margin: 0 80px 0 0;
-                }
+                // >span {
+                //   margin: 0 80px 0 0;
+                // }
               }
             }
           }

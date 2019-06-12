@@ -102,7 +102,7 @@
         </template>
         <el-form-item style="width: 192px;">
           <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
-          <el-button style="width: 45%;" type="primary" @click="resetForm('todayAlarmForm')">重置</el-button>
+          <el-button style="width: 45%;" @click="resetForm('todayAlarmForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -538,7 +538,7 @@ export default {
         margin: 0 0.5%;
         max-width: 342px;
         width: 32%;
-        height: 240px;
+        height: 266px;
         padding: 30px 20px 0;
         margin-bottom: 20px;
         background:rgba(255,255,255,1);
@@ -587,11 +587,13 @@ export default {
           }
         }
         .list_con_info{
-          display: flex;
-          justify-content: space-between;
-          line-height: 50px;
+          /* display: flex;
+          justify-content: space-between; */
+          /* line-height: 50px; */
+          padding-top: 16px;
           > div:nth-child(1){
             color: #333;
+            margin-bottom: 6px;
           }
           > div:nth-child(2) > span{
             color: #999;

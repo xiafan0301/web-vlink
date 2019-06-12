@@ -55,10 +55,7 @@
     <div class="vehicle_info_right_group">
       <vue-scroll>
         <div class="search_right_box">
-          <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-            <el-form-item style="width: 240px;" prop="keyWord">
-              <el-input style="width: 240px;" type="text" placeholder="请输入车牌号或车主或型号" v-model="searchForm.keyWord" />
-            </el-form-item>
+          <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">  
             <template v-if="selectMethod === 1">
               <el-form-item prop="albumId">
                 <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
@@ -83,6 +80,9 @@
                 </el-select>
               </el-form-item>
             </template>
+            <el-form-item style="width: 240px;" prop="keyWord">
+              <el-input style="width: 240px;" type="text" placeholder="请输入车牌号或车主或型号" v-model="searchForm.keyWord" />
+            </el-form-item>
             <el-form-item>
               <el-button class="select_btn" @click="selectDataList">查询</el-button>
               <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
@@ -313,7 +313,7 @@
           </li>
           <li>
             <span>车主生日：</span>
-            <span>{{vehicleDetailInfo.ownerBirth | fmTimestamp }}</span>
+            <span>{{vehicleDetailInfo.ownerBirth}}</span>
           </li>
           <li>
             <span>底库信息：</span>
@@ -339,7 +339,7 @@
           </li>
           <li>
             <span>备注：</span>
-            <span>{{vehicleDetailInfo.desci}}</span>
+            <span class="group_box">{{vehicleDetailInfo.desci}}</span>
           </li>
         </ul>
       </div>
@@ -469,7 +469,7 @@ export default {
     // 获取车辆列表数据
     getVehicleInfoList () {
       const params = {
-        // 'where.type': type,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.keyWord': this.searchForm.keyWord,
         'where.albumId': this.searchForm.albumId,
         'where.groupId': this.searchForm.groupId,
@@ -491,7 +491,6 @@ export default {
                 item.albumDetailList.push(a.title);
               });
             });
-            console.log('vehicleList', this.vehicleList)
           }
         })
         .catch(() => {})
@@ -526,7 +525,8 @@ export default {
       this.allVelGroupNumber = 0;
       this.pagination.pageNum = 1;
       const params = {
-        groupName: this.searchGroupName
+        groupName: this.searchGroupName,
+        origin: 1
       }
       getVehicleGroup(params)
         .then(res => {
@@ -542,7 +542,8 @@ export default {
     // 查询车辆底库
     getVelBottomNameInfo () {
       const params = {
-        bankName: this.searchGroupName
+        bankName: this.searchGroupName,
+        origin: 1
       }
       getVehicleBottomName(params)
         .then(res => {
@@ -561,14 +562,16 @@ export default {
         getVehicleInfo(id)
           .then(res => {
             if (res) {
+              let birth = res.data.ownerBirth.substr(0, 10);
               this.vehicleDetailInfo = res.data;
+              this.vehicleDetailInfo.ownerBirth = birth;
+
               this.vehicleDetailInfo.albumList.map(item => {
                 this.albumDetailList.push(item.title);
               });
               this.vehicleDetailInfo.groupList.map(item => {
                 this.groupDetailList.push(item.groupName);
               });
-              console.log(this.groupDetailList)
             }
           })
           .catch(() => {})
@@ -704,7 +707,6 @@ export default {
         selectArr.push(item.uid);
       });
       const params = {
-        // groupName: this.addGroupName || null,
         groupName: name || null,
         vehicleIds: selectArr
       };
@@ -714,7 +716,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getVeGroupInfo();
@@ -761,7 +763,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;

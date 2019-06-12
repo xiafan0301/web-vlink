@@ -11,15 +11,15 @@
           </el-option>
         </el-select>
         <div v-if="searchData.type !== 1" style="margin-bottom: 0;">
-          <el-select v-model="searchData.vehicleGroupId" @change="chooseType" placeholder="选择车辆组">
+          <el-select v-model="searchData.vehicleGroupId" placeholder="选择车辆组">
             <el-option
               v-for="item in vehicleGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.uid">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.vehicleColor" @change="chooseType" placeholder="选择车辆颜色">
+          <el-select v-model="searchData.vehicleColor" placeholder="选择车辆颜色">
             <el-option
               v-for="item in vehicleColorList"
               :key="item.value"
@@ -27,7 +27,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.plateType" @change="chooseType" placeholder="选择号牌种类">
+          <el-select v-model="searchData.plateType" placeholder="选择号牌种类">
             <el-option
               v-for="item in plateTypeList"
               :key="item.value"
@@ -37,15 +37,15 @@
           </el-select>
         </div>
         <div v-if="searchData.type !== 2" style="margin-bottom: 0;">
-          <el-select v-model="searchData.portraitGroupId" @change="chooseType" placeholder="选择人员组">
+          <el-select v-model="searchData.portraitGroupId" placeholder="选择人员组">
             <el-option
               v-for="item in portraitGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.uid">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.sex" @change="chooseType" placeholder="选择性别">
+          <el-select v-model="searchData.sex" placeholder="选择性别">
             <el-option
               v-for="item in sexList"
               :key="item.value"
@@ -53,7 +53,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="searchData.ageGroup" @change="chooseType" placeholder="选择年龄段">
+          <el-select v-model="searchData.ageGroup" placeholder="选择年龄段">
             <el-option
               v-for="item in ageGroupList"
               :key="item.value"
@@ -72,7 +72,19 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-input v-model="searchData.carNum" placeholder="关注范围"></el-input>
+        <el-select
+          v-model="areaIds"
+          class="camera-select"
+          multiple
+          collapse-tags
+          placeholder="关注范围">
+          <el-option
+            v-for="item in eventAreas"
+            :key="item.id"
+            :label="item.areaName"
+            :value="item.areaId">
+          </el-option>
+        </el-select>
         <el-button  @click="resetSearch">重置</el-button>
         <el-button   :loading="searching" type="primary" @click="beginSearch">搜索</el-button>
       </div>
@@ -154,12 +166,15 @@
                 prop="processStatus"
                 label="处理状态"
                 min-width="100">
+                <template slot-scope="scope">
+                  <span class="event_status" :class="[scope.row.processStatus === 1 ? 'untreated_event' : scope.row.processStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.processStatusName}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="操作"
                 min-width="100">
                 <template slot-scope="scope">
-                  <el-button type="text">查看</el-button>
+                  <el-button type="text" @click="checkIt(scope.row)">查看</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -200,9 +215,13 @@
 <script>
 let AMap = window.AMap;
 import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList} from '../../api/api.judge.js';
+import {MapGETmonitorList} from '../../api/api.map.js';
+import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 export default {
   data() {
     return {
+      areaIds: [],
+      eventAreas: [],
       pagination: {
         currentPage: 1,
         pageSize: 6,
@@ -211,10 +230,10 @@ export default {
       evData: [],
       searchData: {
         type: null, // 1：人， 2： 车,0 无限
-        portraitGroupId: null,  // 人员组
+        portraitGroupId: '',  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        vehicleGroupId: null, // 车辆组
+        vehicleGroupId: '', // 车辆组
         vehicleColor: null,
         plateType: null, // 车牌种类
         time: null
@@ -319,8 +338,32 @@ export default {
     });
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
+    this.getAllAreas();
+    // 获取人员组，跟车辆组列表
+    getGroupListIsPortrait().then(res => {
+      if (res) {
+        this.portraitGroupList = res.data;
+      }
+    })
+    getGroupListIsVehicle().then(res => {
+      if (res) {
+        this.vehicleGroupList = res.data;
+      }
+    })
   },
   methods: {
+    getAllAreas () {
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params)
+          .then(res => {
+            if (res) {
+              this.eventAreas = Object.assign([], res.data.areaTreeList, [{areaName: '全部', areaId: 0}]);
+              this.areaIds.push(0)
+            }
+          })
+    },
     chooseType (e) {
       if (e === 1) {
         this.searchData.vehicleGroupId = null;
@@ -329,7 +372,7 @@ export default {
       } else if (e === 2) {
         this.searchData.portraitGroupId = null;
         this.searchData.sex = null;
-        this.searchData.ageScope = null;
+        this.searchData.ageGroup = null;
       }
     },
     setDTime () {
@@ -341,17 +384,26 @@ export default {
       this.searchData.time = [_s, _e]
     },
     resetSearch () {
-      this.searchData = {
-        type: null, // 1：人， 2： 车,0 无限
-        portraitGroupId: '',  // 人员组
-        sex: null, // 1男，2女
-        ageScope: null, // 年龄段
-        vehicleGroupId: '', // 车辆组
-        plateType: null, // 车牌种类
-        time: null
-      }
+      this.searchData.type = null;
+      this.searchData.portraitGroupId = '';
+      this.searchData.sex = null;
+      this.searchData.vehicleColor = null;
+      this.searchData.ageGroup = null;
+      this.searchData.vehicleGroupId = '';
+      this.searchData.plateType = null;
+      this.areaIds = [];
     },
     beginSearch () {
+      let _todo = false;
+      for (let key in this.searchData) {
+        if (this.searchData[key] && key !== 'time') {
+          _todo = true;
+        }
+      }
+      if (!_todo) {
+        this.$message.warning('请至少输入一个搜索条件');
+        return false;
+      }
       this.searching = true;
       this.surveillanceIds = [];
       this.$_showLoading({
@@ -366,10 +418,18 @@ export default {
           params[key] = this.searchData[key];
         }
       }
+      if (this.areaIds.length) {
+        params['areaIds'] = this.areaIds.join(',');
+      }
       JfoGETSurveillanceObject(params)
         .then(res => {
-          this.searching = false;
           if (res) {
+            if (res.data.list.length === 0) {
+              this.$message.info('抱歉，没有找到匹配结果')
+              this.amap.clearMap();
+              this.searching = false;
+              return false;
+            }
              res.data.list.forEach(z => {
               if (z.surveillanceId) {
                 this.surveillanceIds.push(z.surveillanceId)
@@ -383,6 +443,7 @@ export default {
             this.drawMarkers(this.evData);
             this.showEventList();
           }
+          this.searching = false;
         })
     },
     drawMarkers (data) {
@@ -555,11 +616,16 @@ export default {
         })
       }
       let params = {
-        'where.surveillanceIds': [...new Set(this.surveillanceIds.join(',').split(','))].join(','),
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
         // surveillanceIds: '23, 11'
       }
+      if (this.surveillanceIds.length) {
+        params['where.surveillanceIds'] = [...new Set(this.surveillanceIds.join(',').split(','))].join(',')
+      } else {
+        params['where.surveillanceIds'] = "";
+      }
+      console.log(params)
       JfoGETEventList(params)
         .then(res => {
           this.$_hideLoading();
@@ -574,6 +640,17 @@ export default {
     handleCurrentChange (val) {
       this.pagination.currentPage = val;
       this.showEventList();
+    },
+    checkIt (obj) {
+      if (obj.processStatus === '1') {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.eventId}});
+      }
+      if (obj.processStatus === '2') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.eventId}});
+      }
+      if (obj.processStatus === '3') {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.eventId}});
+      }
     }
   },
   watch: {}
@@ -804,5 +881,28 @@ export default {
   }
   .se_hi_pa {
     text-align: center;
+  }
+  .event_status {
+    &:before {
+      content: '.';
+      font-size: 30px;
+      margin-right: 4px;
+      vertical-align: super;
+    }
+  }
+  .untreated_event {
+    &:before {
+      color: #0C70F8;
+    }
+  }
+  .treating_event {
+    &:before {
+      color: #63C751;
+    }
+  }
+  .end_event {
+    &:before {
+      color: #B8B8B8;
+    }
   }
 </style>
