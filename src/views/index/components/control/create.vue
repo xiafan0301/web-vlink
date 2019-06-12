@@ -92,7 +92,7 @@
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlAlarmId" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+          <el-form-item label="告警级别:" prop="controlAlarmId" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
             <el-select value-key="uid" v-model="createForm.controlAlarmId" filterable placeholder="请选择">
               <el-option
                 v-for="item in controAlarmList"
@@ -130,10 +130,10 @@
     </div>
     <div class="create_f_box">
       <!-- 新增布控 -->
-      <el-button v-if=" pageType !== 2" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <el-button v-if=" pageType !== 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
       <!-- 编辑布控 -->
-      <el-button v-if="pageType === 2" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
-      <el-button  @click="toGiveUpDialog = true">取消</el-button>
+      <el-button v-if="pageType === 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
+      <el-button  @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -142,8 +142,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skipIsList">放弃</el-button>
-        <el-button  type="primary" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skipIsList" class="select_btn btn_140">放弃</el-button>
+        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -296,7 +296,6 @@ export default {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 1);
           });
-          console.log(this.allDevData)
         }
       })
     },
@@ -357,7 +356,6 @@ export default {
           if (!isThrough) {
             return false;
           } else {
-            console.log('验证通过');
             const modelList = [];
             this.checkList.forEach(f => {
               if (f === '人员追踪') {
@@ -402,7 +400,6 @@ export default {
               data.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
               data.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
             }
-            console.log(JSON.stringify(data) )
             this.loadingBtn = true;
             addControl(data).then(res => {
               if (res && res.data) {
@@ -425,7 +422,6 @@ export default {
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {
-      console.log(this.createForm.periodTime);
       let startTimeArr = this.createForm.periodTime.map(m => m.startTime);
       let endTimeArr = this.createForm.periodTime.map(m => m.endTime);
       let begin = startTimeArr.sort();
@@ -513,7 +509,6 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
-          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour);
         }
       })
     },
@@ -536,12 +531,10 @@ export default {
           if (!isThrough) {
             return false;
           } else {
-            console.log('验证通过');
             const modelList = [];
             this.checkList.forEach(f => {
               if (f === '人员追踪') {
                 this.$refs.mapOne.validateModelOne();
-                console.log(1111)
                 modelList.push(this.modelDataOne);
               } else if (f === '车辆追踪') {
                 this.$refs.mapTwo.validateModelTwo();
@@ -584,7 +577,6 @@ export default {
               this.controlDetail.surveillanceDateStart = null;
               this.controlDetail.surveillanceDateEnd = null;
             }
-            console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
             putControl(this.controlDetail).then((res) => {
               if (res) {
@@ -601,20 +593,20 @@ export default {
       })
     }
   },
-  beforeDestroy () {
-    if (this.$refs['mapOne']) {
-      this.$refs['mapOne'].isDestroyed();
-    }
-    if (this.$refs['mapTwo']) {
-      this.$refs['mapTwo'].isDestroyed();
-    }
-    if (this.$refs['mapThree']) {
-      this.$refs['mapThree'].isDestroyed();
-    }
-    if (this.$refs['mapFour']) {
-      this.$refs['mapFour'].isDestroyed();
-    }
-  }
+  // beforeDestroy () {
+  //   if (this.$refs['mapOne']) {
+  //     this.$refs['mapOne'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapTwo']) {
+  //     this.$refs['mapTwo'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapThree']) {
+  //     this.$refs['mapThree'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapFour']) {
+  //     this.$refs['mapFour'].isDestroyed();
+  //   }
+  // }
 }
 </script>
 <style lang="scss" scoped>

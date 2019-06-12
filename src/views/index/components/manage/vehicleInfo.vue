@@ -55,10 +55,7 @@
     <div class="vehicle_info_right_group">
       <vue-scroll>
         <div class="search_right_box">
-          <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-            <el-form-item style="width: 240px;" prop="keyWord">
-              <el-input style="width: 240px;" type="text" placeholder="请输入车牌号或车主或型号" v-model="searchForm.keyWord" />
-            </el-form-item>
+          <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">  
             <template v-if="selectMethod === 1">
               <el-form-item prop="albumId">
                 <el-select v-model="searchForm.albumId" style="width: 240px;" placeholder="底库筛选" clearable> <!--底库列表-->
@@ -83,6 +80,9 @@
                 </el-select>
               </el-form-item>
             </template>
+            <el-form-item style="width: 240px;" prop="keyWord">
+              <el-input style="width: 240px;" type="text" placeholder="请输入车牌号或车主或型号" v-model="searchForm.keyWord" />
+            </el-form-item>
             <el-form-item>
               <el-button class="select_btn" @click="selectDataList">查询</el-button>
               <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
@@ -339,7 +339,7 @@
           </li>
           <li>
             <span>备注：</span>
-            <span>{{vehicleDetailInfo.desci}}</span>
+            <span class="group_box">{{vehicleDetailInfo.desci}}</span>
           </li>
         </ul>
       </div>
@@ -707,7 +707,6 @@ export default {
         selectArr.push(item.uid);
       });
       const params = {
-        // groupName: this.addGroupName || null,
         groupName: name || null,
         vehicleIds: selectArr
       };
@@ -717,7 +716,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getVeGroupInfo();
@@ -764,7 +763,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;

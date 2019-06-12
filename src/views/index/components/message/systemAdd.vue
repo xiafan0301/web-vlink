@@ -17,7 +17,7 @@
             <el-input
               maxlength="200"
               type="textarea"
-              :rows="4"
+              :rows="5"
               placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
@@ -25,8 +25,8 @@
         </el-form>
       </div>
       <div class="add_footer">
-        <el-button :loading="loadingBtn" type="primary" @click="addMsgNote('addForm')">发布</el-button>
-        <el-button @click.native="skip(1)">返回</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_100" @click="addMsgNote('addForm')">发布</el-button>
+        <el-button @click.native="skip(1)" class="reset_btn btn_100">返回</el-button>
       </div>
     </div>
   </div>

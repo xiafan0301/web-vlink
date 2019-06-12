@@ -58,9 +58,6 @@
         <vue-scroll>
           <div class="search_right_box">
             <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
-              <el-form-item style="width: 240px;" prop="idNo">
-                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
-              </el-form-item>
               <el-form-item prop="idType">
                 <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
                   <el-option label="身份证" :value="1"></el-option>
@@ -97,6 +94,9 @@
                   </el-select>
                 </el-form-item>
               </template>
+              <el-form-item style="width: 240px;" prop="idNo">
+                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号" v-model="searchForm.idNo" />
+              </el-form-item>
               <el-form-item>
                 <el-button class="select_btn" @click="searchPersonData">查询</el-button>
                 <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
@@ -118,14 +118,14 @@
                         <li
                           v-for="(item, index) in copyPerGroupInfoList"
                           :key="'item' + index"
-                          @click="handleCopyGroup(item.id)"
+                          @click="handleCopyGroup(item.id, item.name)"
                         >{{item.name}}</li>
                       </template>
                       <template v-else>
                         <li
                           v-for="(item, index) in perGroupList"
                           :key="'item' + index"
-                          @click="handleCopyGroup(item.id)"
+                          @click="handleCopyGroup(item.id, item.name)"
                         >{{item.name}}</li>
                       </template>
                     </ul>
@@ -342,7 +342,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span>{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks}}</span>
             </li>
           </ul>
         </div>
@@ -632,7 +632,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.addGroupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;
@@ -672,7 +672,7 @@ export default {
       this.getPersonList();
     },
     // 将人员复制到选择的组
-    handleCopyGroup (id) {
+    handleCopyGroup (id, name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
@@ -686,7 +686,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getGroupList();

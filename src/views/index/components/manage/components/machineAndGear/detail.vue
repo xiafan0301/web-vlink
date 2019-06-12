@@ -10,7 +10,7 @@
     </div>
     <div class="basic_info">
       <div class="status_img">
-        <i class="vl_icon vl_icon_archives_1"></i>
+        <i class="vl_icon vl_icon_archives_2"></i>
       </div>
       <div class="header member_header">
         <span>基本信息</span>

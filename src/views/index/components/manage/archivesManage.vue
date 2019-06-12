@@ -18,12 +18,12 @@
             class="depart_tree_list"
             :data="departmentList.A"
             node-key="uid"
+            highlight-current
             :default-expanded-keys="defaultExpandKey"
             icon-class="el-icon-arrow-right"
             :props="defaultProps"
-            @node-click="handleNodeClick"
             :expand-on-click-node="false">
-            <span class="custom-tree-node" :class="[activeSelect === data.uid ? 'tree_checked' : '']" slot-scope="{ node, data }">
+            <span class="custom-tree-node" slot-scope="{ node, data }">
               <span :class="[data.isShow ? 'orang_name' : '']">{{ data.organName }}</span>
               <span class="operation">
                 <i class="vl_icon vl_icon_manage_13 add_btn"  @click="onAddDepart(data)" title="添加"></i>
@@ -89,7 +89,7 @@
         <el-form :model="addUnit" :rules="addRules" ref="addUnit" label-width="10px">
           <el-form-item label=" " prop="organName" class="organ_name">
             <el-input v-model="addUnit.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入单位名称"></el-input>
-            <p class="organ_error_tip" v-show="isShowOrganError">单位已存在</p>
+            <!-- <p class="organ_error_tip" v-show="isShowOrganError">单位已存在</p> -->
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addUnit.organPid" placeholder="请选择上级单位">
@@ -103,7 +103,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="chargeUserName">
-            <el-select style="width: 50%" clearable v-model="addUnit.province" placeholder="省" @change="handleAreaData(addUnit.province, '市')">
+            <el-select style="width: 47%;margin-right: 5px;" clearable v-model="addUnit.province" placeholder="省" @change="handleAreaData(addUnit.province, '市')">
               <el-option
                 v-for="(item, index) in provinceList"
                 :key="'item' + index"
@@ -112,7 +112,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 50%" clearable v-model="addUnit.city" placeholder="市" @change="handleAreaData(addUnit.city, '县')">
+            <el-select style="width: 47%" clearable v-model="addUnit.city" placeholder="市" @change="handleAreaData(addUnit.city, '县')">
               <el-option
                 v-for="(item, index) in cityList"
                 :key="'item' + index"
@@ -121,7 +121,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 50%" clearable v-model="addUnit.county" placeholder="县" @change="handleAreaData(addUnit.county, '街道')">
+            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" clearable v-model="addUnit.county" placeholder="县" @change="handleAreaData(addUnit.county, '街道')">
               <el-option
                 v-for="(item, index) in countyList"
                 :key="'item' + index"
@@ -130,7 +130,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 50%" clearable v-model="addUnit.street" placeholder="街道">
+            <el-select style="width: 47%" clearable v-model="addUnit.street" placeholder="街道">
               <el-option
                 v-for="(item, index) in streetList"
                 :key="'item' + index"
@@ -158,7 +158,7 @@ export default {
       keyWord: null, // 根据部门名称搜索部门
       closeShow: false, // 显示清除输入框图标
       state: 1,
-      activeSelect: -17, // 树节点选中
+      // activeSelect: -17, // 树节点选中
       isAddLoading: false, // 添加单位加载中
       isShowOrganError: false,
       newDepartmentDialog: false, // 新增单位弹出框
@@ -331,7 +331,7 @@ export default {
             this.departmentList.A.forEach(a => {
               if (a.uid === this.userInfo.organList[0].uid) {
                 a.isShow = true;
-                this.activeSelect = a.uid;
+                // this.activeSelect = a.uid;
                 this.defaultExpandKey.push(a.uid);
               }
               this.departmentList.B.forEach(b => {
@@ -392,9 +392,9 @@ export default {
         })
     },
     // 节点被选中
-    handleNodeClick (obj) {
-      this.activeSelect = obj.uid;
-    },
+    // handleNodeClick (obj) {
+    //   this.activeSelect = obj.uid;
+    // },
     // 根据部门进行搜索
     searchData () {
       this.getDepartList();
@@ -513,6 +513,9 @@ export default {
       }
     }
     .content {
+      /deep/.el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+        background: #E0F2FF;
+      }
       .depart_tree_list {
         /deep/ .is-expanded {
           .el-tree-node__expand-icon.expanded, .orang_name {
@@ -530,9 +533,6 @@ export default {
             font-size: 14px;
           }
         }
-        /deep/ .el-tree-node__content>.el-tree-node__expand-icon {
-          // padding: 0;
-        }
         /deep/ .el-tree-node__content {
           height: 30px;
           line-height: 30px;
@@ -544,10 +544,6 @@ export default {
             display: block;
           }
         }
-        .tree_checked {
-          background: #E0F2FF;
-        }
-
         .operation {
           margin-right: 30px;
           .del_btn {

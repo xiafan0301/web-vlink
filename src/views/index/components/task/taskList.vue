@@ -206,10 +206,28 @@ export default {
     },
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
-      if(obj.dispatchType == 2) {
-        this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType, objType: obj.objType}});
+      if(obj.dispatchType == 2) {       //告警
+        if(obj.processType == 5) {
+          if (obj.dispatchStatus == 1) {
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId, objType: obj.objType}});
+          }
+          if (obj.dispatchStatus == 2) {
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId, objType: obj.objType}});
+          }
+        }else {
+          this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType, objType: obj.objType}});          
+        }
       }else {
-        this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType}});
+        if(obj.processType == 5) {
+          if (obj.dispatchStatus == 1) {
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
+          }
+          if (obj.dispatchStatus == 2) {
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
+          }
+        }else {
+          this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType}});
+        }
       }
     },
     getOneMonth () { // 设置默认一个月

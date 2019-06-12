@@ -8,8 +8,8 @@
       <h4>是否确定删除本次布控任务？</h4>
       <p>删除后该组将找不到。</p>
       <div slot="footer">
-        <el-button @click="delManageDialog = false">取消</el-button>
-        <el-button :loading="loadingBtn" type="primary" @click="delControl">确认</el-button>
+        <el-button @click="delManageDialog = false" class="reset_btn btn_140">取消</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_140" @click="delControl">确认</el-button>
       </div>
     </el-dialog>
   </div>

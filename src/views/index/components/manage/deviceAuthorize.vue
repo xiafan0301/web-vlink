@@ -26,8 +26,8 @@
       </template>
       <template v-if="tabState === 2">
         <div class="temp_left_content">
-          <div class="add_btn">
-            <i class="vl_icon vl_icon_manage_4" @click="skipTempGrantPage"></i>
+          <div class="add_btn" @click="skipTempGrantPage">
+            <i class="vl_icon vl_icon_manage_4"></i>
             <span>临时授权</span>
           </div>
           <div class="temp_content_box">
@@ -468,9 +468,8 @@ export default {
         display: flex;
         color: #333333;
         align-items: center;
-        i {
-          cursor: pointer;
-        }
+        width: 125px;
+        cursor: pointer;
         > span {
           margin-left: 5px;
         }

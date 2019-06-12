@@ -124,7 +124,7 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 20px; height: 28px; background-position: -104px -134px;}
+.vl_icon_control_09{width: 20px; height: 28px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
@@ -253,10 +253,13 @@
 .vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
 .vl_icon_task_3{width: 46px; height: 46px; background-position: -731px -1522px;}
 /*****档案管理图标*****/
-.vl_icon_archives_1{width: 117px; height: 117px;background-position: -360px -1732px;} /*正常状态*/
-.vl_icon_archives_2{width: 117px; height: 117px;background-position: -100px -1732px;} /*出车状态*/
-.vl_icon_archives_3{width: 117px; height: 117px;background-position: -232px -1732px;} /*启用状态*/
-.vl_icon_archives_4{width: 17px; height: 25px;background-position: -520px -1732px;} /*地图图标*/
+.vl_icon_archives_1{width: 117px; height: 117px;background-position: -99px -1732px;} /*出车状态*/
+.vl_icon_archives_2{width: 117px; height: 117px;background-position: -632px -1732px;} /*正常状态*/
+.vl_icon_archives_3{width: 117px; height: 117px;background-position: -367px -1732px;} /*启用状态*/
+.vl_icon_archives_4{width: 15px; height: 20px;background-position: -912px -1728px;} /*地图图标*/
+.vl_icon_archives_5{width: 117px; height: 117px;background-position: -234px -1732px;} /*在库状态*/
+.vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
+.vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -536,7 +539,7 @@
   text-align: right;
   padding: 20px;
 }
-.cum_pagination  .btn-prev, .el-pagination .btn-next {
+.cum_pagination .btn-prev, .cum_pagination .btn-next {
   width: 32px;
   height: 32px;
   padding: 0;

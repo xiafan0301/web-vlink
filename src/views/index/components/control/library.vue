@@ -26,14 +26,14 @@
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
           </div>
@@ -46,7 +46,7 @@
               v-model="libPortraitForm.perTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -92,8 +92,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
+            <el-button class="select_btn btn_90" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
@@ -104,7 +104,7 @@
               v-model="libVehicleForm.carTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -160,8 +160,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
+            <el-button class="select_btn btn_90" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -169,8 +169,8 @@
       <div class="member_list">
         <div class="member_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
-          <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
-          <el-button v-else type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          <el-button v-if="tabType === '1'" class="select_btn btn_100" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+          <el-button v-else class="select_btn btn_100" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
@@ -471,14 +471,14 @@
             </div>
           </div>
           <div slot="footer">
-            <el-button @click="toGiveUpDialog = true">取消</el-button>
+            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
             <template v-if="tabType === '1'">
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" type="primary" @click="putPortrait('portraitForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putPortrait('portraitForm')">确定</el-button>
             </template>
             <template v-else>
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="saveCar('carForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" type="primary" @click="putCar('carForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putCar('carForm')">确定</el-button>
             </template>
           </div>
         </el-dialog>
@@ -493,8 +493,8 @@
         top="40vh">
         <h4>是否放弃本次操作？</h4>
         <div slot="footer">
-          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;">放弃</el-button>
-          <el-button  type="primary" @click="toGiveUpDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="select_btn btn_140">放弃</el-button>
+          <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
         </div>
       </el-dialog>
     </template>
@@ -674,10 +674,10 @@ export default {
           {required: true, message: '请填写车牌号码', trigger: 'blur'},
           {validator: checkPlateNumber, trigger: 'blur'}
         ],
-        vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
-        vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
-        numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
-        numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
+        // vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
+        // vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
+        // numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
+        // numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
       },
       lastIdNo: null,
       lastCarIdNo: null,
@@ -1293,13 +1293,13 @@ export default {
           margin-left: 10px;
         }
         &.active{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
         }
         &:hover{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
@@ -1326,10 +1326,10 @@ export default {
             }
           }
           &.active{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
           &:hover{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
         }
       }
@@ -1501,13 +1501,14 @@ export default {
       .el-upload--picture-card{
         width: 160px;
         height: 160px;
-        background: rgba(67,140,238,1);
+        background: #F2F2F2;
         border-radius: 20px;
         i{
           width: 120px;
           height: 110px;
         }
         &:hover{
+          background: #0C70F8;
           i.vl_icon_control_14{
             background-position: -228px -570px;
           }
