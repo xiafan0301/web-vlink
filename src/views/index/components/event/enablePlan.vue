@@ -178,10 +178,10 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="任务名称:"  :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                      <el-input v-model="item.taskName"></el-input>
+                      <el-input v-model="item.taskName" maxlength="140"></el-input>
                     </el-form-item>
                     <el-form-item label="任务内容:"  :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                      <el-input type="textarea" rows="9" v-model="item.taskContent"></el-input>
+                      <el-input type="textarea" rows="9" v-model="item.taskContent" maxlength="1000"></el-input>
                     </el-form-item>
                   </el-form>
                 </div>

@@ -215,7 +215,7 @@
           <span>您已选择{{multipleSelection.length}}个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
             <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-              <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+              <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
               <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
             </el-form-item>
           </el-form>
@@ -236,7 +236,7 @@
         >
         <el-form :model="addGroupForm" ref="addGroupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName"></el-input>
+            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="addGroupForm.userGroupName" maxlength="6"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
@@ -320,6 +320,7 @@ export default {
       isEditLoading: false, // 编辑组名加载中
       isDeleteLoading: false, // 删除组加载中
       isRemoveLoading: false, // 移除分组加载中
+      originGroupName: null, // 最初始的组名
     }
   },
   mounted () {
@@ -338,6 +339,7 @@ export default {
               res.data.groupNumList.map(item => {
                 if (item.id == this.groupId) {
                   this.groupName = item.name;
+                  this.originGroupName = item.name; // 保存下来，最后修改的时候比较是否有变化
                 } else {
                   this.copyGroupList.push({
                     uid: item.id,
@@ -444,6 +446,10 @@ export default {
           const params = {
             groupName: this.addGroupForm.userGroupName
           };
+          if (this.originGroupName === this.addGroupForm.userGroupName) {
+            this.editGroupDialog = false;
+            return;
+          }
           checkVelRename(params)
             .then(res => {
               if (res.data) {

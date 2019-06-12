@@ -10,10 +10,10 @@
       <div class="content-box">
         <el-form :model="addPlanForm" ref="addPlanForm" :rules="rules" class="add-plan-form" size="small">
           <el-form-item label="预案名称:" prop="planName" label-width="120px">
-            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;" maxlength="50"></el-input>
           </el-form-item>
           <el-form-item label="预案类型:" label-width="120px" prop="editEventType">
-          <el-select v-model="addPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+          <el-select v-model="addPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;" maxlength="50">
             <el-option
               v-for="(item, index) in planTypeList"
               :key="index"
@@ -35,7 +35,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="预案正文:" label-width="120px" prop="planDetail">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.planDetail" placeholder="请输入预案正文"></el-input>
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.planDetail" placeholder="请输入预案正文" maxlength="10000"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
@@ -68,11 +68,11 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:">
-                    <el-input v-model="item.taskName"  placeholder="请输入任务名称" @change="changeTaskName(item.taskName, index)"></el-input>
+                    <el-input v-model="item.taskName"  placeholder="请输入任务名称" @change="changeTaskName(item.taskName, index)" maxlength="140"></el-input>
                     <span v-show="item.isError && item.isError" style="color: #F56C6C;font-size:12px;">最多输入140个字</span>
                   </el-form-item>
                   <el-form-item label="任务内容:">
-                    <el-input type="textarea" rows="8"  placeholder="请输入任务内容" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent"></el-input>
+                    <el-input type="textarea" rows="8"  placeholder="请输入任务内容" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent" maxlength="1000"></el-input>
                     <span v-show="item.isContentError && item.isContentError" style="color: #F56C6C;font-size:12px;">最多输入1000个字</span>
                   </el-form-item>
                 </el-form>

@@ -10,9 +10,9 @@
     </div>
     <div class="content_box">
       <div class="content_new_group">
-        <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="100px">
+        <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="110px">
           <el-form-item label="轮巡名称:" style="width: 49%;" prop="roundName">
-            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称"></el-input>
+            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称" maxlength="10"></el-input>
           </el-form-item>
            <el-form-item label="轮巡时间:" style="width: 49%;" prop="dateTime">
             <el-date-picker
@@ -36,7 +36,7 @@
               <el-option label="16" :value="16"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="间隔时间:" style="width: 49%;" prop="roundInterval">
+          <el-form-item label="间隔时间(秒):" style="width: 49%;" prop="roundInterval">
             <el-input style="width: 100%;" v-model="addForm.roundInterval" placeholder="10-120秒"></el-input>
           </el-form-item>
         </el-form>
@@ -132,6 +132,21 @@
       <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addForm')">保存</el-button>
       <el-button class="operation_btn back_btn" @click="cancelSubmit">取消</el-button>
     </div>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </vue-scroll>
 </template>
@@ -149,11 +164,12 @@ export default {
   data () {
     return {
       isSelected: 0, // 查询--重置
+      backDialog: false, // 返回提示弹出框
       tabState: 1, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
-        roundInterval: null, // 间隔时间
-        frameNum: null, // 画面数
+        roundInterval: 60, // 间隔时间
+        frameNum: 4, // 画面数
         dateTime: [] // 轮巡时间
       },
       pickerOptions0: {
@@ -208,6 +224,7 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    this.dataStr = JSON.stringify(this.addForm); // 将初始数据转成字符串
 
     if (this.$route.query.id) {
       this.patrolId = this.$route.query.id;
@@ -266,7 +283,6 @@ export default {
         getVideoRoundDetail(this.patrolId)
           .then(res => {
             if (res.data) {
-              console.log('sss', res.data);
               
               this.addForm.roundName = res.data.roundName;
               this.addForm.roundInterval = res.data.roundInterval;
@@ -276,7 +292,6 @@ export default {
 
               this.alcurrentDeviceList = JSON.parse(JSON.stringify(res.data.areaGroupList)); // 保存一份原始的当前设备下的设备列表
               this.currentDeviceList = JSON.parse(JSON.stringify(res.data.areaGroupList));
-              console.log(this.currentDeviceList)
 
               this.currentDeviceList.map(item => {
                 let cname = item.areaName;
@@ -304,8 +319,6 @@ export default {
                 this.leftDeviceNumber += item.deviceList.length;
                 this.leftDeviceNumber += item.bayonetList.length;
               });
-              console.log('hhh', this.currentDeviceList)
-              console.log('sss', this.leftDeviceNumber)
             }
           })
           .catch(() => {})
@@ -471,7 +484,7 @@ export default {
           this.currentDeviceList[index].isChecked = false;
         }
       }
-
+      this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
     },
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {
@@ -620,8 +633,6 @@ export default {
     },
     // 新增轮巡
     addPatrolInfo () {
-      // this.$refs[form].validate(valid => {
-      //   if (valid) {
       if (this.currentDeviceList.length === 0) {
         this.$message({
           type: 'warning',
@@ -803,6 +814,25 @@ export default {
     },
     // 返回
     cancelSubmit () {
+      console.log(this.currentDeviceList)
+      const data = JSON.stringify(this.addForm);
+      if (!this.patrolId) { // 新增
+        if (this.dataStr === data && this.currentDeviceList.length === 0) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      } else { // 修改
+        if (this.dataStr === data) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
       this.$router.back(-1);
     },
     // 轮巡时间change

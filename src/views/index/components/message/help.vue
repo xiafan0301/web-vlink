@@ -6,7 +6,6 @@
           <el-form ref="helpForm" :model="helpForm" class="help_form">
             <el-form-item prop="helpDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="helpForm.helpDate"
                 type="daterange"
                 range-separator="-"
@@ -16,7 +15,7 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item style="width: 260px;" prop="content">
+            <el-form-item prop="content">
               <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
             <el-form-item prop="helpRadius">
@@ -310,9 +309,9 @@ export default {
     .help_form{
       width: 100%;
       display: flex;
-      flex-wrap: wrap;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

@@ -19,8 +19,10 @@
             :data="departmentList.A"
             node-key="uid"
             highlight-current
+            :current-node-key="activeSelect"
             :default-expanded-keys="defaultExpandKey"
             icon-class="el-icon-arrow-right"
+            @node-click="handleNodeClick"
             :props="defaultProps"
             :expand-on-click-node="false">
             <span class="custom-tree-node" slot-scope="{ node, data }">
@@ -88,7 +90,7 @@
       <div style="margin-top: 10px;">
         <el-form :model="addUnit" :rules="addRules" ref="addUnit" label-width="10px">
           <el-form-item label=" " prop="organName" class="organ_name">
-            <el-input v-model="addUnit.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入单位名称"></el-input>
+            <el-input v-model="addUnit.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入单位名称" maxlength="10"></el-input>
             <!-- <p class="organ_error_tip" v-show="isShowOrganError">单位已存在</p> -->
           </el-form-item>
           <el-form-item label=" " prop="organPid">
@@ -158,7 +160,7 @@ export default {
       keyWord: null, // 根据部门名称搜索部门
       closeShow: false, // 显示清除输入框图标
       state: 1,
-      // activeSelect: -17, // 树节点选中
+      activeSelect: null, // 当前节点选中
       isAddLoading: false, // 添加单位加载中
       isShowOrganError: false,
       newDepartmentDialog: false, // 新增单位弹出框
@@ -331,8 +333,11 @@ export default {
             this.departmentList.A.forEach(a => {
               if (a.uid === this.userInfo.organList[0].uid) {
                 a.isShow = true;
-                // this.activeSelect = a.uid;
+                this.activeSelect = a.uid;
                 this.defaultExpandKey.push(a.uid);
+                this.$store.commit('setCurrentOrgan', {
+                  currentOrganId: a.uid
+                });
               }
               this.departmentList.B.forEach(b => {
                 if (a.uid === b.organPid) {
@@ -392,9 +397,12 @@ export default {
         })
     },
     // 节点被选中
-    // handleNodeClick (obj) {
-    //   this.activeSelect = obj.uid;
-    // },
+    handleNodeClick (obj) {
+      this.activeSelect = obj.uid;
+      this.$store.commit('setCurrentOrgan', {
+        currentOrganId: obj.uid
+      });
+    },
     // 根据部门进行搜索
     searchData () {
       this.getDepartList();

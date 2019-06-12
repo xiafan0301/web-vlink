@@ -18,7 +18,7 @@
               <!-- <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="editRoom.roomNumber"></el-input> -->
             </el-form-item>
             <el-form-item label="点室名称:" prop="roomName">
-              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="editRoom.roomName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="editRoom.roomName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="所属单位:" prop="organId">
               <el-select style="width: 100%;" v-model="editRoom.organId" placeholder="请选择所属单位" @change="handleDepartment">
@@ -31,7 +31,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="责任人:" prop="dutyUserName">
-              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="editRoom.dutyUserName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="editRoom.dutyUserName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="联系电话:" prop="userMobile">
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="editRoom.userMobile"></el-input>
@@ -65,12 +65,13 @@
                 </el-option>
               </el-select>
               <el-select style="width: 24%;" v-model="street" placeholder="镇">
-                <!-- <el-option
-                  v-for="(item, index) in departmentData"
-                  :key="index"
-                  :label="item.organName"
+                <el-option
+                  v-for="(item, index) in streetList"
+                  :key="'item' + index"
+                  :label="item.cname"
                   :value="item.uid"
-                ></el-option> -->
+                >
+                </el-option>
               </el-select>
               <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="editRoom.address" @input="changeAddress"></el-input>
               <div class="map_select" @click="initMap">
@@ -85,7 +86,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="描述:" prop="desci">
-              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="editRoom.desci"></el-input>
+              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="editRoom.desci" maxlength="150"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -161,6 +162,7 @@ export default {
       provinceList: [], // 省数据
       cityList: [], // 市数据
       countyList: [], // 县数据
+      streetList: [], // 镇数据
       map: null, // 地图对象
       autoInput: null, // 自动输入对象
     }
@@ -323,7 +325,7 @@ export default {
             if (this.areaName === '县') {
               this.countyList = res.data;
             }
-            if (this.areaName === '街道') {
+            if (this.areaName === '镇') {
               this.streetList = res.data;
             }
           }
