@@ -50,7 +50,7 @@
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
-                        <div class="tree_li_dis" v-else>
+                        <div class="tree_li_dis" draggable="false" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
@@ -124,16 +124,17 @@
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                       <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
                         <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem, 2)"
                           @dragstart="dragStart($event, sitem, 2)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
-                        <div class="tree_li_dis" v-else>
+                        <!-- 
+                          v-if="!deviceIsPlaying(sitem, 2)"
+                          <div class="tree_li_dis" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
-                        </div>
+                        </div> -->
                       </li>
                     </ul>
                     <ul class="tree_sli" v-else>

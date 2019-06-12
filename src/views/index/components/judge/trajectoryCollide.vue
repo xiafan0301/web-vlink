@@ -73,7 +73,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <el-button @click="resetSearch">重置</el-button>
+        <el-button  @click="resetSearch">重置</el-button>
         <el-button type="primary" :loading="searching" @click="tcDiscuss">{{searching ? '碰撞' : '碰撞分析'}}</el-button>
       </div>
     </div>
@@ -255,7 +255,7 @@ export default {
         if (oRes) {
           let x = {
             cname: oRes.fileName, // 附件名称 ,
-            contentUid: 43143,
+            contentUid: this.$store.state.loginUser.uid,
             // desci: '', // 备注 ,
             filePathName: oRes.fileName, // 附件保存名称 ,
             fileType: 1, // 文件类型 ,
@@ -309,7 +309,7 @@ export default {
       this.loadingHis = true;
       this.historyPicDialog = true;
       let params = {
-        userId: 43143,
+        userId: this.$store.state.loginUser.uid,
         fileType: 1
       }
       JtcGETAppendixInfoList(params).then(res => {
@@ -418,6 +418,12 @@ export default {
         JtcGETTrail(params).then(res => {
           if (res) {
             console.log(res);
+            if (res.data.length === 0) {
+              this.$message.info('抱歉，没有找到匹配结果')
+              this.amap.clearMap();
+              this.searching = false;
+              return false;
+            }
             res.data.forEach((z, index) => {
               z['playing'] = false;
               z['checked'] = true;

@@ -206,8 +206,8 @@ export default {
     wsSend (signal, obj) {
       if (this.wsObj.stompClient) {
         this.wsObj.stompClient.send(signal, this.wsObj.stompHeaders, JSON.stringify(Object.assign({
-          sender: this.localId,
-          senderName: this.localId,
+          sender: obj.remoteId,
+          senderName: this.$store.state.loginUser.userName,
           senderImgurl: '',
           limit: this.wsObj.wsLimit
         }, obj)));
@@ -351,7 +351,7 @@ export default {
     // 接收通话请求
     wrRecipient (oMsg, isAddOffered) {
       let _this = this;
-      _this.$confirm('收到' + oMsg.sender + '的视频请求，确定接收吗？', '提示', {
+      _this.$confirm('收到' + oMsg.senderName + '的视频请求，确定接收吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -405,6 +405,7 @@ export default {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         if (!navigator.getMedia) {
+          _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
@@ -442,7 +443,8 @@ export default {
             });
           }, function (_error) {
             console.log(_error)
-            alert('您的设备没有摄像头也没有麦，无法通话')
+            _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+            _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
           })
         });
       } else {

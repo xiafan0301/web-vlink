@@ -33,7 +33,7 @@
       <div class="vl_jtc_search">
         <div style="text-align: center">
           <el-button @click="resetSearch">重置</el-button>
-          <el-button type="primary" :loading="searching" :disabled="curImgNum === 0" @click="tcDiscuss(false)">确定</el-button>
+          <el-button type="primary" :loading="searching"  @click="tcDiscuss(false)">确定</el-button>
         </div>
       </div>
     </div>
@@ -241,7 +241,7 @@ export default {
     },
     drop (e) {
       let x = {
-        contentUid: 43143,
+        contentUid: this.$store.state.loginUser.uid,
         cname: '拖拽图片' + Math.random(),
         filePathName: '拖拽图片' + Math.random(),
         path: e.dataTransfer.getData("Text")
@@ -296,7 +296,7 @@ export default {
         if (oRes) {
           let x = {
             cname: oRes.fileName, // 附件名称 ,
-            contentUid: 43143,
+            contentUid: this.$store.state.loginUser.uid,
             // desci: '', // 备注 ,
             filePathName: oRes.fileName, // 附件保存名称 ,
             fileType: 1, // 文件类型 ,
@@ -351,7 +351,7 @@ export default {
       this.loadingHis = true;
       this.historyPicDialog = true;
       let params = {
-        userId: 43143,
+        userId: this.$store.state.loginUser.uid,
         fileType: 1
       }
       JtcGETAppendixInfoList(params).then(res => {
@@ -424,6 +424,10 @@ export default {
       this.curImgNum = 0;
     },
     tcDiscuss () {
+      if (this.curImgNum === 0) {
+        this.$message.warning('请至少上传或选择一张图片')
+        return false;
+      }
       this.searching = true;
       this.$_showLoading({target: '.vl_jfo_event'});
       let _ids = [];

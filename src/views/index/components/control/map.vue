@@ -31,15 +31,15 @@
             filterable
             remote
             clearable
-            value-key="value"
+            value-key="uid"
             placeholder="请输入布控对象"
             :remote-method="getControlObject"
             :loading="loading">
             <el-option
               v-for="item in controlObjDropdownList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.uid"
+              :label="item.name"
+              :value="item">
             </el-option>
           </el-select>
         </el-form-item>
@@ -65,7 +65,7 @@
         </el-form-item>
         <el-form-item style="width: 192px;" prop="alarmId">
           <el-select v-model="mapForm.alarmId" placeholder="告警级别">
-            <el-option label="全部" :value="null"></el-option>
+            <el-option label="全部告警级别" :value="null"></el-option>
             <el-option
               v-for="item in alarmLevelList"
               :key="item.value"
@@ -87,8 +87,8 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item style="width: 192px;">
-          <el-button class="reset_btn" type="primary" plain @click="resetForm()">重置</el-button>
-          <el-button class="select_btn" type="primary" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
+          <el-button class="reset_btn btn_90" @click="resetForm()">重置</el-button>
+          <el-button class="select_btn btn_90" :loading="loadingBtn" @click="getControlMap">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -195,7 +195,11 @@ export default {
       mapForm: {
         name: null,
         event: null,
-        obj: null,
+        obj: {
+          objId: null,
+          objType: null,
+          name: null
+        },
         state: 1,
         type: null,
         alarmId: null,
@@ -209,7 +213,7 @@ export default {
         {label: '已结束', value: 3}
       ],
       typeList: [
-        {label: '全部', value: null},
+        {label: '全部设备类型', value: null},
         {label: '枪机', value: 1},
         {label: '球机', value: 2},
         {label: '半球机', value: 3},
@@ -278,12 +282,7 @@ export default {
       }
       getControlObject(params).then(res => {
         if (res && res.data) {
-          this.controlObjDropdownList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+          this.controlObjDropdownList = res.data;
         }
       })
     },
@@ -357,7 +356,9 @@ export default {
         surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
         eventId: this.mapForm.event,//事件Id
-        surveillanceObjectId: this.mapForm.obj//布控对象id
+        surveillanceObjectId: this.mapForm.obj.objId,//布控对象id
+        surveillanceObjectType: this.mapForm.obj.objType,//布控对象类型
+        surveillanceObjectName: this.mapForm.obj.name//布控对象名称
       }
       this.loadingBtn = true;
       getControlMap(params).then(res => {
@@ -367,7 +368,7 @@ export default {
             if (this.map) {
               this.map.remove(this.markerList);
             }
-            this.$message.error('无设备匹配');
+            this.$message.warning('无设备匹配');
             return;
           }
           let data = [];
@@ -418,7 +419,7 @@ export default {
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
               <div class="vl_map_info">
-                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span>布控名称：</span><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>`;
+                <div class="vl_map_name" id="${_this.controlObjList.list[0].uid}"><span title="${_this.controlObjList.list[0].surveillanceName}">${_this.controlObjList.list[0].surveillanceName}</span></div>`;
               if (_this.controlObjList.list[0].surveillanceType === 1) {
                 vlMapObj += `<div><span>布控日期：</span><span>${_this.controlObjList.list[0].surveillanceDateStart}至${_this.controlObjList.list[0].surveillanceDateEnd}</span></div>`;
               }
@@ -460,7 +461,7 @@ export default {
               let item = _this.controlObjList.list[i];
               vlMapObjList += 
               `<div class="vl_map_info">
-                <div class="vl_map_name" id="${item.uid}"><span>布控名称：</span><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>`;
+                <div class="vl_map_name" id="${item.uid}"><span title="${item.surveillanceName}">${item.surveillanceName}</span></div>`;
                 if (item.surveillanceType === 1) {
                   vlMapObjList += `<div><span>布控日期：</span><span>${item.surveillanceDateStart}至${item.surveillanceDateEnd}</span></div>`;
                 }
@@ -787,9 +788,6 @@ export default {
       }
       .map_form{
         padding: 20px;
-        .reset_btn, .select_btn{
-          width: 90px;
-        }
       }
     }
     .map_box{
@@ -1071,7 +1069,7 @@ export default {
             }
           }
           .vl_map_name{
-            width: 60%;
+            width: 100%;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis; 

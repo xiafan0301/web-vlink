@@ -7,9 +7,9 @@
       <li>
         <router-link :to="{name: 'message_notice'}">公告管理</router-link>
       </li>
-      <li>
+      <!-- <li>
         <router-link :to="{name: 'message_note'}">短信通知</router-link>
-      </li>
+      </li> -->
       <li>
         <router-link :to="{name: 'message_system'}">系统消息</router-link>
       </li>
@@ -60,6 +60,35 @@ export default {
         color: #409EFF;
         cursor: pointer;
       }
+    }
+    // 重置按钮样式
+    .select_btn, .reset_btn {
+      width: 80px;
+    }
+    .btn_90{
+      width: 90px!important;
+    }
+    .btn_100{
+      width: 100px!important;
+    }
+    .btn_140{
+      width: 140px!important;
+    }
+    .select_btn {
+      background-color: #0C70F8;
+      color: #ffffff;
+    }
+    .reset_btn {
+      background-color: #ffffff;
+      color: #666666;
+      border-color: #DDDDDD;
+    }
+    // 重置日期选择框样式
+    .el-range__icon.el-icon-date{
+      display: none;
+    }
+    .el-date-editor, .el-select{
+      width: 100%;
     }
   }
 }

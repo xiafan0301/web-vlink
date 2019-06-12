@@ -6,7 +6,6 @@
           <el-form ref="helpForm" :model="helpForm" class="help_form">
             <el-form-item prop="helpDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="helpForm.helpDate"
                 type="daterange"
                 range-separator="-"
@@ -16,7 +15,7 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item style="width: 260px;" prop="content">
+            <el-form-item prop="content">
               <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
             <el-form-item prop="helpRadius">
@@ -39,14 +38,14 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
-              <el-button type="primary" @click="getMutualHelpList">查询</el-button>
-              <el-button @click="resetForm">重置</el-button>
+            <el-form-item style="padding-right: 0;">
+              <el-button class="select_btn" @click="getMutualHelpList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="help_content">
-          <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
+          <el-button class="select_btn" style="width: 145px;" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"
@@ -136,8 +135,8 @@
         title="结束互助">
         <h4>是否确定结束该次互助？</h4>
         <div slot="footer">
-          <el-button @click="delDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="endEvent">确认</el-button>
+          <el-button @click="delDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="endEvent">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -311,7 +310,8 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

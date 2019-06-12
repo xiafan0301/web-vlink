@@ -206,13 +206,7 @@ export default {
           height: .4rem;
           line-height: .4rem;
           padding: 0 .12rem;
-          background-color: #0C70F8!important;
-          border-color: #0C70F8!important;
-          color: #FFFFFF;
-          &:hover {
-          background-color: #409EFF!important;
-            border-color: #409EFF!important;
-          }
+          margin-top: .4rem;
         }
         .el-select {
           margin-bottom: .1rem;

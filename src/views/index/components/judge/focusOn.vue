@@ -14,9 +14,9 @@
           <el-select v-model="searchData.vehicleGroupId" placeholder="选择车辆组">
             <el-option
               v-for="item in vehicleGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.uid">
             </el-option>
           </el-select>
           <el-select v-model="searchData.vehicleColor" placeholder="选择车辆颜色">
@@ -40,9 +40,9 @@
           <el-select v-model="searchData.portraitGroupId" placeholder="选择人员组">
             <el-option
               v-for="item in portraitGroupList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.uid">
             </el-option>
           </el-select>
           <el-select v-model="searchData.sex" placeholder="选择性别">
@@ -166,6 +166,9 @@
                 prop="processStatus"
                 label="处理状态"
                 min-width="100">
+                <template slot-scope="scope">
+                  <span class="event_status" :class="[scope.row.processStatus === 1 ? 'untreated_event' : scope.row.processStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.processStatusName}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="操作"
@@ -213,6 +216,7 @@
 let AMap = window.AMap;
 import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList} from '../../api/api.judge.js';
 import {MapGETmonitorList} from '../../api/api.map.js';
+import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
 export default {
   data() {
     return {
@@ -226,10 +230,10 @@ export default {
       evData: [],
       searchData: {
         type: null, // 1：人， 2： 车,0 无限
-        portraitGroupId: null,  // 人员组
+        portraitGroupId: '',  // 人员组
         sex: null, // 1男，2女
         ageGroup: null, // 年龄段
-        vehicleGroupId: null, // 车辆组
+        vehicleGroupId: '', // 车辆组
         vehicleColor: null,
         plateType: null, // 车牌种类
         time: null
@@ -335,6 +339,17 @@ export default {
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
     this.getAllAreas();
+    // 获取人员组，跟车辆组列表
+    getGroupListIsPortrait().then(res => {
+      if (res) {
+        this.portraitGroupList = res.data;
+      }
+    })
+    getGroupListIsVehicle().then(res => {
+      if (res) {
+        this.vehicleGroupList = res.data;
+      }
+    })
   },
   methods: {
     getAllAreas () {
@@ -344,7 +359,7 @@ export default {
       MapGETmonitorList(params)
           .then(res => {
             if (res) {
-              this.eventAreas = Object.assign([], res.data.areaTreeList, [{areaName: '溆浦县', areaId: res.data.areaId}])
+              this.eventAreas = res.data.areaTreeList;
             }
           })
     },
@@ -371,12 +386,23 @@ export default {
       this.searchData.type = null;
       this.searchData.portraitGroupId = '';
       this.searchData.sex = null;
+      this.searchData.vehicleColor = null;
       this.searchData.ageGroup = null;
       this.searchData.vehicleGroupId = '';
       this.searchData.plateType = null;
       this.areaIds = [];
     },
     beginSearch () {
+      let _todo = false;
+      for (let key in this.searchData) {
+        if (this.searchData[key] && key !== 'time') {
+          _todo = true;
+        }
+      }
+      if (!_todo) {
+        this.$message.warning('请至少输入一个搜索条件');
+        return false;
+      }
       this.searching = true;
       this.surveillanceIds = [];
       this.$_showLoading({
@@ -396,8 +422,13 @@ export default {
       }
       JfoGETSurveillanceObject(params)
         .then(res => {
-          this.searching = false;
           if (res) {
+            if (res.data.list.length === 0) {
+              this.$message.info('抱歉，没有找到匹配结果')
+              this.amap.clearMap();
+              this.searching = false;
+              return false;
+            }
              res.data.list.forEach(z => {
               if (z.surveillanceId) {
                 this.surveillanceIds.push(z.surveillanceId)
@@ -411,6 +442,7 @@ export default {
             this.drawMarkers(this.evData);
             this.showEventList();
           }
+          this.searching = false;
         })
     },
     drawMarkers (data) {
@@ -583,11 +615,16 @@ export default {
         })
       }
       let params = {
-        'where.surveillanceIds': [...new Set(this.surveillanceIds.join(',').split(','))].join(','),
         pageNum: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
         // surveillanceIds: '23, 11'
       }
+      if (this.surveillanceIds.length) {
+        params['where.surveillanceIds'] = [...new Set(this.surveillanceIds.join(',').split(','))].join(',')
+      } else {
+        params['where.surveillanceIds'] = "";
+      }
+      console.log(params)
       JfoGETEventList(params)
         .then(res => {
           this.$_hideLoading();
@@ -843,5 +880,28 @@ export default {
   }
   .se_hi_pa {
     text-align: center;
+  }
+  .event_status {
+    &:before {
+      content: '.';
+      font-size: 30px;
+      margin-right: 4px;
+      vertical-align: super;
+    }
+  }
+  .untreated_event {
+    &:before {
+      color: #0C70F8;
+    }
+  }
+  .treating_event {
+    &:before {
+      color: #63C751;
+    }
+  }
+  .end_event {
+    &:before {
+      color: #B8B8B8;
+    }
   }
 </style>

@@ -428,6 +428,18 @@ export const addVideoDownload = (data) => {
 /**
  * 当前服务器时间
  */
+export const videoFileDownStartTime = (data) => {
+  return request({
+    url: '/video-patrol-service/video-file-down-start-time',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
+
+/**
+ * 当前服务器时间
+ */
 export const getServerTimestamp = () => {
   return request({
     url: '/video-patrol-service/server-timestamp',

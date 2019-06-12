@@ -8,18 +8,18 @@
       <div class="vl_jtc_img_box">
         <div class="vl_jtc_upload_img" :style="{}" @drop="drop($event)" @dragover="allowDrop($event)">
           <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :limit="3"
-                  multiple
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  @drop="drop($event)"
-                  :on-exceed="uploadPicExceed"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
+            :class="{'vl_jtc_upload': true}"
+            :limit="3"
+            multiple
+            :show-file-list="false"
+            accept="image/*"
+            :action="uploadAcion"
+            list-type="picture-card"
+            @drop="drop($event)"
+            :on-exceed="uploadPicExceed"
+            :before-upload="beforeAvatarUpload"
+            :on-success="uploadSucess"
+            :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
             <i class="el-icon-plus avatar-uploader-icon" v-else></i>
@@ -46,7 +46,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期">
         </el-date-picker>
-        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="填写相似度(数字)"></el-input> - 100</div>
+        <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
         <el-select
           v-model="devIdData"
           multiple
@@ -75,7 +75,7 @@
         </div>
         <div style="text-align: center">
           <el-button @click="resetSearch">重置</el-button>
-          <el-button type="primary" :loading="searching" :disabled="curImgNum === 0" @click="tcDiscuss(false)">确定</el-button>
+          <el-button type="primary" :loading="searching" @click="tcDiscuss(false)">确定</el-button>
         </div>
       </div>
     </div>
@@ -168,10 +168,10 @@
                 <span>女性</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_02"></i></span>
+                <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
+                <span>{{sturcDetail.deviceName}}<i class="vl_icon vl_icon_retrieval_02"></i></span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.address}}<i class="vl_icon vl_icon_retrieval_04"></i></span>
@@ -342,7 +342,7 @@
       },
       drop (e) {
         let x = {
-          contentUid: 43143,
+          contentUid: this.$store.state.loginUser.uid,
           cname: '拖拽图片' + Math.random(),
           filePathName: '拖拽图片' + Math.random(),
           path: e.dataTransfer.getData("Text")
@@ -414,7 +414,7 @@
           if (oRes) {
             let x = {
               cname: oRes.fileName, // 附件名称 ,
-              contentUid: 43143,
+              contentUid: this.$store.state.loginUser.uid,
               // desci: '', // 备注 ,
               filePathName: oRes.fileName, // 附件保存名称 ,
               fileType: 1, // 文件类型 ,
@@ -469,7 +469,7 @@
         this.loadingHis = true;
         this.historyPicDialog = true;
         let params = {
-          userId: 43143,
+          userId: this.$store.state.loginUser.uid,
           fileType: 1
         }
         JtcGETAppendixInfoList(params).then(res => {
@@ -565,6 +565,10 @@
       },
       tcDiscuss (boolean) {
         if (!boolean) {
+          if (this.curImgNum === 0) {
+            this.$message.warning('请至少上传或选择一张图片')
+            return false;
+          }
           this.searching = true;
           this.showSim = true;
         }
