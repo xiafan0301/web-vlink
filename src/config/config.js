@@ -156,5 +156,5 @@ export const cookieTime = 24;
 export const mapXupuxian = {
     adcode: '431224',
     name: '溆浦县',
-    center: [110.685133, 27.907633]
+    center: [110.594280, 27.908490]
 };

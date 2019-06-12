@@ -13,9 +13,9 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="groupDialog = false">取消</el-button>
-        <el-button v-if="operateType === '1'" :loading="loadingBtn" type="primary" @click="addGroup('group')">新增</el-button>
-        <el-button v-else :loading="loadingBtn" type="primary" @click="putGroup('group')">确认</el-button>
+        <el-button @click="groupDialog = false" class="reset_btn btn_140">取消</el-button>
+        <el-button v-if="operateType === '1'" :loading="loadingBtn" class="select_btn btn_140" @click="addGroup('group')">新增</el-button>
+        <el-button v-else :loading="loadingBtn" class="select_btn btn_140" @click="putGroup('group')">确认</el-button>
       </div>
     </el-dialog>
   </div>

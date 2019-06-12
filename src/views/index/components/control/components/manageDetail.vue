@@ -24,15 +24,16 @@
           <li>
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div v-else><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
-          <li>
+          <li style="width: 30%;">
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
-            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
+          <div class="vl_f_333">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
@@ -123,7 +124,7 @@
                 </div>
               </div>
               <div class="manage_d_s_m_r">
-                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
+                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
                 <ul class="bottom">
                   <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
                   <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -166,7 +167,7 @@
                             @dragover="dragover"
                             :draggable="true"
                           >
-                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                            <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                           </li>
                         </vue-scroll>
                       </ul>
@@ -188,7 +189,7 @@
                                   @dragover="dragover"
                                   :draggable="true"
                                 >
-                                  <span>{{dev.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                  <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                                 </li>
                               </ul>
                             </el-collapse-transition>
@@ -258,8 +259,8 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
-                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="239px" @click="showLargeVideo(item)"></video>
+                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(controlResList.list, index, 1)">
+                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
                     <div>
@@ -290,7 +291,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlResultLarge" :src="videoObj.snapVideo"></video>
+      <video id="controlResultLarge" style="object-fit: fill;" :src="videoObj.snapVideo"></video>
       <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{videoObj.deviceName}}</div>
@@ -310,17 +311,17 @@
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
     <div class="manage_f_box" v-if="controlState === 2">
-      <el-button type="primary" @click="skip(3)">编辑</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skip(3)">编辑</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
     <div class="manage_f_box" v-if="controlState === 1">
-      <el-button type="primary" @click="showDialog('stopDialog')">终止</el-button>
+      <el-button class="select_btn btn_100" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
     <div class="manage_f_box" v-if="controlState === 3">
-      <el-button type="primary" @click="skipIsCreate">复用</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skipIsCreate">复用</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog
@@ -332,7 +333,7 @@
         <div class="detail_list">
           <div>
             <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterUserName}}</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterPhone}}</span></div>
           </div>
           <div>
             <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatusName}}</span></div>
@@ -340,7 +341,7 @@
           </div>
           <div>
             <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventTypeName}}</span></div>
-            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevel}}</span></div>
+            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevelName}}</span></div>
           </div>
         </div>
         <div class="detail_list">
@@ -354,7 +355,18 @@
         </div>
         <vue-scroll>
           <div class="detail_img_box">
-            <img :src="item.path !== 'string' ? item.path : '//via.placeholder.com/117x117'" alt="" v-for="item in eventDetail.closeAttachmentList" :key="item.id">
+            <div v-for="(item, index) in eventDetail.attachmentList" :key="item.id">
+              <img v-if="item.fileType === 1" @click="previewPictures(eventDetail.attachmentList, index, 2)" :src="item.path" alt="">
+              <div v-else @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
+                <video id="eventVideo" :src="item.path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo(item, 2)"></video>
+                <div class="result_tool" v-show="eventVideoTool">
+                  <div>
+                    <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="_pauseVideo(item)"></i>
+                    <i class="vl_icon vl_icon_control_09" v-else @click="_playVideo(item)"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </vue-scroll>
       </el-dialog>
@@ -380,8 +392,10 @@ export default {
       controlState: null,//布控详情状态
       controlDetail: conDetail,//布控详情
       eventDetail: null,//事件详情
+      eventVideoTool: false,
       // 地图参数
       map: null,
+      zoomLevel: 10,
       // 追踪点列表数据
       trackPointList: [],
       devNum: null,//摄像头数量
@@ -434,9 +448,14 @@ export default {
   },
   methods: {
     // 预览图片
-    previewPictures (index) {
+    previewPictures (data, index, type) {
       setTimeout(() => {
-        let imgs = this.controlResList.list.map(m => m.snapPhoto);
+        let imgs = [];
+        if (type === 1) {
+          imgs = data.map(m => m.snapPhoto);} 
+        else {
+          imgs = data.map(m => m.path);
+        }
         // 图片数组2
         let imgs2 = []
         imgs.forEach(function (src) {
@@ -470,9 +489,26 @@ export default {
       }
       document.getElementById('controlResult' + index).play();
     },
+    // 开始播放
+    _playVideo (item) {
+      item.curVideoPlay = true;
+      document.getElementById('eventVideo').play();
+    },
+    // 停止播放
+    _pauseVideo (item) {
+      item.curVideoPlay = false;
+      document.getElementById('eventVideo').pause();
+    } ,
     // 显示大屏
-    showLargeVideo (item) {
-      this.videoObj = item;
+    showLargeVideo (item, type) {
+      this.videoObj = {};
+      if (type === 1) {
+        this.videoObj = item;
+      } else {
+        const {path} = item;
+        this.videoObj.snapVideo = path;
+        this.videoObj.curVideoPlay = false;
+      }
       this.showLarge = true;
       this.playLargeVideo();
     },
@@ -872,6 +908,11 @@ export default {
       _this.map.add(markerList);
       _this.map.setFitView();
     },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(this.zoomLevel);
+      }
+    },
     // 地图缩放
     mapZoomSet (val) {
       if (this.map) {
@@ -882,12 +923,13 @@ export default {
     resetMap () {
       let _this = this;
       let map = new window.AMap.Map('mapBox', {
-        zoom: 10,
+        zoom: this.zoomLevel,
         center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
-      _this.mapMark();
+      // _this.mapMark();
+      _this.controlArea(1);
     }
   },
   destroyed () {
@@ -938,7 +980,10 @@ export default {
         line-height: 20px;
         div:nth-child(2){
           flex: 0 0 58%;
+          padding-right: 120px;
+          word-break: break-all;
           span{
+            white-space: nowrap;
             color: #0C70F8;
             cursor: pointer;
           }
@@ -1329,10 +1374,39 @@ export default {
       display: flex;
       flex-flow: row wrap;
       align-content: flex-start;
-      img{
-        flex: 0 0 117px;
+      > div{
+        width: 117px;
+        height: 117px;
+        position: relative;
         margin-right: 20px;
         margin-bottom: 20px;
+        img{
+          width: 100%;
+          height: 100%;
+        }
+        > div{
+          width: 100%;
+          height: 100%;
+          .result_tool{
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,.4);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            margin-left: -25px;
+            margin-bottom: -25px;
+            cursor: pointer;
+            > div{
+              width: 100%;
+              height:100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+          }
+        }
       }
     }
   }

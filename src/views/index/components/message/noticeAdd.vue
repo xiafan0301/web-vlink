@@ -3,7 +3,7 @@
     <!-- 面包屑 -->
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">公共管理</el-breadcrumb-item>
+        <el-breadcrumb-item @click.native="skip(1)" class="mes_back">公告管理</el-breadcrumb-item>
         <el-breadcrumb-item>{{pageType === 2 ? '新增': '修改' }}公告</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -17,26 +17,26 @@
             <el-input
               maxlength="200"
               type="textarea"
-              :rows="4"
+              :rows="5"
               placeholder="请对事发情况进行描述，文字限制200字"
               v-model="addForm.content">
             </el-input>
           </el-form-item>
           <el-form-item style="width: 736px;">
             <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicSubmit="uploadPicSubmit" @uploadPicFileList="uploadPicFileList" :maxSize="9"></div>
-            <p class="vl_f_999">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M)</p>
+            <p class="vl_f_999" style="line-height: 20px;">(最多传9张 支持JPEG、JPG、PNG，大小不超过2M)</p>
           </el-form-item>
         </el-form>
       </div>
       <div class="add_footer">
         <!-- 新增 -->
-        <el-button :loading="loadingBtn" type="primary" v-if="pageType === 2" @click="addMsgNote('addForm', 2)">发布</el-button>
-        <el-button :loading="loadingBtn" v-if="pageType === 2" @click="addMsgNote('addForm', 1)">保存</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_100" v-if="pageType === 2" @click="addMsgNote('addForm', 2)">发布</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_100" v-if="pageType === 2" @click="addMsgNote('addForm', 1)">保存</el-button>
         <!-- 修改 -->
-        <el-button :loading="loadingBtn" type="primary" v-if="pageType === 4" @click="putMsgNote('addForm', 2)">发布</el-button>
-        <el-button :loading="loadingBtn" v-if="pageType === 4" @click="putMsgNote('addForm', 1)">保存</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_100" v-if="pageType === 4" @click="putMsgNote('addForm', 2)">发布</el-button>
+        <el-button :loading="loadingBtn" class="select_btn btn_100" v-if="pageType === 4" @click="putMsgNote('addForm', 1)">保存</el-button>
 
-        <el-button @click.native="skip(1)">返回</el-button>
+        <el-button @click.native="skip(1)" class="reset_btn btn_100">返回</el-button>
       </div>
     </div>
   </div>
