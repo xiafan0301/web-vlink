@@ -95,6 +95,7 @@
     <el-dialog
       v-if="config.sign"
       :visible.sync="signForm.addSign"
+      :append-to-body="true"
       width="500px">
       <el-form :model="signForm" :rules="signFormRules" ref="signForm" style="padding: 10px 0 0 30px;">
         <el-form-item prop="addSignContent">
