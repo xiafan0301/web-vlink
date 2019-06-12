@@ -55,7 +55,7 @@
             </div>
             
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_011" @click="getTaskCount"></i>
+              <i class="vl_icon vl_icon_011" @click="getTaskCountList"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -63,7 +63,7 @@
           <el-popover
             ref="popover"
             placement="bottom"
-            width="397"
+            width="428"
             trigger="click"
             :popper-class="alarmPopoverClass"
             v-model="alarmVisible">
@@ -72,20 +72,20 @@
             <vue-scroll>
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
-                <div>
+                <div class="uesr_info">
                   <h1>{{item.surveillanceName}}</h1>
                   <p>{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
-                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
+                <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
                   <span>{{item.semblance}}</span>
                   <p>匹配度</p>
                   <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
-                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
+                <div class="img_info"><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
-              <div class="hd_alarm_b">
+              <div class="hd_alarm_b" v-if="item.objType == 1 || item.objType == 2">
                 <template v-if="item.objType == 1">
                   <div class="alarm_b_list">{{item.name}}</div>
                   <div class="alarm_b_list">{{item.sex}}</div>
@@ -96,7 +96,7 @@
                   <div class="alarm_b_list">{{item.numberColor}}</div>
                   <div class="alarm_b_list">{{item.vehicleType}}</div>
                 </template>
-                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
+                <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
             </vue-scroll>
@@ -356,6 +356,10 @@ export default {
         }
       })
     },
+    getTaskCountList() {
+      this.getTaskCount();
+      this.getTaskData();
+    },
     //任务数量统计
     getTaskCount() {
       let params = {
@@ -593,16 +597,18 @@ export default {
   max-height: calc(100% - 40px);
   height: calc(100% - 40px);
   .vl_hd_alarm{
-    padding: 10px 22px;
+    padding: 22px 0;
+    margin: 0 22px;
     border-bottom: 1px solid #F2F2F2;
     cursor: pointer;
     .hd_alarm_t{
       display: flex;
       justify-content: space-between;
-      > div{
+      /* > div{
         flex: 0 0 25%;
-      }
-      > div:nth-child(1){
+      } */
+      .uesr_info {
+        flex: 0 0 30%;
         > div{
           margin-bottom: 10px;
           color: #333333;
@@ -612,8 +618,21 @@ export default {
           font-size: 12px;
           color: #999999;
         }
+        h1,p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+          }
+        h1 {
+          -webkit-line-clamp: 1; //行数
+        }
+        p {
+          -webkit-line-clamp: 2; //行数
+        }
       }
       > div:nth-child(3){
+        flex: 0 0 16%;
         text-align: center;
         padding-top: 15px;
         > span{
@@ -636,18 +655,19 @@ export default {
           }
         }
       }
-      > div:nth-child(2), > div:nth-child(4){
+      .img_info {
+        flex: 0 0 27%;
         text-align: center;
         > img{
-          width: 70px;
-          height: 70px;
+          width: 90px;
+          height: 90px;
         }
       }
     }
     .hd_alarm_b{
       margin-top: 10px;
       display: flex;
-      justify-content: space-between;
+      /* justify-content: space-between; */
       > div{
         padding: 5px;
         font-size: 12px;
@@ -655,6 +675,7 @@ export default {
         border:1px solid rgba(242,242,242,1);
         border-radius:3px;
         color: #666;
+        margin-right: 8px;
       }
       .alarm_b_list {
         span {
@@ -664,6 +685,17 @@ export default {
             color: #F2F2F2;
           }
         }
+      }
+    }
+    &:hover {
+      .uesr_info h1, .uesr_info p{
+        color: #0A6DF2;
+      }
+      .img_info img{
+        box-shadow: -3px 0px 8px rgba(0, 0, 0, 0.15),   /*左边阴影*/ 
+                    0px -3px 8px rgba(0, 0, 0, 0.15),  /*上边阴影*/ 
+                    3px 0px 8px rgba(0, 0, 0, 0.15),  /*右边阴影*/ 
+                    0px 8px 10px rgba(0, 0, 0, 0.15); /*下边阴影*/
       }
     }
   }
@@ -770,7 +802,7 @@ export default {
 .alarm_popover {
   max-height: calc(100% - 100px);
   height: calc(100% - 100px);
-  padding: 12px 0;
+  padding: 0 0 12px 0;
 }
 .show_box {
   display: none!important;

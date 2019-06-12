@@ -209,10 +209,10 @@ export default {
       if(obj.dispatchType == 2) {       //告警
         if(obj.processType == 5) {
           if (obj.dispatchStatus == 1) {
-            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId, objType: obj.objType}});
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId, objType: obj.objType,uid: obj.uid}});
           }
           if (obj.dispatchStatus == 2) {
-            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId, objType: obj.objType}});
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId, objType: obj.objType,uid: obj.uid}});
           }
         }else {
           this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType, objType: obj.objType}});          
@@ -220,10 +220,10 @@ export default {
       }else {
         if(obj.processType == 5) {
           if (obj.dispatchStatus == 1) {
-            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId }});
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId ,uid: obj.uid}});
           }
           if (obj.dispatchStatus == 2) {
-            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId }});
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId ,uid: obj.uid}});
           }
         }else {
           this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType}});
