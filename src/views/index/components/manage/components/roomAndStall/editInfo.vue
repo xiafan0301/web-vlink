@@ -65,12 +65,13 @@
                 </el-option>
               </el-select>
               <el-select style="width: 24%;" v-model="street" placeholder="镇">
-                <!-- <el-option
-                  v-for="(item, index) in departmentData"
-                  :key="index"
-                  :label="item.organName"
+                <el-option
+                  v-for="(item, index) in streetList"
+                  :key="'item' + index"
+                  :label="item.cname"
                   :value="item.uid"
-                ></el-option> -->
+                >
+                </el-option>
               </el-select>
               <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="editRoom.address" @input="changeAddress"></el-input>
               <div class="map_select" @click="initMap">
@@ -161,6 +162,7 @@ export default {
       provinceList: [], // 省数据
       cityList: [], // 市数据
       countyList: [], // 县数据
+      streetList: [], // 镇数据
       map: null, // 地图对象
       autoInput: null, // 自动输入对象
     }
@@ -323,7 +325,7 @@ export default {
             if (this.areaName === '县') {
               this.countyList = res.data;
             }
-            if (this.areaName === '街道') {
+            if (this.areaName === '镇') {
               this.streetList = res.data;
             }
           }

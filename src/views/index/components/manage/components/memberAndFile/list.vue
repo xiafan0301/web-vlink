@@ -133,18 +133,20 @@ export default {
       ],
       userInfo: {}, // 存储的用户信息
       deleteId: null, // 要删除的id
-      currentOrganId: null, // 当前选中的单位
     }
   },
   watch: {
-    currentOrganId (val) {
-      console.log('val', val)
+    currentOrganId () {
+      this.getList();
+    }
+  },
+  computed: {
+    currentOrganId () {
+      return this.$store.state.currentOrganId;
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-
-    this.currentOrganId = this.$store.state.currentOrganId;
 
     this.getList();
   },
