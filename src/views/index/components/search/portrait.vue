@@ -33,7 +33,7 @@
       <div class="vl_jtc_search">
         <div style="text-align: center">
           <el-button @click="resetSearch">重置</el-button>
-          <el-button type="primary" :loading="searching" :disabled="curImgNum === 0" @click="tcDiscuss(false)">确定</el-button>
+          <el-button type="primary" :loading="searching"  @click="tcDiscuss(false)">确定</el-button>
         </div>
       </div>
     </div>
@@ -424,6 +424,10 @@ export default {
       this.curImgNum = 0;
     },
     tcDiscuss () {
+      if (this.curImgNum === 0) {
+        this.$message.warning('请至少上传或选择一张图片')
+        return false;
+      }
       this.searching = true;
       this.$_showLoading({target: '.vl_jfo_event'});
       let _ids = [];

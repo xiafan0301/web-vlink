@@ -13,10 +13,10 @@
           end-placeholder="结束日期">
         </el-date-picker>
         <el-select v-model="searchData.personGroupId" placeholder="监控人群">
-          <el-option v-for="item in personList" :key="item.value" :value="item.value" :label="item.label"></el-option>
+          <el-option v-for="item in personList" :key="item.id" :value="item.uid" :label="item.groupName"></el-option>
         </el-select>
         <el-select v-model="searchData.deviceGroupId" placeholder="设备分组">
-          <el-option v-for="item in deviceList" :key="item.value" :value="item.value" :label="item.label"></el-option>
+          <el-option v-for="item in deviceList" :key="item.id" :value="item.uid" :label="item.groupName"></el-option>
         </el-select>
         <el-select v-model="searchData.intelligentCharac" placeholder="设备特性">
           <el-option v-for="item in CharacList" :key="item.value" :value="item.value" :label="item.label"></el-option>
@@ -82,6 +82,8 @@
 let AMap = window.AMap;
 import {testData} from './testData';
 import {JfoGETGroup, JhaGETStatisicByAddress, JhaGETAlarmSnapByAddress} from '../../api/api.judge.js';
+import {getGroupListIsPortrait} from '../../api/api.control.js';
+import {getAllGroups} from '../../api/api.manage.js';
 export default {
   data() {
     return {
@@ -89,9 +91,9 @@ export default {
       evData: [],
       searchData: {
         time: null,
-        personGroupId: null,
+        personGroupId: '',
         intelligentCharac: null,
-        deviceGroupId: null,
+        deviceGroupId: '',
         latitude: null,
         longitude: null
       },
@@ -176,6 +178,17 @@ export default {
       this.autoComplete = new AMap.Autocomplete(autoOptions);
     })
     // this.getSelectData(); 调基础服务那边接口，还不通
+    getGroupListIsPortrait().then(res => {
+      if (res) {
+        this.personList = res.data;
+      }
+    })
+    getAllGroups({groupType: 7}).then(res => {
+      if (res) {
+        res.data.splice(0, 0, {groupName: '全部分组', uid: null});
+        this.deviceList = res.data;
+      }
+    })
   },
   methods: {
     getSelectData () {
@@ -220,9 +233,9 @@ export default {
       this.searchData.time = [_s, _e]
     },
     resetSearch () {
-      this.searchData.personGroupId = null;
+      this.searchData.personGroupId = '';
       this.searchData.intelligentCharac = null;
-      this.searchData.deviceGroupId = null;
+      this.searchData.deviceGroupId = '';
       this.searchData.latitude = null;
       this.searchData.longitude = null;
       this.searchAdress = '';
@@ -245,6 +258,11 @@ export default {
         .then(res => {
           this.searching = false;
           if (res) {
+            if (res.data.length === 0) {
+              this.$message.info('抱歉，没有找到匹配结果')
+              this.amap.clearMap();
+              return false;
+            }
             this.evData = res.data.map(x => {
               x.checked = false;
               return x;

@@ -30,6 +30,7 @@
                   :render-after-expand="false"
                   node-key="infoName"
                   :filter-node-method="filterNode"
+                  :default-expanded-keys="defaultExpand"
                   :props="mapTreeProps">
                   <span class="custom-tree-node" slot-scope="{ node, data }" @click.stop="mapInfoListTap(data)">
                     <span>{{ node.label }}</span>
@@ -58,7 +59,7 @@
                 <div class="map_lc_dc_mark" @click="signListTap(item, 'InfoWindow')" v-for="item in markList" :key="item.id" v-if="item.isShow">
                   <div class="dc_mark_c">{{item.markContent}}</div>
                   <p><span>{{item.opUserName}}</span><span>{{item.createTime | fmTimestamp('yy-MM-dd HH:mm')}}</span></p>
-                  <div class="dc_mark_b"><i class="el-icon-location-outline"></i><span>{{item.position}}</span> <span class="el-icon-delete" @click.stop="delMark('这条', item)"></span></div>
+                  <div class="dc_mark_b"><i class="el-icon-location-outline"></i><span>{{item.position}}</span> <span v-if="item.mineFlag" class="el-icon-delete" @click.stop="delMark('这条', item)"></span></div>
                 </div>
                 <p v-show="markList.length === 0 || signEmpty" style="text-indent: 20px;">无相关数据</p>
               </vue-scroll>
@@ -121,11 +122,21 @@
         <ul class="map_rrt_u1">
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
-            <span>选择区域</span>
+            <el-popover
+              placement="left"
+              trigger="hover"
+              content="单机选择范围，双击完成">
+              <span slot="reference">选择区域</span>
+            </el-popover>
           </li>
           <li :class="{'vl_icon_sed': activeType ===  2}" @click="ranging">
             <i class="vl_icon vl_icon_042"></i>
-            <span>测距</span>
+            <el-popover
+              placement="left"
+              trigger="hover">
+              <p>点击×删除当前测距点，点击<span class="el-icon-delete"></span>删除全部测距点</p>
+              <span slot="reference">测距</span>
+            </el-popover>
           </li>
           <li :class="{'vl_icon_sed': activeType ===  3}" @click="cutScreen">
             <i class="vl_icon vl_icon_043"></i>
@@ -180,6 +191,7 @@ export default {
   components: {flvplayer, webrtc},
   data () {
     return {
+      defaultExpand: [],
       mapCenter: [110.594419,27.908869],
       graspRoad: null,
       key2Type: {
@@ -206,12 +218,11 @@ export default {
         {name: '人员', _key: 'sysUserExtendListNum', supOptions: [{name: '部门成员'},{name: '普通民众'}], isIndeterminate: false, checkAll: true, supTypeList: [0, 1], supTypeListAll: [0, 1]}
       ],
       car2Name: {
-        1: '执勤车',
-        2: '公交车',
-        3: '出租车',
-        4: '客运车',
-        5: '校车',
-        6: '危化车'
+        1: '公交车',
+        2: '出租车',
+        3: '客运车',
+        4: '校车',
+        5: '危化车'
       },
       map: null, // 地图对象
       isIndeterminate: false,
@@ -468,7 +479,7 @@ export default {
         console.log(this.mapTreeData[0])
       }
     },
-    // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素
+    // 更新maptreeData[0]下，各个设备的数量值,以及刷新地图元素,boolean true代表是左侧搜索或者顶部type勾选
     updateNumberss (boolean, key, isAdd, isSetArea) {
       let newNum = [{deviceBasicListNum: 0}, {bayonetListNum: 0}, {carListNum: 0}, {sysUserExtendListNum: 0}];
       this.mapTreeData[0].infoList.forEach(x => {
@@ -513,6 +524,7 @@ export default {
             if (this.selAreaPolygon) {
               x.infoList = x.infoList.filter(z => z.isInArea);
               if (x.infoList.length === 0) {
+                // this.mapTreeData[0].infoList.splice(uIndex, 1)
                 x.infoList.push({infoName: '无相关数据'})
               }
               x.infoList.forEach(y => {
@@ -680,7 +692,7 @@ export default {
             setTimeout(() => {
               this.$_showLoading({target: '#' + x._id})
               this.initPlayer(x);
-            }, 200)
+            }, 300)
           }, 1000 * _i)
         })
       } else {
@@ -770,6 +782,7 @@ export default {
                 x['isDrawLine'] = false;
               })
               __obj.carList = vData;
+              this.defaultExpand.push(res.data.areaName);
               res.data.areaTreeList.push(__obj);
               this.mapTreeData = this.switchData(res.data);
               this.$_hideLoading();
@@ -777,79 +790,91 @@ export default {
               // this.moveDom();
               this.updateDom();
               // 定时查询车辆数据
-              this.vehicleTimer = setInterval(() => {
-                this.getVehicel().then(_supData => {
-                  let _carL = this.mapTreeData[0].infoList.find(x => x.infoName === '车辆');
-                  _supData = this.objSetItem(_supData, {infoName: 'vehicleNumber', areaType: '5', dataType: 2, isShow: true, longitude: 'gpsLongitude', latitude: 'gpsLatitude', isDrawLine: false});
-                  _supData.forEach(x => {
-                    // 说明最新的该车辆在原来数据里有
-                    let oldDIndex = _carL.carList.findIndex(y => y.uid === x.uid);
-                    if (oldDIndex !== -1) {
-                      x['isDrawLine'] = _carL.carList[oldDIndex]['isDrawLine'];
-                      let moveMark = this.marks[2].find(y => y.getExtData().uid === x.uid);
-                      let _s = moveMark.getPosition();
-                      // x['lineArr'] = this.drivingPath([[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]]); // 路线纠偏
-                      x['lineArr'] = [[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]];
-                      // 判断车辆是否在画轨迹
-                      new window.AMap.Polyline({
-                        map: this.map,
-                        path: x.lineArr,
-//                        showDir:true,
-                        strokeColor: "#28F",  //线颜色
-                        strokeOpacity: 0,     //线透明度
-                        strokeWeight: 6,      //线宽
-                        // strokeStyle: "solid"  //线样式
-                      });
-                      // console.log('line------------', x, _carL.carList[oldDIndex])
-                      moveMark.moveAlong(x.lineArr, x.speed);
-                      if (x.isDrawLine) {
-                        // 把前一次跑的路线更换成已完成的线
-                        let _path = [];
-                        if (_carL.carList[oldDIndex].lineArr[0].lng && _carL.carList[oldDIndex].lineArr[0].lat) {
-                          _path = [[_carL.carList[oldDIndex].lineArr[0].lng, _carL.carList[oldDIndex].lineArr[0].lat], [_s.lng, _s.lat]]
-                        } else {
-                          _path = [[_carL.carList[oldDIndex].lineArr[0][0], _carL.carList[oldDIndex].lineArr[0][1]], [_s.lng, _s.lat]]
-                        }
-                        let passedLine = new window.AMap.Polyline({
-                          map: this.map,
-                          path: _path,
-//                          path: _carL.carList[oldDIndex].lineArr,
-                          strokeColor: "#61C772",  //线颜色
-                          // strokeOpacity: 1,     //线透明度
-                          strokeWeight: 6,      //线宽
-                          lineCap: 'round'
-                          // strokeStyle: "solid"  //线样式
-                        });
-                        this.carMarks.passedLine.push(passedLine);
-                      }
-                    } else {
-                      x['lineArr'] = [[x.gpsLongitude, x.gpsLatitude]];
-                      // 把新增的车放入地图
-                      this.mapMark([{infoList:[x]}], true)
-                    }
-                    _carL.carList.splice(oldDIndex, 1);
-                  })
-                  // _carL.carList里剩下的是，消失的车子,移除掉
-                  if (_carL.carList.length) {
-                    _carL.carList.forEach(x => {
-                      let rMarkIndex = this.marks[2].findIndex(y => y.getExtData().uid === x.uid);
-                      this.map.remove(this.marks[2][rMarkIndex]);
-                      this.marks[2].splice(rMarkIndex, 1);
-                      // 如果在画轨迹的车没有了，则清除轨迹路线
-                      if (this.carMarks && this.carMarks.uid === x.uid) {
-                        this.clearCarLine();
-                      }
-                    })
-                  }
-                  _carL.carList = _supData;
-                  _carL.infoList = _supData;
-                  this.updateNumberss();
-                })
-              }, 5000)
+              this.carLoop();
             })
           }
         })
     },
+    carLoop () {
+      this.vehicleTimer = setTimeout(() => {
+        console.log('1')
+        this.getVehicel().then(_supData => {
+          let _carL = this.mapTreeData[0].infoList.find(x => x.infoName === '车辆');
+          _supData = this.objSetItem(_supData, {infoName: 'vehicleNumber', areaType: '5', dataType: 2, isShow: true, longitude: 'gpsLongitude', latitude: 'gpsLatitude', isDrawLine: false});
+          _supData.forEach(x => {
+            // 说明最新的该车辆在原来数据里有
+            let oldDIndex = _carL.carList.findIndex(y => y.uid === x.uid);
+            if (oldDIndex !== -1) {
+              x['isDrawLine'] = _carL.carList[oldDIndex]['isDrawLine'];
+              let moveMark = this.marks[2].find(y => y.getExtData().uid === x.uid);
+              let _s = moveMark.getPosition();
+              // x['lineArr'] = this.drivingPath([[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]]); // 路线纠偏
+              // 判断有没有画区域
+//              if (this.selAreaPolygon && window.AMap.GeometryUtil.isPointInRing(_s, this.selAreaPolygon.C.path)) {
+//                x['isInArea'] = true;
+//              } else {
+//                x['isInArea'] = false;
+//              }
+              x['lineArr'] = [[_s.lng, _s.lat], [x.gpsLongitude, x.gpsLatitude]];
+              // 判断车辆是否在画轨迹
+              new window.AMap.Polyline({
+                map: this.map,
+                path: x.lineArr,
+//                        showDir:true,
+                strokeColor: "#28F",  //线颜色
+                strokeOpacity: 0,     //线透明度
+                strokeWeight: 6,      //线宽
+                // strokeStyle: "solid"  //线样式
+              });
+              // console.log('line------------', x, _carL.carList[oldDIndex])
+              moveMark.moveAlong(x.lineArr, x.speed);
+              if (x.isDrawLine) {
+                // 把前一次跑的路线更换成已完成的线
+                let _path = [];
+                if (_carL.carList[oldDIndex].lineArr[0].lng && _carL.carList[oldDIndex].lineArr[0].lat) {
+                  _path = [[_carL.carList[oldDIndex].lineArr[0].lng, _carL.carList[oldDIndex].lineArr[0].lat], [_s.lng, _s.lat]]
+                } else {
+                  _path = [[_carL.carList[oldDIndex].lineArr[0][0], _carL.carList[oldDIndex].lineArr[0][1]], [_s.lng, _s.lat]]
+                }
+                let passedLine = new window.AMap.Polyline({
+                  map: this.map,
+                  path: _path,
+//                          path: _carL.carList[oldDIndex].lineArr,
+                  strokeColor: "#61C772",  //线颜色
+                  // strokeOpacity: 1,     //线透明度
+                  strokeWeight: 6,      //线宽
+                  lineCap: 'round'
+                  // strokeStyle: "solid"  //线样式
+                });
+                this.carMarks.passedLine.push(passedLine);
+              }
+            } else {
+              x['lineArr'] = [[x.gpsLongitude, x.gpsLatitude]];
+              // 把新增的车放入地图
+              this.mapMark([{infoList:[x]}], true)
+            }
+            _carL.carList.splice(oldDIndex, 1);
+          })
+          // _carL.carList里剩下的是，消失的车子,移除掉
+          if (_carL.carList.length) {
+            _carL.carList.forEach(x => {
+              let rMarkIndex = this.marks[2].findIndex(y => y.getExtData().uid === x.uid);
+              this.map.remove(this.marks[2][rMarkIndex]);
+              this.marks[2].splice(rMarkIndex, 1);
+              // 如果在画轨迹的车没有了，则清除轨迹路线
+              if (this.carMarks && this.carMarks.uid === x.uid) {
+                this.clearCarLine();
+              }
+            })
+          }
+          _carL.carList = _supData;
+          _carL.infoList = _supData;
+          this.updateNumberss();
+        })
+        this.carLoop();
+      }, 5000)
+    },
+    // 路线纠偏
     drivingPath (path) {
       let newPath = [];
       if (!this.graspRoad) {
@@ -1100,9 +1125,11 @@ export default {
               } else {
                 sDataType = obj.dataType;
               }
-              let uContent = '';
+              let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
               if (_this.mapTypeList.includes(obj.dataType) || obj.dataType === 4) {
-                uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+                if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
+                  uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
+                }
               } else {
                 uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
               }
@@ -1181,6 +1208,7 @@ export default {
                     // strokeStyle: "solid"  //线样式
                   });
                   let curP = marker.getPosition();
+                  _this.map.setZoomAndCenter(18, [curP.lng, curP.lat])
                   let carMark = new window.AMap.Marker({ // 添加自定义点标记
                     map: _this.map,
                     position: [curP.lng, curP.lat], // 基点位置 [116.397428, 39.90923]
@@ -1223,13 +1251,17 @@ export default {
                 } else if (obj.dataType === 1) {
                   let bayIndex = _this.bayonetOpened.findIndex(j => j.uid === obj.uid)
                   if (bayIndex !== -1) {
+                    let _return = false;
                     _this.bayonetOpened[bayIndex].deviceList.forEach(g => {
                       let _index = _this.videoMarker.curObj.findIndex(x => x.uid === g.uid);
                       if (_index !== -1 && !$('#' + _this.videoMarker.curObj[_index]._id).is(':hidden')) {
                         document.getElementById(_this.videoMarker.curObj[_index]._id).style.border = '2px solid #FA453A'
+                        _return = true;
                       }
                     })
-                    return false
+                    if (_return) {
+                      return false;
+                    }
                   }
                 } else if (obj.dataType === 3) {
                   let sysIndex = _this.callingList.findIndex(j => j.uid === obj.uid + '')
@@ -1302,14 +1334,14 @@ export default {
     mapHoverInfo (data) {
       let str = '<div class="vl_map_hover_main"><ul>';
       if (data.dataType === 0) {
-        str += '<li><span>设备名称：</span>' + data.infoName + '</li>';
-        str += '<li><span>设备地址：</span>' + data.address + '</li>';
+        str += '<li><span>设备名称：</span><p>' + data.infoName + '</p></li>';
+        str += '<li><span>设备地址：</span><p>' + data.address + '</p></li>';
         str += '</ul></div>'
       } else if (data.dataType === 1) {
-        str += '<li><span>卡口名称：</span>' + data.infoName + '</li>';
-        str += '<li><span>卡口编号：</span>' + data.bayonetNo + '</li>';
-        str += '<li><span>地理位置：</span>' + data.bayonetAddress + '</li>';
-        str += '<li><span>设备数量：</span>' + data.devNum + '</li>';
+        str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
+        str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
+        str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
+        str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
         str += '</ul></div>'
       } else if (data.dataType === 2) {
         str += '<li><span>车牌号码：</span>' + data.vehicleNumber + '</li>';
@@ -1335,9 +1367,11 @@ export default {
           <div class="sign_show_edit">
             <textarea class="sign_text" maxlength="50" cols="30" rows="4"></textarea>
             <div class="byte_num"><span class="sign_text_num">${data.markContent.length}</span>/50</div>
-          </div>
-          <div class="sign_btn"><span class="sign_del">删除</span><span class="sign_edit">编辑</span></div>
-        </div>`
+          </div>`
+        if (data.mineFlag) {
+          str += `<div class="sign_btn"><span class="sign_del">删除</span><span class="sign_edit">编辑</span></div>`;
+        }
+         str += `</div>`
       } else if (data.dataType === 5) {
         str = `<div id="${data._id}" class="vl_map_hover_main map_video_box">`;
         str += `<video  style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted></video>`
@@ -2105,6 +2139,7 @@ export default {
               position: [x.addLongitude, x.addLatitude], // 基点位置 [116.397428, 39.90923]
               offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
               draggable: true, // 是否可拖动
+              zIndex: 99,
               // 自定义点标记覆盖物内容
               content: c
             });
@@ -2218,16 +2253,17 @@ export default {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           let arr = [];
-          let _i = parseInt(Math.random()  * 50);
+//          let _i = parseInt(Math.random()  * 50);
+          let _i = 5;
           for(let i = 0; i < _i; i++) {
             let _obj = {
               uid: i + 1,
-              vehicleType: parseInt(Math.random()  * 7),
+              vehicleType: i + 1,
               areaType: "5",
               dataType: 2,
-              vehicleNumber: '湘N·' + this.getRandomNo(),
-              direction: Math.random() > 0.5 ? '东南' : '西北',
-              speed: parseFloat(Math.random().toString().slice(2, 4)) * 10,
+              vehicleNumber: '湘N·2T52' + i,
+              direction: '东南',
+              speed: parseFloat(Math.random().toString().slice(2, 4)),
               gpsLongitude: 110.60105 + Math.random() / 30,
               gpsLatitude: 27.888218 + Math.random() / 30
             }
@@ -2246,6 +2282,10 @@ export default {
     }
   },
   beforeDestroy () {
+    if (this.vehicleTimer) {
+      window.clearTimeout(this.vehicleTimer);
+      this.vehicleTimer = null;
+    }
     if (this.map) {
       this.map.destroy();
       this.geocoder = null
@@ -2257,10 +2297,6 @@ export default {
       x.destroy();
     })
     console.log('----------->', this.vehicleTimer)
-    if (this.vehicleTimer) {
-      clearInterval(this.vehicleTimer);
-      this.vehicleTimer = null;
-    }
   }
 }
 </script>
@@ -2438,6 +2474,7 @@ export default {
       cursor: pointer;
       background: #ffffff;
       border-radius: 13px;
+      z-index: 2001;
     }
   }
   .vl_map_full_video {

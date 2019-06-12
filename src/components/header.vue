@@ -122,7 +122,7 @@
       <li>
         <router-link :to="{name: 'map'}">
           <i class="vl_icon vl_icon_002"></i>
-          <span>地图</span>
+          <span>GIS</span>
         </router-link>
       </li>
       <li>
