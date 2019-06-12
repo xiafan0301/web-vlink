@@ -377,9 +377,10 @@ export default {
     width: 100%;
     height: 100%;
     z-index: 99;
+    background: #ffffff;
     >img {
       width: 100%;
-      height: 100%;
+      height: auto;
     }
     >div {
       position: absolute;
