@@ -73,17 +73,17 @@
 .vl_icon_sxt_uncheck { width: 41px; height: 48px; background-position: -760px -188px; }
 .vl_icon_kk_uncheck { width: 41px; height: 48px; background-position: -820px -188px; }
 /*各种车子-737px -1450px;*/
-.vl_icon_map_mark24 { width: 47px;  height: 74px; background-position: -559px -1434px;}
-.vl_icon_map_mark22 { width: 47px;  height: 74px; background-position: -617px -1434px;}
-.vl_icon_map_mark26 { width: 47px;  height: 74px; background-position: -674px -1434px;}
-.vl_icon_map_mark25 { width: 47px;  height: 74px; background-position: -733px -1434px;}
+.vl_icon_map_mark23 { width: 47px;  height: 74px; background-position: -559px -1434px;}
+.vl_icon_map_mark21 { width: 47px;  height: 74px; background-position: -617px -1434px;}
+.vl_icon_map_mark25 { width: 47px;  height: 74px; background-position: -674px -1434px;}
+.vl_icon_map_mark24 { width: 47px;  height: 74px; background-position: -733px -1434px;}
 /* 地图板块 侧边栏*/
 .vl_icon_map_002 { width: 20px; height: 19px; background-position: -365px -376px; }
 .vl_icon_map_001 { width: 20px; height: 19px; background-position: -321px -350px; }
 .vl_icon_map_mark6 { width: 43px; height: 68px; background-position: -340px -174px; }
 .vl_icon_map_mark3 { width: 43px;  height: 68px; background-position: -84px -171px; }
 .vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; }
-.vl_icon_map_mark2, .vl_icon_map_mark23  { width: 43px;  height: 68px; background-position: -214px -171px; }
+.vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
 .vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; }
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
@@ -383,15 +383,22 @@
    padding: 10px;
  }
  .vl_map_hover_main > ul > li {
+   display: flex;
    padding: 2px 0;
    color: #333;
  }
  .vl_map_hover_main > ul > li > span {
    display: inline-block;
-   width: 50%;
+   width: 70px;
    text-align: right;
    color: #666;
  }
+.vl_map_hover_main > ul > li > p {
+    display: inline-block;
+    text-align: left;
+    color: #666;
+    width: 110px;
+}
  .vl_map_hover_main .vl_map_hover_btn {
    display: inline-block;
    padding: 0 10px;

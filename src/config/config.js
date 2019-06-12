@@ -111,8 +111,14 @@ for (let _key in oDomains) {
 export {ajaxCtx};
 
 // 视频通讯相关配置
+let _wsEnv = '';
+if (ENV_API === 'dev') {
+  _wsEnv = 'apidev'
+} else {
+  _wsEnv = 'apidev'
+}
 export const webrtcConfig = {
-  wsUrl: 'ws://apidev.aorise.org/visual-video/ws/signaling', // websocket地址
+  wsUrl: 'ws://' + _wsEnv + '.aorise.org/visual-video/ws/signaling', // websocket地址
   turnUrl: '222.244.147.121:3479', // turn地址
   turnUsername: 'test', // turn name
   turnCredential: 'test', // turn credential

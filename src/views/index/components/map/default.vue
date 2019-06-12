@@ -136,11 +136,12 @@ export default {
               .dc_mark_b {
                 font-size: 12px;
                 position: relative;
+                width: calc(100% - 12px);
                 .el-icon-delete {
                   float: right;
                   display: none;
                   position: absolute;
-                  right: -6px;
+                  right: -12px;
                   bottom: 0px;
                   cursor: pointer;
                 }
@@ -167,10 +168,10 @@ export default {
             .is-expanded {
               > .el-tree-node__content {
                 .el-tree-node__expand-icon{
-                  color: #0C70F8;
+                  /*color: #0C70F8;*/
                 }
                 .custom-tree-node {
-                  color: #0C70F8;
+                  /*color: #0C70F8;*/
                 }
               }
             }
@@ -237,12 +238,17 @@ export default {
         .el-button-group {
           button {
             border: none;
-            padding: 0 0.1rem;
             &:hover {
               background: #ffffff;
             }
             &:focus {
               background: #ffffff;
+            }
+            &:first-child {
+              padding: 0 0.02rem 0 0.1rem;
+            }
+            &:last-child {
+              padding: 0 0.1rem 0 0;
             }
           }
         }
