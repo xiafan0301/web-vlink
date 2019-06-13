@@ -337,6 +337,7 @@ export default {
       } else if (oMsg.type === 'DUPLICATE_CONNECTION') {
         // 账号已经在其它地方登录
         _this.wrOff(oMsg);
+        _this.bReconnect = false;
         localStorage.setItem('as_vlink_user_info', '');
         this.$router.push({name: 'login'});
       } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
