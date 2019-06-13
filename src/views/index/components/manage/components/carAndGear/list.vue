@@ -87,6 +87,16 @@
           >
         </el-table-column>
         <el-table-column
+          label="核载人数"
+          prop="createTime"
+          width="300"
+          show-overflow-tooltip
+          >
+           <template slot-scope="scope">
+            <span>{{scope.row.createTime | fmTimestamp}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
           label="所属单位"
           prop="organName"
           show-overflow-tooltip
@@ -250,23 +260,22 @@ export default {
           if (res) {
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
-            // if (this.vehicleTypeList.length > 0) {
-              this.dataList.map(item => {
-                item.vehicleTypeName = '';
-                item.numberTypeName = '';
-                this.vehicleTypeList.map(val => {
-                  if (item.vehicleType == val.enumField) {
-                    item.vehicleTypeName = val.enumValue;
-                  }
-                });
-                this.numberTypeList.map(val => {
-                  if (item.numberType == val.enumField) {
-                    item.numberTypeName = val.enumValue;
-                  }
-                });
+
+            this.dataList.map(item => {
+              item.vehicleTypeName = '';
+              item.numberTypeName = '';
+
+              this.vehicleTypeList.map(val => {
+                if (item.vehicleType == val.enumField) {
+                  item.vehicleTypeName = val.enumValue;
+                }
               });
-              console.log(this.dataList)
-            // }
+              this.numberTypeList.map(val => {
+                if (item.numberType == val.enumField) {
+                  item.numberTypeName = val.enumValue;
+                }
+              });
+            });
           }
         })
     },
