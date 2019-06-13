@@ -26,6 +26,7 @@
                 filterable
                 remote
                 clearable
+                @clear="eventList = []"
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
@@ -266,25 +267,28 @@ export default {
     },
     // 获取关联事件列表
     getEventList (query) {
-      const params = {
-        'where.keword': query,
-        'where.isSurveillance': false,//没有关联布控的事件
-        pageSize: 1000000,
-        orderBy: 'report_time',
-        order: 'desc'
-      }
-      getEventList(params).then(res => {
-        if (res && res.data) {
-          // 过滤掉事件状态为已结束的关联事件
-          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
-            return {
-              label: m.eventCode,
-              value: m.uid,
-              eventStatus: m.eventStatus
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          'where.keword': _query,
+          'where.isSurveillance': false,//没有关联布控的事件
+          pageSize: 1000000,
+          orderBy: 'report_time',
+          order: 'desc'
         }
-      })
+        getEventList(params).then(res => {
+          if (res && res.data) {
+            // 过滤掉事件状态为已结束的关联事件
+            this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
+              return {
+                label: m.eventCode,
+                value: m.uid,
+                eventStatus: m.eventStatus
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有监控设备列表
     getAllMonitorList () {

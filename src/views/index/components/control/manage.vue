@@ -52,6 +52,7 @@
             </el-form-item>
             <el-form-item prop="controlObj">
               <el-select
+                @clear="controlObjList = []"
                 v-model="manageForm.controlObj"
                 filterable
                 remote
@@ -70,6 +71,7 @@
             </el-form-item>
             <el-form-item prop="deviceId">
               <el-select
+                @clear="facilityNameList = []"
                 v-model="manageForm.deviceId"
                 filterable
                 remote
@@ -326,40 +328,48 @@ export default {
       for (let key in this.manageForm) {
         this.manageForm[key] = null;
       }
+      this.controlObjList = [];
+      this.facilityNameList = [];
       this.getControlList();
     },
     // 获取所有布控对象
     getControlObject (query) {
-      const params = {
-        name: query
-      }
-      getControlObject(params).then(res => {
-        if (res && res.data) {
-          this.controlObjList = res.data.map(m => {
-            return {
-              value: m.objId,
-              label: m.name,
-              type: m.objType
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: query
         }
-      })
+        getControlObject(params).then(res => {
+          if (res && res.data) {
+            this.controlObjList = res.data.map(m => {
+              return {
+                value: m.objId,
+                label: m.name,
+                type: m.objType
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有布控设备
     getControlDevice (query) {
-      const params = {
-        name: query
-      }
-      getControlDevice(params).then(res => {
-        if (res && res.data) {
-          this.facilityNameList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: query
         }
-      })
+        getControlDevice(params).then(res => {
+          if (res && res.data) {
+            this.facilityNameList = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.name
+              }
+            });
+          }
+        })
+      }
     },
     // 获取布控列表
     getControlList () {
