@@ -363,8 +363,8 @@ export default {
         getVehicleDetail(vehicleId)
           .then(res => {
             if (res) {
-              
               this.detailInfo = res.data;
+              
               this.vehicleTypeList.map(val => {
                 if (this.detailInfo.vehicleType == val.enumField) {
                   this.detailInfo.vehicleTypeName = val.enumValue;

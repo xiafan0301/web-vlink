@@ -68,12 +68,18 @@
           prop="deptName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.deptName ? scope.row.deptName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="操作用户"
           prop="userName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userName ? scope.row.userName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="创建时间"

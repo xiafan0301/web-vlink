@@ -114,4 +114,5 @@ export const validatePersonNum = (rule, value, callback) => {
       callback();
     }
   }
+  callback();
 };
