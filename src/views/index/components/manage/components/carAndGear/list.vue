@@ -87,16 +87,6 @@
           >
         </el-table-column>
         <el-table-column
-          label="核载人数"
-          prop="createTime"
-          width="300"
-          show-overflow-tooltip
-          >
-           <template slot-scope="scope">
-            <span>{{scope.row.createTime | fmTimestamp}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
           label="所属单位"
           prop="organName"
           show-overflow-tooltip
