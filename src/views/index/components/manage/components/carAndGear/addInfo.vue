@@ -26,8 +26,8 @@
               <el-option
                 v-for="(item, index) in vehicleTypeList"
                 :key="index"
-                :label="item.label"
-                :value="item.value"
+                :label="item.enumValue"
+                :value="item.enumField"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -44,14 +44,14 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="号牌种类:" prop="lnumberType">
-            <el-select style="width: 40%;" v-model="addCar.lnumberType" placeholder="请选择号牌种类">
-              <!-- <el-option
-                v-for="(item, index) in departmentData"
+          <el-form-item label="号牌种类:" prop="numberType">
+            <el-select style="width: 40%;" v-model="addCar.numberType" placeholder="请选择号牌种类" @change="handleNumberType">
+              <el-option
+                v-for="(item, index) in numberTypeList"
                 :key="index"
-                :label="item.organName"
-                :value="item.uid"
-              ></el-option> -->
+                :label="item.enumValue"
+                :value="item.enumField"
+              ></el-option>
             </el-select>
           </el-form-item>
            <el-form-item label="号牌颜色:" prop="numberColor">
@@ -85,7 +85,7 @@
 </template>
 <script>
 import { validatePersonNum, checkPlateNumber } from '@/utils/validator.js';
-import { vehicleTypeList, dataList } from '@/utils/data.js';
+import { dataList } from '@/utils/data.js';
 // import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
@@ -110,15 +110,15 @@ export default {
       rules: {
         vehicleNumber: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
-          { max: 10, message: '最多输入10个字', trigger: 'blur' },
+          // { max: 10, message: '最多输入10个字', trigger: 'blur' },
           { validator: checkPlateNumber, trigger: 'blur' }
         ],
-        transportNo: [
-          { max: 50, message: '最多输入50个字', trigger: 'blur'}
-        ],
-        identityNo: [
-          { max: 17, message: '最多输入17个字', trigger: 'blur'}
-        ],
+        // transportNo: [
+        //   { max: 50, message: '最多输入50个字', trigger: 'blur'}
+        // ],
+        // identityNo: [
+        //   { max: 17, message: '最多输入17个字', trigger: 'blur'}
+        // ],
         vehicleType: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
@@ -129,21 +129,56 @@ export default {
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ]
       },
+      numColorList: [
+        {label: '黄底黑字', value: 1},
+        {label: '蓝底白字', value: 2},
+        {label: '蓝底白字', value: 8},
+        {label: '黄底黑字黑框线', value: 15},
+        {label: '白底黑字、红“警”字', value: 23},
+        {label: '白底黑字、红“警”字', value: 24},
+        {label: '渐变绿底黑字', value: 25},
+        {label: '黄绿双拼底黑字', value: 26},
+        // {label: '蓝底白字', value: 27},
+        // {label: '黄底黑字', value: 28},
+        // {label: '黄底黑字', value: 29},
+        {label: '其他', value: 99}
+      ],//号牌颜色列表
       vehicleTypeList: [], // 车辆类型
       vehicleColorList: [], // 车身颜色
       userInfo: {}, // 用户信息
+      numberTypeList: [], // 号牌种类
       departmentList: [], // 部门列表
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
-    this.vehicleTypeList = vehicleTypeList;
-    // this.vehicleColorList = vehicleColorList;
+    this.getVehicleTypeList();
     this.getVehicleColor();
+    this.getNumberTypeList();
     this.getDepartList();
   },
   methods: {
+    // 获取号牌种类列表
+    getNumberTypeList () {
+      const type = dataList.numberType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numberTypeList = res.data;
+          }
+        })
+    },
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.vehicleTypeList = res.data;
+          }
+        })
+    },
     // 获取车身颜色
     getVehicleColor () {
       const color = dataList.vehicleColor;
@@ -172,6 +207,14 @@ export default {
           }
         })
     },
+    // 号牌种类change
+    handleNumberType (val) {
+      this.numColorList.map(item => {
+        if (item.value == val) {
+          this.addCar.numberColor = item.label;
+        }
+      })
+    },
     // 取消提交
     cancelSubmit (form) {
       this.$refs[form].resetFields();
@@ -182,7 +225,6 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           this.isAddLoading = true;
-          console.log(this.addCar);
           addVehicle(this.addCar)
             .then(res => {
               if (res) {

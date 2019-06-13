@@ -29,7 +29,7 @@
           </li>
           <li>
             <span>性别:</span>
-            <span>{{detailInfo.userSex === 1 ? '女' : '男'}}</span>
+            <span>{{detailInfo.userSex == 1 ? '男' : detailInfo.userSex == 2 ? '女' : '未知'}}</span>
           </li>
           <li>
             <span>手机号码:</span>
@@ -41,7 +41,7 @@
           </li>
           <li>
             <span>职位:</span>
-            <span>{{detailInfo.position ? detailInfo.position : '无'}}</span>
+            <span>{{detailInfo.position ? detailInfo.positionName : '无'}}</span>
           </li>
           <li>
             <span>邮箱:</span>
@@ -168,6 +168,8 @@
 <script>
 import { getUserDetail, delUser } from '@/views/index/api/api.user.js';
 import { getEventList } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -176,13 +178,27 @@ export default {
       isDelete: false, // 是否勾选删除成员账户
       isDeleteLoading: false, // 删除加载中
       detailInfo: {}, // 用户详情
-      dataList: []
+      dataList: [],
+      memberJobList: [], // 成员职位
     }
   },
   mounted () {
+    this.getMemberJobList();
+
     this.getDetail();
   },
   methods: {
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取用户详情
     getDetail () {
       const userId = this.$route.query.id;
@@ -192,6 +208,12 @@ export default {
             if (res) {
               this.detailInfo = res.data;
               this.getEventData();
+
+              this.memberJobList.map(val => {
+                if (this.detailInfo.position == val.enumField) {
+                  this.detailInfo.positionName = val.enumValue;
+                }
+              });
             }
           })
       }

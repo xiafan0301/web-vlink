@@ -141,7 +141,7 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$store.state.currentOrganId,
         pageSize: 0
       };
       getDepartmentList(params)

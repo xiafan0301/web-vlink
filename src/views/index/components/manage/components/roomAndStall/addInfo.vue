@@ -297,6 +297,19 @@ export default {
     handleAreaData (id, val) {
       this.areaName = val;
       this.areaId = id;
+      
+      // this.addRoom.region = null;
+      // this.cityList = [];
+      // this.countyList = [];
+      // this.streetList = [];
+      console.log(this.addRoom.city)
+      if (this.addRoom.city) {
+        console.log('uuuuu')
+        this.addRoom.city = null;
+      }
+      if (this.addRoom.region) {
+        this.addRoom.region = null;
+      }
       this.getAreaList();
     },
     // 获取当前部门及子级部门
