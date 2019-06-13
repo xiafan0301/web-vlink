@@ -755,6 +755,9 @@ export default {
   },
   beforeDestroy () {
     this.wsObj.stompClient.disconnect();
+    if (this.wsObj.pongInval) {
+      window.clearInterval(this.wsObj.pongInval);
+    }
     if (this.wsObj.wsTimeout) {
       window.clearTimeout(this.wsObj.wsTimeout);
     }
