@@ -129,6 +129,7 @@
         </el-form-item>
       </el-form>
     </div>
+    <vue-scroll>
     <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">检索结果<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
@@ -148,7 +149,7 @@
           <div class="border_right" v-show="!key.isExpand"><span></span></div>
           <span>{{key.label}}</span>
         </div>
-        <vue-scroll>
+        <!-- <vue-scroll> -->
         <div class="list_content" v-show="key.isExpand">
           <div class="list_box" v-for="(item,index) in key.value" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
             <div class="list_img">
@@ -207,10 +208,11 @@
             </div>
           </div>
         </div>
-        </vue-scroll>
+        <!-- </vue-scroll> -->
       </div>
       </template>
     </div>
+    </vue-scroll>
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
 </template>
@@ -750,7 +752,7 @@ export default {
     width: calc(100% - 252px);
     margin-left: 252px;
     position: relative;
-    padding: 20px;
+    padding: 20px 0 20px 20px;
     .list_top{
       color: #333;
       > span{
@@ -823,7 +825,7 @@ export default {
         }
       }
       .list_content{
-        max-height: 776px;
+        /* max-height: 776px; */
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
