@@ -337,9 +337,19 @@ export default {
       } else if (oMsg.type === 'DUPLICATE_CONNECTION') {
         // 账号已经在其它地方登录
         _this.wrOff(oMsg);
+        // 断开连接 清除定时器
         _this.bReconnect = false;
+        if (_this.wsObj.stompClient) {
+          _this.wsObj.stompClient.disconnect();
+        }
+        if (_this.wsObj.pongInval) {
+          window.clearInterval(this.wsObj.pongInval);
+        }
+        if (_this.wsObj.wsTimeout) {
+          window.clearTimeout(this.wsObj.wsTimeout);
+        }
         localStorage.setItem('as_vlink_user_info', '');
-        this.$router.push({name: 'login'});
+        _this.$router.push({name: 'login'});
       } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
         // 房间已满
         _this.wrOff(oMsg);
@@ -759,7 +769,9 @@ export default {
   },
   beforeDestroy () {
     this.bReconnect = false;
-    this.wsObj.stompClient.disconnect();
+    if (this.wsObj.stompClient) {
+      this.wsObj.stompClient.disconnect();
+    }
     if (this.wsObj.pongInval) {
       window.clearInterval(this.wsObj.pongInval);
     }
