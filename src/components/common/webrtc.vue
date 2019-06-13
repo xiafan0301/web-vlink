@@ -74,6 +74,7 @@ export default {
     return {
       localId: 'aorise',
       aWRData: [], // webrtcObj
+      bReconnect: true,
       max: 3, // 同时通话的最大数量
       config: {
       },
@@ -167,10 +168,12 @@ export default {
           _this.wsObj.subping.unsubscribe();
           _this.wsObj.subping = null;
         }
-        // 重连ws
-        _this.wsObj.wsTimeout = window.setTimeout(() => {
-          _this.wsReInit(_data);
-        }, 3000);
+        if (_this.bReconnect) {
+          // 重连ws
+          _this.wsObj.wsTimeout = window.setTimeout(() => {
+            _this.wsReInit(_data);
+          }, 3000);
+        }
       });
     },
     // 重连ws
@@ -754,6 +757,7 @@ export default {
     }
   },
   beforeDestroy () {
+    this.bReconnect = false;
     this.wsObj.stompClient.disconnect();
     if (this.wsObj.pongInval) {
       window.clearInterval(this.wsObj.pongInval);
