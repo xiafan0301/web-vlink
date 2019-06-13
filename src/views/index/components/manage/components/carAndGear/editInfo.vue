@@ -45,7 +45,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="号牌种类:" prop="numberType">
-            <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类">
+            <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类" @change="handleNumberType">
               <el-option
                 v-for="(item, index) in numberTypeList"
                 :key="index"
@@ -128,6 +128,20 @@ export default {
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ]
       },
+      numColorList: [
+        {label: '黄底黑字', value: 1},
+        {label: '蓝底白字', value: 2},
+        {label: '蓝底白字', value: 8},
+        {label: '黄底黑字黑框线', value: 15},
+        {label: '白底黑字、红“警”字', value: 23},
+        {label: '白底黑字、红“警”字', value: 24},
+        {label: '渐变绿底黑字', value: 25},
+        {label: '黄绿双拼底黑字', value: 26},
+        // {label: '蓝底白字', value: 27},
+        // {label: '黄底黑字', value: 28},
+        // {label: '黄底黑字', value: 29},
+        {label: '其他', value: 99}
+      ],//号牌颜色列表
       userInfo: {}, // 用户信息
       vehicleTypeList: [], // 车辆类型
       vehicleColorList: [], // 车身颜色
@@ -178,6 +192,14 @@ export default {
         })
         .catch(() => {})
     },
+    // 号牌种类change
+    handleNumberType (val) {
+      this.numColorList.map(item => {
+        if (item.value == val) {
+          this.editCar.numberColor = item.label;
+        }
+      })
+    },
     // 获取车辆详情
     getDetail () {
       const vehicleId = this.$route.query.id;
@@ -196,10 +218,9 @@ export default {
               this.editCar.organId = res.data.organId;
               this.editCar.deviceNo = res.data.deviceNo;
               this.editCar.devicePassword = res.data.devicePassword;
+              this.editCar.numberColor = res.data.numberColor;
 
-              console.log(typeof vehicleType)
               this.editCar.vehicleType = vehicleType.toString();
-              console.log(typeof this.editCar.vehicleType)
               this.editCar.vehicleColor = vehicleColor.toString();
               this.editCar.numberType = numberType.toString();
 

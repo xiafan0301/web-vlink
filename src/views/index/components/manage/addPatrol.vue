@@ -180,7 +180,7 @@ export default {
       rules: {
         roundName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { max: 10, message: '最多输入10个字', trigger: 'blur' }
+          // { max: 10, message: '最多输入10个字', trigger: 'blur' }
         ],
         dateTime: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },

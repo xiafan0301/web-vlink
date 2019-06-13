@@ -179,8 +179,8 @@
                 </div>
                 <div class="plan-form-box">
                   <el-form class="plan-form" label-width="90px" :model="item"  size="middle">
-                    <el-form-item label="执行部门:"  :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
-                      <el-select v-model="item.departmentId" placeholder="请选择执行部门">
+                    <el-form-item label="调度部门:"  :rules ="[{ required: true, message: '请选择调度部门', trigger: 'blur' }]">
+                      <el-select v-model="item.departmentId" placeholder="请选择调度部门">
                         <el-option
                           v-for="(item, index) in departmentData"
                           :key="index"
