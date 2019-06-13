@@ -28,11 +28,11 @@
       <ul class="detail_info clearfix">
         <li>
           <span>车辆编号:</span>
-          <span>{{detailInfo.vehicleNumber ? detailInfo.vehicleNumber : '无'}}</span>
+          <span>{{detailInfo.transportNo ? detailInfo.transportNo : '无'}}</span>
         </li>
         <li>
           <span>车牌号码:</span>
-          <span>{{detailInfo.transportNo ? detailInfo.transportNo : '无'}}</span>
+          <span>{{detailInfo.vehicleNumber ? detailInfo.vehicleNumber : '无'}}</span>
         </li>
         <li>
           <span>识别代码:</span>

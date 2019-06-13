@@ -67,8 +67,8 @@ const oDomains = {
     },
     // 用户权限地址
     auth: {
-      // dev: 'http://10.116.64.107:8081/api/auth/', // 江先琨
-      dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
+      dev: 'http://10.116.64.107:8081/api/auth/', // 江先琨
+      // dev: 'http://apidev.aorise.org/vlink-auth/api/auth/',
       test: 'http://apirel.aorise.org/vlink-auth/api/auth/',
       prod: 'http://apirel.aorise.org/vlink-auth/api/auth/'
     },
