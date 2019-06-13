@@ -16,13 +16,14 @@
       <div v-else>视频加载中，请稍后...</div>
     </div>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
-    <span v-if="config.close && !fullScreen" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
+    <span v-if="config.close && !fullScreen && !optionsDis" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
-    <!-- 暂停按钮 -->
+    <!-- 暂停按钮（遮盖） -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
+    <!-- 右下操作合集 -->
     <div class="flvplayer_bot" :class="{'flvplayer_bot_dis': videoLoading}">
       <div class="flvplayer_bot_t com_ellipsis">{{oData.title}}</div>
-      <div class="flvplayer_bot_o">
+      <div v-show="!optionsDis" class="flvplayer_bot_o">
         <span>
           <!-- 播放/暂停 -->
           <span class="flvplayer_opt vl_icon vl_icon_v21" v-show="playActive" title="暂停" @click="playerPlay(false)"></span>
@@ -194,7 +195,7 @@
 import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
-  getVideoFileDownStartBatch, getVideoFileDownProgressBatch, videoFileDownStartTime } from "@/views/index/api/api.video.js";
+  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -206,8 +207,8 @@ export default {
    *    endTime: Date 回放结束时间
    *    video: 设备信息（uid、）
    *    record: 为true时 则生成放历史记录
-   *  }
-   * oConfig: 播放配置信息
+   *  },
+   * oConfig: { 播放配置信息
    *    pause: 开始是否暂停，默认为false
    *    sign: 是否可标记，默认为true
    *    signEmit: 标记成功后是否需要emit，默认为false
@@ -217,12 +218,14 @@ export default {
    *    cut: 是否可截屏，默认为true,
    *    tape: 是否可录像，默认为true
    *    download: 是否可下载(回放)，默认为true
-   *    
+   * },
+   * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
    */
-  props: ['index', 'oData', 'oConfig', 'bResize', 'showFullScreen'],
+  props: ['index', 'oData', 'oConfig', 'optDis', 'bResize', 'showFullScreen'],
   data () {
     return {
+      optionsDis: false,
       mini: false, // 主要控制播放器操作栏显示方式
 
       videoLoading: true,
@@ -335,6 +338,9 @@ export default {
         this.config = Object.assign(this.config, this.oConfig);
       }
     },
+    optDis () {
+      this.optionsDis = this.optDis;
+    },
     volume () {
       if (this.volume <= 0) {
         this.volumeAble = false;
@@ -369,6 +375,7 @@ export default {
   },
   mounted () {
     console.log('mounted oData', this.oData);
+    this.optionsDis = this.optDis;
     if (this.oConfig) {
       this.config = Object.assign(this.config, this.oConfig);
     }
@@ -680,8 +687,6 @@ export default {
         this.download.maxM = _o;
         if (this.download.currentM > _o) { this.download.currentM = _o; }
       }
-      console.log('this.download.maxM', this.download.maxM);
-      console.log('this.download.currentM', this.download.currentM);
     },
     playerDownloadSubmit () {
       this.download.nextStepLaoding = true;
@@ -699,7 +704,9 @@ export default {
               recordId: _obj.recordId,
               deviceId: this.oData.video.uid,
               progress: 0,
-              downUrl: ''
+              downUrl: '',
+              startTime: _obj.startTime,
+              endTime: _obj.endTime
               // startTime: formatDate();
             }
           }
@@ -727,19 +734,11 @@ export default {
       }, ti);
     },
     playerDownloadProgress () {
-      // getVideoFileDownProgress
-      // console.log('this.download.recordData', this.download.recordData);
       let sparam = '?';
-      // let aa = [];
       sparam += 'deviceId=' + this.oData.video.uid;
       for(let i in this.download.recordData) {
         sparam += '&recordId=' + this.download.recordData[i].recordId;
-        // aa.push(this.download.recordData[i].recordId);
       }
-     /*  sparam = {
-        deviceId: this.oData.video.uid,
-        recordId: aa
-      } */
       getVideoFileDownProgressBatch(sparam).then(res => {
         if (res && res.data && res.data.batchCamRealRecordDto) {
           let rd = res.data.batchCamRealRecordDto;
@@ -764,14 +763,6 @@ export default {
           window.clearInterval(this.download.downlaodInval);
           this.download.progressFailed = true;
         }
-        /* if (res && res.data) {
-          if (res.data.progress >= 100 && this.download.downlaodInval) {
-            this.download.progressVal = 100;
-            this.download.downloadUrl = res.data.downUrl;
-            window.clearInterval(this.download.downlaodInval);
-          } else {
-            this.download.progressVal = res.data.progress;
-          } */
       }).catch(error => {
         console.log("getVideoFileDownProgressBatch error：", error);
         window.clearInterval(this.download.downlaodInval);
@@ -780,6 +771,22 @@ export default {
     },
     downloadFile (item) {
       console.log(item);
+      /* 下载记录 */
+      let oUser = this.$store.state.loginUser;
+      let dept = (oUser && oUser.organList && oUser.organList[0]) ? oUser.organList[0] : {};
+      addVideoDownload({
+        deviceId: this.oData.video.uid,
+        startTime: item.startTime ? formatDate(item.startTime) : '',
+        endTime: item.endTime ? formatDate(item.endTime) : '',
+        oprDeptId: dept.uid,
+        oprDeptName: dept.organName,
+        ptUserId: oUser ? oUser.uid : '',
+        ptUserName: oUser ? oUser.userName : ''
+      }).then(() => {
+      }).catch(error => {
+        console.log("addVideoDownload error：", error);
+      });
+      /* 下载 */
       let $iframe = $('<iframe id="down-file-iframe" />');
 			let $form = $('<form target="down-file-iframe" method="post" />');
 			$form.attr('action', item.downUrl);
