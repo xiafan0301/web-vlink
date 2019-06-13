@@ -255,6 +255,7 @@
                 placeholder="请输入设备名搜索"
                 size="small"
                 clearable
+                @clear="devListIsKey = []"
                 @change="getAlarmSnap"
                 :remote-method="getControlDevice"
                 :loading="loading">
@@ -749,20 +750,23 @@ export default {
     },
     // 获取所有布控设备
     getControlDevice (query) {
-      const params = {
-        name: query,
-        uid: this.controlId
-      }
-      getControlDevice(params).then(res => {
-        if (res && res.data) {
-          this.devListIsKey = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: _query,
+          uid: this.controlId
         }
-      })
+        getControlDevice(params).then(res => {
+          if (res && res.data) {
+            this.devListIsKey = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.name
+              }
+            });
+          }
+        })
+      }
     },
     // 获取布控抓拍结果列表
     getAlarmSnap () {
@@ -799,6 +803,9 @@ export default {
     dragstart (e, index, item) {
       this.dragstartIndex = index;
       this.dragActiveObj = item;
+       // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!e) { e = window.event; }
+      e.dataTransfer.setData('name', 'ouyang');
     },
   
     dragend () {

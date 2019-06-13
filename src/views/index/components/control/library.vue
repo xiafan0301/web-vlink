@@ -79,6 +79,7 @@
               filterable
               remote
               clearable
+              @clear="portraitDropdownList = []"
               value-key="value"
               placeholder="输入证件号码"
               :remote-method="getPortraitDropdownListByIdNo"
@@ -147,6 +148,7 @@
               filterable
               remote
               clearable
+              @clear="carDropdownList = []"
               value-key="value"
               placeholder="输入车辆号码"
               :remote-method="getVehicleDropdownListByVehicleNumber"
