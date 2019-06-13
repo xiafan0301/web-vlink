@@ -825,7 +825,6 @@ export default {
         }
       }
       .list_content{
-        /* max-height: 776px; */
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;

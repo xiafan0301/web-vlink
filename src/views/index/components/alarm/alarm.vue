@@ -33,7 +33,6 @@ export default {
   > .alarm_content {
     height: 100%;
     padding-left: 200px;
-    /* overflow: auto; */
   }
 }
 </style>
