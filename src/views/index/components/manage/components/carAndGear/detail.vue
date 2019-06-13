@@ -60,7 +60,7 @@
         </li>
         <li>
           <span>设备账户:</span>
-          <span>{{detailInfo.deviceNo ? detailInfo.deviceNo : '无'}}</span>
+          <span>{{detailInfo.deviceAccount ? detailInfo.deviceAccount : '无'}}</span>
         </li>
         <li>
           <span>访问密码:</span>
