@@ -14,8 +14,8 @@
         filterable
         remote
         multiple
-        reserve-keyword
         allow-create
+        @remove-tag="licenseNumList = []"
         @change="getLicenseNum"
         value-key="value"
         placeholder="请输入车牌信息"
@@ -172,7 +172,17 @@
         width="482px"
         top="40vh"
         title="选择目标">
-        <el-select v-model="targetObj" value-key="value" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" :placeholder="changeRepertorySel" style="width: 100%;margin-top: 20px;">
+        <el-select
+          @remove-tag="surveillanceObjectDtoList = [],groups = [];"
+          v-model="targetObj" 
+          value-key="value" 
+          multiple 
+          filterable 
+          remote 
+          :remote-method="repertorySel" 
+          :loading="loading" 
+          :placeholder="changeRepertorySel" 
+          style="width: 100%;margin-top: 20px;">
           <!-- 只有成员对象类型 -->
           <template v-if="surveillanceObjectDtoList.length > 0 && groups.length === 0">
             <el-option
@@ -457,34 +467,39 @@ export default {
     },
     // 从库中选择
     repertorySel (query) {
-      const params = {
-        key: query,
-        modelType: parseInt(this.modelType)
-      }
-      repertorySel(params).then(res => {
-        if (res && res.data) {
-          if (res.data.groups && res.data.groups.length > 0) {
-            this.groups = res.data.groups.map((m, index) => {
-              return {
-                label: m.groupName,
-                surveillanceObjectDtoList: m.surveillanceObjectDtoList,
-                value: m.groupName + '_' + index
-              }
-            });
-          }
-          if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
-            this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
-              return {
-                label: m.objType === 1 ? m.name : m.objType === 2 ? m.vehicleNumber : '',
-                value: m.objId,
-                idNo: m.idNo,
-                objType: m.objType,
-                photoUrl: m.objType === 1 ? m.photoUrl : m.objType === 2 ? m.vehicleImagePath : '',
-              }
-            });
-          }
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        this.groups = [];
+        this.surveillanceObjectDtoList = [];
+        const params = {
+          key: _query,
+          modelType: parseInt(this.modelType)
         }
-      })
+        repertorySel(params).then(res => {
+          if (res && res.data) {
+            if (res.data.groups && res.data.groups.length > 0) {
+              this.groups = res.data.groups.map((m, index) => {
+                return {
+                  label: m.groupName,
+                  surveillanceObjectDtoList: m.surveillanceObjectDtoList,
+                  value: m.groupName + '_' + index
+                }
+              });
+            }
+            if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
+              this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
+                return {
+                  label: m.objType === 1 ? m.name : m.objType === 2 ? m.vehicleNumber : '',
+                  value: m.objId,
+                  idNo: m.idNo,
+                  objType: m.objType,
+                  photoUrl: m.objType === 1 ? m.photoUrl : m.objType === 2 ? m.vehicleImagePath : '',
+                }
+              });
+            }
+          }
+        })
+      }
     },
     // 验证车牌号方法
     checkPlateNumber (value) {
@@ -1543,7 +1558,7 @@ export default {
       let _this = this;
       let _circle = new window.AMap.Circle({
         center: new window.AMap.LngLat(lnglat[0], lnglat[1]), // 圆心位置
-        radius: _this.scopeRadius * 100,  //半径
+        radius: _this.scopeRadius * 1000,  //半径
         strokeColor: "#F33",  //线颜色
         strokeOpacity: 1,  //线透明度
         strokeWeight: 3,  //线粗细度
@@ -1737,7 +1752,7 @@ export default {
             devDom.removeClass('vl_icon_sxt');
           }
         })
-        f.setRadius(parseInt(this.scopeRadius) * 100);//设置半径
+        f.setRadius(parseInt(this.scopeRadius) * 1000);//设置半径
         this.lnglat = [f.getCenter().lng, f.getCenter().lat];//重新获取追踪点坐标
         this.getTraceEquList(f, undefined, index);//重新获取圆形覆盖物内的设备
       })
