@@ -71,7 +71,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
               <div v-else-if="deviceIsPlaying(item)" class="content_list_dis" draggable="false">
@@ -94,7 +94,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
             </li>
           </ul>
@@ -141,6 +141,8 @@ export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
+      userId: '',
+
       tipMsg: '暂无视频播放，在标记列表选择视频进行查看',
       dragActiveObj: null,
       videoList: [null, null, null, null],
@@ -182,6 +184,9 @@ export default {
         }
       }
     }
+  },
+  created () {
+    this.userId = this.$store.state.loginUser.uid;
   },
   mounted () {
     this.searchSubmit();

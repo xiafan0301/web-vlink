@@ -176,7 +176,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :optDis="patrolActive === 1" :bResize="bResize"
               :oConfig="{sign: true}">
             </div>
           </div>
@@ -540,7 +540,7 @@ export default {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
         this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
       }
-      this.$message('轮巡已开始。');
+      this.$message('轮巡进行中。');
     },
     // 当前轮巡 轮
     patrolCurrentGoOn () {
