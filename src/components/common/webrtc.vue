@@ -381,7 +381,8 @@ export default {
           type: t,
           remoteId: oMsg.sender,
           remoteName: oMsg.sender,
-          oMsData: oMsg.data
+          oMsData: oMsg.data,
+          isAddOffered: isAddOffered
         }
         _this.$emit('exceptCalling', eC)
       }).catch(() => {
@@ -589,8 +590,8 @@ export default {
         // 发送应答信令 ===========================
         _pc.createAnswer(function (desc) {
           _pc.setLocalDescription(desc);
-          _this.wsSend(desc ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
-              type: desc ? 'ADDANSWERED' : 'ANSWERED',
+          _this.wsSend(obj.isAddOffered ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
+              type: obj.isAddOffered ? 'ADDANSWERED' : 'ANSWERED',
               data: JSON.stringify(desc),
               recipient: obj.remoteId,
               recipientName: obj.remoteName

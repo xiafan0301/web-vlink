@@ -150,7 +150,6 @@
   </div>
 </template>
 <script>
-import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
 import {ScpGETPortraitInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js';
@@ -171,7 +170,6 @@ export default {
       },
       pagination: { total: 0, pageSize: 16, pageNum: 1 },
       uploadAcion: ajaxCtx.base + '/new',
-      testData: testData,
       searching: false,
       curImageUrl: '', // 当前上传的图片
       curImgNum: 0, // 当前图片数量
