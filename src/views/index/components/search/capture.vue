@@ -164,8 +164,7 @@
             <div class="struc_c_d_info">
               <h2>对比信息<div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span>青年</span>
-                <span>女性</span>
+                <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
@@ -222,7 +221,7 @@
   export default {
     data() {
       return {
-        targetType: '1',
+        targetType: null,
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 18,
@@ -565,6 +564,10 @@
         if (!boolean) {
           if (this.curImgNum === 0) {
             this.$message.warning('请至少上传或选择一张图片')
+            return false;
+          }
+          if (!this.targetType) {
+            this.$message.warning('请选择人像抓拍还是车像抓拍')
             return false;
           }
           this.searching = true;

@@ -52,6 +52,7 @@
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option value="全部特性"></el-option>
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -62,6 +63,7 @@
               </el-form-item>
               <el-form-item prop="groupId">
                 <el-select  style="width: 240px;" v-model="searchForm.groupId" placeholder="自定义组">
+                  <el-option value="全部分组"></el-option>
                   <el-option
                     v-for="(item, index) in groupsList"
                     :key="index"
@@ -73,6 +75,7 @@
               </el-form-item>
               <el-form-item prop="dutyOrganId">
                 <el-select style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option value="全部部门"></el-option>
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -165,7 +168,7 @@ export default {
     return {
       isSelected: 0, // 查询--重置
       backDialog: false, // 返回提示弹出框
-      tabState: 2, // 地图选择
+      tabState: 1, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
         roundInterval: 60, // 间隔时间
@@ -194,9 +197,9 @@ export default {
         ]
       },
       searchForm: {
-        groupId: null, // 分组id
-        intelCharac: null, // 智能特性
-        dutyOrganId: null, // 责任部门id
+        groupId: '全部分组', // 分组id
+        intelCharac: '全部特性', // 智能特性
+        dutyOrganId: '全部部门', // 责任部门id
         devName: null // 设备名称
       },
       allDeviceList: [], // 所有的设备列表
@@ -404,10 +407,6 @@ export default {
         this.selectDeviceList[index].isChecked = true;
       }
 
-      // if (checkedArr.length === 0 || checkedArr.length < this.selectDeviceList[index].deviceList.length) {
-      //   this.selectDeviceList[index].isChecked = false;
-      // }
-
       if (this.selectDeviceList[index].deviceList.length !== 0) {
         if (checkedSxtArr.length === 0 || checkedSxtArr.length < this.selectDeviceList[index].deviceList.length) {
           this.selectDeviceList[index].isChecked = false;
@@ -418,7 +417,7 @@ export default {
           this.selectDeviceList[index].isChecked = false;
         }
       }
-
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
       // 过滤出父级中没有选中
       let checkedParentArr = this.selectDeviceList.filter(itm => {
         return itm.isChecked === false;
@@ -560,8 +559,32 @@ export default {
     },
     // 获取所有可选的设备
     getAllDevicesList () {
+      let groupId, dutyOrganId, intelCharac;
+      if (this.searchForm.groupId === '全部分组') {
+        groupId = null;
+      } else {
+        groupId = this.searchForm.groupId;
+      }
+      if (this.searchForm.dutyOrganId === '全部部门') {
+        dutyOrganId = null;
+      } else {
+        dutyOrganId = this.searchForm.dutyOrganId;
+      }
+      if (this.searchForm.intelCharac === '全部特性') {
+        intelCharac = null;
+      } else {
+        intelCharac = this.searchForm.intelCharac;
+      }
+
       this.selectDeviceNumber = 0;
-      getAllDevices(this.searchForm)
+
+      const params = {
+        groupId,
+        dutyOrganId,
+        intelCharac,
+        devName: this.searchForm.devName
+      }
+      getAllDevices(params)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;
@@ -569,11 +592,9 @@ export default {
             //在可选设备中删除已有的设备
             if (this.patrolId) {
               if (this.currentDeviceList.length > 0) {
-                console.log('77777')
                 this.currentDeviceList.map(item => {
                   this.selectDeviceList.map((val) => {
                     if (item.areaUid == val.uid) {
-                      console.log('nnnnn')
                       item.deviceList.map(a => {
                         val.deviceList.map((b, i) => {
                           if (a.uid === b.uid) {

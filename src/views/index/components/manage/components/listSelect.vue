@@ -224,6 +224,7 @@ export default {
     addDeviceToLeft () {
       let willRemoveDevice = JSON.parse(JSON.stringify(this.selectDeviceList));
       let checkedDeviceList = [], checkedDeviceNumber = 0, selectDeviceNumber = 0, params;
+
       if (this.rightAllChecked) { // 全选
         checkedDeviceList = this.selectDeviceList;
         willRemoveDevice = [];
@@ -244,6 +245,7 @@ export default {
             for (let length = this.selectDeviceList[i].deviceList.length, j = length - 1; j >= 0; j --) {
               if (this.selectDeviceList[i].deviceList[j].isChildChecked === true) {
                 params.deviceList.push(this.selectDeviceList[i].deviceList[j]);
+
                 willRemoveDevice[i].deviceList.splice(j, 1);
               }
             }
@@ -253,10 +255,10 @@ export default {
                 willRemoveDevice[i].bayonetList.splice(k, 1);
               }
             }
+            if ((params.deviceList && params.deviceList.length !== 0) || (params.bayonetList && params.bayonetList.length !== 0)) {
+              checkedDeviceList.push(params);
+            }
           }
-        }
-        if ((params.deviceList && params.deviceList.length !== 0) || (params.bayonetList && params.bayonetList.length !== 0)) {
-          checkedDeviceList.push(params);
         }
       }
       if (checkedDeviceList && checkedDeviceList.length > 0) {
@@ -596,9 +598,9 @@ export default {
                 color: #666666;
                 display: flex;
                 align-items: center;
-                >span {
-                  margin: 0 80px 0 0;
-                }
+                // >span {
+                //   margin: 0 80px 0 0;
+                // }
               }
             }
           }

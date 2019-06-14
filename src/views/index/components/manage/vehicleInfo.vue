@@ -143,12 +143,18 @@
                 prop="vehicleNumber"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleNumber ? scope.row.vehicleNumber : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="车主"
                 prop="ownerName"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.ownerName ? scope.row.ownerName : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="性别"
@@ -161,12 +167,18 @@
                 prop="vehicleModel"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleModel ? scope.row.vehicleModel : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="车辆颜色"
                 prop="vehicleColor"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleColor ? scope.row.vehicleColor : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="底库信息"
@@ -187,11 +199,11 @@
             </el-table>
           </template>
           <template v-else>
-              <el-table
+            <el-table
               class="event_table"
               :data="vehicleList"
               @selection-change="handleSelectChange"
-              >
+            >
               <el-table-column
                 type="selection"
                 width="55">
@@ -206,12 +218,18 @@
                 prop="vehicleNumber"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleNumber ? scope.row.vehicleNumber : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="车主"
                 prop="ownerName"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.ownerName ? scope.row.ownerName : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="性别"
@@ -224,12 +242,18 @@
                 prop="vehicleModel"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleModel ? scope.row.vehicleModel : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="车辆颜色"
                 prop="vehicleColor"
                 show-overflow-tooltip
                 >
+                <template slot-scope="scope">
+                  <span>{{scope.row.vehicleColor ? scope.row.vehicleColor : '-'}}</span>
+                </template>
               </el-table-column>
               <el-table-column
                 label="分组信息"
@@ -237,8 +261,11 @@
                 :show-overflow-tooltip='true'
               >
                 <template slot-scope="scope">
-                  <span>
+                  <span v-if="scope.row.groupDetailList">
                     {{scope.row.groupDetailList.join('、')}}
+                  </span>
+                  <span v-else>
+                    -
                   </span>
                 </template>
               </el-table-column>
@@ -786,7 +813,7 @@ export default {
       e.stopPropagation();
       this.$router.push({name: 'admin_vehicle_info', query: {id: id}});
     },
-    // 显示加入组tankuang
+    // 显示加入组弹框
     showGroupDialog () {
       if (this.multipleSelection.length > 0) {
         this.showGroup = !this.showGroup;

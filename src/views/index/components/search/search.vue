@@ -653,7 +653,7 @@
               }
               .struc_cdi_line {
                 span {
-                  position: relative;
+                  /*position: relative;*/
                   max-width: 100%;
                   display: inline-block;
                   height: .3rem;

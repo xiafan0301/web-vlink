@@ -104,6 +104,7 @@ export default {
   },
   watch: {
     finalDeviceList (val) {
+      console.log('val', val)
       let checkedDeviceList = [], // 选中的设备
         currentDeviceList = [], // 选中的设备经过处理后
         deviceList = [], bayonetList = [];
@@ -191,7 +192,7 @@ export default {
           let params = {
             cname: i,
             uid: deviceObj[i][0].uid,
-            isOpenArrow: false,
+            isOpenArrow: true,
             isChecked: false,
             isSXT: true,
             deviceList: [],
@@ -375,31 +376,6 @@ export default {
           _this.selAreaAble = true;
           _this.mapMarkHandler();
 
-          // 移入覆盖物生成删除小图标
-          let offSet = [0, 0], _marker = null;
-          // polygon.on('mouseover', function(p) {
-          //   // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-          //   if (_marker) return;
-          //   _marker = new window.AMap.Marker({ // 添加自定义点标记
-          //     map: _this.map,
-          //     position: [p.lnglat.lng, p.lnglat.lat],
-          //     offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-          //     draggable: false, // 是否可拖动
-          //     extData: '',
-          //     // 自定义点标记覆盖物内容
-          //     content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-          //   });
-          //   // 点击小图标移除覆盖物和删除小图标
-          //   _marker.on('click', function() {
-          //     _this.map.remove(polygon);
-          //     _this.selAreaPolygon = null;
-          //     _this.map.remove(_marker);
-
-          //     _this.mapMarkHandler();
-              
-          //   })
-          //   _marker.setMap(_this.map);
-          // })
         }, 100);
       });
     },
@@ -505,7 +481,7 @@ export default {
 
             _this.map && _this.map.setCenter([obj.longitude, obj.latitude]);
 
-            let offSet = [-20.5, -48], selClass = '';
+            let offSet = [-20.5, -48], selClass = '', hoverWindow = null;
             if (_this.selAreaPolygon && !_this.selAreaPolygon.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
               // 多边形存在且不在多边形之中
               selClass = "vl_map_selarea_hide";
@@ -527,6 +503,27 @@ export default {
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
             _this.marker = marker;
+
+            let title = '';
+            if (keyWord === 'kk') {
+              title = '卡口名称：' + obj.deviceName;
+            } else {
+              title = '摄像头名称：' + obj.deviceName;
+            }
+            _this.marker.on('mouseover', function () {
+              let sContent = '<div class="vl_map_hover" >' +
+                '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p>' + title + '</p></div></div>';
+              hoverWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+                content: sContent
+              });
+              hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+            });
+            _this.marker.on('mouseout', function () {
+              if (hoverWindow) { hoverWindow.close(); }
+            });
             if (!aMarkers) { aMarkers = []; }
             aMarkers.push(marker);
             

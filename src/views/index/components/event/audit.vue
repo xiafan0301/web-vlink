@@ -103,6 +103,9 @@
           prop="reporterPhone"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.reporterPhone ? scope.row.reporterPhone : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="身份"
@@ -120,6 +123,9 @@
           prop="reportTime"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.reportTime ? scope.row.reportTime : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="事件地点"
@@ -127,6 +133,9 @@
           prop="eventAddress"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventAddress ? scope.row.eventAddress : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报内容"
@@ -134,6 +143,9 @@
           prop="eventDetail"
           :show-overflow-tooltip='true'
         >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventDetail ? scope.row.eventDetail : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="是否有图或视频"

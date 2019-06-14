@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li style="align-items: center;">
+                <li style="align-items: baseline;">
                   <span class="audit-label">状态:</span>
                   <span :class="[$route.query.status === 'pass' ? 'pass-status' : 'reject-status']">{{$route.query.status === 'pass' ? '通过' : '驳回'}}</span>
                 </li>

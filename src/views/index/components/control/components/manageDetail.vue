@@ -21,14 +21,14 @@
             <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
             <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType}}</span></div>
           </li>
-          <li>
+          <li style="width: 32%;">
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
-            <div v-else><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div v-else style="display: flex;"><span class="vl_f_666">布控时间：</span><span class="vl_f_333" style="flex: 1;">{{controlDetail.time}}</span></div>
           </li>
-          <li style="width: 30%;">
+          <li style="width: 32%;">
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
-            <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'" style="display: flex;"><span class="vl_f_666">布控时间：</span><span class="vl_f_333" style="flex: 1;">{{controlDetail.time}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
