@@ -668,14 +668,15 @@ export default {
             recipient: oMsg.sender,
             recipientName: oMsg.sender
           });
-          // MEMBER_LEAVED
-//          this.wsSend(webrtcConfig.apis.leave, {
-//            type: 'MEMBER_LEAVED',
-//            data: '',
-//            recipient: oMsg.sender,
-//            recipientName: oMsg.sender
-//          });
+          console.log('关闭')
         }
+        // MEMBER_LEAVED
+        this.wsSend(webrtcConfig.apis.leave, {
+          type: 'MEMBER_LEAVED',
+          data: '',
+          recipient: oMsg.sender,
+          recipientName: oMsg.sender
+        });
       }
       // 显示提示信息
       if (oMsg && oMsg.data) {

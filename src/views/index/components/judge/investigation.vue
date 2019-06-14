@@ -3,6 +3,7 @@
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
         <el-autocomplete
+          style="width: 100%"
           v-model="searchData.uid"
           :fetch-suggestions="autoEvent"
           @select="showChoose"
@@ -10,6 +11,7 @@
           placeholder="关联事件编号搜索">
         </el-autocomplete>
         <el-date-picker
+          style="width: 100%"
           v-model="searchData.time"
           type="daterange"
           range-separator="-"
