@@ -25,6 +25,7 @@
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option value="全部特性"></el-option>
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -35,6 +36,7 @@
               </el-form-item>
               <el-form-item prop="dutyOrganId">
                 <el-select style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option value="全部部门"></el-option>
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -130,8 +132,8 @@ export default {
       isShowError: false,
       errorText: null,
       searchForm: {
-        intelCharac: null, // 智能特性
-        dutyOrganId: null, // 责任部门
+        intelCharac: '全部特性', // 智能特性
+        dutyOrganId: '全部部门', // 责任部门id
         devName: null // 设备名称
       },
       groupName: '', // 新增分组名
@@ -396,8 +398,26 @@ export default {
     },
      // 获取所有可选的设备
     getAllDevicesList () {
+      let dutyOrganId, intelCharac;
+      if (this.searchForm.dutyOrganId === '全部部门') {
+        dutyOrganId = null;
+      } else {
+        dutyOrganId = this.searchForm.dutyOrganId;
+      }
+      if (this.searchForm.intelCharac === '全部特性') {
+        intelCharac = null;
+      } else {
+        intelCharac = this.searchForm.intelCharac;
+      }
+
       this.selectDeviceNumber = 0;
-      getAllDevices(this.searchForm)
+
+      const params = {
+        dutyOrganId,
+        intelCharac,
+        devName: this.searchForm.devName
+      }
+      getAllDevices(params)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;

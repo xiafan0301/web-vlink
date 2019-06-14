@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li style="align-items: center;margin-bottom:10px;">
+                <li style="align-items: baseline;">
                   <span class="audit-label">状态:</span>
                   <span class="audit-status">待审核</span>
                 </li>
