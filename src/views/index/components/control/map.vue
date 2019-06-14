@@ -436,6 +436,9 @@ export default {
       getControlMapByDevice(params).then(res => {
         if (res && res.data) {
           let _this = this;
+
+          $('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false;
+
           _this.controlObjList = res.data;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
           _this.domId = obj.uid + '_' + random14()
@@ -671,12 +674,6 @@ export default {
           })
           // 获得布控进行中直播视频
           if (obj.surveillanceStatus === 1) {
-            // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-            // obj.title = obj.deviceName;
-            // obj.video = {
-            //   deviceSip: deviceSip
-            // }
             _this.videoObj = {
               type: 1,
               title: obj.deviceName,
@@ -689,7 +686,6 @@ export default {
                 _this.isShowV = true;
               }, 100)
             }
-            console.log($('#controlVideo'))
           }
           // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
           $('#mapBox').on('click', '.control_more', function () {
