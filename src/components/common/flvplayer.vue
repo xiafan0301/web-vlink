@@ -989,6 +989,7 @@ export default {
               width: w,
               height: h,
           });
+          // $video[0].crossOrigin = 'anonymous';
           // video canvas 必须为原生对象
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
