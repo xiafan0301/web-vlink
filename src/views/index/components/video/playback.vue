@@ -177,7 +177,7 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div draggable="false" class="show_his_dis" v-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
@@ -381,8 +381,7 @@ export default {
       // apiDelVideoRecords
       this.$confirm('确定删除所有的播放历史吗?', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
         apiDelVideoRecords({playType: 2}).then(() => {
           this.getVideoRecordList();

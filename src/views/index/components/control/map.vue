@@ -122,7 +122,7 @@
               </li>
               <li>
                 <i class="vl_icon vl_icon_control_05"></i>
-                <span>{{item.deviceName}}</span>
+                <span :title="item.deviceName">{{item.deviceName | strCutWithLen(20)}}</span>
               </li>
             </ul>
           </el-card>
@@ -278,7 +278,7 @@ export default {
       const _query = this.Trim(query, 'g');
       if (_query) {
         const params = {
-          'where.keword': _query,
+          'where.keyword': _query,
           pageSize: 1000000,
           orderBy: 'report_time',
           order: 'desc'
@@ -436,6 +436,9 @@ export default {
       getControlMapByDevice(params).then(res => {
         if (res && res.data) {
           let _this = this;
+
+          $('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false;
+
           _this.controlObjList = res.data;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
           _this.domId = obj.uid + '_' + random14()
@@ -443,11 +446,14 @@ export default {
             vlMapVideo = `
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
-              <div class="vl_map_img">
-                <div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>
-                <div class="vl_map_state">进行中</div>
-               
-              </div>`;
+              <div class="vl_map_img">`;
+              console.log(obj, 'objobjobj')
+              if (obj.deviceStatus === 1) {
+                vlMapVideo += `<div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>`;
+              } else {
+                vlMapVideo += `<div style="width: 300px;height: 150px;background: #000;display: flex;align-items: center;justify-content: center;color: #fff;">设备故障，暂时无法获取视频</div>`;
+              }
+               vlMapVideo += `<div class="vl_map_state">进行中</div></div>`;
           }
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
@@ -668,23 +674,18 @@ export default {
           })
           // 获得布控进行中直播视频
           if (obj.surveillanceStatus === 1) {
-            // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-            // obj.title = obj.deviceName;
-            // obj.video = {
-            //   deviceSip: deviceSip
-            // }
             _this.videoObj = {
               type: 1,
               title: obj.deviceName,
               video: Object.assign({}, obj)
             };
-            _this.isShowVideo = true;
-            setTimeout(() => {
-              $('#' + _this.domId).append($('#controlVideo'));
-              _this.isShowV = true;
-            }, 100)
-            console.log($('#controlVideo'))
+            if (obj.deviceStatus === 1) {
+              _this.isShowVideo = true;
+              setTimeout(() => {
+                $('#' + _this.domId).append($('#controlVideo'));
+                _this.isShowV = true;
+              }, 100)
+            }
           }
           // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
           $('#mapBox').on('click', '.control_more', function () {
@@ -719,7 +720,14 @@ export default {
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let content = '';
-        content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+        console.log(obj, 'obj')
+        if (obj.deviceStatus === 1) {
+          // 设备正常
+          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+        } else {
+          // 设备不正常
+          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+        }
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
@@ -736,7 +744,7 @@ export default {
             // 点击切换告警闪烁图标
             if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
               if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
-                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
               } else {
@@ -744,15 +752,15 @@ export default {
                 $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
                 $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
+                // $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
                 $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标
-              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+              // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
               $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
               $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
+              // $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
             }
             _this.getControlMapByDevice(e.target.C.extData);
           })

@@ -69,12 +69,18 @@
               prop="vehicleNumber"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.vehicleNumber ? scope.row.vehicleNumber : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="车主"
               prop="ownerName"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.ownerName ? scope.row.ownerName : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="性别"
@@ -87,18 +93,27 @@
               prop="vehicleModel"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.vehicleModel ? scope.row.vehicleModel : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="车辆颜色"
               prop="vehicleColor"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.vehicleColor ? scope.row.vehicleColor : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="备注"
               prop="desci"
               :show-overflow-tooltip='true'
             >
+              <template slot-scope="scope">
+                <span>{{scope.row.desci ? scope.row.desci : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column label="操作" width="100">
               <template slot-scope="scope">
@@ -132,46 +147,46 @@
           </div>
           <ul class="content_right">
             <li>
-              <span>车牌号：</span>
-              <span>{{vehicleDetailInfo.vehicleNumber}}</span>
-            </li>
-            <li>
-              <span>车牌类型：</span>
-              <span>{{vehicleDetailInfo.numberType}}</span>
-            </li>
-            <li>
-              <span>车牌颜色：</span>
-              <span>{{vehicleDetailInfo.numberColor}}</span>
-            </li>
-            <li>
-              <span>车主：</span>
-              <span>{{vehicleDetailInfo.ownerName}}</span>
-            </li>
-            <li>
-              <span>证件号码：</span>
-              <span>{{vehicleDetailInfo.ownerIdCard}}</span>
-            </li>
-            <li>
-              <span>车辆类型：</span>
-              <span>{{vehicleDetailInfo.vehicleType}}</span>
-            </li>
-            <li>
-              <span>车辆型号：</span>
-              <span>{{vehicleDetailInfo.vehicleModel}}</span>
-            </li>
-            <li>
-              <span>车辆颜色：</span>
-              <span>{{vehicleDetailInfo.vehicleColor}}</span>
-            </li>
-            <li>
-              <span>车主性别：</span>
-              <span>{{vehicleDetailInfo.ownerSex}}</span>
-            </li>
-            <li>
-              <span>车主生日：</span>
-              <span>{{vehicleDetailInfo.ownerBirth}}</span>
-            </li>
-            <li>
+            <span>车牌号：</span>
+            <span>{{vehicleDetailInfo.vehicleNumber ? vehicleDetailInfo.vehicleNumber : '无'}}</span>
+          </li>
+          <li>
+            <span>车牌类型：</span>
+            <span>{{vehicleDetailInfo.numberType ? vehicleDetailInfo.numberType : '无'}}</span>
+          </li>
+          <li>
+            <span>车牌颜色：</span>
+            <span>{{vehicleDetailInfo.numberColor ? vehicleDetailInfo.numberColor : '无'}}</span>
+          </li>
+          <li>
+            <span>车主：</span>
+            <span>{{vehicleDetailInfo.ownerName ? vehicleDetailInfo.ownerName : '无'}}</span>
+          </li>
+          <li>
+            <span>证件号码：</span>
+            <span>{{vehicleDetailInfo.ownerIdCard ? vehicleDetailInfo.ownerIdCard : '无'}}</span>
+          </li>
+          <li>
+            <span>车辆类型：</span>
+            <span>{{vehicleDetailInfo.vehicleType ? vehicleDetailInfo.vehicleType : '无'}}</span>
+          </li>
+          <li>
+            <span>车辆型号：</span>
+            <span>{{vehicleDetailInfo.vehicleModel ? vehicleDetailInfo.vehicleModel : '无'}}</span>
+          </li>
+          <li>
+            <span>车辆颜色：</span>
+            <span>{{vehicleDetailInfo.vehicleColor ? vehicleDetailInfo.vehicleColor : '无'}}</span>
+          </li>
+          <li>
+            <span>车主性别：</span>
+            <span>{{vehicleDetailInfo.ownerSex ? vehicleDetailInfo.ownerSex : '无'}}</span>
+          </li>
+          <li>
+            <span>车主生日：</span>
+            <span>{{vehicleDetailInfo.ownerBirth ? vehicleDetailInfo.ownerBirth : '无'}}</span>
+          </li>
+          <li>
             <span>底库信息：</span>
             <div class="group_box">
               <template v-if="albumList.length > 0">
@@ -197,7 +212,7 @@
           </li>
             <li>
               <span>备注：</span>
-              <span class="group_box">{{vehicleDetailInfo.desci}}</span>
+              <span class="group_box">{{vehicleDetailInfo.desci ? vehicleDetailInfo.desci : '无'}}</span>
             </li>
           </ul>
         </div>

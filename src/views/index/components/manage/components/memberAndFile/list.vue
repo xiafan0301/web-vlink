@@ -132,7 +132,9 @@ export default {
   mounted () {
     this.userInfo = this.$store.state.loginUser;
     this.getMemberJobList();
-    this.getList();
+    setTimeout(() => {
+      this.getList();
+    }, 500)
   },
   methods: {
     // 获取成员职位数据

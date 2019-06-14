@@ -20,6 +20,8 @@
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
     <!-- 暂停按钮（遮盖） -->
     <span class="vl_icon vl_icon_v51" v-show="!playActive" @click="playerPlay(true)"></span>
+    <!-- 录像提示 -->
+    <span class="flvplayer_lux" v-if="tape.active" @click="tapeEnd" title="点击停止录像">{{tape.tapeTime | transSeconds}}</span>
     <!-- 右下操作合集 -->
     <div class="flvplayer_bot" :class="{'flvplayer_bot_dis': videoLoading}">
       <div class="flvplayer_bot_t com_ellipsis">{{oData.title}}</div>
@@ -281,6 +283,9 @@ export default {
       tape: {
         active: false, // 录像激活状态，激活了不一定在录像（ajax）
         loading: false, // 正在开始/结束录像，此时，重复点击按钮不会触发事件
+        tapeTime: 0, // 录像时间（秒）
+        // tapeTip: '',
+        tapeTimeInval: null, // 录像时间定时器
         recordId: null,
         downloadUrl: '',
         tapeEndDialogVisible: false
@@ -581,6 +586,9 @@ export default {
       if (this.download.downlaodInval) {
         window.clearInterval(this.download.downlaodInval);
       }
+      if (this.tape.tapeTimeInval) {
+        window.clearInterval(this.tape.tapeTimeInval);
+      }
       if (this.player) {
         this.player.unload();
         this.player.destroy();
@@ -600,19 +608,31 @@ export default {
     /* 录像函数 */
     tapeStart () {
       if (this.tape.active) { return; }
-      console.log('tapeStart');
       this.tape.active = true;
       this.tape.loading  = true;
       this.$message('开始录像。');
+      this.tape.tapeTime = 0;
+      this.tape.tapeTimeInval = window.setInterval(() => {
+        this.tape.tapeTime += 1;
+      }, 1000);
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
       }).then(res => {
         if (res && res.data) {
-          console.log(res.data);
+          // console.log(res.data);
           this.tape.recordId = res.data.recordId;
           this.tape.loading  = false; // 此时才可以触发结束事件
+        } else {
+          if (this.tape.tapeTimeInval) {
+            window.clearInterval(this.tape.tapeTimeInval);
+          }
         }
       }).catch(error => {
+        this.tape.active = false;
+        this.tape.loading  = false;
+        if (this.tape.tapeTimeInval) {
+          window.clearInterval(this.tape.tapeTimeInval);
+        }
         console.log("getVideoPlayRecordStart error：", error);
       });
     },
@@ -620,6 +640,9 @@ export default {
       if (this.tape.loading) { return; }
       this.tape.tapeEndDialogVisible = true;
       this.tape.loading = true;
+      if (this.tape.tapeTimeInval) {
+        window.clearInterval(this.tape.tapeTimeInval);
+      }
       getVideoPlayRecordEnd({
         deviceId: this.oData.video.uid,
         recordId: this.tape.recordId
@@ -629,8 +652,12 @@ export default {
           this.tape.active = false;
           this.tape.loading = false;
         }
+        this.tape.active = false;
+        this.tape.loading = false;
       }).catch(error => {
         console.log("getVideoPlayRecordEnd error：", error);
+        this.tape.active = false;
+        this.tape.loading = false;
       });
     },
     tapeClosed () {
@@ -660,7 +687,7 @@ export default {
       // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
-      // console.log('downloadStartTimeChanged');
+      console.log('downloadStartTimeChanged');
       if (val) {
         val = val.getTime();
         let _mint = this.download.allEndTime - 60 * 1000;
@@ -962,6 +989,7 @@ export default {
               width: w,
               height: h,
           });
+          // $video[0].crossOrigin = 'anonymous';
           // video canvas 必须为原生对象
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();
@@ -1123,6 +1151,9 @@ export default {
     if (this.download.downlaodInval) {
       window.clearInterval(this.download.downlaodInval);
     }
+    if (this.tape.tapeTimeInval) {
+      window.clearInterval(this.tape.tapeTimeInval);
+    }
     // $(window).off('unload', this.videoUnloadSave);
   }
 }
@@ -1270,6 +1301,14 @@ export default {
   -ms-transform: translate3d(50%, 0, 0);
   -o-transform: translate3d(50%, 0, 0);
   transform: translate3d(50%, 0, 0);
+}
+.flvplayer_lux {
+  position: absolute; left: 15px; top: 15px;
+  width: 99px; height: 24px; line-height: 24px;
+  background: url(../../assets/img/video/vi_110.png);
+  color: #0C70F8; text-align: center; font-size: 14px;
+  padding-left: 20px;
+  cursor: default;
 }
 </style>
 <style>

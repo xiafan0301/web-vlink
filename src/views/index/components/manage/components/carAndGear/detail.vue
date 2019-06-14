@@ -311,7 +311,9 @@ export default {
     this.getVehicleTypeList();
     this.getNumberTypeList();
 
-    this.getDetail();
+    setTimeout(() =>{
+      this.getDetail();
+    }, 500)
   },
   methods: {
     // 获取车身颜色
