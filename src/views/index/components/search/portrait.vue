@@ -114,8 +114,7 @@
             <div class="struc_c_d_info">
               <h2>{{sturcDetail.name}}<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span>待查字典</span>
-                <span>待查字典</span>
+                <span>{{sturcDetail.label}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.birthDate}}</span>
