@@ -95,7 +95,8 @@ export default {
   mounted () {
       this.userInfo =  this.$store.state.loginUser;
       this.processType = this.$route.query.processType
-      this.detailUrl = '/task/detail?id='+ this.$route.query.eventId +'&processType=' + this.processType
+      this.detailUrl = '/task/detail?id='+ this.$route.query.eventId +'&processType=' + this.processType + 
+                        '&dispatchType=' + this.$route.query.dispatchType+ '&uid=' +this.$route.query.uid
       if(this.processType == 3) {
           this.rules['reportUser'] = [
           { required: true, message: '请选择处理人', trigger: 'change' }]
