@@ -122,7 +122,7 @@
               </li>
               <li>
                 <i class="vl_icon vl_icon_control_05"></i>
-                <span>{{item.deviceName}}</span>
+                <span :title="item.deviceName">{{item.deviceName | strCutWithLen(20)}}</span>
               </li>
             </ul>
           </el-card>
@@ -748,7 +748,7 @@ export default {
             // 点击切换告警闪烁图标
             if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
               if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
-                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
               } else {
@@ -756,15 +756,15 @@ export default {
                 $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
                 $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
+                // $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
                 $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标
-              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+              // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
               $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
               $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
+              // $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
             }
             _this.getControlMapByDevice(e.target.C.extData);
           })
