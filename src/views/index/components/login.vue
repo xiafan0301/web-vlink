@@ -257,4 +257,9 @@ export default {
   position: absolute; bottom: 20px; left: 0;
   animation: fadeIn .6s ease-out .4s both;
 }
+/* .vl_icon_lg_logo {
+  background-image: url(../../../assets/img/ymx/ymx_logo_login.png);
+  background-position: 0 0;
+  background-size: 100% auto;
+} */
 </style>

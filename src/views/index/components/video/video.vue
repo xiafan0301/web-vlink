@@ -189,17 +189,19 @@ export default {
                 padding: 10px 40px 10px 20px;
                 border-bottom: 1px dotted #ddd;
                 cursor: default;
-                &:hover { 
-                  color: #186DFB;
-                  background-color: #E0F3FF;
-                }
                 > h3 { height: 20px; line-height: 20px; }
                 > p { color: #999; height: 20px; line-height: 20px; }
                 > i {
-                  position: absolute; top: 50%; right: 25px;
+                  display: none;
+                  position: absolute; top: 50%; right: 15px;
                   font-size: 16px;
-                  margin: -8px;
+                  margin-top: -8px;
                   cursor: pointer;
+                }
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                  > i { display: block; }
                 }
                 &.show_his_dis {
                   > h3 { color: #999; }

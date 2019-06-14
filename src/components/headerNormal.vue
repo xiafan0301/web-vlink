@@ -2,6 +2,8 @@
   <header class="vl_header clearfix">
     <div class="hd_log vl_icon vl_icon_logo" @click="goBack">
     </div>
+    <!-- <div class="hd_log vl_ymx_logo" @click="goBack">
+    </div> -->
   </header>
 </template>
 <script>
@@ -33,5 +35,10 @@ export default {
     margin: 26px 20px 0 20px;
     cursor: pointer;
   }
+}
+.vl_ymx_logo {
+  background: url(../assets/img/ymx/ymx_logo.png) no-repeat;
+  background-size: 100% auto;
+  position: relative; top: 7px;
 }
 </style>
