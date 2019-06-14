@@ -125,7 +125,7 @@
             <el-popover
               placement="left"
               trigger="hover"
-              content="单机选择范围，双击完成">
+              content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>
@@ -2159,7 +2159,7 @@ export default {
               position: [x.addLongitude, x.addLatitude], // 基点位置 [116.397428, 39.90923]
               offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
               draggable: true, // 是否可拖动
-              zIndex: 99,
+              zIndex: 9999,
               // 自定义点标记覆盖物内容
               content: c
             });
@@ -2261,7 +2261,8 @@ export default {
           timer: null,
           mark: null,
           mute: false,
-          oMsData: data.oMsData
+          oMsData: data.oMsData,
+          isAddOffered: data.isAddOffered
         }
         this.addCalling(cObj)
       }
@@ -2555,7 +2556,7 @@ export default {
       position: absolute;
       font-size: 20px;
       top: 10px;
-      left: 14px;
+      left: 12px;
       width: 30px;
       height: 30px;
       -webkit-border-radius: 20px;
@@ -2563,13 +2564,13 @@ export default {
       border-radius: 20px;
       background: #0C70F8;
       color: #ffffff;
-      display: none;
+      /*display: none;*/
       cursor: pointer;
     }
-    &:hover{
-      >span {
-        display: block;
-      }
-    }
+    /*&:hover{*/
+      /*>span {*/
+        /*display: block;*/
+      /*}*/
+    /*}*/
   }
 </style>

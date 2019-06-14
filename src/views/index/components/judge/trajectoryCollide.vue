@@ -122,7 +122,6 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder, MapGetPortraitsByName} from '../../api/api.judge.js';
 import {getPortraitByIdNo, getVehicleByVehicleNumber} from '../../api/api.control.js'
@@ -130,7 +129,6 @@ export default {
   data() {
     return {
       uploadAcion: ajaxCtx.base + '/new',
-      testData: testData,
       mapData: [],
       searching: false,
       curImageUrl: '', // 当前上传的图片

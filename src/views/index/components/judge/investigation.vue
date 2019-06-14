@@ -79,12 +79,10 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
 import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList, JigGETEventAreas} from '../../api/api.judge.js';
 export default {
   data() {
     return {
-      testData: testData,
       evData: [],
       searchData: {
         uid: '',
@@ -291,7 +289,9 @@ export default {
       this.showVideoList = true;
       const params = {
         surveillanceId: this.curSXT.surveillanceId,
-        deviceId: this.curSXT.deviceId
+        deviceId: this.curSXT.deviceId,
+        dateStart: this.searchData.time ? this.searchData.time[0] : null,
+        dateEnd: this.searchData.time ? this.searchData.time[1] : null
       }
       this.$_showLoading({target: '.__vuescroll'});
       JigGETAlarmSnapList(params)

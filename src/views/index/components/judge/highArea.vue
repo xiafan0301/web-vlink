@@ -80,14 +80,12 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
 import {JfoGETGroup, JhaGETStatisicByAddress, JhaGETAlarmSnapByAddress} from '../../api/api.judge.js';
 import {getGroupListIsPortrait} from '../../api/api.control.js';
 import {getAllGroups} from '../../api/api.manage.js';
 export default {
   data() {
     return {
-      testData: testData,
       evData: [],
       searchData: {
         time: null,

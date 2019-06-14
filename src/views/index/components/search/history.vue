@@ -9,7 +9,7 @@
             stripe
             style="width: 100%;">
             <el-table-column label="操作类型" min-width="180" align="center">
-              <template slot-scope="scope">待查字典</template>
+              <template slot-scope="scope">{{seType[scope.row.retrievalType]}}</template>
             </el-table-column>
             <el-table-column prop="opUserName" label="操作人员" min-width="180">
             </el-table-column>
@@ -51,6 +51,11 @@ export default {
   data () {
     return {
       tableData: [],
+      seType: {
+        1: '抓拍检索',
+        2: '人像检索',
+        3: '人像对比'
+      },
       pagination: {
         currentPage: 1,
         pageSize: 10,
