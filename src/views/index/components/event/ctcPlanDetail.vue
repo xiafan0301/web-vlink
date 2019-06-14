@@ -11,11 +11,11 @@
         <ul>
           <li>
             <span>预案名称:</span>
-            <span>{{planDetail.planName}}</span>
+            <span>{{planDetail.planName ? planDetail.planName : '无'}}</span>
           </li>
           <li>
             <span>预案类型:</span>
-            <span>{{planDetail.eventTypeName}}</span>
+            <span>{{planDetail.eventTypeName ? planDetail.eventTypeName : '无'}}</span>
           </li>
           <li>
             <span>适用事件等级:</span>
@@ -29,7 +29,7 @@
           </li>
           <li>
             <span>预案正文:</span>
-            <span>{{planDetail.planDetail}}</span>
+            <span>{{planDetail.planDetail ? planDetail.planDetail : '无'}}</span>
           </li>
           <li>
             <span>附件:</span>
@@ -67,11 +67,11 @@
           </li>
           <li>
             <span>创建用户:</span>
-            <span>{{planDetail.createUserName}}</span>
+            <span>{{planDetail.createUserName ? planDetail.createUserName : '无'}}</span>
           </li>
           <li>
             <span>创建时间:</span>
-            <span>{{planDetail.createTime}}</span>
+            <span>{{planDetail.createTime ? planDetail.createTime : '无'}}</span>
           </li>
         </ul>
       </div>
