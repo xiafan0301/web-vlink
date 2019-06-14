@@ -1,6 +1,6 @@
 <template>
   <footer class="vl_footer">
-    <P>技术支持：湖南奥昇信息技术有限责任公司</P>
+    <P>技术支持：湖南优美兴信息技术有限公司</P>
     <p>copyright &copy; 2018 - 2019 aorise.com ALL Rights Reserved</p>
   </footer>
 </template>

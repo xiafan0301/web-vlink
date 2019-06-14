@@ -528,6 +528,7 @@ export default {
               vertical-align: text-bottom;
             }
             > p:nth-child(1){
+              margin-bottom: 6px;
               font-weight: bold;
             }
           }
