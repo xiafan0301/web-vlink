@@ -190,10 +190,10 @@ export default {
         roundName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
         ],
-        dateTime: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { validator: validatePatrolTime, trigger: 'blur' }
-        ],
+//        dateTime: [
+//          { required: true, message: '该项内容不可为空', trigger: 'blur' },
+//          { validator: validatePatrolTime, trigger: 'blur' }
+//        ],
         roundInterval: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { validator: validateDurationTime, trigger: 'blur' }
@@ -648,11 +648,15 @@ export default {
     },
     // 提交数据
     submitData (form) {
+      console.log('1')
       this.$refs[form].validate(valid => {
+        console.log('1')
         if (valid) {
+          console.log('1')
           if (this.patrolId) {
             this.editPatrolInfo();
           } else {
+            console.log('2')
             this.addPatrolInfo();
           }
         }
