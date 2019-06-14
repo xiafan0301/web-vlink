@@ -40,6 +40,7 @@
           </el-option>
         </el-select>
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 1"
           v-model="searchData.name"
           :fetch-suggestions="autoEvent1"
@@ -48,6 +49,7 @@
         </el-autocomplete>
         <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.name" placeholder="输入姓名搜索"></el-input>-->
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 1"
           v-model="searchData.cardId"
           :fetch-suggestions="autoEvent2"
@@ -56,6 +58,7 @@
         </el-autocomplete>
         <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.cardId" placeholder="输入证件号码搜索"></el-input>-->
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 2"
           v-model="searchData.carNum"
           :fetch-suggestions="autoEvent3"
