@@ -19,6 +19,7 @@
               style="width: 100%;"
               v-model="addForm.dateTime"
               type="datetimerange"
+              :editable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               :picker-options="pickerOptions0"
@@ -159,7 +160,7 @@ import mapSelect from './components/mapSelect.vue';
 import { formatDate, random14 } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { validateDurationTime } from '@/utils/validator.js';
+import { validateDurationTime, validatePatrolTime } from '@/utils/validator.js';
 import { getAllDevices, getCusGroup, getDepartmentList } from '@/views/index/api/api.manage.js';
 import { addVideoRound, getVideoRoundDetail, updateVideoRoundState } from '@/views/index/api/api.video.js';
 export default {
@@ -173,20 +174,25 @@ export default {
         roundName: null, // 轮巡名称
         roundInterval: 60, // 间隔时间
         frameNum: 4, // 画面数
-        dateTime: [] // 轮巡时间
+        dateTime: [], // 轮巡时间
       },
       pickerOptions0: {
-        disabledDate (time) {
-          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
+        disabledDate: (d) => {
+          d = d.getTime();
+          if (d < new Date().getTime() - 24 * 60 * 60 * 1000) {
+            return true;
+          } else {
+            return false;
+          }
         }
       },
       rules: {
         roundName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          // { max: 10, message: '最多输入10个字', trigger: 'blur' }
         ],
         dateTime: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
+          { validator: validatePatrolTime, trigger: 'blur' }
         ],
         roundInterval: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
@@ -845,7 +851,6 @@ export default {
     },
     // 返回
     cancelSubmit () {
-      console.log(this.currentDeviceList)
       const data = JSON.stringify(this.addForm);
       if (!this.patrolId) { // 新增
         if (this.dataStr === data && this.currentDeviceList.length === 0) {
@@ -868,6 +873,7 @@ export default {
     },
     // 轮巡时间change
     handleChangeDate (val) {
+      console.log('uuuuuuuuuuuuuuuuuuuu')
       console.log(val)
     }
   }

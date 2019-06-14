@@ -157,8 +157,9 @@ export default {
     this.getVehicleColor();
     this.getNumberTypeList();
     this.getVehicleTypeList();
-    this.getDetail();
     this.getDepartList();
+
+    this.getDetail();
   },
   methods: {
     // 获取号牌种类列表

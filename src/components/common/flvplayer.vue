@@ -687,7 +687,7 @@ export default {
       // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
-      // console.log('downloadStartTimeChanged');
+      console.log('downloadStartTimeChanged');
       if (val) {
         val = val.getTime();
         let _mint = this.download.allEndTime - 60 * 1000;
@@ -989,6 +989,7 @@ export default {
               width: w,
               height: h,
           });
+          // $video[0].crossOrigin = 'anonymous';
           // video canvas 必须为原生对象
           let ctx = $canvas[0].getContext('2d');
           this.cutTime = new Date().getTime();

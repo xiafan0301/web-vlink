@@ -157,6 +157,9 @@
                   prop="name"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    <span>{{scope.row.name ? scope.row.name : '-'}}</span>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="性别"
@@ -182,6 +185,9 @@
                   prop="idNo"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    <span>{{scope.row.idNo ? scope.row.idNo : '-'}}</span>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="底库信息"
@@ -189,9 +195,10 @@
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span>
+                    <span v-if="scope.row.albumDataList.length > 0">
                       {{scope.row.albumDataList.join('、')}}
                     </span>
+                    <span v-else>-</span>
                   </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
@@ -221,6 +228,9 @@
                   prop="name"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    <span>{{scope.row.name ? scope.row.name : '-'}}</span>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="性别"
@@ -246,6 +256,9 @@
                   prop="idNo"
                   show-overflow-tooltip
                   >
+                  <template slot-scope="scope">
+                    <span>{{scope.row.idNo ? scope.row.idNo : '-'}}</span>
+                  </template>
                 </el-table-column>
                 <el-table-column
                   label="分组信息"
@@ -253,9 +266,10 @@
                   :show-overflow-tooltip='true'
                 >
                   <template slot-scope="scope">
-                    <span>
+                    <span v-if="scope.row.groupDataList.length > 0">
                       {{scope.row.groupDataList.join('、')}}
                     </span>
+                    <span v-else>-</span>
                   </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="操作" width="100">
@@ -294,7 +308,7 @@
           <ul class="content_right">
             <li>
               <span>姓名：</span>
-              <span>{{personDetailInfo.name}}</span>
+              <span>{{personDetailInfo.name ? personDetailInfo.name : '无'}}</span>
             </li>
             <li>
               <span>性别：</span>
@@ -310,17 +324,16 @@
             </li>
             <li>
               <span>证件号码：</span>
-              <span>{{personDetailInfo.idNo}}</span>
+              <span>{{personDetailInfo.idNo ? personDetailInfo.idNo : '无'}}</span>
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate}}</span>
+              <span>{{personDetailInfo.birthDate ? personDetailInfo.birthDate : '无'}}</span>
             </li>
             <li>
               <span>底库信息：</span>
               <div class="group_box">
                 <template v-if="albumDetailList.length > 0">
-                  <!-- <span v-for="(item, index) in personDetailInfo.albumList" :key="index">{{item.title + '、'}}</span> -->
                   <span>{{albumDetailList.join('、')}}</span>
                 </template>
                 <template v-else>
@@ -342,7 +355,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span class="group_box">{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks ? personDetailInfo.remarks : '无'}}</span>
             </li>
           </ul>
         </div>
@@ -455,15 +468,17 @@ export default {
     }
   },
   mounted () {
-    document.addEventListener('click', function(e) {
-      console.log(e)
-      // e.stopPropagation();
-      if (e.target.className !== 'add_event_btn') {
-        console.log('aaaa')
-        this.showGroup = false;
-      }
-    });
+    // document.addEventListener('click', function(e) {
+    //   console.log(e)
+    //   // e.stopPropagation();
+    //   if (e.target.className !== 'add_event_btn') {
+    //     console.log('aaaa')
+    //     this.showGroup = false;
 
+    //     console.log(this.showGroup)
+    //   }
+    // });
+    // console.log(this.showGroup)
     this.getGroupList();
     this.getBottomBankList();
     // this.getPersonList();

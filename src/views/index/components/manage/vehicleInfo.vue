@@ -304,43 +304,43 @@
         <ul class="content_right">
           <li>
             <span>车牌号：</span>
-            <span>{{vehicleDetailInfo.vehicleNumber}}</span>
+            <span>{{vehicleDetailInfo.vehicleNumber ? vehicleDetailInfo.vehicleNumber : '无'}}</span>
           </li>
           <li>
             <span>车牌类型：</span>
-            <span>{{vehicleDetailInfo.numberType}}</span>
+            <span>{{vehicleDetailInfo.numberType ? vehicleDetailInfo.numberType : '无'}}</span>
           </li>
           <li>
             <span>车牌颜色：</span>
-            <span>{{vehicleDetailInfo.numberColor}}</span>
+            <span>{{vehicleDetailInfo.numberColor ? vehicleDetailInfo.numberColor : '无'}}</span>
           </li>
           <li>
             <span>车主：</span>
-            <span>{{vehicleDetailInfo.ownerName}}</span>
+            <span>{{vehicleDetailInfo.ownerName ? vehicleDetailInfo.ownerName : '无'}}</span>
           </li>
           <li>
             <span>证件号码：</span>
-            <span>{{vehicleDetailInfo.ownerIdCard}}</span>
+            <span>{{vehicleDetailInfo.ownerIdCard ? vehicleDetailInfo.ownerIdCard : '无'}}</span>
           </li>
           <li>
             <span>车辆类型：</span>
-            <span>{{vehicleDetailInfo.vehicleType}}</span>
+            <span>{{vehicleDetailInfo.vehicleType ? vehicleDetailInfo.vehicleType : '无'}}</span>
           </li>
           <li>
             <span>车辆型号：</span>
-            <span>{{vehicleDetailInfo.vehicleModel}}</span>
+            <span>{{vehicleDetailInfo.vehicleModel ? vehicleDetailInfo.vehicleModel : '无'}}</span>
           </li>
           <li>
             <span>车辆颜色：</span>
-            <span>{{vehicleDetailInfo.vehicleColor}}</span>
+            <span>{{vehicleDetailInfo.vehicleColor ? vehicleDetailInfo.vehicleColor : '无'}}</span>
           </li>
           <li>
             <span>车主性别：</span>
-            <span>{{vehicleDetailInfo.ownerSex}}</span>
+            <span>{{vehicleDetailInfo.ownerSex ? vehicleDetailInfo.ownerSex : '无'}}</span>
           </li>
           <li>
             <span>车主生日：</span>
-            <span>{{vehicleDetailInfo.ownerBirth}}</span>
+            <span>{{vehicleDetailInfo.ownerBirth ? vehicleDetailInfo.ownerBirth : '无'}}</span>
           </li>
           <li>
             <span>底库信息：</span>
@@ -366,7 +366,7 @@
           </li>
           <li>
             <span>备注：</span>
-            <span class="group_box">{{vehicleDetailInfo.desci}}</span>
+            <span class="group_box">{{vehicleDetailInfo.desci ? vehicleDetailInfo.desci : '无'}}</span>
           </li>
         </ul>
       </div>

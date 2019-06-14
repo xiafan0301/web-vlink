@@ -184,8 +184,9 @@ export default {
   },
   mounted () {
     this.getMemberJobList();
-
-    this.getDetail();
+    setTimeout(() => {
+      this.getDetail();
+    }, 500)
   },
   methods: {
     // 获取成员职位数据

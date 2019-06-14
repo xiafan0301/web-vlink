@@ -313,7 +313,7 @@ export default {
 
     setTimeout(() =>{
       this.getDetail();
-    }, 1000)
+    }, 500)
   },
   methods: {
     // 获取车身颜色
