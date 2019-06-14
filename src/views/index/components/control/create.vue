@@ -247,8 +247,11 @@ export default {
       getEventDetail(eventId).then(res => {
         if (res && res.data) {
           this.eventDetail = res.data;
-          this.createForm.event = res.data.uid;
-          this.getEventList();
+          this.eventList = [{
+            label: this.eventDetail.eventCode,
+            value: this.eventDetail.uid
+          }]
+          this.createForm.event = this.eventDetail.uid;
         }
       })
     },

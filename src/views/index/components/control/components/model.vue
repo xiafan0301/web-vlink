@@ -435,6 +435,7 @@ export default {
     },
     // 从库中选择确定
     seltarget () {
+      console.log(this.targetObj, 'this.targetObj')
       let groupList = [],objList = [];
       // 过滤组
       groupList = this.targetObj.filter(f => f.surveillanceObjectDtoList !== undefined);
@@ -444,7 +445,7 @@ export default {
           arr = f.surveillanceObjectDtoList.map(m => {
             return {
               objType: m.objType,
-              url: m.photoUrl,
+              url: m.objType === 1 ? m.photoUrl : m.vehicleImagePath,
               objId: m.objId
             }
           })
