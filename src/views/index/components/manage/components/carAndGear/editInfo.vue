@@ -45,7 +45,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="号牌种类:" prop="numberType">
-            <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类">
+            <el-select style="width: 40%;" v-model="editCar.numberType" placeholder="请选择号牌种类" @change="handleNumberType">
               <el-option
                 v-for="(item, index) in numberTypeList"
                 :key="index"
@@ -67,8 +67,8 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="设备账号:" prop="deviceNo">
-            <el-input style="width: 40%;" placeholder="请输入设备账号" v-model="editCar.deviceNo"></el-input>
+          <el-form-item label="设备账号:" prop="deviceAccount">
+            <el-input style="width: 40%;" placeholder="请输入设备账号" v-model="editCar.deviceAccount"></el-input>
           </el-form-item>
           <el-form-item label="访问密码:" prop="devicePassword">
             <el-input style="width: 40%;" placeholder="请输入访问密码" v-model="editCar.devicePassword"></el-input>
@@ -104,7 +104,7 @@ export default {
         numberType: null, // 号牌种类
         numberColor: null, // 号牌颜色
         organId: null, // 所属单位
-        deviceNo: null, // 设备账号
+        deviceAccount: null, // 设备账号
         devicePassword: null // 访问密码
       },
       rules: {
@@ -128,6 +128,20 @@ export default {
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ]
       },
+      numColorList: [
+        {label: '黄底黑字', value: 1},
+        {label: '蓝底白字', value: 2},
+        {label: '蓝底白字', value: 8},
+        {label: '黄底黑字黑框线', value: 15},
+        {label: '白底黑字、红“警”字', value: 23},
+        {label: '白底黑字、红“警”字', value: 24},
+        {label: '渐变绿底黑字', value: 25},
+        {label: '黄绿双拼底黑字', value: 26},
+        // {label: '蓝底白字', value: 27},
+        // {label: '黄底黑字', value: 28},
+        // {label: '黄底黑字', value: 29},
+        {label: '其他', value: 99}
+      ],//号牌颜色列表
       userInfo: {}, // 用户信息
       vehicleTypeList: [], // 车辆类型
       vehicleColorList: [], // 车身颜色
@@ -178,6 +192,14 @@ export default {
         })
         .catch(() => {})
     },
+    // 号牌种类change
+    handleNumberType (val) {
+      this.numColorList.map(item => {
+        if (item.value == val) {
+          this.editCar.numberColor = item.label;
+        }
+      })
+    },
     // 获取车辆详情
     getDetail () {
       const vehicleId = this.$route.query.id;
@@ -194,12 +216,11 @@ export default {
               this.editCar.identityNo = res.data.identityNo;
               this.editCar.capacityPeople = res.data.capacityPeople;
               this.editCar.organId = res.data.organId;
-              this.editCar.deviceNo = res.data.deviceNo;
+              this.editCar.deviceAccount = res.data.deviceAccount;
               this.editCar.devicePassword = res.data.devicePassword;
+              this.editCar.numberColor = res.data.numberColor;
 
-              console.log(typeof vehicleType)
               this.editCar.vehicleType = vehicleType.toString();
-              console.log(typeof this.editCar.vehicleType)
               this.editCar.vehicleColor = vehicleColor.toString();
               this.editCar.numberType = numberType.toString();
 

@@ -137,7 +137,9 @@ export default {
               this.editUser.organName = res.data.organName;
               this.editUser.userMobile = res.data.userMobile;
 
-              this.editUser.position = position.toString();
+              if (position) {
+                this.editUser.position = position.toString();
+              }
             }
           })
       }

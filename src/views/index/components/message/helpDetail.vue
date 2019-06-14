@@ -44,7 +44,7 @@
           <!-- <img src="//via.placeholder.com/32x32" alt=""> -->
           <img src="../../../../assets/img/wr_photo.png" alt="">
           <ul>
-            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserIdentity}}）</span></li>
+            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserIdentity || '市民'}}）</span></li>
             <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{dicFormater(sourceType, String(item.eventSource || 2))}}</span></li>
             <li class="con_three">{{item.isParticipate ? '已参与民众互助' : '未参与民众互助'}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>

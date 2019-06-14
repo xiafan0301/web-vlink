@@ -57,8 +57,8 @@
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item" size="middle" >
-                  <el-form-item label="执行部门:"  label-position="left">
-                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
+                  <el-form-item label="调度部门:"  label-position="left">
+                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择调度部门">
                       <el-option
                         v-for="(item, index) in departmentList"
                         :key="'item' + index"

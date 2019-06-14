@@ -19,7 +19,7 @@
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
                 <el-form-item label="事发地点:" prop="eventAddress" label-width="85px" class="address_input">
-                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress">
+                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点" @focus="getAutoInputAddress"  @input="changeAddress" v-model="addEventForm.eventAddress">
                   </el-input>
                   <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
@@ -278,6 +278,12 @@ export default {
     // this.initMap();
   },
   methods: {
+    // 当获取地址输入框焦点时
+    getAutoInputAddress () {
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+    },
     // 关闭地图
     closeMap () {
       if (this.map) {
@@ -354,7 +360,9 @@ export default {
         _this.newMarker.on('mouseout', function () {
           if (hoverWindow) { hoverWindow.close(); }
         });
-        _this.map.setCenter([longitude, latitude]);
+        if (_this.map) {
+          _this.map.setCenter([longitude, latitude]);
+        }
         _this.newMarker.setMap(_this.map);
       }
     },

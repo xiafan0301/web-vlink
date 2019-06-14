@@ -23,35 +23,20 @@
                 <li>
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
-                    <!-- <template v-if="$route.query.status === 'reject'"> -->
-                      <span >{{detailInfo.reporterPhone}}</span>
-                    <!-- </template>
-                    <template v-else>
-                      <span class="reportUser">{{detailInfo.reporterPhone}}</span>
-                      <div class="phone_dialog">
-                        <div>
-                          <i class="vl_icon vl_icon_event_14"></i>
-                          <span>语音通话</span>
-                        </div>
-                        <div>
-                          <i class="vl_icon vl_icon_event_17"></i>
-                          <span>视频通话</span>
-                        </div>
-                      </div>
-                    </template> -->
+                    <span >{{detailInfo.reporterPhone ? detailInfo.reporterPhone : '无'}}</span>
                   </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
-                  <span>{{detailInfo.reportTime}}</span>
+                  <span>{{detailInfo.reportTime ? detailInfo.reportTime : '无'}}</span>
                 </li>
                 <li>
                   <span>事发地点:</span>
-                  <span>{{detailInfo.eventAddress}}</span>
+                  <span>{{detailInfo.eventAddress ? detailInfo.eventAddress : '无'}}</span>
                 </li>
                 <li>
                   <span>事件情况:</span>
-                  <span>{{detailInfo.eventDetail}}</span>
+                  <span>{{detailInfo.eventDetail ? detailInfo.eventDetail : '无'}}</span>
                   <div class="upload_box">
                     <div class="img_list" v-for="(item, index) in uploadImgList" :key="index">
                       <img
@@ -71,15 +56,15 @@
                 </li>
                 <li>
                   <span>处理单位:</span>
-                  <span>{{detailInfo.dealOrgName}}</span>
+                  <span>{{detailInfo.dealOrgName ? detailInfo.dealOrgName : '无'}}</span>
                 </li>
                 <li>
                   <span>事件类型:</span>
-                  <span>{{detailInfo.eventTypeName}}</span>
+                  <span>{{detailInfo.eventTypeName ? detailInfo.eventTypeName : '无'}}</span>
                 </li>
                 <li>
                   <span>事件等级:</span>
-                  <span>{{detailInfo.eventLevelName}}</span>
+                  <span>{{detailInfo.eventLevelName ? detailInfo.eventLevelName : '无'}}</span>
                 </li>
                 <li>
                   <span>伤亡人员:</span>
