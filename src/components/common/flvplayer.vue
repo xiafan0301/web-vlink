@@ -660,7 +660,7 @@ export default {
       // this.download.downlaodMaxVal = (getDate(this.download.file.endTime).getTime() - getDate(this.download.file.startTime).getTime()) / 1000
     },
     downloadStartTimeChanged (val) {
-      // console.log('downloadStartTimeChanged');
+      console.log('downloadStartTimeChanged');
       if (val) {
         val = val.getTime();
         let _mint = this.download.allEndTime - 60 * 1000;

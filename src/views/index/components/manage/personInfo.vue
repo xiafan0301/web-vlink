@@ -455,15 +455,17 @@ export default {
     }
   },
   mounted () {
-    document.addEventListener('click', function(e) {
-      console.log(e)
-      // e.stopPropagation();
-      if (e.target.className !== 'add_event_btn') {
-        console.log('aaaa')
-        this.showGroup = false;
-      }
-    });
+    // document.addEventListener('click', function(e) {
+    //   console.log(e)
+    //   // e.stopPropagation();
+    //   if (e.target.className !== 'add_event_btn') {
+    //     console.log('aaaa')
+    //     this.showGroup = false;
 
+    //     console.log(this.showGroup)
+    //   }
+    // });
+    // console.log(this.showGroup)
     this.getGroupList();
     this.getBottomBankList();
     // this.getPersonList();
