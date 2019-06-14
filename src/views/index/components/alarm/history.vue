@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="alarm_today">
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
@@ -129,7 +130,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <vue-scroll>
+    <!-- <vue-scroll> -->
     <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">检索结果<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
@@ -212,9 +213,10 @@
       </div>
       </template>
     </div>
-    </vue-scroll>
+    <!-- </vue-scroll> -->
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
+  </vue-scroll>
 </template>
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
