@@ -122,7 +122,7 @@
               </li>
               <li>
                 <i class="vl_icon vl_icon_control_05"></i>
-                <span>{{item.deviceName}}</span>
+                <span :title="item.deviceName">{{item.deviceName | strCutWithLen(20)}}</span>
               </li>
             </ul>
           </el-card>
