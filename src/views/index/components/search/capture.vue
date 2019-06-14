@@ -188,7 +188,7 @@
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
-            <video id="capVideo" src="../../../../assets/video/demo.mp4"></video>
+            <video id="capVideo" :src="sturcDetail.uploadPath"></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>

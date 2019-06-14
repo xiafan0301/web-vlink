@@ -101,7 +101,7 @@
       </div>
     </el-dialog>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+      <video id="vlJtcLargeV" :src="curVideoUrl"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{mapData[curVideo.indexNum] ? mapData[curVideo.indexNum].deviceName : ''}}</div>
@@ -415,8 +415,8 @@ export default {
       } else {
         JtcGETTrail(params).then(res => {
           if (res) {
-            console.log(res);
-            if (res.data.length === 0) {
+            if (!res.data || res.data.length === 0) {
+              console.log('23')
               this.$message.info('抱歉，没有找到匹配结果')
               this.amap.clearMap();
               this.searching = false;
@@ -451,7 +451,7 @@ export default {
           let _idPoint = 'vlJtcPoint' + obj._key;
           let _sContent = `
             <div class="vl_jtc_mk" >
-              <video preload="auto" id="${_id}" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+              <video preload="auto" id="${_id}" src="${obj.videoPath}"></video>
               <p>${obj.shotTime}<i id="${_idBtn}" class="vl_icon vl_icon_control_09"></i></p>
               <div class="vl_jtc_mk_check">
                 <input id="${_idCheck}" checked type="checkbox">

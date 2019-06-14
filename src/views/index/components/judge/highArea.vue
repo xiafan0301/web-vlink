@@ -256,7 +256,7 @@ export default {
         .then(res => {
           this.searching = false;
           if (res) {
-            if (res.data.length === 0) {
+            if (!res.data || res.data.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果')
               this.amap.clearMap();
               return false;
