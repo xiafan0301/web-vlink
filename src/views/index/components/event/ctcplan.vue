@@ -57,12 +57,18 @@
           prop="planName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.planName ? scope.row.planName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="预案类型"
           prop="eventTypeName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventTypeName ? scope.row.eventTypeName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="适用事件等级"
@@ -80,12 +86,18 @@
           prop="createUserName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createUserName ? scope.row.createUserName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="创建时间"
           prop="createTime"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.createTime ? scope.row.createTime : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">

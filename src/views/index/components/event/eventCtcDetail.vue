@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.evt_status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看调度指挥</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -33,18 +33,6 @@
             </li>
           </ul>
         </div>
-        <!-- <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div> -->
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
@@ -125,50 +113,6 @@
             </template>
           </div>
         </div>
-        <!-- <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
-          <div class="header">
-            <p class="ctc-title">事件进展</p>
-          </div>
-          <div class="divide"></div>
-          <div class="process-box">
-            <div class="department">
-              <p>参与部门</p>
-              <ul>
-                <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
-                  <span>{{item.departmentName}}</span>
-                  <span>{{item.createTime}}</span>
-                  <span>{{item.taskStatusName}}</span>
-                </li>
-              </ul>
-            </div>
-            <div class="process-list">
-              <p>事件过程</p>
-              <ul>
-                <li v-for="(item, index) in basicInfo.processingList" :key="index">
-                  <div class='circle-left'>
-                    <div class='big-circle'>
-                      <div class='small-circle'></div>
-                    </div>
-                  </div>
-                  <div class='line'></div>
-                  <div class="content-right">
-                    <div class='content'>{{item.processContent}}（操作人：{{item.opUserName}}）</div>
-                    <div class='time'>{{item.createTime}}</div>
-                    <div style="width:100%;margin-top:10px;">
-                      <img
-                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
-                        :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
-                      >
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div> -->
       </div>
       <div class="operation-footer">
         <template v-if="$route.query.status !== 'ctc_end'">
@@ -300,7 +244,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .event-ctc-content, .event-process, .summary {
+    .event-ctc-content, .summary {
       width: 100%;
       margin-bottom: 20px;
       background-color: #ffffff;
@@ -370,81 +314,6 @@ export default {
             height: 1px;
             margin: 10px 0;
             border-bottom: 1px dashed #F2F2F2;
-          }
-        }
-      }
-      .process-box {
-        width: 100%;
-        padding: 20px;
-        .department{
-          > p {
-            color: #333333;
-            font-weight: bold;
-          }
-          > ul {
-            margin: 10px 0;
-            li {
-              color: #333333;
-              height: 23px;
-              line-height: 23px;
-              span {
-                margin-right: 8px;
-              }
-            }
-          }
-        }
-        .process-list {
-          > p {
-            color: #333333;
-            font-weight: bold;
-          }
-          > ul {
-            margin: 10px 0;
-            > li {
-              display: flex;
-              height: 100%;
-              position: relative;
-              .circle-left {
-                margin-top: 3px;
-                .big-circle {
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 50%;
-                  border: 1px solid #0C70F8;
-                  .small-circle {
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    background: #0C70F8;
-                    margin: 3px auto 0 auto;
-                  }
-                }
-              }
-              .line {
-                width: 1px;
-                height: calc(100% - 33px);
-                position: absolute;
-                left: 12px;
-                top: 30px;
-                bottom: 10px;
-                background: #0C70F8;
-              }
-              .content-right {
-                margin-left: 1%;
-                font-size: 13px;
-                .time {
-                  color:#9D9D9D;
-                  margin-bottom: 5px;
-                }
-                .content {
-                  color: #333333;
-                  margin-bottom: 5px;
-                }
-              }
-              &:last-child .line {
-                display: none;
-              }
-            }
           }
         }
       }
