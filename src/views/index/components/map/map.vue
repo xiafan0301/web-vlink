@@ -845,7 +845,8 @@ export default {
                   strokeColor: "#61C772",  //线颜色
                   // strokeOpacity: 1,     //线透明度
                   strokeWeight: 6,      //线宽
-                  lineCap: 'round'
+                  lineCap: 'round',
+                  bubble: true
                   // strokeStyle: "solid"  //线样式
                 });
                 this.carMarks.passedLine.push(passedLine);
