@@ -270,7 +270,7 @@ export default {
       const _query = this.Trim(query, 'g');
       if (_query) {
         const params = {
-          'where.keword': _query,
+          'where.keyword': _query,
           'where.isSurveillance': false,//没有关联布控的事件
           pageSize: 1000000,
           orderBy: 'report_time',
@@ -474,7 +474,7 @@ export default {
             this.createForm.event = this.controlDetail.eventId;
           }
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = this.pageType === 3 ? [] : (this.controlDetail.surveillanceDateStart ? [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd] : [])
           this.createForm.controlAlarmId = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
