@@ -2,6 +2,8 @@
   <div class="vl_header">
     <div class="hd_log vl_icon vl_icon_logo">
     </div>
+    <!-- <div class="hd_log vl_ymx_logo">
+    </div> -->
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
@@ -809,6 +811,11 @@ export default {
 }
 .person_info {
   height: auto !important;
+}
+.vl_ymx_logo {
+  background: url(../assets/img/ymx/ymx_logo.png) no-repeat;
+  background-size: 100% auto;
+  position: relative; top: 7px;
 }
 /* .el-popover {
   max-height: 476px;
