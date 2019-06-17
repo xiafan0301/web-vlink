@@ -662,10 +662,7 @@ export default {
           {required: true, message: '请填写姓名', trigger: 'blur'},
           {validator: checkName, trigger: 'blur'}
         ],
-        // sex: [{required: true, message: '请选择性别类型', trigger: 'change'}],
-        // nation: [{required: true, message: '请选择民族类型', trigger: 'change'}],
         idType: [{required: true, message: '请选择证件类型', trigger: 'change'}],
-        // birthDate: [{required: true, message: '请填写出生日期', trigger: 'change'}],
         idNo: [
           {required: true, message: '请填写证件号码', trigger: 'blur'},
           {validator: checkIdCard, trigger: 'blur'}
@@ -675,11 +672,7 @@ export default {
         vehicleNumber: [
           {required: true, message: '请填写车牌号码', trigger: 'blur'},
           {validator: checkPlateNumber, trigger: 'blur'}
-        ],
-        // vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
-        // vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
-        // numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
-        // numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
+        ]
       },
       lastIdNo: null,
       lastCarIdNo: null,
@@ -1114,6 +1107,7 @@ export default {
           this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
           this.dialogImageUrl = carInfo.vehicleImagePath;
           carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
+          carInfo.numberColor = carInfo.numberType;
           this.lastCarIdNo = carInfo.vehicleNumber;
           this.carForm = carInfo;
           console.log(this.carForm)
