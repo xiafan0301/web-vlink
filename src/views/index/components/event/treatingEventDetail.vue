@@ -1,5 +1,5 @@
 <template>
-<vue-scroll>
+<!-- <vue-scroll> -->
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
@@ -280,7 +280,7 @@
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
-</vue-scroll>
+<!-- </vue-scroll> -->
 </template>
 <script>
 import EventBasic from './components/eventBasic';
@@ -505,7 +505,6 @@ export default {
 <style lang="scss" scoped>
 .treating-detail {
   width: 100%;
-  // margin-bottom: 20px;
   .content-box {
     width: 100%;
     padding: 0 20px;
