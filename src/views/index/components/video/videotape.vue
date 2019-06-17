@@ -159,24 +159,21 @@ export default {
     del (item) {
       this.$confirm('是否确定删除该条录像记录？', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        delVideoTranscribe(item.video.uid).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            message: '删除成功！',
-            type: 'success'
-          });
+        delVideoTranscribe(item.video.uid).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              message: '删除成功！',
+              type: 'success'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecord error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
     download (item) {
