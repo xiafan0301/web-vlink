@@ -342,11 +342,11 @@ export default {
       } else {
         isRelationEvent = 0;
       }
-      this.$router.push({name: 'ctc_end', query: { eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'ctc_end', query: { alarmId: this.$route.query.id, eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'alarm_ctc_operation', query: { eventId: this.$route.query.id, status: this.$route.query.status, eventType: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
+      this.$router.push({name: 'alarm_ctc_operation', query: { alarmId: this.$route.query.id, eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, status: this.$route.query.status, eventType: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
     },
     //告警详情
     toAlarmDetail() {

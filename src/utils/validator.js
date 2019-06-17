@@ -128,5 +128,6 @@ export const validatePatrolTime = (rule, value, callback) => {
       callback(new Error('请选择正确的时间'));
     }
   }
+  callback();
 };
 
