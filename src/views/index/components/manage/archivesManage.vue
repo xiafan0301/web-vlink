@@ -105,7 +105,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="province">
-            <el-select style="width: 47%;margin-right: 5px;" clearable v-model="addUnit.province" placeholder="省" @change="handleAreaData(addUnit.province, '市')">
+            <el-select style="width: 47%;margin-right: 5px;" v-model="addUnit.province" placeholder="省" @change="handleProvinceData(addUnit.province, 'add')">
               <el-option
                 v-for="(item, index) in provinceList"
                 :key="'item' + index"
@@ -114,7 +114,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="addUnit.city" placeholder="市" @change="handleAreaData(addUnit.city, '县')">
+            <el-select style="width: 47%" v-model="addUnit.city" placeholder="市" @change="handleCityData(addUnit.city, 'add')">
               <el-option
                 v-for="(item, index) in cityList"
                 :key="'item' + index"
@@ -123,7 +123,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" clearable v-model="addUnit.region" placeholder="县" @change="handleAreaData(addUnit.region, '镇')">
+            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" v-model="addUnit.region" placeholder="县" @change="handleRegionData(addUnit.region, 'add')">
               <el-option
                 v-for="(item, index) in countyList"
                 :key="'item' + index"
@@ -132,7 +132,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="addUnit.street" placeholder="镇">
+            <el-select style="width: 47%" v-model="addUnit.street" placeholder="镇">
               <el-option
                 v-for="(item, index) in streetList"
                 :key="'item' + index"
@@ -175,7 +175,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label=" " prop="province">
-            <el-select style="width: 47%;margin-right: 5px;" clearable v-model="editUnit.province" placeholder="省" @change="handleAreaData(editUnit.province, '市')">
+            <el-select style="width: 47%;margin-right: 5px;" v-model="editUnit.province" placeholder="省" @change="handleProvinceData(editUnit.province, 'edit')">
               <el-option
                 v-for="(item, index) in provinceList"
                 :key="'item' + index"
@@ -184,7 +184,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="editUnit.city" placeholder="市" @change="handleAreaData(editUnit.city, '县')">
+            <el-select style="width: 47%" v-model="editUnit.city" placeholder="市" @change="handleCityData(editUnit.city, 'edit')">
               <el-option
                 v-for="(item, index) in cityList"
                 :key="'item' + index"
@@ -193,7 +193,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" clearable v-model="editUnit.region" placeholder="县" @change="handleAreaData(editUnit.region, '镇')">
+            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" v-model="editUnit.region" placeholder="县" @change="handleRegionData(editUnit.region, 'edit')">
               <el-option
                 v-for="(item, index) in countyList"
                 :key="'item' + index"
@@ -202,7 +202,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="editUnit.street" placeholder="镇">
+            <el-select style="width: 47%" v-model="editUnit.street" placeholder="镇">
               <el-option
                 v-for="(item, index) in streetList"
                 :key="'item' + index"
@@ -299,6 +299,7 @@ export default {
     this.getAreaList();
   },
   methods: {
+    handleAreaData () {},
     // 获取行政区划数据
     getAreaList () {
       const params = {
@@ -323,9 +324,48 @@ export default {
         })
     },
     // 省 change
-    handleAreaData (id, val) {
-      this.areaName = val;
+    handleProvinceData (id, val) {
+      this.areaName = '市';
       this.areaId = id;
+      // this.cityList = [];
+      if (val === 'add') {
+        this.addUnit.city = '';
+        this.addUnit.region = '';
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.city = '';
+        this.editUnit.region = '';
+        this.editUnit.street = '';
+      }
+
+      this.getAreaList();
+    },
+    // 市 change
+    handleCityData (id, val) {
+      this.areaName = '县';
+      this.areaId = id;
+      
+      if (val === 'add') {
+        this.addUnit.region = '';
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.region = '';
+        this.editUnit.street = '';
+      }
+
+      this.getAreaList();
+    },
+    // 县 change
+    handleRegionData (id, val) {
+      this.areaName = '镇';
+      this.areaId = id;
+      
+      if (val === 'add') {
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.street = '';
+      }
+
       this.getAreaList();
     },
     // 获取当前部门及子级部门

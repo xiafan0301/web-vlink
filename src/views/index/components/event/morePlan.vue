@@ -9,7 +9,7 @@
           </template>
            <template v-else-if="$route.query.type === 'alarm_ctc'">
             <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
           </template>
           <template v-else>
             <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
@@ -163,11 +163,11 @@ export default {
     },
     // 跳至查看详情页面
     skipDetailInfo (obj) {
-      this.$router.push({name: 'plan_detail', query: {planId: obj.uid, eventId: this.$route.query.eventId, type: this.$route.query.type, objType: this.$route.query.objType }});
+      this.$router.push({name: 'plan_detail', query: {alarmId: this.$route.query.alarmId, planId: obj.uid, eventId: this.$route.query.eventId, type: this.$route.query.type, objType: this.$route.query.objType }});
     },
     // 跳至启用预案页面
     skipEnablePlanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, objType: this.$route.query.objType}});
+      this.$router.push({name: 'enable_plan', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, objType: this.$route.query.objType}});
     },
     // 获取列表数据
     getPlanList () {

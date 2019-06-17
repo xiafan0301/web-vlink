@@ -4,7 +4,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -386,7 +386,7 @@ export default {
     //告警详情
     toAlarmDetail() {
       // this.isLoading = true;
-      const eventId = this.$route.query.eventId;
+      const eventId = this.$route.query.alarmId;
       getAlarmDetail(eventId).then( res => {
         this.sturcDetail = res.data;
         this.sturcDetail['objType'] = this.$route.query.objType;
@@ -501,15 +501,15 @@ export default {
       // this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'more_plan', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'plan_detail', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
+      this.$router.push({name: 'enable_plan', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, planId: obj.uid, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 返回
     back () {
