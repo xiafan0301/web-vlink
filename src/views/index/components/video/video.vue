@@ -7,7 +7,7 @@
       <li>
         <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
         <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
-        <router-link :to="{name: 'video_playback'}">录像回放</router-link>
+        <router-link :to="{name: 'video_playback'}">视频回放</router-link>
       </li>
       <li>
         <!-- <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a> -->
