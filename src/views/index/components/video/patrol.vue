@@ -537,6 +537,11 @@ export default {
         }, this.patrolHandlerData.currentRoundRemain * 1000);
       } else {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
+        if (this.showVideoTotal !== this.patrolHandlerData.currentRound.frameNum) {
+          // 改变布局
+          this.showVideoTotal = this.patrolHandlerData.currentRound.frameNum;
+          this.bResize = {};
+        }
         this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
       }
       this.$message('轮巡进行中。');
