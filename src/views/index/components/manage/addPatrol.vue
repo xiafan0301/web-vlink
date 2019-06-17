@@ -34,7 +34,7 @@
               <el-option label="4" :value="4"></el-option>
               <el-option label="5" :value="5"></el-option>
               <el-option label="9" :value="9"></el-option>
-              <el-option label="16" :value="16"></el-option>
+              <!-- <el-option label="16" :value="16"></el-option> -->
             </el-select>
           </el-form-item>
           <el-form-item label="间隔时间(秒):" style="width: 49%;" prop="roundInterval">
@@ -190,10 +190,10 @@ export default {
         roundName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
         ],
-//        dateTime: [
-//          { required: true, message: '该项内容不可为空', trigger: 'blur' },
-//          { validator: validatePatrolTime, trigger: 'blur' }
-//        ],
+       dateTime: [
+         { required: true, message: '该项内容不可为空', trigger: 'blur' },
+         { validator: validatePatrolTime, trigger: 'blur' }
+       ],
         roundInterval: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { validator: validateDurationTime, trigger: 'blur' }
@@ -648,15 +648,12 @@ export default {
     },
     // 提交数据
     submitData (form) {
-      console.log('1')
       this.$refs[form].validate(valid => {
-        console.log('1')
         if (valid) {
-          console.log('1')
           if (this.patrolId) {
             this.editPatrolInfo();
           } else {
-            console.log('2')
+            console.log('88888')
             this.addPatrolInfo();
           }
         }
@@ -664,6 +661,7 @@ export default {
     },
     // 新增轮巡
     addPatrolInfo () {
+      console.log('77777')
       if (this.currentDeviceList.length === 0) {
         this.$message({
           type: 'warning',
@@ -672,6 +670,7 @@ export default {
         });
         return;
       }
+      console.log('666666')
       let devList = [], bayList = [];
       this.currentDeviceList.map(item => {
         if (item.deviceList.length > 0) {
@@ -898,7 +897,7 @@ export default {
       .add_form {
         width: 100%;
         .el-form-item__content {
-          width: 80%;
+          width: 75%;
         }
         .select_btn, .reset_btn {
           width: 80px;

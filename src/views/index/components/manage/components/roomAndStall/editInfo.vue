@@ -14,7 +14,7 @@
         <div class="content_left">
           <el-form :model="editRoom" :rules="rules" ref="editRoom" label-width="90px" class="add_room_form">
             <el-form-item label="点室编号:" prop="roomNumber" style="margin-bottom:10px;">
-              <span style="color: #333333;">{{editRoom.roomNumber}}</span>
+              <span style="color: #333333;">{{editRoom.roomNumber ? editRoom.roomNumber : '无'}}</span>
               <!-- <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="editRoom.roomNumber"></el-input> -->
             </el-form-item>
             <el-form-item label="点室名称:" prop="roomName">
@@ -37,7 +37,7 @@
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="editRoom.userMobile"></el-input>
             </el-form-item>
             <el-form-item label="所属地址:" prop="address" class="address_select">
-              <el-select style="width: 24%;margin-right: 5px;" v-model="editRoom.province" placeholder="省" @change="handleAreaData(editRoom.province, '市')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="editRoom.province" placeholder="省" @change="handleProvinceData">
                 <el-option
                   v-for="(item, index) in provinceList"
                   :key="'item' + index"
@@ -46,7 +46,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="editRoom.city" placeholder="市" @change="handleAreaData(editRoom.city, '县')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="editRoom.city" placeholder="市" @change="handleCityData">
                 <el-option
                   v-for="(item, index) in cityList"
                   :key="'item' + index"
@@ -55,7 +55,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="editRoom.region" placeholder="县">
+              <el-select style="width: 24%;margin-right: 1%" v-model="editRoom.region" placeholder="县" @change="handleRegionData">
                 <el-option
                   v-for="(item, index) in countyList"
                   :key="'item' + index"
@@ -64,14 +64,14 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;" v-model="street" placeholder="镇">
+              <el-select style="width: 25%;" v-model="editRoom.street" placeholder="镇">
                 <el-option
-                  v-for="(item, index) in streetList"
-                  :key="'item' + index"
-                  :label="item.cname"
-                  :value="item.uid"
-                >
-                </el-option>
+                    v-for="(item, index) in streetList"
+                    :key="'item' + index"
+                    :label="item.cname"
+                    :value="item.uid"
+                  >
+                  </el-option>
               </el-select>
               <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="editRoom.address" @input="changeAddress"></el-input>
               <div class="map_select" @click="initMap">
@@ -112,7 +112,6 @@ export default {
   data () {
     return {
       isShowClose: false, // 是否显示关闭地图按钮
-      street: null,
       isEditLoading: false, // 添加加载中
       editRoom: {
         uid: null,
@@ -127,6 +126,7 @@ export default {
         province: null, // 省
         region: null, // 县
         city: null, // 市
+        street: null, // 镇
         address: null, // 所属地址
         longitude: null, // 经度
         latitude: null, // 纬度
@@ -199,6 +199,7 @@ export default {
               this.editRoom.province = res.data.province;
               this.editRoom.city = res.data.city;
               this.editRoom.region = res.data.region;
+              this.editRoom.street = res.data.street;
 
               this.getCountryList();
               this.getCityList();
@@ -356,9 +357,33 @@ export default {
         })
     },
     // 省 change
-    handleAreaData (id, val) {
-      this.areaName = val;
+    handleProvinceData (id) {
+      this.areaName = '市';
       this.areaId = id;
+      // this.cityList = [];
+      this.editRoom.city = '';
+      this.editRoom.region = '';
+      this.editRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 市 change
+    handleCityData (id) {
+      this.areaName = '县';
+      this.areaId = id;
+      
+      this.editRoom.region = '';
+      this.editRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 县 change
+    handleRegionData (id) {
+      this.areaName = '镇';
+      this.areaId = id;
+      
+      this.editRoom.street = '';
+
       this.getAreaList();
     },
     // 获取当前部门及子级部门

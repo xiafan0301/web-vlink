@@ -36,7 +36,7 @@
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="addRoom.userMobile"></el-input>
             </el-form-item>
             <el-form-item label="所属地址:" prop="address" class="address_select">
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.province" placeholder="省" @change="handleAreaData(addRoom.province, '市')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.province" placeholder="省" @change="handleProvinceData">
                 <el-option
                   v-for="(item, index) in provinceList"
                   :key="'item' + index"
@@ -45,7 +45,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.city" placeholder="市" @change="handleAreaData(addRoom.city, '县')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.city" placeholder="市" @change="handleCityData">
                 <el-option
                   v-for="(item, index) in cityList"
                   :key="'item' + index"
@@ -54,7 +54,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.region" placeholder="县" @change="handleAreaData(addRoom.region, '镇')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.region" placeholder="县" @change="handleRegionData">
                 <el-option
                   v-for="(item, index) in countyList"
                   :key="'item' + index"
@@ -63,7 +63,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;" v-model="street" placeholder="镇">
+              <el-select style="width: 25%;" v-model="addRoom.street" placeholder="镇">
                 <el-option
                     v-for="(item, index) in streetList"
                     :key="'item' + index"
@@ -111,7 +111,6 @@ export default {
   data () {
     return {
       isShowClose: false, // 是否显示关闭地图按钮
-      street: null,
       isAddLoading: false, // 添加加载中
       addRoom: {
         desci: null, // 描述
@@ -125,6 +124,7 @@ export default {
         province: null, // 省
         region: null, // 县
         city: null, // 市
+        street: null, // 镇
         address: null, // 所属地址
         longitude: null, // 经度
         latitude: null, // 纬度
@@ -132,14 +132,14 @@ export default {
       rules: {
         roomName: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+          // { max: 50, message: '最多输入50个字', trigger: 'blur' }
         ],
-        dutyUserName: [
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
-        ],
-        roomNumber: [
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
-        ],
+        // dutyUserName: [
+        //   { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        // ],
+        // roomNumber: [
+        //   { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        // ],
         userMobile: [
           { validator: validatePhone, trigger: 'blur' }
         ],
@@ -149,9 +149,9 @@ export default {
         organId: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
-        desci: [
-          { max: 150, message: '最多输入150个字', trigger: 'blur' }
-        ]
+        // desci: [
+        //   { max: 150, message: '最多输入150个字', trigger: 'blur' }
+        // ]
       },
       userInfo: {}, // 用户信息
       departmentList: [], // 部门列表
@@ -294,22 +294,33 @@ export default {
         })
     },
     // 省 change
-    handleAreaData (id, val) {
-      this.areaName = val;
+    handleProvinceData (id) {
+      this.areaName = '市';
+      this.areaId = id;
+      // this.cityList = [];
+      this.addRoom.city = '';
+      this.addRoom.region = '';
+      this.addRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 市 change
+    handleCityData (id) {
+      this.areaName = '县';
       this.areaId = id;
       
-      // this.addRoom.region = null;
-      // this.cityList = [];
-      // this.countyList = [];
-      // this.streetList = [];
-      console.log(this.addRoom.city)
-      if (this.addRoom.city) {
-        console.log('uuuuu')
-        this.addRoom.city = null;
-      }
-      if (this.addRoom.region) {
-        this.addRoom.region = null;
-      }
+      this.addRoom.region = '';
+      this.addRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 县 change
+    handleRegionData (id) {
+      this.areaName = '镇';
+      this.areaId = id;
+      
+      this.addRoom.street = '';
+
       this.getAreaList();
     },
     // 获取当前部门及子级部门
@@ -393,7 +404,6 @@ export default {
           .address_select {
             position: relative;
             .map_select {
-              // width: calc(100% - 85%);
               position: absolute;
               right: 0;
               bottom: 0;
