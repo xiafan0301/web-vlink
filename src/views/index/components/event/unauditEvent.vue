@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li style="align-items: center;margin-bottom:10px;">
+                <li style="align-items: baseline;">
                   <span class="audit-label">状态:</span>
                   <span class="audit-status">待审核</span>
                 </li>
@@ -43,7 +43,7 @@
               </ul>
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
                 <el-form-item label="事发地点:" label-width="85px" prop="eventAddress" class="address_input">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @input="changeAddress" ></el-input>
+                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @focus="getAutoInputAddress" @input="changeAddress" ></el-input>
                   <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
                 <el-form-item label="事件情况:" label-width="85px" prop="eventDetail">
@@ -331,6 +331,12 @@ export default {
     this.getDetail();
   },
   methods: {
+    // 当获取地址输入框焦点时
+    getAutoInputAddress () {
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+    },
     // 返回
     back () {
       const data = JSON.stringify(this.addEventForm);
@@ -505,7 +511,7 @@ export default {
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
-        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
+       
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],
@@ -535,6 +541,9 @@ export default {
         marker.on('mouseout', function () {
           if (hoverWindow) { hoverWindow.close(); }
         });
+        if (_this.map) {
+           _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
+        }
       }
     },
     // 事件地址change

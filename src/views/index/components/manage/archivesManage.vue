@@ -28,9 +28,9 @@
             <span class="custom-tree-node" slot-scope="{ node, data }">
               <span :class="[data.isShow ? 'orang_name' : '']">{{ data.organName }}</span>
               <span class="operation">
-                <i class="vl_icon vl_icon_manage_13 add_btn"  @click="onAddDepart(data)" title="添加"></i>
-                <i class="vl_icon vl_icon_manage_7 edit_btn" @click="onEditDepart(data)" title="编辑"></i>
-                <i class="vl_icon vl_icon_manage_8 del_btn" @click="onDeleteDepart(data)" title="删除"></i>
+                <i class="vl_icon vl_icon_manage_13 add_btn"  @click="onAddDepart(data, $event)" title="添加"></i>
+                <i class="vl_icon vl_icon_manage_7 edit_btn" @click="onEditDepart(data, $event)" title="编辑"></i>
+                <i class="vl_icon vl_icon_manage_8 del_btn" @click="onDeleteDepart(data, $event)" title="删除"></i>
               </span>
             </span>
           </el-tree>
@@ -88,15 +88,15 @@
       class="dialog_comp"
       >
       <div style="margin-top: 10px;">
-        <el-form :model="addUnit" :rules="addRules" ref="addUnit" label-width="10px">
+        <el-form :model="addUnit" :rules="rules" ref="addUnit" label-width="10px">
           <el-form-item label=" " prop="organName" class="organ_name">
-            <el-input v-model="addUnit.organName" @change="handleChangeOrganName" style="width: 95%;" placeholder="请输入单位名称" maxlength="10"></el-input>
+            <el-input v-model="addUnit.organName" style="width: 95%;" placeholder="请输入单位名称" maxlength="10"></el-input>
             <!-- <p class="organ_error_tip" v-show="isShowOrganError">单位已存在</p> -->
           </el-form-item>
           <el-form-item label=" " prop="organPid">
             <el-select style="width: 95%;" v-model="addUnit.organPid" placeholder="请选择上级单位">
               <el-option
-                v-for="(item, index) in allDepartmentList"
+                v-for="(item, index) in departmentFormList"
                 :key="'item' + index"
                 :label="item.organName"
                 :value="item.uid"
@@ -104,8 +104,8 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label=" " prop="chargeUserName">
-            <el-select style="width: 47%;margin-right: 5px;" clearable v-model="addUnit.province" placeholder="省" @change="handleAreaData(addUnit.province, '市')">
+          <el-form-item label=" " prop="province">
+            <el-select style="width: 47%;margin-right: 5px;" v-model="addUnit.province" placeholder="省" @change="handleProvinceData(addUnit.province, 'add')">
               <el-option
                 v-for="(item, index) in provinceList"
                 :key="'item' + index"
@@ -114,7 +114,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="addUnit.city" placeholder="市" @change="handleAreaData(addUnit.city, '县')">
+            <el-select style="width: 47%" v-model="addUnit.city" placeholder="市" @change="handleCityData(addUnit.city, 'add')">
               <el-option
                 v-for="(item, index) in cityList"
                 :key="'item' + index"
@@ -123,7 +123,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" clearable v-model="addUnit.county" placeholder="县" @change="handleAreaData(addUnit.county, '街道')">
+            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" v-model="addUnit.region" placeholder="县" @change="handleRegionData(addUnit.region, 'add')">
               <el-option
                 v-for="(item, index) in countyList"
                 :key="'item' + index"
@@ -132,7 +132,7 @@
               >
               </el-option>
             </el-select>
-            <el-select style="width: 47%" clearable v-model="addUnit.street" placeholder="街道">
+            <el-select style="width: 47%" v-model="addUnit.street" placeholder="镇">
               <el-option
                 v-for="(item, index) in streetList"
                 :key="'item' + index"
@@ -149,10 +149,80 @@
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addUnitInfo('addUnit')">确认</el-button>
       </div>
     </el-dialog>
+    <!--编辑单位弹框-->
+    <el-dialog
+      title="编辑单位"
+      :visible.sync="editDepartmentDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <div style="margin-top: 10px;">
+        <el-form :model="editUnit" :rules="rules" ref="editUnit" label-width="10px">
+          <el-form-item label=" " prop="organName" class="organ_name">
+            <el-input v-model="editUnit.organName" style="width: 95%;" placeholder="请输入单位名称" maxlength="10"></el-input>
+          </el-form-item>
+          <el-form-item label=" " prop="organPid">
+            <el-select style="width: 95%;" v-model="editUnit.organPid" placeholder="请选择上级单位">
+              <el-option
+                v-for="(item, index) in departmentFormList"
+                :key="'item' + index"
+                :label="item.organName"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label=" " prop="province">
+            <el-select style="width: 47%;margin-right: 5px;" v-model="editUnit.province" placeholder="省" @change="handleProvinceData(editUnit.province, 'edit')">
+              <el-option
+                v-for="(item, index) in provinceList"
+                :key="'item' + index"
+                :label="item.cname"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+            <el-select style="width: 47%" v-model="editUnit.city" placeholder="市" @change="handleCityData(editUnit.city, 'edit')">
+              <el-option
+                v-for="(item, index) in cityList"
+                :key="'item' + index"
+                :label="item.cname"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+            <el-select style="width: 47%;margin-right: 5px;margin-top: 20px;" v-model="editUnit.region" placeholder="县" @change="handleRegionData(editUnit.region, 'edit')">
+              <el-option
+                v-for="(item, index) in countyList"
+                :key="'item' + index"
+                :label="item.cname"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+            <el-select style="width: 47%" v-model="editUnit.street" placeholder="镇">
+              <el-option
+                v-for="(item, index) in streetList"
+                :key="'item' + index"
+                :label="item.cname"
+                :value="item.uid"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelEdit('editUnit')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isEditLoading" @click="editUnitInfo('editUnit')">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getDepartmentList, delDepart } from '@/views/index/api/api.manage.js';
+import { getDepartmentList, delDepart, addDepart, updateDepart } from '@/views/index/api/api.manage.js';
 import { apiAreaList } from '@/views/index/api/api.base.js';
 export default {
   data () {
@@ -162,8 +232,10 @@ export default {
       state: 1,
       activeSelect: null, // 当前节点选中
       isAddLoading: false, // 添加单位加载中
+      isEditLoading: false, // 编辑单位加载中
       isShowOrganError: false,
       newDepartmentDialog: false, // 新增单位弹出框
+      editDepartmentDialog: false, // 编辑单位弹出框
       delDepartmentDialog: false, // 删除部门弹出框
       delChildDepartmentDialog: false, // 删除下级部门弹出框
       isDeleteLoading: false, // 删除部门加载中
@@ -175,22 +247,37 @@ export default {
       },
       defaultExpandKey: [], // 默认展开的key
       addUnit: {
+        proKey: null,
         organName: null, // 单位名称
         organPid: null, // 上级单位
-        province: null,
-        city: null,
-        county: null,
-        street: null
+        province: null, // 省
+        city: null, // 市
+        region: null, // 县
+        street: null // 镇
       },
-      addRules: {
+      editUnit: {
+        uid: null,
+        proKey: null,
+        organName: null, // 单位名称
+        organPid: null, // 上级单位
+        province: null, // 省
+        city: null, // 市
+        region: null, // 县
+        street: null // 镇
+      },
+      rules: {
         organName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { max: 10, message: '最多输入10个字', trigger: 'blur' }
+          // { max: 10, message: '最多输入10个字', trigger: 'blur' }
         ],
         organPid: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
+        ],
+        province: [
+          { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
+      departmentFormList: [], // 新增和修改的单位
       allDepartmentList: [],  // 当前用户所属单位及下级单位
       departmentList: { A: [], B: [], C: [], D: [], E: [] }, // 部门树
       userInfo: {}, // 用户信息
@@ -205,10 +292,14 @@ export default {
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
+    this.addUnit.proKey = this.userInfo.proKey;
+    this.editUnit.proKey = this.userInfo.proKey;
+
     this.getDepartList();
     this.getAreaList();
   },
   methods: {
+    handleAreaData () {},
     // 获取行政区划数据
     getAreaList () {
       const params = {
@@ -226,16 +317,55 @@ export default {
             if (this.areaName === '县') {
               this.countyList = res.data;
             }
-            if (this.areaName === '街道') {
+            if (this.areaName === '镇') {
               this.streetList = res.data;
             }
           }
         })
     },
     // 省 change
-    handleAreaData (id, val) {
-      this.areaName = val;
+    handleProvinceData (id, val) {
+      this.areaName = '市';
       this.areaId = id;
+      // this.cityList = [];
+      if (val === 'add') {
+        this.addUnit.city = '';
+        this.addUnit.region = '';
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.city = '';
+        this.editUnit.region = '';
+        this.editUnit.street = '';
+      }
+
+      this.getAreaList();
+    },
+    // 市 change
+    handleCityData (id, val) {
+      this.areaName = '县';
+      this.areaId = id;
+      
+      if (val === 'add') {
+        this.addUnit.region = '';
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.region = '';
+        this.editUnit.street = '';
+      }
+
+      this.getAreaList();
+    },
+    // 县 change
+    handleRegionData (id, val) {
+      this.areaName = '镇';
+      this.areaId = id;
+      
+      if (val === 'add') {
+        this.addUnit.street = '';
+      } else {
+        this.editUnit.street = '';
+      }
+
       this.getAreaList();
     },
     // 获取当前部门及子级部门
@@ -393,6 +523,7 @@ export default {
                 })
               }
             })
+            console.log()
           }
         })
     },
@@ -402,6 +533,22 @@ export default {
       this.$store.commit('setCurrentOrgan', {
         currentOrganId: obj.uid
       });
+      // this.addUnit.organPid = obj.uid;
+
+      // const params = {
+      //   'where.proKey': this.userInfo.proKey,
+      //   'where.organPid': obj.uid,
+      //   pageSize: 0
+      // };
+      // getDepartmentList(params)
+      //   .then(res => {
+      //     if (res) {
+      //       this.departmentFormList.push(obj);
+      //       res.data.list.map(item => {
+      //         this.departmentFormList.push(item);
+      //       });
+      //     }
+      //   })
     },
     // 根据部门进行搜索
     searchData () {
@@ -462,16 +609,48 @@ export default {
         })
         .catch(() => {this.isDeleteChildLoading = false;})
     },
-    // 单位名称change
-    handleChangeOrganName (val) {
-      if (!val) {
-        this.isShowOrganError = false;
-      } 
-    },
     // 添加单位
     addUnitInfo (form) {
       this.$refs[form].validate(valid => {
-        if (valid) {}
+        if (valid) {
+          this.provinceList.map(item => {
+            if (item.uid === this.addUnit.province) {
+              this.addUnit.province = item.cname;
+            }
+          })
+          this.cityList.map(item => {
+            if (item.uid === this.addUnit.city) {
+              this.addUnit.city = item.cname;
+            }
+          })
+          this.countyList.map(item => {
+            if (item.uid === this.addUnit.region) {
+              this.addUnit.region = item.cname;
+            }
+          })
+          this.streetList.map(item => {
+            if (item.uid === this.addUnit.street) {
+              this.addUnit.street = item.cname;
+            }
+          })
+          this.isAddLoading = true;
+          addDepart(this.addUnit)
+            .then(res => {
+              if (res) {
+                 this.$message({
+                  type: 'success',
+                  message: '添加成功',
+                  customClass: 'request_tip'
+                });
+                this.newDepartmentDialog = false;
+                this.getDepartList();
+                this.isAddLoading = false;
+              } else {
+                this.isAddLoading = false;
+              }
+            })
+            .catch(() => {this.isAddLoading = false;})
+        }
       });
     },
     // 取消添加
@@ -479,21 +658,73 @@ export default {
       this.$refs[form].resetFields();
       this.newDepartmentDialog = false;
     },
+    // 取消添加
+    cancelEdit (form) {
+      this.$refs[form].resetFields();
+      this.editDepartmentDialog = false;
+    },
     // 显示添加部门弹出框
-    onAddDepart (obj) {
+    onAddDepart (obj, e) {
+       e.stopPropagation();
+
       this.newDepartmentDialog = true;
+
+      this.addUnit.organPid = obj.uid;
+
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': obj.uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentFormList.push(obj);
+            res.data.list.map(item => {
+              this.departmentFormList.push(item);
+            });
+          }
+        })
     },
     // 显示编辑部门弹出框
-    onEditDepart (obj) {},
+    onEditDepart (obj, e) {
+      e.stopPropagation();
+
+      this.editDepartmentDialog = true;
+
+      this.editUnit.organName = obj.organName;
+      this.editUnit.organPid = obj.uid;
+      this.editUnit.province = obj.province;
+      this.editUnit.city = obj.city;
+      this.editUnit.region = obj.region;
+      this.editUnit.street = obj.street;
+
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        'where.organPid': obj.uid,
+        pageSize: 0
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentFormList.push(obj);
+            res.data.list.map(item => {
+              this.departmentFormList.push(item);
+            });
+          }
+        })
+    },
     // 显示删除部门弹出框
-    onDeleteDepart (obj) {
+    onDeleteDepart (obj, e) {
+       e.stopPropagation();
+
       this.deleteId = obj.uid;
       if ((obj.organRight - obj.organLeft) > 1) {
         this.delChildDepartmentDialog = true;
       } else {
         this.delDepartmentDialog = true;
       }
-    },
+    }
   }
 }
 </script>

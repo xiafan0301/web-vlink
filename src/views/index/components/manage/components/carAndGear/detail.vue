@@ -28,11 +28,11 @@
       <ul class="detail_info clearfix">
         <li>
           <span>车辆编号:</span>
-          <span>{{detailInfo.vehicleNumber ? detailInfo.vehicleNumber : '无'}}</span>
+          <span>{{detailInfo.transportNo ? detailInfo.transportNo : '无'}}</span>
         </li>
         <li>
           <span>车牌号码:</span>
-          <span>{{detailInfo.transportNo ? detailInfo.transportNo : '无'}}</span>
+          <span>{{detailInfo.vehicleNumber ? detailInfo.vehicleNumber : '无'}}</span>
         </li>
         <li>
           <span>识别代码:</span>
@@ -60,7 +60,7 @@
         </li>
         <li>
           <span>设备账户:</span>
-          <span>{{detailInfo.deviceNo ? detailInfo.deviceNo : '无'}}</span>
+          <span>{{detailInfo.deviceAccount ? detailInfo.deviceAccount : '无'}}</span>
         </li>
         <li>
           <span>访问密码:</span>
@@ -311,7 +311,9 @@ export default {
     this.getVehicleTypeList();
     this.getNumberTypeList();
 
-    this.getDetail();
+    setTimeout(() =>{
+      this.getDetail();
+    }, 500)
   },
   methods: {
     // 获取车身颜色
@@ -363,8 +365,8 @@ export default {
         getVehicleDetail(vehicleId)
           .then(res => {
             if (res) {
-              
               this.detailInfo = res.data;
+              
               this.vehicleTypeList.map(val => {
                 if (this.detailInfo.vehicleType == val.enumField) {
                   this.detailInfo.vehicleTypeName = val.enumValue;

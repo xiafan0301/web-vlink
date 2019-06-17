@@ -54,7 +54,7 @@ service.interceptors.response.use(function (response) {
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
-      let msg = '访问出错';
+      let msg = '系统繁忙，请稍后再试！';
       if (_data.viewMsg) {
         msg = _data.viewMsg;
       }

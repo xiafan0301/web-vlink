@@ -133,7 +133,7 @@ export default {
   methods: {
     // 跳至反馈情况页面
     skipCtcEndPage () {
-      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType, opUserId: this.opUserId, dispatchType:this.$route.query.dispatchType }});
+      this.$router.push({name: 'task_handle', query: { eventId: this.$route.query.id, processType: this.$route.query.processType, opUserId: this.opUserId, dispatchType:this.$route.query.dispatchType, uid: this.$route.query.uid }});
     },
     //修改事件处理过程状态
     editProcessStatus() {

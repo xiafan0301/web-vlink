@@ -162,7 +162,7 @@ export default {
         marker.on('mouseover', function () {
           let sContent = '<div class="vl_map_hover machine_map_hover" >' +
             '<div class="vl_main_hover_address" style="min-width: 380px;padding: 10px 70px 10px 10px">'
-            +'<p class="vl_map_hover_main_p">事发地点： ' + obj.address + '</p><p class="vl_map_hover_main_p">经纬度：经度' + obj.longitude + '；纬度：' + obj.latitude +'</p></div></div>';
+            +'<p class="vl_map_hover_main_p">所在位置： ' + obj.address + '</p><p class="vl_map_hover_main_p">经纬度：经度' + obj.longitude + '；纬度：' + obj.latitude +'</p></div></div>';
           hoverWindow = new window.AMap.InfoWindow({
             isCustom: true,
             closeWhenClickMap: true,

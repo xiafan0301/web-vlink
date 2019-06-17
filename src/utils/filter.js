@@ -11,6 +11,17 @@ Vue.filter('fnPercent', function (val, total) {
 /*
  * 时间戳处理
  * */
+Vue.filter('transSeconds', function (seconds) {
+  let iH = Math.floor(seconds / (60 * 60));
+  let iM = Math.floor((seconds - iH * 60 * 60) / 60);
+  let iS = seconds % 60;
+  return ((iH < 10) ? ('0' + iH) : iH) + ':' +
+  ((iM < 10) ? ('0' + iM) : iM) + ':' +
+  ((iS < 10) ? ('0' + iS) : iS);
+});
+/*
+ * 时间戳处理
+ * */
 Vue.filter('fmTimestamp', function (timestamp, fm) {
   return formatDate(timestamp, fm);
 });

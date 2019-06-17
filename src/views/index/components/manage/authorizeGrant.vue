@@ -30,6 +30,7 @@
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 200px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option value="全部特性"></el-option>
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -40,6 +41,7 @@
               </el-form-item>
               <el-form-item prop="groupId">
                 <el-select  style="width: 200px;" v-model="searchForm.groupId" placeholder="自定义组">
+                  <el-option value="全部分组"></el-option>
                   <el-option
                     v-for="(item, index) in groupsList"
                     :key="index"
@@ -51,6 +53,7 @@
               </el-form-item>
               <el-form-item prop="dutyOrganId">
                 <el-select  style="width: 200px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option value="全部部门"></el-option>
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -115,7 +118,7 @@ import listSelect from './components/listSelect.vue';
 import mapSelect from './components/mapSelect.vue';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { getDepartmentList, getASelectDevice, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';
+import { getDepartmentList, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -127,9 +130,9 @@ export default {
         reportTime: null,
       },
       searchForm: {
-        intelCharac: null, // 智能特性
-        groupId: null, // 自定义组id
-        dutyOrganId: null, // 责任部门id
+        igroupId: '全部分组', // 分组id
+        intelCharac: '全部特性', // 智能特性
+        dutyOrganId: '全部部门', // 责任部门id
         devName: null // 设备名称
       },
       userInfo: {}, // 存储的用户信息
@@ -188,10 +191,10 @@ export default {
           }
         })
     },
-    // 查询数据
-    searchData () {
-      this.getAllDevicesList();
-    },
+    // // 查询数据
+    // searchData () {
+    //   this.getAllDevicesList();
+    // },
     // 重置搜索条件
     resetData (form) {
       this.$refs[form].resetFields();
@@ -356,52 +359,76 @@ export default {
         this.rightAllChecked = false;
       }
     },
-    // 从添加设备接收要提交的设备
-    emitFinalDevice (list, number, selectList, selectNum) {
-      if (list) {
-        let arr = [];
-        if (list.length > 0) {
-          // if (this.groupId) { // 如果是编辑分组
-          //   this.currentDeviceList = [];
-          //   this.leftDeviceNumber = 0;
-          // }
-          console.log('list', list)
-          list.map(item => {
-            arr = this.currentDeviceList.filter(itm => {
-              if (itm.uid === item.uid) {
-                item.deviceList.map(val => {
-                  itm.deviceList.push(val);
-                });
-                item.bayonetList.map(val => {
-                  itm.bayonetList.push(val);
-                });
-                return item;
-              }
-            });
-            if (arr.length === 0) {
-              this.currentDeviceList.push(item);
-            }
-          });
-          this.leftDeviceNumber += number;
-        } else {
-          this.currentDeviceList = [];
-        }
-      }
-      if (selectList && selectList.length > 0) {
-        console.log('selectList', selectList)
-        this.selectDeviceList = [];
-        selectList.map(item => {
-          this.selectDeviceList.push(item);
-        });
-        // if (!this.groupId) { // 如果是新增分组
-          this.selectDeviceNumber = selectNum && selectNum;
-        // }
-      }
-    },
+    // // 从添加设备接收要提交的设备
+    // emitFinalDevice (list, number, selectList, selectNum) {
+    //   if (list) {
+    //     let arr = [];
+    //     if (list.length > 0) {
+    //       // if (this.groupId) { // 如果是编辑分组
+    //       //   this.currentDeviceList = [];
+    //       //   this.leftDeviceNumber = 0;
+    //       // }
+    //       console.log('list', list)
+    //       list.map(item => {
+    //         arr = this.currentDeviceList.filter(itm => {
+    //           if (itm.uid === item.uid) {
+    //             item.deviceList.map(val => {
+    //               itm.deviceList.push(val);
+    //             });
+    //             item.bayonetList.map(val => {
+    //               itm.bayonetList.push(val);
+    //             });
+    //             return item;
+    //           }
+    //         });
+    //         if (arr.length === 0) {
+    //           this.currentDeviceList.push(item);
+    //         }
+    //       });
+    //       this.leftDeviceNumber += number;
+    //     } else {
+    //       this.currentDeviceList = [];
+    //     }
+    //   }
+    //   if (selectList && selectList.length > 0) {
+    //     console.log('selectList', selectList)
+    //     this.selectDeviceList = [];
+    //     selectList.map(item => {
+    //       this.selectDeviceList.push(item);
+    //     });
+    //     // if (!this.groupId) { // 如果是新增分组
+    //       this.selectDeviceNumber = selectNum && selectNum;
+    //     // }
+    //   }
+    // },
     // 获取所有可选的设备
     getAllDevicesList () {
+      let groupId, dutyOrganId, intelCharac;
+      if (this.searchForm.groupId === '全部分组') {
+        groupId = null;
+      } else {
+        groupId = this.searchForm.groupId;
+      }
+      if (this.searchForm.dutyOrganId === '全部部门') {
+        dutyOrganId = null;
+      } else {
+        dutyOrganId = this.searchForm.dutyOrganId;
+      }
+      if (this.searchForm.intelCharac === '全部特性') {
+        intelCharac = null;
+      } else {
+        intelCharac = this.searchForm.intelCharac;
+      }
+
       this.selectDeviceNumber = 0;
-      getAllDevices(this.searchForm)
+
+      const params = {
+        groupId,
+        dutyOrganId,
+        intelCharac,
+        devName: this.searchForm.devName
+      }
+      getAllDevices(params)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;

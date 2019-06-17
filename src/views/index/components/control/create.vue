@@ -26,6 +26,7 @@
                 filterable
                 remote
                 clearable
+                @clear="eventList = []"
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
@@ -246,8 +247,11 @@ export default {
       getEventDetail(eventId).then(res => {
         if (res && res.data) {
           this.eventDetail = res.data;
-          this.createForm.event = res.data.uid;
-          this.getEventList();
+          this.eventList = [{
+            label: this.eventDetail.eventCode,
+            value: this.eventDetail.uid
+          }]
+          this.createForm.event = this.eventDetail.uid;
         }
       })
     },
@@ -266,25 +270,28 @@ export default {
     },
     // 获取关联事件列表
     getEventList (query) {
-      const params = {
-        'where.keword': query,
-        'where.isSurveillance': false,//没有关联布控的事件
-        pageSize: 1000000,
-        orderBy: 'report_time',
-        order: 'desc'
-      }
-      getEventList(params).then(res => {
-        if (res && res.data) {
-          // 过滤掉事件状态为已结束的关联事件
-          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
-            return {
-              label: m.eventCode,
-              value: m.uid,
-              eventStatus: m.eventStatus
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          'where.keyword': _query,
+          'where.isSurveillance': false,//没有关联布控的事件
+          pageSize: 1000000,
+          orderBy: 'report_time',
+          order: 'desc'
         }
-      })
+        getEventList(params).then(res => {
+          if (res && res.data) {
+            // 过滤掉事件状态为已结束的关联事件
+            this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
+              return {
+                label: m.eventCode,
+                value: m.uid,
+                eventStatus: m.eventStatus
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有监控设备列表
     getAllMonitorList () {
@@ -320,7 +327,12 @@ export default {
         this.$emit('changePageType', 1);
       // 新建、复用布控任务时
       } else {
-        this.$router.push({ name: 'control_manage' });
+        // 从事件模块跳转过来的
+        if (this.$route.query.eventId) {
+          this.$router.push({ name: 'event_manage' });
+        } else {
+          this.$router.push({ name: 'control_manage' });
+        }
       }
       this.toGiveUpDialog = false;
     },
@@ -470,7 +482,7 @@ export default {
             this.createForm.event = this.controlDetail.eventId;
           }
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
+          this.createForm.controlDate = this.pageType === 3 ? [] : (this.controlDetail.surveillanceDateStart ? [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd] : [])
           this.createForm.controlAlarmId = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {

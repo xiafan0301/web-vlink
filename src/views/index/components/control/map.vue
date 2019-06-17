@@ -13,6 +13,7 @@
             filterable
             remote
             clearable
+            @clear="eventList = []"
             value-key="value"
             placeholder="请输入事件编号"
             :remote-method="getEventList"
@@ -31,6 +32,7 @@
             filterable
             remote
             clearable
+            @clear="controlObjDropdownList = []"
             value-key="uid"
             placeholder="请输入布控对象"
             :remote-method="getControlObject"
@@ -120,7 +122,7 @@
               </li>
               <li>
                 <i class="vl_icon vl_icon_control_05"></i>
-                <span>{{item.deviceName}}</span>
+                <span :title="item.deviceName">{{item.deviceName | strCutWithLen(20)}}</span>
               </li>
             </ul>
           </el-card>
@@ -163,6 +165,17 @@
     <div is="flvplayer" v-if="isShowVideo" :class="{'is_show_video': isShowV}" style="display: none;" id="controlVideo" @playerFullScreenTwo="showScreen" :oData="videoObj" :bResize="bResize"
       :oConfig="{sign: true, fullscreen: false, fullscreen2: true }">
     </div>
+    <el-dialog
+      class="create_control_dialog"
+      :visible.sync="isShowCreateControlDialog"
+      :close-on-click-modal="false"
+      width="530px">
+      <div class="create_control">
+        <img src="../../../../assets/img/video/vi_101.png" alt="">
+        <p>没有进行中的布控</p>
+        <el-button @click="skipIsCreateControl" class="reset_btn btn_100">新建布控</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -191,6 +204,7 @@ export default {
       isShowSwiperBtn: false,
       loading: false,
       loadingBtn: false,
+      isShowCreateControlDialog: false,
       // 左侧搜索参数
       mapForm: {
         name: null,
@@ -247,7 +261,7 @@ export default {
     }
   },
   mounted () {
-    this.getControlMap();
+    this.getControlMap(1);
     let map = new window.AMap.Map('mapBox', {
       zoom: 10,
       center: mapXupuxian.center
@@ -256,42 +270,50 @@ export default {
     this.map = map;
   },
   methods: {
+    skipIsCreateControl () {
+      this.$router.push({name: 'control_create'});
+    },
     // 获取关联事件列表
     getEventList (query) {
-      const params = {
-        'where.eventCode': query,
-        pageSize: 1000000,
-        orderBy: 'report_time',
-        order: 'desc'
-      }
-      getEventList(params).then(res => {
-        if (res && res.data) {
-          this.eventList = res.data.list.map(m => {
-            return {
-              label: m.eventCode,
-              value: m.uid
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          'where.keyword': _query,
+          pageSize: 1000000,
+          orderBy: 'report_time',
+          order: 'desc'
         }
-      })
+        getEventList(params).then(res => {
+          if (res && res.data) {
+            this.eventList = res.data.list.map(m => {
+              return {
+                label: m.eventCode,
+                value: m.uid
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有布控对象
     getControlObject (query) {
-      const params = {
-        name: query
-      }
-      getControlObject(params).then(res => {
-        if (res && res.data) {
-          this.controlObjDropdownList = res.data;
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: _query
         }
-      })
+        getControlObject(params).then(res => {
+          if (res && res.data) {
+            this.controlObjDropdownList = res.data;
+          }
+        })
+      }
     },
     sikpISalarmToday () {
       this.$router.push({ name: 'today_alarm' });
     },
     // 显示大屏
     showScreen () {
-      console.log(1111111111111111)
       $('.control_map').append($('#controlVideo'));
       this.isShowVideo = false;
       this.isShowV = false; 
@@ -342,7 +364,7 @@ export default {
       })
     },
     // 获取实时监控的布控设备
-    getControlMap () {
+    getControlMap (flag) {
       if (this.mapForm.state !== 1) {
         this.isShowSnapList = false;
       } else {
@@ -368,7 +390,17 @@ export default {
             if (this.map) {
               this.map.remove(this.markerList);
             }
-            this.$message.warning('无设备匹配');
+            // 第一次进入页面,无进行中的布控设备数据时，弹出新建布控的跳转弹窗
+            if (flag === 1) {
+              this.isShowCreateControlDialog = true;
+            } else {
+              this.$message({
+                customClass: 'control_map_message',
+                iconClass: 'xxxx',
+                showClose: true,
+                message: '搜索无相关数据'
+              }); 
+            }
             return;
           }
           let data = [];
@@ -393,7 +425,6 @@ export default {
     },
     // 获取设备下布控列表
     getControlMapByDevice (obj) {
-      console.log(obj, 'obj')
       const params = {
         deviceName: obj.deviceName,
         uid: obj.uid,
@@ -403,6 +434,9 @@ export default {
       getControlMapByDevice(params).then(res => {
         if (res && res.data) {
           let _this = this;
+
+          $('.control_map').append($('#controlVideo'));_this.isShowVideo = false; _this.isShowV = false;
+
           _this.controlObjList = res.data;
           let sContent = '', clickWindow = null, vlMapVideo = '', vlMapObj = '', vlMapObjList = '';
           _this.domId = obj.uid + '_' + random14()
@@ -410,11 +444,13 @@ export default {
             vlMapVideo = `
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
-              <div class="vl_map_img">
-                <div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>
-                <div class="vl_map_state">进行中</div>
-               
-              </div>`;
+              <div class="vl_map_img">`;
+              if (obj.deviceStatus === 1) {
+                vlMapVideo += `<div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>`;
+              } else {
+                vlMapVideo += `<div style="width: 300px;height: 150px;background: #000;display: flex;align-items: center;justify-content: center;color: #fff;">设备故障，暂时无法获取视频</div>`;
+              }
+               vlMapVideo += `<div class="vl_map_state">进行中</div></div>`;
           }
           if (_this.controlObjList.num === 1) {
             vlMapObj = `
@@ -584,7 +620,6 @@ export default {
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
           $('#mapBox').on('click', '.vl_map_name', function (e) {
-            console.log(e)
             const { href } = _this.$router.resolve({
               name: 'control_manage',
               query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
@@ -635,23 +670,18 @@ export default {
           })
           // 获得布控进行中直播视频
           if (obj.surveillanceStatus === 1) {
-            // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-            // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-            // obj.title = obj.deviceName;
-            // obj.video = {
-            //   deviceSip: deviceSip
-            // }
             _this.videoObj = {
               type: 1,
               title: obj.deviceName,
               video: Object.assign({}, obj)
             };
-            _this.isShowVideo = true;
-            setTimeout(() => {
-              $('#' + _this.domId).append($('#controlVideo'));
-              _this.isShowV = true;
-            }, 100)
-            console.log($('#controlVideo'))
+            if (obj.deviceStatus === 1) {
+              _this.isShowVideo = true;
+              setTimeout(() => {
+                $('#' + _this.domId).append($('#controlVideo'));
+                _this.isShowV = true;
+              }, 100)
+            }
           }
           // 当布控列表数据超过10条时，点击查看更多跳转到布控列表
           $('#mapBox').on('click', '.control_more', function () {
@@ -686,7 +716,13 @@ export default {
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let content = '';
-        content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+        if (obj.deviceStatus === 1) {
+          // 设备正常
+          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';
+        } else {
+          // 设备不正常
+          content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
+        }
         if (obj.longitude > 0 && obj.latitude > 0) {
           let offSet = [-20.5, -48];
           let marker = new window.AMap.Marker({ // 添加自定义点标记
@@ -703,7 +739,7 @@ export default {
             // 点击切换告警闪烁图标
             if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
               if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
-                $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+                // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
               } else {
@@ -711,15 +747,15 @@ export default {
                 $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
                 $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
                 $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
+                // $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
                 $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标
-              $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
+              // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
               $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
               $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
+              // $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
             }
             _this.getControlMapByDevice(e.target.C.extData);
           })
@@ -1212,6 +1248,33 @@ export default {
   }
   .pic.el-card .el-card__body{
     height: 100%
+  }
+}
+// 重置布控地图模块提示消息样式
+.control_map_message{
+  width: 300px;
+  > p, > i{
+    color: #0C70F8;
+  }
+  > i{
+    font-weight: bold;
+  }
+}
+.create_control_dialog .create_control{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  > img{
+    width: 50%;
+  }
+  > p{
+    padding: 10px 0;
+  }
+  > .reset_btn{
+    background:rgba(242,242,242,1);
+    border:1px solid rgba(211,211,211,1);
+    border-radius:4px;
   }
 }
 </style>

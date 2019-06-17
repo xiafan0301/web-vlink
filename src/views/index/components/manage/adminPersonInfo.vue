@@ -82,6 +82,9 @@
               prop="name"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.name ? scope.row.name : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="性别"
@@ -106,12 +109,18 @@
               prop="idNo"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.idNo ? scope.row.idNo : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="备注信息"
               prop="remarks"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.remarks ? scope.row.remarks : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
@@ -146,7 +155,7 @@
           <ul class="content_right">
             <li>
               <span>姓名：</span>
-              <span>{{personDetailInfo.name}}</span>
+              <span>{{personDetailInfo.name ? personDetailInfo.name : '无'}}</span>
             </li>
             <li>
               <span>性别：</span>
@@ -162,11 +171,11 @@
             </li>
             <li>
               <span>证件号码：</span>
-              <span>{{personDetailInfo.idNo}}</span>
+              <span>{{personDetailInfo.idNo ? personDetailInfo.idNo : '无'}}</span>
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate}}</span>
+              <span>{{personDetailInfo.birthDate ? personDetailInfo.birthDate : '无'}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -192,7 +201,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span class="group_box">{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks ? personDetailInfo.remarks : '无'}}</span>
             </li>
           </ul>
         </div>

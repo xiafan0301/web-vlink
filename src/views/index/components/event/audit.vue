@@ -17,7 +17,6 @@
         </el-form-item>
         <el-form-item prop="eventStatus">
           <el-select v-model="auditForm.eventStatus" style="width: 240px;" placeholder="审核状态">
-            <!-- <el-option value='全部状态'></el-option> -->
             <el-option
               v-for="(item, index) in auditStatusList"
               :key="index"
@@ -67,10 +66,6 @@
           <span>+</span>
           <span>新增事件</span>
         </div>
-        <!-- <div class="select-checkbox">
-          <span>自动审核政务人员的</span>
-          <el-switch v-model="isOpen" @change="isAutoCheck"></el-switch>
-        </div> -->
       </div>
       <el-table
         class="audit_table"
@@ -103,6 +98,9 @@
           prop="reporterPhone"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.reporterPhone ? scope.row.reporterPhone : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="身份"
@@ -120,6 +118,9 @@
           prop="reportTime"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.reportTime ? scope.row.reportTime : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="事件地点"
@@ -127,6 +128,9 @@
           prop="eventAddress"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventAddress ? scope.row.eventAddress : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="上报内容"
@@ -134,6 +138,9 @@
           prop="eventDetail"
           :show-overflow-tooltip='true'
         >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventDetail ? scope.row.eventDetail : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="是否有图或视频"
@@ -175,18 +182,16 @@ export default {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       auditForm: {
         reportTime: [], // 日期
-        // eventSource: 16, // 事件来源 app端
         eventType: '全部类型', // 事件类型
         eventStatus: '1', // 事件状态--默认待审核
         userName: '全部上报者', // 上报者
         phoneOrNumber: null // 手机号或事件编号
       },
-      // isOpen: false, // 自动审核政务人员
       auditList: [],
       auditStatusList: [], // 审核状态
       eventTypeList: [], // 事件类型
       identityList: [], // 上报者身份
-      autoCheckList: [], // 自动审核政务人员
+      // autoCheckList: [], // 自动审核政务人员
       userInfo: {}, // 存储的用户信息
     }
   },
@@ -194,16 +199,8 @@ export default {
     this.userInfo =  this.$store.state.loginUser;
   },
   mounted () {
-    // const status = window.localStorage.getItem('iaAutoCheck');
-    // if (status !== null) {
-    //   if (status) {
-    //     this.isOpen = true;
-    //   } else {
-    //     this.isOpen = false;
-    //   }
-    // }
     this.getOneMonth();
-    this.getAutoCheck();
+    // this.getAutoCheck();
     this.getAuditStatusList();
     this.getEventTypeList();
     this.getIdentityList();
@@ -245,17 +242,17 @@ export default {
         })
         .catch(() => {})
     },
-    // 获取自动审核政务人员
-    getAutoCheck () {
-      const id = dataList.autoCheck;
-      getDiciData(id)
-        .then(res => {
-          if (res) {
-            this.autoCheckList = res.data;
-          }
-        })
-        .catch(() => {})
-    },
+    // // 获取自动审核政务人员
+    // getAutoCheck () {
+    //   const id = dataList.autoCheck;
+    //   getDiciData(id)
+    //     .then(res => {
+    //       if (res) {
+    //         this.autoCheckList = res.data;
+    //       }
+    //     })
+    //     .catch(() => {})
+    // },
     // 获取审核状态数据
     getAuditStatusList () {
       const status = dataList.auditStatus;

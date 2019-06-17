@@ -250,23 +250,22 @@ export default {
           if (res) {
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
-            // if (this.vehicleTypeList.length > 0) {
-              this.dataList.map(item => {
-                item.vehicleTypeName = '';
-                item.numberTypeName = '';
-                this.vehicleTypeList.map(val => {
-                  if (item.vehicleType == val.enumField) {
-                    item.vehicleTypeName = val.enumValue;
-                  }
-                });
-                this.numberTypeList.map(val => {
-                  if (item.numberType == val.enumField) {
-                    item.numberTypeName = val.enumValue;
-                  }
-                });
+
+            this.dataList.map(item => {
+              item.vehicleTypeName = '';
+              item.numberTypeName = '';
+
+              this.vehicleTypeList.map(val => {
+                if (item.vehicleType == val.enumField) {
+                  item.vehicleTypeName = val.enumValue;
+                }
               });
-              console.log(this.dataList)
-            // }
+              this.numberTypeList.map(val => {
+                if (item.numberType == val.enumField) {
+                  item.numberTypeName = val.enumValue;
+                }
+              });
+            });
           }
         })
     },

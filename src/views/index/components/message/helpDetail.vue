@@ -24,7 +24,10 @@
         <div><span class="vl_f_666" style="margin-bottom: 12px;">事发时间：</span><span class="vl_f_333">{{helpDetail.reportTime}}</span></div>
         <div style="margin-bottom: 12px;"><span class="vl_f_666">事件情况：</span><span class="vl_f_333">{{helpDetail.eventDetail}}</span></div>
         <div><span class="vl_f_666">事发地点：</span><span class="vl_f_333">{{helpDetail.eventAddress}}</span></div>
-        <div class="help_det_img_list" v-if="helpDetail.attachmentList.length > 0" id="imgsOne">
+        <div class="help_det_img_list">
+          <template v-if="helpDetail.attachmentList.length > 0 && helpDetail.attachmentList[0].fileType === 1">
+            <img v-for="(item, index) in helpDetail.attachmentList" :src="item.path" :key="index" alt="" @click="openBigImg(index, helpDetail.attachmentList)">
+          </template>
           <div v-if="helpDetail.attachmentList.length > 0 && helpDetail.attachmentList[0].fileType === 2" @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
             <video id="eventVideo" :src="helpDetail.attachmentList[0].path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo()"></video>
             <div class="result_tool" v-show="eventVideoTool">
@@ -44,12 +47,12 @@
           <!-- <img src="//via.placeholder.com/32x32" alt=""> -->
           <img src="../../../../assets/img/wr_photo.png" alt="">
           <ul>
-            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserIdentity}}）</span></li>
+            <li class="con_one"><span>{{item.commentUserMobile}}</span><span class="vl_f_999 vl_f_12">（{{item.commentUserIdentity || '市民'}}）</span></li>
             <li class="con_two"><span class="vl_f_999 vl_f_12" style="margin-right: 10px;">{{item.createTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span><span class="vl_f_999 vl_f_12">来源 {{dicFormater(sourceType, String(item.eventSource || 2))}}</span></li>
             <li class="con_three">{{item.isParticipate ? '已参与民众互助' : '未参与民众互助'}}</li>
             <li class="con_four vl_f_333">{{item.content}}</li>
-            <li class="con_five" v-if="item.sysAppendixInfoList.length > 0" :id="'imgsTwo_' + item.uid">
-              <!-- <img :src="info.path" alt="" v-for="info in item.sysAppendixInfoList" :key="info.uid"> -->
+            <li class="con_five" v-if="item.sysAppendixInfoList.length > 0">
+              <img :src="info.path" alt="" v-for="(info, _index) in item.sysAppendixInfoList" :key="_index"  @click="openBigImg(_index, item.sysAppendixInfoList)">
             </li>
             <li class="con_six">
               <div><i class="vl_icon vl_icon_message_5"></i><span class="vl_f_666" @click="commentId = item.uid;isConfirmation = false;">回复该评论</span></div>
@@ -115,6 +118,7 @@
       <i @click="showCut = false" class="close_btn el-icon-error"></i>
       <a download="截图" :href="demoImg" id="controlResultCutImg" ></a>
     </div>
+    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
@@ -123,8 +127,9 @@ import {objDeepCopy} from '../../../../utils/util.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
 import {getCommentInfoList, replyComment, shieldComment} from '@/views/index/api/api.message.js';
 import {dataList} from '@/utils/data.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {emotion},
+  components: {emotion, BigImg},
   props: ['helpId'],
   data () {
     return {
@@ -141,6 +146,9 @@ export default {
       shieldId: null,//屏蔽id
       shieldUserId: null,//被屏蔽用户id
       commentIndex: null,//评论下标
+      imgList: [],
+      imgIndex: null,
+      isShowImg: false,
       // 屏蔽弹窗参数
       shieldDialog: null,
       shieldChecked: false,
@@ -160,53 +168,24 @@ export default {
     this.getCommentInfoList();
   },
   methods: {
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.isShowImg = value;
+      this.imgList = [];
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList = data;
+    },
     // 根据id获取民众互助详情
     getMutualHelpDetail () {
       getEventDetail(this.helpId).then(res => {
         if (res && res.data) {
           this.helpDetail = res.data;
-          // 生产可供预览的图片
-          if (this.helpDetail.attachmentList.some(s => s.fileType === 2)) return false;
-          if (this.helpDetail.attachmentList && this.helpDetail.attachmentList.length > 0) {
-            this.previewPictures('imgsOne', this.helpDetail.attachmentList);
-          }
         }
       })
-    },
-    // 预览图片
-    previewPictures (id, data) {
-      setTimeout(() => {
-        let imgs = data.map(m => m.path);
-        // 图片数组2
-        let imgs2 = []
-        // 获取图片列表容器
-        let $el = document.getElementById(id);
-        let html = '';
-        // 创建img dom
-        imgs.forEach(function (src) {
-          // 拼接html结构
-          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;border-radius:4px;"></div>';
-          // 生成imgs2数组
-          imgs2.push({
-            url: src,
-            angle: 0
-          })
-        })
-        // 将图片添加至图片容器中
-        $el.innerHTML = html;
-        // 使用方法
-        let ziv = new ZxImageView(null, imgs2);
-        // console.log(ziv);
-        // 查看第几张
-        let $images = $el.querySelectorAll('.item');
-        for (let i = 0; i < $images.length; i++) {
-          (function (index) {
-            $images[i].addEventListener('click', function () {
-              ziv.view(index);
-            })
-          }(i))
-        }
-      }, 50)
     },
     // 开始播放
     _playVideo () {
@@ -273,10 +252,6 @@ export default {
         if (res && res.data) {
           this.total = res.data.total;
           this.commentList = this.commentList.concat(res.data.list);
-          for (let item of res.data.list) {
-            if (item.sysAppendixInfoList && item.sysAppendixInfoList.length === 0) continue;
-            this.previewPictures('imgsTwo_' + item.uid, item.sysAppendixInfoList);
-          }
         }
       })
     },
@@ -390,6 +365,15 @@ export default {
         padding-top: 10px;
         display: flex;
         flex-wrap: wrap;
+        > img{
+          width: 117px;
+          height: 117px;
+          margin-right: 20px;
+          margin-bottom: 20px;
+          border-radius: 4px;
+          border:1px solid rgba(211,211,211,1);
+          cursor: pointer;
+        }
         > div{
           width: 117px;
           height: 117px;
@@ -468,13 +452,15 @@ export default {
             width: 428px;
             display: flex;
             flex-wrap: wrap;
-            // > img{
-            //   width:117px;
-            //   height:117px;
-            //   margin-right: 20px;
-            //   border-radius:4px;
-            //   border:1px solid rgba(211,211,211,1);
-            // }
+            > img{
+              width:117px;
+              height:117px;
+              margin-right: 20px;
+              margin-bottom: 20px;
+              border-radius:4px;
+              border:1px solid rgba(211,211,211,1);
+              cursor: pointer;
+            }
           }
           .con_six{
             display: flex;
@@ -528,6 +514,7 @@ export default {
               vertical-align: text-bottom;
             }
             > p:nth-child(1){
+              margin-bottom: 6px;
               font-weight: bold;
             }
           }
@@ -632,6 +619,10 @@ export default {
     &:hover {
       color: #409EFF;
     }
+  }
+  video{
+    border-radius:4px;
+    border:1px solid rgba(211,211,211,1);
   }
 }
 </style>

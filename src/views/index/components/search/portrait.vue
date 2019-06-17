@@ -114,8 +114,7 @@
             <div class="struc_c_d_info">
               <h2>{{sturcDetail.name}}<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span>待查字典</span>
-                <span>待查字典</span>
+                <span>{{sturcDetail.label}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.birthDate}}</span>
@@ -150,7 +149,6 @@
   </div>
 </template>
 <script>
-import {testData} from '../judge/testData';
 import {ajaxCtx} from '@/config/config';
 import {ScpGETPortraitInfo, ScpGETretrievalHisById} from '../../api/api.search.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../api/api.judge.js';
@@ -171,7 +169,6 @@ export default {
       },
       pagination: { total: 0, pageSize: 16, pageNum: 1 },
       uploadAcion: ajaxCtx.base + '/new',
-      testData: testData,
       searching: false,
       curImageUrl: '', // 当前上传的图片
       curImgNum: 0, // 当前图片数量

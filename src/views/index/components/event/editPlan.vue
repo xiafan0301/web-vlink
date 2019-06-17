@@ -58,8 +58,8 @@
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="editPlanForm.taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:">
-                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
+                  <el-form-item label="调度部门:">
+                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择调度部门">
                       <el-option
                         v-for="(item, index) in departmentList"
                         :key="'item' + index"
@@ -81,7 +81,7 @@
               <template v-if="editPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
                   <i class="vl_icon vl_icon_event_8"></i>
-                  <span>添加协同部门</span>
+                  <span>添加调度任务</span>
                 </div>
               </template>
             </div>

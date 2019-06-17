@@ -49,27 +49,4 @@ const proccessEventType = {
   feedbackId: 5 // 反馈
 }
 
-const vehicleColorList = [
-  { label: '白', value: 'A' },
-  { label: '灰', value: 'B' },
-  { label: '黄', value: 'C' },
-  { label: '粉', value: 'D' },
-  { label: '红', value: 'E' },
-  { label: '紫', value: 'F' },
-  { label: '绿', value: 'G' },
-  { label: '蓝', value: 'H' },
-  { label: '棕', value: 'I' },
-  { label: '黑', value: 'J' },
-  { label: '其他', value: 'Z' }
-]; // 车身颜色
-
-const vehicleTypeList = [ // 车辆类型
-  { label: '执勤车', value: 1 },
-  { label: '公交车', value: 2 },
-  { label: '出租车', value: 3 },
-  { label: '客运车', value: 4 },
-  { label: '校车', value: 5 },
-  { label: '危机车', value: 6 }
-];
-
-export { dataList, handeMethods, operationType, proccessEventType, vehicleColorList, vehicleTypeList };
+export { dataList, handeMethods, operationType, proccessEventType };

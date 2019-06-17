@@ -114,4 +114,20 @@ export const validatePersonNum = (rule, value, callback) => {
       callback();
     }
   }
+  callback();
 };
+/**
+ * 校验轮巡时间  30分钟≤（结束时间-开始时间）≤8小时
+ */
+export const validatePatrolTime = (rule, value, callback) => {
+  if (value) {
+    const startTime = new Date(value[0]);
+    const endTime = new Date(value[1]);
+    const timeDiff = endTime.getTime() - startTime.getTime();
+    if (timeDiff < 1800000 || timeDiff > (8*60*60*1000)) {
+      callback(new Error('请选择正确的时间'));
+    }
+  }
+  callback();
+};
+
