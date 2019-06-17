@@ -57,7 +57,6 @@ export default {
             width: 100%;
             height: 100%;
             background: #000;
-            opacity: 0.8;
             position: relative;
             img {
               display: block;
@@ -67,6 +66,7 @@ export default {
               top:0;
               bottom:0;
               margin:auto;
+              max-height: 94vh;
             }
           }
           .el-carousel__arrow {

@@ -327,7 +327,12 @@ export default {
         this.$emit('changePageType', 1);
       // 新建、复用布控任务时
       } else {
-        this.$router.push({ name: 'control_manage' });
+        // 从事件模块跳转过来的
+        if (this.$route.query.eventId) {
+          this.$router.push({ name: 'event_manage' });
+        } else {
+          this.$router.push({ name: 'control_manage' });
+        }
       }
       this.toGiveUpDialog = false;
     },
