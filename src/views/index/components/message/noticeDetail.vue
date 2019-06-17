@@ -13,20 +13,27 @@
         <div class="vl_f_666">消息内容：</div>
         <div>
           <div class="vl_f_333">{{detail.details}}</div>
-          <div class="det_pic_box" id="imgs">
+          <div class="det_pic_box">
+            <img v-for="(item, index) in imgList" :src="item.path" alt="" :key="index" @click="openBigImg(index)">
           </div>
         </div>
       </div>
     </div>
+    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
 import {getMsgNoteDetail} from '@/views/index/api/api.message.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
+  components: {BigImg},
   props: ['msgNoteId'],
   data () {
     return {
-      detail: null
+      detail: null,
+      imgList: [],
+      imgIndex: null,
+      isShowImg: false
     }
   },
   mounted () {
@@ -38,50 +45,22 @@ export default {
       getMsgNoteDetail(this.msgNoteId).then(res => {
         if (res && res.data) {
           this.detail = res.data;
-          if (this.detail.sysAppendixList && this.detail.sysAppendixList.length > 0) {
-            this.previewPictures();
-          }
+          this.imgList = this.detail.sysAppendixList;
         }
       })
+    },
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.isShowImg = value;
+    },
+    // 放大图片
+    openBigImg (index) {
+      this.isShowImg = true;
+      this.imgIndex = index;
     },
     skip (pageType) {
       this.$emit('changePage', pageType)
     },
-    // 预览图片
-    previewPictures () {
-      setTimeout(() => {
-        let imgs = this.detail.sysAppendixList.map(m => m.path);
-        // 图片数组2
-        let imgs2 = []
-        // 获取图片列表容器
-        let $el = document.getElementById('imgs');
-        let html = '';
-        // 创建img dom
-        imgs.forEach(function (src) {
-          // 拼接html结构
-          html += '<div class="item" style="width: 33%;height: 137px;padding-right: 20px;padding-bottom: 20px;cursor: pointer;" data-angle="' + 0 + '"><img src="' + src + '" style="width: 100%;height: 100%;border-radius:4px;"></div>';
-          // 生成imgs2数组
-          imgs2.push({
-            url: src,
-            angle: 0
-          })
-        })
-        // 将图片添加至图片容器中
-        $el.innerHTML = html;
-        // 使用方法
-        let ziv = new ZxImageView(null, imgs2);
-        // console.log(ziv);
-        // 查看第几张
-        let $images = $el.querySelectorAll('.item');
-        for (let i = 0; i < $images.length; i++) {
-          (function (index) {
-            $images[i].addEventListener('click', function () {
-              ziv.view(index);
-            })
-          }(i))
-        }
-      }, 50)
-    }
   }
 }
 </script>
@@ -110,12 +89,13 @@ export default {
         padding-top: 20px;
         display: flex;
         flex-wrap: wrap;
-        // .img{
-        //   width: 33%;
-        //   height: 137px;
-        //   padding-right: 20px;
-        //   padding-bottom: 20px;
-        // }
+        > img{
+          width: 33%;
+          height: 137px;
+          padding-right: 20px;
+          padding-bottom: 20px;
+          cursor: pointer;
+        }
       }
     }
   }

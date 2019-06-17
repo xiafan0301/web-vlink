@@ -314,7 +314,6 @@ export default {
     },
     // 显示大屏
     showScreen () {
-      console.log(1111111111111111)
       $('.control_map').append($('#controlVideo'));
       this.isShowVideo = false;
       this.isShowV = false; 
@@ -426,7 +425,6 @@ export default {
     },
     // 获取设备下布控列表
     getControlMapByDevice (obj) {
-      console.log(obj, 'obj')
       const params = {
         deviceName: obj.deviceName,
         uid: obj.uid,
@@ -447,7 +445,6 @@ export default {
               <div class="vl_map_close vl_icon vl_icon_control_04"></div>
               <div class="vl_map_click_main">
               <div class="vl_map_img">`;
-              console.log(obj, 'objobjobj')
               if (obj.deviceStatus === 1) {
                 vlMapVideo += `<div id="${_this.domId}" style="width: 300px;height: 150px;background: #000;"></div>`;
               } else {
@@ -623,7 +620,6 @@ export default {
           this.clickWindow = clickWindow;
           // 跳转至布控详情页
           $('#mapBox').on('click', '.vl_map_name', function (e) {
-            console.log(e)
             const { href } = _this.$router.resolve({
               name: 'control_manage',
               query: {pageType: 2, state: obj.surveillanceStatus, controlId: e.currentTarget.id }
@@ -720,7 +716,6 @@ export default {
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let content = '';
-        console.log(obj, 'obj')
         if (obj.deviceStatus === 1) {
           // 设备正常
           content = '<div id="' + obj.uid + '" class="vl_icon vl_icon_control_01"></div>';

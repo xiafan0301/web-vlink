@@ -55,9 +55,6 @@
     },
     "parserOptions": {
       "parser": "babel-eslint"
-    },
-    "globals": {
-      "ZxImageView": true
     }
   },
   "postcss": {

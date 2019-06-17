@@ -272,7 +272,7 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(controlResList.list, index, 1)">
+                  <img :src="item.path" alt="" v-show="!item.isShowCurImg" @click="openBigImg(index, controlResList.list)">
                   <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
@@ -369,7 +369,7 @@
         <vue-scroll>
           <div class="detail_img_box">
             <div v-for="(item, index) in eventDetail.attachmentList" :key="item.id">
-              <img v-if="item.fileType === 1" @click="previewPictures(eventDetail.attachmentList, index, 2)" :src="item.path" alt="">
+              <img v-if="item.fileType === 1" @click="openBigImg(index, eventDetail.attachmentList)" :src="item.path" alt="">
               <div v-else @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
                 <video id="eventVideo" :src="item.path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo(item, 2)"></video>
                 <div class="result_tool" v-show="eventVideoTool">
@@ -386,6 +386,7 @@
     </div>
     <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
+    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
@@ -397,8 +398,9 @@ import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
 import {mapXupuxian} from '@/config/config.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {delDialog, stopDialog, flvplayer},
+  components: {delDialog, stopDialog, flvplayer, BigImg},
   props: ['controlId'],
   data () {
     return {
@@ -406,6 +408,9 @@ export default {
       controlDetail: conDetail,//布控详情
       eventDetail: null,//事件详情
       eventVideoTool: false,
+      imgList: [],
+      imgIndex: null,
+      isShowImg: false,
       // 地图参数
       map: null,
       zoomLevel: 10,
@@ -460,30 +465,16 @@ export default {
     this.getControlDetail();
   },
   methods: {
-    // 预览图片
-    previewPictures (data, index, type) {
-      setTimeout(() => {
-        let imgs = [];
-        if (type === 1) {
-          imgs = data.map(m => m.snapPhoto);} 
-        else {
-          imgs = data.map(m => m.path);
-        }
-        // 图片数组2
-        let imgs2 = []
-        imgs.forEach(function (src) {
-          // 生成imgs2数组
-          imgs2.push({
-            url: src,
-            angle: 0
-          })
-        })
-        // 使用方法
-        let ziv = new ZxImageView(null, imgs2);
-        this.$nextTick(() => {
-          ziv.view(index);
-        })
-      }, 50)
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.isShowImg = value;
+      this.imgList = [];
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList = data;
     },
     /* ************布控结果********* */
     // 停止播放
@@ -785,6 +776,8 @@ export default {
             this.$set(f, 'curVideoPlay', false);
             this.$set(f, 'curVideoTool', false);
             this.$set(f, 'isShowCurImg', false);
+            f.path = f.snapPhoto;
+            delete f.snapPhoto;
           })
         }
       })
@@ -1393,6 +1386,7 @@ export default {
     }
     .detail_img_box{
       width: 64%;
+      height: 276px;
       padding: 20px 0 0 70px;
       display: flex;
       flex-flow: row wrap;
@@ -1406,6 +1400,7 @@ export default {
         img{
           width: 100%;
           height: 100%;
+          cursor: pointer;
         }
         > div{
           width: 100%;
