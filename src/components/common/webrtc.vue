@@ -491,53 +491,29 @@ export default {
         if (_state === 'new') {
           // 新建连接
           console.log('wr >>>>> 新建连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            uid: obj.uid,
-            state: 12 // 正在建立连接
-          });
+          obj.state = 12;
         } else if (_state === 'connecting') {
           // 连接中
           console.log('wr >>>>> 连接中');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            uid: obj.uid,
-            state: 13 // 正在连接中
-          });
+          obj.state = 13;
         } else if (_state === 'connected') {
           // 已连接
           console.log('wr >>>>> 已连接');
           obj.state = 20;
-          _this.wrStateHandler(obj);
-
         } else if (_state === 'disconnected') {
           // 断开连接
           console.log('wr >>>>> 断开连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 32 // 断开连接
-          });
+          obj.state = 32;
         } else if (_state === 'failed') {
           // 连接失败
           console.log('wr >>>>> 连接失败');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 31 // 连接失败
-          });
+          obj.state = 31;
         } else if (_state === 'closed') {
           // 连接关闭
+          obj.state = 33;
           console.log('wr >>>>> 连接关闭');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 33 // 连接关闭
-          });
         }
+        _this.wrStateHandler(obj);
       };
       // 候选
       _pc.onicecandidate = function (event) {
