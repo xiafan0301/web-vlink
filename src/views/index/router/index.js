@@ -78,6 +78,11 @@ const router = new VueRouter({
       path: '/pc',
       name: 'pc',
       component: () => import('@/views/index/components/webrtcTest.vue')
+    }, {
+      path: '/share',
+      name: 'share',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/appshare/share.vue')
     }
   ]
 })

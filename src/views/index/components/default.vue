@@ -66,6 +66,8 @@ export default {
 <style lang="scss" scoped>
 .vl_main {
   height: 100%;
+  min-width: 1200px;
+  min-height: 625px;
   > .vl_content {
     padding-top: 100px;
     height: 100%;
