@@ -327,7 +327,12 @@ export default {
         this.$emit('changePageType', 1);
       // 新建、复用布控任务时
       } else {
-        this.$router.push({ name: 'control_manage' });
+        // 从事件模块跳转过来的
+        if (this.$route.query.eventId) {
+          this.$router.push({ name: 'event_manage' });
+        } else {
+          this.$router.push({ name: 'control_manage' });
+        }
       }
       this.toGiveUpDialog = false;
     },
@@ -350,12 +355,6 @@ export default {
     },
     // 保存布控任务
     saveControl (formName) {
-      // 点击保存按钮时清除没勾选的模型类别的验证结果
-      if (!this.checkList.some(s => s === '人员追踪')) {
-        this.$refs.mapOne.reset();
-      } else if (!this.checkList.some(s => s === '车辆追踪')) {
-        this.$refs.mapTwo.reset();
-      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠
@@ -371,7 +370,7 @@ export default {
               } else if (f === '车辆追踪') {
                 this.$refs.mapTwo.validateModelTwo();
                 modelList.push(this.modelDataTwo);
-              } else if (f === '越界分析') {
+              } else if (f === '越界分析') {  
                 this.$refs.mapThree.validateModelThree();
                 modelList.push(this.modelDataThree);
               } else if (f === '范围分析') {
@@ -519,18 +518,8 @@ export default {
         }
       })
     },
-    // 编辑布控
+    // 编辑布控任务
     putControl (formName) {
-      // 点击保存按钮时清除没勾选的模型类别的验证结果
-      if (!this.checkList.some(s => s === '人员追踪')) {
-        if (this.$refs.mapOne) {
-          this.$refs.mapOne.reset();
-        }
-      } else if (!this.checkList.some(s => s === '车辆追踪')) {
-        if (this.$refs.mapTwo) {
-          this.$refs.mapTwo.reset();
-        }
-      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠

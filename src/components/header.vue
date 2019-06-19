@@ -95,7 +95,7 @@
                 </template>
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
-                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <!-- <div class="alarm_b_list">{{item.numberColor}}</div> -->
                   <div class="alarm_b_list">{{item.vehicleType}}</div>
                 </template>
                 <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
@@ -669,6 +669,7 @@ export default {
     .hd_alarm_b{
       margin-top: 10px;
       display: flex;
+      flex-wrap: wrap;
       /* justify-content: space-between; */
       > div{
         padding: 5px;
@@ -678,6 +679,10 @@ export default {
         border-radius:3px;
         color: #666;
         margin-right: 8px;
+        flex: none;
+        &:last-child {
+          margin-right: 0;
+        }
       }
       .alarm_b_list {
         span {

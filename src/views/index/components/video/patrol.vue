@@ -537,6 +537,11 @@ export default {
         }, this.patrolHandlerData.currentRoundRemain * 1000);
       } else {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
+        if (this.showVideoTotal !== this.patrolHandlerData.currentRound.frameNum) {
+          // 改变布局
+          this.showVideoTotal = this.patrolHandlerData.currentRound.frameNum;
+          this.bResize = {};
+        }
         this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
       }
       this.$message('轮巡进行中。');
@@ -698,14 +703,16 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord(item.uid).then(() => {
-        this.getVideoRecordList();
-        this.$message({
-          message: '删除成功！',
-          type: 'success'
-        });
+      apiDelVideoRecord(item.uid).then((res) => {
+        if (res) {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }
       }).catch(error => {
-        this.$message.error('删除失败！');
+        // this.$message.error('删除失败！');
         console.log("apiDelVideoRecord error：", error);
       });
     },
@@ -715,21 +722,19 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消'
       }).then(() => {
-        apiDelVideoRecords({playType: 1}).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        apiDelVideoRecords({playType: 1}).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecords error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
 

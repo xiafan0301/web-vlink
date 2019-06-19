@@ -392,6 +392,17 @@ export default {
       }
     }
   },
+  watch: {
+    // 取消分析模型勾选时，清除没勾选的模型必填项的验证结果
+    isDisabled (val) {
+      if (this.modelType === '1' && val) {
+        this.reset();
+      }
+      if (this.modelType === '2' && val) {
+        this.reset();
+      }
+    }
+  },
   mounted () {
     if (this.modelType !== '3' && this.modelDevData && this.modelDevData.length > 0) {
       this.resetMap();
@@ -435,7 +446,6 @@ export default {
     },
     // 从库中选择确定
     seltarget () {
-      console.log(this.targetObj, 'this.targetObj')
       let groupList = [],objList = [];
       // 过滤组
       groupList = this.targetObj.filter(f => f.surveillanceObjectDtoList !== undefined);
