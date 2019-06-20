@@ -113,7 +113,7 @@
         <div>
           <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
           <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <!-- <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span> -->
           <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
