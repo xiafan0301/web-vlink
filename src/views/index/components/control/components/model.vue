@@ -966,6 +966,7 @@ export default {
     },
     // 地图标记 data:摄像头数据/卡口数据
     mapMark (data, selBayList, type) {
+      console.log(data, 'data')
       let _this = this, _hoverWindow = null, areaName = null, markerList = [];
       // 卡口
       if (data.length > 0 && data[0].type === 2) {
@@ -986,13 +987,9 @@ export default {
           let _content = null;
           // 摄像头
           if (_obj.type === 1) {
-            if (_obj.deviceStatus && _obj.isSelected) {
+            if (_obj.isSelected) {
               _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-            } else if (_obj.deviceStatus && !_obj.isSelected) {
-              _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            } else if (!_obj.deviceStatus && _obj.isSelected) {
-              _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
-            } else if (!_obj.deviceStatus && !_obj.isSelected) {
+            } else if (!_obj.isSelected) {
               _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             }
           // 卡口
@@ -1188,8 +1185,6 @@ export default {
         const lngLat = data.obj.getPath()[data.obj.getPath().length - 1];
         _position = [lngLat.lng, lngLat.lat];
       }
-      // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-      // if (_marker) return;
       _marker = new window.AMap.Marker({ // 添加自定义点标记
         map: _this.map,
         position: _position,
@@ -1286,26 +1281,20 @@ export default {
         }
         // 摄像头
         if (_obj.type === 1) {
-          if (_obj.deviceStatus && !_obj.isSelected) {
+          if (!_obj.isSelected) {
             devDom.removeClass('vl_icon_sxt');
             devDom.addClass('vl_icon_sxt_uncheck');
             devDom.removeClass('vl_icon_control_36');
             if (type === undefined) {
               devDom.addClass('vl_icon_control_34');
             }
-          } else if (_obj.deviceStatus && _obj.isSelected) {
+          } else {
             devDom.removeClass('vl_icon_sxt_uncheck');
             devDom.addClass('vl_icon_sxt');
             devDom.removeClass('vl_icon_control_34');
             if (type === undefined) {
               devDom.addClass('vl_icon_control_36');
             }
-          } else if (!_obj.deviceStatus && !_obj.isSelected) {
-            devDom.removeClass('vl_icon_sxt_not_choose');
-            devDom.addClass('vl_icon_sxt_uncheck');
-          } else if (!_obj.deviceStatus && _obj.isSelected) {
-            devDom.removeClass('vl_icon_sxt_uncheck');
-            devDom.addClass('vl_icon_sxt_not_choose');
           }
         // 卡口
         } else {
@@ -1627,32 +1616,13 @@ export default {
             setTimeout(() => {
               //在覆盖物内的置为选中-图标
               const devDom = $(`#${_this.mapId} #${_obj.uid}_sxt`);
-              // 回填时
-              if (resDevList !== undefined) {
-                if (resDevList.some(s => s.deviceId === _obj.uid)) {
-                  _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-                  // 摄像头
-                  if (_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_control_34');
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt');
-                  } else if (!_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt_not_choose');
-                  }
-                }
-              // 新增时
-              } else {
+              // 新增时/回填时
+              if (resDevList === undefined || resDevList.some(s => s.deviceId === _obj.uid)) {
                 _obj.isSelected = true;//在覆盖物内的置为选中-多选框
                 // 摄像头
-                if (_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_control_34');
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt');
-                } else if (!_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt_not_choose');
-                }
+                devDom.removeClass('vl_icon_control_34');
+                devDom.removeClass('vl_icon_sxt_uncheck');
+                devDom.addClass('vl_icon_sxt');
               }
               // 计算追踪点到设备的距离km
               const p1 = [_obj.longitude, _obj.latitude];
@@ -1808,20 +1778,12 @@ export default {
         setTimeout(() => {
           //在覆盖物内的置为选中-图标
           const devDom = $(`#${_this.mapId} #${_obj.uid}_kk`);
-          // 新增时
-          if (resBayList === undefined) {
+          // 新增时/回填时
+          if (resBayList === undefined || resBayList.some(s => s.bayonetId === _obj.uid)) {
             devDom.removeClass('vl_icon_control_35');
             devDom.removeClass('vl_icon_kk_uncheck');
             devDom.addClass('vl_icon_kk');
             _obj.isSelected = true;//在范围内的置为选中-多选框
-          // 回填时
-          } else {
-            if (resBayList.some(s => s.bayonetId === _obj.uid)) {
-              devDom.removeClass('vl_icon_control_35');
-              devDom.removeClass('vl_icon_kk_uncheck');
-              devDom.addClass('vl_icon_kk');
-              _obj.isSelected = true;//在范围内的置为选中-多选框
-            }
           }
           _this.trackPointList[_index].bayonetList.push(_obj);
         }, 500)
@@ -1918,29 +1880,12 @@ export default {
             setTimeout(() => {
               //在覆盖物内的置为选中-图标
               const devDom = $(`#${_this.mapId} #${_obj.uid}_sxt`);
-              // 新增时
-              if (resDevList === undefined) {
-                if (_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_control_34');
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt');
-                } else if (!_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt_not_choose');
-                }
+              // 新增时/回填时
+              if (resDevList === undefined || resDevList.some(s => s.deviceId === _obj.uid)) {
+                devDom.removeClass('vl_icon_control_34');
+                devDom.removeClass('vl_icon_sxt_uncheck');
+                devDom.addClass('vl_icon_sxt');
                 _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-              } else {
-                if (resDevList.some(s => s.deviceId === _obj.uid)) {
-                  if (_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_control_34');
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt');
-                  } else if (!_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt_not_choose');
-                  }
-                  _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-                }
               }
               _this.trackPointList[_index].devList.push(_obj);
             }, 1000)
