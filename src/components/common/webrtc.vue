@@ -43,7 +43,9 @@
 </template>
 <script>
 import {webrtcConfig} from '@/config/config.js';
+import {random14} from '../../utils/util.js';
 import {oWRMsgs} from './webrtc.data.js';
+import {MapGETmonitorList} from '../../views/index/api/api.map.js';
 export default {
   /**
    *  // 初始化的时候webrt对象
@@ -69,7 +71,7 @@ export default {
    *  exceptCalling // 收到移动端的通话请求，
    *  wrSwitchCall // 视频切换到语音通话
    */
-  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
+//  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
   data () {
     return {
       localId: 'aorise',
@@ -98,6 +100,17 @@ export default {
       },
       videoContainerIdPre: 'remoteContainer_',
       videoIdPre: 'remoteVideo_'
+    }
+  },
+  computed: {
+    oAdd () {
+      return this.$store.state.oAdd;
+    },
+    oDel () {
+      return this.$store.state.oDel;
+    },
+    callingList () {
+      return this.$store.state.callingList;
     }
   },
   watch: {
@@ -231,7 +244,7 @@ export default {
             message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
             type: 'warning'
           });
-          this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+          this.wrClose({uid: obj.uid, _mid: obj._mid});
           return;
         }
         let flag = false; // 是否已经在通话中
@@ -384,7 +397,7 @@ export default {
           oMsData: oMsg.data,
           isAddOffered: isAddOffered
         }
-        _this.$emit('exceptCalling', eC)
+        _this.exceptCalling(eC)
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -420,7 +433,7 @@ export default {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         if (!navigator.getMedia) {
-          _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+          _this.wrClose({uid: obj.uid, _mid: obj._mid});
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
@@ -458,7 +471,7 @@ export default {
             });
           }, function (_error) {
             console.log(_error)
-            _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+            _this.wrClose({uid: obj.uid, _mid: obj._mid});
             _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
           })
         });
@@ -618,14 +631,6 @@ export default {
       let pc = new PeerConnection(iceServer);
       return pc;
     },
-    // 关闭窗口
-    wrClose (item) {
-      this.$emit('wrClose', {uid: item.uid, _mid: item._mid});
-      // 自己构造 oMsg
-      this.wrOff({
-        sender: item.remoteId
-      }, true);
-    },
     /*
      * 通讯断开连接
      * oMsg  sender&senderName & audioFlag
@@ -697,7 +702,7 @@ export default {
         state: 状态
         {}：其它信息
        */
-      this.$emit('wrStateEmit', obj);
+      this.wrStateEmit(obj);
     },
     /**
      * 通话消息提示处理器 oWRMsgs
@@ -733,7 +738,7 @@ export default {
     // 切换语音
     wrSwitchCall (item) {
       item.type === '0' ? item.type = '1' : item.type = '0';
-      this.$emit('wrSwitchCall', item);
+      this.$store.commit('SWITCH_CALL', Object.assign({}, item))
       this.wsSend(webrtcConfig.apis.change, {
         type: 'CHANGE',
         recipient: item.remoteId,
@@ -743,6 +748,74 @@ export default {
     // 静音
     wrMute (item) {
       item.mute = !item.mute;
+    },
+    // 语音视频通话
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
+      if (oData.state > 20) {
+        this.wrClose(oData);
+      } else if (oData.state === 20 && oData.minute === 0 && oData.second === 0) {
+        this.$nextTick(() => {
+          this.$set(oData, 'isTime', true)
+        })
+        oData.countTime(oData);
+        this.$store.commit('STATE_HANDLER', Object.assign({}, oData))
+      }
+    },
+    wrClose (data) {
+      // $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
+      let o = this.callingList.find(x => x.uid === data.uid);
+      if (o) {
+        // this.map.remove(o.mark);
+        o.clearTime(o);
+      }
+      // 关闭通话，手动将state设为32，需要监听的模块，监听到继续做响应操作
+      data.state = 32;
+      this.$store.commit('STATE_HANDLER', Object.assign({}, data));
+      this.$store.commit('DEL_WEBRTC', data);
+      // 自己构造 oMsg
+      this.wrOff({
+        sender: data.remoteId
+      }, true);
+    },
+    // 收到手机端发送的视频请求
+    exceptCalling (data) {
+      // 增加通话对象到webrtc ，先查询到该来点用户信息，
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params).then( res => {
+        if (res) {
+          let _obj = {}, cObj = {};
+          res.data.areaTreeList.forEach(x => {
+            x.sysUserExtendList.forEach(y => {
+              if (y.uid + '' === data.remoteId) {
+                _obj = y;
+              }
+            })
+          })
+          cObj = {
+            uid: _obj.uid + '',
+            longitude: _obj.longitude,
+            latitude: _obj.latitude,
+            remoteId: _obj.uid + '',
+            remoteName: _obj.infoName,
+            type: data.type,
+            _id: 'mapCall' + random14(),
+            _mid: 'mapMark3' +_obj.uid,
+            isTime: false,
+            minute: 0,
+            second: 0,
+            timer: null,
+            mark: null,
+            mute: false,
+            oMsData: data.oMsData,
+            isAddOffered: data.isAddOffered
+          }
+          console.log(_obj)
+          this.$store.commit('ADD_WEBRTC', {oAdd: cObj})
+        }
+      })
     }
   },
   beforeDestroy () {
