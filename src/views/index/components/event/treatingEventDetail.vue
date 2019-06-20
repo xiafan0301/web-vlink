@@ -505,6 +505,8 @@ export default {
 <style lang="scss" scoped>
 .treating-detail {
   width: 100%;
+  height: 100%;
+  overflow-y: scroll;
   .content-box {
     width: 100%;
     padding: 0 20px;

@@ -18,9 +18,9 @@
       </li>
     </ul>
     <div class="eve_content">
-      <vue-scroll>
+      <!-- <vue-scroll> -->
         <router-view></router-view>
-      </vue-scroll>
+      <!-- </vue-scroll> -->
     </div>
   </div>
 </template>
