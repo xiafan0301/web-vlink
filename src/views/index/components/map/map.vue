@@ -172,8 +172,6 @@
     </el-dialog>
     <!--全屏视频监控-->
     <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
-    <!--语音视频通话-->
-    <div is="webrtc" @wrStateEmit="wrStateEmit" @wrClose="wrClose" @wrSwitchCall="wrSwitchCall" @exceptCalling="exceptCalling" :oAdd="oAdd" :oDel="oDel"></div>
     <!--通话时长-->
     <p :class="'vl_map_time_' + item._id" v-for="item in isCalling"  :key="item.id">
       {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
@@ -182,13 +180,12 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import webrtc from '@/components/common/webrtc.vue';
 import {formatDate, h2canvas, objDeepCopy, random14} from '../../../../utils/util.js';
 import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
 import {apiVideoPlay} from "@/views/index/api/api.video.js";
 import {getAlarmListByDev} from '@/views/index/api/api.control.js';
 export default {
-  components: {flvplayer, webrtc},
+  components: {flvplayer},
   data () {
     return {
       defaultExpand: [],
@@ -280,14 +277,29 @@ export default {
 //      isPc: false,
 //      telNo: null,
 //      curCall: {}
-      oAdd: {},
-      oDel: {},
-      callingList: [] // 通话状态下的人员列表，{}包含
+//      oAdd: {},
+//      oDel: {},
+//      callingList: [] // 通话状态下的人员列表，{}包含
     }
   },
   computed: {
     isCalling () {
-      return this.callingList.filter(x => x.isTime)
+      return this.$store.state.callingList.filter(x => x.isTime)
+    },
+    oAdd () {
+      return this.$store.state.oAdd;
+    },
+    oDel () {
+      return this.$store.state.oDel;
+    },
+    callingList () {
+      return this.$store.state.callingList;
+    },
+    stateHandler () {
+      return this.$store.state.stateHandler;
+    },
+    switchCall () {
+      return this.$store.state.switchCall;
     }
   },
   created () {
@@ -363,6 +375,29 @@ export default {
           this.constObj[x].supTypeList = [];
         }
       })
+    },
+    // 视频通话相关
+    stateHandler (oData) {
+      console.log('----------------------------->', oData)
+      if (oData.state > 20) {
+        if (oData.mark) {
+          this.map.remove(oData.mark);
+        }
+        $('#' + oData._mid).removeClass('vl_icon_map_mark_calling');
+      } else if (oData.state === 20) {
+        let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
+        setTimeout(() => {
+          $('#' + oData._id).append(domT[0])
+        }, 1000)
+      }
+    },
+    switchCall (data) {
+      let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
+       $('#' + data._id + ' div').removeClass(_sclass);
+       $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
+    },
+    oAdd () {
+      this.watchCalling();
     }
   },
   mounted () {
@@ -446,7 +481,9 @@ export default {
     _this.mapMarkerEvents();
     setTimeout(() => {
       this.getAlarmListByDev();
-    }, 12000)
+    }, 12000);
+
+
   },
   methods: {
     filterMapTree () {
@@ -792,13 +829,14 @@ export default {
               this.updateDom();
               // 定时查询车辆数据
               this.carLoop();
+
+              this.watchCalling();
             })
           }
         })
     },
     carLoop () {
       this.vehicleTimer = setTimeout(() => {
-        console.log('1')
         this.getVehicel().then(_supData => {
           let _carL = this.mapTreeData[0].infoList.find(x => x.infoName === '车辆');
           _supData = this.objSetItem(_supData, {infoName: 'vehicleNumber', areaType: '5', dataType: 2, isShow: true, longitude: 'gpsLongitude', latitude: 'gpsLatitude', isDrawLine: false});
@@ -871,7 +909,6 @@ export default {
             })
           }
           _carL.carList = objDeepCopy(_supData);
-          console.log(this.mapTreeData[0].infoList[9])
           // 判断顶部车辆有没有勾选
           if (this.mapTypeList.includes(2)) {
             _carL.infoList = [];
@@ -891,6 +928,7 @@ export default {
         this.carLoop();
       }, 5000)
     },
+
     // 路线纠偏
     drivingPath (path) {
       let newPath = [];
@@ -963,7 +1001,7 @@ export default {
         }
         // 都加上markSid , 方便处理移动端发起的通话
         if (!z['markSid']) {
-          z['markSid'] = 'mapMark' + random14();
+          z['markSid'] = 'mapMark' + z['dataType'] + z['uid'];
         }
         return z;
       })
@@ -1554,17 +1592,7 @@ export default {
     setElementText (el, content) {
       el.text(content)
     },
-    addCalling (_obj) {
-      if (this.hoverWindow ){this.hoverWindow.close()}
-      let _m = this.markCalling(_obj);
-      _obj.mark = _m;
-      this.oAdd = _obj;
-      this.callingList.push(_obj)
-      $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
-      // 模拟通话成功，开始计时
-      _obj.countTime = this.countTime;
-      _obj.clearTime = this.clearTime;
-    },
+
     markCalling (obj) {
       let _this = this, marker;
       if (obj.longitude > 0 && obj.latitude > 0) {
@@ -1583,22 +1611,6 @@ export default {
         });
       }
       return marker;
-    },
-    countTime (data) {
-      data.timer = setInterval(() => {
-        if (data.second < 59) {
-          data.second += 1;
-        } else {
-          data.second = 0;
-          data.minute += 1;
-        }
-      }, 1000)
-    },
-    clearTime (data) {
-      if (data.timer) {
-        clearInterval(data.timer)
-        data.timer = null;
-      }
     },
     // 清除地图标注
     clearSign (isAll, dataType, _index) {
@@ -2188,87 +2200,31 @@ export default {
         }
       })
     },
-    // 语音视频通话
-    wrStateEmit (oData) {
-      console.log('状态EMIT oData: ', oData);
-      if (oData.state > 20) {
-        this.wrClose(oData);
-      } else if (oData.state === 20) {
-        this.$nextTick(() => {
-          this.$set(oData, 'isTime', true)
-        })
-        console.log(this.callingList)
-        // oData.isTime = true;
-        oData.countTime(oData);
-        let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
-        setTimeout(() => {
-          $('#' + oData._id).append(domT[0])
-        }, 1000)
-      }
-    },
-    wrClose (data) {
-      $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
-      let o = this.callingList.find(x => x.uid === data.uid);
-      if (o) {
-        this.map.remove(o.mark);
-         o.clearTime(o);
-      }
-      let _index = this.callingList.findIndex(x => x.uid === data.uid);
-      if (_index !== -1) {
-        this.callingList.splice(_index, 1);
-      }
-      console.log(this.callingList)
-    },
-    wrSwitchCall (data) {
-      let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
-      $('#' + data._id + ' div').removeClass(_sclass);
-      $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
-    },
-        // 收到手机端发送的视频请求
-    exceptCalling (data) {
-      let _obj, infoList = this.mapTreeData[0].infoList;
-      for (let i = 0; i < infoList.length; i++) {
-        if (parseFloat(infoList[i].uid) === parseFloat(data.remoteId) && infoList[i].dataType === 3) {
-          _obj = infoList[i];
-          break;
-        } else {
-          for (let j = 0; j < infoList[i].infoList.length; j++) {
-            if (parseFloat(infoList[i].infoList[j].uid) === parseFloat(data.remoteId) && infoList[i].infoList[j].dataType === 3) {
-              _obj = infoList[i].infoList[j];
-              break;
-            }
-          }
-          if (_obj) {
-            break;
-          }
-        }
-      }
-      if (!_obj) {
-        this.$message.error('来自非地图上人物的来电')
-      } else {
-        // 增加通话对象到webrtc
-        let cObj = {
-          uid: _obj.uid + '',
-          longitude: _obj.longitude,
-          latitude: _obj.latitude,
-          remoteId: _obj.uid + '',
-          remoteName: _obj.infoName,
-          type: data.type,
-          _id: 'mapCall' + random14(),
-          _mid: _obj.markSid,
-          isTime: false,
-          minute: 0,
-          second: 0,
-          timer: null,
-          mark: null,
-          mute: false,
-          oMsData: data.oMsData,
-          isAddOffered: data.isAddOffered
-        }
-        this.addCalling(cObj)
-      }
-    },
 
+
+    // 语音视频通话
+    addCalling (_obj) {
+      if (this.hoverWindow ){this.hoverWindow.close()}
+      // let _m = this.markCalling(_obj);
+      // _obj.mark = _m;
+      this.$store.commit('ADD_WEBRTC', {oAdd: _obj})
+      /// $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
+    },
+    // 检测到视频通话
+    watchCalling () {
+      // 视频通话相关,初次进入地图，判断是否有在通话中的人员
+      this.callingList.forEach(x => {
+        let _m = this.markCalling(x);
+        x.mark = _m;
+        console.log($('#' + x._mid))
+        this.map.setZoomAndCenter(16, [x.longitude, x.latitude])
+        setTimeout(() => {
+          $('#' + x._mid).addClass('vl_icon_map_mark_calling');
+          let domT = document.getElementsByClassName('vl_map_time_' + x._id)
+          $('#' + x._id).append(domT[0])
+        }, 30)
+      })
+    },
 
     // 模拟假车辆数据
     getVehicel () {
