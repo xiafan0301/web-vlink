@@ -117,7 +117,7 @@
         </el-table-column>
         <el-table-column
           label="状态"
-          prop="force"
+          prop="isForce"
           >
           <template slot-scope="scope">
             <span v-show="scope.row.isForce">禁用</span>
