@@ -1593,7 +1593,6 @@ export default {
       el.text(content)
     },
 
-
     markCalling (obj) {
       let _this = this, marker;
       if (obj.longitude > 0 && obj.latitude > 0) {
@@ -2201,6 +2200,8 @@ export default {
         }
       })
     },
+
+
     // 语音视频通话
     addCalling (_obj) {
       if (this.hoverWindow ){this.hoverWindow.close()}
