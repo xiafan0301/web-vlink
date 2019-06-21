@@ -241,14 +241,25 @@ export const getLunarDateString = (lunarDate) => {
   return data;
 }
 // 深度拷贝
-export const objDeepCopy = (source) => {
-  let sourceCopy = source instanceof Array ? [] : {};
-  for (let item in source) {
-      sourceCopy[item] = typeof source[item] === 'object' ? objDeepCopy(source[item]) : source[item];
+export const objDeepCopy = (obj) => { //递归拷贝
+  if(obj === null) return null; //null 的情况
+  if(obj instanceof RegExp) return new RegExp(obj);
+  if(obj instanceof Date) return new Date(obj);
+  if(typeof obj !== 'object') {
+      //如果不是复杂数据类型，直接返回
+      return obj;
   }
-  return sourceCopy;
+  /**
+   * 如果obj是数组，那么 obj.constructor 是 [Function: Array]
+   * 如果obj是对象，那么 obj.constructor 是 [Function: Object]
+   */
+  let t = new obj.constructor();
+  for(let key in obj) {
+      //如果 obj[key] 是复杂数据类型，递归
+      t[key] = objDeepCopy(obj[key]);
+  }
+  return t;
 }
-
 // 数组去重
 export const unique = (array) => {
   let obj = {}, resultArray = [];
