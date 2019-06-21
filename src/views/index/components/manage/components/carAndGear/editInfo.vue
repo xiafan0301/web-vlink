@@ -67,6 +67,16 @@
               ></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="运营公司:" prop="organId">
+            <el-select style="width: 40%;" v-model="editCar.organId" placeholder="请选择运营公司">
+              <el-option
+                v-for="(item, index) in departmentList"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="设备账号:" prop="deviceAccount">
             <el-input style="width: 40%;" placeholder="请输入设备账号" v-model="editCar.deviceAccount"></el-input>
           </el-form-item>
@@ -233,13 +243,13 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
             });

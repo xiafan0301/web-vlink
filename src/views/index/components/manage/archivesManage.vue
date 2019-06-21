@@ -222,7 +222,7 @@
   </div>
 </template>
 <script>
-import { getDepartmentList, delDepart, addDepart, updateDepart } from '@/views/index/api/api.manage.js';
+import { getDepartmentList, delDepart, addDepart, updateDepart, getUserList, getDepartDetail } from '@/views/index/api/api.manage.js';
 import { apiAreaList } from '@/views/index/api/api.base.js';
 export default {
   data () {
@@ -248,6 +248,7 @@ export default {
       defaultExpandKey: [], // 默认展开的key
       addUnit: {
         proKey: null,
+        chargeUserName: null, // 组织机构负责人
         organName: null, // 单位名称
         organPid: null, // 上级单位
         province: null, // 省
@@ -258,6 +259,7 @@ export default {
       editUnit: {
         uid: null,
         proKey: null,
+        chargeUserName: null, // 组织机构负责人
         organName: null, // 单位名称
         organPid: null, // 上级单位
         province: null, // 省
@@ -287,6 +289,7 @@ export default {
       cityList: [], // 市数据
       countyList: [], // 县数据
       streetList: [], // 街道数据
+      // userList: [], // 用户数据
     }
   },
   mounted () {
@@ -297,9 +300,9 @@ export default {
 
     this.getDepartList();
     this.getAreaList();
+    this.getUsersData();
   },
   methods: {
-    handleAreaData () {},
     // 获取行政区划数据
     getAreaList () {
       const params = {
@@ -367,6 +370,22 @@ export default {
       }
 
       this.getAreaList();
+    },
+    // 获取用户数据
+    getUsersData () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getUserList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            // 默认一个机构负责人
+            this.addUnit.chargeUserName = res.data.list[0].uid;
+            this.editUnit.chargeUserName = res.data.list[0].uid;
+          }
+        })
+        .catch(() => {})
     },
     // 获取当前部门及子级部门
     getDepartList () {
@@ -523,7 +542,6 @@ export default {
                 })
               }
             })
-            console.log()
           }
         })
     },
@@ -531,24 +549,8 @@ export default {
     handleNodeClick (obj) {
       this.activeSelect = obj.uid;
       this.$store.commit('setCurrentOrgan', {
-        currentOrganId: obj.uid
+        currentOrganObj: obj
       });
-      // this.addUnit.organPid = obj.uid;
-
-      // const params = {
-      //   'where.proKey': this.userInfo.proKey,
-      //   'where.organPid': obj.uid,
-      //   pageSize: 0
-      // };
-      // getDepartmentList(params)
-      //   .then(res => {
-      //     if (res) {
-      //       this.departmentFormList.push(obj);
-      //       res.data.list.map(item => {
-      //         this.departmentFormList.push(item);
-      //       });
-      //     }
-      //   })
     },
     // 根据部门进行搜索
     searchData () {
@@ -688,16 +690,12 @@ export default {
     },
     // 显示编辑部门弹出框
     onEditDepart (obj, e) {
+      console.log('obj', obj)
       e.stopPropagation();
 
       this.editDepartmentDialog = true;
 
-      this.editUnit.organName = obj.organName;
-      this.editUnit.organPid = obj.uid;
-      this.editUnit.province = obj.province;
-      this.editUnit.city = obj.city;
-      this.editUnit.region = obj.region;
-      this.editUnit.street = obj.street;
+      this.getDetail(obj.uid);
 
       const params = {
         'where.proKey': this.userInfo.proKey,
@@ -724,6 +722,25 @@ export default {
       } else {
         this.delDepartmentDialog = true;
       }
+    },
+    // 获取机构详情
+    getDetail (id) {
+      const params = {
+        uid: id,
+        proKey: this.userInfo.proKey
+      };
+      getDepartDetail(params)
+        .then(res => {
+          if (res) {
+            console.log('res', res)
+            // this.editUnit.organName = obj.organName;
+            // this.editUnit.organPid = obj.organPid;
+            // this.editUnit.province = obj.province;
+            // this.editUnit.city = obj.city;
+            // this.editUnit.region = obj.region;
+            // this.editUnit.street = obj.street;
+          }
+        })
     }
   }
 }

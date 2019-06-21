@@ -67,6 +67,16 @@
               ></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="运营公司:" prop="organId">
+            <el-select style="width: 40%;" v-model="addCar.organId" placeholder="请选择运营公司">
+              <el-option
+                v-for="(item, index) in departmentList"
+                :key="index"
+                :label="item.organName"
+                :value="item.uid"
+              ></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="设备账号:" prop="deviceAccount">
             <el-input style="width: 40%;" placeholder="请输入设备账号" v-model="addCar.deviceAccount"></el-input>
           </el-form-item>
@@ -110,15 +120,8 @@ export default {
       rules: {
         vehicleNumber: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
-          // { max: 10, message: '最多输入10个字', trigger: 'blur' },
           { validator: checkPlateNumber, trigger: 'blur' }
         ],
-        // transportNo: [
-        //   { max: 50, message: '最多输入50个字', trigger: 'blur'}
-        // ],
-        // identityNo: [
-        //   { max: 17, message: '最多输入17个字', trigger: 'blur'}
-        // ],
         vehicleType: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
@@ -194,15 +197,20 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
+            });
+            this.departmentList.map(val => {
+              if (val.uid == this.$route.query.organObj.uid) {
+                this.addCar.organId = val.uid;
+              } 
             });
           }
         })
