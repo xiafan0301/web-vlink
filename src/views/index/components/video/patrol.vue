@@ -890,12 +890,12 @@ export default {
   > .vid_title {
     position: absolute; top: 0; left: 270px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 16px 0 0 0;
   }
   > .vid_opes {
-    position: absolute; top: 2px; right: 20px;
+    position: absolute; top: 2px; right: 10px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 15px 0 0 0;
   }
   > .vid_content {
     height: 100%;

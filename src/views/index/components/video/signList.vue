@@ -347,9 +347,9 @@ export default {
   height: 100%;
   position: relative;
   > .sign_list {
-    position: absolute; top: 0; left: 20px;
+    position: absolute; top: 0; left: 10px;
     width: 230px; height: 100%;
-    padding: 20px 0;
+    padding: 10px 0;
     > div {
       width: 100%; height: 100%;
       background: #fff;
@@ -359,7 +359,7 @@ export default {
   > .vid_content {
     height: 100%;
     overflow: hidden;
-    padding-left: 250px;
+    padding-left: 240px;
   }
 }
 .show_search {
