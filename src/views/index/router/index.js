@@ -22,6 +22,8 @@ import routerAlarm from './router.alarm.js'
 import routerManage from './router.manage.js'
 // 任务板块 router
 import routerTask from './router.task.js'
+// 车辆侦察 router
+import routerVehicle from './router.vehicle.js'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -50,7 +52,8 @@ const router = new VueRouter({
         routerMessage,
         routerAlarm,
         routerManage,
-        routerTask
+        routerTask,
+        routerVehicle
       ]
     }, {
       path: '/login',
@@ -83,6 +86,20 @@ const router = new VueRouter({
       name: 'share',
       meta: { unrequireLogin: true },
       component: () => import('@/views/index/components/appshare/share.vue')
+    }, {
+      path: '/v',
+      name: 'v',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/vehicle.vue'),
+      redirect: { name: 'v_menu' },
+      children: [
+        {
+          path: 'menu',
+          name: 'v_menu',
+          meta: { unrequireLogin: true },
+          component: () => import('@/views/index/components/vehicle/menu.vue')
+        }
+      ]
     }
   ]
 })
