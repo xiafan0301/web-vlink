@@ -261,6 +261,61 @@
 .vl_icon_archives_5{width: 117px; height: 117px;background-position: -234px -1732px;} /*在库状态*/
 .vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
 .vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
+
+.vl_icon2 {
+  display: inline-block;
+  width: 102px; height: 108px;
+  background-repeat: no-repeat;
+  background-image: url(../img/icons2.png);
+  transition: .4s ease-out;
+}
+
+.vl_icon2_001 { background-position: -36px -38px; }
+.vl_icon2_001:hover { background-position: -36px -148px; }
+.vl_icon2_002 { background-position: -172px -38px; }
+.vl_icon2_002:hover { background-position: -172px -148px; }
+.vl_icon2_003 { background-position: -308px -38px; }
+.vl_icon2_003:hover { background-position: -308px -148px; }
+.vl_icon2_004 { background-position: -444px -38px; }
+.vl_icon2_004:hover { background-position: -444px -148px; }
+.vl_icon2_005 { background-position: -582px -38px; }
+.vl_icon2_005:hover { background-position: -582px -148px; }
+.vl_icon2_006 { background-position: -718px -38px; }
+.vl_icon2_006:hover { background-position: -718px -148px; }
+.vl_icon2_007 { background-position: -854px -38px; }
+.vl_icon2_007:hover { background-position: -854px -148px; }
+
+.vl_icon2_011 { background-position: -36px -293px; }
+.vl_icon2_011:hover { background-position: -36px -418px; }
+.vl_icon2_012 { background-position: -172px -293px; }
+.vl_icon2_012:hover { background-position: -172px -418px; }
+.vl_icon2_013 { background-position: -308px -293px; }
+.vl_icon2_013:hover { background-position: -308px -418px; }
+.vl_icon2_014 { background-position: -444px -293px; }
+.vl_icon2_014:hover { background-position: -444px -418px; }
+.vl_icon2_015 { background-position: -582px -293px; }
+.vl_icon2_015:hover { background-position: -582px -418px; }
+.vl_icon2_016 { background-position: -718px -293px; }
+.vl_icon2_016:hover { background-position: -718px -418px; }
+.vl_icon2_017 { background-position: -854px -293px; }
+.vl_icon2_017:hover { background-position: -854px -418px; }
+.vl_icon2_018 { background-position: -990px -293px; }
+.vl_icon2_018:hover { background-position: -990px -418px; }
+
+.vl_icon2_021 { background-position: -990px -38px; }
+.vl_icon2_021:hover { background-position: -990px -148px; }
+.vl_icon2_022 { background-position: -1126px -38px; }
+.vl_icon2_022:hover { background-position: -1126px -148px; }
+.vl_icon2_023 { background-position: -1262px -38px; }
+.vl_icon2_023:hover { background-position: -1262px -148px; }
+.vl_icon2_024 { background-position: -1398px -38px; }
+.vl_icon2_024:hover { background-position: -1398px -148px; }
+.vl_icon2_025 { background-position: -1126px -293px; }
+.vl_icon2_025:hover { background-position: -1126px -418px; }
+
+
+.vl_content_pad { padding: 10px; }
+
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}

@@ -61,10 +61,10 @@ export default {
   }
 }
 .vid_show_menu {
-  position: absolute; top: 0; left: 20px; z-index: 20;
-  width: 230px; height: 80px;
+  position: absolute; top: 0; left: 10px; z-index: 20;
+  width: 230px; height: 70px;
   > .show_menu_t {
-    position: absolute; top: 15px; left: 0; z-index: 2;
+    position: absolute; top: 10px; left: 0; z-index: 2;
     width: 100%; height: 50px; line-height: 50px;
     background: #fff;
     border: 1px solid #D3D3D3;
@@ -82,7 +82,7 @@ export default {
   > .show_menu_b {
     display: none;
     width: 100%; height: 100%;
-    padding-top: 80px;
+    padding-top: 70px;
     animation: fadeIn .4s ease-out both;
     > div {
       position: relative;
@@ -286,10 +286,10 @@ export default {
   }
 }
 .vid_show_list {
-  width: 100%; height: 100%; padding: 10px;
+  width: 100%; height: 100%; padding: 5px;
   > li {
     float: left;
-    padding: 10px;
+    padding: 5px;
     width: 50%; height: 50%;
     transition: all .3s;
     > div {
