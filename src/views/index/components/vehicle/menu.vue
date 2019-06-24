@@ -135,32 +135,31 @@ export default {
       padding-top: 10px;
       > li {
         position: relative;
-        height: 200px;
         margin-bottom: 10px;
         background-color: #fff;
         box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
         > span {
-          position: absolute; top: 85px; left: 28px;
+          position: absolute; top: 50%; left: 28px;
+          margin-top: -15px;
           width: 50px; height: 24px;
           font-size: 16px; color: #333; font-weight: bold;
           text-align: center;
         }
         > ul {
           padding-left: 100px;
-          overflow: hidden;
-          height: 100%;
+          overflow: hidden; padding-top: 20px; padding-bottom: 20px;
           > li {
             float: left;
-            padding: 0;
-            width: 140px; height: 100%;
+            padding: 20px 0 0 0;
+            width: 140px; height: 180px;
             > a {
               display: block;
-              margin-top: 32px;
+              margin-top: 10px;
               text-align: center;
               > i {}
               > span {
                 display: block;
-                position: relative; top: -10px;
+                position: relative; top: -8px;
                 color: #333; font-size: 14px;
               }
               &:hover { text-decoration: none; }
