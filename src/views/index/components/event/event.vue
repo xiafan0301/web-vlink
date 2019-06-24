@@ -18,7 +18,9 @@
       </li>
     </ul>
     <div class="eve_content">
-      <router-view></router-view>
+      <!-- <vue-scroll> -->
+        <router-view></router-view>
+      <!-- </vue-scroll> -->
     </div>
   </div>
 </template>
@@ -39,6 +41,7 @@ export default {
   > .eve_content {
     height: 100%;
     padding-left: 200px;
+    // overflow: scroll;
   }
 }
 </style>

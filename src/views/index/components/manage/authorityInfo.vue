@@ -175,6 +175,7 @@
 export default {
   data () {
     return {
+      userGroupName: null,
       data: [{
         label: '一级 1',
         children: [{
