@@ -74,11 +74,11 @@ export default {
       // 登录
       let eventId = this.$route.query.eventId;
       // const eventId = '1010b44e-68a2-4a7e-8c97-fa81a6156f24';
-      const videoId = '55a7160c-9b6f-11e8-8458-3b3b0f4508db';
+      // const videoId = '55a7160c-9b6f-11e8-8458-3b3b0f4508db';
       getEventDetail(eventId)
         .then(res => {
           if (res && res.data) {
-            res.data.attachmentList && res.data.attachmentList.map((item, index) => {
+            res.data.attachmentList && res.data.attachmentList.map((item) => {
               if (item.fileType === 2) { // 视频
                 this.videoList.push(item.path);
               } else if (item.fileType === 1) {
