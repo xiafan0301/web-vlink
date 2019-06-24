@@ -28,6 +28,10 @@ export default {
 .vl_map {
   position: relative;
   height: 100%;
+  .vl_map_hover_main {
+    left: -96px;
+    bottom: 28px;
+  }
   > .map_l {
     position: absolute; top: 0; left: 0; z-index: 2;
     padding: .2rem 0 .2rem .2rem;
@@ -75,9 +79,24 @@ export default {
             position: absolute; top: 0; left: 0;
             width: 100%; height: .36rem;
             padding: 2px .2rem;
-            input {
+            display: flex;
+            input, button , .el-input__suffix{
               height: .32rem;
               line-height: .32rem;
+            }
+            .el-input__suffix {
+              padding: 0;
+              i {
+                height: .32rem;
+                line-height: .32rem;
+              }
+            }
+            button {
+              padding: 0 .08rem;
+              margin-left: .1rem;
+              i {
+                line-height: .32rem;
+              }
             }
             > i {
               position: absolute; top: .1rem; right: .35rem;
@@ -96,12 +115,13 @@ export default {
               padding: 0 .15rem;
             }
             .map_lc_dc_mark {
-              width: 100%;
+              width: 2.6rem;
               padding: .2rem;
               border-bottom: 1px dashed #D3D3D3;
               .dc_mark_c {
                 color: #333333;
                 margin-bottom: .15rem;
+                word-wrap: break-word;
               }
               > p {
                 color: #999999;
@@ -116,11 +136,12 @@ export default {
               .dc_mark_b {
                 font-size: 12px;
                 position: relative;
+                width: calc(100% - 12px);
                 .el-icon-delete {
                   float: right;
                   display: none;
                   position: absolute;
-                  right: -6px;
+                  right: -12px;
                   bottom: 0px;
                   cursor: pointer;
                 }
@@ -147,10 +168,10 @@ export default {
             .is-expanded {
               > .el-tree-node__content {
                 .el-tree-node__expand-icon{
-                  color: #0C70F8;
+                  /*color: #0C70F8;*/
                 }
                 .custom-tree-node {
-                  color: #0C70F8;
+                  /*color: #0C70F8;*/
                 }
               }
             }
@@ -213,9 +234,28 @@ export default {
       > li {
         float: left;
       }
+      > .vl_map_rt_cks {
+        .el-button-group {
+          button {
+            border: none;
+            &:hover {
+              background: #ffffff;
+            }
+            &:focus {
+              background: #ffffff;
+            }
+            &:first-child {
+              padding: 0 0.02rem 0 0.1rem;
+            }
+            &:last-child {
+              padding: 0 0.1rem 0 0;
+            }
+          }
+        }
+      }
     }
     > .map_rrt {
-      position: absolute; right: .2rem; top: 50%;
+      position: absolute; right: .2rem; top: 45%;
       height: 5.1rem;
       margin-top: -2.55rem;
       transition: right .3s ease-out;
@@ -337,9 +377,10 @@ export default {
     width: 100%;
     height: 100%;
     z-index: 99;
+    background: #ffffff;
     >img {
       width: 100%;
-      height: 100%;
+      height: auto;
     }
     >div {
       position: absolute;

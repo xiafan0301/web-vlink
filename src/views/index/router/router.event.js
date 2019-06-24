@@ -104,6 +104,10 @@ export default {
       name: 'alarm_ctc_detail_info',
       component: () => import('@/views/index/components/event/alarmCtcDetailInfo.vue')
     }, {
+      path: 'alarmCtcOperation',
+      name: 'alarm_ctc_operation',
+      component: () => import('@/views/index/components/event/alarmCtcOperation.vue')
+    }, {
       path: 'ctcEnd',
       name: 'ctc_end',
       component: () => import('@/views/index/components/event/ctcEnd.vue')

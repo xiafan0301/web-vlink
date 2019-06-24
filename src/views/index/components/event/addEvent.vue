@@ -18,28 +18,15 @@
                 <el-form-item label="上报时间:" prop="reportTime" label-width="85px">
                   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" type="datetime" :picker-options="pickerOptions0" style='width: 95%' placeholder="选择日期" v-model="addEventForm.reportTime" ></el-date-picker>
                 </el-form-item>
-                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px">
-                  <el-input type="text" id="address" style='width: 95%' placeholder="请输入事发地点"  @input="changeAddress" v-model="addEventForm.eventAddress" />
+                <el-form-item label="事发地点:" prop="eventAddress" label-width="85px" class="address_input">
+                  <el-input type="text" id="inputAddress" style='width: 95%' placeholder="请输入事发地点" @focus="getAutoInputAddress"  @input="changeAddress" v-model="addEventForm.eventAddress">
+                  </el-input>
+                  <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
                 <el-form-item label="事件情况:" prop="eventDetail" label-width="85px" class="limit_parent">
-                  <!-- <p class="limit_number">(<span style="color: red">{{addEventForm.eventDetail && addEventForm.eventDetail.length || 0}}</span>/140)</p> -->
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" maxlength="140" />
                 </el-form-item>
                 <div class="img-form-item">
-                  <el-upload
-                    :action="uploadUrl"
-                    list-type="picture-card"
-                    accept=".png,.jpg,.jpeg,.mp4"
-                    multiple
-                    :disabled="imgDisabled"
-                    :before-upload='handleBeforeUpload'
-                    :on-success='handleSuccess'
-                    :show-file-list='false'
-                  >
-                    <i class="el-icon-plus"></i>
-                    <span class='add-img-text'>添加</span>
-                    <!-- <span class="imgTips" v-show="isImgNumber">图片最多上传9张</span> -->
-                  </el-upload>
                   <template v-if="uploadImgList.length > 0">
                     <div 
                       class="img_list"
@@ -64,9 +51,23 @@
                       </div>
                     </div>
                   </template>
+                  <el-upload
+                    :action="uploadUrl"
+                    list-type="picture-card"
+                    accept=".png,.jpg,.jpeg,.mp4,.bmp"
+                    multiple
+                    :disabled="imgDisabled"
+                    :before-upload='handleBeforeUpload'
+                    :on-success='handleSuccess'
+                    :show-file-list='false'
+                  >
+                    <i class="el-icon-plus"></i>
+                    <span class='add-img-text'>添加</span>
+                  </el-upload>
                 </div>
-                <el-form-item label-width="85px">
+                <el-form-item label-width="85px" class="upload_tip">
                   <div style="color: #999999;">（只能上传视频或图片，视频最多1个，图片最多9张）</div>
+                  <p class="error_tip" v-show="isShowErrorTip">{{errorText}}</p>
                 </el-form-item>
                 <el-form-item  label="处理单位:" prop="dealOrgId" label-width="85px">
                   <el-select v-model="addEventForm.dealOrgId" style='width: 95%'>
@@ -101,13 +102,13 @@
                     </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="伤亡人员:" prop="casualties" label-width="85px">
-                  <el-radio-group v-model="addEventForm.casualties" style='width: 230px'>
-                    <el-radio label="无"></el-radio>
-                    <el-radio label="不确定"></el-radio>
-                    <el-radio label="有"></el-radio>
+                <el-form-item label="伤亡人员:" prop="casualtieName" label-width="85px">
+                  <el-radio-group v-model="addEventForm.casualtieName" style='width: 230px'>
+                    <el-radio label="无" value="无"></el-radio>
+                    <el-radio label="不确定" value="不确定"></el-radio>
+                    <el-radio label="有" value="有"></el-radio>
                   </el-radio-group>
-                  <template v-if="addEventForm.casualties === '有'">
+                  <template v-if="addEventForm.casualtieName === '有'">
                     <el-input style='width: 120px;margin-left:-1%;font-size: 12px;' size="small" placeholder='请输入死亡人数' v-model='dieNumber'></el-input>
                     <span style='margin-left:1%'>人</span>
                     <div class="el-form-item__error--inline el-form-item__error" v-show="isDieError">{{dieTip}}</div>
@@ -118,7 +119,7 @@
           </vue-scroll>
         </div>
       </div>
-      <div class="content_right">
+      <div class="content_right" v-show="isShowMap">
         <div id="mapBox"></div>
         <div class="right-flag">
           <ul class="map-rrt">
@@ -129,6 +130,7 @@
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
         </div>
+        <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
     <div class="operation-footer">
@@ -166,6 +168,7 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isShowMap: false, // 是否显示地图
       isPlaying: false, // 是否播放视频
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
@@ -182,18 +185,19 @@ export default {
       },
       addEventForm: {
         eventSource: '1',
-        eventFlag: true,
-        mutualFlag: false,
+        type: 1, // 1---事件  2---互助
         reporterPhone: '', // 报案人  手机号码
         reportTime: '', // 上报时间
         eventAddress: '', // 事发地点
         eventDetail: '', // 事件情况
         eventType: '', // 事件类型
         eventLevel: '', // 事件等级
-        casualties: '', // 伤亡人员
+        casualtieName: '不确定', // 伤亡人员 --默认不确定
+        casualties: '',
         longitude: '', // 经度
         latitude: '', // 纬度
         dealOrgId: '', // 处理单位
+        areaCode: '', // 行政区代码
         // radius: -1, // 是否推送
         appendixInfoList: [], // 图片文件
       },
@@ -230,6 +234,37 @@ export default {
       uploadImgList: [], // 要上传的图片列表
       uplaodVideoList: [], // 要上传的视频列表
       imgList1: [], // 要放大的图片
+      isShowErrorTip: false, // 是否显示图片上传错误提示
+      errorText: null, // 图片上传错误提示
+      autoInput: null, // 自动输入对象
+    }
+  },
+  watch: {
+    uplaodVideoList (val) {
+      if (this.uploadImgList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uploadImgList.length > 9 || val.length > 1) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
+    },
+    uploadImgList (val) {
+      if (this.uplaodVideoList.length > 0 && val.length > 0) {
+        this.isShowErrorTip = true;
+        this.errorText = '图片和视频只能上传一种';
+      } else if (this.uplaodVideoList.length > 1 || val.length > 9) {
+        this.isShowErrorTip = true;
+        this.errorText = '最多上传1个视频或9张图片';
+      } 
+      else {
+        this.isShowErrorTip = false;
+        this.errorText = null;
+      }
     }
   },
   created () {
@@ -240,42 +275,96 @@ export default {
   },
   mounted () {
     this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
-    this.initMap();
+    // this.initMap();
   },
   methods: {
+    // 当获取地址输入框焦点时
+    getAutoInputAddress () {
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+    },
+    // 关闭地图
+    closeMap () {
+      if (this.map) {
+        this.map.destroy();
+        this.isShowMap = false;
+      }
+    },
     // 初始化地图
     initMap () {
       let _this = this;
-      // _this.resetMap();
+      _this.isShowMap = true;
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
-      _this.map = map;
+
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+
       map.on('click', function(e) {
-        console.log(e);  
-        if (_this.newMarker) {
-          _this.map.remove(_this.newMarker);
-          _this.newMarker = null;
-        }
         _this.addEventForm.longitude = e.lnglat.getLng();
         _this.addEventForm.latitude = e.lnglat.getLat();
-        window.AMap.service('AMap.Geocoder', function () { // 回调函数
-          let geocoder = new window.AMap.Geocoder({});
-          geocoder.getAddress([e.lnglat.getLng(), e.lnglat.getLat()], function (status, result) {
-            let sAddr = '';
+        
+        new window.AMap.service('AMap.Geocoder', function () { // 回调函数
+          let geocoder = null;
+          geocoder = new window.AMap.Geocoder({});
+
+          const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
+
+          geocoder.getAddress(lnglatXY, function (status, result) {
             if (status === 'complete' && result.info === 'OK') {
-              // 获得了有效的地址信息: result.regeocode.formattedAddress
-              // console.log(result.regeocode.formattedAddress);
-              sAddr = result.regeocode.formattedAddress;
+              _this.addEventForm.areaCode = result.regeocode.addressComponent.adcode;
+              _this.addEventForm.eventAddress = result.regeocode.formattedAddress;
+              _this.mapMark(e.lnglat.getLng(), e.lnglat.getLat(), _this.addEventForm.eventAddress);
             }
-            _this.addEventForm.eventAddress = sAddr;
-            _this.mapMark(_this.addEventForm);
           });
         });
       });
-      _this.mapMark(_this.addEventForm);
+      _this.map = map;
+
+      _this.mapMark(_this.addEventForm.longitude, _this.addEventForm.latitude, _this.addEventForm.eventAddress);
+    },
+    // 地图标记
+    mapMark (longitude, latitude, eventAddress) {
+      let _this = this;
+      if (_this.newMarker) {
+        _this.map.remove(_this.newMarker);
+        _this.newMarker = null;
+      }
+      let hoverWindow = null, offSet = [-20.5, -48];
+      if (longitude > 0 && latitude > 0) {
+        _this.newMarker = new window.AMap.Marker({ // 添加自定义点标记
+          map: _this.map,
+          position: [longitude, latitude],
+          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+          extData: '',
+          draggable: false, // 是否可拖动
+          // 自定义点标记覆盖物内容
+          content: '<div class="vl_icon vl_icon_control_30"></div>'
+        });
+        _this.newMarker.on('mouseover', function () {
+          let sContent = '<div class="vl_map_hover" >' +
+            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + eventAddress + '</p></div></div>';
+          hoverWindow = new window.AMap.InfoWindow({
+            isCustom: true,
+            closeWhenClickMap: true,
+            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+            content: sContent
+          });
+          hoverWindow.open(_this.map, new window.AMap.LngLat(longitude, latitude));
+        });
+        _this.newMarker.on('mouseout', function () {
+          if (hoverWindow) { hoverWindow.close(); }
+        });
+        if (_this.map) {
+          _this.map.setCenter([longitude, latitude]);
+        }
+        _this.newMarker.setMap(_this.map);
+      }
     },
     // 获取处理单位
     getHandleUnit () {
@@ -316,61 +405,21 @@ export default {
     resetMap () {
       this.initMap();
     },
-   // 地图标记
-    mapMark (obj) {
-      let _this = this;
-      _this.map.clearMap();
-      let hoverWindow = null;
-      if (obj.longitude > 0 && obj.latitude > 0) {
-        let offSet = [-20.5, -48];
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
-          position: [obj.longitude, obj.latitude],
-          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // 自定义点标记覆盖物内容
-          content: '<div class="vl_icon vl_icon_control_30"></div>'
-        });
-        marker.setMap(_this.map);
-        _this.newMarker = marker;
-        // hover
-        marker.on('mouseover', function () {
-          let sContent = '<div class="vl_map_hover" >' +
-            '<div class="vl_main_hover_address" style="min-width: 300px;padding: 15px"><p class="vl_map_hover_main_p">事发地点： ' + obj.eventAddress + '</p></div></div>';
-          hoverWindow = new window.AMap.InfoWindow({
-            isCustom: true,
-            closeWhenClickMap: true,
-            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-            content: sContent
-          });
-          // aCenter = mEvent.target.F.position
-          hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
-          hoverWindow.on('close', function () {
-            // console.log('infoWindow close')
-          });
-        });
-        marker.on('mouseout', function () {
-          if (hoverWindow) { hoverWindow.close(); }
-        });
-      }
-    },
     // 事件地址change
     changeAddress () {
-      console.log('aaa')
       let _this = this;
-      let autoInput = new window.AMap.Autocomplete({
-        input: 'address'
-      })
-      window.AMap.event.addListener(autoInput, 'select', function (e) {
-        console.log('e', e)
+
+      window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.addEventForm.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
             if (status === 'complete' && result.info === 'OK') {
+              _this.addEventForm.areaCode = result.geocodes[0].adcode;
               _this.addEventForm.longitude = result.geocodes[0].location.lng;
               _this.addEventForm.latitude = result.geocodes[0].location.lat;
-              _this.mapMark(_this.addEventForm);
+
+              _this.mapMark(_this.addEventForm.longitude, _this.addEventForm.latitude, _this.addEventForm.eventAddress);
             }
           });
         })
@@ -384,14 +433,30 @@ export default {
     },
     handleBeforeUpload (file) { // 图片上传之前
       let isLtTenM;
-      if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      const isPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'video/mp4' || file.type === 'image/bmp';
+      if (!isPng) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是png、jpg、jpeg、mp4格式',
+          customClass: 'upload_file_tip'
+        });
+      }
+      if (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/bmp') {
         isLtTenM = file.size / 1024 / 1024 < 2;
       } else {
         isLtTenM = file.size / 1024 / 1024 < 10;
       }
       if (!isLtTenM) {
-        this.$message.error('上传的图片大小不能超过2M,视频大小不能超过10M');
+        this.$message({
+          type: 'warning',
+          message: '上传的图片大小不能超过2M,视频大小不能超过10M',
+          customClass: 'upload_file_tip'
+        });
       }
+      if (this.isShowErrorTip) {
+        return;
+      }
+      return isPng && isLtTenM;
     },
     // 移除图片
     removeImg (index) {
@@ -403,37 +468,41 @@ export default {
     },
     // 图片上传成功
     handleSuccess (res) {
-      if (res && res.data) {
-        const fileName = res.data.fileName;
-        let type, data;
-        if (fileName) {
-          type = fileName.substring(fileName.lastIndexOf('.'));
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
-            data = {
-              contentUid: 0,
-              fileType: dataList.imgId,
-              path: res.data.fileFullPath,
-              filePathName: res.data.filePath,
-              cname: res.data.fileName,
-              imgSize: res.data.fileSize,
-              imgWidth: res.data.fileWidth,
-              imgHeight: res.data.fileHeight,
-              thumbnailPath: res.data.thumbnailFileFullPath,
+      if (this.isShowErrorTip) {
+        return false;
+      } else {
+        if (res && res.data) {
+          const fileName = res.data.fileName;
+          let type, data;
+          if (fileName) {
+            type = fileName.substring(fileName.lastIndexOf('.'));
+            if (type === '.png' || type === '.jpg' || type === '.jpeg' || type === '.bmp') {
+              data = {
+                contentUid: 0,
+                fileType: dataList.imgId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath
+              }
+              this.uploadImgList.push(data);
+            } else {
+              data = {
+                contentUid: 0,
+                fileType: dataList.videoId,
+                path: res.data.fileFullPath,
+                filePathName: res.data.filePath,
+                cname: res.data.fileName,
+                imgSize: res.data.fileSize,
+                imgWidth: res.data.fileWidth,
+                imgHeight: res.data.fileHeight,
+                thumbnailPath: res.data.thumbnailFileFullPath
+              }
+              this.uplaodVideoList.push(data);
             }
-            this.uploadImgList.push(data);
-          } else {
-            data = {
-              contentUid: 0,
-              fileType: dataList.videoId,
-              path: res.data.fileFullPath,
-              filePathName: res.data.filePath,
-              cname: res.data.fileName,
-              imgSize: res.data.fileSize,
-              imgWidth: res.data.fileWidth,
-              imgHeight: res.data.fileHeight,
-              thumbnailPath: res.data.thumbnailFileFullPath,
-            }
-            this.uplaodVideoList.push(data);
           }
         }
       }
@@ -444,11 +513,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg = /^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';
@@ -467,19 +536,7 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
-          if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-            this.$message({
-              type: 'warning',
-              message: '图片和视频只能上传一种',
-              customClass: 'request_tip'
-            });
-            return;
-          } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-            this.$message({
-              type: 'warning',
-              message: '最多上传1个视频或9张图片',
-              customClass: 'request_tip'
-            });
+          if (this.isShowErrorTip) { // 上传错误提示
             return;
           }
           this.uploadImgList.map(item => {
@@ -528,11 +585,11 @@ export default {
         if (valid) {
           this.addEventForm.appendixInfoList = [];
           let reg =/^[1-9]\d*$/; // 校验死亡人数
-          if (this.addEventForm.casualties === '无') {
+          if (this.addEventForm.casualtieName === '无') {
             this.addEventForm.casualties = 0;
-          } else if (this.addEventForm.casualties === '不确定') {
+          } else if (this.addEventForm.casualtieName === '不确定') {
             this.addEventForm.casualties = -1;
-          } else if (this.addEventForm.casualties === '有') {
+          } else if (this.addEventForm.casualtieName === '有') {
             if (!reg.test(this.dieNumber)) {
               this.isDieError = true;
               this.dieTip = '死亡人数只能为正整数';
@@ -551,19 +608,7 @@ export default {
             }
             this.addEventForm.casualties = this.dieNumber;
           }
-          if (this.uploadImgList.length > 0 && this.uplaodVideoList.length > 0) {
-            this.$message({
-              type: 'warning',
-              message: '图片和视频只能上传一种',
-              customClass: 'request_tip'
-            });
-            return;
-          } else if (this.uploadImgList.length > 9 || this.uplaodVideoList.length > 1) {
-            this.$message({
-              type: 'warning',
-              message: '最多上传1个视频或9张图片',
-              customClass: 'request_tip'
-            });
+          if (this.isShowErrorTip) { // 上传错误提示
             return;
           }
           this.uploadImgList.map(item => {
@@ -643,7 +688,6 @@ export default {
         width: 96%;
         margin: 20px 0 0 2%;
         .add_event_form {
-          // width: 100%;
           .img-form-item {
             margin-left: 85px;
             width: 400px;
@@ -692,6 +736,17 @@ export default {
                 height: 100%;
               }
             }
+            .upload_tip {
+            margin-left: 85px;
+            // /deep/ .el-form-item__content {
+              // line-height: 20px;
+              .error_tip {
+                padding-left: 5px;
+                color: #F56C6C;
+                font-size: 12px;
+              }
+            // }
+          }
           }
           .limit_parent {
             position: relative;
@@ -701,18 +756,35 @@ export default {
               top: 25px;
             }
           }
+          .address_input {
+            position: relative;
+            /deep/ .el-input__inner {
+              padding: 0 20px 0 15px;
+            }
+            .address_icon {
+              position: absolute;
+              right: 6%; 
+              top: 13px;
+            }
+          }
         }
       }
     }
     .content_right {
       width: 100%;
       height: 100%;
+      position: relative;
       #mapBox {
         width: 100%;
         height: 100%;
       }
+      .close_btn {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
       .right-flag {
-        position: absolute; right: 40px; bottom: 100px;
+        position: absolute; right: 20px; bottom: 0;
         height: 220px;
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
@@ -721,7 +793,7 @@ export default {
           background-color: #fff;
           box-shadow: 0 0 10px rgba(148,148,148,0.24);
           >li {
-            padding: 15px 10px;
+            padding: 10px 0;
             cursor: pointer;
             border-bottom: 1px solid #eee;
             text-align: center;
@@ -738,6 +810,8 @@ export default {
       }
     }
   }
+    
+             
   .operation-footer {
     border-left: 1px solid #F2F2F2;
     width: 100%;
@@ -764,5 +838,4 @@ export default {
     }
   }
 }
-
 </style>

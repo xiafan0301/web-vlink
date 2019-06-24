@@ -7,7 +7,7 @@
    display: inline-block;
    background-repeat: no-repeat;
    background-image: url(../img/icons.png);
-   transition: .4s ease-out;
+   /* transition: .4s ease-out; */
 }
 .vl_icon_logo { width: 170px; height: 48px; background-position: -96px -521px; }
 /* header */
@@ -52,14 +52,15 @@
 .vl_icon_v233 { width: 24px; height: 24px; background-position: -522px -257px; }
 .vl_icon_v24 { width: 24px; height: 24px; background-position: -200px -132px; }
 .vl_icon_v25 { width: 24px; height: 24px; background-position: -249px -131px; }
+.vl_icon_v25_2 { width: 24px; height: 24px; background-position: -481px -295px; }
 .vl_icon_v26 { width: 24px; height: 24px; background-position: -298px -132px; }
-.vl_icon_v27 { width: 24px; height: 24px; background-position: -349px -132px; }
+.vl_icon_v27 { width: 24px; height: 24px; background-position: -350px -132px; }
 .vl_icon_v28 { width: 24px; height: 24px; background-position: -399px -133px; }
 .vl_icon_v29 { width: 24px; height: 24px; background-position: -872px -259px; }
 .vl_icon_v292 { width: 24px; height: 24px; background-position: -872px -303px; }
 .vl_icon_v30 { width: 24px; height: 24px; background-position: -566px -257px; }
 .vl_icon_v31 { width: 24px; height: 24px; background-position: -877px -132px; }
-.vl_icon_v32 { width: 24px; height: 24px; background-position: -923px -132px; }
+.vl_icon_v32 { width: 24px; height: 24px; background-position: -923px -134px; }
 .vl_icon_v51 { width: 80px; height: 80px; background-position: -659px -254px; }
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
@@ -71,20 +72,29 @@
 .vl_icon_zzd { width: 41px; height: 48px; background-position: -700px -188px; }
 .vl_icon_sxt_uncheck { width: 41px; height: 48px; background-position: -760px -188px; }
 .vl_icon_kk_uncheck { width: 41px; height: 48px; background-position: -820px -188px; }
+/*各种车子-737px -1450px;*/
+.vl_icon_map_mark23 { width: 47px;  height: 74px; background-position: -559px -1434px;}
+.vl_icon_map_mark21 { width: 47px;  height: 74px; background-position: -617px -1434px;}
+.vl_icon_map_mark25 { width: 47px;  height: 74px; background-position: -674px -1434px;}
+.vl_icon_map_mark24 { width: 47px;  height: 74px; background-position: -733px -1434px;}
 /* 地图板块 侧边栏*/
 .vl_icon_map_002 { width: 20px; height: 19px; background-position: -365px -376px; }
 .vl_icon_map_001 { width: 20px; height: 19px; background-position: -321px -350px; }
 .vl_icon_map_mark6 { width: 43px; height: 68px; background-position: -340px -174px; }
 .vl_icon_map_mark3 { width: 43px;  height: 68px; background-position: -84px -171px; }
 .vl_icon_map_mark1 { width: 43px;  height: 68px; background-position: -149px -171px; }
-.vl_icon_map_mark2 { width: 43px;  height: 68px; background-position: -214px -171px; }
+.vl_icon_map_mark2, .vl_icon_map_mark22  { width: 43px;  height: 68px; background-position: -214px -171px; }
 .vl_icon_map_mark0 { width: 43px;  height: 68px; background-position: -275px -171px; }
 .vl_icon_map_mark4 { width: 31px; height: 34px; background-position: -477px -196px; }
 .vl_icon_map_sxt_error { width: 43px; height: 68px; background-position: -402px -174px; }
 .vl_icon_map_hover_mark0 { width: 47px;  height: 68px; background-position: -534px -1160px;}
 .vl_icon_map_hover_mark1 { width: 47px;  height: 68px; background-position: -619px -1160px;}
-.vl_icon_map_hover_mark2 { width: 47px;  height: 68px; background-position: -787px -1163px;}
+.vl_icon_map_hover_mark2{ width: 47px;  height: 68px; background-position: -787px -1163px;}
 .vl_icon_map_hover_mark3 { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_mark_calling { width: 47px;  height: 68px; background-position: -394px -260px;}
+.vl_icon_map_calling0 { width: 32px;  height: 26px; background: url("../img/webrtc/webrtc11.png") no-repeat; }
+.vl_icon_map_calling1 { width: 32px;  height: 26px; background: url("../img/webrtc/webrtc04.png") no-repeat; }
+.vl_icon_map_car0 { width: 47px;  height: 74px; background-position: -400px -426px;}
 /* 地图板块 工具栏 */
 .vl_icon_041 { width: 20px; height: 20px; background-position: -97px -375px; }
 .vl_icon_sed .vl_icon_041 { background-position: -97px -347px; }
@@ -99,10 +109,12 @@
 /* 地图板块 标注 */
 .vl_icon_051 { width: 31px; height: 34px; background-position: -477px -196px; }
 /* 地图板块 视频通话 */
-.vl_icon_vc_011 { width: 37px; height: 27px; background-position: -97px -1036px; }
-.vl_icon_vc_021 { width: 48px; height: 48px; background-position: -253px -1083px; }
-.vl_icon_vc_022 { width: 48px; height: 48px; background-position: -174px -1083px; }
-.vl_icon_vc_023 { width: 48px; height: 48px; background-position: -98px -1083px; }
+.vl_icon_vc_011 { width: 37px; height: 27px; background: url("../img/webrtc/webrtc01.png") no-repeat; }
+.vl_icon_vc_021 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc08.png") no-repeat; }
+.vl_icon_vc_022 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc02.png") no-repeat  -2px -1px; }
+.vl_icon_vc_023 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc07.png") no-repeat  -5px -3px; }
+.vl_icon_vc_024 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc03.png") no-repeat  -2px -1px; }
+.vl_icon_vc_025 { width: 48px; height: 48px; background: url("../img/webrtc/webrtc09.png") no-repeat  5px 5px; }
 /* 布控板块图标 */
 .vl_icon_control_01 { width: 41px; height: 48px; background-position: -570px -188px; }
 .vl_icon_control_02 { width: 41px; height: 48px; background-position: -634px -188px; }
@@ -112,7 +124,7 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 20px; height: 28px; background-position: -104px -134px;}
+.vl_icon_control_09{width: 20px; height: 28px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
@@ -206,15 +218,16 @@
 .vl_icon_event_24{width: 20px; height: 20px; background-position: -615px -309px;} /*事件---图片--关闭*/
 .vl_icon_event_25{width: 18px; height: 12px; background-position: -693px -486px;} /*事件---预览文件*/
 .vl_icon_event_26{width: 22px; height: 22px; background-position: -725px -481px;} /*事件---下载视频*/
+.vl_icon_event_27{width: 14px; height: 15px; background-position: -689px -670px;} /*事件---添加事件--地图小图标*/
 /****事件-统计分析****/
 .vl_icon_statistics_1{width: 70px; height: 31px; background-position: -167px -1038px;} /*待处理右*/
 .vl_icon_statistics_2{width: 70px; height: 31px; background-position: -273px -1030px;} /*处理中右*/
 .vl_icon_statistics_3{width: 73px; height: 37px; background-position: -380px -1032px;} /*处理完成右*/
 .vl_icon_statistics_4{width: 73px; height: 42px; background-position: -485px -1032px;} /*事件数量右*/
-.vl_icon_statistics_5{width: 49px; height: 49px; background-position: -544px -1082px;} /*待处理左*/
-.vl_icon_statistics_6{width: 40px; height: 49px; background-position: -478px -1082px;} /*处理中左*/
-.vl_icon_statistics_7{width: 49px; height: 49px; background-position: -398px -1082px;} /*处理完成左*/
-.vl_icon_statistics_8{width: 40px; height: 49px; background-position: -332px -1082px;} /*事件数量左*/
+.vl_icon_statistics_5{width: 83px; height: 83px; background-position: -829px -934px;} /*待处理左*/
+.vl_icon_statistics_6{width: 83px; height: 83px; background-position: -722px -934px;} /*处理中左*/
+.vl_icon_statistics_7{width: 83px; height: 83px; background-position: -612px -934px;} /*处理完成左*/
+.vl_icon_statistics_8{width: 83px; height: 83px; background-position: -504px -934px;} /*事件数量左*/
 .vl_icon_statistics_control_0{width: 65px; height: 34px; background-position: -630px -1097px;} /*事件布控-已布控*/
 .vl_icon_statistics_control_1{width: 65px; height: 39px; background-position: -730px -1092px;} /*事件布控-未布控*/
 /******管理*******/
@@ -240,6 +253,69 @@
 .vl_icon_task_1{width: 46px; height: 46px; background-position: -592px -1522px;}
 .vl_icon_task_2{width: 46px; height: 46px; background-position: -662px -1522px;}
 .vl_icon_task_3{width: 46px; height: 46px; background-position: -731px -1522px;}
+/*****档案管理图标*****/
+.vl_icon_archives_1{width: 117px; height: 117px;background-position: -99px -1732px;} /*出车状态*/
+.vl_icon_archives_2{width: 117px; height: 117px;background-position: -632px -1732px;} /*正常状态*/
+.vl_icon_archives_3{width: 117px; height: 117px;background-position: -367px -1732px;} /*启用状态*/
+.vl_icon_archives_4{width: 15px; height: 20px;background-position: -912px -1728px;} /*地图图标*/
+.vl_icon_archives_5{width: 117px; height: 117px;background-position: -234px -1732px;} /*在库状态*/
+.vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
+.vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
+
+.vl_icon2 {
+  display: inline-block;
+  width: 102px; height: 108px;
+  background-repeat: no-repeat;
+  background-image: url(../img/icons2.png);
+  transition: .4s ease-out;
+}
+
+.vl_icon2_001 { background-position: -36px -38px; }
+.vl_icon2_001:hover { background-position: -36px -148px; }
+.vl_icon2_002 { background-position: -172px -38px; }
+.vl_icon2_002:hover { background-position: -172px -148px; }
+.vl_icon2_003 { background-position: -308px -38px; }
+.vl_icon2_003:hover { background-position: -308px -148px; }
+.vl_icon2_004 { background-position: -444px -38px; }
+.vl_icon2_004:hover { background-position: -444px -148px; }
+.vl_icon2_005 { background-position: -582px -38px; }
+.vl_icon2_005:hover { background-position: -582px -148px; }
+.vl_icon2_006 { background-position: -718px -38px; }
+.vl_icon2_006:hover { background-position: -718px -148px; }
+.vl_icon2_007 { background-position: -854px -38px; }
+.vl_icon2_007:hover { background-position: -854px -148px; }
+
+.vl_icon2_011 { background-position: -36px -293px; }
+.vl_icon2_011:hover { background-position: -36px -418px; }
+.vl_icon2_012 { background-position: -172px -293px; }
+.vl_icon2_012:hover { background-position: -172px -418px; }
+.vl_icon2_013 { background-position: -308px -293px; }
+.vl_icon2_013:hover { background-position: -308px -418px; }
+.vl_icon2_014 { background-position: -444px -293px; }
+.vl_icon2_014:hover { background-position: -444px -418px; }
+.vl_icon2_015 { background-position: -582px -293px; }
+.vl_icon2_015:hover { background-position: -582px -418px; }
+.vl_icon2_016 { background-position: -718px -293px; }
+.vl_icon2_016:hover { background-position: -718px -418px; }
+.vl_icon2_017 { background-position: -854px -293px; }
+.vl_icon2_017:hover { background-position: -854px -418px; }
+.vl_icon2_018 { background-position: -990px -293px; }
+.vl_icon2_018:hover { background-position: -990px -418px; }
+
+.vl_icon2_021 { background-position: -990px -38px; }
+.vl_icon2_021:hover { background-position: -990px -148px; }
+.vl_icon2_022 { background-position: -1126px -38px; }
+.vl_icon2_022:hover { background-position: -1126px -148px; }
+.vl_icon2_023 { background-position: -1262px -38px; }
+.vl_icon2_023:hover { background-position: -1262px -148px; }
+.vl_icon2_024 { background-position: -1398px -38px; }
+.vl_icon2_024:hover { background-position: -1398px -148px; }
+.vl_icon2_025 { background-position: -1126px -293px; }
+.vl_icon2_025:hover { background-position: -1126px -418px; }
+
+
+.vl_content_pad { padding: 10px; }
+
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}
@@ -347,6 +423,9 @@
     border-radius: 4px;
     box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
  }
+ .machine_map_hover:after, .vl_main_hover_address:after {
+  left: 40% !important;
+ }
  .vl_map_hover_main:after, .vl_main_hover_address:after {
    border-bottom-color: rgba(0, 0, 0, 1);
    content: "";
@@ -363,6 +442,7 @@
    padding: 10px;
  }
  .vl_map_hover_main > ul > li {
+   display: flex;
    padding: 2px 0;
    color: #333;
  }
@@ -372,6 +452,12 @@
    text-align: right;
    color: #666;
  }
+.vl_map_hover_main > ul > li > p {
+    display: inline-block;
+    text-align: left;
+    color: #666;
+    width: 110px;
+}
  .vl_map_hover_main .vl_map_hover_btn {
    display: inline-block;
    padding: 0 10px;
@@ -509,6 +595,37 @@
 }
 .el-table th>.cell {
   font-weight: bolder;
+}
+
+/** 分页样式 **/
+.cum_pagination {
+  text-align: right;
+  padding: 20px;
+}
+.cum_pagination .btn-prev, .cum_pagination .btn-next {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+}
+.cum_pagination .el-pager li.active {
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  background-color: #0C70F8;
+  border-radius: 5px;
+}
+.cum_pagination .el-pager li {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  border: 1px solid #E6E6E6;
+  border-radius: 5px;
+  color: #333333;
+  margin: 0 5px;
+  font-weight: 500;
 }
 
 /** 面包屑导航样式 **/
@@ -779,3 +896,33 @@
 .vl_vid_sdater > input { 
   padding: 0 2px 0 30px !important;
  }
+
+ /* 下载按钮样式 */
+ .vid_dowload_btn {
+  display: inline-block;
+  margin-left: 20px;
+  width: 140px; height: 40px; line-height: 40px;
+  font-weight: 500; font-size: 14px; color: #FFF;
+  background-color: #409EFF;
+  border-color: #409EFF;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  text-align: center;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: .1s;
+  transition: .1s;
+  -ms-user-select: none;
+  border-radius: 4px;
+ }
+ .vid_dowload_btn:hover { text-decoration: none; }
+ .vid_dowload_btn:link { text-decoration: none; }
+
+ .address_icon {
+   vertical-align: middle;
+   cursor: pointer;
+ }
+ /* .address_input .el-input__inner:hover .el-input-group__append {
+  border-color: #0C70F8 !important;
+} */

@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="alarm_today">
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
@@ -125,10 +126,11 @@
         </template>
         <el-form-item style="width: 192px;">
           <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
-          <el-button style="width: 45%;" type="primary" @click="resetForm('todayAlarmForm')">重置</el-button>
+          <el-button style="width: 45%;" @click="resetForm('todayAlarmForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
+    <!-- <vue-scroll> -->
     <div class="alarm_list" v-loading="isLoading">
       <div class="list_top">检索结果<span v-if="alarmList">({{alarmList.length}})</span></div>
       <div class="alarm_grade">
@@ -148,7 +150,7 @@
           <div class="border_right" v-show="!key.isExpand"><span></span></div>
           <span>{{key.label}}</span>
         </div>
-        <vue-scroll>
+        <!-- <vue-scroll> -->
         <div class="list_content" v-show="key.isExpand">
           <div class="list_box" v-for="(item,index) in key.value" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
             <div class="list_img">
@@ -207,12 +209,14 @@
             </div>
           </div>
         </div>
-        </vue-scroll>
+        <!-- </vue-scroll> -->
       </div>
       </template>
     </div>
+    <!-- </vue-scroll> -->
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
+  </vue-scroll>
 </template>
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
@@ -750,7 +754,7 @@ export default {
     width: calc(100% - 252px);
     margin-left: 252px;
     position: relative;
-    padding: 20px;
+    padding: 20px 0 20px 20px;
     .list_top{
       color: #333;
       > span{
@@ -823,7 +827,6 @@ export default {
         }
       }
       .list_content{
-        max-height: 776px;
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -831,7 +834,7 @@ export default {
           margin-right: 1%;
           max-width: 342px;
           width: 32%;
-          height: 240px;
+          height: 266px;
           padding: 30px 20px 0;
           margin-bottom: 20px;
           background:rgba(255,255,255,1);
@@ -880,11 +883,13 @@ export default {
             }
           }
           .list_con_info{
-            display: flex;
+            /* display: flex;
             justify-content: space-between;
-            line-height: 50px;
+            line-height: 50px; */
+            padding-top: 16px;
             > div:nth-child(1){
               color: #333;
+              margin-bottom: 6px;
             }
             > div:nth-child(2) > span{
               color: #999;

@@ -3,8 +3,18 @@
     <div class="more-plan">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail' }">事件详情</el-breadcrumb-item>
+          <template v-if="$route.query.type === 'ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+           <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
+          </template>
           <el-breadcrumb-item>查询预案</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -18,7 +28,7 @@
                   v-for="(item, index) in eventTypeList"
                   :key="index"
                   :label="item.enumValue"
-                  :value="item.uid"
+                  :value="item.enumField"
                 >
                 </el-option>
               </el-select>
@@ -30,7 +40,7 @@
                   v-for="(item, index) in eventLevelList"
                   :key="index"
                   :label="item.enumValue"
-                  :value="item.uid"
+                  :value="item.enumField"
                 >
                 </el-option>
               </el-select>
@@ -89,6 +99,7 @@
           </el-table>
         </div>
         <el-pagination
+          class="cum_pagination"
           @current-change="onPageChange"
           :current-page="pagination.pageNum"
           :page-sizes="[100, 200, 300, 400]"
@@ -152,24 +163,22 @@ export default {
     },
     // 跳至查看详情页面
     skipDetailInfo (obj) {
-      console.log(obj);
-      this.$router.push({name: 'plan_detail', query: {planId: obj.uid, eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'plan_detail', query: {alarmId: this.$route.query.alarmId, planId: obj.uid, eventId: this.$route.query.eventId, type: this.$route.query.type, objType: this.$route.query.objType }});
     },
     // 跳至启用预案页面
     skipEnablePlanPage (obj) {
-      console.log(obj);
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
+      this.$router.push({name: 'enable_plan', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, objType: this.$route.query.objType}});
     },
     // 获取列表数据
     getPlanList () {
       let planLevel, planType;
       if (this.planForm.planLevel === '全部等级') {
-        planLevel = '';
+        planLevel = null;
       } else {
         planLevel = this.planForm.planLevel;
       }
       if (this.planForm.planType === '全部类型') {
-        planType = '';
+        planType = null;
       } else {
         planType = this.planForm.planType;
       }

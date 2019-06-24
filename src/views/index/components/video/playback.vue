@@ -29,6 +29,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -43,6 +44,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
@@ -62,16 +64,17 @@
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                       <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
                         <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem)"
                           @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
+                        <!-- 
+                        v-if="!deviceIsPlaying(sitem)"
                         <div class="tree_li_dis" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
-                        </div>
+                        </div> -->
                       </li>
                     </ul>
                     <ul class="tree_sli" v-else>
@@ -106,6 +109,7 @@
                   size="small"
                   v-model="startTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
                   @change="startTimeChange"
@@ -120,6 +124,7 @@
                   size="small"
                   v-model="endTime"
                   type="datetime"
+                  time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
                   @change="endTimeChange"
@@ -139,16 +144,17 @@
                     <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
                       <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list3_' + sindex">
                         <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem)"
                           @dragstart="dragStart($event, sitem)" @dragend="dragEnd"
                           draggable="true" style="cursor: move;">
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
+                        <!-- 
+                          v-if="!deviceIsPlaying(sitem)"
                         <div class="tree_li_dis" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
-                        </div>
+                        </div> -->
                       </li>
                     </ul>
                     <ul class="tree_sli" v-else>
@@ -171,15 +177,15 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div draggable="false" class="show_his_dis" v-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                   <div @dragstart="dragStart2($event, item, 2)" @dragend="dragEnd"
                     draggable="true" style="cursor: move;" v-else>
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
-                    <p>{{item.playBackStartTime | fmTimestamp}}</p>
+                    <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
                 </li>
@@ -246,6 +252,7 @@ export default {
       endTime: '',
       startTimeOptions: {
         disabledDate: (d) => {
+          // console.log(d);
           // d > new Date() || d > this.endTime
           if (d > new Date()) {
             return true;
@@ -256,7 +263,7 @@ export default {
       },
       endTimeOptions: {
         disabledDate: (d) => {
-          if (d > new Date() || d < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
+          if (d > new Date() || d.getTime() < (this.startTime.getTime() - 3600 * 1000 * 24) || d.getTime() > (this.startTime.getTime() + 3600 * 1000 * 24)) {
             return true;
           } else {
             return false;
@@ -359,14 +366,16 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord(item.uid).then(() => {
-        this.getVideoRecordList();
-        this.$message({
-          message: '删除成功！',
-          type: 'success'
-        });
+      apiDelVideoRecord(item.uid).then((res) => {
+        if (res) {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }
       }).catch(error => {
-        this.$message.error('删除失败！');
+        // this.$message.error('删除失败！');
         console.log("apiDelVideoRecord error：", error);
       });
     },
@@ -374,24 +383,21 @@ export default {
       // apiDelVideoRecords
       this.$confirm('确定删除所有的播放历史吗?', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        apiDelVideoRecords({playType: 2}).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        apiDelVideoRecords({playType: 2}).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecords error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
 
@@ -476,7 +482,7 @@ export default {
         uid: item.deviceUid,
         _record: true
       });
-      console.log('this.dragActiveObj', this.dragActiveObj)
+      // console.log('this.dragActiveObj', this.dragActiveObj)
       // 设置属性dataTransfer   两个参数   1：key   2：value
       if (!ev) { ev = window.event; }
       ev.dataTransfer.setData('name', 'ouyang');

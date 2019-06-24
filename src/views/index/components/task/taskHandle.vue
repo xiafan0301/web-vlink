@@ -37,14 +37,17 @@
           <el-upload
             :action="uploadUrl"
             multiple
-            accept=".doc,.docx, .png, .jpg, .jpeg"
-            :show-file-list='true'
+            accept=".png, .jpg, .jpeg"
             :on-remove="handleRemove"
             :before-upload='handleBeforeUpload'
             :on-success='handleSuccess'
+             list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
           >
-            <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button>
-            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.doc .docx .png .jpg .jpeg，最多上传3张图片）</div>
+            <!-- <el-button size="small" class="upload-btn" icon="el-icon-upload2">上传文件</el-button> -->
+            <i class="el-icon-plus"></i>
+            <span class='add-img-text'>添加</span>
+            <div slot="tip" class="el-upload__tip end-upload-tip">（支持扩展名：.png .jpg .jpeg，最多上传9张图片）</div>
           </el-upload>
         </div>
       </div>
@@ -52,6 +55,9 @@
         <el-button class="operation_btn function_btn" :loading="isEndLoading" @click="submitData('endForm')">确定</el-button>
         <el-button class="operation_btn back_btn" @click="back">返回</el-button>
       </div>
+      <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="dialogImageUrl" alt="">
+          </el-dialog>
     </div>
   </vue-scroll>
 </template>
@@ -59,7 +65,7 @@
 import { dataList } from '@/utils/data.js';
 import { ajaxCtx } from '@/config/config.js';
 import { taskProcess } from '@/views/index/api/api.event.js';
-import { getUserList } from '@/views/index/api/api.manage.js';
+import { getUserMember } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -82,12 +88,15 @@ export default {
       taskType: dataList.taskType,
       userList: [],
       userInfo: {},
+      dialogImageUrl: '',
+        dialogVisible: false
     }
   },
   mounted () {
       this.userInfo =  this.$store.state.loginUser;
       this.processType = this.$route.query.processType
-      this.detailUrl = '/task/detail?id='+ this.$route.query.eventId +'&processType=' + this.processType
+      this.detailUrl = '/task/detail?id='+ this.$route.query.eventId +'&processType=' + this.processType + 
+                        '&dispatchType=' + this.$route.query.dispatchType+ '&uid=' +this.$route.query.uid
       if(this.processType == 3) {
           this.rules['reportUser'] = [
           { required: true, message: '请选择处理人', trigger: 'change' }]
@@ -98,6 +107,10 @@ export default {
     // 关闭事件change
     handleEventChange () {
     },
+     handlePictureCardPreview(file) {
+        this.dialogImageUrl = file.url;
+        this.dialogVisible = true;
+      },
     handleBeforeUpload (file) { // 图片上传之前
       const isLtTenM = file.size / 1024 / 1024 < 10;
       if (!isLtTenM) {
@@ -111,7 +124,7 @@ export default {
       let type;
       if (fileName) {
         type = fileName.substring(fileName.lastIndexOf('.'));
-        if (type === '.png' || type === '.jpg' || type === '.bmp') {
+        if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
           this.uploadImgList.map((item, index) => {
             if (item.cname === fileName) {
               this.uploadImgList.splice(index, 1);
@@ -133,7 +146,7 @@ export default {
         let type, data;
         if (fileName) {
           type = fileName.substring(fileName.lastIndexOf('.'));
-          if (type === '.png' || type === '.jpg' || type === '.bmp') {
+          if (type === '.png' || type === '.jpg' || type === '.bmp' || type === '.jpeg') {
             data = {
               contentUid: 0,
               fileType: dataList.imgId,
@@ -165,11 +178,16 @@ export default {
     },
     // 获取所有的用户
     getList () {
+      let uid = null ;
+      if(this.userInfo.organList && this.userInfo.organList.length >0) {
+        uid = this.userInfo.organList[0].uid
+      }
       const params = {
+        'where.uid': uid,
         'where.proKey': this.userInfo.proKey,
         pageSize: 0
       }
-      getUserList(params)
+      getUserMember(params)
         .then(res => {
           if (res) {
             res.data.list.map(item => {
@@ -186,12 +204,12 @@ export default {
     // 提交
     submitData (form) {
       this.$refs[form].validate(valid => {
-        let params, attachmentList = [], taskProcessDto = {};
+        let attachmentList = [], taskProcessDto = {}, dispatchType = null;
         if (valid) {
-          if (this.uploadImgList.length > 3) {
+          if (this.uploadImgList.length > 9) {
             this.$message({
               type: 'warning',
-              message: '最多上传3张图片',
+              message: '最多上传9张图片',
               customClass: 'request_tip'
             });
             return false;
@@ -202,9 +220,11 @@ export default {
           this.uploadImgList && this.uploadImgList.map(item => {
             attachmentList.push(item);
           })
+          let cProcessType = this.processType == 3 ? 2 : 5;
           taskProcessDto = {
               processContent: this.endForm.summary,
-              processType: this.processType 
+              processType: cProcessType,
+              feedbackUserId: this.$route.query.opUserId
           }
           if(attachmentList && attachmentList.length > 0) {
               taskProcessDto['attachmentList'] = attachmentList
@@ -212,12 +232,17 @@ export default {
           if(this.processType == 3) {
               taskProcessDto['uid'] = this.endForm.reportUser
           }
-          params = {
+          /* params = {
               eventId: this.$route.query.eventId,
               taskProcessDto: taskProcessDto
-            }
+            } */
+         /*  if(this.processType == 2 || this.processType == 3) {
+            dispatchType = 1
+          }else {
+            dispatchType = 2
+          } */
           this.isEndLoading = true;
-          taskProcess(params)
+          taskProcess(taskProcessDto,this.$route.query.eventId,this.$route.query.dispatchType )
             .then(res => {
               if (res) {
                 this.$message({
@@ -268,9 +293,6 @@ export default {
         color: #999999;
         margin: 10px 0;
         font-size: 14px;
-      }
-      /deep/ .el-upload-list__item {
-        width: 80%;
       }
       .img_list {
           display: flex;

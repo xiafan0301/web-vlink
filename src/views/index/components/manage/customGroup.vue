@@ -12,8 +12,8 @@
           </i>
         </el-input>
       </div>
-      <div class="add_btn">
-        <i class="vl_icon vl_icon_manage_4" @click="skipAddGroupPage"></i>
+      <div class="add_btn" @click="skipAddGroupPage">
+        <i class="vl_icon vl_icon_manage_4"></i>
         <span>新增分组</span>
       </div>
       <div class="content_box">
@@ -25,9 +25,9 @@
               :key="'item' + index"
               @click="showGroupDeviceInfo(item.uid)"
             >
-              <span>{{item.groupName}}</span>
+              <span>{{item.groupName}}  ({{item.deviceList.length + item.bayonetList.length}})</span>
               <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
-              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid)"></i>
+              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid, item.groupName)"></i>
             </li>
           </ul>
         </vue-scroll>
@@ -39,11 +39,20 @@
       </div>
       <div class="detail_info_right">
         <ul class="tab_ul clearfix">
-          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头</li>
-          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口</li>
+          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头({{deviceList.length}})</li>
+          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口({{bayonetList.length}})</li>
         </ul>
-        <div class="data_list">
-          <p v-for="(item, index) in deviceList" :key="index">{{item.deviceName}}</p>
+        <div class="data_list" v-show="arrowActive === 1">
+          <vue-scroll>
+            <p v-for="(item, index) in deviceList" :key="index" v-show="deviceList.length > 0">{{item.deviceName}}</p>
+            <p style="color: #999;" v-show="deviceList.length === 0">暂无数据</p>
+          </vue-scroll>
+        </div>
+        <div class="data_list" v-show="arrowActive === 2">
+          <vue-scroll>
+            <p v-for="(item, index) in bayonetList" :key="index" v-show="bayonetList.length > 0">{{item.bayonetName}}</p>
+            <p style="color: #999;" v-show="bayonetList.length === 0">暂无数据</p>
+          </vue-scroll>
         </div>
       </div>
     </div>
@@ -76,6 +85,7 @@ export default {
       closeShow: false,
       groupList: [], // 所有的分组
       deviceList: [], // 设备列表
+      bayonetList: [], // 卡口列表
       deleteId: null, // 要删除的分组设备id
     }
   },
@@ -86,7 +96,7 @@ export default {
     // 获取所有的分组
     getGroupList () {
       const params = {
-        keyWord: this.keyWord
+        keyword: this.keyWord
       };
       getCusGroup(params)
         .then(res => {
@@ -115,6 +125,7 @@ export default {
       this.groupList.map(item => {
         if (item.uid === id) {
           this.deviceList = JSON.parse(JSON.stringify(item.deviceList));
+          this.bayonetList = JSON.parse(JSON.stringify(item.bayonetList));
         }
       })
     },
@@ -123,8 +134,8 @@ export default {
       this.$router.push({name: 'add_group'});
     },
     // 编辑分组
-    skipEditGroupPage (id) {
-      this.$router.push({name: 'add_group', query: {groupId: id}});
+    skipEditGroupPage (id, name) {
+      this.$router.push({name: 'add_group', query: {groupId: id, name: name}});
     },
     // change  tab
     changeTab (val) {
@@ -188,9 +199,8 @@ export default {
       display: flex;
       color: #333333;
       align-items: center;
-      i {
-        cursor: pointer;
-      }
+      width: 120px;
+      cursor: pointer;
       > span {
         margin-left: 5px;
       }
@@ -243,6 +253,7 @@ export default {
   }
   .custom_group_right {
     width: calc(100% - 260px);
+    height: 100%;
     .no_data {
       display: none;
       width: 186px;
@@ -252,6 +263,7 @@ export default {
     }
     .detail_info_right {
       width: 100%;
+      height: 100%;
       .tab_ul {
         clear: both;
         padding: 10px 10px 0;
@@ -268,6 +280,7 @@ export default {
         }
       }
       .data_list {
+        height: calc(100% - 50px);
         p {
           padding: 10px 20px 0;
           color: #666666;

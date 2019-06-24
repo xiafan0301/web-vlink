@@ -6,7 +6,6 @@
           <el-form ref="noteForm" :model="noteForm" class="note_form">
             <el-form-item prop="noteDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="noteForm.noteDate"
                 type="daterange"
                 range-separator="-"
@@ -27,14 +26,14 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
-              <el-button type="primary" @click="getSmsList">查询</el-button>
-              <el-button @click="resetForm">重置</el-button>
+            <el-form-item style="padding-right: 0;">
+              <el-button class="select_btn" @click="getSmsList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="help_content">
-          <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增短信</el-button>
+          <el-button class="select_btn" style="width: 117px;" icon="el-icon-plus" @click.native="skip(2)">新增短信</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"
@@ -77,6 +76,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="noteList && noteList.list && noteList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -213,7 +213,8 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

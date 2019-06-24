@@ -3,12 +3,13 @@
   <div class="ctc-operation">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
         <template v-if="$route.query.type === 'ctc'">
-          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: this.$route.query.eventId }}">调度详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status }}">调度详情</el-breadcrumb-item>
         </template>
         <template v-else>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: this.$route.query.eventId }}">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status }}">事件详情</el-breadcrumb-item>
         </template>
         <el-breadcrumb-item>调度指挥</el-breadcrumb-item>
       </el-breadcrumb>
@@ -17,7 +18,7 @@
       <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
       <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
         <div class="header">
-          <p class="ctc-title">调度指挥方案</p>
+          <p class="ctc-title">调度方案</p>
         </div>
         <div class="divide"></div>
         <ul class="content-list">
@@ -34,12 +35,53 @@
               <span>任务内容：</span>
               <span>{{item.taskContent}}</span>
             </div>
+            <div class="divide-list"></div>
           </li>
-          <div class="divide-list"></div>
         </ul>
       </div>
       <div class="ctc-plan-box">
         <div class="plan-box">
+          <div class="plan-list">
+            <div class="main-content" :class="[addTaskList.length === 0 ? 'has_add_btn_content' : 'no_add_btn_content']">
+              <div class="title">
+                <template v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
+                  <span>再次调度方案</span>
+                </template>
+                <template v-else>
+                  <span>调度方案</span>
+                </template>
+                <!-- <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 0"></i> -->
+              </div>
+              <div class="divide"></div>
+              <div class="plan-form-box" >
+                <el-form class="plan-form" label-width="90px" :model="taskObj"  size="middle">
+                  <el-form-item label="调度部门:" :rules ="[{ required: true, message: '请选择调度部门', trigger: 'blur' }]">
+                    <el-select v-model="taskObj.departmentId" placeholder="请选择调度部门">
+                      <el-option
+                        v-for="(item, index) in departmentData"
+                        :key="index"
+                        :label="item.organName"
+                        :value="item.uid"
+                      >
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
+                    <el-input v-model="taskObj.taskName" maxlength="140"></el-input>
+                  </el-form-item>
+                  <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
+                    <el-input type="textarea" rows="8" v-model="taskObj.taskContent" maxlength="1000"></el-input>
+                  </el-form-item>
+                </el-form>
+              </div>
+            </div>
+            <template v-if="addTaskList.length === 0">
+              <div class="add-ctc" @click="addTask()">
+                <i class="vl_icon vl_icon_event_8"></i>
+                <span>添加调度任务</span>
+              </div>
+            </template>
+          </div>
           <div class="plan-operation-box">
             <div class="plan-title">
               <span>推荐预案</span>
@@ -71,11 +113,13 @@
                   </el-table-column>
                   <el-table-column
                     label="适用事件等级"
-                    prop="levelNameList"
+                    prop="levelList"
                     show-overflow-tooltip
                     >
                     <template slot-scope="scope">
-                      <span>{{scope.row.levelNameList.join('、')}}</span>
+                      <span v-for="(item, index) in scope.row.levelList" :key="index">
+                        {{item.planLevelName + ' '}}
+                      </span>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="150">
@@ -89,22 +133,22 @@
               </vue-scroll>
             </div>
           </div>
-          <div class="plan-list" v-for="(item, index) in taskList" :key="index">
-            <div class="main-content">
+          <div class="plan-list" v-for="(item, index) in addTaskList" :key="index">
+            <div class="main-content"  :class="[addTaskList.length === (index + 1) ? 'has_add_btn_content' : 'no_add_btn_content']">
               <div class="title">
                 <template v-if="basicInfo.taskList && basicInfo.taskList.length > 0">
-                  <span>再次调度指挥方案</span>
+                  <span>再次调度方案</span>
                 </template>
                 <template v-else>
-                  <span>调度指挥方案</span>
+                  <span>调度方案</span>
                 </template>
-                <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="taskList.length > 1"></i>
+                <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="addTaskList.length > 0"></i>
               </div>
               <div class="divide"></div>
               <div class="plan-form-box">
                 <el-form class="plan-form" label-width="90px" :model="item"  size="middle">
-                  <el-form-item label="执行部门:"  :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
-                    <el-select v-model="item.departmentId" placeholder="请选择执行部门">
+                  <el-form-item label="调度部门:"  :rules ="[{ required: true, message: '请选择调度部门', trigger: 'blur' }]">
+                    <el-select v-model="item.departmentId" placeholder="请选择调度部门">
                       <el-option
                         v-for="(item, index) in departmentData"
                         :key="index"
@@ -115,18 +159,18 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:" :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                    <el-input v-model="item.taskName"></el-input>
+                    <el-input v-model="item.taskName" maxlength="140"></el-input>
                   </el-form-item>
                   <el-form-item label="任务内容:" :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                    <el-input type="textarea" rows="8" v-model="item.taskContent"></el-input>
+                    <el-input type="textarea" rows="8" v-model="item.taskContent" maxlength="1000"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
             </div>
-            <template v-if="taskList.length === (index + 1)">
-              <div class="add-ctc" @click="addTask('form' + index)">
+            <template v-if="addTaskList.length === (index + 1)">
+              <div class="add-ctc" @click="addTask()">
                 <i class="vl_icon vl_icon_event_8"></i>
-                <span>调度指挥任务添加</span>
+                <span>添加调度任务</span>
               </div>
             </template>
           </div>
@@ -150,18 +194,19 @@ export default {
   components: { EventBasic, BigImg },
   data () {
     return {
+
         imgIndex: 0, // 点击的图片索引
         isShowImg: false, // 是否放大图片
         imgList1: [],
         basicInfo: {}, // 事件详情
-        taskList: [
-          {
-            departmentName: null,
-            taskName: null,
-            taskContent: null,
-            departmentId: null
-          }
-        ],
+        taskObj: { // 第一个taskList对象
+          departmentName: null,
+          taskName: null,
+          taskContent: null,
+          departmentId: null
+        },
+        addTaskList: [],
+        taskList: [], // 最终的任务列表
         planList: [], // 表格数据
         userInfo: {},
         departmentData: [],
@@ -174,12 +219,14 @@ export default {
   mounted () {
     this.getDepartList();
     this.getDetail();
-    this.getReplanList();
+    if (this.$route.query.eventType) {
+      this.getReplanList();
+    }
   },
   methods: {
     getReplanList () { // 获取预案列表
       const params = {
-        pageNum: -1,
+        pageNum: 0,
         'where.planType': this.$route.query.eventType
       }
       getPlanData(params)
@@ -200,6 +247,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            this.departmentData.map((item, index) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.departmentData.splice(index, 1);
+              }
+            });
           }
         })
     },
@@ -241,6 +293,14 @@ export default {
     // 提交数据
     onSubmit () {
       let _this = this;
+      _this.taskList = [];
+      
+      _this.taskList.push(_this.taskObj);
+
+      _this.addTaskList.map(item => {
+        _this.taskList.push(item);
+      });
+
       _this.judgeData().then(result => {
         if (result === true) {
           this.taskList.map((item, index) => {
@@ -251,7 +311,11 @@ export default {
             });
           });
           this.isLoading = true;
-          addTaskInfo(this.taskList, this.$route.query.eventId)
+          const params = {
+            dispatchType: 1, // 1--事件 2--告警
+            eventId: this.$route.query.eventId
+          }
+          addTaskInfo(this.taskList, params)
             .then(res => {
               if (res) {
                 this.$message({
@@ -260,7 +324,6 @@ export default {
                   customClass: 'request_tip'
                 })
                 this.$router.push({name: 'event_ctc'});
-                // this.$router.back(-1);
                 this.isLoading = false;
               } else {
                 this.$message({
@@ -282,21 +345,23 @@ export default {
         taskContent: null,
         departmentId: null
       }
-      this.taskList.push(value);
+      this.addTaskList.push(value);
+      // this.taskList.push(value);
     },
     deletePlanBox (index) { // 删除调度方法输入框
-      this.taskList.splice(index, 1);
+      this.addTaskList.splice(index, 1);
+      // this.taskList.splice(index, 1);
     },
     skipMorePlan () { // 跳转至更多预案页面
-      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'more_plan', query: {eventId: this.$route.query.eventId, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
-      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
+      this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid}});
+      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: obj.uid, type: this.$route.query.type, status: this.$route.query.status}});
     },
     // 返回
     back () {
@@ -316,7 +381,7 @@ export default {
       this.isShowImg = true;
       this.imgIndex = index;
       this.imgList1 = JSON.parse(JSON.stringify(data));
-    },
+    }
   }
 }
 </script>
@@ -327,7 +392,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .ctc-plan-box, {
+    .ctc-plan-box {
       width: 100%;
       margin-bottom: 50px;
       .plan-box {
@@ -383,11 +448,18 @@ export default {
               height: calc(480px - 65px);
             }
           }
+          .no_add_btn_content {
+            height: 100%;
+          }
+          .has_add_btn_content {
+            height: calc(100% - 65px);
+          }
           .main-content {
             box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
             border-radius:4px;
             background-color: #ffffff;
-            height: 100%;
+            // height: 100%;
+            // height: calc(100% - 65px);
             .title {
               padding: 10px 20px;
               display: flex;
@@ -492,14 +564,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
           &:last-child {
-            display: none;
+            .divide-list {
+              display: none;
+            }
+          }
+          .divide-list {
+            width: 100%;
+            height: 1px;
+            margin: 10px 0;
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }
@@ -533,5 +607,3 @@ export default {
   }
 }
 </style>
-
-

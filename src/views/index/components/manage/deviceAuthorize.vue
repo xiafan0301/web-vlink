@@ -6,34 +6,42 @@
         <li :class="{'active': tabState === 2}" @click="tabState = 2">临时授权</li>
       </ul>
       <template v-if="tabState === 1">
-        <ul class="au_left_content">
-          <li v-for="(item, index) in departmentData" :key="'item' + index">
-            <div class="parent_content" :class="{'active_li': item.isOpen === true}" @click="getMemberInfo(item.uid, index)">
-              <i :class="[item.isOpen === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-              <span>{{item.organName}}</span>
-            </div>
-            <template v-if="item.isOpen === true">
-              <div class="content_detail">
-                <p v-for="(itm, idx) in memberListData" :key="'itm' + idx">{{itm.userName}}</p>
-              </div>
-            </template>
-          </li>
-        </ul>
+        <div class="au_content_box">
+          <vue-scroll>
+            <ul class="au_left_content">
+              <li v-for="(item, index) in departmentData" :key="'item' + index">
+                <div class="parent_content" :class="{'active_li': item.isOpen === true}" @click="getMemberInfo(item.uid, index)">
+                  <i :class="[item.isOpen === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
+                  <span>{{item.organName}}</span>
+                </div>
+                <template v-if="item.isOpen === true">
+                  <div class="content_detail">
+                    <p v-for="(itm, idx) in memberListData" :key="'itm' + idx">{{itm.userName}}</p>
+                  </div>
+                </template>
+              </li>
+            </ul>
+          </vue-scroll>
+        </div>
       </template>
       <template v-if="tabState === 2">
         <div class="temp_left_content">
-          <div class="add_btn">
-            <i class="vl_icon vl_icon_manage_4" @click="skipTempGrantPage"></i>
+          <div class="add_btn" @click="skipTempGrantPage">
+            <i class="vl_icon vl_icon_manage_4"></i>
             <span>临时授权</span>
           </div>
-          <ul>
-            <li
-              v-for="(item, index) in userListData"
-              :key="item.uid"
-              :class="[tempActiveUser === index ? 'active_name' : '']"
-              @click="getTempDetailDevice(item.uid, index)"
-            >{{item.userName}}</li>
-          </ul>
+          <div class="temp_content_box">
+            <vue-scroll>
+              <ul>
+                <li
+                  v-for="(item, index) in userListData"
+                  :key="item.uid"
+                  :class="[tempActiveUser === index ? 'active_name' : '']"
+                  @click="getTempDetailDevice(item.uid, index)"
+                >{{item.userName}}</li>
+              </ul>
+            </vue-scroll>
+          </div>
         </div>
       </template>
     </div>
@@ -410,7 +418,32 @@ export default {
   height: 100%;
   .device_left {
     width: 260px;
+    height: 100%;
     border-right: 1px solid #f2f2f2;
+    .au_content_box {
+      height: calc(100% - 50px);
+      .au_left_content {
+        padding: 10px 20px 10px;
+        >li {
+          line-height: 30px;
+          color: #333333;
+          .parent_content {
+            >span {
+              margin-left: 5px;
+            }
+            &.active_li {
+              i, span {
+                color: #0C70F8;
+              }
+            }
+          }
+          .content_detail {
+            color: #666666;
+            padding-left: 17px;
+          }
+        }
+      }
+    }
     .tab_box {
       >li {
         width: 50%;
@@ -427,27 +460,7 @@ export default {
         }
       }
     }
-    .au_left_content {
-      padding: 10px 20px 10px;
-      >li {
-        line-height: 30px;
-        color: #333333;
-        .parent_content {
-          >span {
-            margin-left: 5px;
-          }
-          &.active_li {
-            i, span {
-              color: #0C70F8;
-            }
-          }
-        }
-        .content_detail {
-          color: #666666;
-          padding-left: 17px;
-        }
-      }
-    }
+    
     .temp_left_content {
       height: calc(100% - 45px);
       .add_btn {
@@ -455,23 +468,25 @@ export default {
         display: flex;
         color: #333333;
         align-items: center;
-        i {
-          cursor: pointer;
-        }
+        width: 125px;
+        cursor: pointer;
         > span {
           margin-left: 5px;
         }
       }
-      >ul {
-        >li {
-          color: #666666;
-          cursor: pointer;
-          height: 36px;
-          line-height: 36px;
-          padding-left: 45px;
-          &.active_name {
-            background-color: #E0F2FF;
-            color: #0C70F8;
+      .temp_content_box {
+        height: calc(100% - 45px);
+        ul {
+          >li {
+            color: #666666;
+            cursor: pointer;
+            height: 36px;
+            line-height: 36px;
+            padding-left: 45px;
+            &.active_name {
+              background-color: #E0F2FF;
+              color: #0C70F8;
+            }
           }
         }
       }

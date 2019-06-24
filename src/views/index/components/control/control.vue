@@ -53,6 +53,7 @@ export default {
         position: absolute;
         left: 20px;
         top: 20px;
+        z-index: 999;
         > div{
           box-shadow:4px 0px 15px 0px rgba(131,131,131,0.23),0px 0px 13px 0px rgba(255,255,255,0.55);
           border:1px solid rgba(223,223,223,1);
@@ -488,6 +489,35 @@ export default {
         color: #B2B2B2;
       }
     }
+    // 重置按钮样式
+    .select_btn, .reset_btn {
+      width: 80px;
+    }
+    .btn_90{
+      width: 90px!important;
+    }
+    .btn_100{
+      width: 100px!important;
+    }
+    .btn_140{
+      width: 140px!important;
+    }
+    .select_btn {
+      background-color: #0C70F8;
+      color: #ffffff;
+    }
+    .reset_btn {
+      background-color: #ffffff;
+      color: #666666;
+      border-color: #DDDDDD;
+    }
+    // 重置日期选择框样式
+    .el-range__icon.el-icon-date{
+      display: none;
+    }
+  }
+  .vl_map_hover_main{
+    bottom: 58px;
   }
 }
 // 重置布控库popover

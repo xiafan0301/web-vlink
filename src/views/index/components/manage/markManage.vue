@@ -17,26 +17,22 @@
         </el-form-item>
         <el-form-item prop="deptId">
           <el-select  style="width: 240px;" v-model="searchForm.deptId" placeholder="操作部门">
-            <el-option value='全部操作部门'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+            <el-option
+              v-for="(item, index) in allDepartmentData"
               :key="index"
-              :label="item.enumValue"
+              :label="item.organName"
               :value="item.uid"
-            >
-            </el-option> -->
+              ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="userId">
           <el-select style="width: 240px;" v-model="searchForm.userId" placeholder="操作用户">
-            <el-option value='全部操作用户'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <el-option
+              v-for="(item, index) in usersList"
               :key="index"
-              :label="item.enumValue"
+              :label="item.userRealName"
               :value="item.uid"
-            >
-            </el-option> -->
+              ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -69,15 +65,21 @@
         </el-table-column>
         <el-table-column
           label="操作部门"
-          prop="departmentName"
+          prop="deptName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.deptName ? scope.row.deptName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="操作用户"
-          prop="user"
+          prop="userName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userName ? scope.row.userName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="创建时间"
@@ -99,6 +101,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -118,7 +121,7 @@
       <div style="margin-top: 15px;">
         <el-form :model="markForm" :rules="rules" ref="markForm" label-width="15px">
           <el-form-item prop="markName" label=" " class="mark_name">
-            <el-input v-model="markForm.markName" placeholder="请输入标记名称"></el-input>
+            <el-input v-model="markForm.markName" placeholder="请输入标记名称" maxlength="20"></el-input>
             <p class="mark_error_tip" v-show="isShowError">该标记已存在</p>
           </el-form-item>
         </el-form>
@@ -140,7 +143,7 @@
       <div style="margin-top: 15px;">
         <el-form :model="markForm" :rules="rules" ref="markForm" label-width="15px">
           <el-form-item prop="markName" label=" " class="mark_name">
-            <el-input v-model="markForm.markName" placeholder="请输入标记名称"></el-input>
+            <el-input v-model="markForm.markName" placeholder="请输入标记名称" maxlength="20"></el-input>
             <p class="mark_error_tip" v-show="isShowError">该标记已存在</p>
           </el-form-item>
         </el-form>
@@ -169,7 +172,7 @@
 </vue-scroll>
 </template>
 <script>
-// import { formatDate } from '@/utils/util.js';
+import { getDepartmentList, getUserList } from '@/views/index/api/api.manage.js';
 import { apiVideoSignContent, apiGetVideoRecords, deleteVideoRecords, updateVideoRecords } from '@/views/index/api/api.video.js';
 export default {
   data () {
@@ -202,16 +205,50 @@ export default {
       markId: null, // 要编辑或删除的id
       isAddLoading: false, // 新增标记弹出框
       isEditLoading: false, // 编辑标记弹出框
-      isDeleteLoading: false // 删除标记探出头
+      isDeleteLoading: false, // 删除标记弹出框
+      userInfo: {}, // 用户信息
+      allDepartmentData: [], // 部门列表
+      usersList: [], // 用户列表
+      originMarkName: null
     }
   },
   mounted () {
+    this.userInfo = this.$store.state.loginUser;
+
+    this.getUsersList();
+    this.getAllDepartList();
     this.getList();
   },
   methods: {
+    // 获取部门列表
+    getAllDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.allDepartmentData = res.data.list;
+          }
+        })
+    },
+    // 获取所有的用户
+    getUsersList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.usersList = res.data.list;
+          }
+        })
+        .catch(() => {})
+    },
     // 获取标记内容列表
     getList () {
-      console.log(this.searchForm.reportTime)
       if (this.searchForm.reportTime === null) {
         this.searchForm.reportTime = [];
       }
@@ -293,6 +330,7 @@ export default {
       this.isShowError = false;
       this.markId = obj.uid;
       this.markForm.markName = obj.content;
+      this.originMarkName = obj.content; // 保存还未修改的标记名称，最后判断是否修改
       this.editMarkDialog = true;
     },
     // 编辑标记
@@ -303,6 +341,10 @@ export default {
             uid: this.markId,
             content: this.markForm.markName
           };
+          if (this.originMarkName === this.markForm.markName) { // 若没有修改标记名称，则直接关闭弹框
+            this.editMarkDialog = false;
+            return;
+          }
           this.isEditLoading = true;
           updateVideoRecords(params)
             .then(res => {
@@ -350,25 +392,19 @@ export default {
                 message: '删除成功',
                 customClass: 'request_tip'
               })
-              this.delMarkDialog = false;
               this.getList();
               this.isDeleteLoading =  false;
             } else {
               this.isDeleteLoading =  false;
             }
+            this.delMarkDialog = false;
           })
-          .catch(() => {this.isDeleteLoading =  false;})
+          .catch(() => {
+            this.isDeleteLoading =  false;
+            this.delMarkDialog = false;
+          })
       }
-    },
-    // getOneMonth () { // 设置默认一个月
-    //   const end = new Date();
-    //   const start = new Date();
-    //   start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-    //   const startDate = formatDate(start, 'yyyy-MM-dd');
-    //   const endDate = formatDate(end, 'yyyy-MM-dd');
-    //   this.searchForm.reportTime.push(startDate);
-    //   this.searchForm.reportTime.push(endDate);
-    // },
+    }
   }
 }
 </script>

@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div class="mes_notice" v-show="pageType === 1">
+    <div class="mes_notice" v-if="pageType === 1">
       <div class="notice_box">
         <div class="notice_form">
           <el-form ref="noticeForm" :model="noticeForm" class="notice_form">
             <el-form-item prop="noticeDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="noticeForm.noticeDate"
                 type="daterange"
                 range-separator="-"
@@ -19,8 +18,18 @@
             <el-form-item prop="titleOrPublisher">
               <el-input v-model="noticeForm.titleOrPublisher" placeholder="请输入标题或者发布者"></el-input>
             </el-form-item>
+            <el-form-item prop="department">
+              <el-select value-key="uid" v-model="noticeForm.department" filterable placeholder="请选择发布部门">
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="noticeState">
-              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择">
+              <el-select value-key="uid" v-model="noticeForm.noticeState" filterable placeholder="请选择是否置顶">
                 <el-option
                   v-for="item in noticeStateList"
                   :key="item.uid"
@@ -29,14 +38,14 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
-              <el-button type="primary" @click="getMsgNoteList">查询</el-button>
-              <el-button @click="resetForm">重置</el-button>
+            <el-form-item style="padding-right: 0;">
+              <el-button class="select_btn" @click="getMsgNoteList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="notice_content">
-          <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增公告消息</el-button>
+          <el-button class="select_btn" style="width:145px;" icon="el-icon-plus" @click.native="skip(2)">新增公告消息</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"
@@ -57,6 +66,12 @@
               <el-table-column
                 label="内容预览"
                 prop="details"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="发布部门"
+                prop="publishUnitName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -104,6 +119,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="noticeList && noticeList.list && noticeList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -123,6 +139,7 @@
 import noticeAdd from './noticeAdd.vue';
 import noticeDetail from './noticeDetail.vue';
 import {getMsgNoteList, putMsgNote} from '@/views/index/api/api.message.js';
+import {getDepartmentList} from '@/views/index/api/api.manage.js';
 export default {
   components: {noticeAdd, noticeDetail},
   data () {
@@ -132,13 +149,16 @@ export default {
       noticeForm: {
         noticeDate: null,
         titleOrPublisher: null,
+        department: null,
         noticeState: null
       },
       lastNoticeForm: {
         noticeDate: null,
         titleOrPublisher: null,
+        department: null,
         noticeState: null
       },
+      departmentList: [],
       noticeStateList: [
         {value: '0', label: '未置顶'},
         {value: '1', label: '已置顶'}
@@ -152,10 +172,34 @@ export default {
       loading: false
     }
   },
+  computed: {
+    userInfo () {
+      return this.$store.state.loginUser;
+    }
+  },
   mounted () {
+    this.getDepartList();
     this.getMsgNoteList();
   },
   methods: {
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList = res.data.list.map(m => {
+              return {
+                value: m.uid,
+                label: m.organName
+              }
+            });
+          }
+        })
+    },
     // 获取公告消息列表
     getMsgNoteList () {
       this.pageType = 1;
@@ -183,7 +227,8 @@ export default {
         'where.startDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[0],
         'where.endDateStr': this.noticeForm.noticeDate && this.noticeForm.noticeDate[1],
         'where.titleOrPublisher': this.noticeForm.titleOrPublisher,
-        'where.isTop': this.noticeForm.noticeState
+        'where.isTop': this.noticeForm.noticeState,
+        'where.publishUnit': this.noticeForm.department
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {
@@ -224,7 +269,9 @@ export default {
       this.msgNoteId = uid;
     },
     resetForm () {
-      this.$refs['noticeForm'].resetFields();
+      for (let key in this.noticeForm) {
+        this.noticeForm[key] = null;
+      }
       this.getMsgNoteList();
     }
   }
@@ -247,7 +294,8 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

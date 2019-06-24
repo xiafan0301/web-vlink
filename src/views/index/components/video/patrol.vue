@@ -47,7 +47,7 @@
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
-                        <div class="tree_li_dis" v-else>
+                        <div class="tree_li_dis" draggable="false" v-else>
                           {{sitem.deviceName}}
                           <span class="vl_icon vl_icon_v11"></span>
                         </div>
@@ -131,14 +131,13 @@
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
                   <div v-if="patrolActive === 1" class="show_his_dis" 
-                    @click="dragEndDis"
                     @dragend="dragEndDis"
                     draggable="true">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
-                  <div class="show_his_dis" v-else-if="item.expireFlag">
+                  <div draggable="false" class="show_his_dis" v-else-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
@@ -176,7 +175,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :optDis="patrolActive === 1" :bResize="bResize"
               :oConfig="{sign: true}">
             </div>
           </div>
@@ -192,13 +191,14 @@
         <el-progress type="circle" 
           :width="200" 
           :stroke-width="16"
-          :percentage="patrolStartPercentage" 
-          color="#1073F8"
-          status="text">
-          <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
+          :percentage="patrolStartPercentage"
+          :format="patrolProgFormat"
+          :show-text="true"
+          color="#1073F8">
+          <!-- <p style="color: #000; text-align: center; font-size: 50px; font-weight: bold;">
             {{Math.ceil(patrolStartSecond / 10)}}
           </p>
-          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P>
+          <P style="color: #666; text-align: center; font-size: 16px; padding: 10px 0 0 0;">秒</P> -->
         </el-progress>
       </div>
       <h3 style="color: #000; text-align: center; font-size: 18px; padding: 0 0 20px 0;">轮巡即将开始</h3>
@@ -210,7 +210,7 @@
     </el-dialog>
     <!-- 轮巡暂停提示 dialog -->
     <el-dialog title="是否暂停轮巡？" :visible.sync="patrolParseDialogVisible" :center="false" :append-to-body="true" width="500px">
-      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，如需要查看其它通路，请先暂停轮巡。</div>
+      <div style="padding: 30px 0 20px 30px; text-align: left; color: #666;">轮巡正在进行中，不可改变布局，如需改变布局查看其它通路请先暂停轮巡。</div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
         <el-button @click="patrolParseDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="patrolParse">确定暂停轮巡</el-button>
@@ -309,6 +309,10 @@ export default {
   },
   methods: {
     /* 轮巡控制事件 begin */
+    patrolProgFormat (percentage) {
+      // return Math.round(percentage) + '秒';
+      return Math.ceil(this.patrolStartSecond / 10)  + ' 秒';
+    },
     // 获取轮巡数据定时器
     patrolSetDataVal () {
       this.patrolDataVal = window.setInterval(() => {
@@ -336,7 +340,7 @@ export default {
               deviceNum: 5, // 轮巡设备数
               startTime: null, // 开始时间
               endTime: null, // 结束时间
-              roundStatus: 1, // 轮巡状态
+              roundStatus: 1, // 状态（1.待开始 2.进行中 3.已结束 4.关闭）
               deviceList: [{uid: 3}, {uid: 2}, {uid: 6}, {uid: 4}, {uid: 5}]
             },
             currentDeviceList: null,
@@ -382,7 +386,7 @@ export default {
     // 轮巡处理
     patrolHandler (pData) {
       // 数据中有当前轮巡
-      if (pData && pData.currentRound && pData.currentRoundRemain > 0) {
+      if (pData && pData.currentRound && pData.currentRound.roundStatus === 2 && pData.currentRoundRemain > 0) {
         if (!this.patrolHandlerData.currentRound || this.patrolHandlerData.currentRound.roundNo != pData.currentRound.roundNo) {
           // 不存在正在执行的轮巡 或者 正在执行的轮巡和当前轮巡 不是同一个 ==> 直接执行当前轮巡
           this.patrolClearCurrent(); // 清除正在执行的轮巡
@@ -393,8 +397,8 @@ export default {
         // 当前轮巡为空，则清除正在执行的轮巡
         this.patrolClearCurrent(); // 清除正在执行的轮巡
       }
-      // 当前有下一个轮巡
-      if (pData && pData.nextRound && pData.nextRoundCountDown > 0) {
+      // 当前有下一个轮巡  状态（1.待开始 2.进行中 3.已结束 4.关闭）
+      if (pData && pData.nextRound && pData.nextRound.roundStatus === 1 && pData.nextRoundCountDown > 0) {
         if (!this.patrolHandlerData.nextRound || this.patrolHandlerData.nextRound.roundNo != pData.nextRound.roundNo) {
           // 下一个轮巡不存在 或 下一个轮巡和已储备的下一个轮巡 不是同一个 ==> 则执行下一个轮巡逻辑
           this.patrolClearNext(); // 清除下一个的轮巡信息
@@ -437,7 +441,7 @@ export default {
     // 立即执行下一个轮巡 状态（1.待开始 2.进行中 3.已结束 4.关闭）
     patrolNextImm () {
       this.patrolNextCloseDis = true;
-      if (this.patrolHandlerData.currentRound) {
+      if (this.patrolHandlerData.currentRound && this.patrolHandlerData.currentRound.uid) {
         // 停止当前沦胥
         mdfVideoRoundState({
           id: this.patrolHandlerData.currentRound.uid,
@@ -447,33 +451,32 @@ export default {
           console.log("mdfVideoRoundState error：", error);
         });
       }
+      this.patrolNextStart();
+    },
+    // 开始执行下一个轮巡
+    patrolNextStart () {
       this.patrolClearDataVal();
+      this.patrolClearCurrent();
       mdfVideoRoundState({
         id: this.patrolHandlerData.nextRound.uid,
         status: 2
       }).then(() => {
-        // 开始执行下一个轮巡
-        this.patrolNextStart();
+        let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
+        if (iT > 0) {
+          iT = Math.round(iT / 1000);
+        }
+        let op = {
+          currentRound: this.patrolHandlerData.nextRound,
+          currentRoundRemain: iT
+        }
+        this.patrolClearNext();
+        this.patrolStart(op);
         // 获取轮巡数据
         this.patrolSetDataVal();
       }).catch(error => {
         this.patrolSetDataVal();
         console.log("mdfVideoRoundState error：", error);
       });
-    },
-    // 开始执行下一个轮巡
-    patrolNextStart () {
-      this.patrolClearCurrent();
-      let iT = this.patrolHandlerData.nextRound.endTime - this.patrolHandlerData.nextRound.startTime;
-      if (iT > 0) {
-        iT = Math.round(iT / 1000);
-      }
-      let op = {
-        currentRound: this.patrolHandlerData.nextRound,
-        currentRoundRemain: iT
-      }
-      this.patrolClearNext();
-      this.patrolStart(op);
     },
     // 关闭下一个轮巡
     patrolNextClose () {
@@ -527,15 +530,21 @@ export default {
         this.patrolHandlerData.currentRoundVal = window.setInterval(() => {
           this.patrolCurrentGoOn();
         }, this.patrolHandlerData.currentRound.roundInterval * 1000);
+        // console.log('currentRoundRemain----------', this.patrolHandlerData.currentRoundRemain * 1000);
         this.patrolHandlerData.currentRoundRemainTimeout = window.setTimeout(() => {
           this.patrolClearCurrent();
           this.$message('轮巡时间已到。');
         }, this.patrolHandlerData.currentRoundRemain * 1000);
       } else {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
+        if (this.showVideoTotal !== this.patrolHandlerData.currentRound.frameNum) {
+          // 改变布局
+          this.showVideoTotal = this.patrolHandlerData.currentRound.frameNum;
+          this.bResize = {};
+        }
         this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
       }
-      this.$message('轮巡已开始。');
+      this.$message('轮巡进行中。');
     },
     // 当前轮巡 轮
     patrolCurrentGoOn () {
@@ -694,14 +703,16 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord(item.uid).then(() => {
-        this.getVideoRecordList();
-        this.$message({
-          message: '删除成功！',
-          type: 'success'
-        });
+      apiDelVideoRecord(item.uid).then((res) => {
+        if (res) {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }
       }).catch(error => {
-        this.$message.error('删除失败！');
+        // this.$message.error('删除失败！');
         console.log("apiDelVideoRecord error：", error);
       });
     },
@@ -709,24 +720,21 @@ export default {
       // apiDelVideoRecords
       this.$confirm('确定删除所有的播放历史吗?', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        apiDelVideoRecords({playType: 1}).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        apiDelVideoRecords({playType: 1}).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecords error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
 

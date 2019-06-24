@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div class="mes_help" v-show="pageType === 1">
+    <div class="mes_help" v-if="pageType === 1">
       <div class="help_box">
         <div class="help_form">
           <el-form ref="helpForm" :model="helpForm" class="help_form">
             <el-form-item prop="helpDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="helpForm.helpDate"
                 type="daterange"
                 range-separator="-"
@@ -16,11 +15,21 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <el-form-item style="width: 260px;" prop="content">
+            <el-form-item prop="content">
               <el-input v-model="helpForm.content" placeholder="输入情况或发布者或地点"></el-input>
             </el-form-item>
+            <el-form-item prop="helpRadius">
+              <el-select value-key="uid" v-model="helpForm.helpRadius" filterable placeholder="请选择推送范围">
+                <el-option
+                  v-for="item in helpRadiusList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="helpState">
-              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择">
+              <el-select value-key="uid" v-model="helpForm.helpState" filterable placeholder="请选择互助状态">
                 <el-option
                   v-for="item in helpStateList"
                   :key="item.uid"
@@ -29,14 +38,14 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item style="width: 25%;">
-              <el-button type="primary" @click="getMutualHelpList">查询</el-button>
-              <el-button @click="resetForm">重置</el-button>
+            <el-form-item style="padding-right: 0;">
+              <el-button class="select_btn" @click="getMutualHelpList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="help_content">
-          <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
+          <el-button class="select_btn" style="width: 145px;" icon="el-icon-plus" @click.native="skip(2)">新增民众互助</el-button>
             <div class="table_box">
             <el-table
               v-loading="loading"
@@ -72,8 +81,14 @@
                 show-overflow-tooltip
                 >
                 <template slot-scope="scope">
-                  {{scope.row.radius === -1 ? '不推送' : scope.row.radius === 0 ? '全部推送' : scope.row.radius > 0 ? (scope.row.radius + '公里以内') : ''}}
+                  {{scope.row.radius === -1 ? '不推送' : scope.row.radius === 0 ? '全部用户' : scope.row.radius > 0 ? (scope.row.radius/1000 + '公里以内') : ''}}
                 </template>
+              </el-table-column>
+              <el-table-column  
+                label="状态"
+                prop="eventStatusName"
+                show-overflow-tooltip
+                >
               </el-table-column>
               <el-table-column  
                 label="事发时间"
@@ -84,8 +99,12 @@
               <el-table-column label="操作" width="140">
                 <template slot-scope="scope">
                   <span class="operation_btn" @click="skip(3, scope.row.uid)">查看</span>
-                  <span class="operation_wire">|</span>
-                  <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                  <template v-if="scope.row.eventStatus !== 3">
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="skip(4, scope.row.uid)">修改</span>
+                    <span class="operation_wire">|</span>
+                    <span class="operation_btn" @click="popEndDialog(scope.row.uid)">结束</span>
+                  </template>
                 </template>
               </el-table-column>
               <div class="not_content" slot="empty">
@@ -95,6 +114,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="helpList && helpList.list && helpList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -106,6 +126,20 @@
         </div>
       </div>
     </div>
+    <div class="end_dialog">
+      <el-dialog
+        :visible.sync="delDialog"
+        :close-on-click-modal="false"
+        width="482px"
+        top="40vh"
+        title="结束互助">
+        <h4>是否确定结束该次互助？</h4>
+        <div slot="footer">
+          <el-button @click="delDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="endEvent">确认</el-button>
+        </div>
+      </el-dialog>
+    </div>
     <div is="helpAdd" v-if="pageType === 2 || pageType === 4" :helpId="helpId" :pageType="pageType" @changePage="skip" @getMutualHelpList="getMutualHelpList"></div>
     <div is="helpDetail" v-if="pageType === 3" :helpId="helpId" @changePage="skip"></div>
   </div>
@@ -113,7 +147,8 @@
 <script>
 import helpAdd from './helpAdd.vue';
 import helpDetail from './helpDetail.vue';  
-import {getMutualHelpList} from '@/views/index/api/api.message.js';
+import {getEventList, endEvent} from '@/views/index/api/api.event.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {helpAdd, helpDetail},
   data () {
@@ -123,32 +158,50 @@ export default {
       helpForm: {
         helpDate: null,
         content: null,
+        helpRadius: null,
         helpState: null
       },
       lastHelpForm: {
         helpDate: null,
         content: null,
+        helpRadius: null,
         helpState: null
       },
-      helpStateList: [
-        {value: -1, label: '不推送'},
-        {value: 0, label: '全部推送'},
-        {value: 10, label: '10公里以内的'},
-        {value: 20, label: '20公里以内的'},
-        {value: 30, label: '30公里以内的'},
-        {value: 40, label: '40公里以内的'}
-      ],
+      helpRadiusList: this.dicFormater(dataList.distanceId)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
+      helpStateList: this.dicFormater(dataList.eventStatus)[0].dictList.filter(f => f.enumField !== '1').map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // 表格参数
       helpList: [{name: 'xxx'}],
       // 翻页参数
       pageSize: 10,
       pageNum: 1,
       currentPage: 1,
-      loading: false
+      loading: false,
+      // 弹窗参数
+      delDialog: false,
+      loadingBtn: false,
+      listHelpId: null
     }
   },
   mounted () {
     this.getMutualHelpList();
+    const data = this.$route.query;
+    // 外部跳转到详情页
+    if (data.pageType && data.helpId) {
+      this.$nextTick(() => {
+        this.pageType = parseInt(data.pageType);
+        this.helpId = data.helpId;
+      })
+    }
   },
   methods: {
     // 获取民众互助列表
@@ -174,18 +227,49 @@ export default {
         pageSize: this.pageSize,
         orderBy: 'report_time',
         order: 'desc',
-        'where.startDateStr': this.helpForm.helpDate && this.helpForm.helpDate[0],
-        'where.endDateStr': this.helpForm.helpDate && this.helpForm.helpDate[1],
-        'where.keyWord': this.helpForm.content,
-        'where.radius': this.helpForm.helpState
+        'where.reportTimeStart': this.helpForm.helpDate && this.helpForm.helpDate[0],
+        'where.reportTimeEnd': this.helpForm.helpDate && this.helpForm.helpDate[1],
+        'where.keywordLocDesci': this.helpForm.content,
+        'where.radius': this.helpForm.helpRadius,
+        'where.mutualFlag': 1,
+        'where.eventStatus': this.helpForm.helpState
       }
       this.loading = true;
-      getMutualHelpList(params).then(res => {
+      getEventList(params).then(res => {
         if (res && res.data) {
           this.helpList = res.data;
         }
       }).finally(() => {
         this.loading = false;
+      })
+    },
+    // 弹出结束互助弹窗
+    popEndDialog (uid) {
+      this.listHelpId = uid;
+      this.delDialog = true;
+    },
+    // 结束互助
+    endEvent () {
+      const data = {
+        eventId: this.listHelpId,
+        isCloseEvent: 1
+      }
+      this.loadingBtn = true;
+      endEvent(data).then(res => {
+        if (res) {
+          this.$message.success('互助结束成功');
+          // 手动隐藏结束按钮
+          for (let item of this.helpList.list) {
+            if (item.uid === this.listHelpId) {
+              item.eventStatus = 3;
+              item.eventStatusName = '已结束';
+              this.delDialog = false;
+              break;
+            }
+          }
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
       })
     },
     indexMethod (index) {
@@ -201,7 +285,9 @@ export default {
       this.helpId = uid;
     },
     resetForm () {
-      this.$refs['helpForm'].resetFields();
+      for (let key in this.helpForm) {
+        this.helpForm[key] = null;
+      }
       this.getMutualHelpList();
     }
   }
@@ -224,13 +310,19 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{
       padding-top: 10px;
     }
   }
-  
+  .end_dialog{
+    h4{
+      font-size: 16px;
+      color: #333333;
+    }
+  }
 }
 </style>

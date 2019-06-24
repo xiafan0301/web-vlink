@@ -26,14 +26,14 @@
             <div class="group_list" v-if="tabType === '1'">
               <div v-for="(item, index) in groupListPortrait" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getPortraitList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getPortraitList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
             <!-- 车像库组列表 -->
             <div class="group_list" v-else>
               <div v-for="(item, index) in groupListCar" :key="item.uid"  :class="{'active': groupIndex === index }">
                 <div @click="getVehicleList(item.uid, index)"><span class="vl_f_333">{{item.groupName}}</span><span class="vl_f_666" style="margin-left: 5px;">({{item.num}})</span></div>
-                <i @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
+                <i v-show="groupIndex === index" @click="getVehicleList(item.uid, index, '2', item.groupName)" class="vl_icon vl_icon_control_21"></i>
               </div>
             </div>
           </div>
@@ -46,7 +46,7 @@
               v-model="libPortraitForm.perTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -79,6 +79,7 @@
               filterable
               remote
               clearable
+              @clear="portraitDropdownList = []"
               value-key="value"
               placeholder="输入证件号码"
               :remote-method="getPortraitDropdownListByIdNo"
@@ -92,8 +93,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
+            <el-button class="select_btn btn_90" @click.native="getPortraitList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
         <!-- 车像库左侧组合搜索 -->
@@ -104,7 +105,7 @@
               v-model="libVehicleForm.carTime"
               type="daterange"
               format="yy-MM-dd"
-              range-separator="至"
+              range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
@@ -147,6 +148,7 @@
               filterable
               remote
               clearable
+              @clear="carDropdownList = []"
               value-key="value"
               placeholder="输入车辆号码"
               :remote-method="getVehicleDropdownListByVehicleNumber"
@@ -160,8 +162,8 @@
             </el-select>
           </el-form-item>
           <el-form-item style="width: 192px;">
-            <el-button style="width: 90px;" type="primary" plain @click.native="reset">重置</el-button>
-            <el-button style="width: 90px;" type="primary" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
+            <el-button class="reset_btn btn_90" @click.native="reset">重置</el-button>
+            <el-button class="select_btn btn_90" @click.native="getVehicleList(groupId, groupIndex)">搜索</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -169,8 +171,8 @@
       <div class="member_list">
         <div class="member_title">
           <div><span class="vl_f_333">布控库</span><span class="vl_f_666">({{memberNum}})</span></div>
-          <el-button v-if="tabType === '1'" type="primary" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
-          <el-button v-else type="primary" @click.native="clearForm('carForm', '1')">新建车像</el-button>
+          <el-button v-if="tabType === '1'" class="select_btn btn_100" @click.native="clearForm('portraitForm', '1')">新建人像</el-button>
+          <el-button v-else class="select_btn btn_100" @click.native="clearForm('carForm', '1')">新建车像</el-button>
         </div>
         <div class="list_box" v-loading="loading">
           <template v-if="tabType === '1'">
@@ -274,25 +276,25 @@
               <p>暂无相关数据</p>
             </div>
           </template>
-          <div style="width: 100%;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
+          <div style="width: 100%;padding-bottom: 10px;" v-show="protraitMemberList && protraitMemberList.list && protraitMemberList.list.length > 0 && tabType === '1'">
             <el-pagination
               style="text-align: center;"
+              background
               @current-change="handleCurrentChange"
               :current-page="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="protraitMemberList.pageSize"
-              layout="total, prev, pager, next, jumper"
+              layout="prev, pager, next"
               :total="protraitMemberList.total">
             </el-pagination>
           </div>
-          <div style="width: 100%;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
+          <div style="width: 100%;padding-bottom: 10px;" v-show="carMemberList && carMemberList.list && carMemberList.list.length > 0 && tabType === '2'">
             <el-pagination
               style="text-align: center;"
+              background
               @current-change="handleCurrentChange"
               :current-page="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
               :page-size="carMemberList.pageSize"
-              layout="total, prev, pager, next, jumper"
+              layout="prev, pager, next"
               :total="carMemberList.total">
             </el-pagination>
           </div>
@@ -471,14 +473,14 @@
             </div>
           </div>
           <div slot="footer">
-            <el-button @click="toGiveUpDialog = true">取消</el-button>
+            <el-button @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
             <template v-if="tabType === '1'">
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="savePortrait('portraitForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" type="primary" @click="putPortrait('portraitForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="savePortrait('portraitForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putPortrait('portraitForm')">确定</el-button>
             </template>
             <template v-else>
-              <el-button v-if="operationType === '1'" :loading="loadingBtn" type="primary" @click="saveCar('carForm')">保存</el-button>
-              <el-button v-else :loading="loadingBtn" type="primary" @click="putCar('carForm')">确定</el-button>
+              <el-button v-if="operationType === '1'" :loading="loadingBtn" class="select_btn btn_100" @click="saveCar('carForm')">保存</el-button>
+              <el-button v-else :loading="loadingBtn" class="reset_btn btn_100" @click="putCar('carForm')">确定</el-button>
             </template>
           </div>
         </el-dialog>
@@ -493,8 +495,8 @@
         top="40vh">
         <h4>是否放弃本次操作？</h4>
         <div slot="footer">
-          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;">放弃</el-button>
-          <el-button  type="primary" @click="toGiveUpDialog = false">取消</el-button>
+          <el-button :loading="loadingBtn" @click="toGiveUpDialog = false;addPortraitDialog = false;" class="select_btn btn_140">放弃</el-button>
+          <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
         </div>
       </el-dialog>
     </template>
@@ -627,9 +629,9 @@ export default {
       // 新增人像参数
       portraitForm: {
         name: '',
-        sex: '',
-        nation: null,
-        idType: '',
+        sex: 0,
+        nation: 1,
+        idType: '1',
         idNo: '',
         birthDate: null,
         groupIds: [],
@@ -660,10 +662,7 @@ export default {
           {required: true, message: '请填写姓名', trigger: 'blur'},
           {validator: checkName, trigger: 'blur'}
         ],
-        sex: [{required: true, message: '请选择性别类型', trigger: 'change'}],
-        nation: [{required: true, message: '请选择民族类型', trigger: 'change'}],
         idType: [{required: true, message: '请选择证件类型', trigger: 'change'}],
-        birthDate: [{required: true, message: '请填写出生日期', trigger: 'change'}],
         idNo: [
           {required: true, message: '请填写证件号码', trigger: 'blur'},
           {validator: checkIdCard, trigger: 'blur'}
@@ -673,11 +672,7 @@ export default {
         vehicleNumber: [
           {required: true, message: '请填写车牌号码', trigger: 'blur'},
           {validator: checkPlateNumber, trigger: 'blur'}
-        ],
-        vehicleColor: [{required: true, message: '请选择车辆颜色', trigger: 'change'}],
-        vehicleType: [{required: true, message: '请选择车辆类型', trigger: 'change'}],
-        numberType: [{required: true, message: '请选择号牌类型', trigger: 'change'}],
-        numberColor: [{required: true, message: '请选择号牌颜色', trigger: 'change'}]
+        ]
       },
       lastIdNo: null,
       lastCarIdNo: null,
@@ -867,7 +862,7 @@ export default {
       }
       this.portraitForm.groupIds = [];
       this.carForm.groupIds = [];
-      this.portraitForm.sex = '';
+      this.portraitForm.sex = 0;
       this.isShowDpList = false;
       this.addPortraitDialog = !this.addPortraitDialog;
       this.isAddDisabled = false;
@@ -943,6 +938,7 @@ export default {
             return;
           }
           this.loadingBtn = true;
+          console.log(this.portraitForm)
           let data = objDeepCopy(this.portraitForm);
           if (data.uid !== undefined) {
             delete data['uid'];
@@ -1111,6 +1107,7 @@ export default {
           this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
           this.dialogImageUrl = carInfo.vehicleImagePath;
           carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
+          carInfo.numberColor = carInfo.numberType;
           this.lastCarIdNo = carInfo.vehicleNumber;
           this.carForm = carInfo;
           console.log(this.carForm)
@@ -1292,13 +1289,13 @@ export default {
           margin-left: 10px;
         }
         &.active{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
         }
         &:hover{
-          background:rgba(242,242,242,1);
+          background:#E0F3FF;
           i, span{
             color: #0C70F8;
           }
@@ -1325,10 +1322,10 @@ export default {
             }
           }
           &.active{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
           &:hover{
-            background:rgba(242,242,242,1);
+            background:#E0F3FF;
           }
         }
       }
@@ -1500,13 +1497,14 @@ export default {
       .el-upload--picture-card{
         width: 160px;
         height: 160px;
-        background: rgba(67,140,238,1);
+        background: #F2F2F2;
         border-radius: 20px;
         i{
           width: 120px;
           height: 110px;
         }
         &:hover{
+          background: #0C70F8;
           i.vl_icon_control_14{
             background-position: -228px -570px;
           }

@@ -91,4 +91,43 @@ export const validateName = (rule, value, callback) => {
     callback();
   }
 };
+/**
+ * 支持10-120之间的正整数
+ */
+export const validateDurationTime = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (!reg.test(value) || parseInt(value) < 10 || parseInt(value) > 120) {
+    callback(new Error('请正确输入10-120之间的整数'));
+  } else {
+    callback();
+  }
+};
+/**
+ * 支持0-99之间的整数
+ */
+export const validatePersonNum = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (value) {
+    if (!reg.test(value) || parseInt(value) > 99) {
+      callback(new Error('请正确输入0-99之间的整数'));
+    } else {
+      callback();
+    }
+  }
+  callback();
+};
+/**
+ * 校验轮巡时间  30分钟≤（结束时间-开始时间）≤8小时
+ */
+export const validatePatrolTime = (rule, value, callback) => {
+  if (value) {
+    const startTime = new Date(value[0]);
+    const endTime = new Date(value[1]);
+    const timeDiff = endTime.getTime() - startTime.getTime();
+    if (timeDiff < 1800000 || timeDiff > (8*60*60*1000)) {
+      callback(new Error('请选择正确的时间'));
+    }
+  }
+  callback();
+};
 

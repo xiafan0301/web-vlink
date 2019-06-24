@@ -4,79 +4,48 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}}">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看上级呈报</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="content-box">
         <EventBasic :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
-        <div class="receive_box">
+        <div class="receive_box" v-show="lowerlevelReportList && lowerlevelReportList.length > 0">
           <div class="divide"></div>
-          <ul>
+          <ul v-for="(item, index) in lowerlevelReportList" :key="index">
             <li>
               <span>接收者:</span>
-              <span>王冬冬、李沁</span>
+              <span>{{item.receiverName}}</span>
             </li>
             <li>
               <span>情况说明:</span>
-              <span>由于情况复杂，已无法控制影响范围，请上级指示！由于情况复杂，已无法控制影响范围，
-                请上级指示！由于情况复杂，已无法控制影响范围，请上级指示！
-                由于情况复杂，已无法控制影响范围，请上级指示！由于情况复杂，已无法控制影响范围，请上级指示！</span>
+              <span>{{item.processContent}}</span>
             </li>
+            <div class="divide" style="width: 250%"></div>
           </ul>
         </div>
-        <div class="report-content">
+        <div class="report-content" v-show="superPointList && superPointList.length > 0">
           <div class="header">
             <p class="ctc-title">上级指示</p>
           </div>
           <div class="divide"></div>
           <ul class="report-list">
-            <li>
+            <li v-for="(item, index) in superPointList" :key="'item' + index">
               <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
+                <span>{{item.opUserName}}</span>
+                <span>{{item.createTime}}</span>
               </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
+              <div>{{item.processContent}}</div>
+              <div style="width:100%;margin-top:10px;">
+                <img
+                  style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;border:1px solid #ccc;"
+                  v-for="(itm, index) in item.attachmentList"
+                  :key="'item' + index"
+                  :src="itm.path"
+                  @click="openBigImg(index, item.attachmentList)"
+                >
               </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
-            </li>
-            <div class="content-divide"></div>
-            <li>
-              <div>
-                <span>wang东东</span>
-                <span>2018-11-21 17:15</span>
-              </div>
-              <div>
-                增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，
-                调度城管一起协同解决增大支援队伍，调度城管一起协同解决增大支援队伍，调度城管一起协同解决
-              </div>
+              <div class="content-divide"></div>
             </li>
           </ul>
         </div>
@@ -93,7 +62,8 @@
 </template>
 <script>
 import EventBasic from './components/eventBasic';
-import { getEventDetail } from '@/views/index/api/api.event.js';
+import { getEventDetail, getEventProcess } from '@/views/index/api/api.event.js';
+import { proccessEventType } from '@/utils/data.js';
 import BigImg from '@/components/common/bigImg.vue';
 export default {
   components: { EventBasic, BigImg },
@@ -103,10 +73,14 @@ export default {
       isShowImg: false, // 是否放大图片
       imgList1: [],
       basicInfo: {}, // 事件详情
+      superPointList: [], // 上级指示列表
+      lowerlevelReportList: [] // 下级呈报列表
     }
   },
   mounted () {
     this.getDetail();
+    this.getSuperPointList();
+    this.getLowerlevelReportList();
   },
   methods: {
     // 获取事件详情
@@ -119,6 +93,32 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    // 获取上级指示列表
+    getSuperPointList () {
+      const params= {
+        processType: proccessEventType.directiveId,
+        dispatchType: 1 // 1--事件  2--告警
+      }
+      getEventProcess(params, this.$route.query.eventId) 
+        .then(res => {
+          if (res) {
+            this.superPointList = res.data;
+          }
+        })
+    },
+    // 获取下级呈报列表
+    getLowerlevelReportList () {
+      const params= {
+        processType: proccessEventType.reportSuperId,
+        dispatchType: 1 // 1--事件  2--告警
+      }
+      getEventProcess(params, this.$route.query.eventId) 
+        .then(res => {
+          if (res) {
+            this.lowerlevelReportList = res.data;
+          }
+        })
     },
     // 跳至向上级呈报页面
     skipReportPage () {
@@ -161,10 +161,17 @@ export default {
       box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       .divide {
         border: 1px dashed #F2F2F2;
+       
       }
       >ul {
         padding: 10px 20px;
         width: 700px;
+        &:last-child {
+          .divide {
+            display: none;
+          }
+        }
+        
         >li {
           display: flex;
           width: 100%;
@@ -222,13 +229,19 @@ export default {
               width: 50%;
             }
           }
+          .content-divide {
+            width: 100%;
+            height: 1px;
+            margin: 5px 0;
+            border-bottom: 1px dashed #F2F2F2;
+          }
+          &:last-child { 
+            .content-divide {
+              display: none;
+            }
+          }
         }
-        .content-divide {
-          width: 100%;
-          height: 1px;
-          margin: 5px 0;
-          border-bottom: 1px dashed #F2F2F2;
-        }
+        
       }
     }
   }

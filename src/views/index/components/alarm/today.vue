@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="alarm_today">
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
@@ -102,7 +103,7 @@
         </template>
         <el-form-item style="width: 192px;">
           <el-button style="width: 45%;" type="primary" @click="getCheckedKeys">确定</el-button>
-          <el-button style="width: 45%;" type="primary" @click="resetForm('todayAlarmForm')">重置</el-button>
+          <el-button style="width: 45%;" @click="resetForm('todayAlarmForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -117,6 +118,7 @@
           <i class="vl_icon vl_icon_alarm_6"></i> -->
         </div>
       </div>
+      <!-- <vue-scroll> -->
       <div class="list_content">
         <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
           <div class="list_img">
@@ -183,12 +185,15 @@
         :page-sizes="[100, 200, 300, 400]"
         :page-size="pageSize"
         layout="total, prev, pager, next, jumper"
-        :total="total">
+        :total="total"
+        class="cum_pagination">
       </el-pagination>
       </template>
+      <!-- </vue-scroll> -->
     </div>
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
+  </vue-scroll>
 </template>
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
@@ -512,7 +517,7 @@ export default {
     width: calc(100% - 252px);
     margin-left: 252px;
     position: relative;
-    padding: 20px;
+    padding: 20px 0 20px 20px;
     .list_top{
       color: #333;
       > span{
@@ -537,7 +542,7 @@ export default {
         margin: 0 0.5%;
         max-width: 342px;
         width: 32%;
-        height: 240px;
+        height: 266px;
         padding: 30px 20px 0;
         margin-bottom: 20px;
         background:rgba(255,255,255,1);
@@ -586,11 +591,13 @@ export default {
           }
         }
         .list_con_info{
-          display: flex;
-          justify-content: space-between;
-          line-height: 50px;
+          /* display: flex;
+          justify-content: space-between; */
+          /* line-height: 50px; */
+          padding-top: 16px;
           > div:nth-child(1){
             color: #333;
+            margin-bottom: 6px;
           }
           > div:nth-child(2) > span{
             color: #999;

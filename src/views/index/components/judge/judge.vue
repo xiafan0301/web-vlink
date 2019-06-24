@@ -51,6 +51,19 @@ export default {
   .vl_judge_tc {
     width: 100%;
     height: 100%;
+    .camera-select {
+      .el-select-dropdown {
+        display: none;
+      }
+      .el-select__tags {
+        >span {
+          white-space: nowrap;
+          display: block;
+          width: 100%;
+          overflow: hidden;
+        }
+      }
+    }
     .vl_j_left {
       float: left;
       width: 2.32rem;
@@ -193,13 +206,7 @@ export default {
           height: .4rem;
           line-height: .4rem;
           padding: 0 .12rem;
-          background-color: #0C70F8!important;
-          border-color: #0C70F8!important;
-          color: #FFFFFF;
-          &:hover {
-          background-color: #409EFF!important;
-            border-color: #409EFF!important;
-          }
+          margin-top: .14rem;
         }
         .el-select {
           margin-bottom: .1rem;

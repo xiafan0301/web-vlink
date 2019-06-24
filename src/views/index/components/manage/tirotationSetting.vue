@@ -39,7 +39,7 @@
           :data="dataList"
           >
           <el-table-column
-            fixed
+            fixed="left"
             label="预案编号"
             prop="roundNo"
             :show-overflow-tooltip='true'
@@ -99,7 +99,12 @@
             :show-overflow-tooltip='true'
           >
           <template slot-scope="scope">
-            <span @click="handleSelectDevice(scope.row)">{{scope.row.deviceNumber}}</span>
+            <template v-if="scope.row.deviceNumber > 0">
+              <span class="active_span" :style="[scope.row.deviceNumber && scope.row.deviceNumber > 0 ? styleObj : '']" @click="handleSelectDevice(scope.row)">{{scope.row.deviceNumber}}</span>
+            </template>
+            <template v-else>
+              <span>{{scope.row.deviceNumber}}</span>
+            </template>
           </template>
           </el-table-column>
           <el-table-column
@@ -112,22 +117,19 @@
               <span>{{scope.row.updateTime | fmTimestamp}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="240">
+          <el-table-column label="操作" width="240" fixed="right">
             <template slot-scope="scope">
               <template v-if="scope.row.roundStatus === 2">
                 <span class="operation_btn" @click="skipVideoPatrolPage">查看</span>
                 <span style="color: #f2f2f2">|</span>
                 <span class="operation_btn" @click="showCloseDialog(scope.row)">关闭</span>
               </template>
-              <!-- <span style="color: #f2f2f2">|</span> -->
               <template v-if="scope.row.roundStatus === 1">
                 <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
                 <span style="color: #f2f2f2">|</span>
                 <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
               </template>
               <template v-if="scope.row.roundStatus === 3">
-                <!-- <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
-                <span style="color: #f2f2f2">|</span> -->
                 <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
               </template>
             </template>
@@ -135,6 +137,7 @@
         </el-table>
       </div>
       <el-pagination
+        class="cum_pagination"
         @current-change="handleCurrentChange"
         :current-page.sync="pagination.pageNum"
         :page-sizes="[100, 200, 300, 400]"
@@ -188,16 +191,30 @@
                 <div style="display: flex; padding: 0 10px;">
                   <div class="parent_temp_li" :class="{'temp_active': item.isOpenArrow === true}" @click="openArrow(index)">
                     <i :class="[item.isOpenArrow === false ? 'el-icon-arrow-right' : 'el-icon-arrow-down']"></i>
-                    <span>{{item.cname}}</span>
+                    <span>{{item.areaName}}</span>
                   </div>
                 </div>
                 <div class="child_temp" v-show="item.isOpenArrow === true">
-                  <ul class="child_temp_detail">
-                    <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
-                      <i class="vl_icon vl_icon_manage_6"></i>
-                      <span>{{itm.deviceName}}</span>
-                    </li>
-                  </ul>
+                  <div class="temp_tab">
+                    <span :class="[item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, true)">摄像头</span>
+                    <span :class="[!item.isSXT ? 'active_span' : '']" @click="changeLDeviceType(index, false)">卡口</span>
+                  </div>
+                  <template v-if="item.deviceList">
+                    <ul class="child_temp_detail" v-show="item.isSXT">
+                      <li v-for="(itm, idx) in item.deviceList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
+                  </template>
+                  <template v-if="item.bayonetList">
+                    <ul class="child_temp_detail" v-show="!item.isSXT">
+                      <li v-for="(itm, idx) in item.bayonetList" :key="'itm' + idx">
+                        <el-checkbox v-model="itm.isChildChecked" @change="handleLeftChildChecked(index, idx, itm.isChildChecked, item.isSXT)"></el-checkbox>
+                        <span>{{itm.deviceName}}</span>
+                      </li>
+                    </ul>
+                  </template>
                 </div>
               </li>
             </ul>
@@ -213,6 +230,10 @@ import { apiVideoRoundList, apiDelVideoRoundList, closeVideoRound, getVideoRound
 export default {
   data () {
     return {
+      styleObj: {
+        'color': '#0C70F8',
+        'cursor': 'pointer'
+      },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
         dateTime: [],
@@ -222,44 +243,7 @@ export default {
       closeRatationDialog: false, // 关闭轮巡弹出框
       delRotationDialog: false, // 删除轮巡弹出框
       deleteId: null, // 要删除--关闭的轮巡id
-      allDeviceList: [
-        {
-          cname: '溆浦县',
-          isOpenArrow: false,
-          deviceList: [
-            {
-              deviceName: '设备1'
-            },
-            {
-              deviceName: '设备1'
-            }
-          ]
-        },
-        {
-          cname: '溆浦县',
-          isOpenArrow: false,
-          deviceList: [
-            {
-              deviceName: '设备1'
-            },
-            {
-              deviceName: '设备1'
-            }
-          ]
-        },
-        {
-          cname: '溆浦县',
-          isOpenArrow: false,
-          deviceList: [
-            {
-              deviceName: '设备1'
-            },
-            {
-              deviceName: '设备1'
-            }
-          ]
-        }
-      ],
+      allDeviceList: [],
       selectDeviceDialog: false, // 查看轮巡设备弹出框
     }
   },
@@ -277,8 +261,8 @@ export default {
         status = this.searchForm.status;
       }
       const params = {
-        'where.startTime': this.searchForm.dateTime[0],
-        'where.endTime': this.searchForm.dateTime[1],
+        'where.startTime': this.searchForm.dateTime[0] + ' 00:00:00',
+        'where.endTime': this.searchForm.dateTime[1] + ' 23:59:59',
         'where.status': status,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -382,14 +366,23 @@ export default {
     },
     // 查看所有的轮巡设备
     handleSelectDevice (obj) {
-      console.log(obj)
       if (obj.id) {
         getVideoRoundDetail(obj.id)
           .then(res => {
-            console.log(res);
             if (res.data) {
-              this.allDeviceList = res.data.deviceList;
+              this.allDeviceList = res.data.areaGroupList;
               this.selectDeviceDialog = true;
+              this.allDeviceList.map(item => {
+                item.isOpenArrow = true;
+                item.isSXT = true; // 默认选中摄像头
+
+                item.deviceList && item.deviceList.map(itm => {
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+                item.bayonetList && item.bayonetList.map(itm => {
+                  itm.isChildChecked = false; // 子级是否选中
+                });
+              });
             }
           })
           .catch(() => {})
@@ -398,12 +391,18 @@ export default {
     // 展开箭头
     openArrow (index) {
       this.allDeviceList[index].isOpenArrow = !this.allDeviceList[index].isOpenArrow;
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
+    },
+    changeLDeviceType (index, val) {
+      this.allDeviceList[index].isSXT = val;
+      this.allDeviceList = JSON.parse(JSON.stringify(this.allDeviceList));
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .tirotation_setting {
+  width: 100%;
   background-color: #ffffff;
   padding: 20px;
   .search_box {
@@ -450,9 +449,9 @@ export default {
       margin-top: 8px;
       /deep/.el-table__row {
         .device_num {
-          cursor: pointer;
-          &:hover {
-            color: #0C70F8;
+          // color: #0C70F8;
+          .active_span:hover {
+            text-decoration: underline;
           }
         }
       }
@@ -490,7 +489,9 @@ export default {
   }
   .dialog_device_comp {
     .content_body {
+      height: 500px;
       .temp_detail_info {
+        // height: 20%;
         > li {
           width: auto;
           cursor: pointer;
@@ -499,13 +500,31 @@ export default {
           color: #333333;
           .parent_temp_li {
             width: 100%;
+            // padding: 0 10px;
             >span {
               margin-left: 5px;
             }
+            .operation_btn {
+              display: none;
+              float: right;
+              margin: 5px 5px 0;
+            }
+            .del_btn {
+              &:hover {
+                background-position: -694px -350px !important;
+              }
+            }
+            .edit_btn {
+              &:hover {
+                background-position: -584px -350px !important;
+              }
+            }
             &.temp_active {
-              width: 100%;
               &:hover {
                 background-color: #E0F2FF;
+                .operation_btn {
+                  display: block;
+                }
               }
               i, span {
                 color: #0C70F8;
@@ -514,16 +533,41 @@ export default {
           }
           .child_temp {
             width: 100%;
+            .temp_tab {
+              color: #666666;
+              margin: 10px 0 10px 20px;
+              font-size: 12px;
+              width: 220px;
+              height: 26px;
+              border: 1px solid #D3D3D3;
+              border-radius:4px;
+              > span {
+                width: 50%;
+                text-align: center;
+                display: inline-block;
+                line-height: 26px;
+                height: 100%;
+                &.active_span {
+                  color: #0C70F8;
+                  background-color: #E0F2FF;
+                }
+              }
+              span:first-child {
+                border-right: 1px solid #D3D3D3;
+              }
+            }
             .child_temp_detail {
               padding-left: 30px;
               padding-right: 10px;
               >li {
-                // padding-bottom: 10px;
+                padding-bottom: 10px;
                 font-size: 14px;
-                cursor: default;
                 color: #666666;
                 display: flex;
                 align-items: center;
+                /deep/ .el-checkbox {
+                  margin-right: 7px;
+                }
                 >span {
                   margin: 0 80px 0 0;
                 }

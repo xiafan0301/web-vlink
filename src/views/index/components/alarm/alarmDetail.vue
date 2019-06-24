@@ -24,7 +24,7 @@
             <img :src="sturcDetail.appendixInfo.path" alt="布控图" v-if="sturcDetail.objType == 3">
             <span>布控图</span>
           </div>
-          <div class="hover_info" v-show="isSeen">
+          <div class="hover_info" v-show="isSeen && !(sturcDetail.objType == 3 || sturcDetail.objType == 4)">
             <p class="hover_i_header">布控信息</p>
               <template v-if="sturcDetail.objType == 1">
                 <div v-if="sturcDetail.basePortraitInfo">
@@ -109,7 +109,7 @@
                 <!-- <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></div> -->
               </h2>
               <div class="struc_cdi_line" v-if="sturcDetail.alarmFeature">
-                <span>{{sturcDetail.alarmFeature.featureName}}</span>
+                <span class="feature_name">{{sturcDetail.alarmFeature.featureName}}</span>
               </div>
               <div v-if="sturcDetail.snapTime">
                 <div class="struc_cdu_line">
@@ -355,10 +355,10 @@ export default {
       }
       if(this.type === 'history') {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime}});
+                                                    objType: this.$route.query.objType, startTime: this.startTime, endTime: this.endTime, id: item.eventInfo ? item.eventInfo.uid : ''}});
       }else {
         this.$router.push({name: 'alarm_ctc', query: {eventId: item.uid, eventType: eventType, type: this.type,
-                                                    objType: this.$route.query.objType}});
+                                                    objType: this.$route.query.objType, id: item.eventInfo ? item.eventInfo.uid : ''}});
       }
     },
     //撤销告警
@@ -639,7 +639,7 @@ export default {
                   position: relative;
                   max-width: 100%;
                   display: inline-block;
-                  height: .34rem;
+                  max-height: .34rem;
                   line-height: .34rem;
                   margin-bottom: .1rem;
                   border: 1px solid #F2F2F2;
@@ -654,6 +654,15 @@ export default {
                     margin-left: .1rem;
                   }
                 }
+              }
+              .feature_name {
+                max-width: 82%!important;
+                max-height: 1.02rem!important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box!important;
+                -webkit-line-clamp: 3; //行数
+                -webkit-box-orient: vertical;
               }
             }
             &:before {

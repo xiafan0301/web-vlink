@@ -62,6 +62,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -96,11 +97,11 @@
       <div style="margin-top: 15px;">
         <el-form :model="addRole" :rules="rules" ref="addRole" label-width="15px">
           <el-form-item prop="roleName" label=" " class="role_name">
-            <el-input v-model="addRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <el-input v-model="addRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复" maxlength="20"></el-input>
             <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
-            <el-input type="textarea" rows="6" v-model="addRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
+            <el-input type="textarea" rows="6" v-model="addRole.roleDesc" placeholder="请简要描述角色，文字限制50字。" maxlength="50"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -121,11 +122,11 @@
       <div style="margin-top: 15px;">
         <el-form :model="editRole" :rules="rules" ref="editRole" label-width="15px">
           <el-form-item prop="roleName" label=" " class="role_name">
-            <el-input v-model="editRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复"></el-input>
+            <el-input v-model="editRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复" maxlength="20"></el-input>
             <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
           </el-form-item>
           <el-form-item prop="roleDesc">
-            <el-input type="textarea" rows="6" v-model="editRole.roleDesc" placeholder="请简要描述角色，文字限制50字。"></el-input>
+            <el-input type="textarea" rows="6" v-model="editRole.roleDesc" placeholder="请简要描述角色，文字限制50字。" maxlength="50"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -351,6 +352,7 @@ export default {
     // 创建用户
     addUser (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,
@@ -449,6 +451,7 @@ export default {
     // 编辑角色 
     editRoleInfo (form) {
       this.$refs[form].validate(valid => {
+        this.isShowOrganError = false;
         if (valid) {
           const params = {
             proKey: this.userInfo.proKey,

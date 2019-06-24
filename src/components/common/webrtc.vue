@@ -2,9 +2,9 @@
   <div class="wr_main">
     <ul>
       <li v-for="(item, index) in aWRData" :key="'wr_list_' + index">
-        <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId">
-          <video :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
-          <span class="vl_icon vl_icon_vc_011 wr_video_scale"></span>
+        <div class="wr_video_container" :id="videoContainerIdPre + item.remoteId" v-show="item.isOpen">
+          <video :muted="item.mute" :id="videoIdPre + item.remoteId" style="object-fit: fill;" autoplay></video>
+          <div class="vl_icon vl_icon_vc_011 wr_video_scale" v-show="item.isTime" @click="item.isOpen = false"></div>
           <div class="wr_video_user">
             <img src="../../assets/img/wr_photo.png" alt="">
             <div>
@@ -13,21 +13,29 @@
             </div>
           </div>
           <div class="wr_video_opts">
+            <p v-if="item.isTime" style="margin-bottom: 20px;">
+              {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
+            </p>
             <div class="wr_video_opts_l">
-              <span>
-                <span class="vl_icon vl_icon_vc_023"></span>
-                <p>切换语音</p>
+              <span v-if="item.type === '1'" :class="{'wr_video_on_connect': !item.isTime}">
+                <span @click="wrSwitchCall(item)" class="vl_icon" :class="{'vl_icon_vc_025': !item.isTime, 'vl_icon_vc_023': item.isTime}"></span>
+                <p v-if="item.type === '0'">切到视频聊天</p>
+                <p v-else>切换到语音</p>
               </span>
               <span @click="wrClose(item, true)">
                 <span class="vl_icon vl_icon_vc_021"></span>
                 <p>取消</p>
               </span>
-              <span>
-                <span class="vl_icon vl_icon_vc_022"></span>
+              <span @click="wrMute(item)" v-if="item.isTime">
+                <span class="vl_icon"  :class="{'vl_icon_vc_024': item.mute, 'vl_icon_vc_022': !item.mute}"></span>
                 <p>静音</p>
               </span>
             </div>
           </div>
+          <span class="wr_video_mask" v-show="item.type === '0'"></span>
+        </div>
+        <div class="wr_video_mini"  @click="item.isOpen = true" v-show="!item.isOpen">
+          <p>{{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}</p>
         </div>
       </li>
     </ul>
@@ -35,10 +43,11 @@
 </template>
 <script>
 import {webrtcConfig} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
+import {random14} from '../../utils/util.js';
 import {oWRMsgs} from './webrtc.data.js';
+import {MapGETmonitorList} from '../../views/index/api/api.map.js';
 export default {
-  /** 
+  /**
    *  // 初始化的时候webrt对象
    *  aInit: [webrtcObj, ...],
    *  // 需要新增webrtc对象
@@ -49,23 +58,25 @@ export default {
    *  oConfig: {
    *    localId: '', // 本地ID
    *  }
-   *  
+   *
    *  webrtcObj: {
    *    // localId: '', // 本地ID (在oConfig中)
    *    remoteId: '', // 对方ID
    *    remoteName: '', // 对方名称
    *    type: 1, // 1视频 / 2语音
    *  }
-   *  
+   *
    *  emits:
    *   wrStateEmit(oData) // 通话状态改变的emit
-   *    
+   *  exceptCalling // 收到移动端的通话请求，
+   *  wrSwitchCall // 视频切换到语音通话
    */
-  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
+//  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
   data () {
     return {
       localId: 'aorise',
       aWRData: [], // webrtcObj
+      bReconnect: true,
       max: 3, // 同时通话的最大数量
       config: {
       },
@@ -91,11 +102,22 @@ export default {
       videoIdPre: 'remoteVideo_'
     }
   },
+  computed: {
+    oAdd () {
+      return this.$store.state.oAdd;
+    },
+    oDel () {
+      return this.$store.state.oDel;
+    },
+    callingList () {
+      return this.$store.state.callingList;
+    }
+  },
   watch: {
     // 添加通话
     oAdd () {
       console.log('watch oAdd:', this.oAdd);
-      this.wrAdd(Object.assign({}, this.oAdd));
+      this.wrAdd(this.oAdd, this.oAdd.oMsData);
     },
     // 删除通话
     oDel () {
@@ -107,7 +129,8 @@ export default {
     if (this.oConfig && this.oConfig.localId) {
       this.localId = this.oConfig.localId;
     } else {
-      this.localId = random14();
+       this.localId = this.$store.state.loginUser.uid;
+//      this.localId = this.$store.state.loginUser.userMobile;
     }
     console.log('webrtc localId', this.localId);
     // 初始化websocket
@@ -129,7 +152,7 @@ export default {
       });
       this.wsObj.stompHeaders = stompHeaders;
       let stompClient = window.Stomp.client(webrtcConfig.wsUrl + '?r=' + Math.random() + '&' + $.param(stompHeaders));
-      stompClient.connect(stompHeaders, function (data) {
+      stompClient.connect(stompHeaders, function () {
         _this.wsObj.stompClient = stompClient;
         console.log('websocket 连接成功！');
         // subscribe 接收到消息
@@ -158,10 +181,12 @@ export default {
           _this.wsObj.subping.unsubscribe();
           _this.wsObj.subping = null;
         }
-        // 重连ws
-        _this.wsObj.wsTimeout = window.setTimeout(() => {
-          _this.wsReInit(_data);
-        }, 3000);
+        if (_this.bReconnect) {
+          // 重连ws
+          _this.wsObj.wsTimeout = window.setTimeout(() => {
+            _this.wsReInit(_data);
+          }, 3000);
+        }
       });
     },
     // 重连ws
@@ -187,7 +212,7 @@ export default {
     /**
      * websocket 发送信令
      * @param {string} signal 信令
-     * @param {object} obj 
+     * @param {object} obj
           { type: 'CANDIDATE',  // 信令类型
             data: JSON.stringify(event.candidate), // 传输的数据
             recipient: obj.userId,  // 接收人ID
@@ -197,8 +222,8 @@ export default {
     wsSend (signal, obj) {
       if (this.wsObj.stompClient) {
         this.wsObj.stompClient.send(signal, this.wsObj.stompHeaders, JSON.stringify(Object.assign({
-          sender: this.localId,
-          senderName: this.localId,
+          sender: obj.remoteId,
+          senderName: this.$store.state.loginUser.userName,
           senderImgurl: '',
           limit: this.wsObj.wsLimit
         }, obj)));
@@ -208,14 +233,18 @@ export default {
     /**
      * 添加WR
      * @param {object} obj webrtcObj
+     * @param {m} desc
      */
-    wrAdd (obj) {
+    wrAdd (obj, desc) {
       if (obj && obj.remoteId) {
+        // 添加isOpen字段，是否最小化
+        obj['isOpen'] = true;
         if (this.aWRData && this.aWRData.length >= this.wsObj.wsLimit) {
           this.$message({
-            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人就行通话！',
+            message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
             type: 'warning'
           });
+          this.wrClose({uid: obj.uid, _mid: obj._mid});
           return;
         }
         let flag = false; // 是否已经在通话中
@@ -230,14 +259,12 @@ export default {
             message: '您已经在与 ' + obj.remoteName + '（' + obj.remoteId + '）进行通话！',
             type: 'warning'
           });
+          // this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
           return;
         }
-        this.aWRData.push(obj);
+        // this.aWRData.push(obj);
         this.$nextTick(() => {
-          this.wrMediaStream(obj.type, {
-            remoteId: obj.remoteId,
-            remoteName: obj.remoteName
-          });
+          this.wrMediaStream(obj.type, obj, desc);
         });
       } else {
         console.log('wrAdd >>> remoteId为空！');
@@ -270,8 +297,10 @@ export default {
         }
       } else if (oMsg.type === 'OFFERED') {
         // 收到OFFER
+        console.log('1')
         _this.wrRecipient(oMsg, false);
       } else if (oMsg.type === 'ADD_OFFERED') {
+        console.log('2')
         // 收到OFFER
         _this.wrRecipient(oMsg, true);
       } else if (oMsg.type === 'ANSWERED') {
@@ -280,7 +309,7 @@ export default {
           let oData = null;
           try {
             oData = JSON.parse(oMsg.data);
-          } catch (e) {}
+          } catch (e) {console.log(e)}
           if (oData) {
             // 设置对方的Description
             _this.wrObj.pcs[oMsg.sender].setRemoteDescription(new RTCSessionDescription(oData));
@@ -321,25 +350,54 @@ export default {
       } else if (oMsg.type === 'DUPLICATE_CONNECTION') {
         // 账号已经在其它地方登录
         _this.wrOff(oMsg);
+        // 断开连接 清除定时器
+        _this.bReconnect = false;
+        if (_this.wsObj.stompClient) {
+          _this.wsObj.stompClient.disconnect();
+        }
+        if (_this.wsObj.pongInval) {
+          window.clearInterval(this.wsObj.pongInval);
+        }
+        if (_this.wsObj.wsTimeout) {
+          window.clearTimeout(this.wsObj.wsTimeout);
+        }
+        localStorage.setItem('as_vlink_user_info', '');
+        _this.$router.push({name: 'login'});
       } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
         // 房间已满
         _this.wrOff(oMsg);
+      } else if (oMsg.type === 'CHANGE') {
+        // 切换
+        console.log('切换')
+        let _t = _this.aWRData.find(x => x.remoteId === oMsg.sender);
+        if (_t && _t.type === '1') {
+          _this.wrSwitchCall(_t)
+        }
       }
     },
     // 接收通话请求
     wrRecipient (oMsg, isAddOffered) {
       let _this = this;
-      _this.$confirm('收到' + oMsg.sender + '的视频请求，确定接收吗？', '提示', {
+      _this.$confirm('收到' + oMsg.senderName + '的视频请求，确定接收吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let t = oMsg.audioFlag ? 2 : 1;
-        _this.wrAdd({
+        let t = oMsg.audioFlag ? '2' : '1';
+//        _this.wrAdd({
+//          type: t,
+//          remoteId: oMsg.sender,
+//          remoteName: oMsg.sender
+//        }, oMsg.data);
+        // 把接受到的参数传给地图
+        let eC = {
           type: t,
           remoteId: oMsg.sender,
-          remoteName: oMsg.sender
-        });
+          remoteName: oMsg.sender,
+          oMsData: oMsg.data,
+          isAddOffered: isAddOffered
+        }
+        _this.exceptCalling(eC)
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -374,11 +432,18 @@ export default {
       if (!_this.wrObj.mediaStream) {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+        if (!navigator.getMedia) {
+          _this.wrClose({uid: obj.uid, _mid: obj._mid});
+          alert('对不起，您的浏览器不支持视频通话。');
+          return;
+        }
+        console.log(type === '1' ? true : false)
         navigator.getMedia({
           'audio': true,
-          'video': false
+          'video': type === '1' ? true : false
         }, function (stream) {
           console.log('getUserMedia success');
+          _this.aWRData.push(obj);
           // 将设备视频保存下来
           _this.wrObj.mediaStream = stream;
           // localVideo
@@ -386,18 +451,38 @@ export default {
           _this.wrCreatConnection(type, obj, desc);
           _this.wrStateHandler({
             remoteId: obj.remoteId,
-            state: 11 // 等待对方接听
+            state: 11, // 等待对方接听
+            uid: obj.uid
           });
         }, function (error) {
           // 媒体流创建失败错误
           console.log('getUserMedia error: ' + error);
-          alert('对不起，您的电脑上没有摄像头或摄像头不可用。');
+          navigator.getMedia({
+            'audio': true,
+            'video': false
+          }, function (_stream) {
+            _this.aWRData.push(obj);
+            _this.wrObj.mediaStream = _stream;
+            _this.wrCreatConnection(type, obj, desc);
+            _this.wrStateHandler({
+              remoteId: obj.remoteId,
+              state: 11, // 等待对方接听
+              uid: obj.uid
+            });
+          }, function (_error) {
+            console.log(_error)
+            _this.wrClose({uid: obj.uid, _mid: obj._mid});
+            _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
+          })
         });
       } else {
+        console.log('----------------222222')
         // 设备已经被唤醒
+        _this.aWRData.push(obj);
         _this.wrCreatConnection(type, obj, desc);
         _this.wrStateHandler({
           remoteId: obj.remoteId,
+          uid: obj.uid,
           state: 11 // 等待对方接听
         });
       }
@@ -419,53 +504,36 @@ export default {
         if (_state === 'new') {
           // 新建连接
           console.log('wr >>>>> 新建连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 12 // 正在建立连接
-          });
+          obj.state = 12;
         } else if (_state === 'connecting') {
           // 连接中
           console.log('wr >>>>> 连接中');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 13 // 正在连接中
-          });
+          obj.state = 13;
         } else if (_state === 'connected') {
           // 已连接
           console.log('wr >>>>> 已连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 20 // 已连接
-          });
+          obj.state = 20;
         } else if (_state === 'disconnected') {
           // 断开连接
           console.log('wr >>>>> 断开连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 32 // 断开连接
-          });
+          obj.state = 32;
         } else if (_state === 'failed') {
           // 连接失败
           console.log('wr >>>>> 连接失败');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 31 // 连接失败
-          });
+          obj.state = 31;
         } else if (_state === 'closed') {
           // 连接关闭
+          obj.state = 33;
           console.log('wr >>>>> 连接关闭');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            state: 33 // 连接关闭
-          });
         }
+        _this.wrStateHandler(obj);
       };
       // 候选
       _pc.onicecandidate = function (event) {
         if (event.candidate) {
           if (_pc.remoteDescription) {
             // 已经存在remote信息，则直接发送候选 （接收）
-            AS_WEBRTC.wsSend(webrtcConfig.apis.candidate, {
+            _this.wsSend(webrtcConfig.apis.candidate, {
               type: 'CANDIDATE',
               data: JSON.stringify(event.candidate),
               recipient: obj.remoteId,
@@ -486,7 +554,7 @@ export default {
         _this.vedioHandler(_this.videoIdPre + obj.remoteId, event.stream);
       };
       // 向PeerConnection中加入需要发送的流
-      _pc.addStream(_this.wrObj.mediaStream);
+      _this.wrObj.mediaStream ? _pc.addStream(_this.wrObj.mediaStream) : _pc.addStream(new MediaStream());
       // 将PC存储起来
       _this.wrObj.pcs[obj.remoteId] = _pc;
       if (desc) {
@@ -511,8 +579,8 @@ export default {
         // 发送应答信令 ===========================
         _pc.createAnswer(function (desc) {
           _pc.setLocalDescription(desc);
-          _this.wsSend(webrtcConfig.apis.answer, {
-              type: 'ANSWERED',
+          _this.wsSend(obj.isAddOffered ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
+              type: obj.isAddOffered ? 'ADDANSWERED' : 'ANSWERED',
               data: JSON.stringify(desc),
               recipient: obj.remoteId,
               recipientName: obj.remoteName
@@ -563,13 +631,6 @@ export default {
       let pc = new PeerConnection(iceServer);
       return pc;
     },
-    // 关闭窗口
-    wrClose (item) {
-      // 自己构造 oMsg
-      this.wrOff({
-        sender: item.remoteId
-      }, true);
-    },
     /*
      * 通讯断开连接
      * oMsg  sender&senderName & audioFlag
@@ -588,14 +649,15 @@ export default {
             recipient: oMsg.sender,
             recipientName: oMsg.sender
           });
-          // MEMBER_LEAVED
-          this.wsSend(webrtcConfig.apis.leave, {
-            type: 'MEMBER_LEAVED',
-            data: '',
-            recipient: oMsg.sender,
-            recipientName: oMsg.sender
-          });
+          console.log('关闭')
         }
+        // MEMBER_LEAVED
+        this.wsSend(webrtcConfig.apis.leave, {
+          type: 'MEMBER_LEAVED',
+          data: '',
+          recipient: oMsg.sender,
+          recipientName: oMsg.sender
+        });
       }
       // 显示提示信息
       if (oMsg && oMsg.data) {
@@ -627,23 +689,20 @@ export default {
      * @param {int} state 状态
      */
     wrStateHandler (obj) {
+      console.log(obj)
       // 消息提示
       this.wrMsgHandler({
         remoteId: obj.remoteId,
         state: obj.state
       });
       // emmit
-      /* 
+      /*
         通话状态改变emit
         remoteId: 通讯方ID remoteId
-        state: 状态 
+        state: 状态
         {}：其它信息
        */
-      this.$emit('wrStateEmit', {
-        remoteId: obj.remoteId,
-        state: obj.state,
-        info: {}
-      });
+      this.wrStateEmit(obj);
     },
     /**
      * 通话消息提示处理器 oWRMsgs
@@ -675,24 +734,147 @@ export default {
           // $(_node).parent().html('<video id="' + nid + '" autoplay></video>');
         }
       }
+    },
+    // 切换语音
+    wrSwitchCall (item) {
+      item.type === '0' ? item.type = '1' : item.type = '0';
+      this.$store.commit('SWITCH_CALL', Object.assign({}, item))
+      this.wsSend(webrtcConfig.apis.change, {
+        type: 'CHANGE',
+        recipient: item.remoteId,
+        recipientName: item.remoteName
+      });
+    },
+    // 静音
+    wrMute (item) {
+      item.mute = !item.mute;
+    },
+    // 语音视频通话
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
+      if (oData.state > 20) {
+        this.wrClose(oData);
+      } else if (oData.state === 20 && oData.minute === 0 && oData.second === 0) {
+        this.$nextTick(() => {
+          this.$set(oData, 'isTime', true)
+        })
+        oData.countTime(oData);
+        this.$store.commit('STATE_HANDLER', Object.assign({}, oData))
+      }
+    },
+    wrClose (data) {
+      // $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
+      let o = this.callingList.find(x => x.uid === data.uid);
+      if (o) {
+        // this.map.remove(o.mark);
+        o.clearTime(o);
+      }
+      // 关闭通话，手动将state设为32，需要监听的模块，监听到继续做响应操作
+      data.state = 32;
+      this.$store.commit('STATE_HANDLER', Object.assign({}, data));
+      this.$store.commit('DEL_WEBRTC', data);
+      // 自己构造 oMsg
+      this.wrOff({
+        sender: data.remoteId
+      }, true);
+    },
+    // 收到手机端发送的视频请求
+    exceptCalling (data) {
+      // 增加通话对象到webrtc ，先查询到该来点用户信息，
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params).then( res => {
+        if (res) {
+          let _obj = {}, cObj = {};
+          res.data.areaTreeList.forEach(x => {
+            x.sysUserExtendList.forEach(y => {
+              if (y.uid + '' === data.remoteId) {
+                _obj = y;
+              }
+            })
+          })
+          cObj = {
+            uid: _obj.uid + '',
+            longitude: _obj.longitude,
+            latitude: _obj.latitude,
+            remoteId: _obj.uid + '',
+            remoteName: _obj.infoName,
+            type: data.type,
+            _id: 'mapCall' + random14(),
+            _mid: 'mapMark3' +_obj.uid,
+            isTime: false,
+            minute: 0,
+            second: 0,
+            timer: null,
+            mark: null,
+            mute: false,
+            oMsData: data.oMsData,
+            isAddOffered: data.isAddOffered
+          }
+          console.log(_obj)
+          this.$store.commit('ADD_WEBRTC', {oAdd: cObj})
+        }
+      })
+    }
+  },
+  beforeDestroy () {
+    this.bReconnect = false;
+    if (this.wsObj.stompClient) {
+      this.wsObj.stompClient.disconnect();
+    }
+    if (this.wsObj.pongInval) {
+      window.clearInterval(this.wsObj.pongInval);
+    }
+    if (this.wsObj.wsTimeout) {
+      window.clearTimeout(this.wsObj.wsTimeout);
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .wr_main {
-  position: absolute; left: 10px; bottom: 10px;
+  position: absolute; left: 260px; bottom: 0px;
+  z-index: 2;
   > ul {
     overflow: hidden;
     > li {
       float: left;
       padding: 10px;
+      min-width: 120px;
       > div.wr_video_container {
         position: relative;
         width: 254px; height: 400px;
         background-color: #000;
         color: #fff;
         > video { width: 100%; height: 100%; }
+        > div {
+          z-index: 4;
+        }
+        > .wr_video_mask {
+          z-index: 3;
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+        }
+      }
+      > div.wr_video_mini {
+        position: absolute;
+        bottom: -50px;
+        width: 100px;
+        height: 100px;
+        background: #0C70F8;
+        color: #ffffff;
+        border-radius: 50%;
+        padding-top: 19px;
+        text-align: center;
+        cursor: pointer;
+        &:hover {
+          background: #409eff;
+        }
       }
     }
   }
@@ -700,7 +882,7 @@ export default {
 .wr_video_scale {
   display: none;
   position: absolute; top: 15px; right: 8px; z-index: 2;
-  cursor: not-allowed;
+  cursor: pointer;
   animation: fadeIn .4s ease-out;
 }
 .wr_video_user {
@@ -723,9 +905,33 @@ export default {
     > span {
       display: inline-block;
       margin: 0 10px;
+      cursor: pointer;
+      vertical-align: top;
+      > span {
+        &:hover {
+          background-color: rgba(255, 255, 255, .2);
+        }
+        -webkit-border-radius: 24px;
+        -moz-border-radius: 24px;
+        border-radius: 24px;
+        font-size: 30px;
+        padding: 8px;
+      }
       > p {
         color: #fff;
         font-size: 12px;
+      }
+    }
+    > .wr_video_on_connect {
+      position: absolute;
+      top: -80px;
+      left: 87px;
+      > span {
+        border-color: #000000;
+        border-width: 5px;
+        &:hover {
+          background-color: rgba(255, 255, 255, 0);
+        }
       }
     }
   }

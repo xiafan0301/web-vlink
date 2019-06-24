@@ -117,7 +117,7 @@
         </el-table-column>
         <el-table-column
           label="状态"
-          prop="force"
+          prop="isForce"
           >
           <template slot-scope="scope">
             <span v-show="scope.row.isForce">禁用</span>
@@ -143,6 +143,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"

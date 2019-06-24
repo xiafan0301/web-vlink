@@ -21,10 +21,12 @@
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select
+                :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
                 v-model="createForm.event"
                 filterable
                 remote
                 clearable
+                @clear="eventList = []"
                 value-key="value"
                 placeholder="请输入关联事件编号"
                 :remote-method="getEventList"
@@ -91,10 +93,10 @@
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
           </el-form-item>
-          <el-form-item label="告警级别（在地图上显示颜色 ）:" prop="controlRank" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
-            <el-select value-key="uid" v-model="createForm.controlRank" filterable placeholder="请选择">
+          <el-form-item label="告警级别:" prop="controlAlarmId" style="width: 25%;margin-bottom: 22px;" :rules="{required: true, message: '请选择告警级别', trigger: 'change'}">
+            <el-select value-key="uid" v-model="createForm.controlAlarmId" filterable placeholder="请选择">
               <el-option
-                v-for="item in controlRankList"
+                v-for="item in controAlarmList"
                 :key="item.uid"
                 :label="item.label"
                 :value="item.value">
@@ -129,10 +131,10 @@
     </div>
     <div class="create_f_box">
       <!-- 新增布控 -->
-      <el-button v-if=" pageType !== 2" type="primary" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
+      <el-button v-if=" pageType !== 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="saveControl('createForm')">保存</el-button>
       <!-- 编辑布控 -->
-      <el-button v-if="pageType === 2" type="primary" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
-      <el-button  @click="toGiveUpDialog = true">取消</el-button>
+      <el-button v-if="pageType === 2" class="select_btn btn_100" :loadingBtn="loadingBtn" @click="putControl('createForm')">保存</el-button>
+      <el-button  @click="toGiveUpDialog = true" class="reset_btn btn_100">取消</el-button>
     </div>
     <el-dialog
       :visible.sync="toGiveUpDialog"
@@ -141,8 +143,8 @@
       top="40vh">
       <h4>是否放弃本次操作？</h4>
       <div slot="footer">
-        <el-button :loading="loadingBtn" @click="skipIsList">放弃</el-button>
-        <el-button  type="primary" @click="toGiveUpDialog = false">取消</el-button>
+        <el-button :loading="loadingBtn" @click="skipIsList" class="select_btn btn_140">放弃</el-button>
+        <el-button class="reset_btn btn_140" @click="toGiveUpDialog = false">取消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -150,9 +152,10 @@
 <script>
 import model from './components/model.vue';
 import {getAllMonitorList, getControlInfoByName, addControl, getControlDetailIsEditor, putControl} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
-import {getEventList, getEventDetail} from '@/views/index/api/api.event.js';
+import {getEventList, getEventDetail, updateEvent} from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util.js';
+import {mapXupuxian} from '@/config/config.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {model},
   props: ['createType', 'controlId'],
@@ -170,13 +173,18 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],//布控类型
-      controlRankList: [],//告警类型
+      controAlarmList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),//告警类型
       createForm: {
         controlName: null,
         event: null,
         controlType: null,
         controlDate: [],
-        controlRank: null,
+        controlAlarmId: null,
         periodTime: [
           {
             startTime: new Date(2019, 4, 10, 0, 0, 0),
@@ -208,7 +216,7 @@ export default {
     }
   },
   created () {
-    this.getDiciData();
+    // this.getDiciData();
     this.getAllMonitorList();
     // 编辑页-2
     if (this.createType) {
@@ -216,7 +224,6 @@ export default {
       if (this.pageType === 2) {
         this.getControlDetailIsEditor(this.controlId);
       }
-      this.getEventList();
     // 新增页-1
     } else {
       this.pageType = 1;
@@ -225,7 +232,6 @@ export default {
     if (this.$route.query.createType) {
       this.pageType = parseInt(this.$route.query.createType);
       this.getControlDetailIsEditor(this.$route.query.controlId);
-      this.getEventList();
     }
     // 事件管理模块通过路由跳转过来
     if (this.$route.query.eventId) {
@@ -233,7 +239,7 @@ export default {
     }
   },
   mounted () {
-    this.GetTimeAfter();
+    this.getTimeAfter();
   },
   methods: {
     // 获取事件详情
@@ -241,13 +247,16 @@ export default {
       getEventDetail(eventId).then(res => {
         if (res && res.data) {
           this.eventDetail = res.data;
-          this.createForm.event = res.data.uid;
-          this.getEventList();
+          this.eventList = [{
+            label: this.eventDetail.eventCode,
+            value: this.eventDetail.uid
+          }]
+          this.createForm.event = this.eventDetail.uid;
         }
       })
     },
     // 获取下个月的今天
-    GetTimeAfter() { 
+    getTimeAfter() { 
       var dd = new Date();
       function checkT(s) {
           return s < 10 ? '0' + s: s;
@@ -261,26 +270,32 @@ export default {
     },
     // 获取关联事件列表
     getEventList (query) {
-      const params = {
-        'where.eventCode': query,
-        pageSize: 1000000,
-        orderBy: 'report_time',
-        order: 'desc'
-      }
-      getEventList(params).then(res => {
-        if (res && res.data) {
-          this.eventList = res.data.list.map(m => {
-            return {
-              label: m.eventCode,
-              value: m.uid
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          'where.keyword': _query,
+          'where.isSurveillance': false,//没有关联布控的事件
+          pageSize: 1000000,
+          orderBy: 'report_time',
+          order: 'desc'
         }
-      })
+        getEventList(params).then(res => {
+          if (res && res.data) {
+            // 过滤掉事件状态为已结束的关联事件
+            this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
+              return {
+                label: m.eventCode,
+                value: m.uid,
+                eventStatus: m.eventStatus
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有监控设备列表
     getAllMonitorList () {
-      const params = {ccode: 431224}
+      const params = {ccode: mapXupuxian.adcode}
       getAllMonitorList(params).then(res => {
         if (res && res.data) {
           this.allDevData = res.data;
@@ -288,7 +303,6 @@ export default {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 1);
           });
-          console.log(this.allDevData)
         }
       })
     },
@@ -313,22 +327,14 @@ export default {
         this.$emit('changePageType', 1);
       // 新建、复用布控任务时
       } else {
-        this.$router.push({ name: 'control_manage' });
+        // 从事件模块跳转过来的
+        if (this.$route.query.eventId) {
+          this.$router.push({ name: 'event_manage' });
+        } else {
+          this.$router.push({ name: 'control_manage' });
+        }
       }
       this.toGiveUpDialog = false;
-    },
-    // 获取告警级别字段
-    getDiciData () {
-      getDiciData(11).then(res => {
-        if (res && res.data) {
-          this.controlRankList = res.data.map(m => {
-            return {
-              value: parseInt(m.enumField),
-              label: m.enumValue
-            }
-          })
-        }
-      })
     },
     // 通过布控名称获取布控信息，异步查询布控是否存在
     getControlInfoByName () {
@@ -349,12 +355,6 @@ export default {
     },
     // 保存布控任务
     saveControl (formName) {
-      // 点击保存按钮时清除没勾选的模型类别的验证结果
-      if (!this.checkList.some(s => s === '人员追踪')) {
-        this.$refs.mapOne.reset();
-      } else if (!this.checkList.some(s => s === '车辆追踪')) {
-        this.$refs.mapTwo.reset();
-      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠
@@ -362,7 +362,6 @@ export default {
           if (!isThrough) {
             return false;
           } else {
-            console.log('验证通过');
             const modelList = [];
             this.checkList.forEach(f => {
               if (f === '人员追踪') {
@@ -371,7 +370,7 @@ export default {
               } else if (f === '车辆追踪') {
                 this.$refs.mapTwo.validateModelTwo();
                 modelList.push(this.modelDataTwo);
-              } else if (f === '越界分析') {
+              } else if (f === '越界分析') {  
                 this.$refs.mapThree.validateModelThree();
                 modelList.push(this.modelDataThree);
               } else if (f === '范围分析') {
@@ -395,7 +394,7 @@ export default {
               }
             })
             let data = {
-              alarmLevel: this.createForm.controlRank,// 告警级别
+              alarmLevel: this.createForm.controlAlarmId,// 告警级别
               eventId: this.createForm.event,// 事件id
               surveillanceName: this.createForm.controlName,// 布控名称
               surveillanceType: this.createForm.controlType,// 布控类型
@@ -407,7 +406,6 @@ export default {
               data.surveillanceDateStart = this.createForm.controlDate && this.createForm.controlDate[0];// 布控开始时间
               data.surveillanceDateEnd = this.createForm.controlDate && this.createForm.controlDate[1];// 布控结束时间
             }
-            console.log(JSON.stringify(data) )
             this.loadingBtn = true;
             addControl(data).then(res => {
               if (res && res.data) {
@@ -415,6 +413,11 @@ export default {
                 this.$router.push({ name: 'control_manage' });
               }
             }).finally(() => {
+              // 新增布控后，状态为待开始的事件，改为进行中
+              const obj = this.eventList.find(f => f.value === this.createForm.event);
+              if (obj && obj.eventStatus === 1) {
+                updateEvent({uid: obj.value, type: 6});
+              }
               this.loadingBtn = false;
             })
           }
@@ -425,7 +428,6 @@ export default {
     },
     // 对比布控时间段是否重叠的方法
     isOverlap () {
-      console.log(this.createForm.periodTime);
       let startTimeArr = this.createForm.periodTime.map(m => m.startTime);
       let endTimeArr = this.createForm.periodTime.map(m => m.endTime);
       let begin = startTimeArr.sort();
@@ -434,7 +436,7 @@ export default {
         return true;
       } else {
         for (let k = 1; k < begin.length; k++) {
-          if (begin[k] <= over[k-1]) {
+          if (begin[k] < over[k-1]) {
             this.$message.error('所选的时间段出现重叠现象，请重新选取！');
             return false;
           } else if (k === begin.length - 1) {
@@ -465,10 +467,17 @@ export default {
         if (res && res.data) {
           this.controlDetail = res.data;
           this.createForm.controlName = this.pageType === 3 ? '复用' + this.controlDetail.surveillanceName : this.controlDetail.surveillanceName;
-          this.createForm.event = this.controlDetail.eventId;
+          // 编辑布控时
+          if (this.pageType === 2) {
+            this.eventList = [{
+              label: this.controlDetail.eventCode,
+              value: this.controlDetail.eventId
+            }]
+            this.createForm.event = this.controlDetail.eventId;
+          }
           this.createForm.controlType = this.controlDetail.surveillanceType;
-          this.createForm.controlDate = this.pageType === 3 ? [] : [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd]
-          this.createForm.controlRank = this.controlDetail.alarmLevel;
+          this.createForm.controlDate = this.pageType === 3 ? [] : (this.controlDetail.surveillanceDateStart ? [this.controlDetail.surveillanceDateStart, this.controlDetail.surveillanceDateEnd] : [])
+          this.createForm.controlAlarmId = this.controlDetail.alarmLevel;
           this.createForm.periodTime = this.controlDetail.surveillancTimeList.map(m => {
             return {
               startTime: new Date(2019, 9, 10, m.startTime.split(':')[0], m.startTime.split(':')[1]),
@@ -506,22 +515,11 @@ export default {
           this.modelDTwo = this.modelList.find(f => f.modelType === 2);
           this.modelDThree = this.modelList.find(f => f.modelType === 3);
           this.modelDFour = this.modelList.find(f => f.modelType === 4);
-          console.log(this.modelDOne, this.modelDTwo, this.modelDThree, this.modelDFour);
         }
       })
     },
-    // 编辑布控
+    // 编辑布控任务
     putControl (formName) {
-      // 点击保存按钮时清除没勾选的模型类别的验证结果
-      if (!this.checkList.some(s => s === '人员追踪')) {
-        if (this.$refs.mapOne) {
-          this.$refs.mapOne.reset();
-        }
-      } else if (!this.checkList.some(s => s === '车辆追踪')) {
-        if (this.$refs.mapTwo) {
-          this.$refs.mapTwo.reset();
-        }
-      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           //验证所选时间段是否出现重叠
@@ -529,12 +527,10 @@ export default {
           if (!isThrough) {
             return false;
           } else {
-            console.log('验证通过');
             const modelList = [];
             this.checkList.forEach(f => {
               if (f === '人员追踪') {
                 this.$refs.mapOne.validateModelOne();
-                console.log(1111)
                 modelList.push(this.modelDataOne);
               } else if (f === '车辆追踪') {
                 this.$refs.mapTwo.validateModelTwo();
@@ -563,10 +559,10 @@ export default {
                 endTime: formatDate(m.endTime, 'HH:mm:ss')
               }
             })
-            this.controlDetail.alarmLevel = this.createForm.controlRank;
-            this.controlDetail.eventId = this.createForm.event;
+            this.controlDetail.alarmLevel = this.createForm.controlAlarmId;
             this.controlDetail.surveillanceName = this.createForm.controlName;
             this.controlDetail.surveillanceType = this.createForm.controlType;
+            this.controlDetail.eventId = this.createForm.event;
             this.controlDetail.modelList = modelList;
             this.controlDetail.surveillancTimeList = time;
             // 为短期布控时才需要传布控日期
@@ -577,7 +573,6 @@ export default {
               this.controlDetail.surveillanceDateStart = null;
               this.controlDetail.surveillanceDateEnd = null;
             }
-            console.log(JSON.stringify(this.controlDetail) )
             this.loadingBtn = true;
             putControl(this.controlDetail).then((res) => {
               if (res) {
@@ -593,7 +588,21 @@ export default {
         }
       })
     }
-  }
+  },
+  // beforeDestroy () {
+  //   if (this.$refs['mapOne']) {
+  //     this.$refs['mapOne'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapTwo']) {
+  //     this.$refs['mapTwo'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapThree']) {
+  //     this.$refs['mapThree'].isDestroyed();
+  //   }
+  //   if (this.$refs['mapFour']) {
+  //     this.$refs['mapFour'].isDestroyed();
+  //   }
+  // }
 }
 </script>
 <style lang="scss" scoped>

@@ -6,7 +6,6 @@
           <el-form ref="systemForm" :model="systemForm" class="system_form">
             <el-form-item prop="systemDate">
               <el-date-picker
-                style="width: 260px;"
                 v-model="systemForm.systemDate"
                 type="daterange"
                 range-separator="-"
@@ -19,14 +18,24 @@
             <el-form-item prop="titleOrPublisher">
               <el-input v-model="systemForm.titleOrPublisher" placeholder="输入标题或发布者"></el-input>
             </el-form-item>
-            <el-form-item style="width: 25%;">
-              <el-button type="primary" @click="getMsgNoteList">查询</el-button>
-              <el-button @click="resetForm">重置</el-button>
+            <el-form-item prop="department">
+              <el-select value-key="uid" v-model="systemForm.department" filterable placeholder="请选择发布部门">
+                <el-option
+                  v-for="item in departmentList"
+                  :key="item.uid"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item style="padding-right: 0;">
+              <el-button class="select_btn" @click="getMsgNoteList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
         <div class="help_content">
-          <el-button type="primary" icon="el-icon-plus" @click.native="skip(2)">新增系统消息</el-button>
+          <el-button class="select_btn" style="width: 145px;" icon="el-icon-plus" @click.native="skip(2)">新增系统消息</el-button>
           <div class="table_box">
             <el-table
               v-loading="loading"
@@ -47,6 +56,12 @@
               <el-table-column
                 label="内容预览"
                 prop="details"
+                show-overflow-tooltip
+                >
+              </el-table-column>
+              <el-table-column
+                label="发布部门"
+                prop="publishUnitName"
                 show-overflow-tooltip
                 >
               </el-table-column>
@@ -74,6 +89,7 @@
             </el-table>
           </div>
           <el-pagination
+            class="cum_pagination"
             v-if="systemList && systemList.list && systemList.list.length > 0"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -93,6 +109,7 @@
 import systemAdd from './systemAdd.vue';
 import systemDetail from './systemDetail.vue';
 import {getMsgNoteList} from '@/views/index/api/api.message.js';
+import {getDepartmentList} from '@/views/index/api/api.manage.js';
 export default {
   components: {systemAdd, systemDetail},
   data () {
@@ -101,13 +118,16 @@ export default {
       // 顶部筛选参数
       systemForm: {
         systemDate: null,
+        department: null,
         titleOrPublisher: null
       },
       lastSystemForm: {
         systemDate: null,
+        department: null,
         titleOrPublisher: null
       },
       // 表格参数
+      departmentList: [],
       systemList: [],
       systemId: null,//消息id
       // 翻页参数
@@ -117,10 +137,34 @@ export default {
       loading: false
     }
   },
+  computed: {
+    userInfo () {
+      return this.$store.state.loginUser;
+    }
+  },
   mounted () {
+    this.getDepartList();
     this.getMsgNoteList();
   },
   methods: {
+    // 获取部门列表
+    getDepartList () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getDepartmentList(params)
+        .then(res => {
+          if (res) {
+            this.departmentList = res.data.list.map(m => {
+              return {
+                value: m.uid,
+                label: m.organName
+              }
+            });
+          }
+        })
+    },
     // 获取系统消息列表
     getMsgNoteList () {
       this.pageType = 1;
@@ -148,6 +192,7 @@ export default {
         'where.startDateStr': this.systemForm.systemDate && this.systemForm.systemDate[0],
         'where.endDateStr': this.systemForm.systemDate && this.systemForm.systemDate[1],
         'where.titleOrPublisher': this.systemForm.titleOrPublisher,
+        'where.publishUnit': this.systemForm.department
       }
       this.loading = true;
       getMsgNoteList(params).then(res => {
@@ -194,7 +239,8 @@ export default {
       width: 100%;
       display: flex;
       .el-form-item{
-        padding-right: 40px;
+        width: 20%;
+        padding-right: 20px;
       }
     }
     .table_box{

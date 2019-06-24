@@ -2,6 +2,8 @@
   <div class="vl_header">
     <div class="hd_log vl_icon vl_icon_logo">
     </div>
+    <!-- <div class="hd_log vl_ymx_logo">
+    </div> -->
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
@@ -22,17 +24,19 @@
             placement="bottom"
             width="378"
             trigger="click"
-            popper-class="task_popover">
-            <vue-scroll>
+            :popper-class="popoverClass"
+            v-model="taskVisible"
+            >
             <div class="vl_task_box" v-if="alarmList && alarmList.length > 0">
             <div class="vl_info vl_t_b_header">
               <p v-for="(item,index) in taskStatusList" :key="index" :class="{active: type == item.enumField}" @click="changeTab(item.enumField)" class="h_menu">
-                {{item.enumValue}}<span v-show="item.total">({{item.total}})</span>
+                {{item.enumValue}}<span>({{item.enumField == 1 ? taskCount.unread : taskCount.haveRead}})</span>
               </p>
               <!-- <p :class="{active: type === 1}" @click="changeTab(1)" class="h_menu">未读<span>(15)</span></p>
               <p :class="{active: type === 2}" @click="changeTab(2)" class="h_menu">已读<span>(15)</span></p> -->
               <p class="h_menu"><span @click="mark">全部标记为已读</span></p>
             </div>
+            <vue-scroll>
             <ul class="vl_t_b_content">
               <li class="vl_info vl_t_b_list" v-for="(item,index) in taskList" :key="'t_'+index" @click="goSkipTaskDetail(item)">
                   <div class="col_content">
@@ -46,13 +50,14 @@
               </li>
               <li class="no_data" v-if="!taskList || taskList.length <= 0">暂无数据</li>
             </ul>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'task'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToTaskList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.msg" class="item" :max="99" slot="reference">
-              <i class="vl_icon vl_icon_011" @click="getTaskData"></i>
+              <i class="vl_icon vl_icon_011" @click="getTaskCountList"></i>
             </el-badge>
           </el-popover>
         </li>
@@ -60,27 +65,29 @@
           <el-popover
             ref="popover"
             placement="bottom"
-            width="397"
+            width="428"
             trigger="click"
-            popper-class="alarm_popover">
-            <vue-scroll>
+            :popper-class="alarmPopoverClass"
+            v-model="alarmVisible">
+            
             <div class="vl_hd_box" v-if="alarmList && alarmList.length > 0">
+            <vue-scroll>
             <div class="vl_hd_alarm" v-for="(item,index) in alarmList" :key="index" @click="goSkipDetail(item)">
               <div class="hd_alarm_t">
-                <div>
+                <div class="uesr_info">
                   <h1>{{item.surveillanceName}}</h1>
                   <p>{{item.devName}}</p>
                   <p>{{item.snapTime}}</p>
                 </div>
-                <div><img :src="item.snapPhoto" alt="抓拍照片"></div>
+                <div class="img_info"><img :src="item.snapPhoto" alt="抓拍照片"></div>
                 <div>
                   <span>{{item.semblance}}</span>
                   <p>匹配度</p>
                   <el-progress :percentage="item.semblance" color="#0C70F8"></el-progress>
                 </div>
-                <div><img :src="item.surveillancePhoto" alt="布防照片"></div>
+                <div class="img_info"><img :src="item.surveillancePhoto" alt="布防照片"></div>
               </div>
-              <div class="hd_alarm_b">
+              <div class="hd_alarm_b" v-if="item.objType == 1 || item.objType == 2">
                 <template v-if="item.objType == 1">
                   <div class="alarm_b_list">{{item.name}}</div>
                   <div class="alarm_b_list">{{item.sex}}</div>
@@ -88,17 +95,18 @@
                 </template>
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
-                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <!-- <div class="alarm_b_list">{{item.numberColor}}</div> -->
                   <div class="alarm_b_list">{{item.vehicleType}}</div>
                 </template>
-                <div class="alarm_b_list">{{item.eventCode || '无'}}<span>|</span><span>关联事件</span></div>
+                <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
               </div>
             </div>
-            <div style="width: 100%;text-align: center;padding: 10px 0;">
-              <router-link :to="{name: 'alarm'}" style="color: #666;">查看更多</router-link>
-            </div>
-            </div>
             </vue-scroll>
+            <div style="width: 100%;text-align: center;padding: 10px 0;">
+              <a style="color: #666;" @click="goToAlarmList">查看更多</a>
+            </div>
+            </div>
+            
             <el-badge :value="sums.events" class="item" :max="99" slot="reference">
               <i class="vl_icon vl_icon_012" :class="{'hd_user_is': sums.events > 0}" @click="getAlarm"></i>
             </el-badge>
@@ -110,49 +118,49 @@
       <li>
         <router-link :to="{name: 'video'}">
           <i class="vl_icon vl_icon_001"></i>
-          <span>视频</span>
+          <span>视频查看</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'map'}">
           <i class="vl_icon vl_icon_002"></i>
-          <span>地图</span>
+          <span>GIS应用</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'event'}">
           <i class="vl_icon vl_icon_003"></i>
-          <span>事件</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'judge'}">
-          <i class="vl_icon vl_icon_004"></i>
-          <span>研判</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'search'}">
-          <i class="vl_icon vl_icon_005"></i>
-          <span>检索</span>
+          <span>事件管理</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'control'}">
           <i class="vl_icon vl_icon_006"></i>
-          <span>布控</span>
+          <span>智能布控</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'vehicle'}">
+          <i class="vl_icon vl_icon_004"></i>
+          <span>车辆侦查</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'search'}">
+          <i class="vl_icon vl_icon_005"></i>
+          <span>人脸检索</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'message'}">
           <i class="vl_icon vl_icon_007"></i>
-          <span>消息</span>
+          <span>消息公告</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'manage'}">
           <i class="vl_icon vl_icon_008"></i>
-          <span>管理</span>
+          <span>系统管理</span>
         </router-link>
       </li>
     </ul>
@@ -184,13 +192,13 @@
         <p>如果忘记旧密码，请在登录页使用“忘记密码”功能重设密码。</p>
         <el-form :model="updateForm" ref="updateForm" :rules="rules" label-width="20px">
           <el-form-item label=" " prop="oldPwd">
-            <el-input type="password" placeholder="请输入旧密码" v-model="updateForm.oldPwd"></el-input>
+            <el-input :type="inputType.oldType" placeholder="请输入旧密码" v-model="updateForm.oldPwd" @focus="changeFocus(1)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="newPwd">
-            <el-input type="password" placeholder="请设置新密码" v-model="updateForm.newPwd"></el-input>
+            <el-input :type="inputType.newType" placeholder="请设置新密码" v-model="updateForm.newPwd" @focus="changeFocus(2)"></el-input>
           </el-form-item>
           <el-form-item label=" " prop="sureNewPwd">
-            <el-input type="password" placeholder="请确认密码" v-model="updateForm.sureNewPwd"></el-input>
+            <el-input :type="inputType.sureType" placeholder="请确认密码" v-model="updateForm.sureNewPwd" @focus="changeFocus(3)"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -204,7 +212,7 @@
 <script>
 import { logout, updatePwd } from '@/views/index/api/api.user.js';
 import { getAlarmList } from "@/views/index/api/api.control.js";
-import { getTasks, markTask } from '@/views/index/api/api.event.js';
+import { getTasks, markTask, getCount } from '@/views/index/api/api.event.js';
 import {formatDate} from '@/utils/util';
 import { dataList } from '@/utils/data.js';
 export default {
@@ -261,6 +269,16 @@ export default {
       taskStatusList: [], // 任务状态数据
       taskType: dataList.taskType,
       taskListAll: [],
+      inputType: {
+        oldType: 'text',
+        newType: 'text',
+        sureType: 'text'
+      }, // 输入框类型
+      taskCount: {},
+      popoverClass: 'task_popover',
+      alarmPopoverClass: 'alarm_popover',
+      taskVisible: false,
+      alarmVisible: false,
     }
   },
   mounted () {
@@ -268,9 +286,22 @@ export default {
     let taskStatusL = this.dicFormater(dataList.taskStatus)
     this.taskStatusList = taskStatusL[0].dictList
     this.getAlarm()
+    this.getTaskCount();
     this.getTaskData();
   },
   methods: {
+    // 将输入框的type改为password
+    changeFocus (val) {
+      if (val === 1) {
+        this.inputType.oldType = 'password';
+      }
+      if (val === 2) {
+        this.inputType.newType = 'password';
+      }
+      if (val === 3) {
+        this.inputType.sureType = 'password';
+      }
+    },
     // 显示退出登录弹出框
     showLoginOutDialog () {
       this.loginoutDialog = true;
@@ -327,6 +358,34 @@ export default {
         }
       })
     },
+    getTaskCountList() {
+      this.getTaskCount();
+      this.getTaskData();
+    },
+    //任务数量统计
+    getTaskCount() {
+      let params = {
+        userId: this.userInfo.uid
+      }
+      getCount(params).then(res => {
+        if(res.data) {
+          this.taskCount = res.data;
+          if(!this.taskCount.haveRead) {
+            this.taskCount['haveRead'] = 0
+          }
+          if(!this.taskCount.unread) {
+            this.taskCount['unread'] = 0
+          }
+          this.sums.msg = res.data.total;
+          //是否展示任务盒子
+          this.$nextTick(()=>{
+            if(this.sums.msg <= 0 ) {
+              this.popoverClass = 'task_popover show_box'
+            }
+          })
+        }
+      }).catch(()=>{})
+    },
     //告警
     getAlarm() {
       this.alarmList = [];
@@ -345,13 +404,20 @@ export default {
             item['alarmTimeD'] = new Date(alarmTimeD).getTime()
           }
           this.sums.events = res.data.total;
+          //是否展示告警盒子
+          this.$nextTick(()=>{
+            if(this.sums.events <= 0 ) {
+              this.alarmPopoverClass = 'alarm_popover show_box'
+            }
+          })
         }
       })
     },
     changeTab(type) {
       this.type = type
       this.taskList = []
-      this.taskList = this.taskListAll.filter(key => this.type == key.readFlag)
+      this.getTaskData()
+      /* this.taskList = this.taskListAll.filter(key => this.type == key.readFlag).filter((item,index) => index < 10) */
     },
     goSkipDetail(item) {
       console.log("----------",item)
@@ -362,27 +428,42 @@ export default {
       }else {
         this.$router.push({name: 'alarm_default', query: {uid: item.uid, objType: item.objType, type: 'history'}});
       }
+      this.alarmVisible = false;
+    },
+    goToAlarmList() {
+      this.$router.push({name: 'alarm'});
+      this.alarmVisible = false;
+    },
+    goToTaskList() {
+      this.$router.push({name: 'task'});
+      this.taskVisible = false;
     },
     goSkipTaskDetail(item) {
-      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType}});
+      this.$router.push({name: 'task_default', query: {id: item.eventId, processType: item.processType, uid: item.uid,dispatchType: item.dispatchType, objType: item.objType, dispatchStatus: item.dispatchStatus}});
+      this.taskVisible = false;
     },
     // 获取任务列表数据
     getTaskData () {
       this.taskList = [];
       let params = {
-        pageNum: -1,
-        pageSize: 0,
+        pageNum: 1,
+        pageSize: 10,
+        'where.isRead': this.type,
+        orderBy: 'create_time',
+        order: 'desc',
       }
       getTasks(params)
         .then(res => {
           if (res && res.data.list) {
             this.taskListAll = res.data.list;
-            this.sums.msg = res.data.total;
-            this.taskList  = res.data.list.filter(key => this.type == key.readFlag)
+            /* this.sums.msg = res.data.total; */
+            this.taskList = res.data.list;
+            /* this.taskList  = res.data.list.filter(key=> this.type == key.readFlag).filter((item,index) => index < 10) */
           }
-          for(let item of this.taskStatusList) {
-            item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length
-          }
+          // for(let item of this.taskStatusList) {
+          //   item['total'] = this.taskList.filter(key => item.enumField == key.readFlag).length
+          //   /* item['total'] = this.taskListAll.filter(key => item.enumField == key.readFlag).length */
+          // }
         })
         .catch(() => {})
     },
@@ -390,7 +471,6 @@ export default {
     mark() {
       let params = {
         userId: this.userInfo.uid,
-        departmentId: null,
       }
       markTask(params).then(res => {
         console.log(res)
@@ -431,7 +511,7 @@ export default {
       > a {
         display: block;
         width: 100%; height: 90px;
-        font-size: 16px; color: #fff;
+        font-size: 15px; color: #fff;
         border-radius: 8px 8px 0 0;
         text-decoration: none !important;
         text-align: center;
@@ -516,18 +596,21 @@ export default {
 </style>
 <style lang="scss">
 .vl_hd_box {
-  max-height: 456px;
+  max-height: calc(100% - 40px);
+  height: calc(100% - 40px);
   .vl_hd_alarm{
-    padding: 10px 22px;
+    padding: 22px 0;
+    margin: 0 22px;
     border-bottom: 1px solid #F2F2F2;
     cursor: pointer;
     .hd_alarm_t{
       display: flex;
       justify-content: space-between;
-      > div{
+      /* > div{
         flex: 0 0 25%;
-      }
-      > div:nth-child(1){
+      } */
+      .uesr_info {
+        flex: 0 0 30%;
         > div{
           margin-bottom: 10px;
           color: #333333;
@@ -537,8 +620,21 @@ export default {
           font-size: 12px;
           color: #999999;
         }
+        h1,p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+          }
+        h1 {
+          -webkit-line-clamp: 1; //行数
+        }
+        p {
+          -webkit-line-clamp: 2; //行数
+        }
       }
       > div:nth-child(3){
+        flex: 0 0 16%;
         text-align: center;
         padding-top: 15px;
         > span{
@@ -561,18 +657,20 @@ export default {
           }
         }
       }
-      > div:nth-child(2), > div:nth-child(4){
+      .img_info {
+        flex: 0 0 27%;
         text-align: center;
         > img{
-          width: 70px;
-          height: 70px;
+          width: 90px;
+          height: 90px;
         }
       }
     }
     .hd_alarm_b{
       margin-top: 10px;
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      /* justify-content: space-between; */
       > div{
         padding: 5px;
         font-size: 12px;
@@ -580,6 +678,11 @@ export default {
         border:1px solid rgba(242,242,242,1);
         border-radius:3px;
         color: #666;
+        margin-right: 8px;
+        flex: none;
+        &:last-child {
+          margin-right: 0;
+        }
       }
       .alarm_b_list {
         span {
@@ -591,14 +694,32 @@ export default {
         }
       }
     }
+    &:hover {
+      .uesr_info h1, .uesr_info p{
+        color: #0A6DF2;
+      }
+      .img_info img{
+        box-shadow: -3px 0px 8px rgba(0, 0, 0, 0.15),   /*左边阴影*/ 
+                    0px -3px 8px rgba(0, 0, 0, 0.15),  /*上边阴影*/ 
+                    3px 0px 8px rgba(0, 0, 0, 0.15),  /*右边阴影*/ 
+                    0px 8px 10px rgba(0, 0, 0, 0.15); /*下边阴影*/
+      }
+    }
+  }
+  a {
+    cursor: pointer;
   }
 }
 .vl_task_box {
-  max-height: 456px;
-  padding: 0 30px;
+  max-height: calc(100% - 85px);
+  height: calc(100% - 85px);
   .vl_t_b_header {
     height: 48px;
     line-height: 48px;
+    padding: 0 30px;
+  }
+  .vl_t_b_content {
+    padding: 0 30px;
   }
   .vl_info {
     display: flex;
@@ -676,17 +797,30 @@ export default {
     padding: 20px 0;
     border-bottom: 1px solid #F2F2F2;
   }
+  a {
+    cursor: pointer;
+  }
 }
 .task_popover {
-  max-height: 476px;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
   padding: 12px 0;
 }
 .alarm_popover {
-  max-height: 476px;
-  padding: 12px 0;
+  max-height: calc(100% - 100px);
+  height: calc(100% - 100px);
+  padding: 0 0 12px 0;
+}
+.show_box {
+  display: none!important;
 }
 .person_info {
   height: auto !important;
+}
+.vl_ymx_logo {
+  background: url(../assets/img/ymx/ymx_logo.png) no-repeat;
+  background-size: 100% auto;
+  position: relative; top: 7px;
 }
 /* .el-popover {
   max-height: 476px;

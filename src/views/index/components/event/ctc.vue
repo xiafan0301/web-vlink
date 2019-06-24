@@ -54,6 +54,9 @@
           prop="reporterPhone"
           show-overflow-tooltip
           >
+           <template slot-scope="scope">
+            <span>{{scope.row.reporterPhone ? scope.row.reporterPhone : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="身份"
@@ -71,6 +74,9 @@
           prop="eventTypeName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventTypeName ? scope.row.eventTypeName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="状态"
@@ -85,6 +91,9 @@
           prop="dispatchTime"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.dispatchTime ? scope.row.dispatchTime : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="地点"
@@ -92,6 +101,9 @@
           width="250"
           :show-overflow-tooltip='true'
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.eventAddress ? scope.row.eventAddress : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="新反馈数量"
@@ -110,6 +122,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -177,8 +190,8 @@ export default {
         'where.keyword': this.ctcForm.phoneOrNumber,
         'where.status': eventStatus,
         pageNum: this.pagination.pageNum,
-        orderBy: 'create_time',
-        order: 'desc'
+        orderBy: 'dispatch_time',
+        order: 'asc'
       }
       getAllCtcList(params)
         .then(res => {
@@ -223,13 +236,21 @@ export default {
           .then(res => {console.log(res);})
           .catch(() => {})
       }
-      if (obj.dispatchStatusName === '进行中') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
-        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
-      }
-      if (obj.dispatchStatusName === '已结束') {
-        this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
-        // this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+      if (obj.objType === 1) { // 事件
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid }});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.uid }});
+        }
+
+      } else { // 告警
+        if (obj.dispatchStatusName === '进行中') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.uid, objType: obj.surveillanceType}});
+        }
+        if (obj.dispatchStatusName === '已结束') {
+          this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.uid, objType: obj.surveillanceType}});
+        }
       }
     }
   }

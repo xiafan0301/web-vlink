@@ -62,7 +62,7 @@
           </div>
         </div>
       </div>
-      <el-button class="vl_judge_tc_btn" @click="beginComp" :loading="compLoading">立即对比</el-button>
+      <el-button class="vl_judge_tc_btn" @click="beginComp" type="primary" :disabled="!this.curImageUrl || !this.curImageUrl2" :loading="compLoading">立即对比</el-button>
     </div>
     <!--历史记录弹窗-->
     <el-dialog
@@ -187,7 +187,7 @@ export default {
         if (oRes) {
           let x = {
             cname: oRes.fileName, // 附件名称 ,
-            contentUid: 43143,
+            contentUid: this.$store.state.loginUser.uid,
             // desci: '', // 备注 ,
             filePathName: oRes.fileName, // 附件保存名称 ,
             fileType: 1, // 文件类型 ,
@@ -239,7 +239,7 @@ export default {
         if (oRes) {
           let x = {
             cname: oRes.fileName, // 附件名称 ,
-            contentUid: 43143,
+            contentUid: this.$store.state.loginUser.uid,
             // desci: '', // 备注 ,
             filePathName: oRes.fileName, // 附件保存名称 ,
             fileType: 1, // 文件类型 ,
@@ -286,7 +286,7 @@ export default {
       this.loadingHis = true;
       this.historyPicDialog = true;
       let params = {
-        userId: 43143,
+        userId: this.$store.state.loginUser.uid,
         fileType: 1
       }
       JtcGETAppendixInfoList(params).then(res => {
@@ -518,9 +518,9 @@ export default {
       display: block;
       width: 2.82rem;
       height: .38rem;
-      border: 1px solid #D3D3D3;
-      background: #F2F2F2;
-      color: #b2b2b2;
+      border: 1px solid #0C70F8;
+      background: #0C70F8;
+      color: #FFFFFF;
       text-align: center;
       line-height: .38rem;
       -webkit-border-radius: 4px;
@@ -528,10 +528,15 @@ export default {
       border-radius: 4px;
       margin: 0 auto;
       cursor: pointer;
+    }
+    .is-disabled {
+      background: #F2F2F2;
+      color: #b2b2b2;
+      border-color: #b2b2b2;
       &:hover {
-        background: #0C70F8;
-        color: #FFFFFF;
-        border-color: #0C70F8;
+        background: #F2F2F2;
+        color: #b2b2b2;
+        border-color: #b2b2b2;
       }
     }
   }

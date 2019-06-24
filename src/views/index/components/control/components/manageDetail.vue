@@ -21,18 +21,19 @@
             <div><span class="vl_f_666">布控编号：</span><span class="vl_f_333">{{controlDetail.surveillanceNo}}</span></div>
             <div><span class="vl_f_666">布控类型：</span><span class="vl_f_333">{{controlDetail.surveillanceType}}</span></div>
           </li>
-          <li>
+          <li style="width: 34%;">
             <div><span class="vl_f_666">布控名称：</span><span class="vl_f_333">{{controlDetail.surveillanceName}}</span></div>
             <div v-if="controlDetail.surveillanceType === '短期布控'"><span class="vl_f_666">布控日期：</span><span class="vl_f_333">{{controlDetail.surveillanceDateStart}} 至 {{controlDetail.surveillanceDateEnd}}</span></div>
+            <div v-else class="control_time"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
-          <li>
+          <li style="width: 34%;">
             <div><span class="vl_f_666">告警级别：</span><span class="vl_f_333">{{controlDetail.alarmLevel}}</span></div>
-            <div><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
+            <div v-if="controlDetail.surveillanceType === '短期布控'" class="control_time"><span class="vl_f_666">布控时间：</span><span class="vl_f_333">{{controlDetail.time}}</span></div>
           </li>
         </ul>
         <div class="manage_d_c_e" v-if="controlDetail.eventDetail">
           <div class="vl_f_666">事件内容：</div>
-          <div class="vl_f_333" style="padding-right: 120px;">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
+          <div class="vl_f_333">{{controlDetail.eventDetail}}<span @click="getEventDetail">详情</span></div>
         </div>
         <div class="manage_d_c_o">
           <div><span class="vl_f_333">布控对象</span><span class="vl_f_333">（{{controlDetail.objectNum}}个）</span></div>
@@ -47,6 +48,7 @@
             </div>
           </div>
           <el-pagination
+            class="cum_pagination"
             style="align-self: flex-start;"
             @current-change="handleCurrentChangeObj"
             :current-page="currentPage"
@@ -85,7 +87,7 @@
                             <!-- 摄像头 -->
                             <ul v-if="tabTypeByScope === '0' && trackPoint.devList && trackPoint.devList.length > 0" style="max-height: 280px;">
                               <template v-for="equ in trackPoint.devList">
-                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span>{{equ.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i></li>
+                                <li @click="selDev(equ)" class="highlight" :class="{'active': devIdOrBayId === equ.uid}" :key="equ.uid"><span :title="equ.deviceName">{{equ.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i></li>
                               </template>
                             </ul>
                             <ul v-if="tabTypeByScope === '0' && (!trackPoint.devList || trackPoint.devList.length === 0)">
@@ -95,7 +97,7 @@
                             <ul v-if="tabTypeByScope === '1' && trackPoint.bayonetList && trackPoint.bayonetList.length > 0" style="max-height: 280px;" class="bayonet_list">
                               <li v-for="bayonet in trackPoint.bayonetList" :key="bayonet.uid + bayonet.bayonetName" style="padding: 0;">
                                 <div class="bayone_name highlight"  @click="dropdownBayonet(trackPoint, bayonet)" :class="{'active': bayonet.isDropdown || devIdOrBayId === bayonet.uid}" style="padding: 10px 34px;">
-                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span>{{bayonet.bayonetName}}</span>
+                                  <i class="el-icon-arrow-down" v-show="bayonet.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bayonet.isDropdown"></i><span :title="bayonet.bayonetName">{{bayonet.bayonetName | strCutWithLen(25)}}</span>
                                 </div>
                                 <el-collapse-transition>
                                   <ul v-if="bayonet.isDropdown && bayonet.devList.length > 0">
@@ -122,7 +124,7 @@
                 </div>
               </div>
               <div class="manage_d_s_m_r">
-                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
+                <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom"></i></div>
                 <ul class="bottom">
                   <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
                   <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -138,7 +140,7 @@
             <div><span>开始时间：</span><span>{{controlDetail.runningStartTime}}</span></div>
             <div v-if="controlState === 3"><span>结束时间：</span><span>{{controlDetail.runningEndTime}}</span></div>
             <div><span>持续时间：</span><span>{{controlDetail.duration}}</span></div>
-            <div v-if="controlDetail.terminationReason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
+            <div v-if="controlDetail.terminationReason" class="termination_reason"><span>终止原因：</span><span>{{controlDetail.terminationReason}}</span></div>
           </div>
           <div class="situ_box" v-if="controlState === 1">
             <div class="situ_top" @click="controlArea(2)">
@@ -156,56 +158,66 @@
                     </div>
                     <!-- 摄像头 -->
                     <el-collapse-transition>
-                      <ul v-if="tabTypeBySituation === '0'">
+                      <ul v-if="tabTypeBySituation === '0' && situList.length > 0">
                         <vue-scroll>
                           <li
                             v-for="(item, index) in situList"
-                            :key="item.uid + index"
+                            :key="item.uid"
                             @dragstart="dragstart($event, index, item)"
                             @dragover="dragover"
                             :draggable="true"
                           >
-                            <span>{{item.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                            <span :title="item.deviceName">{{item.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                           </li>
                         </vue-scroll>
+                      </ul>
+                      <ul v-if="tabTypeBySituation === '0' && situList.length === 0">
+                        <li>范围内无设备</li>
                       </ul>
                     </el-collapse-transition>
                     <!-- 卡口 -->
                     <el-collapse-transition>
-                      <div v-if="tabTypeBySituation === '1'" class="bayone_list">
+                      <div v-if="tabTypeBySituation === '1' && bayList.length > 0" class="bayone_list">
                         <vue-scroll>
-                          <div v-for="(bay, index) in bayList" :key="bay.uid + index">
+                          <div v-for="bay in bayList" :key="bay.uid">
                             <div class="bayone_name" :class="{'active': bay.isDropdown}" @click="dropdownBay(bay)">
-                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span>{{bay.bayonetName}}</span>
+                              <i class="el-icon-arrow-down" v-show="bay.isDropdown"></i><i class="el-icon-arrow-right" v-show="!bay.isDropdown"></i><span :title="bay.bayonetName">{{bay.bayonetName | strCutWithLen(25)}}</span>
                             </div>
                             <el-collapse-transition>
-                              <ul style="max-height: 346px;" v-show="bay.isDropdown">
+                              <ul style="max-height: 346px;" v-show="bay.isDropdown && bay.devList.length > 0">
                                 <li
                                   v-for="(dev, index) in bay.devList"
-                                  :key="dev.uid + index"
+                                  :key="dev.uid"
                                   @dragstart="dragstart($event, index, dev)"
                                   @dragover="dragover"
                                   :draggable="true"
                                 >
-                                  <span>{{dev.deviceName}}</span><i class="vl_icon vl_icon_control_05"></i>
+                                  <span :title="dev.deviceName">{{dev.deviceName | strCutWithLen(25)}}</span><i class="vl_icon vl_icon_control_05"></i>
                                 </li>
+                              </ul>
+                              <ul v-show="bay.devList.length === 0">
+                                <li>卡口内无设备</li>
                               </ul>
                             </el-collapse-transition>
                           </div>
                         </vue-scroll>
+                      </div>
+                      <div v-if="tabTypeBySituation === '1' && bayList.length === 0" class="bayone_list">
+                        <ul>
+                          <li>范围内无卡口</li>
+                        </ul>
                       </div>
                     </el-collapse-transition>
                   </div>
                 <div class="situ_right">
                   <div class="situ_r_video" v-for="(item, index) in rightVideoList" :key="item.uid"
                     @dragend="dragend"
-                    @dragenter="dragenter"
-                    @dragleave="dragleave"
                     @dragover="dragover"
                     @drop="drop($event, index)"
                     >
-                    <div class="situ_r_img" v-if="!item.isShowVideo">
-                      <div>从左边拖拽设备播放</div>
+                    <div class="situ_r_box" v-if="!item.isShowVideo">
+                      <img src="../../../../../assets/img/video/vi_101.png" alt="">
+                      <div>拖拽设备列表图标至此</div>
                     </div>
                     <div v-if="item.isShowVideo" is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
                       :oConfig="{sign: true}">
@@ -235,14 +247,15 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
               <el-select
+                class="select_box"
                 value-key="value"
                 v-model="devNameIsKey"
                 filterable
                 remote
-                reserve-keyword
                 placeholder="请输入设备名搜索"
                 size="small"
                 clearable
+                @clear="devListIsKey = []"
                 @change="getAlarmSnap"
                 :remote-method="getControlDevice"
                 :loading="loading">
@@ -259,8 +272,8 @@
             <div>
               <div class="result_img_box" v-for="(item, index) in controlResList.list" :key="index">
                 <div @mouseenter="item.curVideoTool = true;" @mouseleave="item.curVideoTool = false;">
-                  <img :src="item.snapPhoto" alt="" v-show="!item.isShowCurImg" @click="previewPictures(index)">
-                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" width="100%" height="100%" @click="showLargeVideo(item)"></video>
+                  <img :src="item.path" alt="" v-show="!item.isShowCurImg" @click="openBigImg(index, controlResList.list)">
+                  <video  v-show="item.isShowCurImg" :id='"controlResult" + index' :src="item.snapVideo" style="object-fit: fill;" width="100%" height="239px" @click="showLargeVideo(item, 1)"></video>
                   <div class="result_tool" v-show="item.curVideoTool">
                     <div>{{item.deviceName}}</div>
                     <div>
@@ -277,6 +290,7 @@
               </div>
             </div>
             <el-pagination
+              class="cum_pagination"
               style="align-self: flex-start;"
               @current-change="handleCurrentChangeRes"
               :current-page="currentPage"
@@ -290,7 +304,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlResultLarge" :src="videoObj.snapVideo"></video>
+      <video id="controlResultLarge" style="object-fit: fill;" :src="videoObj.snapVideo"></video>
       <div @click="closeLargeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{videoObj.deviceName}}</div>
@@ -310,17 +324,17 @@
     <!-- 底部操作按钮 -->
     <!-- 待开始 -->
     <div class="manage_f_box" v-if="controlState === 2">
-      <el-button type="primary" @click="skip(3)">编辑</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skip(3)">编辑</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <!-- 进行中 -->
     <div class="manage_f_box" v-if="controlState === 1">
-      <el-button type="primary" @click="showDialog('stopDialog')">终止</el-button>
+      <el-button class="select_btn btn_100" @click="showDialog('stopDialog')">终止</el-button>
     </div>
     <!-- 已结束 -->
     <div class="manage_f_box" v-if="controlState === 3">
-      <el-button type="primary" @click="skipIsCreate">复用</el-button>
-      <el-button @click="showDialog('delDialog')">删除</el-button>
+      <el-button class="select_btn btn_100" @click="skipIsCreate">复用</el-button>
+      <el-button class="reset_btn btn_100" @click="showDialog('delDialog')">删除</el-button>
     </div>
     <div class="event_detail_dialog" v-if="eventDetail">
       <el-dialog
@@ -332,7 +346,7 @@
         <div class="detail_list">
           <div>
             <div><span class="vl_f_666">事件编号：</span><span class="vl_f_333">{{eventDetail.eventCode}}</span></div>
-            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterUserName}}</span></div>
+            <div style="padding-left: 14px;"><span class="vl_f_666">报案人：</span><span class="vl_f_333">{{eventDetail.reporterPhone}}</span></div>
           </div>
           <div>
             <div><span class="vl_f_666">事件状态：</span><span class="vl_f_333">{{eventDetail.eventStatusName}}</span></div>
@@ -340,7 +354,7 @@
           </div>
           <div>
             <div><span class="vl_f_666">事件类型：</span><span class="vl_f_333">{{eventDetail.eventTypeName}}</span></div>
-            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevel}}</span></div>
+            <div><span class="vl_f_666">事件等级：</span><span class="vl_f_333">{{eventDetail.eventLevelName}}</span></div>
           </div>
         </div>
         <div class="detail_list">
@@ -354,13 +368,25 @@
         </div>
         <vue-scroll>
           <div class="detail_img_box">
-            <img :src="item.path !== 'string' ? item.path : '//via.placeholder.com/117x117'" alt="" v-for="item in eventDetail.closeAttachmentList" :key="item.id">
+            <div v-for="(item, index) in eventDetail.attachmentList" :key="item.id">
+              <img v-if="item.fileType === 1" @click="openBigImg(index, eventDetail.attachmentList)" :src="item.path" alt="">
+              <div v-else @mouseenter="eventVideoTool = true;" @mouseleave="eventVideoTool = false;">
+                <video id="eventVideo" :src="item.path" width="117px" height="117px" style="object-fit: fill;" @click="showLargeVideo(item, 2)"></video>
+                <div class="result_tool" v-show="eventVideoTool">
+                  <div>
+                    <i class="vl_icon vl_icon_judge_01" v-if="item.curVideoPlay" @click="_pauseVideo(item)"></i>
+                    <i class="vl_icon vl_icon_control_09" v-else @click="_playVideo(item)"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </vue-scroll>
       </el-dialog>
     </div>
     <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
     <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
+    <BigImg :imgList="imgList" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
 <script>
@@ -371,16 +397,23 @@ import {conDetail} from '../testData.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getControlDetail, getControlObjList, controlArea, getControlDevice, getAlarmSnap} from '@/views/index/api/api.control.js';
 import {getEventDetail} from '@/views/index/api/api.event.js';
+import {mapXupuxian} from '@/config/config.js';
+import BigImg from '@/components/common/bigImg.vue';
 export default {
-  components: {delDialog, stopDialog, flvplayer},
-  props: ['state', 'controlId'],
+  components: {delDialog, stopDialog, flvplayer, BigImg},
+  props: ['controlId'],
   data () {
     return {
       controlState: null,//布控详情状态
       controlDetail: conDetail,//布控详情
       eventDetail: null,//事件详情
+      eventVideoTool: false,
+      imgList: [],
+      imgIndex: null,
+      isShowImg: false,
       // 地图参数
       map: null,
+      zoomLevel: 10,
       // 追踪点列表数据
       trackPointList: [],
       devNum: null,//摄像头数量
@@ -428,38 +461,20 @@ export default {
       curVideoUrl: null,
     }
   },
-  created () {
-    this.$nextTick(() => {
-      this.controlState = this.state;
-    })
-  },
   mounted () {
-    this.resetMap();
     this.getControlDetail();
-    if (this.state !== 2) {
-      this.getAlarmSnap();
-    }
   },
   methods: {
-    // 预览图片
-    previewPictures (index) {
-      setTimeout(() => {
-        let imgs = this.controlResList.list.map(m => m.snapPhoto);
-        // 图片数组2
-        let imgs2 = []
-        imgs.forEach(function (src) {
-          // 生成imgs2数组
-          imgs2.push({
-            url: src,
-            angle: 0
-          })
-        })
-        // 使用方法
-        let ziv = new ZxImageView(null, imgs2);
-        this.$nextTick(() => {
-          ziv.view(index);
-        })
-      }, 50)
+    // 关闭图片放大
+    emitCloseImgDialog(value){
+      this.isShowImg = value;
+      this.imgList = [];
+    },
+    // 放大图片
+    openBigImg (index, data) {
+      this.isShowImg = true;
+      this.imgIndex = index;
+      this.imgList = data;
     },
     /* ************布控结果********* */
     // 停止播放
@@ -478,9 +493,26 @@ export default {
       }
       document.getElementById('controlResult' + index).play();
     },
+    // 开始播放
+    _playVideo (item) {
+      item.curVideoPlay = true;
+      document.getElementById('eventVideo').play();
+    },
+    // 停止播放
+    _pauseVideo (item) {
+      item.curVideoPlay = false;
+      document.getElementById('eventVideo').pause();
+    } ,
     // 显示大屏
-    showLargeVideo (item) {
-      this.videoObj = item;
+    showLargeVideo (item, type) {
+      this.videoObj = {};
+      if (type === 1) {
+        this.videoObj = item;
+      } else {
+        const {path} = item;
+        this.videoObj.snapVideo = path;
+        this.videoObj.curVideoPlay = false;
+      }
       this.showLarge = true;
       this.playLargeVideo();
     },
@@ -532,9 +564,17 @@ export default {
     },
     // 获取布控详情
     getControlDetail () {
+      console.log(this.controlId, 'this.controlId')
       getControlDetail(this.controlId).then(res => {
         if (res && res.data) {
           this.controlDetail = res.data;
+          this.controlState = this.controlDetail.surveillanceStatus === '待开始' ? 2 : this.controlDetail.surveillanceStatus === '进行中' ? 1 : 3;
+          this.$nextTick(() => {
+            this.resetMap();
+          })
+          if (this.controlState !== 2) {
+            this.getAlarmSnap();
+          }
         }
       })
     },
@@ -701,30 +741,34 @@ export default {
     },
     // 获取所有布控设备
     getControlDevice (query) {
-      const params = {
-        name: query
-      }
-      getControlDevice(params).then(res => {
-        if (res && res.data) {
-          this.devListIsKey = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: _query,
+          uid: this.controlId
         }
-      })
+        getControlDevice(params).then(res => {
+          if (res && res.data) {
+            this.devListIsKey = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.name
+              }
+            });
+          }
+        })
+      }
     },
     // 获取布控抓拍结果列表
     getAlarmSnap () {
-      const params = {
+      let params = {
         pageNum: this.pageNumObjRes,
         pageSize: this.pageSizeRes,
         'where.surveillanceId': this.controlId,
         'where.dateStart': this.controlTimeIsKey && this.controlTimeIsKey[0],
-        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1],
-        'where.deviceName': this.devNameIsKey
+        'where.dateEnd': this.controlTimeIsKey && this.controlTimeIsKey[1]
       }
+      this.devNameIsKey && (params['where.deviceName'] = this.devNameIsKey);
       getAlarmSnap(params).then(res => {
         if (res && res.data) {
           this.controlResList = res.data;
@@ -732,6 +776,8 @@ export default {
             this.$set(f, 'curVideoPlay', false);
             this.$set(f, 'curVideoTool', false);
             this.$set(f, 'isShowCurImg', false);
+            f.path = f.snapPhoto;
+            delete f.snapPhoto;
           })
         }
       })
@@ -743,45 +789,20 @@ export default {
     },
     /* ************运行情况********* */
     // 关闭播放器
-    playerClose (index, sid) {
-      console.log('sid', sid);
+    playerClose (index) {
       this.rightVideoList.splice(index, 1, {isShowVideo: false});
-
-      // let _div = document.createElement('div');
-      // _div.className = 'situ_r_img';
-      // _div.innerHTML = '<div></div>'
-      // e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      // let _video = this.rVList.splice(index, 1, {})[0];
-      // let _index = _video.index;
-      // this.situList.splice(_index, 1, _video);
     },
     // 拖拽
     dragstart (e, index, item) {
-      // 使其半透明
-      // e.target.style.opacity = .5;
       this.dragstartIndex = index;
-      console.log(this.dragstartIndex, 'dragstartIndex')
-
       this.dragActiveObj = item;
+       // 设置属性dataTransfer   两个参数   1：key   2：value
+      if (!e) { e = window.event; }
+      e.dataTransfer.setData('name', 'ouyang');
     },
   
     dragend () {
-      // 重置透明度
-      // e.target.style.opacity = "";
-
       this.dragActiveObj = null;
-    },
-    dragenter (e) {
-      // 当可拖动的元素进入可放置的目标高亮目标节点
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "#E0F3FF";
-      }
-    },
-    dragleave (e) {
-      // 当拖动元素离开可放置目标节点，重置其背景
-      if ( e.target.parentNode.parentNode.className == "situ_r_video" ) {
-          // e.target.style.background = "";
-      }
     },
     dragover (e) {
       // 阻止默认动作
@@ -793,9 +814,6 @@ export default {
       e.stopPropagation();
       console.log(this.rightVideoList, 'rightVideoList')
       if (this.dragActiveObj) {
-        // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
-        // let deviceSip = 'rtmp://live.hkstv.hk.lxdns.com/live/hks1';
-        // console.log('deviceSip', deviceSip);
         this.rightVideoList.splice(index, 1, {
           isShowVideo: true,
           type: 1,
@@ -803,53 +821,9 @@ export default {
           video: Object.assign({}, this.dragActiveObj)
         });
       }
-      // 移动拖动的元素到所选择的放置目标节点
-      // console.log(e.target)
-      // if ( e.target.parentNode.parentNode.className === "situ_r_video" ) {
-      //     e.target.style.background = "";
-      //     let sid = this.situList[this.dragstartIndex].uid;
-      //     let div = document.createElement('div');
-      //     let video = `<video src="${require('../../../../../assets/video/video.mp4')}" autoplay loop controls></video>
-      //       <div>
-      //         <i class="vl_icon vl_icon_control_06"></i>
-      //         <i class="vl_icon vl_icon_control_11"></i>
-      //         <i class="vl_icon vl_icon_control_07"></i>
-      //       </div>
-      //       <i class="vl_icon vl_icon_control_13" id="${sid}"></i>
-      //     `;
-      //     div.innerHTML = video;
-      //     e.target.parentNode.parentNode.replaceChild( div, e.target.parentNode);
-      //     // 从左往右边拖拽逻辑
-      //     const rVList = [{},{},{},{}]
-      //     let delVideo = this.situList.splice(this.dragstartIndex, 1, {});
-      //     delVideo[0]['index'] = this.dragstartIndex;
-      //     if (rVList[index].uid) {
-      //       let _video = rVList.splice(index, 1)[0];
-      //       let _index = _video.index;
-      //       this.situList.splice(_index, 1 , _video);
-      //       rVList.splice(index, 1, {});
-      //     } else {
-      //       rVList.splice(index, 1, ...delVideo);
-      //     }
-      //     console.log(delVideo) 
-      //     // 防止重复绑定点击事件，先解绑
-      //     $(`.situ_right > :nth-child(${index + 1})`).unbind('click');
-      //     // 利用事件冒泡,绑定关闭按钮的点击事件，关闭后，从右边回到左边列表
-      //     let _this = this;
-      //     $(`.situ_right > :nth-child(${index + 1})`).on('click', '#' + sid, function (e) {
-      //       let _div = document.createElement('div');
-      //       _div.className = 'situ_r_img';
-      //       _div.innerHTML = '<div></div>'
-      //       e.target.parentNode.parentNode.replaceChild( _div, e.target.parentNode);
-      //       let _video = rVList.splice(index, 1, {})[0];
-      //       let _index = _video.index;
-            
-      //       _this.situList.splice(_index, 1, _video);
-      //     })
-      // }
     }, 
     mapMark () {
-      let _this = this, hoverWindow = null, data = null;
+      let _this = this, hoverWindow = null, data = null, markerList = [];
       if (!_this.trackPointList) {
         return false;
       }
@@ -940,8 +914,15 @@ export default {
             }
             _this.devIdOrBayId = obj.uid;//左侧列表高亮
           });
-          marker.setMap(_this.map);
+          markerList.push(marker);
         }
+      }
+      _this.map.add(markerList);
+      _this.map.setFitView();
+    },
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(this.zoomLevel);
       }
     },
     // 地图缩放
@@ -953,14 +934,14 @@ export default {
     // 初始化地图
     resetMap () {
       let _this = this;
-      console.log(_this.controlState)
       let map = new window.AMap.Map('mapBox', {
-        zoom: 16, // 级别
-        center: [112.97503, 28.09358], // 中心点坐标112.980377,28.100175
+        zoom: this.zoomLevel,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       _this.map = map;
-      _this.mapMark();
+      // _this.mapMark();
+      _this.controlArea(1);
     }
   },
   destroyed () {
@@ -1002,6 +983,12 @@ export default {
           div{
             margin-top: 15px;
           }
+          .control_time{
+            display: flex;
+            > span:nth-child(2){
+              flex: 1;
+            }
+          }
         }
       }
       .manage_d_c_e{
@@ -1011,7 +998,10 @@ export default {
         line-height: 20px;
         div:nth-child(2){
           flex: 0 0 58%;
+          padding-right: 120px;
+          word-break: break-all;
           span{
+            white-space: nowrap;
             color: #0C70F8;
             cursor: pointer;
           }
@@ -1107,9 +1097,19 @@ export default {
         .situ_time{
           line-height: 44px;
           padding-left: 15px;
+          padding-bottom: 10px;
           display: flex;
+          flex-wrap: wrap;
           > div{
-            width: 25%;
+            width: 33%;
+          }
+          .termination_reason{
+            width: 100%;
+            line-height: 20px;
+            display: flex;
+            > span:nth-child(2){
+              flex: 1;
+            }
           }
         }
         .situ_box{
@@ -1121,6 +1121,7 @@ export default {
             justify-content: space-between;
             line-height: 44px;
             padding: 0 15px;
+            border-bottom: 1px solid #f2f2f2;
             background:rgba(250,250,250,1);
             cursor: pointer;
             i{
@@ -1132,10 +1133,11 @@ export default {
           .situ_content{
             display: flex;
             flex-wrap: nowrap;
+            height: 812px;
             .situ_left{
               width: 258px;
               min-width: 258px;
-              height: 600px;
+              height: 100%;
               border-right: 1px solid #F2F2F2;
               > div{
                 height: 50px;
@@ -1177,7 +1179,7 @@ export default {
                   display: flex;
                   flex-wrap: nowrap;
                   justify-content: space-between;
-                  padding: 0 15px 0 40px;
+                  padding: 0 15px 0 35px;
                   color: #666666;
                   cursor: move;
                   > i{
@@ -1225,25 +1227,29 @@ export default {
             }
             .situ_right{
               width: calc(100% - 258px);
+              height: 100%;
               display: flex;
               flex-flow: row wrap;
-              align-content: flex-start;
-              padding-top: 20px;
-              padding-right: 1%;
+              align-content: space-between;
+              justify-content: space-between;
+              padding: 0.8%;
+              background: #fafafa;
               .situ_r_video{
-                flex: 0 0 49%;
-                height: 49%;
+                width: 49.5%;
+                height: 49.2%;
                 position: relative;
                 overflow: hidden;
-                margin-bottom: 20px;
-                margin-left: 1%;
-                .situ_r_img{
+                .situ_r_box{
                   width: 100%;
                   height: 100%;
                   display: flex;
+                  flex-direction: column;
                   justify-content: center;
                   align-items: center;
-                  background: #e6e6e6;
+                  background: #fff;
+                  > img{
+                    width: 50%;
+                  }
                 }
               }
             }
@@ -1293,6 +1299,10 @@ export default {
               border:1px solid rgba(211,211,211,1);
               img{
                 width: 100%;
+                height: 239px;
+              }
+              video{
+                object-fit: fill;
               }
               .result_tool{
                 width: 100%;
@@ -1303,7 +1313,7 @@ export default {
                 justify-content: space-between;
                 padding-left: 15px;
                 position: absolute;
-                bottom: 52px;
+                bottom: 48px;
                 left: 0;
                 > div{
                   color: #fff;
@@ -1323,7 +1333,10 @@ export default {
                 }
               }
               > div:nth-child(1){
+                width: 100%;
+                height: 239px;
                 cursor: pointer;
+                background: #000;
               }
               > div:nth-child(2){
                 p{
@@ -1379,14 +1392,45 @@ export default {
     }
     .detail_img_box{
       width: 64%;
+      height: 276px;
       padding: 20px 0 0 70px;
       display: flex;
       flex-flow: row wrap;
       align-content: flex-start;
-      img{
-        flex: 0 0 117px;
+      > div{
+        width: 117px;
+        height: 117px;
+        position: relative;
         margin-right: 20px;
         margin-bottom: 20px;
+        img{
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+        }
+        > div{
+          width: 100%;
+          height: 100%;
+          .result_tool{
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,.4);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            margin-left: -25px;
+            margin-bottom: -25px;
+            cursor: pointer;
+            > div{
+              width: 100%;
+              height:100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+          }
+        }
       }
     }
   }
@@ -1396,6 +1440,28 @@ export default {
   .vl_icon{
     transition: none;
   }
+}
+@media (max-width: 1400px) {
+  .control_manage_d{
+    .situ_content{
+      height: 500px!important;
+    }
+    .result_img_box{
+      height: 208px!important;
+      >div{
+        height: 160px!important;
+        >img{
+          height: 160px!important;
+        }
+        >video{
+          height: 160px!important;
+        }
+        .result_tool{
+          bottom: 46px!important;
+        }
+      }
+    }
+  } 
 }
 </style>
 <style lang="scss">
@@ -1422,6 +1488,10 @@ export default {
       }
      
     }
+  }
+  .select_box .el-input__suffix-inner{
+    position: relative;
+    bottom: 3px;
   }
 }
 </style>

@@ -10,8 +10,8 @@
         <div><el-checkbox v-model="allChecked" @change="operateAllChecked()">全选</el-checkbox><span class="vl_f_333">已选择 <span>{{allIsChecked}}</span>张</span></div>
       </div>
       <div>
-        <el-button @click="judgeIsSelectedCopy">复制到组</el-button>
-        <el-button @click="judgeIsSelectedRemove">移出该组</el-button>
+        <el-button @click="judgeIsSelectedCopy" class="reset_btn btn_100">复制到组</el-button>
+        <el-button @click="judgeIsSelectedRemove" class="reset_btn btn_100">移出该组</el-button>
         <el-collapse-transition>
           <ul class="group_copy" v-show="isShowGroupCopy">
             <vue-scroll>
@@ -68,11 +68,11 @@
       <div style="width: 100%;">
         <el-pagination
           style="text-align: center;"
+          background
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
           :page-size="carMemberList.pageSize"
-          layout="total, prev, pager, next, jumper"
+          layout="prev, pager, next"
           :total="carMemberList.total">
         </el-pagination>
       </div>
@@ -84,11 +84,10 @@
         :close-on-click-modal="false"
         width="482px"
         top="40vh">
-        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要删除该分组吗？</h1>
-        <p class="vl_f_12 vl_f_999">删除后该分组人像将找不到。</p>
+        <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">是否确定删除该组？</h1>
         <div slot="footer">
-          <el-button @click="delGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="delVehicleGroupById">确认</el-button>
+          <el-button @click="delGroupDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="delVehicleGroupById">确认</el-button>
         </div>
       </el-dialog>
     </div>
@@ -102,8 +101,8 @@
         <h1 class="vl_f_16 vl_f_333" style="margin-bottom: 4px;">确定要将这 <span>{{allIsChecked}}</span>条车像数据移出该组？</h1>
         <p class="vl_f_12 vl_f_999">移出该组后将在系统默认中。</p>
         <div slot="footer">
-          <el-button @click="removeGroupDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="removeVehicle">确认</el-button>
+          <el-button @click="removeGroupDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="removeVehicle">确认</el-button>
         </div>
       </el-dialog>
     </div>

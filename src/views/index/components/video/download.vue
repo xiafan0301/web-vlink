@@ -3,6 +3,7 @@
     <div class="dl_hi_main">
       <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf" size="small">
         <el-form-item>
+          <span style="color: #666;">视频时间：&nbsp;</span>
           <el-date-picker
             v-model="formInline.time"
             type="daterange"
@@ -15,15 +16,14 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="formInline.user" placeholder="操作部门">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <!-- deptList -->
+          <el-select v-model="formInline.region" placeholder="操作部门">
+            <el-option v-for="(item, index) in deptList" :label="item.organName" :key="'dept-list-' + index" :value="item.uid"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="formInline.region" placeholder="操作用户">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="formInline.user" placeholder="操作用户">
+            <el-option v-for="(item, index) in userList" :label="item.userName" :key="'user-list-' + index" :value="item.uid"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -65,6 +65,7 @@
 </template>
 <script>
 import { apiVideoDownloadList } from "@/views/index/api/api.video.js";
+import { getUserList, getDepartmentList } from "@/views/index/api/api.manage.js";
 import { formatDate } from "@/utils/util.js";
 export default {
   data () {78 
@@ -116,13 +117,39 @@ export default {
         currentPage: 1,
         pageSize: 10,
         total: 0
-      }
+      },
+      userList: [],
+      deptList: []
     }
   },
   mounted () {
+    this.getAllUserList();
+    this.getAllDeptList();
     this.searchSubmit();
   },
   methods: {
+    getAllDeptList () {
+      getDepartmentList({
+        'where.proKey': this.$store.state.loginUser.proKey
+      }).then(res => {
+        if (res && res.data) {
+          this.deptList = res.data.list;
+        }
+      }).catch(error => {
+        console.log("getDepartmentList error：", error);
+      });
+    },
+    getAllUserList () {
+      getUserList({
+        'where.proKey': this.$store.state.loginUser.proKey
+      }).then(res => {
+        if (res && res.data) {
+          this.userList = res.data.list;
+        }
+      }).catch(error => {
+        console.log("getUserList error：", error);
+      });
+    },
     searchReset (formName) {
       this.$refs[formName].resetFields();
       this.formInline = {
@@ -143,8 +170,8 @@ export default {
         // order: '',
         'where.startTime': formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
         'where.endTime': formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
-        'where.oprUserId': '1',
-        'where.oprDeptId': '1'
+        'where.oprUserId': this.formInline.user,
+        'where.oprDeptId': this.formInline.region
       }).then(res => {
         if (res && res.data) {
           this.pagination.total = res.data.total;

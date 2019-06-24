@@ -8,7 +8,9 @@
     <div class="box">
       <el-carousel :autoplay="false" arrow="always" height="100%" :initial-index="imgIndex">
         <el-carousel-item v-for="(item, index) in imgList" :key="index">
-          <img :src="item.path" alt="">
+          <div class="img_container">
+            <img :src="item.path" />
+          </div>
         </el-carousel-item>
       </el-carousel>
       <i class="vl_icon vl_icon_event_23 close_icon" @click="closeImgDialog"></i>
@@ -48,12 +50,24 @@ export default {
       .box {
         width: 100%;
         height: 100%;
-        position: relative;
+        // position: relative;
         .el-carousel {
           height: 100%;
-          img {
+          .img_container {
             width: 100%;
             height: 100%;
+            background: #000;
+            position: relative;
+            img {
+              display: block;
+              position:absolute;
+              left:0;
+              right:0;
+              top:0;
+              bottom:0;
+              margin:auto;
+              max-height: 94vh;
+            }
           }
           .el-carousel__arrow {
             width: 64px;

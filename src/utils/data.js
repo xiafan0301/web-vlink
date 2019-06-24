@@ -5,7 +5,10 @@ const dataList = {
   identity: 4, // 上报者身份
   eventSource: 5, // 事件来源  中心端--1 app端--2
   participateType: 6, // 参与类型
-  sourceWeb: 17, // 来源中心端
+  vehicleColor: 17, // 车身颜色
+  vehicleType: 31, // 车辆类型
+  numberType: 32, // 号牌种类
+  memberJob: 42, // 成员职位
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员
@@ -17,7 +20,10 @@ const dataList = {
   fileId: 3, // 文件id
   distanceId: 23, // 推送距离
   taskType: 25, // 任务类型
-  taskStatus: 24, // 任务状态
+  taskStatus: 24, // 任务状态,
+  alarmLevel: 11, //告警级别
+  sourceType: 5, //资源来源
+  intelCharac: 38 // 智能特性
 }
 // 处理方式
 const handeMethods = {
@@ -42,4 +48,5 @@ const proccessEventType = {
   acceptId: 4, // 受理
   feedbackId: 5 // 反馈
 }
+
 export { dataList, handeMethods, operationType, proccessEventType };

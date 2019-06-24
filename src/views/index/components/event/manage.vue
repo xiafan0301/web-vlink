@@ -46,7 +46,7 @@
               v-for="(item, index) in identityList"
               :key="index"
               :label="item.organName"
-              :value="item.uid"
+              :value="item.organName"
             >
             </el-option>
           </el-select>
@@ -90,12 +90,11 @@
         </el-table-column>
         <el-table-column
           label="身份"
-          prop="reporterRole"
+          prop="reporterUserRole"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
-            <span v-else-if='!scope.row.reporterUser'>市民</span>
+            <span v-if='scope.row.reporterUserRole'>{{scope.row.reporterUserRole}}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -117,7 +116,7 @@
           prop="eventStatusName"
           >
           <template slot-scope="scope">
-            <span class="event_status" :class="[scope.row.eventStatusName === '待处理' ? 'untreated_event' : scope.row.eventStatusName === '处理中' ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
+            <span class="event_status" :class="[scope.row.eventStatus === 1 ? 'untreated_event' : scope.row.eventStatus === 2 ? 'treating_event' : 'end_event']">{{scope.row.eventStatusName}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -152,6 +151,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
       :current-page.sync="pagination.pageNum"
@@ -229,7 +229,13 @@ export default {
       getDepartmentList(params)
         .then(res => {
           if (res && res.data.list) {
-            this.identityList = res.data.list;
+             const params = {
+              organName: '市民'
+            };
+            this.identityList.push(params);
+            res.data.list.map(item => {
+              this.identityList.push(item)
+            });
           }
         })
     },
@@ -258,6 +264,7 @@ export default {
         'where.eventFlag': 1, // 是否是事件  1--是 0-否
         'where.eventType': eventType,
         'where.reporterUserRole': userName,
+        'where.dealOrgId': this.userInfo.organList[0].uid,
         'where.keyword': this.eventForm.phoneOrNumber,
         'where.acceptFlag': 2, // 审核通过
         pageNum: this.pagination.pageNum,
@@ -284,19 +291,24 @@ export default {
     },
     // 跳至事件详情页
     skipEventDetailPage (obj) {
-      if (obj.eventStatusName === '待处理') {
+      if (obj.eventStatus === 1) {
         this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '处理中') {
+      if (obj.eventStatus === 2) {
         this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.uid}});
       }
-      if (obj.eventStatusName === '已结束') {
+      if (obj.eventStatus === 3) {
         this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.uid}});
       }
     },
     // 跳至新增布控页面
     skipAddControlPage (obj) {
-      this.$router.push({path: '/control/manage', query: {eventId: obj.uid}});
+      if (!obj.surveillanceId) {
+        this.$router.push({path: '/control/create', query: {eventId: obj.uid}});
+      } 
+      if (obj.surveillanceId) {
+        this.$router.push({path: '/control/manage', query: {controlId: obj.surveillanceId, pageType: 2, state: 1}});
+      }
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
@@ -352,27 +364,8 @@ export default {
   }
   .table_box {
     padding: 0 20px;
-    // .add_event_btn {
-    //   width: 108px;
-    //   height: 40px;
-    //   background-color: #0C70F8;
-    //   color: #ffffff;
-    //   font-size: 14px;
-    //   line-height: 40px;
-    //   text-align: center;
-    //   border-radius: 3px;
-    //   cursor: pointer;
-    //   span:nth-child(1) {
-    //     font-size: 16px;
-    //   }
-    //   span:nth-child(2) {
-    //     margin-left: 5px;
-    //   }
-    // }
     .event_table {
       margin-top: 8px;
-      // padding-bottom: 20px;
-      // width: 100%;
       .event_status {
         &:before {
           content: '.';

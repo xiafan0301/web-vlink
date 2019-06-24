@@ -2,7 +2,7 @@
   <div class="basic-info">
     <div class="header">
       <i class="vl_icon vl_icon_event_4"></i>
-      <span>事件编号：{{basicInfo.eventCode}}</span>
+      <span>事件编号：{{basicInfo.eventCode ? basicInfo.eventCode : '无'}}</span>
     </div>
     <div class="event-status-img">
       <template v-if="status === 'unhandle'">
@@ -22,18 +22,15 @@
       <div class='basic-list'>
         <div>
           <span class='title'>事件类型：</span>
-          <!-- <span class='content'>火灾阿萨达萨达萨达萨达</span> -->
-          <span class='content'>{{basicInfo.eventTypeName}}</span>
+          <span class='content'>{{basicInfo.eventTypeName ? basicInfo.eventTypeName : '无'}}</span>
         </div>
         <div>
           <span class='title'>事件等级：</span>
-          <!-- <span class='content'>I级（特大）</span> -->
-          <span class='content'>{{basicInfo.eventLevelName}}</span>
+          <span class='content'>{{basicInfo.eventLevelName ? basicInfo.eventLevelName : '无'}}</span>
         </div>
         <div>
           <span class='title'>报案时间：</span>
-          <!-- <span class='content'>2018-06-07 15:00</span> -->
-          <span class='content'>{{basicInfo.reportTime}}</span>
+          <span class='content'>{{basicInfo.reportTime ? basicInfo.reportTime : '无'}}</span>
         </div>
       </div>
       <div class='basic-list'>
@@ -60,14 +57,12 @@
         </div>
         <div style='width: 65%'>
           <span class='title'>事发地点：</span>
-          <!-- <span class='content'>长沙市创谷工业园，地址如果文字过多，可以多行显示</span> -->
-          <span class='content'>{{basicInfo.eventAddress}}</span>
+          <span class='content'>{{basicInfo.eventAddress ? basicInfo.eventAddress : '无'}}</span>
         </div>
       </div>
       <div class='basic-list'>
         <div>
           <span class='title'>人员伤亡：</span>
-          <!-- <span class='content'>不确定</span> -->
           <template v-if='basicInfo.casualties == -1'>
             <span class='content'>不确定</span>
           </template>
@@ -82,17 +77,17 @@
       <div class='basic-list'>
         <div style='width: 100%'>
           <span class='title'>事件情况：</span>
-          <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail}}</span>
+          <span class='content' style="width: 50%;display:inline-block;">{{basicInfo.eventDetail ? basicInfo.eventDetail : '无'}}</span>
         </div>
       </div>
       <div class='upload_box'>
-        <div class="img-content" v-for="(item, index) in uploadImgList" :key="index">
+        <div class="img-box" v-for="(item, index) in uploadImgList" :key="index">
           <img
             :src="item.path"
             @click="handleBigImg(index)"
           />
         </div>
-        <div class='video-content' v-for="(item, index) in uplaodVideoList" :key="index">
+        <div class='video-box' v-for="(item, index) in uplaodVideoList" :key="index">
           <video
             :src="item.path"
           />
@@ -104,15 +99,15 @@
     </div>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <video id="eventVideo" :src="videoDetail.path"></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.cname}}</div>
         <div>
-          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
-          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-else></span>
           <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-          <span><a download="视频" :href="videoDetail.videoUrl" class="vl_icon vl_icon_event_26"></a></span>
+          <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
     </div>
@@ -149,23 +144,37 @@ export default {
     openVideo (obj) {
       this.videoDetail = obj;
       this.showLarge = true;
-      // this.isPlaying = true;
-      document.getElementById('vlJtcLargeV').play();
     },
     // 关闭视频
     closeVideo () {
       this.showLarge = false;
-      document.getElementById('vlJtcLargeV').pause();
+      document.getElementById('eventVideo').pause();
     },
     // 暂停视频
     pauseLargeVideo () {
-      document.getElementById('vlJtcLargeV').pause();
+      document.getElementById('eventVideo').pause();
       this.isPlaying = false;
     },
     // 播放视频
-    playLargeVideo () {
-      document.getElementById('vlJtcLargeV').play();
-      this.isPlaying = true;
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('eventVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('eventVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
     },
     // 截屏
     cutScreen () {},
@@ -267,11 +276,11 @@ export default {
       }
     }
     .upload_box {
-      width: 100%;
+      width: 415px;
       padding-left: 80px;
       display: flex;
       flex-wrap: wrap;
-      .img-content, .video-content {
+      .img-box, .video-box {
         position: relative;
         .play_icon {
           position: absolute;

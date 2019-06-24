@@ -2,19 +2,20 @@
   <el-form :ref="mapId" :model="modelForm" class="control_model">
     <!-- 图片上传 -->
     <el-form-item :label="changeObj" :rules="{ required: true, message: '', trigger: 'blur'}" style="margin-bottom: 0;padding-left: 20px;padding-top: 10px;">
-      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList"></div>
-      <div class="pic_format">
-        <div @click="popSel">从库中选择</div>
+      <div is="uploadPic" :fileList="fileList" @uploadPicDel="uploadPicDel" @uploadPicFileList="uploadPicFileList" :isDisabled="isDisabled"></div>
+      <div class="pic_format" v-show="!isDisabled">
+        <div @click="popSel">从布控库中选择</div>
       </div>
     </el-form-item>
-    <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: 50%;padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
+    <el-form-item v-if="modelType !== '1'" label="车牌信息" placeholder="请补充车牌号码" style="width: calc(50% - 30px);padding-left: 20px;" :class="{'licenseNum': modelType !== '4'}">
       <el-select
+        :disabled="isDisabled"
         v-model="modelForm.licenseNum"
         filterable
         remote
         multiple
-        reserve-keyword
         allow-create
+        @remove-tag="licenseNumList = []"
         @change="getLicenseNum"
         value-key="value"
         placeholder="请输入车牌信息"
@@ -28,8 +29,8 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: 50%;padding-left: 20px;">
-      <el-select value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getAllBayontListByAreaId">
+    <el-form-item v-if="modelType === '3'" label="受限范围" placeholder="请选择" style="width: calc(50% - 30px);padding-left: 20px;">
+      <el-select :disabled="isDisabled" value-key="value" v-model="modelForm.limitation" multiple filterable allow-create default-first-option placeholder="请输入受限范围" @change="getAllBayontListByAreaId">
         <el-option
           v-for="item in areaList"
           :key="item.value"
@@ -39,9 +40,10 @@
       </el-select>
     </el-form-item>
     <template v-if="modelType === '1' || modelType === '2'">
-      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: 50%;padding-left: 20px;" class="point">
+      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: calc(50% - 30px);padding-left: 20px;" class="point">
         <el-autocomplete
-          style="width: 490px;"
+          :disabled="isDisabled"
+          style="width: 100%;"
           v-model="item.point"
           :trigger-on-focus="false"
           :fetch-suggestions="autoAdress"
@@ -53,7 +55,7 @@
         <i class="vl_icon vl_icon_control_28" @click="removePoint(item)" v-if="modelForm.points.length > 1"></i>
       </el-form-item>
       <el-form-item style="width: calc(50% - 30px);padding-left: 20px;">
-        <div class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
+        <div v-show="!isDisabled" class="add_point" @click="addPoint"><i class="vl_icon vl_icon_control_22"></i>添加追踪点</div>
       </el-form-item>
     </template>
     <!-- 地图 -->
@@ -61,8 +63,15 @@
       <div :id="mapId"></div>
       <div class="manage_d_s_m_l">
         <!-- 人员追踪/车辆追踪 -->
-        <div class="manage_t" style="height: 130px;padding: 20px 20px;" v-if="modelType === '1' || modelType === '2'">
-          <el-input v-model="scopeRadius" @keyup.enter.native="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+        <div class="manage_t" style="height: 130px;padding: 20px 20px;position: relative;" v-if="modelType === '1' || modelType === '2'">
+          <el-popover
+            placement="right"
+            width="200"
+            trigger="hover"
+            content="输入追踪点后可以改变范围半径大小">
+            <el-input slot="reference" v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
+          </el-popover>
+          <span v-show="scopeRadius" style="position: absolute;top: 30px;left: 52px;">km</span>
           <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option
               v-for="item in featuresTypeList"
@@ -90,7 +99,7 @@
             <span>已选{{modelType !== '3' ? '设备' : '卡口'}}({{selDevOrBayNum}})</span>
           </div>
           <div class="dp_box">
-            <div v-for="trackPoint in trackPointList" :key="trackPoint.tid">
+            <div v-for="(trackPoint, index) in trackPointList" :key="index">
               <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
                 <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.trackPointName}}</span>
               </div>
@@ -101,7 +110,7 @@
                     <ul style="max-height: 346px;">
                       <template v-for="equ in trackPoint.devList">
                         <li :key="equ.uid" @click="devHighlight(equ)" :class="['normal', {'active': devId === equ.uid}]">
-                          <span :class="{'four': modelType === '4'}">{{equ.deviceName}}<br/><span v-if="modelType === '1' || modelType === '2'" class="vl_f_666">距追踪点001 <span style="color: orange;">{{equ.distance}}km</span></span></span>
+                          <span :title="equ.deviceName" :class="{'four': modelType === '4'}">{{equ.deviceName | strCutWithLen(20)}}<br/><span v-if="modelType === '1' || modelType === '2'" class="vl_f_666">距{{trackPoint.trackPointName}} <span style="color: orange;">{{equ.distance}}km</span></span></span>
                           <div>
                             <i v-if="equ.deviceStatus" class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
                             <i v-else class="vl_icon vl_icon_control_32" style="margin-top: 8px;"></i>
@@ -121,7 +130,7 @@
                     <ul style="max-height: 346px;">
                       <template v-for="equ in trackPoint.bayonetList">
                         <li :key="equ.uid" @click="devHighlight(equ)" :class="['normal', {'active': devId === equ.uid}]">
-                          <span style="margin-top: 8px;">{{equ.bayonetName}}</span>
+                          <span style="margin-top: 8px;" :title="equ.bayonetName">{{equ.bayonetName | strCutWithLen(20)}}</span>
                           <div>
                             <i class="vl_icon vl_icon_control_05" style="margin-top: 8px;"></i>
                             <el-checkbox v-model="equ.isSelected" style="display:none;" @click.native="changeSelectedStatus(equ)"></el-checkbox>
@@ -138,11 +147,17 @@
         </div>
       </div>
       <div class="manage_d_s_m_r">
-        <div class="area top" v-if="modelType === '4'" @click="bindDraw" :class="{'active': selAreaAcitve}">
-          <i class="vl_icon vl_icon_041"></i>
-          <p>选中区域</p>
-        </div>
-        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetMap()"></i></div>
+        <el-popover
+          placement="left"
+          width="200"
+          trigger="hover"
+          content="单击选择范围，双击完成">
+          <div slot="reference" class="area top" v-show="modelType === '4' && !isDisabled" @click="bindDraw" :class="{'active': selAreaAcitve}">
+            <i class="vl_icon vl_icon_041"></i>
+            <p>选中区域</p>
+          </div>
+        </el-popover>
+        <div class="top"><i class="vl_icon vl_icon_control_23" @click="resetZoom()"></i></div>
         <ul class="bottom">
           <li><i class="el-icon-plus" @click="mapZoomSet(1)"></i></li>
           <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
@@ -157,7 +172,17 @@
         width="482px"
         top="40vh"
         title="选择目标">
-        <el-select v-model="targetObj" value-key="value" multiple filterable remote reserve-keyword :remote-method="repertorySel" :loading="loading" :placeholder="changeRepertorySel" style="width: 100%;margin-top: 20px;">
+        <el-select
+          @remove-tag="surveillanceObjectDtoList = [],groups = [];"
+          v-model="targetObj" 
+          value-key="value" 
+          multiple 
+          filterable 
+          remote 
+          :remote-method="repertorySel" 
+          :loading="loading" 
+          :placeholder="changeRepertorySel" 
+          style="width: 100%;margin-top: 20px;">
           <!-- 只有成员对象类型 -->
           <template v-if="surveillanceObjectDtoList.length > 0 && groups.length === 0">
             <el-option
@@ -223,18 +248,18 @@
           </template>
         </el-select>
         <div slot="footer">
-          <el-button @click="createSelDialog = false">取消</el-button>
-          <el-button :loading="loadingBtn" type="primary" @click="seltarget">确认</el-button>
+          <el-button @click="createSelDialog = false" class="reset_btn btn_140">取消</el-button>
+          <el-button :loading="loadingBtn" class="select_btn btn_140" @click="seltarget">确认</el-button>
         </div>
       </el-dialog>
     </div>
   </el-form>
 </template>
 <script>
-import {objDeepCopy} from '@/utils/util.js';
+import {random14, objDeepCopy} from '@/utils/util.js';
 import {getAreas, repertorySel, getVehicleByVehicleNumber, getAllBayontListByAreaId, getAllMonitorGroupList, getAllMonitorList} from '@/views/index/api/api.control.js';
 import uploadPic from './uploadPic.vue';
-// import {bonDataTwo, bonDataOne} from '../testData.js';
+import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   name: 'model',
@@ -254,9 +279,9 @@ export default {
       // 地图数据
       modelDevData: this.allDevData,
       map: null,
+      zoomLevel: 12,
       mouseTool: null,
       selAreaAcitve: false,
-      selAreaAble: false,
       selAreaCircle: [],
       trackPointData: [],
       selAreaPolygon: null,
@@ -266,6 +291,7 @@ export default {
       allBayMarker: {},//每次选择的行政区对应的卡口点标记列表集合
       lastLimitationNum: 0,
       lastSelList: [],
+      markerPolygonList: [],//多边形覆盖物列表
       // 测距
       rangingAcitve: false,
       rangingObj: null,
@@ -277,7 +303,7 @@ export default {
       devId: null,//设备列表id
       featuresId: null,//设备特性
       featuresTypeList: [
-        {label: '不限', value: null},
+        {label: '不限特性', value: null},
         {label: '人脸识别', value: 1},
         {label: '结构分析', value: 2},
         {label: '车辆识别', value: 3},
@@ -287,7 +313,8 @@ export default {
       ],//设备特性列表
       devGroupList: [],//设备组下拉列表
       devGroupId: null,//设备组id
-      scopeRadius: 20, // 范围半径
+      scopeRadius: 3, // 范围半径
+      lastScopeRadius: 3,//记录最后一次输入的范围半径
       lnglat: [], // 圆形覆盖物圆心坐标
       polygonLnglat: null, // 多边形覆盖物坐标集合
       mapClickEvent: null,
@@ -305,11 +332,11 @@ export default {
   computed: {
     changeObj () {
       if (this.modelType === '1') {
-        return '人员图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '人员图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       } else if (this.modelType === '2') {
-        return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '车辆图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       } else {
-        return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过2M）';
+        return '目标图片:（支持JPEG、JPG、PNG、每张大小不超过4M）';
       }
     },
     changeRepertorySel () {
@@ -344,10 +371,39 @@ export default {
         })
         return bayList.length;
       }
+    },
+    // 分析模型是否禁用
+    isDisabled () {
+      if (this.modelType === '1') {
+        if (this.checkListCommon('人员追踪')) return false;
+        return true;
+      }
+      if (this.modelType === '2') {
+        if (this.checkListCommon('车辆追踪')) return false;
+        return true;
+      }
+      if (this.modelType === '3') {
+        if (this.checkListCommon('越界分析')) return false;
+        return true;
+      }
+      if (this.modelType === '4') {
+        if (this.checkListCommon('范围分析')) return false;
+        return true;
+      }
+    }
+  },
+  watch: {
+    // 取消分析模型勾选时，清除没勾选的模型必填项的验证结果
+    isDisabled (val) {
+      if (this.modelType === '1' && val) {
+        this.reset();
+      }
+      if (this.modelType === '2' && val) {
+        this.reset();
+      }
     }
   },
   mounted () {
-    console.log(this.modelType, 'this.modelType')
     if (this.modelType !== '3' && this.modelDevData && this.modelDevData.length > 0) {
       this.resetMap();
       if (this.modelType === '4') {
@@ -370,6 +426,10 @@ export default {
     }
   },
   methods: {
+    // 公共方法
+    checkListCommon (type) {
+      return this.checkList.some(s => s === type);
+    },
     // 上传方法
     uploadPicDel (fileList) {
       this.fileList = fileList;
@@ -395,7 +455,7 @@ export default {
           arr = f.surveillanceObjectDtoList.map(m => {
             return {
               objType: m.objType,
-              url: m.photoUrl,
+              url: m.objType === 1 ? m.photoUrl : m.vehicleImagePath,
               objId: m.objId
             }
           })
@@ -418,34 +478,39 @@ export default {
     },
     // 从库中选择
     repertorySel (query) {
-      const params = {
-        key: query,
-        modelType: parseInt(this.modelType)
-      }
-      repertorySel(params).then(res => {
-        if (res && res.data) {
-          if (res.data.groups && res.data.groups.length > 0) {
-            this.groups = res.data.groups.map((m, index) => {
-              return {
-                label: m.groupName,
-                surveillanceObjectDtoList: m.surveillanceObjectDtoList,
-                value: m.groupName + '_' + index
-              }
-            });
-          }
-          if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
-            this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
-              return {
-                label: m.objType === 1 ? m.name : m.objType === 2 ? m.vehicleNumber : '',
-                value: m.objId,
-                idNo: m.idNo,
-                objType: m.objType,
-                photoUrl: m.objType === 1 ? m.photoUrl : m.objType === 2 ? m.vehicleImagePath : '',
-              }
-            });
-          }
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        this.groups = [];
+        this.surveillanceObjectDtoList = [];
+        const params = {
+          key: _query,
+          modelType: parseInt(this.modelType)
         }
-      })
+        repertorySel(params).then(res => {
+          if (res && res.data) {
+            if (res.data.groups && res.data.groups.length > 0) {
+              this.groups = res.data.groups.map((m, index) => {
+                return {
+                  label: m.groupName,
+                  surveillanceObjectDtoList: m.surveillanceObjectDtoList,
+                  value: m.groupName + '_' + index
+                }
+              });
+            }
+            if (res.data.surveillanceObjectDtoList && res.data.surveillanceObjectDtoList.length > 0) {
+              this.surveillanceObjectDtoList = res.data.surveillanceObjectDtoList.map(m => {
+                return {
+                  label: m.objType === 1 ? m.name : m.objType === 2 ? m.vehicleNumber : '',
+                  value: m.objId,
+                  idNo: m.idNo,
+                  objType: m.objType,
+                  photoUrl: m.objType === 1 ? m.photoUrl : m.objType === 2 ? m.vehicleImagePath : '',
+                }
+              });
+            }
+          }
+        })
+      }
     },
     // 验证车牌号方法
     checkPlateNumber (value) {
@@ -491,7 +556,7 @@ export default {
 
     // 验证人员追踪的必填项
     validateModelOne () {
-      if (this.checkList.some(s => s === '人员追踪')) {
+      if (this.checkListCommon('人员追踪')) {
         this.$refs[this.mapId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
@@ -516,7 +581,6 @@ export default {
                 })
               }
             });
-            console.log(this.fileList, 'this.fileList')
             let fileListOne = [],fileListTwo = [],fileList = [];
             // 从库中选择的
             if (this.fileList.filter(f => f.objType !== undefined).length > 0) {
@@ -540,7 +604,6 @@ export default {
             }
             
             fileList = [...fileListOne, ...fileListTwo];
-            console.log(1111)
             const data = {
               modelType: 1,
               pointDtoList: pointDtoList,
@@ -556,8 +619,7 @@ export default {
     },
     // 验证车辆追踪的必填项
     validateModelTwo () {
-      if (this.checkList.some(s => s === '车辆追踪')) {
-        console.log('车辆追踪')
+      if (this.checkListCommon('车辆追踪')) {
         this.$refs[this.mapId].validate((valid) => {
           if (valid) {
             if (this.fileList.length === 0) {
@@ -620,8 +682,7 @@ export default {
     },
     // 验证越界分析的必填项
     validateModelThree () {
-      if (this.checkList.some(s => s === '越界分析')) {
-        console.log('越界分析')
+      if (this.checkListCommon('越界分析')) {
         if (this.fileList.length === 0) {
           this.$emit('sendModelDataThree', null);
           this.$message.error('请上传图片！');
@@ -678,8 +739,7 @@ export default {
     },
     // 验证范围分析的必填项
     validateModelFour () {
-      if (this.checkList.some(s => s === '范围分析')) {
-        console.log('范围分析')
+      if (this.checkListCommon('范围分析')) {
         if (this.fileList.length === 0) {
           this.$emit('sendModelDataFour', null);
           this.$message.error('请上传图片！');
@@ -738,7 +798,6 @@ export default {
 
     // 回填人员追踪数据
     getModelDataOne() {
-      console.log(1111)
       // 回填图片
       this.fileList = this.modelDataOne.surveillanceObjectDtoList.map(m => {
         return {
@@ -761,7 +820,6 @@ export default {
     },
     // 回填车辆追踪数据
     getModelDataTwo() {
-      console.log(2222)
       this.fileList = this.modelDataTwo.surveillanceObjectDtoList.map(m => {
         return {
           objId: m.objId,
@@ -791,7 +849,6 @@ export default {
     },
     // 回填越界分析数据
     getModelDataThree () {
-      console.log(3333)
       this.fileList = this.modelDataThree.surveillanceObjectDtoList.map(m => {
         return {
           objId: m.objId,
@@ -831,7 +888,6 @@ export default {
     },
     // 回填范围分析数据
     getModelDataFour () {
-      console.log(4444)
       this.fileList = this.modelDataFour.surveillanceObjectDtoList.map(m => {
         return {
           objId: m.objId,
@@ -863,6 +919,12 @@ export default {
       }
       return arr;
     },
+    // 初始化缩放等级
+    resetZoom () {
+      if (this.map) {
+        this.map.setZoom(this.zoomLevel);
+      }
+    },
     // 地图缩放
     mapZoomSet (val) {
       if (this.map) {
@@ -872,41 +934,20 @@ export default {
     // 初始化地图
     resetMap () {
       // 共有部分
-      let _this = this, _hoverWindow = null;
+      let _this = this;
       let map = new window.AMap.Map(_this.mapId, {
-        zoom: 12, // 级别27.898681, longitude: 110.690875
-        center: [112.97503, 28.09358], // 中心点坐标[112.97503, 28.09358]
-        // viewMode: '3D' // 使用3D视图
+        zoom: this.zoomLevel,
+        center: mapXupuxian.center
       });
       map.setMapStyle('amap://styles/whitesmoke');
       map.plugin('AMap.Autocomplete', () => {
         let autoOptions = {
-          city: '长沙'
+          city: '溆浦县'
         }
         _this.autoComplete = new window.AMap.Autocomplete(autoOptions);
       })
       _this.map = map;
       if (_this.modelType !== '3') {
-        map.on('mouseover', function() {
-          let   _sContent = `<div class="vl_map_hover">
-            <div class="vl_map_hover_main">`
-            if (_this.modelType === '1' || _this.modelType === '2') {
-              _sContent += `<ul><li>输入半径或地图选择</li></ul>`;
-            } else if (_this.modelType === '4') {
-              _sContent += `<ul><li>单击选择范围，双击完成</li></ul>`;
-            }
-            _sContent += `</div></div>`;
-          _hoverWindow = new window.AMap.InfoWindow({
-            isCustom: true,
-            closeWhenClickMap: true,
-            offset: new window.AMap.Pixel(40, 40), // 相对于基点的偏移位置
-            content: _sContent
-          });
-          _hoverWindow.open(_this.map, new window.AMap.LngLat(112.97503, 28.09358));
-        })
-        map.on('mouseout', function() {
-          if (_hoverWindow) { _hoverWindow.close(); }
-        })
         if (_this.operateType === 1 || (_this.modelType === '1' && (!_this.modelDataOne || _this.modelDataOne === 1)) || (_this.modelType === '2' && (!_this.modelDataTwo || _this.modelDataTwo === 1)) || (_this.modelType === '4' && (!_this.modelDataFour || _this.modelDataFour === 1))) {
           _this.mapMark(_this.modelDevData);
         }
@@ -925,7 +966,8 @@ export default {
     },
     // 地图标记 data:摄像头数据/卡口数据
     mapMark (data, selBayList, type) {
-      let _this = this, _hoverWindow = null, areaName = null;
+      console.log(data, 'data')
+      let _this = this, _hoverWindow = null, areaName = null, markerList = [];
       // 卡口
       if (data.length > 0 && data[0].type === 2) {
         if (selBayList) {
@@ -945,13 +987,9 @@ export default {
           let _content = null;
           // 摄像头
           if (_obj.type === 1) {
-            if (_obj.deviceStatus && _obj.isSelected) {
+            if (_obj.isSelected) {
               _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt"></div>';
-            } else if (_obj.deviceStatus && !_obj.isSelected) {
-              _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
-            } else if (!_obj.deviceStatus && _obj.isSelected) {
-              _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_not_choose"></div>';
-            } else if (!_obj.deviceStatus && !_obj.isSelected) {
+            } else if (!_obj.isSelected) {
               _content = '<div id="' + _obj.uid + '_sxt' + '" class="vl_icon vl_icon_sxt_uncheck"></div>';
             }
           // 卡口
@@ -1072,15 +1110,16 @@ export default {
               }
             }
           })
-          _marker.setMap(_this.map);
-          // _this.map.setFitView();// 自动适配到合适视野范围
           // 卡口
           if (_obj.type === 2) {
             _this.allBayMarker[areaName].push(_marker);
           }
+          markerList.push(_marker);
         }
       }
-      if ((_this.operateType === 2 || _this.operateType === 3) && type) {
+      _this.map.add(markerList);
+      // 修改和复用时
+      if (type && (_this.operateType === 2 || _this.operateType === 3)) {
        
         if (_this.modelType === '1') {
           _this.modelDataOne.pointDtoList.forEach((m, index) => {
@@ -1097,59 +1136,126 @@ export default {
         if (_this.modelType === '4') {
           _this.modelDataFour.pointDtoList.forEach((f) => {
             // 回填范围分析
-            let polygon = new window.AMap.Polygon({
-              map: _this.map,
-              strokeColor: '#FA453A',
-              strokeOpacity: 1,
-              strokeWeight: 1,
-              fillColor: '#FA453A',
-              fillOpacity: 0.2, 
-              path: _this.getLngLatList(f),
-              zIndex: 12
-            });
-            // 移入覆盖物生成删除小图标
-            let offSet = [-10, -10], _marker = null;
-            polygon.on('mouseover', function(e) {
-              // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-              if (_marker) return;
-              _marker = new window.AMap.Marker({ // 添加自定义点标记
-                map: _this.map,
-                position: [e.lnglat.lng, e.lnglat.lat],
-                offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-                draggable: false, // 是否可拖动
-                extData: '',
-                // 自定义点标记覆盖物内容
-                content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-              });
-              // 点击小图标移除覆盖物和删除小图标
-              _marker.on('click', function() {
-                _this.map.remove(polygon);
-                _this.map.remove(_marker);
-                // 移除覆盖物内对应的设备
-                const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == f.latitude && p.longitude == f.longitude);
-                console.log(_this.trackPointList)
-                _this.trackPointList.splice(delObjIndex, 1);
-              })
-              _marker.setMap(_this.map);
-            })
-            polygon.on('mouseout', function() {
-              // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-              setTimeout(() => {
-                _this.map.remove(_marker);//移除删除小图标
-                _marker = null;
-              }, 100)
-            })
-            _this.polygonLnglat = _this.getLngLatList(f);
-            if (_this.polygonLnglat) {
-              _this.getScopeEquList(polygon, f.devList);
-            }
+            _this.drawPolygonCommon(f, 2);
           })
         }
       }
+      // 切换设备特性时
+      if (!type && (_this.modelType === '1' || _this.modelType === '2')) {
+        setTimeout(() => {
+          _this.trackPointData.forEach(f => {
+            _this.markLocation(f.marker.C.position.lng, f.marker.C.position.lat, f.address, f.index);
+          })
+          _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
+        }, 50)
+      }
+      // 切换设备组时
+      if (!type && this.modelType === '4') {
+        this.markerPolygonList.forEach(obj => {
+          this.drawPolygonCommon({obj}, 1);
+        })
+      }
+      
+      _this.map.setFitView();
+    },
+    // 范围分析公用方法, data:新增数据/回填数据。type:1-新增，2-回填。
+    drawPolygonCommon (data, type) {
+      let _this = this;
+      _this.polygonLnglat = null;
+      if (type === 1 && this.mouseTool) {
+        _this.selAreaRest();
+      }
+      let polygon = new window.AMap.Polygon({
+        map: _this.map,
+        strokeColor: '#FA453A',
+        strokeOpacity: 1,
+        strokeWeight: 1,
+        fillColor: '#FA453A',
+        fillOpacity: 0.2, 
+        path: type === 2 ? _this.getLngLatList(data) : data.obj.getPath(),
+        zIndex: 12
+      });
+      // 移入覆盖物生成删除小图标
+      let offSet = [-10, -10], _marker = null;
+      let _position = null;
+      if (type === 2) {
+        const lngLat = _this.getLngLatList(data)[_this.getLngLatList(data).length - 1];
+        _position = [lngLat.lng, lngLat.lat];
+      } else {
+        const lngLat = data.obj.getPath()[data.obj.getPath().length - 1];
+        _position = [lngLat.lng, lngLat.lat];
+      }
+      _marker = new window.AMap.Marker({ // 添加自定义点标记
+        map: _this.map,
+        position: _position,
+        offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        extData: '',
+        // 自定义点标记覆盖物内容
+        content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
+      });
+      // 点击小图标移除覆盖物和删除小图标
+      _marker.on('click', function() {
+        // 过滤掉相同的marker
+        _this.markerPolygonList = _this.markerPolygonList.filter(f => {
+          for (let key in f.getPath()) {
+            if (f.getPath()[key] !== polygon.getPath()[key]) return true;
+            return false;
+          }
+        });
+        _this.map.remove(polygon);
+        _this.map.remove(_marker);
+        // 移除覆盖物内对应的设备
+        let delObjIndex = null;
+        if (type === 2) {
+          delObjIndex = _this.trackPointList.findIndex(p => p.latitude == data.latitude && p.longitude == data.longitude);
+        } else {
+          const lngStr = data.obj.getPath().map(m => m.lng).join(',');
+          const latStr = data.obj.getPath().map(m => m.lat).join(',');
+          delObjIndex = _this.trackPointList.findIndex(p => p.latitude == latStr && p.longitude == lngStr);
+        }
+        const _obj = _this.trackPointList.splice(delObjIndex, 1);
+        // 删除完任意范围时，对左侧的设备列表重新排序
+        _this.trackPointList.forEach((f, index) => {
+          f.tid = index + 1;
+          f.address = f.trackPointName = `范围00${index + 1}`;
+        })
+        console.log( _this.trackPointList)
+        // 把覆盖物内的设备置为未选中
+        for (let f of _obj[0].devList) {
+          // 如果该设备还存在于其他覆盖物中，跳过此操作
+          if (_this.trackPointList.some(t => t.devList.some(d => d.uid === f.uid))) {
+            continue;
+          }
+          if (f.isSelected) {
+            f.isSelected = !f.isSelected;
+            _this.changeSelectedStatus(f, 1);
+          }
+        }
+      })
+      _marker.setMap(_this.map);
+      
+      if (type === 2) {
+        _this.polygonLnglat = _this.getLngLatList(data);
+        if (_this.polygonLnglat) {
+          _this.getScopeEquList(polygon, data.devList);
+        }
+      } else {
+        _this.polygonLnglat = data.obj.getPath();
+        _this.selAreaPolygon = polygon;
+        _this.getScopeEquList(polygon);
+      }
+      // 过滤掉相同的marker
+      _this.markerPolygonList = _this.markerPolygonList.filter(f => {
+        for (let key in f.getPath()) {
+          if (f.getPath()[key] !== polygon.getPath()[key]) return true;
+          return false;
+        }
+      });
+      _this.markerPolygonList.push(polygon);
     },
     // 点击设备列表的多选框切换marker的在圆形覆盖物的选中状态的公共方法
     changeSelectedStatus (_obj, type) {
-      console.log(_obj, '_obj')
       let devDom = null;
       setTimeout(() => {
         if (this.modelType === '3') {
@@ -1175,26 +1281,20 @@ export default {
         }
         // 摄像头
         if (_obj.type === 1) {
-          if (_obj.deviceStatus && !_obj.isSelected) {
+          if (!_obj.isSelected) {
             devDom.removeClass('vl_icon_sxt');
             devDom.addClass('vl_icon_sxt_uncheck');
             devDom.removeClass('vl_icon_control_36');
             if (type === undefined) {
               devDom.addClass('vl_icon_control_34');
             }
-          } else if (_obj.deviceStatus && _obj.isSelected) {
+          } else {
             devDom.removeClass('vl_icon_sxt_uncheck');
             devDom.addClass('vl_icon_sxt');
             devDom.removeClass('vl_icon_control_34');
             if (type === undefined) {
               devDom.addClass('vl_icon_control_36');
             }
-          } else if (!_obj.deviceStatus && !_obj.isSelected) {
-            devDom.removeClass('vl_icon_sxt_not_choose');
-            devDom.addClass('vl_icon_sxt_uncheck');
-          } else if (!_obj.deviceStatus && _obj.isSelected) {
-            devDom.removeClass('vl_icon_sxt_uncheck');
-            devDom.addClass('vl_icon_sxt_not_choose');
           }
         // 卡口
         } else {
@@ -1260,7 +1360,7 @@ export default {
     // 获取所有监控设备列表,初始化地图
     getAllMonitorList (type) {
       const params = {
-        ccode: 431224,
+        ccode: mapXupuxian.adcode,
         intelligentCharac: this.featuresId,// 设备特性id
         groupId: this.devGroupId// 设备组id
       }
@@ -1271,12 +1371,8 @@ export default {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 1);
           });
-          if (!type) {
-            this.modelForm.points = [{point: null}];
-          }
           if (this.modelType === '1' || this.modelType === '2') {
             this.selAreaCircle = [];
-            this.trackPointData = [];
           }
           this.trackPointList = [];
           this.map.clearMap();
@@ -1291,7 +1387,10 @@ export default {
       } else {
         this.autoComplete.search(queryString, (status, result) => {
           if (status === 'complete') {
-            console.log(result.tips, 'result.tips')
+            result.tips.forEach(f => {
+              f.name = `${f.name}(${f.district})`;
+            })
+            console.log(result.tips)
             cb(result.tips);
           } else {
             cb([]);
@@ -1301,7 +1400,10 @@ export default {
     },
     // 获取追踪点
     chooseAddress (e) {
-      console.log(e);
+      if (!e.location) {
+        this.$message.error('无法获取到经纬度！');
+        return;
+      }
       this.markLocation(e.location.lng, e.location.lat, e.address, this.pointIndex);
     },
      // 添加追踪点
@@ -1339,7 +1441,6 @@ export default {
       // 移除追踪点的点标记
       const delMakerObjIndex = _this.trackPointData.findIndex(f => f.marker.C.position.lat == circle.C.center.lat && f.marker.C.position.lng == circle.C.center.lng);
       if (delMakerObjIndex !== -1) {
-        console.log('qqqqqqqqqqqqqqqqq')
         const delMakerObj = _this.trackPointData.splice(delMakerObjIndex, 1);
         _this.map.remove(delMakerObj[0].marker);
         // 删除后重新排序
@@ -1379,7 +1480,6 @@ export default {
       let _this = this;
       let circleObj = _this.selAreaCircle.find(f => f.index === index);
       let circle = circleObj ? circleObj._circle : '';
-      console.log(circle, 'circlecircle')
       if (circle) {
         // 移除圆形覆盖物
         _this.map.remove(circle);
@@ -1402,13 +1502,11 @@ export default {
         if (_index !== -1) {
           _this.map.remove(_this.trackPointData[_index].marker);
           _this.trackPointData.splice(_index, 1);
-          console.log(index, 'index')
-          console.log(_index, '_index')
         }
       }
      
       // 追踪点标记
-      let offSet = [-20.5, -48], _hoverWindow = null, pointId = index + address, marker = null;
+      let offSet = [-20.5, -48], pointId = index + '_' + random14(), marker = null;
       if (lng > 0 && lat > 0) {
         marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
@@ -1421,159 +1519,92 @@ export default {
         });
         // mouseover
         marker.on('mouseover', function () {
-          let _sContent = `<div class="vl_map_hover">
-            <div class="vl_map_hover_main"><ul>
-              <li><span>追踪点地址：</span><span>${address}</span></li>
-            </ul></div>`;
-          _hoverWindow = new window.AMap.InfoWindow({
-            isCustom: true,
-            closeWhenClickMap: true,
-            offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-            content: _sContent
-          });
-          _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
-          console.log(_this.trackPointList)
-
-          _this.devId = null;
-          $(`#${_this.mapId} .vl_icon_control_36`).removeClass('vl_icon_control_36');
-          $(`#${_this.mapId} .vl_icon_control_37`).removeClass('vl_icon_control_37');
-          $(`#${_this.mapId} .vl_icon_control_34`).removeClass('vl_icon_control_34');
-          $(`#${_this.mapId} .vl_icon_control_35`).removeClass('vl_icon_control_35');
-          $('#' + pointId).addClass('vl_icon_control_37');
+          _this.hoverPointMarkerCommon(pointId, address, lng, lat);
 
           // 展开追踪点的设备列表
           _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
-          const obj = _this.trackPointList.find(f => f.address === address);
+          const obj = _this.trackPointList.find(f => f.longitude == lng && f.latitude == lat);
           if (obj) {
             _this.tid = obj.tid;
             obj.isDropdown = true;
           }
         });
         marker.setMap(_this.map);
-        _this.trackPointData.splice(index, 0, {marker, index});
-        console.log(_this.trackPointData, '_this.trackPointData')
+        _this.trackPointData = _this.trackPointData.filter(f => f.marker.C.position.lng != lng && f.marker.C.position.lat != lat);// 切换设备特性筛选时，过滤掉相同的追踪点marker
+        _this.trackPointData.splice(index, 0, {marker, index, address});
         _this.lnglat = [lng, lat];
         _this.map.setCenter([lng, lat]);
+        _this.map.setZoom(13);
+        _this.hoverPointMarkerCommon(pointId, address, lng, lat);
         // 画圆形覆盖物
-        _this.mapCircle(index, resDevList)
+        _this.mapCircle(index, resDevList, _this.lnglat)
       }
     },
+    hoverPointMarkerCommon (pointId, address, lng, lat) {
+      let _hoverWindow = null, _this = this;
+      let _sContent = `<div class="vl_map_hover">
+        <div class="vl_map_hover_main"><ul>
+          <li><span>追踪点地址：</span><span>${address}</span></li>
+        </ul></div>`;
+      _hoverWindow = new window.AMap.InfoWindow({
+        isCustom: true,
+        closeWhenClickMap: true,
+        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
+        content: _sContent
+      });
+      _hoverWindow.open(_this.map, new window.AMap.LngLat(lng, lat));
+
+      _this.devId = null;
+      setTimeout(() => {
+        $(`#${_this.mapId} .vl_icon_control_36`).removeClass('vl_icon_control_36');
+        $(`#${_this.mapId} .vl_icon_control_37`).removeClass('vl_icon_control_37');
+        $(`#${_this.mapId} .vl_icon_control_34`).removeClass('vl_icon_control_34');
+        $(`#${_this.mapId} .vl_icon_control_35`).removeClass('vl_icon_control_35');
+        $('#' + pointId).addClass('vl_icon_control_37');
+      }, 500)
+    },
     // 标记地图范围，圆形覆盖物
-    mapCircle (index, resDevList) {
-      console.log(11111,'1111')
+    mapCircle (index, resDevList, lnglat) {
       let _this = this;
       let _circle = new window.AMap.Circle({
-        center: new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]), // 圆心位置
-        radius: _this.scopeRadius * 100,  //半径
+        center: new window.AMap.LngLat(lnglat[0], lnglat[1]), // 圆心位置
+        radius: _this.scopeRadius * 1000,  //半径
         strokeColor: "#F33",  //线颜色
         strokeOpacity: 1,  //线透明度
         strokeWeight: 3,  //线粗细度
         fillColor: "#ee2200",  //填充颜色
         fillOpacity: 0.35 //填充透明度
       })
-      // 移入覆盖物生成删除小图标
-      let offSet = [0, 0], _marker = null;
-      _circle.on('mouseover', function(e) {
-        console.log(e, 'eee')
-        if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-        if (_marker) return;
-        _marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: _this.map,
-          position: [e.lnglat.lng, e.lnglat.lat],
-          offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          extData: '',
-          // 自定义点标记覆盖物内容
-          content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-        });
-        // 点击小图标移除覆盖物和删除小图标
-        _marker.on('click', function() {
-          _this.map.remove(_marker);//移除删除小图标
-          // 移除圆形覆盖物
-          _this.map.remove(_circle);
-          const _index = _this.selAreaCircle.findIndex(f => f._circle.C.center.lat == e.target.C.center.lat && f._circle.C.center.lng == e.target.C.center.lng)
-          _this.selAreaCircle = _this.selAreaCircle.filter(f => f.index !== _index);
-          // 删除完后重新排序
-          _this.selAreaCircle.forEach((f, index) => {
-            f.index = index;
-          })
-
-          // 移除追踪点的点标记
-          const delMakerObjIndex = _this.trackPointData.findIndex(f => f.marker.C.position.lat == e.target.C.center.lat && f.marker.C.position.lng == e.target.C.center.lng);
-          if (delMakerObjIndex !== -1) {
-            const delMakerObj = _this.trackPointData.splice(delMakerObjIndex, 1);
-            _this.map.remove(delMakerObj[0].marker);
-            // 删除后重新排序
-            _this.trackPointData.forEach((f, index) => {
-              f.index = index;
-            })
-          }
-         
-          // 移除左侧追踪点列表数据
-          const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.target.C.center.lat && p.longitude == e.target.C.center.lng);
-          const _obj = _this.trackPointList.splice(delObjIndex, 1);
-          // 删除完后重新排序
-          _this.trackPointList.forEach((f, index) => {
-            f.tid = index;
-            f.trackPointName = '追踪点00' + (index + 1);
-            f.address = _this.modelForm.points[index].point;
-          })
-
-          _this.modelForm.points.splice(delObjIndex, 1);//删除对应的追踪点input
-         
-          // 覆盖物中还有追踪点时不能把里面设备全部置为未选中
-          if (_this.selAreaCircle.findIndex(f => f._circle.C.center.lat == e.target.C.center.lat && f._circle.C.center.lng == e.target.C.center.lng) === -1) {
-            // 把覆盖物内的设备置为未选中
-            _obj[0].devList.forEach(f => {
-              if (f.isSelected) {
-                f.isSelected = !f.isSelected;
-                _this.changeSelectedStatus(f, 1);
-              }
-            })
-          }
-        })
-        _marker.setMap(_this.map);
-      })
-      _circle.on('mouseout', function(e) {
-        if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-        setTimeout(() => {
-          if (_circle && _circle.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-            return;
-          }
-          _this.map.remove(_marker);//移除删除小图标
-          _marker = null;
-        }, 100)
-      })
-      _this.getTraceEquList(_circle, resDevList, index);
+      _this.getTraceEquList(_circle, resDevList, index, lnglat);
       _this.selAreaCircle.splice(index, 0, {_circle, index});
       _circle.setMap(_this.map);
     },
     // 获得人员追踪、车辆追踪内的设备列表数据
-    getTraceEquList (graphics, resDevList, index) {
+    getTraceEquList (graphics, resDevList, index, lnglat) {
       let _this = this;
       let data = objDeepCopy(_this.modelDevData);
-      console.log(data, 'data')
       let obj = {
         tid: index, 
         trackPointName: '追踪点00' + (index + 1),
         address: _this.modelForm.points[index].point,
         deviceChara: _this.featuresId,//设备特性
-        longitude: _this.lnglat[0],//追踪点经度
-        latitude: _this.lnglat[1],//追踪点纬度
+        longitude: lnglat[0],//追踪点经度
+        latitude: lnglat[1],//追踪点纬度
         radius: _this.scopeRadius,//范围半径
         groupId: 1,//设备组id,随便传个
         devList: []//设备列表
       }
       // 把在圆形覆盖物范围之内的追踪点添加进来
-      if (_this.lnglat[0] > 0 && _this.lnglat[1] > 0) {
-        if (graphics && graphics.contains(new window.AMap.LngLat(_this.lnglat[0], _this.lnglat[1]))) {
+      if (lnglat[0] > 0 && lnglat[1] > 0) {
+        if (graphics && graphics.contains(new window.AMap.LngLat(lnglat[0], lnglat[1]))) {
           // 在圆形之中
-          _this.$set(obj, 'isDropdown', false);
+          // 展开当前选择的追踪点下面的设备列表
+          _this.trackPointList.forEach(f => f.isDropdown = false);//首先全置为false
+          _this.$set(obj, 'isDropdown', true);
+          _this.tid = obj.tid;
           _this.trackPointList.splice(index, 0, obj);
-          console.log(1111111111111111111)
         }
       }
-      console.log(_this.trackPointList, '_this.trackPointList_this.trackPointList')
       const _index = _this.trackPointList.indexOf(obj);
       _this.trackPointList[_index].devList = [];
       // 把在圆形覆盖物范围之内的设备添加进来
@@ -1585,40 +1616,20 @@ export default {
             setTimeout(() => {
               //在覆盖物内的置为选中-图标
               const devDom = $(`#${_this.mapId} #${_obj.uid}_sxt`);
-              // 回填时
-              if (resDevList !== undefined) {
-                if (resDevList.some(s => s.deviceId === _obj.uid)) {
-                  _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-                  // 摄像头
-                  if (_obj.deviceStatus) {
-                    console.log(devDom, 'devDom')
-                    devDom.removeClass('vl_icon_control_34');
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt');
-                  } else if (!_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt_not_choose');
-                  }
-                }
-              // 新增时
-              } else {
+              // 新增时/回填时
+              if (resDevList === undefined || resDevList.some(s => s.deviceId === _obj.uid)) {
                 _obj.isSelected = true;//在覆盖物内的置为选中-多选框
                 // 摄像头
-                if (_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_control_34');
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt');
-                } else if (!_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt_not_choose');
-                }
+                devDom.removeClass('vl_icon_control_34');
+                devDom.removeClass('vl_icon_sxt_uncheck');
+                devDom.addClass('vl_icon_sxt');
               }
               // 计算追踪点到设备的距离km
               const p1 = [_obj.longitude, _obj.latitude];
-              const distance = AMap.GeometryUtil.distance(_this.lnglat, p1);
+              const distance = window.AMap.GeometryUtil.distance(lnglat, p1);
               _obj.distance = parseFloat((distance / 1000).toFixed(1));
               _this.trackPointList[_index].devList.push(_obj);
-            }, 10)
+            }, 1000)
           }
         }
       }
@@ -1627,26 +1638,30 @@ export default {
         _this.trackPointList[_index].devList.sort((x, y) => {
           return x.distance - y.distance;
         })
-      }, 20)
-      
+      }, 1050)
     },
     // 设备圆形覆盖物半径
     setCircleRadius () {
+      // 只有在输入的半径有变化时才会执行下去
+      if (this.scopeRadius === this.lastScopeRadius) {
+        return;
+      }
+      this.lastScopeRadius = this.scopeRadius;
       if (this.lnglat.length === 0) {
         this.$message.error('请输入追踪点');
-        return false;
+        return;
       }
       if (this.scopeRadius < 0) {
         this.$message.error('半径为正数');
-        return false;
+        return;
       } else if (this.scopeRadius > 20) {
         this.$message.error('半径不可超过20千米');
-        return false;
+        return;
       }
       this.trackPointList = [];
-      let selAreaData = this.map.getAllOverlays('circle');//获得所有的圆形覆盖物
+      // let selAreaData = this.map.getAllOverlays('circle');//获得所有的圆形覆盖物
       // 遍历设置每个圆形覆盖物的半径
-      selAreaData.forEach((f, index) => {
+      this.selAreaCircle.map(m => m._circle).forEach((f, index) => {
         // 先把圆形覆盖物内的设备点标记置为未选中状态
         this.modelDevData.forEach(obj => {
           if (f && f.contains(new window.AMap.LngLat(obj.longitude, obj.latitude))) {
@@ -1655,9 +1670,9 @@ export default {
             devDom.removeClass('vl_icon_sxt');
           }
         })
-        f.setRadius(parseInt(this.scopeRadius) * 100);//设置半径
-        this.lnglat = [f.getCenter().lng, f.getCenter().lat];//重新获取追踪点坐标
-        this.getTraceEquList(f, undefined, index);//重新获取圆形覆盖物内的设备
+        f.setRadius(parseInt(this.scopeRadius) * 1000);//设置半径
+        const lnglat = [f.getCenter().lng, f.getCenter().lat];//重新获取追踪点坐标
+        this.getTraceEquList(f, undefined, index, lnglat);//重新获取圆形覆盖物内的设备
       })
      
     },
@@ -1667,7 +1682,7 @@ export default {
     // 获取所有行政区列表
     getAreas () {
       const params = {
-        parentUid: '431224'
+        organPid: mapXupuxian.adcode
       }
       getAreas(params).then(res => {
         if (res && res.data) {
@@ -1691,7 +1706,6 @@ export default {
     removeTag (item) {
       this.allBayData = [];
       const trackPointIndex = this.trackPointList.findIndex(f => f.address === item.label);
-      console.log(this.allBayMarker)
       this.trackPointList.splice(trackPointIndex, 1);
       // 移除单个行政区对应的点标记列表
       if (Object.keys(this.allBayMarker).length > 0) {
@@ -1721,26 +1735,12 @@ export default {
       // 修改回填时
       } else {
         params = {
-          areaId: selBayList.value
+          areaId: selBayList && selBayList.value
         }
       }
       getAllBayontListByAreaId(params).then(res => {
         if (res && res.data) {
           this.allBayData = res.data;
-          // if (selBayList instanceof Array) {
-          //   if (this.modelForm.limitation[this.modelForm.limitation.length - 1].label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // } else {
-          //   if (selBayList.label === '东城区') {
-          //     this.allBayData = bonDataOne;
-          //   } else {
-          //     this.allBayData = bonDataTwo;
-          //   }
-          // }
-         
           this.allBayData.forEach(f => {
             this.$set(f, 'isSelected', false);
             this.$set(f, 'type', 2);
@@ -1763,11 +1763,12 @@ export default {
       if (selBayList instanceof Array) {
         obj.trackPointName = _this.modelForm.limitation[this.modelForm.limitation.length - 1].label;
         obj.address = _this.modelForm.limitation[this.modelForm.limitation.length - 1].label;
-      } else {
+      } else if (selBayList) {
         obj.trackPointName = selBayList.label;
         obj.address = selBayList.label;
       }
-      _this.$set(obj, 'isDropdown', false);
+      _this.trackPointList.forEach(f => f.isDropdown = false);
+      _this.$set(obj, 'isDropdown', true);
       _this.trackPointList.push(obj);
       let _index = _this.trackPointList.indexOf(obj);
       _this.trackPointList[_index].bayonetList = [];
@@ -1777,20 +1778,12 @@ export default {
         setTimeout(() => {
           //在覆盖物内的置为选中-图标
           const devDom = $(`#${_this.mapId} #${_obj.uid}_kk`);
-          // 新增时
-          if (resBayList === undefined) {
+          // 新增时/回填时
+          if (resBayList === undefined || resBayList.some(s => s.bayonetId === _obj.uid)) {
             devDom.removeClass('vl_icon_control_35');
             devDom.removeClass('vl_icon_kk_uncheck');
             devDom.addClass('vl_icon_kk');
             _obj.isSelected = true;//在范围内的置为选中-多选框
-          // 回填时
-          } else {
-            if (resBayList.some(s => s.bayonetId === _obj.uid)) {
-              devDom.removeClass('vl_icon_control_35');
-              devDom.removeClass('vl_icon_kk_uncheck');
-              devDom.addClass('vl_icon_kk');
-              _obj.isSelected = true;//在范围内的置为选中-多选框
-            }
           }
           _this.trackPointList[_index].bayonetList.push(_obj);
         }, 500)
@@ -1819,74 +1812,16 @@ export default {
     // 绑定draw
     bindDraw () {
       let _this = this;
+      if (_this.mouseTool) {
+        _this.selAreaRest();
+        return false;
+      }
       // 在地图中添加MouseTool插件
       let mouseTool = new window.AMap.MouseTool(_this.map);
       _this.mouseTool = mouseTool;
       // 添加事件
       window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-        _this.polygonLnglat = null;
-        setTimeout(() => {
-          _this.selAreaRest(true);
-          let polygon = new window.AMap.Polygon({
-            map: _this.map,
-            strokeColor: '#FA453A',
-            strokeOpacity: 1,
-            strokeWeight: 1,
-            fillColor: '#FA453A',
-            fillOpacity: 0.2, 
-            path: e.obj.getPath(),
-            zIndex: 12
-          });
-          // 移入覆盖物生成删除小图标
-          let offSet = [0, 0], _marker = null;
-          polygon.on('mouseover', function(p) {
-            // if (_this.trackPointList.length === 1) return;//只有一个追踪点时，不生成删除小图标
-            if (_marker) return;
-            _marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.map,
-              position: [p.lnglat.lng, p.lnglat.lat],
-              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              extData: '',
-              // 自定义点标记覆盖物内容
-              content: `<div class="el-icon-error" style="font-size: 20px; color: red;"></div>`
-            });
-            // 点击小图标移除覆盖物和删除小图标
-            _marker.on('click', function() {
-              _this.map.remove(polygon);
-              _this.map.remove(_marker);
-              // 移除覆盖物内对应的设备
-              const delObjIndex = _this.trackPointList.findIndex(p => p.latitude == e.obj.getPath()[0].lat && p.longitude == e.obj.getPath()[0].lng);
-              const _obj = _this.trackPointList.splice(delObjIndex, 1);
-              // 把覆盖物内的设备置为未选中
-              for (let f of _obj[0].devList) {
-                // 如果该设备还存在于其他覆盖物中，跳过此操作
-                if (_this.trackPointList.some(t => t.devList.some(d => d.uid === f.uid))) {
-                  continue;
-                }
-                if (f.isSelected) {
-                  f.isSelected = !f.isSelected;
-                  _this.changeSelectedStatus(f, 1);
-                }
-              }
-            })
-            _marker.setMap(_this.map);
-          })
-          polygon.on('mouseout', function(e) {
-            // if (_this.trackPointList.length === 1) return;//只有一个范围时，不生成删除小图标
-            setTimeout(() => {
-              if (polygon && polygon.contains(new window.AMap.LngLat(e.lnglat.lng, e.lnglat.lat))) {
-                return;
-              }
-              _this.map.remove(_marker);//移除删除小图标
-              _marker = null;
-            }, 100)
-          })
-          _this.selAreaPolygon = polygon;
-          _this.selAreaAble = true;
-          _this.getScopeEquList(polygon);
-        }, 100);
-        _this.polygonLnglat = e.obj.getPath();
+        _this.drawPolygonCommon(e, 1);
       });
       _this.selArea();
     },
@@ -1911,15 +1846,11 @@ export default {
       }
     },
     // 重置选择区域
-    selAreaRest (notClearPolygon) {
+    selAreaRest () {
       this.selAreaAcitve = false;
       this.mouseTool.close(true);
+      this.mouseTool = null;
       this.map.setDefaultCursor('');
-      if (!notClearPolygon && this.selAreaPolygon) {
-        this.map.remove(this.selAreaPolygon);
-        this.selAreaPolygon = null;
-        this.selAreaAble = false;
-      }
     },
     // 获取范围分析选取范围内的设备列表数据
     getScopeEquList (graphics, resDevList) {
@@ -1935,7 +1866,8 @@ export default {
         groupId: _this.devGroupId,//设备组id,先写死
         devList: []//设备列表
       }
-      _this.$set(obj, 'isDropdown', false);
+      _this.trackPointList.forEach(f => f.isDropdown = false);
+      _this.$set(obj, 'isDropdown', true);
       _this.trackPointList.push(obj);
       let _index = _this.trackPointList.indexOf(obj);
 
@@ -1948,29 +1880,12 @@ export default {
             setTimeout(() => {
               //在覆盖物内的置为选中-图标
               const devDom = $(`#${_this.mapId} #${_obj.uid}_sxt`);
-              // 新增时
-              if (resDevList === undefined) {
-                if (_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_control_34');
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt');
-                } else if (!_obj.deviceStatus) {
-                  devDom.removeClass('vl_icon_sxt_uncheck');
-                  devDom.addClass('vl_icon_sxt_not_choose');
-                }
+              // 新增时/回填时
+              if (resDevList === undefined || resDevList.some(s => s.deviceId === _obj.uid)) {
+                devDom.removeClass('vl_icon_control_34');
+                devDom.removeClass('vl_icon_sxt_uncheck');
+                devDom.addClass('vl_icon_sxt');
                 _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-              } else {
-                if (resDevList.some(s => s.deviceId === _obj.uid)) {
-                  if (_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_control_34');
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt');
-                  } else if (!_obj.deviceStatus) {
-                    devDom.removeClass('vl_icon_sxt_uncheck');
-                    devDom.addClass('vl_icon_sxt_not_choose');
-                  }
-                  _obj.isSelected = true;//在覆盖物内的置为选中-多选框
-                }
               }
               _this.trackPointList[_index].devList.push(_obj);
             }, 1000)
@@ -1983,24 +1898,22 @@ export default {
       }, 1050)
     },
     /******************************* 范围分析方法end ****************************/
-  },
-  // destroyed () {
-  //   if (this.map) {
-  //     console.log('销毁')
-  //     this.map.destroy();
-  //   }
-  // },
+    // 销毁地图实例
+    isDestroyed () {
+      if (this.map) {
+        this.map.destroy();
+      }
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
 .control_model{
   .pic_format{
-    line-height: 40px;
     display: inline-block;
-    & > div{
+    > div{
+      line-height: 20px!important;
       white-space: nowrap;
-    }
-    & > div:nth-child(1){
       color: #0C70F8;
       cursor: pointer;
     }

@@ -3,8 +3,18 @@
     <div class="plan-detail">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+         <template v-if="$route.query.type === 'ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/ctcDetailInfo', query: {id: $route.query.eventId, status: $route.query.status} }">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else-if="$route.query.type === 'alarm_ctc'">
+            <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+          </template>
+          <template v-else>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
+          </template>
           <el-breadcrumb-item>预案详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -35,14 +45,14 @@
           <li>
             <span>附件:</span>
             <span style="display:flex;align-items:center;">
-              <template v-if="planDetailInfo.attachmentName">
+              <template v-if="planDetailInfo.sysAppendixInfo">
                 <i class="vl_icon vl_icon_event_5"></i>
-                {{planDetailInfo.attachmentName}}
+                {{planDetailInfo.sysAppendixInfo.cname}}
+                <i class="vl_icon vl_icon_event_6" @click="downloadFile(planDetailInfo.sysAppendixInfo.path)" style="margin-left:5px;cursor:pointer;"></i>
               </template>
               <template v-else>
                 无
               </template>
-              <i class="vl_icon vl_icon_event_6" v-show="planDetailInfo.url" @click="downloadFile(planDetailInfo.url)" style="margin-left:5px;cursor:pointer;"></i>
             </span>
           </li>
           <li>
@@ -114,7 +124,7 @@ export default {
     },
     // 跳至启用预案页面
     skipReplanPage () {
-      this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.eventId, planId: this.$route.query.planId}});
+      this.$router.push({name: 'enable_plan', query: {alarmId: this.$route.query.alarmId, eventId: this.$route.query.eventId, planId: this.$route.query.planId, type: 'alarm_ctc', status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 返回
     back () {

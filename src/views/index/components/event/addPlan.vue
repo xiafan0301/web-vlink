@@ -10,10 +10,10 @@
       <div class="content-box">
         <el-form :model="addPlanForm" ref="addPlanForm" :rules="rules" class="add-plan-form" size="small">
           <el-form-item label="预案名称:" prop="planName" label-width="120px">
-            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+            <el-input v-model="addPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;" maxlength="50"></el-input>
           </el-form-item>
           <el-form-item label="预案类型:" label-width="120px" prop="editEventType">
-          <el-select v-model="addPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+          <el-select v-model="addPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;" maxlength="50">
             <el-option
               v-for="(item, index) in planTypeList"
               :key="index"
@@ -35,13 +35,13 @@
             </el-select>
           </el-form-item>
           <el-form-item label="预案正文:" label-width="120px" prop="planDetail">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.planDetail" placeholder="请输入预案正文"></el-input>
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="addPlanForm.planDetail" placeholder="请输入预案正文" maxlength="10000"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
               style="width: 500px;"
               :action="uploadUrl"
-              accept='.txt.pdf,.doc,.docx,.ppt,.pptx'
+              accept='.txt,.pdf,.doc,.docx'
               :on-success="handSuccess"
               :before-upload="beforeUpload"
               :limit="1"
@@ -50,15 +50,15 @@
               <div slot="tip" class="el-upload__tip plan-upload-tip">（支持：PDF、word、txt文档）</div>
             </el-upload>
           </el-form-item>
-          <el-form-item label="响应处置:" label-width="120px">
+          <el-form-item label="响应处置:" label-width="120px" class="response_handle">
             <div class="response_box" v-for="(item, index) in addPlanForm.taskList" :key="index">
               <div class="plan_form_box">
                 <div class="title">
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-if="addPlanForm.taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item" size="middle" >
-                  <el-form-item label="执行部门:"  label-position="left">
-                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
+                  <el-form-item label="调度部门:"  label-position="left">
+                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择调度部门">
                       <el-option
                         v-for="(item, index) in departmentList"
                         :key="'item' + index"
@@ -68,11 +68,11 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:">
-                    <el-input v-model="item.taskName"  placeholder="请输入任务名称" @change="changeTaskName(item.taskName, index)"></el-input>
+                    <el-input v-model="item.taskName"  placeholder="请输入任务名称" @change="changeTaskName(item.taskName, index)" maxlength="140"></el-input>
                     <span v-show="item.isError && item.isError" style="color: #F56C6C;font-size:12px;">最多输入140个字</span>
                   </el-form-item>
                   <el-form-item label="任务内容:">
-                    <el-input type="textarea" rows="8"  placeholder="请输入任务内容" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent"></el-input>
+                    <el-input type="textarea" rows="8"  placeholder="请输入任务内容" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent" maxlength="1000"></el-input>
                     <span v-show="item.isContentError && item.isContentError" style="color: #F56C6C;font-size:12px;">最多输入1000个字</span>
                   </el-form-item>
                 </el-form>
@@ -80,7 +80,7 @@
               <template v-if="addPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
                   <i class="vl_icon vl_icon_event_8"></i>
-                  <span>添加协同部门</span>
+                  <span>添加调度任务</span>
                 </div>
               </template>
             </div>
@@ -212,7 +212,18 @@ export default {
     },
     // 在上传之前
     beforeUpload (file) {
+      console.log(file)
       const isLt = file.size / 1024 / 1024 < 10;
+      const isWord = file.type === 'text/plain' || file.type === 'application/msword' 
+        || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        || file.type === 'application/pdf';
+      if (!isWord) {
+        this.$message({
+          type: 'warning',
+          message: '上传文件只能是txt、pdf、word格式!',
+          customClass: 'upload_file_tip'
+        });
+      }
       if (!isLt) {
         this.$message({
           type: 'warning',
@@ -220,7 +231,7 @@ export default {
           customClass: 'upload_file_tip'
         });
       }
-      return isLt;
+      return isLt && isWord;
     },
     addTask () {
       const value = {
@@ -266,7 +277,7 @@ export default {
           if (filterArr.length === 0) {
             this.addPlanForm.eventTypeName = this.addPlanForm.editEventType;
           } else {
-            this.addPlanForm.eventType = filterArr[0].uid;
+            this.addPlanForm.eventType = filterArr[0].enumField;
           }
           this.judgeData().then(result => {
             if (result) {
@@ -347,6 +358,13 @@ export default {
     .add-plan-form {
       width: 100%;
       padding: 10px 0;
+      .response_handle {
+        /deep/ .el-form-item__label:before {
+          content: '*';
+          color: #F56C6C;
+          margin-right: 4px;
+        }
+      }
       /deep/ .el-form-item__label {
         color: #666666;
       }

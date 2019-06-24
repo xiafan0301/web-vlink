@@ -5,7 +5,7 @@
       <router-view></router-view>
     </div>
     <!-- 登录提示dialog -->
-    <el-dialog
+    <!-- <el-dialog
       title="登录提示"
       :visible.sync="loginDialogVisible"
       :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false"
@@ -16,18 +16,21 @@
       <div style="padding: 30px 0 10px 0; text-align: center;">
         <el-button style="width: 80%;" type="primary" @click="reLogin">重&nbsp;新&nbsp;登&nbsp;录</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
+    <!--视频通话-->
+    <div is="webrtc"></div>
   </div>
 </template>
 <script>
+import webrtc from '@/components/common/webrtc.vue';
 import vlinkHeader from '../../../components/header.vue';
 export default {
-  components: {vlinkHeader},
+  components: {vlinkHeader, webrtc},
   data () {
     return {
-      loginDialogVisible: false,
+      /* loginDialogVisible: false,
       time: 10,
-      intval: null
+      intval: null */
     }
   },
   computed: {
@@ -38,7 +41,8 @@ export default {
   watch: {
     unLogin () {
       console.log('relogin: ', this.$store.state.loginToken);
-      this.loginDialogVisible = true;
+      this.reLogin();
+      /* this.loginDialogVisible = true;
       if (this.intval) {
         window.clearInterval(this.intval);
       }
@@ -48,8 +52,10 @@ export default {
           this.reLogin();
           window.clearInterval(this.intval);
         }
-      }, 1000);
+      }, 1000); */
     }
+  },
+  mounted () {
   },
   methods: {
     reLogin () {
@@ -65,6 +71,8 @@ export default {
 <style lang="scss" scoped>
 .vl_main {
   height: 100%;
+  min-width: 1200px;
+  min-height: 625px;
   > .vl_content {
     padding-top: 100px;
     height: 100%;

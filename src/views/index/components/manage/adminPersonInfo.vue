@@ -25,7 +25,7 @@
                     <li
                       v-for="(item, index) in copyGroupList"
                       :key="index"
-                      @click="handleCopyGroup(item.uid)"
+                      @click="handleCopyGroup(item.id, item.name)"
                     >{{item.name}}</li>
                   </ul>
                 </vue-scroll>
@@ -41,9 +41,6 @@
         <div class="table_box">
           <div class="search_box">
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-              <el-form-item prop="idNo">
-                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
-              </el-form-item>
               <el-form-item prop="idType">
                 <el-select v-model="searchForm.idType" style="width: 240px;" placeholder="证件类型">
                   <el-option label="身份证" :value="1"></el-option>
@@ -52,10 +49,12 @@
               </el-form-item>
               <el-form-item prop="sex">
                 <el-select v-model="searchForm.sex" style="width: 240px;" placeholder="性别">
-                  <!-- <el-option label="全部" :value="0"></el-option> -->
                   <el-option label="男" :value="1"></el-option>
                   <el-option label="女" :value="2"></el-option>
                 </el-select>
+              </el-form-item>
+              <el-form-item prop="idNo">
+                <el-input style="width: 240px;" type="text" placeholder="请输入姓名或证件号码" v-model="searchForm.idNo" />
               </el-form-item>
               <el-form-item>
                 <el-button class="select_btn" @click="searchData">查询</el-button>
@@ -83,6 +82,9 @@
               prop="name"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.name ? scope.row.name : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="性别"
@@ -91,8 +93,6 @@
               >
               <template slot-scope="scope">
                 <span>{{scope.row.sex == 1 ? '男' : '女'}}</span>
-                <!-- <span v-show="scope.row.sex == 1">男</span>
-                <span v-show="scope.row.sex == 2">女</span> -->
               </template>
             </el-table-column>
             <el-table-column
@@ -109,12 +109,18 @@
               prop="idNo"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.idNo ? scope.row.idNo : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="备注信息"
               prop="remarks"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.remarks ? scope.row.remarks : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
@@ -123,6 +129,7 @@
             </el-table-column>
           </el-table>
           <el-pagination
+            class="cum_pagination"
             @current-change="handleCurrentChange"
             :current-page.sync="pagination.pageNum"
             :page-sizes="[100, 200, 300, 400]"
@@ -148,7 +155,7 @@
           <ul class="content_right">
             <li>
               <span>姓名：</span>
-              <span>{{personDetailInfo.name}}</span>
+              <span>{{personDetailInfo.name ? personDetailInfo.name : '无'}}</span>
             </li>
             <li>
               <span>性别：</span>
@@ -164,23 +171,37 @@
             </li>
             <li>
               <span>证件号码：</span>
-              <span>{{personDetailInfo.idNo}}</span>
+              <span>{{personDetailInfo.idNo ? personDetailInfo.idNo : '无'}}</span>
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate | fmTimestamp}}</span>
+              <span>{{personDetailInfo.birthDate ? personDetailInfo.birthDate : '无'}}</span>
             </li>
             <li>
               <span>底库信息：</span>
-              <span></span>
+              <div class="group_box">
+                <template v-if="albumList && albumList.length > 0">
+                  <span>{{albumList.join('、')}}</span>
+                </template>
+                <template v-else>
+                  <span>无</span>
+                </template>
+              </div>
             </li>
             <li>
               <span>分组信息：</span>
-              <span></span>
+              <div class="group_box">
+                <template v-if="groupList && groupList.length > 0">
+                  <span>{{groupList.join('、')}}</span>
+                </template>
+                <template v-else>
+                  <span>无</span>
+                </template>
+              </div>
             </li>
             <li>
               <span>备注：</span>
-              <span>{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks ? personDetailInfo.remarks : '无'}}</span>
             </li>
           </ul>
         </div>
@@ -198,7 +219,7 @@
           <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="groupForm" ref="groupForm" :rules="rules">
               <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-                <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+                <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName" maxlength="6"></el-input>
                 <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
               </el-form-item>
             </el-form>
@@ -219,7 +240,7 @@
         >
         <el-form :model="groupForm" ref="groupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName" maxlength="6"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
@@ -287,6 +308,8 @@ export default {
         sex: null
       },
       personInfoList: [],
+      albumList: [], // 底库列表
+      groupList: [], // 分组列表
       perosnDetailInfoDialog: false, // 查看人员信息弹出框
       addGroupDialog: false, // 新增分组弹出框
       editGroupDialog: false, // 修改分组弹出框
@@ -295,7 +318,6 @@ export default {
       perGroupList: [], // 人员分组列表
       groupId: null, // 分组id
       albumId: null, // 底库id
-      isGroup: false,
       groupName: null, // 组名
       copyGroupList: [],
       multipleSelection: [], // 表格多选
@@ -305,37 +327,38 @@ export default {
       isEditLoading: false, // 编辑组名加载中
       isDeleteLoading: false, // 删除组加载中
       isRemoveLoading: false, // 移除分组加载中
+      originGroupName: null, // 最初始的组名
     }
   },
   mounted () {
-    this.groupId = parseInt(this.$route.query.id);
-    if (this.$route.query.type == 1) { // 分组查看
-      this.isGroup = true;
-    } else { // 底库查看
-      this.isGroup = false;
-    }
+    this.groupId = this.$route.query.id;
+    this.getGroupList();
     this.getPersonList();
-    this.getGroupList(parseInt(this.$route.query.id));
   },
   methods: {
     // 获取分组列表
-    getGroupList (uid) {
+    getGroupList () {
       const params = {
         type: 4 // 4---人像
       }
       getPerGroupList(params)
         .then(res => {
           if (res) {
-            res.data.groupNumList.map(item => {
-              if (item.id === uid) {
-                this.groupName = item.name;
-              } else {
-                this.copyGroupList.push({
-                  uid: item.id,
-                  name: item.name
-                })
-              }
-            });
+            if (this.groupId) {
+              res.data.groupNumList.map(item => {
+                if (item.id == this.groupId) {
+                  this.groupName = item.name;
+                  this.originGroupName = item.name; // 保存下来，最后修改的时候比较是否有变化
+                } else {
+                  this.copyGroupList.push({
+                    uid: item.id,
+                    name: item.name
+                  })
+                }
+              });
+            } else {
+              this.copyGroupList = res.data.groupNumList;
+            }
           }
         })
         .catch(() => {})
@@ -343,7 +366,7 @@ export default {
     // 获取人员列表
     getPersonList () {
       const params = {
-        // 'where.type': this.selectMethod,
+        'where.origin': 1, // 筛选底库的，不包括布控库
         'where.albumId': this.albumId,
         'where.groupId': this.groupId,
         'where.idType': this.searchForm.idType,
@@ -386,7 +409,7 @@ export default {
       this.isShowError = false;
     },
     // 将人员复制到选择的组
-    handleCopyGroup (id) {
+    handleCopyGroup (id, name) {
       let selectArr = [];
       this.multipleSelection.map(item => {
         selectArr.push(item.id);
@@ -400,7 +423,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: '成功在' + name + '组中加入对象',
               customClass: 'request_tip'
             })
             this.getPersonList();
@@ -413,10 +436,21 @@ export default {
     showLookDetailInfo (obj) {
       this.perosnDetailInfoDialog = true;
       if (obj.id) {
+        this.albumList = [];
+        this.groupList = [];
         getPersonDetail(obj.id)
           .then(res => {
             if (res) {
+              const birth = res.data.birthDate.substr(0, 10);
               this.personDetailInfo = res.data;
+              this.personDetailInfo.birthDate = birth;
+
+              this.personDetailInfo.albumList.map(item => {
+                this.albumList.push(item.title);
+              });
+              this.personDetailInfo.groupList.map(item => {
+                this.groupList.push(item.name);
+              });
             }
           })
           .catch(() => {})
@@ -467,6 +501,10 @@ export default {
           const params = {
             name: this.groupForm.userGroupName
           };
+          if (this.originGroupName === this.groupForm.userGroupName) {
+            this.editGroupDialog = false;
+            return;
+          }
           judgePerson(params)  // --判断组名是否重复
             .then(res => {
               if (res.data) {
@@ -574,7 +612,7 @@ export default {
           if (res) {
             this.$message({
               type: 'success',
-              message: '新增成功',
+              message: '新增' + this.groupForm.userGroupName + '组，并成功加入对象',
               customClass: 'request_tip'
             })
             this.showGroup = false;
@@ -742,14 +780,20 @@ export default {
           width: 100%;
           padding: 8px 0;
           display: flex;
-          span:first-child {
+          .group_box {
+            width: calc(100% - 100px);
+            span {
+              width: auto;
+            }
+          }
+          >span:first-child {
             display: inline-block;
             width: 100px;
             color: #666666;
             text-align: right;
           }
           span:last-child {
-            width: calc(100% - 100px);
+            // width: calc(100% - 100px);
             color: #333333;
           }
         }

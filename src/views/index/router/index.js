@@ -18,10 +18,12 @@ import routerControl from './router.control.js'
 import routerMessage from './router.message.js'
 // 告警板块 router
 import routerAlarm from './router.alarm.js'
-// 事件板块 router
+// 管理板块 router
 import routerManage from './router.manage.js'
 // 任务板块 router
 import routerTask from './router.task.js'
+// 车辆侦察 router
+import routerVehicle from './router.vehicle.js'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -50,7 +52,8 @@ const router = new VueRouter({
         routerMessage,
         routerAlarm,
         routerManage,
-        routerTask
+        routerTask,
+        routerVehicle
       ]
     }, {
       path: '/login',
@@ -75,13 +78,28 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/webrtc',
-      name: 'webrtc',
+      path: '/pc',
+      name: 'pc',
       component: () => import('@/views/index/components/webrtcTest.vue')
     }, {
-      path: '/webrtcTri',
-      name: 'webrtcTri',
-      component: () => import('@/views/index/components/webrtcTerminal.vue')
+      path: '/share',
+      name: 'share',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/appshare/share.vue')
+    }, {
+      path: '/v',
+      name: 'v',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/vehicle.vue'),
+      redirect: { name: 'v_menu' },
+      children: [
+        {
+          path: 'menu',
+          name: 'v_menu',
+          meta: { unrequireLogin: true },
+          component: () => import('@/views/index/components/vehicle/menu.vue')
+        }
+      ]
     }
   ]
 })

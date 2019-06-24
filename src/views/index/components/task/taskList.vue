@@ -56,6 +56,7 @@
           prop="readFlag"
           >
           <template slot-scope="scope">
+            <span :class="scope.row.readFlag == 1 ? 'dot bg_blue' : 'dot bg_white'"></span>
             {{ dicFormater( taskStatus, scope.row.readFlag)}}
           </template>
         </el-table-column>
@@ -80,9 +81,7 @@
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span v-if='scope.row.reporterRole'>{{scope.row.reporterRole}}</span>
-            <span v-else-if='!scope.row.reporterUser'>市民</span>
-            <span v-else>-</span>
+            <span v-if='scope.row.senderDepartmentName'>{{scope.row.senderDepartmentName}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -113,7 +112,8 @@
       :page-sizes="[100, 200, 300, 400]"
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
-      :total="pagination.total">
+      :total="pagination.total"
+      class="cum_pagination">
     </el-pagination>
     </template>
   </div>
@@ -148,7 +148,7 @@ export default {
   mounted () {
     let taskTypeL = this.dicFormater(dataList.taskType)
     let taskStatusL = this.dicFormater(dataList.taskStatus)
-    this.taskTypeList = taskTypeL[0].dictList
+    this.taskTypeList = taskTypeL[0].dictList.filter(res => !(res.enumField == 4 || res.enumField == 6))
     this.taskStatusList = taskStatusL[0].dictList
     this.getOneMonth();
     this.getTaskData();
@@ -206,7 +206,29 @@ export default {
     },
     // 跳至事件详情页
     skipTaskDetailPage (obj) {
-      this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType}});
+      if(obj.dispatchType == 2) {       //告警
+        if(obj.processType == 5) {
+          if (obj.dispatchStatus == 1) {
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId, objType: obj.objType,uid: obj.uid}});
+          }
+          if (obj.dispatchStatus == 2) {
+            this.$router.push({name: 'alarm_ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId, objType: obj.objType,uid: obj.uid}});
+          }
+        }else {
+          this.$router.push({name: 'task_alarm_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType, objType: obj.objType}});          
+        }
+      }else {
+        if(obj.processType == 5) {
+          if (obj.dispatchStatus == 1) {
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_ing', id: obj.eventId ,uid: obj.uid}});
+          }
+          if (obj.dispatchStatus == 2) {
+            this.$router.push({name: 'ctc_detail_info', query: {status: 'ctc_end', id: obj.eventId ,uid: obj.uid}});
+          }
+        }else {
+          this.$router.push({name: 'task_detail', query: { id: obj.eventId, processType: obj.processType,uid: obj.uid, dispatchType:obj.dispatchType}});
+        }
+      }
     },
     getOneMonth () { // 设置默认一个月
       const end = new Date();
@@ -264,6 +286,25 @@ export default {
     padding: 0 20px;
     .task_table {
       margin-top: 8px;
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .bg_blue {
+        background: #0C70F8;
+      }
+      .bg_white {
+        background: #fff;
+      }
+      .hover-row {
+        &:hover {
+          .bg_white {
+            background: #E6F7FF!important;
+          }
+        }
+      }
       .task_status {
         &:before {
           content: '.';

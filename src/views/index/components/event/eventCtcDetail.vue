@@ -4,7 +4,7 @@
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail' }">事件详情</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.evt_status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看调度指挥</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -12,7 +12,7 @@
         <EventBasic :status="$route.query.status" :basicInfo="basicInfo" @emitHandleImg="emitHandleImg"></EventBasic>
         <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">
@@ -29,21 +29,9 @@
                 <span>任务内容：</span>
                 <span>{{item.taskContent}}</span>
               </div>
+              <div class="divide-list"></div>
             </li>
-            <div class="divide-list"></div>
           </ul>
-        </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
         </div>
         <div class="summary" v-show="basicInfo.eventSummary">
           <div class="summary-header">
@@ -51,7 +39,7 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="eventFile && eventFile.length > 0">
+            <template v-if="(eventFile && eventFile.length > 0) || (eventImg && eventImg.length > 0)">
               <p>事件总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -91,7 +79,7 @@
           </div>
           <div class="divide"></div>
           <div class="summary-content">
-            <template v-if="ctcFile && ctcFile.length > 0">
+            <template v-if="(ctcFile && ctcFile.length > 0) || (ctcImg && ctcImg.length > 0)">
               <p>调度总结附件</p>
               <div class="content-icon">
                 <ul class="clearfix" style="clear:both">
@@ -125,53 +113,9 @@
             </template>
           </div>
         </div>
-        <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
-          <div class="header">
-            <p class="ctc-title">事件进展</p>
-          </div>
-          <div class="divide"></div>
-          <div class="process-box">
-            <div class="department">
-              <p>参与部门</p>
-              <ul>
-                <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
-                  <span>{{item.departmentName}}</span>
-                  <span>{{item.createTime}}</span>
-                  <span>{{item.taskStatusName}}</span>
-                </li>
-              </ul>
-            </div>
-            <div class="process-list">
-              <p>事件过程</p>
-              <ul>
-                <li v-for="(item, index) in basicInfo.processingList" :key="index">
-                  <div class='circle-left'>
-                    <div class='big-circle'>
-                      <div class='small-circle'></div>
-                    </div>
-                  </div>
-                  <div class='line'></div>
-                  <div class="content-right">
-                    <div class='content'>{{item.processContent}}（操作人：{{item.opUserName}}）</div>
-                    <div class='time'>{{item.createTime}}</div>
-                    <div style="width:100%;margin-top:10px;">
-                      <img
-                        style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
-                        :key="'item' + index"
-                        :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
-                      >
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="operation-footer">
-        <template v-if="$route.query.status !== 'ending'">
+        <template v-if="$route.query.status !== 'ctc_end'">
           <el-button class="operation_btn function_btn" @click="skipAgainCtcPage">再次调度</el-button>
           <el-button class="operation_btn back_btn" @click="skipCtcEndPage">结束调度</el-button>
         </template>
@@ -228,11 +172,11 @@ export default {
     },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId}});
+      this.$router.push({name: 'ctc_end', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, type: 'event' }});
+      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.eventId, eventType: this.basicInfo.eventType, status: this.$route.query.status }});
     },
     // 获取事件详情
     getDetail () {
@@ -300,7 +244,7 @@ export default {
     width: 100%;
     padding: 0 20px;
     margin-bottom: 100px;
-    .event-ctc-content, .judge_result, .event-process, .summary {
+    .event-ctc-content, .summary {
       width: 100%;
       margin-bottom: 20px;
       background-color: #ffffff;
@@ -360,101 +304,16 @@ export default {
               }
             }
           }
-        }
-        .divide-list {
-          width: 100%;
-          height: 1px;
-          margin: 10px 0;
-          border-bottom: 1px dashed #F2F2F2;
-        }
-      }
-      .judge_result_content {
-        width: 100%;
-        .no_result {
-          height: 100px;
-          line-height: 100px;
-          display: flex;
-          align-items: center;
-          margin-left: 45%;
-          >span {
-            margin-left: 10px;
-            color: #999999;
-            font-size: 16px;
-          }
-        }
-      }
-      .process-box {
-        width: 100%;
-        padding: 20px;
-        .department{
-          > p {
-            color: #333333;
-            font-weight: bold;
-          }
-          > ul {
-            margin: 10px 0;
-            li {
-              color: #333333;
-              height: 23px;
-              line-height: 23px;
-              span {
-                margin-right: 8px;
-              }
+          &:last-child {
+            .divide-list {
+              display: none;
             }
           }
-        }
-        .process-list {
-          > p {
-            color: #333333;
-            font-weight: bold;
-          }
-          > ul {
+          .divide-list {
+            width: 100%;
+            height: 1px;
             margin: 10px 0;
-            > li {
-              display: flex;
-              height: 100%;
-              position: relative;
-              .circle-left {
-                margin-top: 3px;
-                .big-circle {
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 50%;
-                  border: 1px solid #0C70F8;
-                  .small-circle {
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    background: #0C70F8;
-                    margin: 3px auto 0 auto;
-                  }
-                }
-              }
-              .line {
-                width: 1px;
-                height: calc(100% - 33px);
-                position: absolute;
-                left: 12px;
-                top: 30px;
-                bottom: 10px;
-                background: #0C70F8;
-              }
-              .content-right {
-                margin-left: 1%;
-                font-size: 13px;
-                .time {
-                  color:#9D9D9D;
-                  margin-bottom: 5px;
-                }
-                .content {
-                  color: #333333;
-                  margin-bottom: 5px;
-                }
-              }
-              &:last-child .line {
-                display: none;
-              }
-            }
+            border-bottom: 1px dashed #F2F2F2;
           }
         }
       }

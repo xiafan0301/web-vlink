@@ -7,7 +7,7 @@
       <li>
         <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
         <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
-        <router-link :to="{name: 'video_playback'}">录像回放</router-link>
+        <router-link :to="{name: 'video_playback'}">视频回放</router-link>
       </li>
       <li>
         <!-- <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a> -->
@@ -22,9 +22,9 @@
       <li>
         <router-link :to="{name: 'video_download'}">下载记录</router-link>
       </li>
-      <li>
+      <!-- <li>
         <router-link :to="{name: 'video_statistics'}">设备概览</router-link>
-      </li>
+      </li> -->
     </ul>
     <div class="vi_content">
       <router-view></router-view>
@@ -189,17 +189,19 @@ export default {
                 padding: 10px 40px 10px 20px;
                 border-bottom: 1px dotted #ddd;
                 cursor: default;
-                &:hover { 
-                  color: #186DFB;
-                  background-color: #E0F3FF;
-                }
                 > h3 { height: 20px; line-height: 20px; }
                 > p { color: #999; height: 20px; line-height: 20px; }
                 > i {
-                  position: absolute; top: 50%; right: 25px;
+                  display: none;
+                  position: absolute; top: 50%; right: 15px;
                   font-size: 16px;
-                  margin: -8px;
+                  margin-top: -8px;
                   cursor: pointer;
+                }
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                  > i { display: block; }
                 }
                 &.show_his_dis {
                   > h3 { color: #999; }

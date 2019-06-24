@@ -90,6 +90,7 @@
       </el-table>
     </div>
     <el-pagination
+      class="cum_pagination"
       @current-change="handleCurrentChange"
       :current-page.sync="pagination.pageNum"
       :page-sizes="[100, 200, 300, 400]"
@@ -419,6 +420,7 @@ export default {
     addUserGroup (form) {
       let _this = this;
       this.$refs[form].validate(valid => {
+        _this.isShowOrganError = false;
         if (valid) {
            const params = {
             proKey: _this.storageInfo.proKey,
@@ -746,6 +748,7 @@ export default {
     editUserGroups (form) {
       let _this = this;
       this.$refs[form].validate(valid => {
+        _this.isShowOrganError = false;
         if(valid) {
           const params = {
             proKey: _this.storageInfo.proKey,

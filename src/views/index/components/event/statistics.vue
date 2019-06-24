@@ -20,7 +20,7 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-select v-model="searchForm.eventDealOrgId" clearable placeholder="请选择" style="margin-left: 10px;">
+          <el-select v-model="searchForm.dealOrgId" clearable placeholder="请选择" style="margin-left: 10px;">
             <el-option
             v-for="(item, index) in departmentData"
             :key="index"
@@ -38,51 +38,53 @@
       <!-- 综合统计 -->
       <ul class="stat-zt">
           <li>
-            <div class="stat-zt-box">
-              <div class="left-icon-number"><i class="vl_icon vl_icon_statistics_8"></i></div>
-              <div class="stat-zt-value">
-                <h3>{{generalData.totalCount}}</h3>
-                <p>事件数量</p>
+            <div class="stat-zt-box" style="background: #0C70F8">
+              <div class="left-icon-number">
+                <i class="vl_icon vl_icon_statistics_8"></i>
               </div>
-              <div class="right-icon">
+              <!-- <div class="stat-zt-value"> -->
+              <p class="event_num_title">事件数量(件)</p>
+              <h3 class="event_number">{{generalData.totalCount}}</h3>
+              <!-- </div> -->
+              <!-- <div class="right-icon">
                 <i class="vl_icon vl_icon_statistics_4"></i>
-              </div>
+              </div> -->
             </div>
           </li>
           <li>
-            <div class="stat-zt-box">
+            <div class="stat-zt-box" style="background: #0D9DF4">
               <div class="left-icon-finish">
                 <i class="vl_icon vl_icon_statistics_7"></i>
               </div>
-              <div class="stat-zt-value">
-                <h3>{{generalData.finishCount}}</h3>
-                <p>处理完成</p>
-              </div>
-              <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div>
+              <!-- <div class="stat-zt-value"> -->
+              <p class="event_num_title">处理完成(件)</p>
+              <h3 class="event_number">{{generalData.finishCount}}</h3>
+              <!-- </div> -->
+              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_3"></i></div> -->
             </div>
           </li>
           <li>
-            <div class="stat-zt-box">
+            <div class="stat-zt-box" style="background: #6262FF">
               <div class="left-icon-ing">
                 <i class="vl_icon vl_icon_statistics_6"></i>
               </div>
-              <div class="stat-zt-value">
-                <h3>{{generalData.processingCount}}</h3>
-                <p>处理中</p>
-              </div>
-              <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div>
+              <!-- <div class="stat-zt-value"> -->
+              <p class="event_num_title">处理中(件)</p>
+              <h3 class="event_number">{{generalData.processingCount}}</h3>
+              <!-- </div> -->
+              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_2"></i></div> -->
             </div>
           </li>
           <li>
-            <div class="stat-zt-box">
+            <div class="stat-zt-box" style="background: #8949F3">
               <div class="left-icon-unhandle">
                 <i class="vl_icon vl_icon_statistics_5"></i>
               </div>
-              <div class="stat-zt-value">
-                <h3>{{generalData.pendingCount}}</h3>
-                <p>待处理</p>
-              </div>
-              <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div>
+              <!-- <div class="stat-zt-value"> -->
+              <p class="event_num_title">待处理(件)</p>
+              <h3 class="event_number">{{generalData.pendingCount}}</h3>
+              <!-- </div> -->
+              <!-- <div class="right-icon"><i class="vl_icon vl_icon_statistics_1"></i></div> -->
             </div>
           </li>
         </ul>
@@ -189,7 +191,7 @@ export default {
     return {
       searchForm: {
         dateTime: [new Date(new Date().getTime() - 3600 * 1000 * 24 * 30), new Date()],
-        eventDealOrgId: null
+        dealOrgId: null
       },
       pickerOptions2: {
         shortcuts: [
@@ -247,10 +249,10 @@ export default {
       chart3Data: [],
       chart4Data: [],
       colors: [
-        ['#115BFA', '#0C70F8', '#0D9DF4', '#6262FF', '#8949F3'],
+        ['#115BFA', '#50CC62', '#0D9DF4', '#6262FF', '#8949F3'],
         [
           [17, 91, 250],
-          [12, 112, 248],
+          [80, 204, 98],
           [13, 157, 244],
           [98, 98, 255],
           [137, 73, 243]
@@ -281,6 +283,7 @@ export default {
   },
   created () {
     this.userInfo = this.$store.state.loginUser;
+    this.searchForm.dealOrgId = this.userInfo.organList[0].uid;
   },
   mounted () {
     this.getDepartList();
@@ -382,6 +385,11 @@ export default {
         .then(res => {
           if (res && res.data.list) {
             this.departmentData = res.data.list;
+            this.departmentData.map((item) => {
+              if (item.uid === this.userInfo.organList[0].uid) {
+                this.searchForm.dealOrgId = item.uid;
+              }
+            });
           }
         })
     },
@@ -442,7 +450,7 @@ export default {
           return '<li class="g2-legend-list-item item-' + index + ' ' + checked +
             '" data-value="' + value + '" data-color=' + color + '>' +
             '<div>' +
-              '<div><i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.4)">' +
+              '<div><i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 0.14)">' +
               '<i style="background-color: rgba(' + _this.colors[1][index][0] + ', ' + _this.colors[1][index][1] + ', ' + _this.colors[1][index][2] + ', 1)"></i></i>' + data[index].count + '</div>' +
               '<p>' + value + '' + '</p>' +
             '</div>' +
@@ -804,7 +812,7 @@ export default {
           if (res && res.data) {
             // console.log('事件高发地点分析', res);
             this.polygons = res.data;
-            console.log('polygons', this.polygons)
+            // console.log('polygons', this.polygons)
             this.setsonPolygons(res.data);
           }
         })
@@ -929,7 +937,8 @@ export default {
       return {
         'where.reportTimeStart': formatDate(this.searchForm.dateTime[0], 'yyyy-MM-dd'),
         'where.reportTimeEnd': formatDate(this.searchForm.dateTime[1], 'yyyy-MM-dd'),
-        'where.eventDealOrgId': this.searchForm.eventDealOrgId
+        'where.dealOrgId': this.searchForm.dealOrgId,
+        'where.eventFlag': 1 // 1--是  0--否  是否为事件
       }
     },
     loadHandler () {
@@ -981,12 +990,13 @@ export default {
         background-color: #ffffff;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         >div {
           &:first-child {
             width: 110px;
             text-align: center;
             padding: 20px 0;
-            box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+            // box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
           }
         }
         .left-icon-number {
@@ -1001,28 +1011,31 @@ export default {
         .left-icon-unhandle {
           background-color: #8949F3;
         }
-        .stat-zt-value {
-          width: 40%;
-          display: flex;
-          padding-top: 25px;
-          padding-left: 15px;
-          flex-direction: column;
-          color: #666666;
-          h3 {
-            font-size: 20px;
-            font-weight: bold;
+        // .stat-zt-value {
+        //   width: 40%;
+        //   display: flex;
+        //   padding-top: 25px;
+        //   padding-left: 15px;
+        //   flex-direction: column;
+        //   color: #666666;
+          .event_num_title {
+            width: calc(100% - 110px);
+            color: #ffffff;
           }
-          span:first-child {
+          .event_number {
+            margin-right: 20px;
+            // width: calc((100% - 110px) / 2);
             font-size:32px;
             font-weight:bold;
+            color: #ffffff;
           }
-        }
-        .right-icon {
-          margin-right: 10px;
-          i {
-            margin-top: 28px;
-          }
-        }
+        // }
+        // .right-icon {
+        //   margin-right: 10px;
+        //   i {
+        //     margin-top: 28px;
+        //   }
+        // }
       }
     }
   }

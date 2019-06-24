@@ -68,8 +68,8 @@
               </template>
               <template v-if="sturcDetail.eventInfo">
                 <div class="control_line"><span class="left">事件编号：</span><span class="right">{{sturcDetail.eventInfo.eventCode || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{sturcDetail.eventInfo.eventType || '无'}}</span></div>
-                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{sturcDetail.eventInfo.eventLevel || '无'}}</span></div>
+                <div class="control_line"><span class="left">事件类型：</span><span class="right">{{ sturcDetail.eventInfo.eventType ? dicFormater( eventType, sturcDetail.eventInfo.eventType) :'无'}}</span></div>
+                <div class="control_line"><span class="left">事件等级：</span><span class="right">{{ sturcDetail.eventInfo.eventLevel ? dicFormater( eventLevel, sturcDetail.eventInfo.eventLevel) : '无'}}</span></div>
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">{{sturcDetail.eventInfo.eventDetail || '无'}}</span></div>
               </template>
               <template v-if="!sturcDetail.eventInfo">
@@ -79,14 +79,17 @@
                 <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
               </template>
             </div>
-            <div class="event-status-img">
-              <template v-if="$route.query.status === 'ctc_end'">
+            <!-- <div class="event-status-img">
+              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
                 <i class="vl_icon vl_icon_event_11"></i>
               </template>
-              <template v-if="$route.query.status === 'ctc_ing'">
+              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 1">
                 <i class="vl_icon vl_icon_event_13"></i>
-              </template>     
-            </div>
+              </template>
+              <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
+                <i class="vl_icon vl_icon_event_12"></i>
+              </template>
+            </div> -->
           </div>
           <div class="card-info right-info">
             <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -136,13 +139,13 @@
             <span>{{sturcDetail.semblance ? (sturcDetail.semblance).toFixed(2) : 0.00}}<span style="font-size: 12px;">%</span></span>
           </div>
         </div>
-        <div class="event-ctc-content" v-show="basicInfo.taskList && basicInfo.taskList.length > 0">
+        <div class="event-ctc-content" v-if="sturcDetail.taskList && sturcDetail.taskList.length > 0">
           <div class="header">
-            <p class="ctc-title">调度指挥方案</p>
+            <p class="ctc-title">调度方案</p>
           </div>
           <div class="divide"></div>
           <ul class="content-list">
-            <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
+            <li v-for="(item, index) in sturcDetail.taskList" :key="'item' + index">
               <div>
                 <span>调度部门：</span>
                 <span>{{item.departmentName}}</span>
@@ -159,19 +162,7 @@
             </li>
           </ul>
         </div>
-        <div class="judge_result">
-          <div class="header">
-            <p class="ctc-title">研判结果</p>
-          </div>
-          <div class="divide"></div>
-          <div class="judge_result_content">
-            <div class="no_result">
-              <i class="vl_icon vl_icon_event_16"></i>
-              <span>暂无数据</span>
-            </div>
-          </div>
-        </div>
-        <div class="summary" v-show="basicInfo.eventSummary">
+        <div class="summary" v-if="sturcDetail.eventInfo && sturcDetail.eventInfo.eventSummary">
           <div class="summary-header">
             <span>事件总结</span>
           </div>
@@ -201,13 +192,13 @@
             <p style="margin-top: 5px;">事件总结内容</p>
             <div class="content_detail">
               <p>
-                {{basicInfo.eventSummary}}
-                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', basicInfo.eventSummary)">更多...</span>
+                {{!!sturcDetail.eventInfo.eventSummary && sturcDetail.eventInfo.eventSummary}}
+                <span v-show="eventSummaryLength > 3000" class="look_more" @click="showSummaryDialog('event', !!sturcDetail.eventInfo.eventSummary && sturcDetail.eventInfo.eventSummary)">更多...</span>
               </p>
             </div>
           </div>
         </div>
-        <div class="summary" v-show="basicInfo.dispatchSummary">
+        <div class="summary" v-if="sturcDetail.eventInfo && sturcDetail.eventInfo.dispatchSummary">
           <div class="summary-header">
             <span>调度总结</span>
           </div>
@@ -237,32 +228,32 @@
             <p style="margin-top: 5px;">调度总结内容</p>
             <div class="content_detail">
               <p>
-                {{basicInfo.dispatchSummary}}
-                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', basicInfo.dispatchSummary)">更多...</span>
+                {{sturcDetail.eventInfo.dispatchSummary}}
+                <span v-show="dispatchSummaryLength > 3000" class="look_more" @click="showSummaryDialog('ctc', sturcDetail.eventInfo.dispatchSummary)">更多...</span>
               </p>
             </div>
           </div>
         </div>
-        <div class="event-process" v-show="(basicInfo.taskList && basicInfo.taskList.length > 0) || (basicInfo.processingList && basicInfo.processingList.length > 0)">
+        <div class="event-process" v-if="(sturcDetail.taskList && sturcDetail.taskList.length > 0) || (sturcDetail && sturcDetail.processingList && sturcDetail.processingList.length > 0)">
           <div class="header">
             <p class="ctc-title">事件进展</p>
           </div>
           <div class="divide"></div>
           <div class="process-box">
-            <div class="department">
+            <div class="department" v-show="sturcDetail.taskList && sturcDetail.taskList.length > 0">
               <p>参与部门</p>
               <ul>
-                <li v-for="(item, index) in basicInfo.taskList" :key="'item' + index">
+                <li v-for="(item, index) in sturcDetail.taskList" :key="'item' + index">
                   <span>{{item.departmentName}}</span>
                   <span>{{item.createTime}}</span>
                   <span>{{item.taskStatusName}}</span>
                 </li>
               </ul>
             </div>
-            <div class="process-list">
+            <div class="process-list" v-show="sturcDetail.processingList && sturcDetail.processingList.length > 0">
               <p>事件过程</p>
               <ul>
-                <li v-for="(item, index) in basicInfo.processingList" :key="index">
+                <li v-for="(item, index) in sturcDetail.processingList" :key="index">
                   <div class='circle-left'>
                     <div class='big-circle'>
                       <div class='small-circle'></div>
@@ -275,10 +266,10 @@
                     <div style="width:100%;margin-top:10px;">
                       <img
                         style="width: 80px;height: 80px;border-radius: 4px;margin-right: 5px;cursor:pointer;"
-                        v-for="(itm, index) in item.attachmentList"
+                        v-for="(itm, index) in item.sysAppendixInfoList"
                         :key="'item' + index"
                         :src="itm.src"
-                        @click="openBigImg(index, item.attachmentList)"
+                        @click="openBigImg(index, item.sysAppendixInfoList)"
                       >
                     </div>
                   </div>
@@ -300,9 +291,11 @@
   </vue-scroll>
 </template>
 <script>
-import { getEventDetail } from '@/views/index/api/api.event.js';
+// import { getEventDetail } from '@/views/index/api/api.event.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
+import { updateProcess } from '@/views/index/api/api.event.js';
 import BigImg from '@/components/common/bigImg.vue';
+import { dataList } from '@/utils/data.js';
 export default {
   components: { BigImg },
   data () {
@@ -310,7 +303,7 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [],
-      basicInfo: {}, // 事件详情
+      // basicInfo: {}, // 事件详情
       eventImg: [], // 事件总结图片列表
       eventFile: [], // 事件总结文件列表
       ctcImg: [], // 调度总结图片列表
@@ -320,22 +313,40 @@ export default {
       summaryContent: null, // 总结内容
       eventSummaryLength: 0,
       dispatchSummaryLength: 0,
+      eventType: dataList.eventType,
+      eventLevel: dataList.eventLevel,
       sturcDetail: {},
       isLoading: false
     }
   },
   mounted () {
-    this.getDetail();
+    // this.getDetail();
     this.toAlarmDetail();
+    if(this.$route.query.uid) {
+      this.editProcessStatus();
+    }
   },
   methods: {
+    //修改事件处理过程状态
+    editProcessStatus() {
+      const uid = this.$route.query.uid;
+      updateProcess(uid).then((res)=>{
+        console.log(res)
+      }).catch(()=>{})
+    },
     // 跳至结束调度页面
     skipCtcEndPage () {
-      this.$router.push({name: 'ctc_end', query: { eventId: this.$route.query.id }});
+      let isRelationEvent;
+      if (this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid) {
+        isRelationEvent = 1;
+      } else {
+        isRelationEvent = 0;
+      }
+      this.$router.push({name: 'ctc_end', query: { alarmId: this.$route.query.id, eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, type: 'alarm_ctc', isRelation: isRelationEvent, status: this.$route.query.status, objType: this.$route.query.objType}});
     },
     // 跳至再次调度页面
     skipAgainCtcPage () {
-      this.$router.push({name: 'ctc_operation', query: { eventId: this.$route.query.id, eventType: this.basicInfo.eventType }});
+      this.$router.push({name: 'alarm_ctc_operation', query: { alarmId: this.$route.query.id, eventId: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.uid, status: this.$route.query.status, eventType: this.sturcDetail.eventInfo && this.sturcDetail.eventInfo.eventType, objType: this.$route.query.objType }});
     },
     //告警详情
     toAlarmDetail() {
@@ -344,6 +355,28 @@ export default {
       getAlarmDetail(eventId).then( res => {
         this.sturcDetail = res.data;
         this.sturcDetail['objType'] = this.$route.query.objType;
+        
+        this.eventSummaryLength = !!this.sturcDetail.eventInfo.eventSummary && this.sturcDetail.eventInfo.eventSummary.length;
+        this.dispatchSummaryLength = !!this.sturcDetail.eventInfo.dispatchSummary && this.sturcDetail.eventInfo.dispatchSummary.length;
+
+        if (this.sturcDetail.eventInfo.closeAttachmentList && this.sturcDetail.eventInfo.closeAttachmentList.length > 0) {
+          this.sturcDetail.eventInfo.closeAttachmentList.map(item => {
+            if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+              this.eventImg.push(item);
+            } else {
+              this.eventFile.push(item);
+            }
+          })
+        }
+        if (this.sturcDetail.eventInfo.dispatchAttachmentList && this.sturcDetail.eventInfo.dispatchAttachmentList.length > 0) {
+          this.sturcDetail.eventInfo.dispatchAttachmentList.map(item => {
+            if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
+              this.ctcImg.push(item);
+            } else {
+              this.ctcFile.push(item);
+            }
+          })
+        }
         this.$nextTick(()=> {
           this.isLoading = false;
         })
@@ -351,41 +384,10 @@ export default {
         this.isLoading = false;
       })
     },
-    // 获取事件详情
-    getDetail () {
-      const eventId = this.$route.query.id;
-      getEventDetail(eventId)
-        .then(res => {
-          if (res) {
-            this.basicInfo = res.data;
-            if (res.data.closeAttachmentList.length > 0) {
-              res.data.closeAttachmentList.map(item => {
-                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
-                  this.eventImg.push(item);
-                } else {
-                  this.eventFile.push(item);
-                }
-              })
-            }
-            if (res.data.dispatchAttachmentList.length > 0) {
-              res.data.dispatchAttachmentList.map(item => {
-                if (item.cname.endsWith('.jpg') || item.cname.endsWith('.png') || item.cname.endsWith('.jpeg')) {
-                  this.ctcImg.push(item);
-                } else {
-                  this.ctcFile.push(item);
-                }
-              })
-            }
-            this.eventSummaryLength = this.basicInfo.eventSummary.length;
-            this.dispatchSummaryLength = this.basicInfo.dispatchSummary.length;
-          }
-        })
-        .catch(() => {})
-    },
     // 图片放大传参
-    emitHandleImg (isShow, index) {
-      this.openBigImg(index, this.basicInfo.attachmentList);
-    },
+    // emitHandleImg (isShow, index) {
+    //   this.openBigImg(index, this.sturcDetail.eventInfo.attachmentList);
+    // },
     // 关闭图片放大
     emitCloseImgDialog(data){
       this.imgList1 = [];

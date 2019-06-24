@@ -112,3 +112,50 @@ export function updatePwd(data) {
     method: 'put'
   });
 }
+/**
+ * 获取用户详情
+ * @param {*} data 
+ */
+export function getUserDetail(uid) {
+  return request({
+    url: '/user-service/user/' + uid,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 获取用户列表
+ * @param {*} data 
+ */
+export function getUserList(data) {
+  return request({
+    url: '/user-service/user',
+    params: data,
+    mode: 'user',
+    method: 'get'
+  });
+}
+/**
+ * 修改用户信息
+ * @param {*} data 
+ */
+export function updateUserInfo(data) {
+  return request({
+    url: '/user-service/user',
+    data,
+    mode: 'user',
+    method: 'put'
+  });
+}
+/**
+ * 删除用户信息
+ * @param {*} data 
+ */
+export function delUser(data) {
+  return request({
+    url: '/user-service/user',
+    params: data,
+    mode: 'user',
+    method: 'delete'
+  });
+}

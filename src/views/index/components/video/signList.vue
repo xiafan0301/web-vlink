@@ -11,6 +11,7 @@
               size="small"
               v-model="startTime"
               type="datetime"
+              time-arrow-control
               :editable="false" :clearable="false"
               :picker-options="startTimeOptions"
               placeholder="选择开始时间">
@@ -24,6 +25,7 @@
               size="small"
               v-model="endTime"
               type="datetime"
+              time-arrow-control
               :editable="false" :clearable="false"
               :picker-options="endTimeOptions"
               placeholder="选择结束时间">
@@ -56,7 +58,8 @@
         </div>
         <div class="sign_content_list">
           <ul v-if="signList && signList.length > 0">
-            <li v-for="(item, index) in signList" :key="'sign_list_' + index" :class="{'sigin_list_dis': item.type === 3}">
+            <li v-for="(item, index) in signList" :key="'sign_list_' + index"
+              :class="{'sigin_list_dis': item.type === 3, 'content_list_del_atv': item.id === delSignActive.id}">
               <!-- 过期 -->
               <div v-if="item.signFlag" class="content_list_dis">
                 <h3 :title="item.content" class="com_ellipsis">
@@ -68,22 +71,21 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
-              <div v-else-if="deviceIsPlaying(item)">
+              <div v-else-if="deviceIsPlaying(item)" class="content_list_dis" draggable="false">
                 <h3 :title="item.content" class="com_ellipsis">
-                  <span>播放中</span>
                   {{item.content}}
                 </h3>
                 <p :title="item.deviceName" class="com_ellipsis">
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete" style="cursor: not-allowed;" title="播放中，无法删除"></i>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span></div>
+                <!-- <i class="el-icon-delete" style="cursor: not-allowed; " title="播放中，无法删除"></i> -->
               </div>
-              <div @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
+              <div class="content_list_able" @dragstart="dragStart($event, item)" @dragend="dragEnd" draggable="true" style="cursor: move;" v-else>
                 <h3 :title="item.content" class="com_ellipsis">
                   {{item.content}}
                 </h3>
@@ -91,8 +93,8 @@
                   <span class="vl_icon vl_icon_v11"></span>
                   {{item.deviceName}}
                 </p>
-                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <div>{{item.userName}}<span>{{item.signTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span></div>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
             </li>
           </ul>
@@ -139,6 +141,8 @@ export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
+      userId: '',
+
       tipMsg: '暂无视频播放，在标记列表选择视频进行查看',
       dragActiveObj: null,
       videoList: [null, null, null, null],
@@ -157,6 +161,8 @@ export default {
       signContent: '',
       signPeopleList: [],
       signContentList: [],
+
+      delSignActive: {},
 
       startTimeOptions: {
         disabledDate: (d) => {
@@ -178,6 +184,9 @@ export default {
         }
       }
     }
+  },
+  created () {
+    this.userId = this.$store.state.loginUser.uid;
   },
   mounted () {
     this.searchSubmit();
@@ -246,6 +255,7 @@ export default {
     },
     getData () {
       this.searchLoading = true;
+      this.delSignActive = {};
       apiVideoList({
         'where.startTime': formatDate(this.startTime),
         'where.endTime': formatDate(this.endTime),
@@ -287,6 +297,7 @@ export default {
       });
     },
     delSign (item) {
+      this.delSignActive = item;
       this.$msgbox({
         title: '提示',
         message: '确定删除该视频标记吗？',
@@ -297,12 +308,15 @@ export default {
           if (action === 'confirm') {
             instance.confirmButtonLoading = true;
             instance.confirmButtonText = '执行中...';
-            apiVideoSignDel(item.id).then(() => {
-              this.searchSubmit();
-              this.$message({
-                message: '删除成功',
-                type: 'success'
-              });
+            apiVideoSignDel(item.id).then((res) => {
+              if (res) {
+                this.searchSubmit();
+                this.$message({
+                  message: '删除成功',
+                  type: 'success'
+                });
+              }
+              this.delSignActive = {};
               done();
               setTimeout(() => {
                 instance.confirmButtonLoading = false;
@@ -315,6 +329,7 @@ export default {
             });
           } else {
             done();
+            this.delSignActive = {};
           }
         }
       }).then(action => {
@@ -348,10 +363,10 @@ export default {
   }
 }
 .show_search {
-  position: absolute; top: 24px; left: 0;
+  position: absolute; top: 24px; left: 0; z-index: 2;
   width: 100%;
   padding-top: 15px; padding-bottom: 5px;
-  border-bottom: 1px solid #f6f6f6;
+  border-bottom: 1px solid #f0f0f0;
   > div {
     position: relative;
     width: 100%; height: 36px;
@@ -388,14 +403,15 @@ export default {
       > div {
         position: relative;
         > .el-icon-delete {
-          position: absolute; top: 50%; right: 10px;
-          margin-top: -10px;
+          display: none;
+          position: absolute; bottom: 1px; right: 0px;
           font-size: 16px;
           cursor: pointer;
+          &:hover { color: #186DFB; }
         }
         > h3 {
           height: 24px; line-height: 24px;
-          margin-right: 20px;
+          margin-right: 10px;
           > span {
             display: inline-block;
             font-style: normal; font-size: 12px; color: #186DFB;
@@ -408,7 +424,7 @@ export default {
         > p {
           position: relative;
           height: 22px; line-height: 22px;
-          margin-right: 20px; padding-left: 20px;
+          margin-right: 10px; padding-left: 20px;
           color: #999; font-size: 12px;
           > span {
             position: absolute; top: 0px; left: 0;
@@ -417,14 +433,19 @@ export default {
         > div {
           color: #999; font-size: 12px;
           overflow: hidden;
-          > span { float: right; padding-right: 10px; }
+          > span { float: right; padding-right: 25px; }
         }
         &.sigin_list_dis {
           color: #999;
           > p > i { border-color: #999; color: #999; }
         }
-        &:hover {
+        &.content_list_able:hover {
           color: #186DFB;
+          > p { color: #186DFB; }
+          > div { color: #186DFB; }
+        }
+        &:hover {
+          > .el-icon-delete { display: block; }
         }
         &.content_list_dis {
           > h3 {
@@ -443,12 +464,18 @@ export default {
     width: 100%; height: 30px;
     padding-top: 2px;
     text-align: center;
-    border-top: 1px solid #f6f6f6;
+    border-top: 1px solid #eee;
   }
 }
 .sign_content_list_empty {
   color: #999;
   text-align: center;
   padding: 20px 20px 0 0;
+}
+.content_list_able:hover .vl_icon_v11 {
+  background-position: -323px -350px;
+}
+.content_list_del_atv {
+  background-color: #E0F3FF;
 }
 </style>

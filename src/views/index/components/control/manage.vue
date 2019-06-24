@@ -1,13 +1,13 @@
 <template>
   <div style="height: 100%;position: relative;">
-    <div class="control_manage" v-show="pageType === 1">
+    <div class="control_manage" v-if="pageType === 1">
       <!-- 顶部搜索栏 -->
       <div class="control_manage_box">
         <div class="search_box">
           <el-form :inline="true" ref="manageForm" :model="manageForm" class="manage_form">
             <el-form-item prop="type">
               <el-select v-model="manageForm.type" placeholder="布控类型">
-                <el-option label="全部" :value="null"></el-option>
+                <el-option label="全部类型" :value="null"></el-option>
                 <el-option
                   v-for="item in typeList"
                   :key="item.value"
@@ -18,7 +18,7 @@
             </el-form-item>
             <el-form-item prop="state">
               <el-select v-model="manageForm.state" placeholder="布控状态">
-                <el-option label="全部" :value="null"></el-option>
+                <el-option label="全部状态" :value="null"></el-option>
                 <el-option
                   v-for="item in stateList"
                   :key="item.value"
@@ -27,11 +27,11 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item prop="rank">
-              <el-select v-model="manageForm.rank" placeholder="告警级别">
-                <el-option label="全部" :value="null"></el-option>
+            <el-form-item prop="alarmId">
+              <el-select v-model="manageForm.alarmId" placeholder="告警级别">
+                <el-option label="全部告警等级" :value="null"></el-option>
                 <el-option
-                  v-for="item in rankList"
+                  v-for="item in alarmLevelList"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -52,6 +52,7 @@
             </el-form-item>
             <el-form-item prop="controlObj">
               <el-select
+                @clear="controlObjList = []"
                 v-model="manageForm.controlObj"
                 filterable
                 remote
@@ -70,6 +71,7 @@
             </el-form-item>
             <el-form-item prop="deviceId">
               <el-select
+                @clear="facilityNameList = []"
                 v-model="manageForm.deviceId"
                 filterable
                 remote
@@ -87,8 +89,8 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button class="select_btn" type="primary" @click="getControlList">查询</el-button>
-              <el-button class="reset_btn" type="primary" plain @click="resetForm">重置</el-button>
+              <el-button class="select_btn" @click="getControlList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm">重置</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -168,7 +170,7 @@
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
-                <span class="operation_btn" @click="skipIsDetail(scope.row.surveillanceStatus, scope.row.uid)">查看</span>
+                <span class="operation_btn" @click="skipIsDetail(scope.row.uid)">查看</span>
                 <!-- 待开始 -->
                 <template v-if="scope.row.surveillanceStatus === '待开始'">
                   <span class="operation_wire">|</span>
@@ -197,6 +199,7 @@
           </el-table>
         </div>
         <el-pagination
+          class="cum_pagination"
           v-if="manageList && manageList.list && manageList.list.length > 0"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
@@ -209,7 +212,7 @@
       <div is="delDialog" ref="delDialog" :controlId="controlId" @getControlList="getControlList"></div>
       <div is="stopDialog" ref="stopDialog" :controlId="controlId" @getControlList="getControlList"></div>
     </div>
-    <div v-if="pageType === 2" is="manageDetail" :state="state" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
+    <div v-if="pageType === 2" is="manageDetail" @changePageType="changePageType" :controlId="controlId" @getControlList="getControlList"></div>
     <div v-if="pageType === 3" is="create" @changePageType="changePageType" :createType="2" :controlId="controlId" @getControlList="getControlList"></div>
   </div>
 </template>
@@ -219,18 +222,18 @@ import create from './create.vue';
 import delDialog from './components/delDialog.vue';
 import stopDialog from './components/stopDialog.vue';
 import {getControlList, getControlObject, getControlDevice} from '@/views/index/api/api.control.js';
-import {getDiciData} from '@/views/index/api/api.js';
+import {dataList} from '@/utils/data.js';
 export default {
   components: {manageDetail, create, delDialog, stopDialog},
   data () {
     return {
       pageType: 1,//页面类型：1-列表页，2-详情页，3-修改页
-      state: null,//布控详情状态，0-待开始 1-进行中 2-已结束                                                           
+      // state: null,//布控详情状态，0-待开始 1-进行中 2-已结束                                                           
       // 顶部搜索参数
       manageForm: {
         type: null,
         state: null,
-        rank: null,
+        alarmId: null,
         time: null,
         controlObj: null,
         deviceId: null
@@ -238,7 +241,7 @@ export default {
       lastManageForm: {
         type: null,
         state: null,
-        rank: null,
+        alarmId: null,
         time: null,
         controlObj: null,
         deviceId: null
@@ -255,7 +258,12 @@ export default {
         {label: '短期布控', value: 1},
         {label: '长期布控', value: 2}
       ],
-      rankList: [],
+      alarmLevelList: this.dicFormater(dataList.alarmLevel)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // 布控管理列表数据
       manageList: [],
       // 翻页数据
@@ -266,14 +274,12 @@ export default {
     }
   },
   created () {
-    this.getDiciData();
     this.getControlList();
     const data = this.$route.query;
     // 外部跳转到详情页
-    if (data.pageType && data.state && data.controlId) {
+    if (data.pageType && data.controlId) {
       this.$nextTick(() => {
         this.pageType = parseInt(data.pageType);
-        this.state = parseInt(data.state);
         this.controlId = data.controlId;
       })
     }
@@ -288,19 +294,6 @@ export default {
     }
   },
   methods: {
-    // 获取告警级别字段
-    getDiciData () {
-      getDiciData(11).then(res => {
-        if (res && res.data) {
-          this.rankList = res.data.map(m => {
-            return {
-              value: parseInt(m.enumField),
-              label: m.enumValue
-            }
-          })
-        }
-      })
-    },
     handleCurrentChange (page) {
       this.pageNum = page;
       this.currentPage = page;
@@ -314,12 +307,11 @@ export default {
       this.controlId = uid;
     },
     // 跳转至布控详情
-    skipIsDetail (state, uid) {
-      this.state = state === '待开始' ? 2 : state === '进行中' ? 1 : 3;
+    skipIsDetail (uid) {
       this.controlId = uid;
       this.pageType = 2;
     },
-    // 跳转至布控编辑
+    // 跳转至布控编辑页
     skipIsEditor (uid) {
       this.pageType = 3;
       this.controlId = uid;
@@ -333,41 +325,51 @@ export default {
       this.$router.push({ name: 'control_create', query: {controlId: uid, createType: 3} });
     },
     resetForm () {
-      this.$refs['manageForm'].resetFields();
+      for (let key in this.manageForm) {
+        this.manageForm[key] = null;
+      }
+      this.controlObjList = [];
+      this.facilityNameList = [];
       this.getControlList();
     },
     // 获取所有布控对象
     getControlObject (query) {
-      const params = {
-        name: query
-      }
-      getControlObject(params).then(res => {
-        if (res && res.data) {
-          this.controlObjList = res.data.map(m => {
-            return {
-              value: m.objId,
-              label: m.name,
-              type: m.objType
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: query
         }
-      })
+        getControlObject(params).then(res => {
+          if (res && res.data) {
+            this.controlObjList = res.data.map(m => {
+              return {
+                value: m.objId,
+                label: m.name,
+                type: m.objType
+              }
+            });
+          }
+        })
+      }
     },
     // 获取所有布控设备
     getControlDevice (query) {
-      const params = {
-        name: query
-      }
-      getControlDevice(params).then(res => {
-        if (res && res.data) {
-          this.facilityNameList = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.name
-            }
-          });
+      const _query = this.Trim(query, 'g');
+      if (_query) {
+        const params = {
+          name: query
         }
-      })
+        getControlDevice(params).then(res => {
+          if (res && res.data) {
+            this.facilityNameList = res.data.map(m => {
+              return {
+                value: m.uid,
+                label: m.name
+              }
+            });
+          }
+        })
+      }
     },
     // 获取布控列表
     getControlList () {
@@ -395,7 +397,7 @@ export default {
         order: null,
         'where.surveillanceType': this.manageForm.type,//布控类型
         'where.status': this.manageForm.state,//布控状态
-        'where.level': this.manageForm.rank,//告警级别
+        'where.level': this.manageForm.alarmId,//告警级别
         'where.dateStart': this.manageForm.time && this.manageForm.time[0],//布控开始时间
         'where.dateEnd': this.manageForm.time && this.manageForm.time[1],//布控结束时间
         'where.surveillanceObjectId': this.manageForm.controlObj && this.manageForm.controlObj.value,//布控对象id
