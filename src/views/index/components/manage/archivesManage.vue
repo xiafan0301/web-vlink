@@ -16,7 +16,7 @@
         <div class="content">
           <el-tree
             class="depart_tree_list"
-            :data="departmentList.A"
+            :data="allDepartmentList"
             node-key="uid"
             highlight-current
             :current-node-key="activeSelect"
@@ -281,7 +281,8 @@ export default {
       },
       departmentFormList: [], // 新增和修改的单位
       allDepartmentList: [],  // 当前用户所属单位及下级单位
-      departmentList: { A: [], B: [], C: [], D: [], E: [] }, // 部门树
+      departmentList: [], // 下级单位
+      // departmentList: { A: [], B: [], C: [], D: [], E: [] }, // 部门树
       userInfo: {}, // 用户信息
       areaId: 1, // 行政区域id 1--省
       areaName: null, // 行政区域change
@@ -290,6 +291,7 @@ export default {
       countyList: [], // 县数据
       streetList: [], // 街道数据
       // userList: [], // 用户数据
+      finalData: []
     }
   },
   mounted () {
@@ -387,14 +389,22 @@ export default {
         })
         .catch(() => {})
     },
+    handleDepartData (parentArr, childArr) {
+      childArr.forEach(a => {
+        parentArr.forEach(b => {
+          if (a.organPid === b.uid) {
+            if (!b.children.find(c => {return a.uid === c.uid})) 
+              b.children.push(a);
+              if (b.children && b.children.length > 0) {
+                this.handleDepartData(b.children, childArr);
+              }
+          }
+        });
+      });
+      this.allDepartmentList = parentArr;
+    },
     // 获取当前部门及子级部门
     getDepartList () {
-      this.departmentList.A = [];
-      this.departmentList.B = [];
-      this.departmentList.C = [];
-      this.departmentList.D = [];
-      this.departmentList.E = [];
-      this.allDepartmentList = [];
       const params = {
         'where.organName': this.keyWord,
         'where.proKey': this.userInfo.proKey,
@@ -404,147 +414,25 @@ export default {
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.allDepartmentList.push(this.userInfo.organList[0]);
+            const params = {
+              uid: this.userInfo.organList[0].uid,
+              organName: this.userInfo.organList[0].organName,
+              isShow: true,
+              children: []
+            };
+
+            this.allDepartmentList.push(params);
+
             res.data.list.map(item => {
-              this.allDepartmentList.push(item);
+              item.children = [];
+              this.departmentList.push(item);
             });
-            this.allDepartmentList.map((item, index) => {
-              if (item.organLayer === 1) {
-                this.departmentList.A.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-             if (item.organLayer === 2) {
-                this.departmentList.B.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 3) {
-                this.departmentList.C.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 4) {
-                this.departmentList.D.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 5) {
-                this.departmentList.E.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isChecked: false,
-                })
-              }
-            });
-            // 2
-            this.departmentList.A.forEach(a => {
-              if (a.uid === this.userInfo.organList[0].uid) {
-                a.isShow = true;
-                this.activeSelect = a.uid;
-                this.defaultExpandKey.push(a.uid);
-                this.$store.commit('setCurrentOrgan', {
-                  currentOrganId: a.uid
-                });
-              }
-              this.departmentList.B.forEach(b => {
-                if (a.uid === b.organPid) {
-                  a.children.push(b);
-                }
-              })
-            })
-            // 3
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  this.departmentList.C.forEach(c => {
-                    if (b.uid === c.organPid) {
-                      b.children.push(c);
-                    }
-                  })
-                })
-              }
-            })
-            // 4
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  if (b.children && b.children.length > 0) {
-                    b.children.forEach(c => {
-                      this.departmentList.D.forEach(d => {
-                        if (c.uid === d.organPid) {
-                          c.children.push(d);
-                        }
-                      })
-                    })
-                  }
-                })
-              }
-            })
-            // 5
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  if (b.children && b.children.length > 0) {
-                    b.children.forEach(c => {
-                      if (c.children && c.children.length > 0) {
-                        c.children.forEach(d => {
-                          this.departmentList.E.forEach(e => {
-                            if (d.uid === e.organPid) {
-                              d.children.push(e);
-                            }
-                          })
-                        })
-                      }
-                    })
-                  }
-                })
-              }
-            })
+
+            this.handleDepartData(this.allDepartmentList, this.departmentList);
           }
         })
     },
+    
     // 节点被选中
     handleNodeClick (obj) {
       this.activeSelect = obj.uid;

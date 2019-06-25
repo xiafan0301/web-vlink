@@ -257,6 +257,7 @@ export default {
 
 <style lang="scss" scoped>
 .add_car {
+  margin-bottom: 100px;
   .add_box {
     margin: 0 10px 20px;
     // padding: 10px;
