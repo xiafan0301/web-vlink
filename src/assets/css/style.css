@@ -313,6 +313,8 @@
 .vl_icon2_025 { background-position: -1126px -293px; }
 .vl_icon2_025:hover { background-position: -1126px -418px; }
 
+/* 车辆侦查 */
+.vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -988px -1296px;}
 
 .vl_content_pad { padding: 10px; }
 
