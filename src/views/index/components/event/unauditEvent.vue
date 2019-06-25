@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li style="align-items: center;margin-bottom:10px;">
+                <li style="align-items: baseline;">
                   <span class="audit-label">状态:</span>
                   <span class="audit-status">待审核</span>
                 </li>
@@ -42,11 +42,12 @@
                 </li>
               </ul>
               <el-form :inline="false" :model="addEventForm" class="add_event_form" :rules="rules" ref="addEventForm">
-                <el-form-item label="事发地点:" label-width="85px" prop="eventAddress">
-                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @input="changeAddress" />
+                <el-form-item label="事发地点:" label-width="85px" prop="eventAddress" class="address_input">
+                  <el-input type="text" style='width: 95%' placeholder="请输入事发地点" id="address" v-model="addEventForm.eventAddress" @focus="getAutoInputAddress" @input="changeAddress" ></el-input>
+                  <i class="vl_icon vl_icon_event_27 address_icon" @click="initMap"></i>
                 </el-form-item>
                 <el-form-item label="事件情况:" label-width="85px" prop="eventDetail">
-                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" />
+                  <el-input type="textarea" rows="5" style='width: 95%' placeholder="请对事发情况进行描述，文字限制140字" v-model="addEventForm.eventDetail" maxlength="140"></el-input>
                 </el-form-item>
                 <div class="img-form-item">
                   <template v-if="uploadImgList.length > 0">
@@ -68,8 +69,9 @@
                         <i class="vl_icon vl_icon_event_24"></i>
                       </div>
                       <div class="play_icon">
-                        <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
-                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i>
+                        <i v-show="!isSmallPlaying" class="play_btn vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
+                        <!-- <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
+                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i> -->
                       </div>
                     </div>
                   </template>
@@ -140,7 +142,7 @@
           </vue-scroll>
         </div>
       </div>
-      <div class="content_right">
+      <div class="content_right" v-show="isShowMap">
         <!--地图-->
         <div id="mapBox"></div>
         <div class="right-flag">
@@ -152,6 +154,7 @@
             <li><i class="el-icon-minus" @click="mapZoomSet(-1)"></i></li>
           </ul>
         </div>
+        <i class="vl_icon vl_icon_event_23 close_btn" @click="closeMap"></i>
       </div>
     </div>
     <div class="operation-footer">
@@ -207,6 +210,20 @@
         <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
       </div>
     </el-dialog>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.cname}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <!-- <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span> -->
+          <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
@@ -221,6 +238,7 @@ export default {
   components: { BigImg },
   data () {
     return {
+      isShowMap: false, // 是否显示地图
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList1: [], // 要放大的图片
@@ -279,7 +297,10 @@ export default {
       uplaodVideoList: [], // 要上传的视频列表
       isRejectLoading: false, // 驳回加载中
       isPassLoading: false, // 通过加载中
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
       isPlaying: false, // 是否播放视频
+      isSmallPlaying: false, // 小屏显示
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
       autoInput: null, // 自动输入对象
@@ -321,13 +342,19 @@ export default {
     this.getRejectReasonList();
   },
   mounted () {
-    this.initMap();
+    // this.initMap();
     setTimeout(() => {
       this.dataStr = JSON.stringify(this.addEventForm); // 将初始数据转成字符串
     }, 1000);
     this.getDetail();
   },
   methods: {
+    // 当获取地址输入框焦点时
+    getAutoInputAddress () {
+      this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+    },
     // 返回
     back () {
       const data = JSON.stringify(this.addEventForm);
@@ -425,17 +452,24 @@ export default {
                 }
               })
             }
-
-            this.mapMark(this.addEventForm);
-
+            
             this.addEventForm.eventType = eventType.toString(); // 将整型转成字符串
             this.addEventForm.eventLevel = eventLevel.toString();
           }
         })
         .catch(() => {})
     },
+    // 关闭地图
+    closeMap () {
+      if (this.map) {
+        this.map.destroy();
+        this.isShowMap = false;
+      }
+    },
     initMap () {
       let _this = this;
+      _this.isShowMap = true;
+
       _this.resetMap();
       let map = new window.AMap.Map('mapBox', {
         zoom: 16, // 级别
@@ -450,7 +484,6 @@ export default {
       })
 
       map.on('click', function(e) {
-        console.log(e);  
         if (_this.newMarker) {
           _this.map.remove(_this.newMarker);
           _this.newMarker = null;
@@ -471,6 +504,7 @@ export default {
           });
         });
       });
+      this.mapMark(this.addEventForm);
     },
     resetMap () {
       let _this = this;
@@ -495,7 +529,7 @@ export default {
       let hoverWindow = null;
       if (obj.longitude > 0 && obj.latitude > 0) {
         let offSet = [-20.5, -48];
-        _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
+       
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: _this.map,
           position: [obj.longitude, obj.latitude],
@@ -525,6 +559,9 @@ export default {
         marker.on('mouseout', function () {
           if (hoverWindow) { hoverWindow.close(); }
         });
+        if (_this.map) {
+           _this.map.setCenter([obj.longitude, obj.latitude]); // 根据经纬度重新设置地图中心点
+        }
       }
     },
     // 事件地址change
@@ -749,21 +786,45 @@ export default {
         }
       })
     },
-    // 播放视频
-    playVideo (val) {
-      if (val) {
-        this.isPlaying = true;
-        document.getElementById('add_video').play();
-        this.handleVideoEnd();
-      } else {
-        this.isPlaying = false;
-        document.getElementById('add_video').pause();
-      }
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+      // this.isPlaying = true;
+      document.getElementById('vlJtcLargeV').play();
     },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      this.isPlaying = false;
+      document.getElementById('vlJtcLargeV').pause();
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('vlJtcLargeV').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo () {
+      document.getElementById('vlJtcLargeV').play();
+      this.isPlaying = true;
+      this.handleVideoEnd();
+    },
+    // // 播放视频
+    // playVideo (val) {
+    //   if (val) {
+    //     this.isPlaying = true;
+    //     document.getElementById('add_video').play();
+    //     this.handleVideoEnd();
+    //   } else {
+    //     this.isPlaying = false;
+    //     document.getElementById('add_video').pause();
+    //   }
+    // },
     // 监听视频是否已经播放结束
     handleVideoEnd () {
       let _this = this;
-      const obj = document.getElementById('add_video');
+      const obj = document.getElementById('vlJtcLargeV');
       if (obj) {
         obj.addEventListener('ended', () => { // 当视频播放结束后触发
           _this.isPlaying = false;
@@ -860,6 +921,17 @@ export default {
         }
         .add_event_form {
           // width: 100%;
+          .address_input {
+            position: relative;
+            /deep/ .el-input__inner {
+              padding: 0 20px 0 15px;
+            }
+            .address_icon {
+              position: absolute;
+              right: 6%; 
+              top: 13px;
+            }
+          }
           /deep/ .el-form-item {
             margin-bottom: 20px;
           }
@@ -894,7 +966,7 @@ export default {
                 margin-top: 22%;
               }
               .play_btn {
-                margin-left: 37%;
+                margin-left: 28%;
                 margin-top: 22%;
               }
             }
@@ -931,12 +1003,18 @@ export default {
     .content_right {
       width: 100%;
       height: 100%;
+      position: relative;
       #mapBox{
         height: 100%;
         width: 100%;
       }
+      .close_btn {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
       .right-flag {
-        position: absolute; right: 40px; bottom: 100px;
+        position: absolute; right: 20px; bottom: 0;
         height: 220px;
         transition: right .3s ease-out;
         animation: fadeInRight .4s ease-out .4s both;
@@ -999,6 +1077,66 @@ export default {
       }
     }
   }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
 

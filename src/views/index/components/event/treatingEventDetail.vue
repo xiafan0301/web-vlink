@@ -1,5 +1,5 @@
 <template>
-<vue-scroll>
+<!-- <vue-scroll> -->
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
@@ -280,7 +280,7 @@
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
-</vue-scroll>
+<!-- </vue-scroll> -->
 </template>
 <script>
 import EventBasic from './components/eventBasic';
@@ -469,21 +469,15 @@ export default {
     },
     // 跳至查看布控详情页面
     skipControlPage () {
-      // let state;
-      // if (this.$route.query.status === 'handling') {
-      //   state = 1;
-      // } else {
-      //   state = 3
-      // }
       this.$router.push({path: '/control/manage', query: { pageType: 2, controlId: this.basicInfo.surveillanceId }});
     },
     // 跳至查看调度指挥页面
     skipEventCtcDetailPage () {
       if (this.basicInfo.dispatchStatus) {
         if (this.basicInfo.dispatchStatus === 1) { // 进行中  1--进行中  2---已结束
-          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_ing', eventId: this.$route.query.eventId}});
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_ing', eventId: this.$route.query.eventId, evt_status: this.$route.query.status}});
         } else { // 已结束
-          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_end', eventId: this.$route.query.eventId}});
+          this.$router.push({name: 'event_ctc_detail', query: {status: 'ctc_end', eventId: this.$route.query.eventId, evt_status: this.$route.query.status}});
         }
       }
     },
@@ -511,7 +505,8 @@ export default {
 <style lang="scss" scoped>
 .treating-detail {
   width: 100%;
-  // margin-bottom: 20px;
+  height: 100%;
+  overflow-y: scroll;
   .content-box {
     width: 100%;
     padding: 0 20px;

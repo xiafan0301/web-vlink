@@ -153,7 +153,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.panoramaPath" alt="">
+            <img :src="showSim ? sturcDetail.uploadPath : sturcDetail.panoramaPath" alt="">
             <span>{{showSim ? '上传图' : '全景图'}}</span>
           </div>
           <div class="struc_c_d_box">
@@ -164,8 +164,7 @@
             <div class="struc_c_d_info">
               <h2>对比信息<div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span>青年</span>
-                <span>女性</span>
+                <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
@@ -188,7 +187,7 @@
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
-            <video id="capVideo" src="../../../../assets/video/demo.mp4"></video>
+            <video id="capVideo" :src="sturcDetail.videoPath"></video>
             <div class="play_btn" @click="videoTap" v-show="!playing">
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>
@@ -216,14 +215,13 @@
 </template>
 <script>
   let AMap = window.AMap;
-  import {testData} from '../judge/testData';
   import {ajaxCtx} from '@/config/config';
   import {ScpGETstrucInfoList, ScpGETdeviceListById, ScpGETretrievalHisById} from '../../api/api.search.js';
   import {JtcPUTAppendixsOrder, JtcPOSTAppendixInfo, JtcGETAppendixInfoList } from '../../api/api.judge'
   export default {
     data() {
       return {
-        targetType: '1',
+        targetType: null,
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 18,
@@ -238,7 +236,6 @@
         },
         pagination: { total: 0, pageSize: 16, pageNum: 1 },
         uploadAcion: ajaxCtx.base + '/new',
-        testData: testData,
         mapData: [],
         searching: false,
         curImageUrl: '', // 当前上传的图片
@@ -342,7 +339,7 @@
       },
       drop (e) {
         let x = {
-          contentUid: 43143,
+          contentUid: this.$store.state.loginUser.uid,
           cname: '拖拽图片' + Math.random(),
           filePathName: '拖拽图片' + Math.random(),
           path: e.dataTransfer.getData("Text")
@@ -414,7 +411,7 @@
           if (oRes) {
             let x = {
               cname: oRes.fileName, // 附件名称 ,
-              contentUid: 43143,
+              contentUid: this.$store.state.loginUser.uid,
               // desci: '', // 备注 ,
               filePathName: oRes.fileName, // 附件保存名称 ,
               fileType: 1, // 文件类型 ,
@@ -469,7 +466,7 @@
         this.loadingHis = true;
         this.historyPicDialog = true;
         let params = {
-          userId: 43143,
+          userId: this.$store.state.loginUser.uid,
           fileType: 1
         }
         JtcGETAppendixInfoList(params).then(res => {
@@ -567,6 +564,10 @@
         if (!boolean) {
           if (this.curImgNum === 0) {
             this.$message.warning('请至少上传或选择一张图片')
+            return false;
+          }
+          if (!this.targetType) {
+            this.$message.warning('请选择人像抓拍还是车像抓拍')
             return false;
           }
           this.searching = true;

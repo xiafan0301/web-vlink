@@ -5,7 +5,7 @@
         <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
           <el-form-item prop="dateTime">
             <el-date-picker
-              style="width: 400px;"
+              style="width: 260px;"
               v-model="searchForm.dateTime"
               type="daterange"
               value-format="yyyy-MM-dd"
@@ -99,7 +99,12 @@
             :show-overflow-tooltip='true'
           >
           <template slot-scope="scope">
-            <span @click="handleSelectDevice(scope.row)">{{scope.row.deviceNumber}}</span>
+            <template v-if="scope.row.deviceNumber > 0">
+              <span class="active_span" :style="[scope.row.deviceNumber && scope.row.deviceNumber > 0 ? styleObj : '']" @click="handleSelectDevice(scope.row)">{{scope.row.deviceNumber}}</span>
+            </template>
+            <template v-else>
+              <span>{{scope.row.deviceNumber}}</span>
+            </template>
           </template>
           </el-table-column>
           <el-table-column
@@ -119,15 +124,12 @@
                 <span style="color: #f2f2f2">|</span>
                 <span class="operation_btn" @click="showCloseDialog(scope.row)">关闭</span>
               </template>
-              <!-- <span style="color: #f2f2f2">|</span> -->
               <template v-if="scope.row.roundStatus === 1">
                 <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
                 <span style="color: #f2f2f2">|</span>
                 <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
               </template>
               <template v-if="scope.row.roundStatus === 3">
-                <!-- <span class="operation_btn" @click="skipAddRatotionPage(scope.row)">编辑</span>
-                <span style="color: #f2f2f2">|</span> -->
                 <span class="operation_btn" @click="showDeleteDialog(scope.row)">删除</span>
               </template>
             </template>
@@ -228,6 +230,10 @@ import { apiVideoRoundList, apiDelVideoRoundList, closeVideoRound, getVideoRound
 export default {
   data () {
     return {
+      styleObj: {
+        'color': '#0C70F8',
+        'cursor': 'pointer'
+      },
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
         dateTime: [],
@@ -255,8 +261,8 @@ export default {
         status = this.searchForm.status;
       }
       const params = {
-        'where.startTime': this.searchForm.dateTime[0] + '00:00:00',
-        'where.endTime': this.searchForm.dateTime[1] + '23:59:59',
+        'where.startTime': this.searchForm.dateTime[0] + ' 00:00:00',
+        'where.endTime': this.searchForm.dateTime[1] + ' 23:59:59',
         'where.status': status,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -353,8 +359,8 @@ export default {
       const end = new Date();
       const start = new Date();
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-      const startDate = formatDate(start, 'yyyy-MM-dd HH:mm:ss');
-      const endDate = formatDate(end, 'yyyy-MM-dd HH:mm:ss');
+      const startDate = formatDate(start, 'yyyy-MM-dd');
+      const endDate = formatDate(end, 'yyyy-MM-dd');
       this.searchForm.dateTime.push(startDate);
       this.searchForm.dateTime.push(endDate);
     },
@@ -443,9 +449,9 @@ export default {
       margin-top: 8px;
       /deep/.el-table__row {
         .device_num {
-          cursor: pointer;
-          &:hover {
-            color: #0C70F8;
+          // color: #0C70F8;
+          .active_span:hover {
+            text-decoration: underline;
           }
         }
       }

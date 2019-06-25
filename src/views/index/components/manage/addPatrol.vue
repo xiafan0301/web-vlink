@@ -10,15 +10,16 @@
     </div>
     <div class="content_box">
       <div class="content_new_group">
-        <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="100px">
+        <el-form :inline="true" :model="addForm" :rules="rules" class="add_form" ref="addForm" label-width="110px">
           <el-form-item label="轮巡名称:" style="width: 49%;" prop="roundName">
-            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称"></el-input>
+            <el-input style="width: 100%;" v-model="addForm.roundName" placeholder="请输入轮巡名称" maxlength="10"></el-input>
           </el-form-item>
            <el-form-item label="轮巡时间:" style="width: 49%;" prop="dateTime">
             <el-date-picker
               style="width: 100%;"
               v-model="addForm.dateTime"
               type="datetimerange"
+              :editable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               :picker-options="pickerOptions0"
@@ -33,10 +34,10 @@
               <el-option label="4" :value="4"></el-option>
               <el-option label="5" :value="5"></el-option>
               <el-option label="9" :value="9"></el-option>
-              <el-option label="16" :value="16"></el-option>
+              <!-- <el-option label="16" :value="16"></el-option> -->
             </el-select>
           </el-form-item>
-          <el-form-item label="间隔时间:" style="width: 49%;" prop="roundInterval">
+          <el-form-item label="间隔时间(秒):" style="width: 49%;" prop="roundInterval">
             <el-input style="width: 100%;" v-model="addForm.roundInterval" placeholder="10-120秒"></el-input>
           </el-form-item>
         </el-form>
@@ -52,6 +53,7 @@
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 240px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option value="全部特性"></el-option>
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -62,6 +64,7 @@
               </el-form-item>
               <el-form-item prop="groupId">
                 <el-select  style="width: 240px;" v-model="searchForm.groupId" placeholder="自定义组">
+                  <el-option value="全部分组"></el-option>
                   <el-option
                     v-for="(item, index) in groupsList"
                     :key="index"
@@ -73,6 +76,7 @@
               </el-form-item>
               <el-form-item prop="dutyOrganId">
                 <el-select style="width: 240px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option value="全部部门"></el-option>
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -132,6 +136,21 @@
       <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addForm')">保存</el-button>
       <el-button class="operation_btn back_btn" @click="cancelSubmit">取消</el-button>
     </div>
+    <!--返回提示弹出框-->
+    <el-dialog
+      title="提示"
+      :visible.sync="backDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">返回后内容不会保存，您确定要返回吗?</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="backDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </vue-scroll>
 </template>
@@ -141,7 +160,7 @@ import mapSelect from './components/mapSelect.vue';
 import { formatDate, random14 } from '@/utils/util.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { validateDurationTime } from '@/utils/validator.js';
+import { validateDurationTime, validatePatrolTime } from '@/utils/validator.js';
 import { getAllDevices, getCusGroup, getDepartmentList } from '@/views/index/api/api.manage.js';
 import { addVideoRound, getVideoRoundDetail, updateVideoRoundState } from '@/views/index/api/api.video.js';
 export default {
@@ -149,26 +168,32 @@ export default {
   data () {
     return {
       isSelected: 0, // 查询--重置
+      backDialog: false, // 返回提示弹出框
       tabState: 1, // 地图选择
       addForm: {
         roundName: null, // 轮巡名称
-        roundInterval: null, // 间隔时间
-        frameNum: null, // 画面数
-        dateTime: [] // 轮巡时间
+        roundInterval: 60, // 间隔时间
+        frameNum: 4, // 画面数
+        dateTime: [], // 轮巡时间
       },
       pickerOptions0: {
-        disabledDate (time) {
-          return time.getTime() < (new Date().getTime() - 24 * 3600 * 1000);
+        disabledDate: (d) => {
+          d = d.getTime();
+          if (d < new Date().getTime() - 24 * 60 * 60 * 1000) {
+            return true;
+          } else {
+            return false;
+          }
         }
       },
       rules: {
         roundName: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
-          { max: 10, message: '最多输入10个字', trigger: 'blur' }
         ],
-        dateTime: [
-          { required: true, message: '该项内容不可为空', trigger: 'blur' },
-        ],
+       dateTime: [
+         { required: true, message: '该项内容不可为空', trigger: 'blur' },
+         { validator: validatePatrolTime, trigger: 'blur' }
+       ],
         roundInterval: [
           { required: true, message: '该项内容不可为空', trigger: 'blur' },
           { validator: validateDurationTime, trigger: 'blur' }
@@ -178,9 +203,9 @@ export default {
         ]
       },
       searchForm: {
-        groupId: null, // 分组id
-        intelCharac: null, // 智能特性
-        dutyOrganId: null, // 责任部门id
+        groupId: '全部分组', // 分组id
+        intelCharac: '全部特性', // 智能特性
+        dutyOrganId: '全部部门', // 责任部门id
         devName: null // 设备名称
       },
       allDeviceList: [], // 所有的设备列表
@@ -208,6 +233,7 @@ export default {
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+    this.dataStr = JSON.stringify(this.addForm); // 将初始数据转成字符串
 
     if (this.$route.query.id) {
       this.patrolId = this.$route.query.id;
@@ -266,7 +292,6 @@ export default {
         getVideoRoundDetail(this.patrolId)
           .then(res => {
             if (res.data) {
-              console.log('sss', res.data);
               
               this.addForm.roundName = res.data.roundName;
               this.addForm.roundInterval = res.data.roundInterval;
@@ -276,7 +301,6 @@ export default {
 
               this.alcurrentDeviceList = JSON.parse(JSON.stringify(res.data.areaGroupList)); // 保存一份原始的当前设备下的设备列表
               this.currentDeviceList = JSON.parse(JSON.stringify(res.data.areaGroupList));
-              console.log(this.currentDeviceList)
 
               this.currentDeviceList.map(item => {
                 let cname = item.areaName;
@@ -304,8 +328,6 @@ export default {
                 this.leftDeviceNumber += item.deviceList.length;
                 this.leftDeviceNumber += item.bayonetList.length;
               });
-              console.log('hhh', this.currentDeviceList)
-              console.log('sss', this.leftDeviceNumber)
             }
           })
           .catch(() => {})
@@ -391,10 +413,6 @@ export default {
         this.selectDeviceList[index].isChecked = true;
       }
 
-      // if (checkedArr.length === 0 || checkedArr.length < this.selectDeviceList[index].deviceList.length) {
-      //   this.selectDeviceList[index].isChecked = false;
-      // }
-
       if (this.selectDeviceList[index].deviceList.length !== 0) {
         if (checkedSxtArr.length === 0 || checkedSxtArr.length < this.selectDeviceList[index].deviceList.length) {
           this.selectDeviceList[index].isChecked = false;
@@ -405,7 +423,7 @@ export default {
           this.selectDeviceList[index].isChecked = false;
         }
       }
-
+      this.selectDeviceList = JSON.parse(JSON.stringify(this.selectDeviceList));
       // 过滤出父级中没有选中
       let checkedParentArr = this.selectDeviceList.filter(itm => {
         return itm.isChecked === false;
@@ -471,7 +489,7 @@ export default {
           this.currentDeviceList[index].isChecked = false;
         }
       }
-
+      this.currentDeviceList = JSON.parse(JSON.stringify(this.currentDeviceList));
     },
     // 从添加设备接收要提交的设备
     emitFinalDevice (list, number, selectList, selectNum) {
@@ -547,8 +565,32 @@ export default {
     },
     // 获取所有可选的设备
     getAllDevicesList () {
+      let groupId, dutyOrganId, intelCharac;
+      if (this.searchForm.groupId === '全部分组') {
+        groupId = null;
+      } else {
+        groupId = this.searchForm.groupId;
+      }
+      if (this.searchForm.dutyOrganId === '全部部门') {
+        dutyOrganId = null;
+      } else {
+        dutyOrganId = this.searchForm.dutyOrganId;
+      }
+      if (this.searchForm.intelCharac === '全部特性') {
+        intelCharac = null;
+      } else {
+        intelCharac = this.searchForm.intelCharac;
+      }
+
       this.selectDeviceNumber = 0;
-      getAllDevices(this.searchForm)
+
+      const params = {
+        groupId,
+        dutyOrganId,
+        intelCharac,
+        devName: this.searchForm.devName
+      }
+      getAllDevices(params)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;
@@ -556,11 +598,9 @@ export default {
             //在可选设备中删除已有的设备
             if (this.patrolId) {
               if (this.currentDeviceList.length > 0) {
-                console.log('77777')
                 this.currentDeviceList.map(item => {
                   this.selectDeviceList.map((val) => {
                     if (item.areaUid == val.uid) {
-                      console.log('nnnnn')
                       item.deviceList.map(a => {
                         val.deviceList.map((b, i) => {
                           if (a.uid === b.uid) {
@@ -613,6 +653,7 @@ export default {
           if (this.patrolId) {
             this.editPatrolInfo();
           } else {
+            console.log('88888')
             this.addPatrolInfo();
           }
         }
@@ -620,8 +661,7 @@ export default {
     },
     // 新增轮巡
     addPatrolInfo () {
-      // this.$refs[form].validate(valid => {
-      //   if (valid) {
+      console.log('77777')
       if (this.currentDeviceList.length === 0) {
         this.$message({
           type: 'warning',
@@ -630,6 +670,7 @@ export default {
         });
         return;
       }
+      console.log('666666')
       let devList = [], bayList = [];
       this.currentDeviceList.map(item => {
         if (item.deviceList.length > 0) {
@@ -698,12 +739,20 @@ export default {
           });
         });
 
-        // let newAllDeviceIds = JSON.parse(JSON.stringify(allDeviceIds));
+        // console.log('currSxtDeviceIds', currSxtDeviceIds)
+        // console.log('allSxtDeviceIds', allSxtDeviceIds)
+
+        let newCurrSxtDeviceIds = JSON.parse(JSON.stringify(currSxtDeviceIds));
+        let newAllSxtDeviceIds = JSON.parse(JSON.stringify(allSxtDeviceIds));
+
+        let newCurrKkDeviceIds = JSON.parse(JSON.stringify(currKkDeviceIds));
+        let newAllKkDeviceIds = JSON.parse(JSON.stringify(allKkDeviceIds));
+
         // 筛选出新添加的设备 -- 摄像头
         for (let len = currSxtDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = allSxtDeviceIds.length, j = length -1; j >= 0; j--) {
             if (currSxtDeviceIds[i] === allSxtDeviceIds[j]) {
-              currSxtDeviceIds.splice(i, 1);
+              newCurrSxtDeviceIds.splice(i, 1);
             }
           }
         }
@@ -711,8 +760,7 @@ export default {
         for (let len = allSxtDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = currSxtDeviceIds.length, j = length -1; j >= 0; j--) {
             if (allSxtDeviceIds[i] === currSxtDeviceIds[j]) {
-              // delSxtList.push()
-              allSxtDeviceIds.splice(i, 1);
+              newAllSxtDeviceIds.splice(i, 1);
             }
           }
         }
@@ -721,7 +769,7 @@ export default {
         for (let len = currKkDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = allKkDeviceIds.length, j = length -1; j >= 0; j--) {
             if (currKkDeviceIds[i] === allKkDeviceIds[j]) {
-              currKkDeviceIds.splice(i, 1);
+              newCurrKkDeviceIds.splice(i, 1);
             }
           }
         }
@@ -729,24 +777,22 @@ export default {
         for (let len = allKkDeviceIds.length, i = len -1; i >= 0; i--) {
           for (let length = currKkDeviceIds.length, j = length -1; j >= 0; j--) {
             if (allKkDeviceIds[i] === currKkDeviceIds[j]) {
-              // delSxtList.push()
-              allKkDeviceIds.splice(i, 1);
+              newAllKkDeviceIds.splice(i, 1);
             }
           }
         }
-        devList = currSxtDeviceIds;
-        allSxtDeviceIds.map(item => {
+        // console.log('currSxtDeviceIds', newCurrSxtDeviceIds)
+        // console.log('allSxtDeviceIds', newAllSxtDeviceIds)
+        devList = newCurrSxtDeviceIds;
+        newAllSxtDeviceIds.map(item => {
           devList.push(item);
         });
 
-        bayList = currKkDeviceIds;
-        allKkDeviceIds.map(item => {
+        bayList = newCurrKkDeviceIds;
+        newAllKkDeviceIds.map(item => {
           bayList.push(item);
         });
 
-
-        console.log('devList', devList);
-        console.log('bayList', bayList)
       } else {
         this.alcurrentDeviceList.map(item => {
           item.deviceList.map(a => {
@@ -759,6 +805,11 @@ export default {
       }
       const params = {
         id: this.patrolId,
+        frameNum: this.addForm.frameNum,
+        roundInterval: parseInt(this.addForm.roundInterval),
+        roundName: this.addForm.roundName,
+        startTime: this.addForm.dateTime[0],
+        endTime: this.addForm.dateTime[1],
         bayList,
         devList
       };
@@ -803,10 +854,29 @@ export default {
     },
     // 返回
     cancelSubmit () {
+      const data = JSON.stringify(this.addForm);
+      if (!this.patrolId) { // 新增
+        if (this.dataStr === data && this.currentDeviceList.length === 0) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      } else { // 修改
+        if (this.dataStr === data) {
+          this.$router.back(-1);  
+        } else {
+          this.backDialog = true;
+        }
+      }
+    },
+    // 确定返回 
+    sureBack () {
+      this.backDialog = false;
       this.$router.back(-1);
     },
     // 轮巡时间change
     handleChangeDate (val) {
+      console.log('uuuuuuuuuuuuuuuuuuuu')
       console.log(val)
     }
   }
@@ -827,7 +897,7 @@ export default {
       .add_form {
         width: 100%;
         .el-form-item__content {
-          width: 80%;
+          width: 75%;
         }
         .select_btn, .reset_btn {
           width: 80px;

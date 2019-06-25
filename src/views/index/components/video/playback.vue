@@ -177,7 +177,7 @@
               <ul class="show_his">
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
-                  <div class="show_his_dis" v-if="item.expireFlag">
+                  <div draggable="false" class="show_his_dis" v-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
@@ -366,14 +366,16 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord(item.uid).then(() => {
-        this.getVideoRecordList();
-        this.$message({
-          message: '删除成功！',
-          type: 'success'
-        });
+      apiDelVideoRecord(item.uid).then((res) => {
+        if (res) {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }
       }).catch(error => {
-        this.$message.error('删除失败！');
+        // this.$message.error('删除失败！');
         console.log("apiDelVideoRecord error：", error);
       });
     },
@@ -381,24 +383,21 @@ export default {
       // apiDelVideoRecords
       this.$confirm('确定删除所有的播放历史吗?', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        apiDelVideoRecords({playType: 2}).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        apiDelVideoRecords({playType: 2}).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecords error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
 
@@ -541,12 +540,12 @@ export default {
   > .vid_title {
     position: absolute; top: 0; left: 270px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 16px 0 0 0;
   }
   > .vid_opes {
-    position: absolute; top: 2px; right: 20px;
+    position: absolute; top: 2px; right: 10px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 15px 0 0 0;
   }
   > .vid_content {
     height: 100%;

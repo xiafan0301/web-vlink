@@ -131,14 +131,13 @@
                 <li v-for="(item, index) in videoRecordList" :key="'hty_' + index">
                   <!-- 过期 -->
                   <div v-if="patrolActive === 1" class="show_his_dis" 
-                    @click="dragEndDis"
                     @dragend="dragEndDis"
                     draggable="true">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
                   </div>
-                  <div class="show_his_dis" v-else-if="item.expireFlag">
+                  <div draggable="false" class="show_his_dis" v-else-if="item.expireFlag">
                     <h3 class="com_ellipsis">{{item.deviceName}}</h3>
                     <p>{{item.playBackStartTime | fmTimestamp}}</p>
                     <i class="el-icon-delete" @click="delVideoRecord(item)"></i>
@@ -176,7 +175,7 @@
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :bResize="bResize"
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :optDis="patrolActive === 1" :bResize="bResize"
               :oConfig="{sign: true}">
             </div>
           </div>
@@ -538,9 +537,14 @@ export default {
         }, this.patrolHandlerData.currentRoundRemain * 1000);
       } else {
         // 当设备数小于等于 画面数 的时候，则相当于不需要轮巡
+        if (this.showVideoTotal !== this.patrolHandlerData.currentRound.frameNum) {
+          // 改变布局
+          this.showVideoTotal = this.patrolHandlerData.currentRound.frameNum;
+          this.bResize = {};
+        }
         this.patrolSetVideoList(this.patrolHandlerData.currentRound.deviceList);
       }
-      this.$message('轮巡已开始。');
+      this.$message('轮巡进行中。');
     },
     // 当前轮巡 轮
     patrolCurrentGoOn () {
@@ -699,14 +703,16 @@ export default {
       });
     },
     delVideoRecord (item) {
-      apiDelVideoRecord(item.uid).then(() => {
-        this.getVideoRecordList();
-        this.$message({
-          message: '删除成功！',
-          type: 'success'
-        });
+      apiDelVideoRecord(item.uid).then((res) => {
+        if (res) {
+          this.getVideoRecordList();
+          this.$message({
+            message: '删除成功！',
+            type: 'success'
+          });
+        }
       }).catch(error => {
-        this.$message.error('删除失败！');
+        // this.$message.error('删除失败！');
         console.log("apiDelVideoRecord error：", error);
       });
     },
@@ -714,24 +720,21 @@ export default {
       // apiDelVideoRecords
       this.$confirm('确定删除所有的播放历史吗?', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        apiDelVideoRecords({playType: 1}).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        apiDelVideoRecords({playType: 1}).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecords error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
 
@@ -887,12 +890,12 @@ export default {
   > .vid_title {
     position: absolute; top: 0; left: 270px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 16px 0 0 0;
   }
   > .vid_opes {
-    position: absolute; top: 2px; right: 20px;
+    position: absolute; top: 2px; right: 10px;
     height: 60px;
-    padding: 20px 0 0 0;
+    padding: 15px 0 0 0;
   }
   > .vid_content {
     height: 100%;

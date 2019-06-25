@@ -2,6 +2,8 @@
   <div class="vl_header">
     <div class="hd_log vl_icon vl_icon_logo">
     </div>
+    <!-- <div class="hd_log vl_ymx_logo">
+    </div> -->
     <div class="hd_user">
       <img src="../assets/img/temp/vl_photo.png" alt="">
       <el-popover
@@ -93,7 +95,7 @@
                 </template>
                 <template v-if="item.objType == 2">
                   <div class="alarm_b_list">{{item.vehicleNumber}}</div>
-                  <div class="alarm_b_list">{{item.numberColor}}</div>
+                  <!-- <div class="alarm_b_list">{{item.numberColor}}</div> -->
                   <div class="alarm_b_list">{{item.vehicleType}}</div>
                 </template>
                 <div class="alarm_b_list" v-if="item.eventCode">{{item.eventCode}}<span>|</span><span>关联事件</span></div>
@@ -116,49 +118,49 @@
       <li>
         <router-link :to="{name: 'video'}">
           <i class="vl_icon vl_icon_001"></i>
-          <span>视频</span>
+          <span>视频查看</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'map'}">
           <i class="vl_icon vl_icon_002"></i>
-          <span>GIS</span>
+          <span>GIS应用</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'event'}">
           <i class="vl_icon vl_icon_003"></i>
-          <span>事件</span>
+          <span>事件管理</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'control'}">
           <i class="vl_icon vl_icon_006"></i>
-          <span>布控</span>
+          <span>智能布控</span>
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'judge'}">
+        <router-link :to="{name: 'vehicle'}">
           <i class="vl_icon vl_icon_004"></i>
-          <span>研判</span>
+          <span>车辆侦查</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'search'}">
           <i class="vl_icon vl_icon_005"></i>
-          <span>检索</span>
+          <span>人脸检索</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'message'}">
           <i class="vl_icon vl_icon_007"></i>
-          <span>消息</span>
+          <span>消息公告</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'manage'}">
           <i class="vl_icon vl_icon_008"></i>
-          <span>管理</span>
+          <span>系统管理</span>
         </router-link>
       </li>
     </ul>
@@ -509,7 +511,7 @@ export default {
       > a {
         display: block;
         width: 100%; height: 90px;
-        font-size: 16px; color: #fff;
+        font-size: 15px; color: #fff;
         border-radius: 8px 8px 0 0;
         text-decoration: none !important;
         text-align: center;
@@ -667,6 +669,7 @@ export default {
     .hd_alarm_b{
       margin-top: 10px;
       display: flex;
+      flex-wrap: wrap;
       /* justify-content: space-between; */
       > div{
         padding: 5px;
@@ -676,6 +679,10 @@ export default {
         border-radius:3px;
         color: #666;
         margin-right: 8px;
+        flex: none;
+        &:last-child {
+          margin-right: 0;
+        }
       }
       .alarm_b_list {
         span {
@@ -809,6 +816,11 @@ export default {
 }
 .person_info {
   height: auto !important;
+}
+.vl_ymx_logo {
+  background: url(../assets/img/ymx/ymx_logo.png) no-repeat;
+  background-size: 100% auto;
+  position: relative; top: 7px;
 }
 /* .el-popover {
   max-height: 476px;

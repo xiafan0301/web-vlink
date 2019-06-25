@@ -165,6 +165,16 @@ export default {
       deleteId: null, // 要删除的车辆id
     }
   },
+  watch: {
+    currentOrganId () {
+      this.getList();
+    }
+  },
+  computed: {
+    currentOrganId () {
+      return this.$store.state.currentOrganId;
+    }
+  },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
@@ -229,7 +239,7 @@ export default {
       const params = {
         'where.vehicleNumber': this.searchForm.vehicleNumber,
         'where.vehicleType': vehicleType,
-        'where.organId': organId,
+        'where.organId': this.$store.state.currentOrganId,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
@@ -240,23 +250,22 @@ export default {
           if (res) {
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
-            // if (this.vehicleTypeList.length > 0) {
-              this.dataList.map(item => {
-                item.vehicleTypeName = '';
-                item.numberTypeName = '';
-                this.vehicleTypeList.map(val => {
-                  if (item.vehicleType == val.enumField) {
-                    item.vehicleTypeName = val.enumValue;
-                  }
-                });
-                this.numberTypeList.map(val => {
-                  if (item.numberType == val.enumField) {
-                    item.numberTypeName = val.enumValue;
-                  }
-                });
+
+            this.dataList.map(item => {
+              item.vehicleTypeName = '';
+              item.numberTypeName = '';
+
+              this.vehicleTypeList.map(val => {
+                if (item.vehicleType == val.enumField) {
+                  item.vehicleTypeName = val.enumValue;
+                }
               });
-              console.log(this.dataList)
-            // }
+              this.numberTypeList.map(val => {
+                if (item.numberType == val.enumField) {
+                  item.numberTypeName = val.enumValue;
+                }
+              });
+            });
           }
         })
     },

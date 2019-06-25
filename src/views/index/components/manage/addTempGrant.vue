@@ -48,6 +48,7 @@
             <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
               <el-form-item prop="intelCharac">
                 <el-select  style="width: 200px;" v-model="searchForm.intelCharac" placeholder="智能特性">
+                  <el-option value="全部特性"></el-option>
                   <el-option
                     v-for="(item, index) in intelCharacList"
                     :key="index"
@@ -58,6 +59,7 @@
               </el-form-item>
               <el-form-item prop="groupId">
                 <el-select  style="width: 200px;" v-model="searchForm.groupId" placeholder="自定义组">
+                  <el-option value="全部分组"></el-option>
                   <el-option
                     v-for="(item, index) in groupsList"
                     :key="index"
@@ -69,6 +71,7 @@
               </el-form-item>
               <el-form-item prop="dutyOrganId">
                 <el-select  style="width: 200px;" v-model="searchForm.dutyOrganId" placeholder="责任部门">
+                  <el-option value="全部部门"></el-option>
                   <el-option
                     v-for="(item, index) in allDepartmentData"
                     :key="index"
@@ -133,7 +136,7 @@ import mapSelect from './components/mapSelect.vue';
 // import { testData } from './components/testData.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { getUserList, getDepartmentList, getASelectDevice, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';
+import { getUserList, getDepartmentList, getCusGroup, getAllDevices } from '@/views/index/api/api.manage.js';
 export default {
   components: {listSelect, mapSelect},
   data () {
@@ -149,9 +152,9 @@ export default {
         }
       },
       searchForm: {
-        intelCharac: null, // 智能特性
-        groupId: null, // 自定义组id
-        dutyOrganId: null, // 责任部门id
+        groupId: '全部分组', // 分组id
+        intelCharac: '全部特性', // 智能特性
+        dutyOrganId: '全部部门', // 责任部门id
         devName: null // 设备名称
       },
       grantList: [], // 所有的授权对象
@@ -481,8 +484,32 @@ export default {
     },
      // 获取所有可选的设备
     getAllDevicesList () {
+      let groupId, dutyOrganId, intelCharac;
+      if (this.searchForm.groupId === '全部分组') {
+        groupId = null;
+      } else {
+        groupId = this.searchForm.groupId;
+      }
+      if (this.searchForm.dutyOrganId === '全部部门') {
+        dutyOrganId = null;
+      } else {
+        dutyOrganId = this.searchForm.dutyOrganId;
+      }
+      if (this.searchForm.intelCharac === '全部特性') {
+        intelCharac = null;
+      } else {
+        intelCharac = this.searchForm.intelCharac;
+      }
+
       this.selectDeviceNumber = 0;
-      getAllDevices(this.searchForm)
+
+      const params = {
+        groupId,
+        dutyOrganId,
+        intelCharac,
+        devName: this.searchForm.devName
+      }
+      getAllDevices(params)
         .then(res => {
           if (res) {
             this.allDeviceList = res.data;

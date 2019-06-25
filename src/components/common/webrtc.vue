@@ -43,7 +43,9 @@
 </template>
 <script>
 import {webrtcConfig} from '@/config/config.js';
+import {random14} from '../../utils/util.js';
 import {oWRMsgs} from './webrtc.data.js';
+import {MapGETmonitorList} from '../../views/index/api/api.map.js';
 export default {
   /**
    *  // 初始化的时候webrt对象
@@ -69,11 +71,12 @@ export default {
    *  exceptCalling // 收到移动端的通话请求，
    *  wrSwitchCall // 视频切换到语音通话
    */
-  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
+//  props: ['oInit', 'oAdd', 'oDel', 'oConfig'],
   data () {
     return {
       localId: 'aorise',
       aWRData: [], // webrtcObj
+      bReconnect: true,
       max: 3, // 同时通话的最大数量
       config: {
       },
@@ -97,6 +100,17 @@ export default {
       },
       videoContainerIdPre: 'remoteContainer_',
       videoIdPre: 'remoteVideo_'
+    }
+  },
+  computed: {
+    oAdd () {
+      return this.$store.state.oAdd;
+    },
+    oDel () {
+      return this.$store.state.oDel;
+    },
+    callingList () {
+      return this.$store.state.callingList;
     }
   },
   watch: {
@@ -167,10 +181,12 @@ export default {
           _this.wsObj.subping.unsubscribe();
           _this.wsObj.subping = null;
         }
-        // 重连ws
-        _this.wsObj.wsTimeout = window.setTimeout(() => {
-          _this.wsReInit(_data);
-        }, 3000);
+        if (_this.bReconnect) {
+          // 重连ws
+          _this.wsObj.wsTimeout = window.setTimeout(() => {
+            _this.wsReInit(_data);
+          }, 3000);
+        }
       });
     },
     // 重连ws
@@ -206,8 +222,8 @@ export default {
     wsSend (signal, obj) {
       if (this.wsObj.stompClient) {
         this.wsObj.stompClient.send(signal, this.wsObj.stompHeaders, JSON.stringify(Object.assign({
-          sender: this.localId,
-          senderName: this.localId,
+          sender: obj.remoteId,
+          senderName: this.$store.state.loginUser.userName,
           senderImgurl: '',
           limit: this.wsObj.wsLimit
         }, obj)));
@@ -228,7 +244,7 @@ export default {
             message: '您最多一次与 ' + this.wsObj.wsLimit + ' 个人进行通话！',
             type: 'warning'
           });
-          this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+          this.wrClose({uid: obj.uid, _mid: obj._mid});
           return;
         }
         let flag = false; // 是否已经在通话中
@@ -334,8 +350,19 @@ export default {
       } else if (oMsg.type === 'DUPLICATE_CONNECTION') {
         // 账号已经在其它地方登录
         _this.wrOff(oMsg);
+        // 断开连接 清除定时器
+        _this.bReconnect = false;
+        if (_this.wsObj.stompClient) {
+          _this.wsObj.stompClient.disconnect();
+        }
+        if (_this.wsObj.pongInval) {
+          window.clearInterval(this.wsObj.pongInval);
+        }
+        if (_this.wsObj.wsTimeout) {
+          window.clearTimeout(this.wsObj.wsTimeout);
+        }
         localStorage.setItem('as_vlink_user_info', '');
-        this.$router.push({name: 'login'});
+        _this.$router.push({name: 'login'});
       } else if (oMsg.type === 'SIGNAL_ROOM_FULL') {
         // 房间已满
         _this.wrOff(oMsg);
@@ -351,7 +378,7 @@ export default {
     // 接收通话请求
     wrRecipient (oMsg, isAddOffered) {
       let _this = this;
-      _this.$confirm('收到' + oMsg.sender + '的视频请求，确定接收吗？', '提示', {
+      _this.$confirm('收到' + oMsg.senderName + '的视频请求，确定接收吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -367,9 +394,10 @@ export default {
           type: t,
           remoteId: oMsg.sender,
           remoteName: oMsg.sender,
-          oMsData: oMsg.data
+          oMsData: oMsg.data,
+          isAddOffered: isAddOffered
         }
-        _this.$emit('exceptCalling', eC)
+        _this.exceptCalling(eC)
       }).catch(() => {
         // 拒绝
         if (isAddOffered) {
@@ -405,7 +433,7 @@ export default {
         // 设备还没被唤醒
         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         if (!navigator.getMedia) {
-          _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+          _this.wrClose({uid: obj.uid, _mid: obj._mid});
           alert('对不起，您的浏览器不支持视频通话。');
           return;
         }
@@ -443,7 +471,7 @@ export default {
             });
           }, function (_error) {
             console.log(_error)
-            _this.$emit('wrClose', {uid: obj.uid, _mid: obj._mid});
+            _this.wrClose({uid: obj.uid, _mid: obj._mid});
             _this.$message.error('您的设备没有摄像头也没有麦，无法通话')
           })
         });
@@ -476,53 +504,29 @@ export default {
         if (_state === 'new') {
           // 新建连接
           console.log('wr >>>>> 新建连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            uid: obj.uid,
-            state: 12 // 正在建立连接
-          });
+          obj.state = 12;
         } else if (_state === 'connecting') {
           // 连接中
           console.log('wr >>>>> 连接中');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            uid: obj.uid,
-            state: 13 // 正在连接中
-          });
+          obj.state = 13;
         } else if (_state === 'connected') {
           // 已连接
           console.log('wr >>>>> 已连接');
           obj.state = 20;
-          _this.wrStateHandler(obj);
-
         } else if (_state === 'disconnected') {
           // 断开连接
           console.log('wr >>>>> 断开连接');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 32 // 断开连接
-          });
+          obj.state = 32;
         } else if (_state === 'failed') {
           // 连接失败
           console.log('wr >>>>> 连接失败');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 31 // 连接失败
-          });
+          obj.state = 31;
         } else if (_state === 'closed') {
           // 连接关闭
+          obj.state = 33;
           console.log('wr >>>>> 连接关闭');
-          _this.wrStateHandler({
-            remoteId: obj.remoteId,
-            _mid: obj._mid,
-            uid: obj.uid,
-            state: 33 // 连接关闭
-          });
         }
+        _this.wrStateHandler(obj);
       };
       // 候选
       _pc.onicecandidate = function (event) {
@@ -575,8 +579,8 @@ export default {
         // 发送应答信令 ===========================
         _pc.createAnswer(function (desc) {
           _pc.setLocalDescription(desc);
-          _this.wsSend(desc ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
-              type: desc ? 'ADDANSWERED' : 'ANSWERED',
+          _this.wsSend(obj.isAddOffered ? webrtcConfig.apis.addanswer : webrtcConfig.apis.answer, {
+              type: obj.isAddOffered ? 'ADDANSWERED' : 'ANSWERED',
               data: JSON.stringify(desc),
               recipient: obj.remoteId,
               recipientName: obj.remoteName
@@ -627,14 +631,6 @@ export default {
       let pc = new PeerConnection(iceServer);
       return pc;
     },
-    // 关闭窗口
-    wrClose (item) {
-      this.$emit('wrClose', {uid: item.uid, _mid: item._mid});
-      // 自己构造 oMsg
-      this.wrOff({
-        sender: item.remoteId
-      }, true);
-    },
     /*
      * 通讯断开连接
      * oMsg  sender&senderName & audioFlag
@@ -653,14 +649,15 @@ export default {
             recipient: oMsg.sender,
             recipientName: oMsg.sender
           });
-          // MEMBER_LEAVED
-//          this.wsSend(webrtcConfig.apis.leave, {
-//            type: 'MEMBER_LEAVED',
-//            data: '',
-//            recipient: oMsg.sender,
-//            recipientName: oMsg.sender
-//          });
+          console.log('关闭')
         }
+        // MEMBER_LEAVED
+        this.wsSend(webrtcConfig.apis.leave, {
+          type: 'MEMBER_LEAVED',
+          data: '',
+          recipient: oMsg.sender,
+          recipientName: oMsg.sender
+        });
       }
       // 显示提示信息
       if (oMsg && oMsg.data) {
@@ -705,7 +702,7 @@ export default {
         state: 状态
         {}：其它信息
        */
-      this.$emit('wrStateEmit', obj);
+      this.wrStateEmit(obj);
     },
     /**
      * 通话消息提示处理器 oWRMsgs
@@ -741,7 +738,7 @@ export default {
     // 切换语音
     wrSwitchCall (item) {
       item.type === '0' ? item.type = '1' : item.type = '0';
-      this.$emit('wrSwitchCall', item);
+      this.$store.commit('SWITCH_CALL', Object.assign({}, item))
       this.wsSend(webrtcConfig.apis.change, {
         type: 'CHANGE',
         recipient: item.remoteId,
@@ -751,10 +748,84 @@ export default {
     // 静音
     wrMute (item) {
       item.mute = !item.mute;
+    },
+    // 语音视频通话
+    wrStateEmit (oData) {
+      console.log('状态EMIT oData: ', oData);
+      if (oData.state > 20) {
+        this.wrClose(oData);
+      } else if (oData.state === 20 && oData.minute === 0 && oData.second === 0) {
+        this.$nextTick(() => {
+          this.$set(oData, 'isTime', true)
+        })
+        oData.countTime(oData);
+        this.$store.commit('STATE_HANDLER', Object.assign({}, oData))
+      }
+    },
+    wrClose (data) {
+      // $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
+      let o = this.callingList.find(x => x.uid === data.uid);
+      if (o) {
+        // this.map.remove(o.mark);
+        o.clearTime(o);
+      }
+      // 关闭通话，手动将state设为32，需要监听的模块，监听到继续做响应操作
+      data.state = 32;
+      this.$store.commit('STATE_HANDLER', Object.assign({}, data));
+      this.$store.commit('DEL_WEBRTC', data);
+      // 自己构造 oMsg
+      this.wrOff({
+        sender: data.remoteId
+      }, true);
+    },
+    // 收到手机端发送的视频请求
+    exceptCalling (data) {
+      // 增加通话对象到webrtc ，先查询到该来点用户信息，
+      let params = {
+        areaUid: '431224'
+      }
+      MapGETmonitorList(params).then( res => {
+        if (res) {
+          let _obj = {}, cObj = {};
+          res.data.areaTreeList.forEach(x => {
+            x.sysUserExtendList.forEach(y => {
+              if (y.uid + '' === data.remoteId) {
+                _obj = y;
+              }
+            })
+          })
+          cObj = {
+            uid: _obj.uid + '',
+            longitude: _obj.longitude,
+            latitude: _obj.latitude,
+            remoteId: _obj.uid + '',
+            remoteName: _obj.infoName,
+            type: data.type,
+            _id: 'mapCall' + random14(),
+            _mid: 'mapMark3' +_obj.uid,
+            isTime: false,
+            minute: 0,
+            second: 0,
+            timer: null,
+            mark: null,
+            mute: false,
+            oMsData: data.oMsData,
+            isAddOffered: data.isAddOffered
+          }
+          console.log(_obj)
+          this.$store.commit('ADD_WEBRTC', {oAdd: cObj})
+        }
+      })
     }
   },
   beforeDestroy () {
-    this.wsObj.stompClient.disconnect();
+    this.bReconnect = false;
+    if (this.wsObj.stompClient) {
+      this.wsObj.stompClient.disconnect();
+    }
+    if (this.wsObj.pongInval) {
+      window.clearInterval(this.wsObj.pongInval);
+    }
     if (this.wsObj.wsTimeout) {
       window.clearTimeout(this.wsObj.wsTimeout);
     }

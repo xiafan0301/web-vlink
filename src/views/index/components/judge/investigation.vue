@@ -3,6 +3,7 @@
     <div class="vl_j_left">
       <div class="vl_jtc_search" style="padding-top: 0;">
         <el-autocomplete
+          style="width: 100%"
           v-model="searchData.uid"
           :fetch-suggestions="autoEvent"
           @select="showChoose"
@@ -10,6 +11,7 @@
           placeholder="关联事件编号搜索">
         </el-autocomplete>
         <el-date-picker
+          style="width: 100%"
           v-model="searchData.time"
           type="daterange"
           range-separator="-"
@@ -45,7 +47,7 @@
         </div>
         <vue-scroll>
           <div class="vl_jtc_mk" v-for="(item, index) in curVideo.videoList" :key="item.id">
-            <video :id="'vlJigVideo' + index" src="../../../../assets/video/demo.mp4"></video>
+            <video :id="'vlJigVideo' + index" :src="item.snapVideo"></video>
             <p>{{item.snapTime}}</p>
             <div class="vl_jig_right_btn">
               <span class="vl_icon vl_icon_judge_01" @click="playVideo(index)" v-if="item.playing"></span>
@@ -58,7 +60,7 @@
       </div>
     </div>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJigLargeV" src="../../../../assets/video/demo.mp4"></video>
+      <video id="vlJigLargeV" :src="curVideoUrl"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{curSXT.deviceName}}</div>
@@ -79,12 +81,10 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
 import {JigGETEvent, JigGETEventAlarm, JigGETAlarmSnapList, JigGETEventAreas} from '../../api/api.judge.js';
 export default {
   data() {
     return {
-      testData: testData,
       evData: [],
       searchData: {
         uid: '',
@@ -176,9 +176,8 @@ export default {
       JigGETEventAreas(params)
         .then(res => {
           if(res) {
-            res.data.splice(0, 0, {cname: '全部', uid: 0});
+            // res.data.splice(0, 0, {cname: '全部', uid: 0});
             this.eventAreas = res.data;
-            this.searchData.areaIds.push(0)
           }
         })
     },
@@ -200,7 +199,7 @@ export default {
       JigGETEventAlarm(params)
         .then(res => {
           if (res) {
-            if (res.data.length === 0) {
+            if (!res.data || res.data.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果')
               this.amap.clearMap();
               this.searching = false;
@@ -292,7 +291,9 @@ export default {
       this.showVideoList = true;
       const params = {
         surveillanceId: this.curSXT.surveillanceId,
-        deviceId: this.curSXT.deviceId
+        deviceId: this.curSXT.deviceId,
+        dateStart: this.searchData.time ? this.searchData.time[0] : null,
+        dateEnd: this.searchData.time ? this.searchData.time[1] : null
       }
       this.$_showLoading({target: '.__vuescroll'});
       JigGETAlarmSnapList(params)

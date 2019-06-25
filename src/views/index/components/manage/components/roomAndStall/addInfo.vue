@@ -14,10 +14,10 @@
         <div class="content_left">
           <el-form :model="addRoom" :rules="rules" ref="addRoom" label-width="90px" class="add_room_form">
             <el-form-item label="点室名称:" prop="roomName">
-              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="addRoom.roomName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室名称" v-model="addRoom.roomName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="点室编号:" prop="roomNumber">
-              <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入点室编号" v-model="addRoom.roomNumber" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="所属单位:" prop="organId">
               <el-select style="width: 100%;" v-model="addRoom.organId" placeholder="请选择所属单位" @change="handleDepartment">
@@ -30,13 +30,13 @@
               </el-select>
             </el-form-item>
             <el-form-item label="责任人:" prop="dutyUserName">
-              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="addRoom.dutyUserName"></el-input>
+              <el-input style="width: 100%;" placeholder="请输入责任人姓名" v-model="addRoom.dutyUserName" maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="联系电话:" prop="userMobile">
               <el-input style="width: 100%;" placeholder="请输入联系电话" v-model="addRoom.userMobile"></el-input>
             </el-form-item>
             <el-form-item label="所属地址:" prop="address" class="address_select">
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.province" placeholder="省" @change="handleAreaData(addRoom.province, '市')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.province" placeholder="省" @change="handleProvinceData">
                 <el-option
                   v-for="(item, index) in provinceList"
                   :key="'item' + index"
@@ -45,7 +45,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.city" placeholder="市" @change="handleAreaData(addRoom.city, '县')">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.city" placeholder="市" @change="handleCityData">
                 <el-option
                   v-for="(item, index) in cityList"
                   :key="'item' + index"
@@ -54,7 +54,7 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;margin-right: 5px;" v-model="addRoom.region" placeholder="县">
+              <el-select style="width: 24%;margin-right: 1%" v-model="addRoom.region" placeholder="县" @change="handleRegionData">
                 <el-option
                   v-for="(item, index) in countyList"
                   :key="'item' + index"
@@ -63,13 +63,14 @@
                 >
                 </el-option>
               </el-select>
-              <el-select style="width: 24%;" v-model="street" placeholder="镇">
-                <!-- <el-option
-                  v-for="(item, index) in departmentData"
-                  :key="index"
-                  :label="item.organName"
-                  :value="item.uid"
-                ></el-option> -->
+              <el-select style="width: 25%;" v-model="addRoom.street" placeholder="镇">
+                <el-option
+                    v-for="(item, index) in streetList"
+                    :key="'item' + index"
+                    :label="item.cname"
+                    :value="item.uid"
+                  >
+                  </el-option>
               </el-select>
               <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="addRoom.address" @input="changeAddress"></el-input>
               <div class="map_select" @click="initMap">
@@ -84,7 +85,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="描述:" prop="desci">
-              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="addRoom.desci"></el-input>
+              <el-input type="textarea" rows="5" style="width: 100%;" placeholder="请输入描述内容" v-model="addRoom.desci" maxlength="150"></el-input>
             </el-form-item>
           </el-form>
         </div>
@@ -110,7 +111,6 @@ export default {
   data () {
     return {
       isShowClose: false, // 是否显示关闭地图按钮
-      street: null,
       isAddLoading: false, // 添加加载中
       addRoom: {
         desci: null, // 描述
@@ -124,6 +124,7 @@ export default {
         province: null, // 省
         region: null, // 县
         city: null, // 市
+        street: null, // 镇
         address: null, // 所属地址
         longitude: null, // 经度
         latitude: null, // 纬度
@@ -131,14 +132,14 @@ export default {
       rules: {
         roomName: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
+          // { max: 50, message: '最多输入50个字', trigger: 'blur' }
         ],
-        dutyUserName: [
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
-        ],
-        roomNumber: [
-          { max: 50, message: '最多输入50个字', trigger: 'blur' }
-        ],
+        // dutyUserName: [
+        //   { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        // ],
+        // roomNumber: [
+        //   { max: 50, message: '最多输入50个字', trigger: 'blur' }
+        // ],
         userMobile: [
           { validator: validatePhone, trigger: 'blur' }
         ],
@@ -148,9 +149,9 @@ export default {
         organId: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
-        desci: [
-          { max: 150, message: '最多输入150个字', trigger: 'blur' }
-        ]
+        // desci: [
+        //   { max: 150, message: '最多输入150个字', trigger: 'blur' }
+        // ]
       },
       userInfo: {}, // 用户信息
       departmentList: [], // 部门列表
@@ -159,6 +160,7 @@ export default {
       provinceList: [], // 省数据
       cityList: [], // 市数据
       countyList: [], // 县数据
+      streetList: [], // 镇数据
       map: null, // 地图对象
       autoInput: null, // 自动输入对象
     }
@@ -205,6 +207,7 @@ export default {
       _this.map = map;
 
       _this.isShowClose = true;
+       _this.mapMark(_this.addRoom.longitude, _this.addRoom.latitude);
     },
     // 地图标记
     mapMark (longitude, latitude) {
@@ -284,16 +287,40 @@ export default {
             if (this.areaName === '县') {
               this.countyList = res.data;
             }
-            if (this.areaName === '街道') {
+            if (this.areaName === '镇') {
               this.streetList = res.data;
             }
           }
         })
     },
     // 省 change
-    handleAreaData (id, val) {
-      this.areaName = val;
+    handleProvinceData (id) {
+      this.areaName = '市';
       this.areaId = id;
+      // this.cityList = [];
+      this.addRoom.city = '';
+      this.addRoom.region = '';
+      this.addRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 市 change
+    handleCityData (id) {
+      this.areaName = '县';
+      this.areaId = id;
+      
+      this.addRoom.region = '';
+      this.addRoom.street = '';
+
+      this.getAreaList();
+    },
+    // 县 change
+    handleRegionData (id) {
+      this.areaName = '镇';
+      this.areaId = id;
+      
+      this.addRoom.street = '';
+
       this.getAreaList();
     },
     // 获取当前部门及子级部门
@@ -377,7 +404,6 @@ export default {
           .address_select {
             position: relative;
             .map_select {
-              // width: calc(100% - 85%);
               position: absolute;
               right: 0;
               bottom: 0;

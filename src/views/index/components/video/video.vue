@@ -7,7 +7,7 @@
       <li>
         <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
         <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
-        <router-link :to="{name: 'video_playback'}">录像回放</router-link>
+        <router-link :to="{name: 'video_playback'}">视频回放</router-link>
       </li>
       <li>
         <!-- <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a> -->
@@ -61,10 +61,10 @@ export default {
   }
 }
 .vid_show_menu {
-  position: absolute; top: 0; left: 20px; z-index: 20;
-  width: 230px; height: 80px;
+  position: absolute; top: 0; left: 10px; z-index: 20;
+  width: 230px; height: 70px;
   > .show_menu_t {
-    position: absolute; top: 15px; left: 0; z-index: 2;
+    position: absolute; top: 10px; left: 0; z-index: 2;
     width: 100%; height: 50px; line-height: 50px;
     background: #fff;
     border: 1px solid #D3D3D3;
@@ -82,7 +82,7 @@ export default {
   > .show_menu_b {
     display: none;
     width: 100%; height: 100%;
-    padding-top: 80px;
+    padding-top: 70px;
     animation: fadeIn .4s ease-out both;
     > div {
       position: relative;
@@ -189,17 +189,19 @@ export default {
                 padding: 10px 40px 10px 20px;
                 border-bottom: 1px dotted #ddd;
                 cursor: default;
-                &:hover { 
-                  color: #186DFB;
-                  background-color: #E0F3FF;
-                }
                 > h3 { height: 20px; line-height: 20px; }
                 > p { color: #999; height: 20px; line-height: 20px; }
                 > i {
-                  position: absolute; top: 50%; right: 25px;
+                  display: none;
+                  position: absolute; top: 50%; right: 15px;
                   font-size: 16px;
-                  margin: -8px;
+                  margin-top: -8px;
                   cursor: pointer;
+                }
+                &:hover { 
+                  color: #186DFB;
+                  background-color: #E0F3FF;
+                  > i { display: block; }
                 }
                 &.show_his_dis {
                   > h3 { color: #999; }
@@ -284,10 +286,10 @@ export default {
   }
 }
 .vid_show_list {
-  width: 100%; height: 100%; padding: 10px;
+  width: 100%; height: 100%; padding: 5px;
   > li {
     float: left;
-    padding: 10px;
+    padding: 5px;
     width: 50%; height: 50%;
     transition: all .3s;
     > div {

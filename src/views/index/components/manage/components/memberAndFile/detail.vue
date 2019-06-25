@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="member_detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
@@ -11,8 +12,8 @@
       <div class="header member_header">
         <span>基本信息</span>
         <p>
-          创建于2018-12-12 12:12:12；
-          最近更新于2018-12-12 12:12:12
+          创建于{{detailInfo.createTime | fmTimestamp}}；
+          最近更新于{{detailInfo.updateTime | fmTimestamp}}
         </p>
       </div>
       <div class="divide"></div>
@@ -20,31 +21,31 @@
         <ul class="detail_info clearfix">
           <li>
             <span>成员编号:</span>
-            <span>D09774</span>
+            <span>{{detailInfo.memberNo ? detailInfo.memberNo : '无'}}</span>
           </li>
           <li>
             <span>成员姓名:</span>
-            <span>张安</span>
+            <span>{{detailInfo.userName}}</span>
           </li>
           <li>
             <span>性别:</span>
-            <span>女</span>
+            <span>{{detailInfo.userSex == 1 ? '男' : detailInfo.userSex == 2 ? '女' : '未知'}}</span>
           </li>
           <li>
             <span>手机号码:</span>
-            <span>17888888888</span>
+            <span>{{detailInfo.userMobile}}</span>
           </li>
           <li>
             <span>所属单位:</span>
-            <span>XXXXXXXXXXXX单位</span>
+            <span>{{detailInfo.organName}}</span>
           </li>
           <li>
             <span>职位:</span>
-            <span>主任</span>
+            <span>{{detailInfo.position ? detailInfo.positionName : '无'}}</span>
           </li>
           <li>
             <span>邮箱:</span>
-            <span>1136386227@qq.com</span>
+            <span>{{detailInfo.userEmail ? detailInfo.userEmail : '无'}}</span>
           </li>
         </ul>
       <!-- </div> -->
@@ -162,8 +163,13 @@
       </div>
     </el-dialog>
   </div>
+</vue-scroll>
 </template>
 <script>
+import { getUserDetail, delUser } from '@/views/index/api/api.user.js';
+import { getEventList } from '@/views/index/api/api.event.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -171,46 +177,71 @@ export default {
       deleteDialog: false, // 删除弹出框
       isDelete: false, // 是否勾选删除成员账户
       isDeleteLoading: false, // 删除加载中
-      dataList: [
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '待处理',
-          eventStatus: 1,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '处理中',
-          eventStatus: 2,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-        {
-          eventCode: '1111111111',
-          eventTypeName: '自然灾害',
-          reporterPhone: '178888888888',
-          reporterUserRole: '雪亮总部1',
-          reportTime: '2018-12-12 12:12:12',
-          eventAddress: '湖南省长沙市啊斯卡拉大家阿拉山口大家埃里克森吉拉斯的',
-          eventStatusName: '已结束',
-          eventStatus: 3,
-          eventDetail: 'aksljfl路径发空间的发肯定是九分理论上大家看但是龙卷风圣诞节快乐'
-        },
-      ]
+      detailInfo: {}, // 用户详情
+      dataList: [],
+      memberJobList: [], // 成员职位
     }
   },
+  mounted () {
+    this.getMemberJobList();
+    setTimeout(() => {
+      this.getDetail();
+    }, 500)
+  },
   methods: {
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取用户详情
+    getDetail () {
+      const userId = this.$route.query.id;
+      if (userId) {
+        getUserDetail(userId)
+          .then(res => {
+            if (res) {
+              this.detailInfo = res.data;
+              this.getEventData();
+
+              this.memberJobList.map(val => {
+                if (this.detailInfo.position == val.enumField) {
+                  this.detailInfo.positionName = val.enumValue;
+                }
+              });
+            }
+          })
+      }
+    },
+    // 获取事件列表数据
+    getEventData () {
+      const params = {
+        'where.eventFlag': 1, // 是否是事件  1--是 0-否
+        'where.keyword': this.detailInfo.userMobile,
+        'where.acceptFlag': 2, // 审核通过
+        pageNum: this.pagination.pageNum,
+        orderBy: 'report_time',
+        order: 'asc'
+      }
+      getEventList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
     // 跳至编辑信息页面
-    skipEditInfoPage () {},
+    skipEditInfoPage () {
+      this.$router.push({name: 'member_edit', query: { id: this.$route.query.id }});
+    },
     // 显示删除弹出框
     showDeleteDialog () {
       this.deleteDialog = true;
@@ -219,9 +250,48 @@ export default {
     back () {
       this.$router.back(-1);
     },
-    handleCurrentChange () {},
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getEventData();
+    },
     // 确认删除
-    sureDelete () {}
+    sureDelete () {
+      if (this.$route.query.id) {
+        const params = {
+          uid: this.$route.query.id,
+          flag: this.isDelete ? 2 : 1 // 1--仅删除用户与机构之间的联系  2--删除用户
+        }
+        this.isDeleteLoading = true;
+        delUser(params)
+          .then (res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.deleteDialog = false;
+              this.$router.push({name: 'member_file'});
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    // 跳至事件详情页
+    skipSelectDetail (obj) {
+      if (obj.eventStatus === 1) {
+        this.$router.push({name: 'untreat_event_detail', query: {status: 'unhandle', eventId: obj.uid}});
+      }
+      if (obj.eventStatus === 2) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'handling', eventId: obj.uid}});
+      }
+      if (obj.eventStatus === 3) {
+        this.$router.push({name: 'treating_event_detail', query: {status: 'ending', eventId: obj.uid}});
+      }
+    },
   }
 }
 </script>

@@ -12,7 +12,7 @@
           <vue-scroll>
             <div class="content_left">
               <ul>
-                <li style="align-items: center;">
+                <li style="align-items: baseline;">
                   <span class="audit-label">状态:</span>
                   <span :class="[$route.query.status === 'pass' ? 'pass-status' : 'reject-status']">{{$route.query.status === 'pass' ? '通过' : '驳回'}}</span>
                 </li>
@@ -23,35 +23,20 @@
                 <li>
                   <span>上报人:</span>
                   <div class="phone_box" style='margin-right:20px;'>
-                    <!-- <template v-if="$route.query.status === 'reject'"> -->
-                      <span >{{detailInfo.reporterPhone}}</span>
-                    <!-- </template>
-                    <template v-else>
-                      <span class="reportUser">{{detailInfo.reporterPhone}}</span>
-                      <div class="phone_dialog">
-                        <div>
-                          <i class="vl_icon vl_icon_event_14"></i>
-                          <span>语音通话</span>
-                        </div>
-                        <div>
-                          <i class="vl_icon vl_icon_event_17"></i>
-                          <span>视频通话</span>
-                        </div>
-                      </div>
-                    </template> -->
+                    <span >{{detailInfo.reporterPhone ? detailInfo.reporterPhone : '无'}}</span>
                   </div>
                 </li>
                 <li>
                   <span>上报时间:</span>
-                  <span>{{detailInfo.reportTime}}</span>
+                  <span>{{detailInfo.reportTime ? detailInfo.reportTime : '无'}}</span>
                 </li>
                 <li>
                   <span>事发地点:</span>
-                  <span>{{detailInfo.eventAddress}}</span>
+                  <span>{{detailInfo.eventAddress ? detailInfo.eventAddress : '无'}}</span>
                 </li>
                 <li>
                   <span>事件情况:</span>
-                  <span>{{detailInfo.eventDetail}}</span>
+                  <span>{{detailInfo.eventDetail ? detailInfo.eventDetail : '无'}}</span>
                   <div class="upload_box">
                     <div class="img_list" v-for="(item, index) in uploadImgList" :key="index">
                       <img
@@ -71,15 +56,15 @@
                 </li>
                 <li>
                   <span>处理单位:</span>
-                  <span>{{detailInfo.dealOrgName}}</span>
+                  <span>{{detailInfo.dealOrgName ? detailInfo.dealOrgName : '无'}}</span>
                 </li>
                 <li>
                   <span>事件类型:</span>
-                  <span>{{detailInfo.eventTypeName}}</span>
+                  <span>{{detailInfo.eventTypeName ? detailInfo.eventTypeName : '无'}}</span>
                 </li>
                 <li>
                   <span>事件等级:</span>
-                  <span>{{detailInfo.eventLevelName}}</span>
+                  <span>{{detailInfo.eventLevelName ? detailInfo.eventLevelName : '无'}}</span>
                 </li>
                 <li>
                   <span>伤亡人员:</span>
@@ -128,7 +113,7 @@
         <div>
           <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
           <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
+          <!-- <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span> -->
           <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>

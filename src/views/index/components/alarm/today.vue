@@ -1,4 +1,5 @@
 <template>
+<vue-scroll>
   <div class="alarm_today">
     <!-- 侧边栏搜索框 -->
     <div class="search_box">
@@ -117,6 +118,7 @@
           <i class="vl_icon vl_icon_alarm_6"></i> -->
         </div>
       </div>
+      <!-- <vue-scroll> -->
       <div class="list_content">
         <div class="list_box" v-for="(item,index) in alarmList" :key="index" @mouseenter="onMouseOver(item)" @mouseleave="onMouseOut(item)">
           <div class="list_img">
@@ -187,9 +189,11 @@
         class="cum_pagination">
       </el-pagination>
       </template>
+      <!-- </vue-scroll> -->
     </div>
     <!-- <alarmDialog ref="alarmDialogComp" :strucInfoList="alarmList" :alarmObj="alarmObj" @isLoading="showLoading"></alarmDialog> -->
   </div>
+  </vue-scroll>
 </template>
 <script>
 import { getGroupsByType } from '@/views/index/api/api'
@@ -513,7 +517,7 @@ export default {
     width: calc(100% - 252px);
     margin-left: 252px;
     position: relative;
-    padding: 20px;
+    padding: 20px 0 20px 20px;
     .list_top{
       color: #333;
       > span{

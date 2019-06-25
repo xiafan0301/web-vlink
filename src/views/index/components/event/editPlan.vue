@@ -10,10 +10,10 @@
       <div class="content-box">
         <el-form :model="editPlanForm" ref="editPlanForm" :rules="rules" class="edit-plan-form" size="small">
           <el-form-item label="预案名称:" prop="planName" label-width="120px">
-            <el-input v-model="editPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;"></el-input>
+            <el-input v-model="editPlanForm.planName" placeholder="请输入预案名称" style="width: 500px;" maxlength="50"></el-input>
           </el-form-item>
           <el-form-item label="预案类型:" label-width="120px" prop="editEventType">
-          <el-select v-model="editPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;">
+          <el-select v-model="editPlanForm.editEventType" filterable allow-create placeholder="请选择预案类型" style="width: 500px;" maxlength="50">
             <el-option
               v-for="(item, index) in planTypeList"
               :key="index"
@@ -35,7 +35,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="预案正文:" label-width="120px" prop="planDetail">
-            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.planDetail" placeholder="请输入预案正文"></el-input>
+            <el-input type="textarea" rows="7" style="width: 500px;" v-model="editPlanForm.planDetail" placeholder="请输入预案正文" maxlength="10000"></el-input>
           </el-form-item>
           <el-form-item label="附件：" label-width="120px">
             <el-upload
@@ -58,8 +58,8 @@
                   <i class="vl_icon vl_icon_event_7" @click="deletePlanBox(index)" v-show="editPlanForm.taskList.length > 1"></i>
                 </div>
                 <el-form class="plan_form" label-width="90px" :model="item"  size="middle" >
-                  <el-form-item label="执行部门:">
-                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择执行部门">
+                  <el-form-item label="调度部门:">
+                    <el-select v-model="item.departmentId" style="width: 100%;" placeholder="请选择调度部门">
                       <el-option
                         v-for="(item, index) in departmentList"
                         :key="'item' + index"
@@ -69,11 +69,11 @@
                     </el-select>
                   </el-form-item>
                   <el-form-item label="任务名称:">
-                    <el-input v-model="item.taskName" @change="changeTaskName(item.taskName, index)" placeholder="请输入任务名称"></el-input>
+                    <el-input v-model="item.taskName" @change="changeTaskName(item.taskName, index)" placeholder="请输入任务名称" maxlength="140"></el-input>
                     <span v-show="item.isError && item.isError" style="color: #F56C6C;font-size:12px;">最多输入140个字</span>
                   </el-form-item>
                   <el-form-item label="任务内容:">
-                    <el-input type="textarea" rows="8" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent" placeholder="请输入任务内容"></el-input>
+                    <el-input type="textarea" rows="8" @change="changeTaskContent(item.taskContent, index)" v-model="item.taskContent" placeholder="请输入任务内容" maxlength="1000"></el-input>
                     <span v-show="item.isContentError && item.isContentError" style="color: #F56C6C;font-size:12px;">最多输入1000个字</span>
                   </el-form-item>
                 </el-form>
@@ -81,7 +81,7 @@
               <template v-if="editPlanForm.taskList.length === (index + 1)">
                 <div class="add_ctc" @click="addTask">
                   <i class="vl_icon vl_icon_event_8"></i>
-                  <span>添加协同部门</span>
+                  <span>添加调度任务</span>
                 </div>
               </template>
             </div>
@@ -322,7 +322,7 @@ export default {
           if (filterArr.length === 0) {
             this.editPlanForm.eventTypeName = this.editPlanForm.editEventType;
           } else {
-            this.editPlanForm.eventType = filterArr[0].uid;
+            this.editPlanForm.eventType = filterArr[0].enumField;
           }
           // this.editPlanForm.editEventType = null;
           if (this.editPlanForm.sysAppendixInfo) {

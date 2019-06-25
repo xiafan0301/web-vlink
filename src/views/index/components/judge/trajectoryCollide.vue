@@ -40,6 +40,7 @@
           </el-option>
         </el-select>
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 1"
           v-model="searchData.name"
           :fetch-suggestions="autoEvent1"
@@ -48,6 +49,7 @@
         </el-autocomplete>
         <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.name" placeholder="输入姓名搜索"></el-input>-->
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 1"
           v-model="searchData.cardId"
           :fetch-suggestions="autoEvent2"
@@ -56,6 +58,7 @@
         </el-autocomplete>
         <!--<el-input v-show="searchData.targetType === 1" v-model="searchData.cardId" placeholder="输入证件号码搜索"></el-input>-->
         <el-autocomplete
+          style="width: 100%"
           v-show="searchData.targetType === 2"
           v-model="searchData.carNum"
           :fetch-suggestions="autoEvent3"
@@ -101,7 +104,7 @@
       </div>
     </el-dialog>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+      <video  crossorigin="anonymous" id="vlJtcLargeV" :src="curVideoUrl"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{mapData[curVideo.indexNum] ? mapData[curVideo.indexNum].deviceName : ''}}</div>
@@ -122,7 +125,6 @@
 </template>
 <script>
 let AMap = window.AMap;
-import {testData} from './testData';
 import {ajaxCtx} from '@/config/config';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcGETTrail, JtcPUTAppendixsOrder, MapGetPortraitsByName} from '../../api/api.judge.js';
 import {getPortraitByIdNo, getVehicleByVehicleNumber} from '../../api/api.control.js'
@@ -130,7 +132,6 @@ export default {
   data() {
     return {
       uploadAcion: ajaxCtx.base + '/new',
-      testData: testData,
       mapData: [],
       searching: false,
       curImageUrl: '', // 当前上传的图片
@@ -255,7 +256,7 @@ export default {
         if (oRes) {
           let x = {
             cname: oRes.fileName, // 附件名称 ,
-            contentUid: 43143,
+            contentUid: this.$store.state.loginUser.uid,
             // desci: '', // 备注 ,
             filePathName: oRes.fileName, // 附件保存名称 ,
             fileType: 1, // 文件类型 ,
@@ -309,7 +310,7 @@ export default {
       this.loadingHis = true;
       this.historyPicDialog = true;
       let params = {
-        userId: 43143,
+        userId: this.$store.state.loginUser.uid,
         fileType: 1
       }
       JtcGETAppendixInfoList(params).then(res => {
@@ -417,8 +418,8 @@ export default {
       } else {
         JtcGETTrail(params).then(res => {
           if (res) {
-            console.log(res);
-            if (res.data.length === 0) {
+            if (!res.data || res.data.length === 0) {
+              console.log('23')
               this.$message.info('抱歉，没有找到匹配结果')
               this.amap.clearMap();
               this.searching = false;
@@ -453,7 +454,7 @@ export default {
           let _idPoint = 'vlJtcPoint' + obj._key;
           let _sContent = `
             <div class="vl_jtc_mk" >
-              <video preload="auto" id="${_id}" src="http://www.w3school.com.cn/example/html5/mov_bbb.mp4"></video>
+              <video crossorigin="anonymous" preload="auto" id="${_id}" src="${obj.videoPath}"></video>
               <p>${obj.shotTime}<i id="${_idBtn}" class="vl_icon vl_icon_control_09"></i></p>
               <div class="vl_jtc_mk_check">
                 <input id="${_idCheck}" checked type="checkbox">

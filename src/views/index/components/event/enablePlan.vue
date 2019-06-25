@@ -9,7 +9,7 @@
           </template>
            <template v-else-if="$route.query.type === 'alarm_ctc'">
             <el-breadcrumb-item :to="{ path: '/event/ctc' }">调度指挥</el-breadcrumb-item>
-            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.eventId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
           </template>
           <template v-else>
             <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
@@ -91,17 +91,6 @@
                   <div class="control_line"><span class="left">事件情况：</span><span class="right">无</span></div>
                 </template>
               </div>
-              <!-- <div class="event-status-img">
-                <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 3">
-                  <i class="vl_icon vl_icon_event_11"></i>
-                </template>
-                <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 1">
-                  <i class="vl_icon vl_icon_event_13"></i>
-                </template>
-                <template v-if="sturcDetail.surveillanceInfo && sturcDetail.surveillanceInfo.surveillanceStatus === 2">
-                  <i class="vl_icon vl_icon_event_12"></i>
-                </template>
-              </div> -->
             </div>
             <div class="card-info right-info">
               <div class="struc_c_d_qj struc_c_d_img struc_mr">
@@ -166,8 +155,8 @@
                 <div class="divide"></div>
                 <div class="plan-form-box">
                   <el-form class="plan-form" label-width="90px" :model="item"  size="middle" >
-                    <el-form-item label="执行部门:" :rules ="[{ required: true, message: '请选择执行部门', trigger: 'blur' }]">
-                      <el-select v-model="item.departmentId" placeholder="请选择执行部门">
+                    <el-form-item label="调度部门:" :rules ="[{ required: true, message: '请选择调度部门', trigger: 'blur' }]">
+                      <el-select v-model="item.departmentId" placeholder="请选择调度部门">
                         <el-option
                           v-for="(item, index) in departmentData"
                           :key="index"
@@ -178,10 +167,10 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="任务名称:"  :rules ="[{ required: true, message: '请输入任务名称', trigger: 'blur' }]">
-                      <el-input v-model="item.taskName"></el-input>
+                      <el-input v-model="item.taskName" maxlength="140"></el-input>
                     </el-form-item>
                     <el-form-item label="任务内容:"  :rules ="[{ required: true, message: '请输入任务内容', trigger: 'blur' }]">
-                      <el-input type="textarea" rows="9" v-model="item.taskContent"></el-input>
+                      <el-input type="textarea" rows="9" v-model="item.taskContent" maxlength="1000"></el-input>
                     </el-form-item>
                   </el-form>
                 </div>
@@ -218,6 +207,7 @@ import EventBasic from './components/eventBasic';
 import { getPlanDetail, ctcTasks, getEventDetail } from '@/views/index/api/api.event.js';
 import { getAlarmDetail } from "@/views/index/api/api.control.js";
 import { getDepartmentList } from '@/views/index/api/api.manage.js';
+import { dataList } from '@/utils/data.js';
 export default {
   components: { EventBasic, BigImg },
   data () {
@@ -234,10 +224,12 @@ export default {
           departmentId: null
         }
       ],
+      eventType: dataList.eventType,
+      eventLevel: dataList.eventLevel,
       basicInfo: {}, // 事件详情
       sturcDetail: {}, // 告警详情
       userInfo: {},
-      departmentData: [], // 执行部门数据
+      departmentData: [], // 调度部门数据
       isEnableLoading: false, // 启用预案加载中
     }
   },
@@ -287,7 +279,7 @@ export default {
     },
     // 获取告警详情
     toAlarmDetail() {
-      const eventId = this.$route.query.eventId;
+      const eventId = this.$route.query.alarmId;
       getAlarmDetail(eventId)
         .then(res => {
           if (res) {
@@ -402,17 +394,12 @@ export default {
                 if (this.$route.query.type === 'ctc') {
                   this.$router.push({name: 'ctc_detail_info', query: {id: this.$route.query.eventId, status: this.$route.query.status}});
                 } else if (this.$route.query.type === 'alarm_ctc') {
-                  this.$router.push({name: 'alarm_ctc_detail_info', query: { id: this.$route.query.eventId, status: this.$route.query.status, objType: this.$route.query.objType }});
+                  this.$router.push({name: 'alarm_ctc_detail_info', query: { id: this.$route.query.alarmId, status: this.$route.query.status, objType: this.$route.query.objType }});
                 } else {
                   this.$router.push({name: 'treating_event_detail', query: {eventId: this.$route.query.eventId, status: this.$route.query.status}});
                 }
                 this.isEnableLoading = false;
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '启用失败',
-                  customClass: 'request_tip'
-                });
                 this.isEnableLoading = false;
               }
             })

@@ -35,24 +35,33 @@
           label="性别"
           prop="userSex"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userSex == 1 ? '男' : scope.row.userSex == 2 ? '女' : '未知'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="职位"
-          prop="job"
+          prop="positionName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.position ? scope.row.positionName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="手机号"
-          prop="phone"
+          prop="userMobile"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="邮箱"
-          prop="email"
+          prop="userEmail"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userEmail ? scope.row.userEmail : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="280">
           <template slot-scope="scope">
@@ -92,6 +101,9 @@
   </div>
 </template>
 <script>
+import { getUserList, delUser } from '@/views/index/api/api.user.js';
+import { getDiciData } from '@/views/index/api/api.js';
+import {dataList } from '@/utils/data.js';
 export default {
   data () {
     return {
@@ -101,53 +113,124 @@ export default {
       isDelete: false, // 是否勾选删除成员账户
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
-      dataList: [
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        },
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        },
-        {
-          userName: '账单',
-          userSex: '女',
-          job: '主任',
-          phone: '18999999999',
-          email: '1136386227@qq.com'
-        }
-      ]
+      dataList: [],
+      userInfo: {}, // 存储的用户信息
+      memberJobList: [], // 成员职位
+      deleteId: null, // 要删除的id
     }
   },
+  watch: {
+    currentOrganId () {
+      this.getList();
+    }
+  },
+  computed: {
+    currentOrganId () {
+      return this.$store.state.currentOrganId;
+    }
+  },
+  mounted () {
+    this.userInfo = this.$store.state.loginUser;
+    this.getMemberJobList();
+    setTimeout(() => {
+      this.getList();
+    }, 500)
+  },
   methods: {
-    searchData () {},
-    onClear () {},
+    // 获取成员职位数据
+    getMemberJobList () {
+      const memberJob = dataList.memberJob;
+      getDiciData(memberJob)
+        .then(res => {
+          if (res) {
+            this.memberJobList = res.data;
+          }
+        })
+        .catch(() => {})
+    },
+    // 获取列表数据
+    getList () {
+      const params = {
+        'where.userName': this.searchUserName,
+        'where.organId': this.$store.state.currentOrganId,
+        pageNum: this.pagination.pageNum,
+      }
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+
+            this.dataList.map(item => {
+              item.positionName = '';
+              this.memberJobList.map(val => {
+                if (item.position == val.enumField) {
+                  item.positionName = val.enumValue;
+                }
+              });
+            });
+          }
+        })
+        .catch(() => {})
+    },
+    // 根据搜索条件进行搜索
+    searchData () {
+      this.closeShow = true;
+      this.getList();
+    },
+    // 清除
+    onClear () {
+      this.closeShow = false;
+      this.searchUserName = null;
+      this.getList();
+    },
     // 跳至查看档案页面
     skipSelectDetail (obj) {
-      this.$router.push({name: 'member_detail'});
+      this.$router.push({name: 'member_detail', query: { id: obj.uid }});
     },
     // 跳至新增成员页面
     skipAddPage () {
       this.$router.push({name: 'member_add'});
     },
     // 跳至编辑页面
-    showEditDialog () {
-      this.$router.push({name: 'member_edit'});
+    showEditDialog (obj) {
+      this.$router.push({name: 'member_edit', query: { id: obj.uid }});
+    },
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getList();
     },
     // 显示删除弹出框
-    showDeleteDialog () {
+    showDeleteDialog (obj) {
       this.deleteDialog = true;
+      this.deleteId = obj.uid;
     },
-    handleCurrentChange () {},
     // 确认删除
-    sureDelete () {}
+    sureDelete () {
+      if (this.deleteId) {
+        const params = {
+          uid: this.deleteId,
+          flag: this.isDelete ? 2 : 1 // 1--仅删除用户与机构之间的联系  2--删除用户
+        }
+        this.isDeleteLoading = true;
+        delUser(params)
+          .then (res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.deleteDialog = false;
+              this.getList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    }
   }
 }
 </script>

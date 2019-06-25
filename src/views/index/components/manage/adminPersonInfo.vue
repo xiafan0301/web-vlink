@@ -82,6 +82,9 @@
               prop="name"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.name ? scope.row.name : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="性别"
@@ -106,12 +109,18 @@
               prop="idNo"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.idNo ? scope.row.idNo : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="备注信息"
               prop="remarks"
               show-overflow-tooltip
               >
+              <template slot-scope="scope">
+                <span>{{scope.row.remarks ? scope.row.remarks : '-'}}</span>
+              </template>
             </el-table-column>
             <el-table-column label="操作" width="140">
               <template slot-scope="scope">
@@ -146,7 +155,7 @@
           <ul class="content_right">
             <li>
               <span>姓名：</span>
-              <span>{{personDetailInfo.name}}</span>
+              <span>{{personDetailInfo.name ? personDetailInfo.name : '无'}}</span>
             </li>
             <li>
               <span>性别：</span>
@@ -162,11 +171,11 @@
             </li>
             <li>
               <span>证件号码：</span>
-              <span>{{personDetailInfo.idNo}}</span>
+              <span>{{personDetailInfo.idNo ? personDetailInfo.idNo : '无'}}</span>
             </li>
             <li>
               <span>出生日期：</span>
-              <span>{{personDetailInfo.birthDate}}</span>
+              <span>{{personDetailInfo.birthDate ? personDetailInfo.birthDate : '无'}}</span>
             </li>
             <li>
               <span>底库信息：</span>
@@ -192,7 +201,7 @@
             </li>
             <li>
               <span>备注：</span>
-              <span class="group_box">{{personDetailInfo.remarks}}</span>
+              <span class="group_box">{{personDetailInfo.remarks ? personDetailInfo.remarks : '无'}}</span>
             </li>
           </ul>
         </div>
@@ -210,7 +219,7 @@
           <span>您已选择1个对象，输入组名后已选对象将自动加入。</span>
           <el-form :model="groupForm" ref="groupForm" :rules="rules">
               <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-                <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+                <el-input @change="handleAGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName" maxlength="6"></el-input>
                 <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
               </el-form-item>
             </el-form>
@@ -231,7 +240,7 @@
         >
         <el-form :model="groupForm" ref="groupForm" :rules="rules">
           <el-form-item label=" " prop="userGroupName" label-width="20px" class="group_name">
-            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName"></el-input>
+            <el-input @change="handleEGroupName" placeholder="请输入组名" style="width: 90%;" v-model="groupForm.userGroupName" maxlength="6"></el-input>
             <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
@@ -318,6 +327,7 @@ export default {
       isEditLoading: false, // 编辑组名加载中
       isDeleteLoading: false, // 删除组加载中
       isRemoveLoading: false, // 移除分组加载中
+      originGroupName: null, // 最初始的组名
     }
   },
   mounted () {
@@ -338,6 +348,7 @@ export default {
               res.data.groupNumList.map(item => {
                 if (item.id == this.groupId) {
                   this.groupName = item.name;
+                  this.originGroupName = item.name; // 保存下来，最后修改的时候比较是否有变化
                 } else {
                   this.copyGroupList.push({
                     uid: item.id,
@@ -490,6 +501,10 @@ export default {
           const params = {
             name: this.groupForm.userGroupName
           };
+          if (this.originGroupName === this.groupForm.userGroupName) {
+            this.editGroupDialog = false;
+            return;
+          }
           judgePerson(params)  // --判断组名是否重复
             .then(res => {
               if (res.data) {

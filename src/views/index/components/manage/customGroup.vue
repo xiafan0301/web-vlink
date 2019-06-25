@@ -25,7 +25,7 @@
               :key="'item' + index"
               @click="showGroupDeviceInfo(item.uid)"
             >
-              <span>{{item.groupName}}  ({{item.deviceList.length + item.bayonetList.length}}个)</span>
+              <span>{{item.groupName}}  ({{item.deviceList.length + item.bayonetList.length}})</span>
               <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
               <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="skipEditGroupPage(item.uid, item.groupName)"></i>
             </li>
@@ -39,8 +39,8 @@
       </div>
       <div class="detail_info_right">
         <ul class="tab_ul clearfix">
-          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头({{deviceList.length}}个)</li>
-          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口({{bayonetList.length}}个)</li>
+          <li class="tab_ul_li" :class="[arrowActive === 1 ? 'active_tab_li' : '']" @click="changeTab(1)">摄像头({{deviceList.length}})</li>
+          <li class="tab_ul_li" :class="[arrowActive === 2 ? 'active_tab_li' : '']" @click="changeTab(2)">卡口({{bayonetList.length}})</li>
         </ul>
         <div class="data_list" v-show="arrowActive === 1">
           <vue-scroll>

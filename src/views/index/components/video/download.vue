@@ -199,7 +199,7 @@ export default {
 </script>
 <style lang="scss" scoped>
   .vl_dl_hi {
-    padding: 20px;
+    padding: 10px;
     width: 100%; height: 100%;
     > .dl_hi_main {
       width: 100%; height: 100%;

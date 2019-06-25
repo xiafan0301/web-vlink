@@ -33,7 +33,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="情况说明:" label-width="100px" prop="explain">
-              <el-input type="textarea" rows="6" v-model="reportForm.explain"></el-input>
+              <el-input type="textarea" rows="6" v-model="reportForm.explain" maxlength="1000"></el-input>
             </el-form-item>
           </el-form>
         </div>

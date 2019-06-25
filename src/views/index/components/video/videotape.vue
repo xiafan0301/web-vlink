@@ -159,24 +159,21 @@ export default {
     del (item) {
       this.$confirm('是否确定删除该条录像记录？', '提示', {
         confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        cancelButtonText: '取消'
       }).then(() => {
-        delVideoTranscribe(item.video.uid).then(() => {
-          this.getVideoRecordList();
-          this.$message({
-            message: '删除成功！',
-            type: 'success'
-          });
+        delVideoTranscribe(item.video.uid).then((res) => {
+          if (res) {
+            this.getVideoRecordList();
+            this.$message({
+              message: '删除成功！',
+              type: 'success'
+            });
+          }
         }).catch(error => {
-          this.$message.error('删除失败！');
+          // this.$message.error('删除失败！');
           console.log("apiDelVideoRecord error：", error);
         });
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });          
       });
     },
     download (item) {
@@ -222,18 +219,18 @@ export default {
   .dl_vt_t {
     position: absolute; top: 20px; left: 0;
     width: 100%;
-    padding-left: 20px;
+    padding-left: 10px;
   }
   .dl_vt_c {
     width: 100%; height: 100%;
     > ul {
       width: 100%; height: 100%;
       overflow: hidden;
-      padding: 0 10px;
+      padding: 0 5px;
       > li {
         float: left;
         width: 33.33%; height: 50%;
-        padding: 10px;
+        padding: 5px;
         > div {
           position: relative;
           width: 100%; height: 100%;

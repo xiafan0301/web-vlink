@@ -71,7 +71,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
               <!-- 播放中 -->
               <div v-else-if="deviceIsPlaying(item)" class="content_list_dis" draggable="false">
@@ -94,7 +94,7 @@
                   {{item.deviceName}}
                 </p>
                 <div>{{item.userName}}<span>{{item.signTime | fmTimestamp('yyyy-MM-dd HH:mm')}}</span></div>
-                <i class="el-icon-delete" @click="delSign(item)"></i>
+                <i v-if="item.userId === userId" class="el-icon-delete" @click="delSign(item)"></i>
               </div>
             </li>
           </ul>
@@ -141,6 +141,8 @@ export default {
   components: {videoEmpty, flvplayer},
   data () {
     return {
+      userId: '',
+
       tipMsg: '暂无视频播放，在标记列表选择视频进行查看',
       dragActiveObj: null,
       videoList: [null, null, null, null],
@@ -182,6 +184,9 @@ export default {
         }
       }
     }
+  },
+  created () {
+    this.userId = this.$store.state.loginUser.uid;
   },
   mounted () {
     this.searchSubmit();
@@ -342,9 +347,9 @@ export default {
   height: 100%;
   position: relative;
   > .sign_list {
-    position: absolute; top: 0; left: 20px;
+    position: absolute; top: 0; left: 10px;
     width: 230px; height: 100%;
-    padding: 20px 0;
+    padding: 10px 0;
     > div {
       width: 100%; height: 100%;
       background: #fff;
@@ -354,7 +359,7 @@ export default {
   > .vid_content {
     height: 100%;
     overflow: hidden;
-    padding-left: 250px;
+    padding-left: 240px;
   }
 }
 .show_search {
