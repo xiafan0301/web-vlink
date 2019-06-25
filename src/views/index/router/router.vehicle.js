@@ -69,6 +69,10 @@ export default {
       path: 'ws', // 尾随分析
       name: 'vehicle_search_ws',
       component: () => import('@/views/index/components/vehicle/analysis/ws.vue')
+    }, { 
+      path: 'wsRecord', // 尾随分析记录
+      name: 'ws_record',
+      component: () => import('@/views/index/components/vehicle/analysis/ws/wsRecord.vue'),
     }, {
       path: 'dctx', // 多车同行分析
       name: 'vehicle_search_dctx',
