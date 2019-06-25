@@ -337,6 +337,9 @@
 .vl_icon2_112 { background-position: -23px -815px; }
 .vl_icon2_112:hover { background-position: -23px -933px; }
 
+/* 车辆侦查 */
+.vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -988px -1296px;}
+
 .vl_content_pad { padding: 10px; }
 
 /* 全局字体颜色 */
