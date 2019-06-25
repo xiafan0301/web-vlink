@@ -6,7 +6,7 @@ export default {
     state.loginToken = options.loginToken;
   },
   setCurrentOrgan (state, options) {
-    state.currentOrganId = options.currentOrganId;
+    state.currentOrganObj = options.currentOrganObj;
   },
 
   // 视频通话
