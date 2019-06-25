@@ -327,15 +327,21 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
+            });
+            this.departmentList.map(val => {
+              if (val.uid == this.$route.query.organObj.uid) {
+                this.addRoom.organId = val.uid;
+                this.addRoom.organName = val.organName;
+              } 
             });
           }
         })

@@ -70,6 +70,7 @@
             <template v-if="fullScreen || showFullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
               <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
+              <span v-if="config.ptz && oData.type === 1" class="flvplayer_opt vl_icon vl_icons_ptz" @click="ptzHandler" title="云台控制"></span>
               <!-- 退出全屏 -->
               <span v-if="fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
             </template>
@@ -79,6 +80,7 @@
         </span>
       </div>
     </div>
+    <!-- 云台控制 -->
     <!-- 添加标记 dialog -->
     <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666; font-size: 15px;">当前监控：{{oData.title}}</div>
@@ -197,7 +199,7 @@
 import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
-  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload } from "@/views/index/api/api.video.js";
+  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload, ptzControl } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -220,6 +222,7 @@ export default {
    *    cut: 是否可截屏，默认为true,
    *    tape: 是否可录像，默认为true
    *    download: 是否可下载(回放)，默认为true
+   *    ptz: 是否开启云台控制（直播、全屏），默认为true
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
@@ -251,7 +254,8 @@ export default {
         fullscreen2: false,
         cut: true, // 是否可截屏
         tape: true, // 是否可录像
-        download: true // 是否可下载(回放)
+        download: true, // 是否可下载(回放)
+        ptz: true
       },
 
       startPlayTime: null,
@@ -321,6 +325,11 @@ export default {
         nextStepLaoding: false,
         progressFailed: false,
         downlaodInval: null // 下载进度定时器
+      },
+      // 云台控制对象
+      ptzObj: {
+        active: false,
+        position: null, // { cmd: , action: 1 } 正在调节的方向
       }
     }
   },
@@ -605,6 +614,52 @@ export default {
       this.initPlayer();
     },
     /***** 视频事件 *****/
+    /* 云台控制 */
+    // 开启云台控制
+    ptzHandler () {
+      this.ptzObj.active = true;
+    },
+    // 方向控制 cmd 1-上 2-下 3-左 4-右
+    // 控制动作 action 0-停止 1-开始
+    ptzPositionCtl (cmd,  action) {
+      if (this.ptzObj.position) {
+        this.ptzPositionDo(this.ptzObj.position.cmd,  0, () => {
+          this.ptzPositionDo(cmd,  action);
+        });
+      }
+    },
+    // 
+    ptzPositionDo (cmd,  action, callback) {
+      ptzControl({
+        deviceId: this.oData.video.uid,
+        cmd: cmd,
+        action: action,
+        para: 100 // 控制参数 取值范围0-255，方向控制为速度值
+      }).then(res => {
+        if (res && res.data) {
+          if (action === 0) {
+            this.ptzObj.position = null;
+          } else if (action === 1) {
+            // 只有调用成功了，才会有正在调接的方向
+            this.ptzObj.position = {
+              cmd: cmd,
+              action: action
+            }
+          }
+          if (callback) { callback.call(); }
+        }
+      }).catch(error => {
+        console.log("ptzControl error：", error);
+      });
+    },
+    // 取消云台控制
+    ptzClose () {
+      this.ptzObj.active = false;
+      if (this.ptzObj.position) {
+        this.ptzPositionDo(this.ptzObj.position.cmd,  0);
+        this.ptzObj.position = null;
+      }
+    },
     /* 录像函数 */
     tapeStart () {
       if (this.tape.active) { return; }

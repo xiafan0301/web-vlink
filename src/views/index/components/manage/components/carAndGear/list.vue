@@ -15,7 +15,7 @@
         </el-form-item>
         <el-form-item prop="organId">
           <el-select style="width: 240px;" v-model="searchForm.organId" placeholder="单位">
-            <el-option value='全部单位'></el-option>
+            <el-option value='全部运营公司'></el-option>
             <el-option
               v-for="(item, index) in departmentList"
               :key="index"
@@ -87,7 +87,7 @@
           >
         </el-table-column>
         <el-table-column
-          label="所属单位"
+          label="运营公司"
           prop="organName"
           show-overflow-tooltip
           >
@@ -154,7 +154,7 @@ export default {
       isDeleteLoading: false, // 删除加载中
       searchForm: {
         vehicleType: '全部车辆类型', // 车辆类型
-        organId: '全部单位', // 所属单位
+        organId: '全部运营公司', // 所属单位
         vehicleNumber: null // 车牌号码
       },
       dataList: [],
@@ -166,13 +166,15 @@ export default {
     }
   },
   watch: {
-    currentOrganId () {
-      this.getList();
+    currentOrganObj () {
+     if (this.$store.state.currentOrganObj) {
+        this.getList();
+      }
     }
   },
   computed: {
-    currentOrganId () {
-      return this.$store.state.currentOrganId;
+    currentOrganObj () {
+      return this.$store.state.currentOrganObj;
     }
   },
   mounted () {
@@ -208,20 +210,26 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
-      const params = {
-        'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
-        pageSize: 0
-      };
-      getDepartmentList(params)
-        .then(res => {
-          if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
-            res.data.list.map(item => {
-              this.departmentList.push(item);
-            });
-          }
-        })
+      // let organId = null;
+      // if (this.$store.state.currentOrganObj) {
+      //   organId = this.$store.state.currentOrganObj.uid;
+      // } else {
+      //   organId = this.userInfo.organList[0].uid;
+      // }
+      // const params = {
+      //   'where.proKey': this.userInfo.proKey,
+      //   'where.organPid': organId,
+      //   pageSize: 0
+      // };
+      // getDepartmentList(params)
+      //   .then(res => {
+      //     if (res) {
+      //       this.departmentList.push(this.userInfo.organList[0]);
+      //       res.data.list.map(item => {
+      //         this.departmentList.push(item);
+      //       });
+      //     }
+      //   })
     },
     // 获取车辆列表
     getList () {
@@ -231,15 +239,16 @@ export default {
       } else {
         vehicleType = this.searchForm.vehicleType;
       }
-      if (this.searchForm.organId === '全部单位') {
-        organId = null;
+    //  let organId = null;
+      if (this.$store.state.currentOrganObj) {
+        organId = this.$store.state.currentOrganObj.uid;
       } else {
-        organId = this.searchForm.organId;
+        organId = this.userInfo.organList[0].uid;
       }
       const params = {
         'where.vehicleNumber': this.searchForm.vehicleNumber,
         'where.vehicleType': vehicleType,
-        'where.organId': this.$store.state.currentOrganId,
+        'where.organId': organId,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',
@@ -289,11 +298,23 @@ export default {
     },
     // 跳至新增车辆页面
     skipAddPage () {
-      this.$router.push({name: 'car_add'});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'car_add', query: { organObj: organObj }});
     },
     // 跳至编辑页面
     skipEditPage (obj) {
-      this.$router.push({name: 'car_edit', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'car_edit', query: { id: obj.uid, organObj: organObj }});
     },
     // 显示删除弹出框
     showDeleteDialog (obj) {
