@@ -11,7 +11,7 @@ import routerEvent from './router.event.js'
 // 研判模块 router
 import routerJudge from './router.judge.js'
 // 检索模块 router
-import routerSearch from './router.search.js'
+// import routerSearch from './router.search.js'
 // 布控板块 router
 import routerControl from './router.control.js'
 // 消息板块 router
@@ -24,6 +24,8 @@ import routerManage from './router.manage.js'
 import routerTask from './router.task.js'
 // 车辆侦察 router
 import routerVehicle from './router.vehicle.js'
+// 车辆侦察 router
+import routerPortrait from './router.portrait.js'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -47,13 +49,14 @@ const router = new VueRouter({
         routerMap,
         routerEvent,
         routerJudge,
-        routerSearch,
+        // routerSearch,
         routerControl,
         routerMessage,
         routerAlarm,
         routerManage,
         routerTask,
-        routerVehicle
+        routerVehicle,
+        routerPortrait
       ]
     }, {
       path: '/login',

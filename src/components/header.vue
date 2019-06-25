@@ -146,9 +146,9 @@
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'search'}">
+        <router-link :to="{name: 'portrait'}">
           <i class="vl_icon vl_icon_005"></i>
-          <span>人脸检索</span>
+          <span>人像检索</span>
         </router-link>
       </li>
       <li>
