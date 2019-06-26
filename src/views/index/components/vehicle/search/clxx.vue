@@ -465,34 +465,12 @@ export default {
             text-align: center;
             width: 100%;
             color: #FFFFFF;
-            height: .4rem;
-            line-height: .4rem;
+            height: 40px;
+            line-height: 40px;
             -webkit-border-radius: 0 0 10px 10px;
             -moz-border-radius: 0 0 10px 10px;
             border-radius: 0 0 10px 10px;
             background: #0C70F8;
-          }
-          .vl_jtc_ic_input {
-            position: absolute;
-            top: .2rem;
-            width: 3rem;
-            height: .26rem;
-            left: .2rem;
-            border: 1px solid #D3D3D3;
-            -webkit-border-radius: .13rem;
-            -moz-border-radius: .13rem;
-            border-radius: .13rem;
-            padding: 0 .02rem;
-            background: #FFFFFF;
-            .el-form-item__content {
-              height: .23rem;
-              line-height: .23rem;
-            }
-            input {
-              border: none!important;
-              height: .23rem;
-              line-height: .23rem;
-            }
           }
           .del_icon {
             display: none;
