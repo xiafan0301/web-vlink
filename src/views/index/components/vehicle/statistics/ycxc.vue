@@ -123,8 +123,7 @@ export default {
      * 查看抓拍记录
      */
     onOpenRecord (obj) {
-      console.log(obj)
-      this.$router.push({name: 'vehicle_search_ycxc_record'})
+      this.$router.push({name: 'vehicle_search_ycxc_record', query: {uid: obj.uid}})
     },
     /**
      * 查看车辆信息

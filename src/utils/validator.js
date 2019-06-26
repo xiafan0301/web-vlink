@@ -125,7 +125,7 @@ export const validatePatrolTime = (rule, value, callback) => {
     const endTime = new Date(value[1]);
     const timeDiff = endTime.getTime() - startTime.getTime();
     if (timeDiff < 1800000 || timeDiff > (8*60*60*1000)) {
-      callback(new Error('请选择正确的时间'));
+      callback(new Error('轮巡时间段在0.5h和8小时之间'));
     }
   }
   callback();
