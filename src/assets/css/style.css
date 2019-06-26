@@ -926,3 +926,29 @@
  /* .address_input .el-input__inner:hover .el-input-group__append {
   border-color: #0C70F8 !important;
 } */
+
+/* th css style create by th */
+.th-breadcrumb {
+  width: 100%; height: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 0 18px;
+  border-bottom: 1px solid #D3D3D3;
+}
+.th-button-export {
+  width: 100px; height: 40px;
+  font-size: 14px;
+}
+.the-table .el-table__header tr{
+  height: 54px;
+}
+.the-table .el-table__body .el-table__row {
+  height: 55px;
+}
+.the-table .el-table__body .el-table__row:hover td {
+  background: #E6F7FF;
+}
+/* th css style create by th */

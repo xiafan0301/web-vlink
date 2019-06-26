@@ -95,6 +95,10 @@ export default {
       path: 'ycxc', // 夜车行车统计
       name: 'vehicle_search_ycxc',
       component: () => import('@/views/index/components/vehicle/statistics/ycxc.vue')
+    }, {
+      path: 'ycxc-record', // 夜车行车抓拍记录
+      name: 'vehicle_search_ycxc_record',
+      component: () => import('@/views/index/components/vehicle/statistics/ycxc-record.vue')
     }
   ]
 }
