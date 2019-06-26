@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item class="con_back">布控车辆出城统计</el-breadcrumb-item>
+        <el-breadcrumb-item>布控车辆出城统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="con_box">
@@ -11,7 +11,7 @@
         <div class="left_start">
           <span>开始</span>
           <el-date-picker
-            v-model="startTime"
+            v-model="queryForm.startTime"
             type="datetime"
             placeholder="请选择开始时间">
           </el-date-picker>
@@ -19,14 +19,14 @@
         <div class="left_end">
           <span>结束</span>
           <el-date-picker
-            v-model="endTime"
+            v-model="queryForm.endTime"
             type="datetime"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <el-select
           style="width: 100%;"
-          v-model="devIdData"
+          v-model="queryForm.devIdData"
           multiple
           popper-class="statistics_select_list"
           @remove-tag="removeSeletedDev"
@@ -61,9 +61,9 @@
             </el-tree>
           </vue-scroll>
         </div>
-        <div class="left_radio"><span>车牌：</span><el-radio v-model="radio" label="1">非</el-radio></div>
+        <div class="left_radio"><span>车牌：</span><el-radio v-model="queryForm.radio" label="1">非</el-radio></div>
         <div class="left_province">
-          <el-select v-model="provinceId" placeholder="请选择">
+          <el-select v-model="queryForm.provinceId" placeholder="请选择">
             <el-option
               v-for="item in provinceList"
               :key="item.value"
@@ -71,7 +71,7 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-input v-model="provinceName"></el-input>
+          <el-input v-model="queryForm.provinceName"></el-input>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn">重置</el-button>
@@ -166,9 +166,14 @@
 export default {
   data () {
     return {
-      startTime: null,
-      endTime: null,
-       devIdData: [],
+      queryForm: {
+        startTime: null,
+        endTime: null,
+        devIdData: [],
+        provinceId: null,
+        provinceName: null,
+        radio: null
+      },
       isShowSelectList: false,
       tabIndex: 1, // select 下拉 tab 切换下标
       data1: [{
@@ -227,9 +232,7 @@ export default {
             label: '二级 3-2'
         }]
       }],
-      provinceId: null,
       provinceList: [],
-      provinceName: null,
       loading: false,
       bkclccList: [{name: 'xxxxxxx'}],
       // 翻页数据
