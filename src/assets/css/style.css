@@ -62,7 +62,7 @@
 .vl_icon_v31 { width: 24px; height: 24px; background-position: -877px -132px; }
 .vl_icon_v32 { width: 24px; height: 24px; background-position: -923px -134px; }
 .vl_icon_v51 { width: 80px; height: 80px; background-position: -659px -254px; }
-.vl_icons_ptz { width: 24px; height: 24px; background-position: -822px -305px; }
+.vl_icons_ptz { width: 24px; height: 24px; background-position: -820px -303px; }
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
@@ -336,6 +336,9 @@
 .vl_icon2_111:hover { background-position: -1373px -684px; }
 .vl_icon2_112 { background-position: -23px -815px; }
 .vl_icon2_112:hover { background-position: -23px -933px; }
+
+/* 车辆侦查 */
+.vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -988px -1296px;}
 
 .vl_content_pad { padding: 10px; }
 

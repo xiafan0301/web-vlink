@@ -1,11 +1,11 @@
 <template>
-<!-- 以图搜车 -->
-  <div class="ytsc_wrap">
+<!-- 模糊搜车 -->
+  <div class="mhsc_wrap">
       <!-- 面包屑通用样式 -->
       <div class="link_bread">
         <el-breadcrumb separator=">" class="bread_common">
           <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>以图搜车</el-breadcrumb-item>
+          <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <!-- 通用的左边菜单 -->
@@ -29,7 +29,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.ytsc_wrap {
+.mhsc_wrap {
   height: 100%;
   position: relative;
   .link_bread {

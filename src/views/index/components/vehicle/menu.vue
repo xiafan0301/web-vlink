@@ -16,7 +16,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_ycsc'}">
-              <i class="vl_icon2 vl_icon2_003"></i><span>以车搜车</span>
+              <i class="vl_icon2 vl_icon2_003"></i><span>以图搜车</span>
             </router-link>
           </li>
           <li>
@@ -110,7 +110,7 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'vehicle_search_ycxc'}">
+            <router-link :to="{name: 'vehicle_search_yjxc'}">
               <i class="vl_icon2 vl_icon2_025"></i><span>夜车行车统计</span>
             </router-link>
           </li>
