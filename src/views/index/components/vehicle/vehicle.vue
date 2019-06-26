@@ -39,8 +39,5 @@ export default {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
   line-height: 20px;
   padding: 10px 10px 6px;
-.vehicle_content {
-  position: relative;
-  height: 100%;
 }
 </style>
