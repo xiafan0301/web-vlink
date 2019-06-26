@@ -28,4 +28,17 @@ export default {
 
 <!-- 车辆侦察公用CSS -->
 <style lang="scss">
+  .input-with-select{
+    .el-select .el-input {
+      width: 60px;
+    }
+  }
+.insetIput{
+  .el-input__inner{
+  padding-left: 90px;
+ 
+}
+
+} 
+
 </style>
