@@ -219,18 +219,18 @@ export default {
   .dl_vt_t {
     position: absolute; top: 20px; left: 0;
     width: 100%;
-    padding-left: 20px;
+    padding-left: 10px;
   }
   .dl_vt_c {
     width: 100%; height: 100%;
     > ul {
       width: 100%; height: 100%;
       overflow: hidden;
-      padding: 0 10px;
+      padding: 0 5px;
       > li {
         float: left;
         width: 33.33%; height: 50%;
-        padding: 10px;
+        padding: 5px;
         > div {
           position: relative;
           width: 100%; height: 100%;

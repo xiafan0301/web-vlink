@@ -91,7 +91,7 @@ export default {
   data () {
     return {
       addUser: {
-        proKey: null,
+        // proKey: null,
         userMobile: null,
         userName: null,
         userSex: 0,
@@ -122,7 +122,7 @@ export default {
   },
   mounted () {
     this.userInfo =  this.$store.state.loginUser;
-    this.addUser.proKey = this.userInfo.proKey;
+    // this.addUser.proKey = this.userInfo.proKey;
     this.getDepartList();
   },
   methods: {
@@ -155,11 +155,11 @@ export default {
                 this.isAddLoading = false;
                 this.$router.push({name: 'user'});
               } else {
-                this.$message({
-                  type: 'error',
-                  message: '新建失败',
-                  customClass: 'request_tip'
-                });
+                // this.$message({
+                //   type: 'error',
+                //   message: '新建失败',
+                //   customClass: 'request_tip'
+                // });
                 this.isAddLoading = false;
               }
             })
