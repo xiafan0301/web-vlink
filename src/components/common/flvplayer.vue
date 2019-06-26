@@ -70,7 +70,7 @@
             <template v-if="fullScreen || showFullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
               <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
-              <span v-if="config.ptz && oData.type === 1" class="flvplayer_opt vl_icon vl_icons_ptz" @click="ptzHandler" title="云台控制"></span>
+              <span v-if="config.ptz && oData.type === 1" class="flvplayer_opt vl_icon vl_icons_ptz" @click="ptzHandler(true)" :title="ptzObj.active ? '关闭云台控制' : '云台控制'"></span>
               <!-- 退出全屏 -->
               <span v-if="fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
             </template>
@@ -81,6 +81,19 @@
       </div>
     </div>
     <!-- 云台控制 -->
+    <template v-if="config.ptz && oData.type === 1">
+      <div class="flvplayer_ptz" v-show="ptzObj.active && (fullScreen || showFullScreen)">
+        <ul>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lit" @mousedown="ptzMousedownEvent(1)" @mouseup="ptzMouseupEvent(1)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lir" @mousedown="ptzMousedownEvent(4)" @mouseup="ptzMouseupEvent(4)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lib" @mousedown="ptzMousedownEvent(2)" @mouseup="ptzMouseupEvent(2)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lil" @mousedown="ptzMousedownEvent(3)" @mouseup="ptzMouseupEvent(3)"></li>
+        </ul>
+        <div>
+          <el-slider :format-tooltip="ptzSliderFm" :min="0" :max="255" v-model="ptzObj.para"></el-slider>
+        </div>
+      </div>
+    </template>
     <!-- 添加标记 dialog -->
     <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666; font-size: 15px;">当前监控：{{oData.title}}</div>
@@ -329,7 +342,11 @@ export default {
       // 云台控制对象
       ptzObj: {
         active: false,
-        position: null, // { cmd: , action: 1 } 正在调节的方向
+        handling: false, // 处理中
+        handleTime: null,
+        minCtrTime: 2000, // 最小控制时间
+        para: 100,
+        position: null // { cmd: , action: 1 } 正在调节的方向
       }
     }
   },
@@ -616,27 +633,53 @@ export default {
     /***** 视频事件 *****/
     /* 云台控制 */
     // 开启云台控制
-    ptzHandler () {
-      this.ptzObj.active = true;
-    },
-    // 方向控制 cmd 1-上 2-下 3-左 4-右
-    // 控制动作 action 0-停止 1-开始
-    ptzPositionCtl (cmd,  action) {
-      if (this.ptzObj.position) {
-        this.ptzPositionDo(this.ptzObj.position.cmd,  0, () => {
-          this.ptzPositionDo(cmd,  action);
-        });
+    ptzHandler (flag) {
+      if (flag) {
+        if (this.ptzObj.active) {
+          this.ptzClose();
+        } else {
+          this.ptzObj.active = true;
+        }
+      } else {
+        this.ptzClose();
       }
     },
-    // 
+    // 方向控制 cmd 1-上 2-下 3-左 4-右
+    ptzMousedownEvent (cmd) {
+      // if (this.ptzObj.handling) { return; }
+      // console.log('ptzMousedownEvent');
+      this.ptzObj.handling = true;
+      this.ptzObj.handleTime = new Date().getTime();
+      this.ptzPositionDo(cmd, 1); // action 0-停止 1-开始 
+      /* window.setTimeout(() => {
+        this.ptzObj.handling = false;
+      }, 3000); */
+    },
+    ptzMouseupEvent (cmd) {
+      // console.log('ptzMouseupEvent');
+      if (this.ptzObj.handleTime) {
+        let ind = new Date().getTime();
+        // console.log(ind - this.ptzObj.handleTime);
+        if (ind - this.ptzObj.handleTime < this.ptzObj.minCtrTime) {
+          window.setTimeout(() => {
+            this.ptzPositionDo(cmd, 0); // action 0-停止 1-开始 
+          }, this.ptzObj.minCtrTime - (ind - this.ptzObj.handleTime));
+        } else {
+          this.ptzPositionDo(cmd, 0); // action 0-停止 1-开始 
+        }
+        this.ptzObj.handleTime = null;
+      }
+    },
+    // 方向控制 cmd 1-上 2-下 3-左 4-右
+    // 控制动作 action 0-停止 1-开始 
     ptzPositionDo (cmd,  action, callback) {
       ptzControl({
         deviceId: this.oData.video.uid,
         cmd: cmd,
         action: action,
-        para: 100 // 控制参数 取值范围0-255，方向控制为速度值
+        para: this.ptzObj.para // 控制参数 取值范围0-255，方向控制为速度值
       }).then(res => {
-        if (res && res.data) {
+        if (res) {
           if (action === 0) {
             this.ptzObj.position = null;
           } else if (action === 1) {
@@ -659,6 +702,9 @@ export default {
         this.ptzPositionDo(this.ptzObj.position.cmd,  0);
         this.ptzObj.position = null;
       }
+    },
+    ptzSliderFm (val) {
+      return '速度值：' + val;
     },
     /* 录像函数 */
     tapeStart () {
@@ -1021,6 +1067,7 @@ export default {
       } else {
         this.fullScreen = flag;
         this.playerEnlarge(false);
+        this.ptzHandler(false);
       }
     },
     playerFullScreenTwo () {
@@ -1214,6 +1261,47 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.flvplayer_ptz {
+  width: 174px;
+  position: absolute; bottom: 50px; left: 50%; z-index: 200;
+  margin-left: -87px;
+  > ul {
+    position: relative;
+    width: 174px; height: 174px;
+    background: url(../../assets/img/video/vi_ptz_01.png) center center no-repeat;
+    > .flvplayer_ptz_li {
+      position: absolute;
+      width: 92px; height: 43px;
+      background-image: url(../../assets/img/video/vi_ptz_02.png);
+      background-position: center center;
+      background-repeat: no-repeat;
+      &.flvplayer_ptz_lit {
+        top: 17px; left: 42px;
+      }
+      &.flvplayer_ptz_lir {
+        top: 61px; right: -1px;
+        transform: rotate(90deg);
+      }
+      &.flvplayer_ptz_lib {
+        bottom: 28px; right: 42px;
+        transform: rotate(180deg);
+      }
+      &.flvplayer_ptz_lil {
+        top: 59px; left: -2px;
+        transform: rotate(270deg);
+      }
+      &:hover { background-image: url(../../assets/img/video/vi_ptz_03.png); }
+      &.flvplayer_ptz_li_sed { background-image: url(../../assets/img/video/vi_ptz_03.png); }
+    }
+  }
+  > div {
+    position: relative; top: -5px;
+    padding: 0 20px;
+    background-color: #000;
+    background-color: rgba(0, 0, 0, .6);
+    border-radius: 4px;
+  }
+}
 .vl_flvplayer {
   position: relative;
   width: 100%; height: 100%;
@@ -1315,7 +1403,7 @@ export default {
 }
 .flvplayer_bot_om.flvplayer_bot_om_h .flvplayer_bot_omh {
   display: none;
-  position: absolute; left: -10px; bottom: 100%;
+  position: absolute; left: -20px; bottom: 100%;
   background-color: #000;
   background-color: rgba(0, 0, 0, .7);
   padding: 10px 10px;
