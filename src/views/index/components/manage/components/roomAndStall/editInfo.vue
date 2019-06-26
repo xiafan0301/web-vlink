@@ -183,6 +183,11 @@ export default {
         getRoomDetail(roomId)
           .then(res => {
             if (res) {
+              let province = res.data.province;
+              let city = res.data.city;
+              let region = res.data.region;
+              let street = res.data.street;
+
               this.editRoom.uid = res.data.uid;
               this.editRoom.desci = res.data.desci;
               this.editRoom.latitude = res.data.latitude;
@@ -196,10 +201,13 @@ export default {
               this.editRoom.roomName = res.data.roomName;
 
               this.editRoom.address = res.data.address;
-              this.editRoom.province = res.data.province;
-              this.editRoom.city = res.data.city;
-              this.editRoom.region = res.data.region;
-              this.editRoom.street = res.data.street;
+
+              this.editRoom.province = province.toString();
+              this.editRoom.city = city.toString();
+              this.editRoom.region = region.toString();
+              if (street) {
+                this.editRoom.street = street.toString();
+              }
 
               this.getCountryList();
               this.getCityList();
@@ -390,13 +398,13 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
             });
