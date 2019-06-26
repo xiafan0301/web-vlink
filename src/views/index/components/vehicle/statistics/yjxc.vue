@@ -574,7 +574,6 @@ export default {
     color: #409EFF!important;
   }
 }
-// 抓拍详情弹窗样式
 html {
   font-size: 100px;
 }
@@ -583,6 +582,7 @@ html {
 @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
 @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
 @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
+// 抓拍详情弹窗样式
 .yjxc_container{
   .struc_detail_dialog {
     .el-dialog {
