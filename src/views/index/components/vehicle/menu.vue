@@ -20,6 +20,11 @@
             </router-link>
           </li>
           <li>
+            <router-link :to="{name: 'vehicle_search_mhsc'}">
+              <i class="vl_icon2 vl_icon2_003"></i><span>模糊搜车</span>
+            </router-link>
+          </li>
+          <li>
             <router-link :to="{name: 'vehicle_search_gcck'}">
               <i class="vl_icon2 vl_icon2_004"></i><span>过车查看</span>
             </router-link>
