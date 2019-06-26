@@ -40,4 +40,17 @@ export default {
   line-height: 20px;
   padding: 10px 10px 6px;
 }
+  .input-with-select{
+    .el-select .el-input {
+      width: 60px;
+    }
+  }
+.insetIput{
+  .el-input__inner{
+  padding-left: 90px;
+ 
+}
+
+} 
+
 </style>
