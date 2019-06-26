@@ -93,8 +93,8 @@ export default {
       component: () => import('@/views/index/components/vehicle/statistics/gcsj.vue')
     }, {
       path: 'ycxc', // 夜车行车统计
-      name: 'vehicle_search_ycxc',
-      component: () => import('@/views/index/components/vehicle/statistics/ycxc.vue')
+      name: 'vehicle_search_yjxc',
+      component: () => import('@/views/index/components/vehicle/statistics/yjxc.vue')
     }
   ]
 }
