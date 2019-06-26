@@ -28,4 +28,8 @@ export default {
 
 <!-- 车辆侦察公用CSS -->
 <style lang="scss">
+.vehicle_content {
+  position: relative;
+  height: 100%;
+}
 </style>
