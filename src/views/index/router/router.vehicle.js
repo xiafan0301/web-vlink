@@ -37,6 +37,10 @@ export default {
       name: 'vehicle_search_gcck',
       component: () => import('@/views/index/components/vehicle/search/gcck.vue')
     }, {
+      path: 'gcck-zp', // 过车查看
+      name: 'vehicle_search_gcck_zp',
+      component: () => import('@/views/index/components/vehicle/search/gcck-zp.vue')
+    }, {
       path: 'clxx', // 车辆信息
       name: 'vehicle_search_clxx',
       component: () => import('@/views/index/components/vehicle/search/clxx.vue')
