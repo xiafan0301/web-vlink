@@ -8,37 +8,39 @@
       <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export">导出</el-button>
     </div>
     <div class="the-bottom">
-      <div class="the-left-search"></div>
+      <div class="the-left-search">
+        
+      </div>
       <div class="the-right-result">
         <vue-scroll>
-        <div class="the-table">
-          <el-table
-            class="data_table" :data="oData.list">
-            <el-table-column label="序号" width="150px" type="index" :index="indexMethod"></el-table-column>
-            <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
-            <el-table-column label="车辆类型" prop="vehicleType">
-              <template slot-scope="scope">
-                <span>{{ scope.row.vehicleType }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="过车次数" prop="vehicleCount"></el-table-column>
-            <el-table-column label="操作">
-              <template slot-scope="scope">
-                <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
-                <span class="operation_btn" @click="onOpenVehicleInfo(scope.row)">车辆信息</span>
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-pagination
-            class="cum_pagination"
-            @current-change="onPageChange"
-            :current-page.sync="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="pagination.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="oData.total">
-          </el-pagination>
-        </div>
+          <div class="the-table">
+            <el-table
+              class="data_table" :data="oData.list">
+              <el-table-column label="序号" width="150px" type="index" :index="indexMethod"></el-table-column>
+              <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
+              <el-table-column label="车辆类型" prop="vehicleType">
+                <template slot-scope="scope">
+                  <span>{{ scope.row.vehicleType }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="过车次数" prop="vehicleCount"></el-table-column>
+              <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
+                  <span class="operation_btn" @click="onOpenVehicleInfo(scope.row)">车辆信息</span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination
+              class="cum_pagination"
+              @current-change="onPageChange"
+              :current-page.sync="currentPage"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="oData.total">
+            </el-pagination>
+          </div>
         </vue-scroll>
       </div>
     </div> 

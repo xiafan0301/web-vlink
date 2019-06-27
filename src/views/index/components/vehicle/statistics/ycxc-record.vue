@@ -27,8 +27,8 @@
         <div class="list-box">
             <div class="list-item" v-for="item in '123123123123123'" :key="item.id" @click="onOpenDetail(item)">
               <img src="../../../../../assets/img/666.jpg" alt="">
-              <p class="time">2018.-11-12  13:14:15</p>
-              <p class="address">抓拍设备：抓拍名称京广高速收费站抓拍名称京广高速收费站抓拍名称京广高速收费站抓拍名称京广高速收费站抓拍名称京广高速收费站</p>
+              <p class="time"><i></i>2018.-11-12  13:14:15</p>
+              <p class="address"><i></i>抓拍设备:抓拍名称京广高速</p>
             </div>
             <el-pagination
               class="cum_pagination th-center-pagination"
@@ -155,6 +155,9 @@
       }
     },
     methods: {
+      /**
+       * 弹框地图初始化
+       */
       initMap () {
         // this.map.setZoomAndCenter(iZoom, aCenter);
         let map = new window.AMap.Map('container', {
@@ -165,6 +168,9 @@
         this.map = map;
         this.drawPoint(this.strucInfoList[0])
       },
+      /**
+       * 地图描点
+       */
       drawPoint (data) {
         console.log(data)
         if (this.markerPoint) {
@@ -212,6 +218,7 @@
        * 打开抓拍弹框
        */
       onOpenDetail (obj) {
+        this.$_showLoading({text: '加载中...'})
         console.log(obj)
         console.log(this.sturcDetail.videoPath)
         this.videoUrl = this.sturcDetail.videoPath
@@ -227,6 +234,7 @@
         this.$nextTick(() => {
           this.initMap()
         })
+        this.$_hideLoading()
       },
       /**
        * 关闭抓拍弹框
@@ -235,6 +243,9 @@
         this.strucCurTab = 1
         this.strucDetailDialog = false
       },
+      /**
+       * 图片切换
+       */
       imgListTap (obj, i) {
         this.curImgIndex = i
       }
@@ -297,25 +308,40 @@
         img {
           display: inline-block;
           width: 100%;
-          height: 70%;
+          height: calc(100% - 70px);
         }
         p {
           font-size: 14px;
           font-family: 'MicrosoftYaHei';
           font-weight: 500;
           color: #333;
+          i {
+            color: #999;
+            margin-right: 3px;
+            display: block;
+            width: 15px;
+            height: 15px;
+          }
         }
         .time {
           padding: 10px 0 5px 0;
+          display: flex;
+          align-items: center;
+          i {
+            background: url("../../../../../assets/img/the-time.png") no-repeat;
+            background-size: 15px 15px;
+          }
         }
         .address {
+          display: flex;
+          align-items: center;
           text-overflow: ellipsis;
-          text-overflow: -o-ellipsis-lastline;
           overflow: hidden;
-          display: -webkit-box;
-          line-clamp: 2;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          white-space: nowrap;
+          i {
+            background: url("../../../../../assets/img/the-daynoint.png") no-repeat;
+            background-size: 15px 15px;
+          }
         }
       }
     }
@@ -455,7 +481,7 @@ html {font-size: 100px;}
         }
       }
       .struc_c_d_qii {
-        margin-right: .3rem;
+        // margin-right: .3rem;
         &:before {
           display: block;
           content: '';
