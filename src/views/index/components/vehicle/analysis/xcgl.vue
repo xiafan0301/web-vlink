@@ -89,15 +89,19 @@
         title="展开菜单"
         @click="videoMenuStatus = true;"
       >
-        <i :class="isHover ? 'vl_icon vl_icon_vehicle_05' : 'vl_icon vl_icon_vehicle_04'" @mouseenter="isHover = true;" @mouseleave="isHover = false;"></i>
+        <i class="vl_icon vl_icon_vehicle_03"></i>
       </div>
       <!-- 车辆信息 -->
-      <div class="info-right" v-loading="searching" :class="{ 'video-menu-close': !videoMenuStatus }">
+      <div
+        class="info-right"
+        v-loading="searching"
+        :class="{ 'video-menu-close': !videoMenuStatus }"
+      >
         <!-- 行车记录列表 -->
         <div class="driving-record" v-show="videoMenuStatus">
           <vue-scroll>
             <div class="title">
-              <p>该车行驶时经过X个设备</p>
+              <p>该车行驶时经过{{nDeviceList.length}}个设备</p>
               <div>
                 <el-button type="primary">导出</el-button>
               </div>
@@ -113,7 +117,7 @@
           </vue-scroll>
           <!-- 关闭按钮 -->
           <div class="close-menu-c" title="关闭菜单" @click="videoMenuStatus = false;">
-            <i :class="isHover ? 'vl_icon vl_icon_vehicle_03' : 'vl_icon vl_icon_vehicle_02'" @mouseenter="isHover = true;" @mouseleave="isHover = false;"></i>
+            <i class="vl_icon vl_icon_vehicle_02"></i>
           </div>
         </div>
         <!-- 地图信息 -->
@@ -184,6 +188,7 @@ import {
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder
 } from "../../../api/api.judge.js";
+import {random14} from '../../../../../utils/util.js';
 export default {
   data() {
     return {
@@ -230,253 +235,282 @@ export default {
         {
           label: "全部时刻",
           value: 0,
-          checked: true
+          checked: true,
+          key: 'allRecords'
         },
         {
           label: "00:00 - 04:00",
           value: 1,
-          checked: false
+          checked: false,
+          key: 'period0_4Records'
         },
         {
           label: "04:00 - 08:00",
           value: 2,
-          checked: false
+          checked: false,
+          key: 'period4_8Records'
         },
         {
           label: "08:00 - 12:00",
           value: 3,
-          checked: false
+          checked: false,
+          key: 'period8_12Records'
         },
         {
           label: "12:00 - 16:00",
           value: 4,
-          checked: false
+          checked: false,
+          key: 'period12_16Records'
         },
         {
           label: "16:00 - 20:00",
           value: 5,
-          checked: false
+          checked: false,
+          key: 'period16_20Records'
         },
         {
           label: "20:00 - 24:00",
           value: 6,
-          checked: false
+          checked: false,
+          key: 'period20_24Records'
         }
       ],
       selectTimeList: [], //选中的时间段
       deviceList: [],
+      nDeviceList: [], //设备列表
       list: {
-        allRecords: [{
-              deviceName: "设备1",
-              shotTime: "2019-6-20 00:08",
-              timeSlot: "1小时10分钟",
-              refTime: "1小时",
-              deviceId: 1,
-              longitude: 110.594972,
-              latitude: 27.908316,
-            },{
-              deviceName: "设备2",
-              shotTime: "2019-6-20 01:18",
-              timeSlot: "1小时10分钟",
-              refTime: "1小时",
-              deviceId: 2,
-              longitude: 110.595908,
-              latitude: 27.909847,
-            },{
-              deviceName: "设备3",
-              shotTime: "2019-6-20 01:48",
-              timeSlot: "30分钟",
-              refTime: "30分钟",
-              deviceId: 3,
-              longitude: 110.585509,
-              latitude: 27.911629,
-            },{
-              deviceName: "设备1",
-              shotTime: "2019-6-20 04:10",
-              timeSlot: "2小时10分钟",
-              refTime: "2小时",
-              deviceId: 1,
-              longitude: 110.594972,
-              latitude: 27.908316,
-            },{
-              deviceName: "设备4",
-              shotTime: "2019-6-20 05:10",
-              timeSlot: "1小时",
-              refTime: "1小时",
-              deviceId: 4,
-              longitude: 110.586619,
-              latitude: 27.917929,
-            },
-            {
-              deviceName: "设备5",
-              shotTime: "2019-6-20 07:48",
-              timeSlot: "2小时38分钟",
-              refTime: "2.5小时",
-              deviceId: 5,
-              longitude: 110.585404,
-              latitude: 27.920138,
-            },{
-              deviceName: "设备3",
-              shotTime: "2019-6-20 08:00",
-              timeSlot: "12分钟",
-              refTime: "12分钟",
-              deviceId: 3,
-              longitude: 110.585509,
-              latitude: 27.911629,
-            },
-            {
-              deviceName: "设备5",
-              shotTime: "2019-6-20 10:00",
-              timeSlot: "2小时",
-              refTime: "2小时",
-              deviceId: 5,
-              longitude: 110.585404,
-              latitude: 27.920138,
-            },
-            {
-              deviceName: "设备6",
-              shotTime: "2019-6-20 11:00",
-              timeSlot: "1小时",
-              refTime: "1小时",
-              deviceId: 6,
-              longitude: 110.587003,
-              latitude: 27.916535,
-            },
-            {
-              deviceName: "设备7",
-              shotTime: "2019-6-20 12:30",
-              timeSlot: "1小时30分钟",
-              refTime: "1.5小时",
-              uid: 7,
-              longitude: 110.583937,
-              latitude: 27.921475,
-            },
-            {
-              deviceName: "设备8",
-              shotTime: "2019-6-20 13:00",
-              timeSlot: "0.5小时",
-              refTime: "0.5小时",
-              uid: 8,
-              longitude: 110.584734,
-              latitude: 27.922959,
-            },
-            {
-              deviceName: "设备2",
-              shotTime: "2019-6-20 15:48",
-              timeSlot: "2小时48分钟",
-              refTime: "3小时",
-              uid: 2,
-              longitude: 110.595908,
-              latitude: 27.909847,
-            }],
-        period0_4Records: [{
-              deviceName: "设备1",
-              shotTime: "2019-6-20 00:08",
-              timeSlot: "1小时10分钟",
-              refTime: "1小时",
-              deviceId: 1,
-              longitude: 110.594972,
-              latitude: 27.908316,
-            },{
-              deviceName: "设备2",
-              shotTime: "2019-6-20 01:18",
-              timeSlot: "1小时10分钟",
-              refTime: "1小时",
-              deviceId: 2,
-              longitude: 110.595908,
-              latitude: 27.909847,
-            },{
-              deviceName: "设备3",
-              shotTime: "2019-6-20 01:48",
-              timeSlot: "30分钟",
-              refTime: "30分钟",
-              deviceId: 3,
-              longitude: 110.585509,
-              latitude: 27.911629,
-            }],
-        period4_8Records: [{
-              deviceName: "设备1",
-              shotTime: "2019-6-20 04:10",
-              timeSlot: "2小时10分钟",
-              refTime: "2小时",
-              deviceId: 1,
-              longitude: 110.587003,
-              latitude: 27.916535,
-            },{
-              deviceName: "设备4",
-              shotTime: "2019-6-20 05:10",
-              timeSlot: "1小时",
-              refTime: "1小时",
-              deviceId: 4,
-              longitude: 110.586619,
-              latitude: 27.917929,
-            },
-            {
-              deviceName: "设备5",
-              shotTime: "2019-6-20 07:48",
-              timeSlot: "2小时38分钟",
-              refTime: "2.5小时",
-              deviceId: 5,
-              longitude: 110.585404,
-              latitude: 27.920138,
-            }],
-        period8_12Records: [{
-              deviceName: "设备3",
-              shotTime: "2019-6-20 08:00",
-              timeSlot: "12分钟",
-              refTime: "12分钟",
-              deviceId: 3,
-              longitude: 110.585509,
-              latitude: 27.911629,
-            },
-            {
-              deviceName: "设备5",
-              shotTime: "2019-6-20 10:00",
-              timeSlot: "2小时",
-              refTime: "2小时",
-              deviceId: 5,
-              longitude: 110.585404,
-              latitude: 27.920138,
-            },
-            {
-              deviceName: "设备6",
-              shotTime: "2019-6-20 11:00",
-              timeSlot: "1小时",
-              refTime: "1小时",
-              deviceId: 6,
-              longitude: 110.587003,
-              latitude: 27.916535,
-            }],
-        period12_16Records: [{
-              deviceName: "设备7",
-              shotTime: "2019-6-20 12:30",
-              timeSlot: "1小时30分钟",
-              refTime: "1.5小时",
-              uid: 7,
-              longitude: 110.583937,
-              latitude: 27.921475,
-            },
-            {
-              deviceName: "设备8",
-              shotTime: "2019-6-20 13:00",
-              timeSlot: "0.5小时",
-              refTime: "0.5小时",
-              uid: 8,
-              longitude: 110.584734,
-              latitude: 27.922959,
-            },
-            {
-              deviceName: "设备2",
-              shotTime: "2019-6-20 15:48",
-              timeSlot: "2小时48分钟",
-              refTime: "3小时",
-              uid: 2,
-              longitude: 110.595908,
-              latitude: 27.909847,
-            }]
+        allRecords: [
+          {
+            deviceName: "设备1",
+            shotTime: "2019-6-20 00:08",
+            timeSlot: "1小时10分钟",
+            refTime: "1小时",
+            deviceId: 1,
+            longitude: 110.594972,
+            latitude: 27.908316
+          },
+          {
+            deviceName: "设备2",
+            shotTime: "2019-6-20 01:18",
+            timeSlot: "1小时10分钟",
+            refTime: "1小时",
+            deviceId: 2,
+            longitude: 110.595908,
+            latitude: 27.909847
+          },
+          {
+            deviceName: "设备3",
+            shotTime: "2019-6-20 01:48",
+            timeSlot: "30分钟",
+            refTime: "30分钟",
+            deviceId: 3,
+            longitude: 110.585509,
+            latitude: 27.911629
+          },
+          {
+            deviceName: "设备1",
+            shotTime: "2019-6-20 04:10",
+            timeSlot: "2小时10分钟",
+            refTime: "2小时",
+            deviceId: 1,
+            longitude: 110.594972,
+            latitude: 27.908316
+          },
+          {
+            deviceName: "设备4",
+            shotTime: "2019-6-20 05:10",
+            timeSlot: "1小时",
+            refTime: "1小时",
+            deviceId: 4,
+            longitude: 110.586619,
+            latitude: 27.917929
+          },
+          {
+            deviceName: "设备5",
+            shotTime: "2019-6-20 07:48",
+            timeSlot: "2小时38分钟",
+            refTime: "2.5小时",
+            deviceId: 5,
+            longitude: 110.585404,
+            latitude: 27.920138
+          },
+          {
+            deviceName: "设备3",
+            shotTime: "2019-6-20 08:00",
+            timeSlot: "12分钟",
+            refTime: "12分钟",
+            deviceId: 3,
+            longitude: 110.585509,
+            latitude: 27.911629
+          },
+          {
+            deviceName: "设备5",
+            shotTime: "2019-6-20 10:00",
+            timeSlot: "2小时",
+            refTime: "2小时",
+            deviceId: 5,
+            longitude: 110.585404,
+            latitude: 27.920138
+          },
+          {
+            deviceName: "设备6",
+            shotTime: "2019-6-20 11:00",
+            timeSlot: "1小时",
+            refTime: "1小时",
+            deviceId: 6,
+            longitude: 110.587003,
+            latitude: 27.916535
+          },
+          {
+            deviceName: "设备7",
+            shotTime: "2019-6-20 12:30",
+            timeSlot: "1小时30分钟",
+            refTime: "1.5小时",
+            deviceId: 7,
+            longitude: 110.583937,
+            latitude: 27.921475
+          },
+          {
+            deviceName: "设备8",
+            shotTime: "2019-6-20 13:00",
+            timeSlot: "0.5小时",
+            refTime: "0.5小时",
+            deviceId: 8,
+            longitude: 110.583893,
+            latitude: 27.924006
+          },
+          {
+            deviceName: "设备2",
+            shotTime: "2019-6-20 15:48",
+            timeSlot: "2小时48分钟",
+            refTime: "3小时",
+            deviceId: 2,
+            longitude: 110.595908,
+            latitude: 27.909847
+          }
+        ],
+        period0_4Records: [
+          {
+            deviceName: "设备1",
+            shotTime: "2019-6-20 00:08",
+            timeSlot: "1小时10分钟",
+            refTime: "1小时",
+            deviceId: 1,
+            longitude: 110.594972,
+            latitude: 27.908316
+          },
+          {
+            deviceName: "设备2",
+            shotTime: "2019-6-20 01:18",
+            timeSlot: "1小时10分钟",
+            refTime: "1小时",
+            deviceId: 2,
+            longitude: 110.595908,
+            latitude: 27.909847
+          },
+          {
+            deviceName: "设备3",
+            shotTime: "2019-6-20 01:48",
+            timeSlot: "30分钟",
+            refTime: "30分钟",
+            deviceId: 3,
+            longitude: 110.585509,
+            latitude: 27.911629
+          }
+        ],
+        period4_8Records: [
+          {
+            deviceName: "设备1",
+            shotTime: "2019-6-20 04:10",
+            timeSlot: "2小时10分钟",
+            refTime: "2小时",
+            deviceId: 1,
+            longitude: 110.587003,
+            latitude: 27.916535
+          },
+          {
+            deviceName: "设备4",
+            shotTime: "2019-6-20 05:10",
+            timeSlot: "1小时",
+            refTime: "1小时",
+            deviceId: 4,
+            longitude: 110.586619,
+            latitude: 27.917929
+          },
+          {
+            deviceName: "设备5",
+            shotTime: "2019-6-20 07:48",
+            timeSlot: "2小时38分钟",
+            refTime: "2.5小时",
+            deviceId: 5,
+            longitude: 110.585404,
+            latitude: 27.920138
+          }
+        ],
+        period8_12Records: [
+          {
+            deviceName: "设备3",
+            shotTime: "2019-6-20 08:00",
+            timeSlot: "12分钟",
+            refTime: "12分钟",
+            deviceId: 3,
+            longitude: 110.585509,
+            latitude: 27.911629
+          },
+          {
+            deviceName: "设备5",
+            shotTime: "2019-6-20 10:00",
+            timeSlot: "2小时",
+            refTime: "2小时",
+            deviceId: 5,
+            longitude: 110.585404,
+            latitude: 27.920138
+          },
+          {
+            deviceName: "设备6",
+            shotTime: "2019-6-20 11:00",
+            timeSlot: "1小时",
+            refTime: "1小时",
+            deviceId: 6,
+            longitude: 110.587003,
+            latitude: 27.916535
+          }
+        ],
+        period12_16Records: [
+          {
+            deviceName: "设备7",
+            shotTime: "2019-6-20 12:30",
+            timeSlot: "1小时30分钟",
+            refTime: "1.5小时",
+            deviceId: 7,
+            longitude: 110.583937,
+            latitude: 27.921475
+          },
+          {
+            deviceName: "设备8",
+            shotTime: "2019-6-20 13:00",
+            timeSlot: "0.5小时",
+            refTime: "0.5小时",
+            deviceId: 8,
+            longitude: 110.583893,
+            latitude: 27.924006
+          },
+          {
+            deviceName: "设备2",
+            shotTime: "2019-6-20 15:48",
+            timeSlot: "2小时48分钟",
+            refTime: "3小时",
+            deviceId: 2,
+            longitude: 110.595908,
+            latitude: 27.909847
+          }
+        ],
+        period16_20Records: [],
+        period20_24Records: [],
       },
       videoMenuStatus: true, // 菜单状态
-      isHover: false,
+      cameraMapMarkers: [], // 地图标记
+      selAreaPolygon: null,
     };
   },
   computed: {
@@ -493,7 +527,7 @@ export default {
     //加载地图
     this.initMap();
     //获取数据
-    this.getList();
+    this.getData();
   },
   methods: {
     // 上传图片
@@ -664,19 +698,19 @@ export default {
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
         //去掉全部时刻的选择项
-        this.selectTimeList = this.selectTimeList.filter(key => key !== 0);
+        this.selectTimeList = this.selectTimeList.filter(key => key.value !== 0);
         if (this.timeSlot[index].checked) {
-          this.selectTimeList.push(this.timeSlot[index].value);
+          this.selectTimeList.push(this.timeSlot[index]);
         } else {
           this.selectTimeList = this.selectTimeList.filter(
-            key => key !== val.value
+            key => key.value !== val.value
           );
         }
       } else {
         //全部时刻
         this.$set(this.timeSlot[0], "checked", true);
         this.selectTimeList = [];
-        this.selectTimeList.push(val.value);
+        this.selectTimeList.push(val);
         for (let i = 0; i < this.timeSlot.length; i++) {
           if (this.timeSlot[i].value !== 0) {
             this.$set(this.timeSlot[i], "checked", false);
@@ -684,15 +718,139 @@ export default {
         }
       }
       console.log(val, this.timeSlot, this.selectTimeList);
+      this.getList();
+    },
+    //接口获取数据
+    getData() {
+      this.selectTimeList = [{
+          label: "全部时刻",
+          value: 0,
+          checked: true,
+          key: 'allRecords'
+        }];
+      this.getList();
     },
     //获取数据
     getList() {
       this.deviceList = [];
-      this.deviceList = [...this.list.allRecords];
-      /* for (let item of this.list) {
-        this.deviceList.push(...item.childen);
-      } */
+      for (let item of this.selectTimeList) {
+        this.deviceList.push(...this.list[item.key])
+      }
+      console.log("=====deviceList=====",this.deviceList)
+      this.getNDeviceList();
+      this.mapClearMarkers(this.cameraMapMarkers);
+      this.mapMark(this.nDeviceList, this.cameraMapMarkers);
     },
+    //获取设备列表
+    getNDeviceList() {
+      let map = {},
+        dest = [];
+      for (let i = 0; i < this.deviceList.length; i++) {
+        let ai = this.deviceList[i];
+        if (!map[ai.deviceId]) {
+          dest.push({
+            deviceId: ai.deviceId,
+            deviceName: ai.deviceName,
+            longitude: ai.longitude,
+            latitude: ai.latitude,
+            data: [ai]
+          });
+          map[ai.deviceId] = ai;
+        } else {
+          for (let j = 0; j < dest.length; j++) {
+            let dj = dest[j];
+            if (dj.deviceId == ai.deviceId) {
+              dj.data.push(ai);
+              break;
+            }
+          }
+        }
+      }
+      console.log(dest);
+      this.nDeviceList = [...dest];
+    },
+    // 地图标记
+    mapMark(data, aMarkers) {
+      if (data && data.length > 0) {
+        let hoverWindow = null;
+        let _this = this;
+        for (let i = 0; i < data.length; i++) {
+          let obj = data[i];
+          obj.sid = i + "_" + random14();
+          if (obj.longitude > 0 && obj.latitude > 0) {
+            let offSet = [-20, -50],
+              selClass = "";
+            if (
+              _this.selAreaPolygon &&
+              !_this.selAreaPolygon.contains(
+                new window.AMap.LngLat(obj.longitude, obj.latitude)
+              )
+            ) {
+              // 多边形存在且不在多边形之中
+              selClass = "vl_close";
+            }
+            let content = '<i class="vl_icon vl_icon_vehicle_04"></i>';
+            let marker = new window.AMap.Marker({
+              // 添加自定义点标记
+              map: _this.map,
+              position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: obj,
+              // 自定义点标记覆盖物内容
+              content: content,
+            });
+            // myAMap.hoverMarkerHandler(map, marker, obj);
+            if (!aMarkers) {
+              aMarkers = [];
+            }
+            aMarkers.push(marker);
+            // hover
+            marker.on("mouseover", function() {
+              let sContent =
+                '<div class="vl_map_hover">' +
+                '<div class="vl_map_hover_main">' +
+                _this.cameraInfo(obj) +
+                "</div>";
+              hoverWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(7, -24), // 相对于基点的偏移位置
+                content: sContent
+              });
+              // aCenter = mEvent.target.F.position
+              hoverWindow.open(
+                _this.map,
+                new window.AMap.LngLat(obj.longitude, obj.latitude)
+              );
+              hoverWindow.on("close", function() {
+                console.log("infoWindow close");
+              });
+            });
+            marker.on("mouseout", function() {
+              if (hoverWindow) {
+                hoverWindow.close();
+              }
+            });
+          }
+        }
+      }
+    },
+    // 清除地图标记
+    mapClearMarkers(aMarkers) {
+      console.log("-------aMarkers-------",aMarkers)
+      if (this.map && aMarkers && aMarkers.length > 0) {
+        this.map.remove(aMarkers);
+        aMarkers = [];
+      }
+    },
+    //摄像头信息
+    cameraInfo(val) {
+      let str = `<p class="name">${val.deviceName}</p>
+                 <p class="num">${val.data.length}次</p>
+            `;
+      return str;
+    }
   }
 };
 </script>
@@ -1032,5 +1190,22 @@ html {
   .__view {
     width: 100% !important; // vue-scroll样式重置
   }
+  /* 地图标记 hover */
+  .vl_map_hover {
+      .vl_map_hover_main {
+          width: 178px;
+          text-align: center;
+          padding: 20px 0;
+          .name {
+            color: #666;
+            padding-bottom: 4px;
+          }
+          .num {
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+          }
+      }
+  } 
 }
 </style>
