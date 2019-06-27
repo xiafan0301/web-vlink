@@ -57,14 +57,16 @@
                 <div class="characteristic_list" v-if="characteristicList.length > 0">
                   <div
                     class="characteristic_item"
+                    :title="item.isChecked ? '取消选择此特征': '选择此特征'"
+                    :class="{ color_blue: item.isChecked }"
                     v-for="(item, index) in characteristicList"
                     :key="'characteristic_list' + index"
-                  >{{item}}</div>
+                    @click="item.isChecked = !item.isChecked;"
+                  >{{item.desc}}</div>
                   <!-- 没有特征 -->
                 </div>
               </div>
             </div>
-
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
               <!-- 自定义特征 -->
@@ -172,7 +174,7 @@
                 </div>
                 <div class="no_device" v-else>选择设备</div>
                 <!-- 树tab页面 -->
-                <div class="device_tree_tab" v-if="treeTabShow">
+                <div class="device_tree_tab" v-show="treeTabShow">
                   <div style="overflow: hidden;">
                     <div
                       class="tab_title"
@@ -182,14 +184,40 @@
                       :key="'tab_title' + index"
                     >{{ item.name }}</div>
                   </div>
-                  <!-- 树 -->
-                  <div class="tree_content">
+                  <!-- 视频树 -->
+                  <div class="tree_content" v-show="selectedTreeTab === 0">
                     <vue-scroll>
                       <div class="checked_all">
-                        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAllTree">全选</el-checkbox>
+                        <el-checkbox
+                          :indeterminate="isIndeterminate"
+                          v-model="checkAllTree"
+                          @change="handleCheckedAll"
+                        >全选</el-checkbox>
                       </div>
                       <el-tree
+                        @check="listenChecked"
                         :data="videoTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="id"
+                        ref="videotree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
+                    </vue-scroll>
+                  </div>
+                  <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
+                    <vue-scroll>
+                      <div class="checked_all">
+                        <el-checkbox
+                          :indeterminate="isIndeterminate"
+                          v-model="checkAllTree"
+                          @change="handleCheckedAll"
+                        >全选</el-checkbox>
+                      </div>
+                      <el-tree
+                        @check="listenChecked"
+                        :data="bayonetTree"
                         show-checkbox
                         default-expand-all
                         node-key="id"
@@ -198,7 +226,7 @@
                         :props="defaultProps"
                       ></el-tree>
                     </vue-scroll>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </el-form>
@@ -408,13 +436,28 @@ import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
 } from "../../../api/api.judge.js";
+import { setTimeout } from 'timers';
 export default {
   data() {
     return {
       selectType: 1,
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间正序， false为时间倒序
-      characteristicList: ["湘H3A546", "红色", "有挂饰"], // 车辆的特征数组
+      characteristicList: [
+        // "湘H3A546", "红色", "有挂饰"
+        {
+          desc: "湘H3A546",
+          isChecked: false
+        },
+        {
+          desc: "红色",
+          isChecked: false
+        },
+        {
+          desc: "有挂饰",
+          isChecked: false
+        }
+      ], // 车辆的特征数组
       // 菜单表单变量
       tzscMenuForm: {
         selectDate: "",
@@ -449,10 +492,44 @@ export default {
       loadingHis: false,
       imgData: null,
       // 选择设备的数据
-      videoTree: [], // 摄像头树
-      bayonetTree: [], // 卡口树
-      isIndeterminate: true, // 是否处于全选与全不选之间
+      isIndeterminate: false, // 是否处于全选与全不选之间
       checkAllTree: false, // 树是否全选
+      bayonetTree: [
+        {
+          id: 1,
+          label: "卡口一级 1",
+          children: [
+            {
+              id: 4,
+              label: "二级 1-1",
+              children: [
+                {
+                  id: 9,
+                  label: "三级 1-1-1"
+                },
+                {
+                  id: 10,
+                  label: "三级 1-1-2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: "一级 2",
+          children: [
+            {
+              id: 5,
+              label: "二级 2-1"
+            },
+            {
+              id: 6,
+              label: "二级 2-2"
+            }
+          ]
+        }
+      ], // 卡口树
       videoTree: [
         {
           id: 1,
@@ -517,11 +594,12 @@ export default {
           ]
         }
       ],
+      videoTreeNodeCount: 0, // 摄像头节点数量
+      bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
         children: "children",
         label: "label"
       },
-
       selectDeviceArr: [
         // 选中的设备数组
         {
@@ -615,26 +693,48 @@ export default {
       return this.historyPicList.filter(x => x.checked);
     }
   },
+  mounted() {
+    this.getLeafCountTree(this.videoTree);
+  },
   methods: {
-    // tab的方法
-    chooseDevice() { // 选择了树的设备
-      console.log(this.$refs.tree.getCheckedNodes());
-      this.treeTabShow = false;
+    // 处理树全选时间
+    handleCheckedAll(val) {
+      this.isIndeterminate = false;
+      if (val) {
+        this.$refs.videotree.setCheckedNodes(this.videoTree);
+      } else {
+        this.$refs.videotree.setCheckedNodes([]);
+      }
     },
-    getCheckedKeys() {
-      console.log(this.$refs.tree.getCheckedKeys());
-    },
-    setCheckedNodes() {
-      this.$refs.tree.setCheckedNodes([
-        {
-          id: 5,
-          label: "二级 2-1"
-        },
-        {
-          id: 9,
-          label: "三级 1-1-1"
+    getLeafCountTree(json) { // 获取树节点的数量
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].hasOwnProperty("id")) {
+          this.videoTreeNodeCount++;
         }
-      ]);
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTree(json[i].children);
+        } else {
+          continue;
+        }
+      }
+    },
+    listenChecked(val, val1) {
+      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
+        this.isIndeterminate = false;
+        this.checkAllTree = true;
+      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = false;
+      }
+    },
+    // tab的方法
+    chooseDevice() {
+      // 选择了树的设备
+      console.log(this.$refs.videotree.getCheckedNodes());
+      this.treeTabShow = false;
     },
     clickTime() {
       if (this.sortType === 1) {
@@ -858,6 +958,7 @@ export default {
             border-radius: 3px;
             margin: 10px 10px 0 0;
             cursor: pointer;
+            color: #999;
           }
           .no_characteristic_list {
             line-height: 40px;
@@ -867,9 +968,6 @@ export default {
           }
           .color_blue {
             color: #0c70f8;
-          }
-          .color_gray {
-            color: #999;
           }
         }
       }
