@@ -107,8 +107,8 @@
           <div class="table_box">
             <div class="add_btn_box">
               <div class="add_event_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" @click="showGroupDialog">
-                <span>+</span>
-                <span>加入组</span>
+                <span class="add_class">+</span>
+                <span class="add_class">加入组</span>
               </div>
               <div class="group_info" v-show="showGroup">
                 <div class="group_info_list">
@@ -468,20 +468,13 @@ export default {
     }
   },
   mounted () {
-    // document.addEventListener('click', function(e) {
-    //   console.log(e)
-    //   // e.stopPropagation();
-    //   if (e.target.className !== 'add_event_btn') {
-    //     console.log('aaaa')
-    //     this.showGroup = false;
-
-    //     console.log(this.showGroup)
-    //   }
-    // });
-    // console.log(this.showGroup)
+    document.addEventListener('click', (e)=> {
+      if ((e.target.className != 'add_event_btn') && (e.target.className != 'add_class')) {
+        this.showGroup = false;
+      }
+    });
     this.getGroupList();
     this.getBottomBankList();
-    // this.getPersonList();
   },
   methods: {
     // 获取分组列表
@@ -557,7 +550,7 @@ export default {
     // 显示加入组tankuang
     showGroupDialog () {
       if (this.multipleSelection.length > 0) {
-        this.showGroup = !this.showGroup;
+        this.showGroup = true;
       } else {
         this.showGroup = false;
       }

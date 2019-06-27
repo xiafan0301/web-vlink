@@ -62,14 +62,36 @@
         <div id="rightMap"></div>
       </div>
     </div>
+    <!-- <div class="tip_box">
+      <div class="select_target">
+        <p class="select_p">查询目标</p>
+          <img src="../../../../../../assets/img/temp/vis-eg.png" alt="">
+          <div class="mongolia">
+            <span>2018-12-12: 12:32:12</span>
+            <i class="vl_icon vl_icon_control_09"></i>
+          </div>
+      </div>
+      <div class="tail_vehicle">
+        <p class="tail_p">尾随车辆</p>
+          <img src="../../../../../../assets/img/temp/vis-eg.png" alt="">
+        <div class="mongolia">
+          <span>2018-12-12: 12:32:12</span>
+          <i class="vl_icon vl_icon_control_09"></i>
+        </div>
+      </div>
+      <div class="divide"></div>
+      <div class="device_name">抓拍设备名称抓拍设备名称设备名称设备名称设备名称1214</div>
+    </div> -->
   </div>
 </template>
 <script>
-import testData from './testData.js';
+import { testData } from './testData.js';
 export default {
   data () {
     return {
-      map: null
+      map: null,
+      testData: testData,
+      marker: {},
     }
   },
   mounted () {
@@ -79,42 +101,147 @@ export default {
     // 初始化地图
     initMap () {
       let _this = this;
-      _this.isShowMap = true;
       let map = new window.AMap.Map('rightMap', {
-        zoom: 16, // 级别
+        zoom: 18, // 级别
         center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
       });
       map.setMapStyle('amap://styles/whitesmoke');
 
-      // map.on('click', function(e) {
-        
-      //   new window.AMap.service('AMap.Geocoder', function () { // 回调函数
-      //     let geocoder = null;
-      //     geocoder = new window.AMap.Geocoder({});
-
-      //     const lnglatXY = [e.lnglat.getLng(), e.lnglat.getLat()];//地图上所标点的坐标
-
-      //     geocoder.getAddress(lnglatXY, function (status, result) {
-      //       if (status === 'complete' && result.info === 'OK') {
-            
-      //       }
-      //     });
-      //   });
-      // });
       _this.map = map;
+      
+      setTimeout(() => {
 
+        _this.mapMark(this.testData)
+      }, 1000)
     },
     mapMark (data) {
-      for (let i = 0; i < data.length; i++) {
-        let obj = data[i];
-        if (obj.longitude > 0 && obj.latitude > 0) {
-          
+      if (data && data.length > 0) {
+        let _this = this, hoverWindow = null, path= [];
+        for (let i = 0; i < data.length; i++) {
+          let obj = data[i];
+          if (obj.longitude > 0 && obj.latitude > 0) {
+            let offSet = [-20.5, -55];
+            let marker = new window.AMap.Marker({
+              map: _this.map,
+              position: [obj.longitude, obj.latitude],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '', // 用户自定义属性
+              // 自定义点标记覆盖物内容
+              content: '<div id="vehicle' + obj.id + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+            });
+  
+           path.push(new window.AMap.LngLat(obj.longitude, obj.latitude));
+
+           marker.on('mouseover', function () {
+             $('#vehicle' + obj.id).addClass('vl_icon_map_hover_mark0');
+
+             let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
+                  +"<img src='../../../../../../assets/img/temp/vis-eg.png' /><div class='mongolia'>"
+                  +"<span>2018-12-12: 12:32:12</span><i class='vl_icon vl_icon_control_09'></i></div></div>"
+                  +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src='../../../../../../assets/img/temp/vis-eg.png' />"
+                  +"<div class='mongolia'><span>2018-12-12: 12:32:12</span><i class='vl_icon vl_icon_control_09'></i></div></div>"
+                  +"<div class='divide'></div><div class='device_name'>抓拍设备名称抓拍设备名称设备名称设备名称设备名称1214</div></div>";
+
+              hoverWindow = new window.AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new window.AMap.Pixel(180, 180), // 相对于基点的偏移位置
+                content: sContent
+              });
+              hoverWindow.open(_this.map, new window.AMap.LngLat(obj.longitude, obj.latitude));
+           });
+            marker.on('mouseout', function () {
+              $('#vehicle' + obj.id).removeClass('vl_icon_map_hover_mark0');
+              // if (hoverWindow) { hoverWindow.close(); }
+            });
+          }
         }
+        // 绘制线条
+        let polyline = new window.AMap.Polyline({
+          path: path,
+          strokeWeight: 4,
+          strokeColor: '#61C772',
+          strokeStyle: 'dashed'
+        });
+
+        _this.map.add(polyline);
+
       }
-    }
+    },
   }
 }
 </script>
+<style lang="scss">
+.tip_box {
+  // position: absolute;
+
+  width: 258px;
+  height: 361px;
+  padding: 20px;
+  background:rgba(255,255,255,1);
+  box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+  .select_target, .tail_vehicle {
+    width:218px;
+    height:122px;
+    margin-bottom: 15px;
+    position: relative;
+    >p {
+      left: 0;
+      top: 0;
+      position: absolute;
+      width:68px;
+      height:20px;
+      border-radius:0px 10px 10px 0px;
+      color: #ffffff;
+    }
+    .select_p {
+      background:rgba(12,112,248,1);
+    }
+    .tail_p {
+      background-color: #50CC62;
+    }
+    .mongolia {
+      width: 100%;
+      // height: 26px;
+      padding: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      position: absolute;
+      background:rgba(0,0,0,1);
+      opacity:0.7;
+      bottom: 0;
+      left: 0;
+      align-items: center;
+      font-size: 12px;
+      color: #fff;
+      >span {
+        margin-left: 5px;
+      }
+      > i {
+        margin-right: 5px;
+        cursor: pointer;
+      }
+    }
+    // .img_box {
+      >img {
+        width: 100%;
+        height: 100%;
+      }
+    // }
+  }
+  .divide {
+    height:1px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #F2F2F2;
+    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+  }
+  .device_name {
+    color: #666666;
+  }
+}
+</style>
+
 <style lang="scss" scoped>
 .ws_record {
   height: 100%;
@@ -196,4 +323,73 @@ export default {
     }
   }
 }
+// .tip_box {
+//   z-index: 4444;
+//   position: absolute;
+//   left: 500px;
+//   top: 300px;
+//   width:258px;
+//   height:361px;
+//   padding: 20px;
+//   background:rgba(255,255,255,1);
+//   box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+//   .select_target, .tail_vehicle {
+//     width:218px;
+//     height:122px;
+//     margin-bottom: 15px;
+//     position: relative;
+//     >p {
+//       left: 0;
+//       top: 0;
+//       position: absolute;
+//       width:68px;
+//       height:20px;
+//       border-radius:0px 10px 10px 0px;
+//       color: #ffffff;
+//     }
+//     .select_p {
+//       background:rgba(12,112,248,1);
+//     }
+//     .tail_p {
+//       background-color: #50CC62;
+//     }
+//     .mongolia {
+//       width: 100%;
+//       // height: 26px;
+//       padding: 5px 0;
+//       display: flex;
+//       justify-content: space-between;
+//       position: absolute;
+//       background:rgba(0,0,0,1);
+//       opacity:0.7;
+//       bottom: 0;
+//       left: 0;
+//       align-items: center;
+//       font-size: 12px;
+//       color: #fff;
+//       >span {
+//         margin-left: 5px;
+//       }
+//       > i {
+//         margin-right: 5px;
+//         cursor: pointer;
+//       }
+//     }
+//     // .img_box {
+//       >img {
+//         width: 100%;
+//         height: 100%;
+//       }
+//     // }
+//   }
+//   .divide {
+//     height:1px;
+//     margin-bottom: 15px;
+//     border-bottom: 1px solid #F2F2F2;
+//     box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+//   }
+//   .device_name {
+//     color: #666666;
+//   }
+// }
 </style>

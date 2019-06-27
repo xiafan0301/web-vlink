@@ -49,8 +49,8 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '18216061865',
-        userPassword: '111111'
+        userMobile: '',
+        userPassword: ''
       },
       loginBtnLoading: false,
       isRemember: false, // 是否记住用户名

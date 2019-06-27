@@ -8,7 +8,7 @@
         <router-link :to="{name: 'basic_info'}">基础信息库</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'manage_department'}">特殊车辆管理</router-link>
+        <router-link :to="{name: 'special_ehicle'}">特殊车辆管理</router-link>
       </li>
       <li>
         <router-link :to="{name: 'archives_manage'}">档案管理</router-link>
