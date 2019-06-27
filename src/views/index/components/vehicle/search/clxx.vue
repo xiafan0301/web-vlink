@@ -9,6 +9,7 @@
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
+        <vue-scroll>
         <p>可选择一个或多个条件进行搜索</p>
         <!-- 上传 -->
         <div class="vl_judge_tc_c_item">
@@ -54,9 +55,11 @@
             <el-button @click="resetSearch">重置</el-button>
             <el-button type="primary" :loading="searching" @click="getVehicleDetail">确定</el-button>
           </div>
+        </vue-scroll>
       </div>
       <!-- 车辆信息 -->
       <div class="info-right" v-loading="searching">
+        <vue-scroll>
         <div class="info-r-content">
           <!-- 车辆信息 -->
           <div class="info-card">
@@ -168,6 +171,7 @@
             </div>
           </div>
         </div>
+        </vue-scroll>
       </div>
     </div>
 
@@ -667,6 +671,9 @@ html {
           padding: 0;
         }
       }
+    }
+    .__view {
+      width: 100% !important; // vue-scroll样式重置
     }
 }
 </style>

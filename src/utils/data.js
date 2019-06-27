@@ -23,7 +23,8 @@ const dataList = {
   vehicleType: 31, // 车辆类型
   numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
-  memberJob: 42 // 成员职位
+  memberJob: 42, // 成员职位
+  licensePlateColor: 30, //车牌颜色
 }
 // 处理方式
 const handeMethods = {
