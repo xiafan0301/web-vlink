@@ -1,11 +1,11 @@
 <template>
-  <!-- 以图搜车 -->
-  <div class="ytsc_wrap">
+  <!-- 模糊搜车 -->
+  <div class="mhsc_wrap">
     <!-- 面包屑通用样式 -->
     <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>以图搜车</el-breadcrumb-item>
+        <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="sc_content">
@@ -14,34 +14,6 @@
         <!-- 菜单表单 -->
         <vue-scroll>
           <div style="padding: 20px;">
-            <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
-              <el-upload
-                @drop="drop($event)"
-                :class="{'vl_jtc_upload': true}"
-                :show-file-list="false"
-                accept="image/*"
-                :action="uploadAcion"
-                list-type="picture-card"
-                :before-upload="beforeAvatarUpload"
-                :on-success="uploadSucess"
-                :on-error="handleError"
-              >
-                <i v-if="uploading" class="el-icon-loading"></i>
-                <img v-else-if="curImageUrl" :src="curImageUrl">
-                <div v-else>
-                  <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
-                  ></i>
-                  <span>点击上传图片</span>
-                </div>
-              </el-upload>
-              <p @click="showHistoryPic">从上传记录中选择</p>
-              <div v-show="curImageUrl" class="del_icon">
-                <i class="el-icon-delete" @click="delPic"></i>
-              </div>
-            </div>
-
             <!-- 表单 -->
             <div class="form_warp">
               <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
@@ -109,6 +81,45 @@
                     </div>
                   </div>
                 </div>
+
+                <el-form-item label prop="carType">
+                  <el-select
+                    class="width232"
+                    v-model="tzscMenuForm.carType"
+                    multiple
+                    placeholder="选择车辆类别"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+
+                <el-form-item label="车牌：" style="margin: 0;" label-width="55px" prop="isNegate">
+                  <el-checkbox v-model="tzscMenuForm.isNegate">非</el-checkbox>
+                </el-form-item>
+
+                <el-form-item label prop="carType">
+                  <el-input
+                    placeholder
+                    v-model="tzscMenuForm.carNumber"
+                    class="input-with-select width232"
+                  >
+                    <el-select
+                      v-model="tzscMenuForm.provice"
+                      style="width: 70px;"
+                      slot="prepend"
+                      placeholder
+                    >
+                      <el-option label="京" value="1"></el-option>
+                      <el-option label="湘" value="2"></el-option>
+                      <el-option label="鲁" value="3"></el-option>
+                    </el-select>
+                  </el-input>
+                </el-form-item>
               </el-form>
             </div>
 
@@ -149,12 +160,7 @@
               :key="'img_list' + index"
             >
               <div class="img_wrap">
-                <img
-                  @dragstart="drag($event)"
-                  title="拖动图片上传"
-                  draggable="true"
-                  src="../../../../../assets/img/not-content.png"
-                >
+                <img src="../../../../../assets/img/not-content.png">
               </div>
               <div class="text_wrap">
                 <h3 class="text_name">检索资料</h3>
@@ -172,35 +178,6 @@
         </div>
       </div>
     </div>
-    <!--上传记录弹窗-->
-    <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片"
-    >
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
-        <i class="el-icon-loading"></i>
-      </div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div
-          class="his-pic-item"
-          :class="{'active': item.checked}"
-          v-for="item in historyPicList"
-          :key="item.uid"
-          @click="chooseHisPic(item)"
-        >
-          <img :src="item.path" alt>
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
     <!--检索详情弹窗-->
     <el-dialog
       :visible.sync="strucDetailDialog"
@@ -328,15 +305,11 @@ export default {
       characteristicList: ["湘H3A546", "红色", "有挂饰"], // 车辆的特征数组
       // 菜单表单变量
       tzscMenuForm: {
-        selectDate: "",
-        selectDevice: "",
-        licenseType: "",
-        licenseColor: "",
-        carType: "",
-        carColor: "",
-        carModel: "",
-        sunVisor: "",
-        inspectionCount: ""
+        selectDate: "", // 选择日期
+        carType: "", // 车辆类型
+        isNegate: false, // 是否取反
+        provice: "", // 省简称
+        carNumber: ""
       },
       rules: {},
       options: [
@@ -350,16 +323,6 @@ export default {
         }
       ],
       stucOrder: 2, // 1升序，2降序，3监控，4相似度
-
-      // 上传图片变量
-      uploadAcion: ajaxCtx.base + "/new", //上传路径
-      uploading: false, // 是否上传中
-      uploadFileList: [],
-      curImageUrl: "", // 当前上传的图片
-      historyPicList: [], // 上传历史记录
-      historyPicDialog: false,
-      loadingHis: false,
-      imgData: null,
       // 选择设备的数据
       videoTree: [], // 摄像头树
       bayonetTree: [], // 卡口树
@@ -451,11 +414,6 @@ export default {
       videoUrl: "" // 弹窗视频回放里的视频
     };
   },
-  computed: {
-    choosedHisPic() {
-      return this.historyPicList.filter(x => x.checked);
-    }
-  },
   methods: {
     clickTime() {
       if (this.sortType === 1) {
@@ -491,132 +449,12 @@ export default {
       this.curImgIndex = index;
       this.sturcDetail = data;
       // this.drawPoint(data);
-    },
-    // 上传图片
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error("只能上传 JPG / PNG 格式图片!");
-      }
-      if (!isLt) {
-        this.$message.error("上传图片大小不能超过 100MB!");
-      }
-      this.uploading = true;
-      return isJPG && isLt;
-    },
-    //上传成功
-    uploadSucess(response, file, fileList) {
-      this.uploading = false;
-      /* this.compSim = '';
-      this.compSimWord = ''; */
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x["uid"] = jRes.data;
-              console.log(x);
-            }
-          });
-          this.imgData = x;
-          this.curImageUrl = x.path;
-        }
-      }
-      this.uploadFileList = fileList;
-    },
-    //上传失败
-    handleError() {
-      this.uploading = false;
-      this.$message.error("上传失败");
-    },
-    //获取上传记录
-    showHistoryPic() {
-      this.loadingHis = true;
-      this.historyPicDialog = true;
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      };
-      JtcGETAppendixInfoList(params)
-        .then(res => {
-          if (res) {
-            this.loadingHis = false;
-            res.data.forEach(x => (x.checked = false));
-            this.historyPicList = res.data;
-          }
-        })
-        .catch(() => {
-          this.historyPicDialog = false;
-        });
-    },
-    //删除图片
-    delPic() {
-      this.uploadFileList.splice(0, 1);
-      this.curImageUrl = "";
-    },
-    //选择最近上传的图片
-    chooseHisPic(item) {
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      });
-      item.checked = true;
-    },
-    //从历史上传图片中上传
-    // addHisToImg () {
-    //   this.historyPicDialog = false;
-    //   let _ids = [];
-    //   this.choosedHisPic.forEach(x => {
-    //     _ids.push(x.uid)
-    //     this.curImageUrl = x.path;
-    //     this.imgData = x;
-    //   })
-    //   let _obj = {
-    //     appendixInfoIds: _ids.join(',')
-    //   }
-    //   JtcPUTAppendixsOrder(_obj);
-    // },
-    drag(ev) {
-      ev.dataTransfer.setData("Text", ev.target.currentSrc);
-    },
-    drop(e) {
-      let x = {
-        contentUid: this.$store.state.loginUser.uid,
-        cname: "拖拽图片" + Math.random(),
-        filePathName: "拖拽图片" + Math.random(),
-        path: e.dataTransfer.getData("Text")
-      };
-      JtcPOSTAppendixInfo(x).then(jRes => {
-        if (jRes) {
-          x["uid"] = jRes.data;
-          console.log(x);
-        }
-      });
-    },
-    allowDrop(e) {
-      e.preventDefault();
     }
   }
 };
 </script>
 <style lang="scss" scoped>
-.ytsc_wrap {
+.mhsc_wrap {
   height: 100%;
   position: relative;
   // 面包屑样式
@@ -812,11 +650,6 @@ export default {
           color: #ffffff;
         }
       }
-      // 表单
-      .form_warp {
-        padding-top: 38px;
-        border-top: 1px solid #d3d3d3;
-      }
     }
     // 右边图片列表
     .right_img_list {
@@ -876,7 +709,6 @@ export default {
               width: 100%;
               height: 100%;
               display: block;
-              cursor: move;
             }
           }
           // 文字的包裹
@@ -945,7 +777,11 @@ html {
   }
 }
 //弹窗
-.ytsc_wrap {
+.mhsc_wrap {
+  .el-input-group__append,
+  .el-input-group__prepend {
+    background: #fff;
+  }
   // 上传
   .upload_warp .vl_jtc_upload {
     .el-upload {

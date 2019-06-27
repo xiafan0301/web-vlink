@@ -24,7 +24,11 @@ const dataList = {
   numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
+<<<<<<< HEAD
   operateCompany: 43, // 运营公司
+=======
+  licensePlateColor: 30, //车牌颜色
+>>>>>>> a4738753728dcb3cf6e7dd96601200935f9338cd
 }
 // 处理方式
 const handeMethods = {

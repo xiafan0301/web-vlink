@@ -447,3 +447,15 @@ export const getServerTimestamp = () => {
     mode: videoModeName
   })
 }
+
+/**
+ * 当前服务器时间
+ */
+export const ptzControl = (data) => {
+  return request({
+    url: '/video-patrol-service/ptz-control',
+    method: 'get',
+    params: data,
+    mode: videoModeName
+  })
+}
