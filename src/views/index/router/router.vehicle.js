@@ -44,7 +44,11 @@ export default {
       path: 'lxwf', // 连续违法
       name: 'vehicle_search_lxwf',
       component: () => import('@/views/index/components/vehicle/search/lxwf.vue')
-    }, {
+    },{
+      path: 'lxwfdetail', // 连续违法详情
+      name: 'vehicle_search_lxwfdetail',
+      component: () => import('@/views/index/components/vehicle/search/lxwfdetail.vue')
+    },{
       path: 'pfgc', // 频繁过车
       name: 'vehicle_search_pfgc',
       component: () => import('@/views/index/components/vehicle/search/pfgc.vue')
