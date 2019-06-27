@@ -341,18 +341,18 @@ export default {
       pageSize: 10,
       // 图标参数
       chartData: [
-        { date: '1月份', '车流量': 10 },
-        { date: '2月份', '车流量': 20 },
-        { date: '3月份', '车流量': 40 },
-        { date: '4月份', '车流量': 30 },
-        { date: '5月份', '车流量': 25 },
-        { date: '6月份', '车流量': 35 },
-        { date: '7月份', '车流量': 30 },
-        { date: '8月份', '车流量': 30 },
-        { date: '9月份', '车流量': 30 },
-        { date: '10月份', '车流量': 30 },
-        { date: '11月份', '车流量': 30 },
-        { date: '12月份', '车流量': 30 }
+        { date: '1月份', '车流量': 10, '车流量1': 1 },
+        { date: '2月份', '车流量': 20, '车流量1': 1 },
+        { date: '3月份', '车流量': 40, '车流量1': 1 },
+        { date: '4月份', '车流量': 30, '车流量1': 1 },
+        { date: '5月份', '车流量': 25, '车流量1': 1 },
+        { date: '6月份', '车流量': 35, '车流量1': 1 },
+        { date: '7月份', '车流量': 30, '车流量1': 1 },
+        { date: '8月份', '车流量': 30, '车流量1': 1 },
+        { date: '9月份', '车流量': 30, '车流量1': 1 },
+        { date: '10月份', '车流量': 30, '车流量1': 1 },
+        { date: '11月份', '车流量': 30, '车流量1': 1 },
+        { date: '12月份', '车流量': 30, '车流量1': 1 }
       ],
       chart: null,
     }
@@ -406,7 +406,7 @@ export default {
       let chart = new G2.Chart({
         container: 'chartContainer1',
         forceFit: true,
-        padding: [ 20, 20, 60, 30 ],
+        padding: [ 20, 0, 60, 30 ],
         width: G2.DomUtil.getWidth(temp),
         height: G2.DomUtil.getHeight(temp)
       });
@@ -418,14 +418,47 @@ export default {
         value: 'value', // value字段
         retains: ['date']
       });
+
+      // impute 补全列/补全字段
+      dv.transform({
+        type: 'impute',
+        field: '车流量1',       // 待补全字段
+        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
+        method: 'value',  // 补全常量
+        value: 120     // 补全字段值时执行的规则
+      });
+      let view2 = chart.view();
+      view2.source(dv);
+      view2.tooltip(false);
+      view2.axis(false);
+      chart.interval()
+      .position('date*车流量1') 
+      .color('车流量', '#F2F2F2')
+      .size(30);
+
       chart.source(dv, {});
       // 坐标轴刻度
-      chart.scale('value', {
+      chart.scale('车流量', {
         max: 120,
         min: 0,
         tickCount: 7,
         title: {
           offset: 50
+        }
+      });
+      chart.axis('date', {
+        label: {
+          textStyle: {
+            fill: '#999999',
+            fontSize: 12
+          }
+        },
+        tickLine: {
+          alignWithLabel: false,
+          length: 0
+        },
+        line: {
+          lineWidth: 0
         }
       });
       chart.tooltip({
@@ -469,6 +502,21 @@ export default {
         tickCount: 7,
         title: {
           offset: 50
+        }
+      });
+      this.chart.axis('date', {
+        label: {
+          textStyle: {
+            fill: '#999999',
+            fontSize: 12
+          }
+        },
+        tickLine: {
+          alignWithLabel: false,
+          length: 0
+        },
+        line: {
+          lineWidth: 0
         }
       });
       this.chart.tooltip({
@@ -578,7 +626,7 @@ export default {
           }
           #chartContainer1, #chartContainer2{
             width: 100%;
-            height: 50%;
+            height: 70%;
           }
           .el-table{
             margin-top: 20px;

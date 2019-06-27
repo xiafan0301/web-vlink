@@ -507,7 +507,7 @@ export default {
       view2.axis(false);
       view2.coord('polar', {
         innerRadius: 0.1
-      }).transpose();
+      }).transpose(); 
       view2.interval().position('item*percent2').color('percent2', '#F2F2F2');
 
       chart.source(dv, {
