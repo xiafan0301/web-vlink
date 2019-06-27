@@ -15,6 +15,10 @@ export default {
       path: 'clcx', // 车辆查询
       name: 'vehicle_search_clcx',
       component: () => import('@/views/index/components/vehicle/search/clcx.vue')
+    },{
+      path: 'clcxdetail', // 车辆详情
+      name: 'vehicle_search_clcxdetail', 
+      component: () => import('@/views/index/components/vehicle/search/clcxdetail.vue')
     }, {
       path: 'tzsc', // 特征搜车
       name: 'vehicle_search_tzsc',
