@@ -10,59 +10,8 @@
       <!-- 搜索条件 -->
       <div class="info-left" v-show="videoMenuStatus">
         <vue-scroll>
-          <!-- 上传 -->
-          <div class="vl_judge_tc_c_item" v-show="selectIndex === 0">
-            <el-upload
-              :class="{'vl_jtc_upload': true}"
-              :show-file-list="false"
-              accept="image/*"
-              :action="uploadAcion"
-              list-type="picture-card"
-              :before-upload="beforeAvatarUpload"
-              :on-success="uploadSucess"
-              :on-error="handleError"
-            >
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="curImageUrl" :src="curImageUrl">
-              <div v-else>
-                <i
-                  style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                  class="vl_icon vl_icon_vehicle_01"
-                ></i>
-                <span>点击上传图片</span>
-              </div>
-            </el-upload>
-            <p @click="showHistoryPic">从上传记录中选择</p>
-            <div v-show="curImageUrl" class="del_icon">
-              <i class="el-icon-delete" @click="delPic"></i>
-            </div>
-          </div>
-          <div v-show="selectIndex === 1">
-            <!-- 车牌号搜索 -->
-            <div class="license-plate-search">
-              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
-            </div>
-            <!-- 车牌颜色搜索 -->
-            <div class="license-plate-color">
-              <el-select v-model="searchData.licensePlateColor" clearable placeholder="全部车牌颜色">
-                <el-option
-                  v-for="item in colorList"
-                  :key="item.enumField"
-                  :label="item.enumValue"
-                  :value="item.enumField"
-                ></el-option>
-              </el-select>
-            </div>
-          </div>
-          <!-- 切换查询条件 -->
-          <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
-          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>
-          <!-- 下划线 -->
-          <div class="line"></div>
-          <!-- 设备搜索 -->
-          
+          <!-- 设备搜索 -->         
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-          <div :class="{'is_show': treeTabShow}">
           <div class="selected_device" @click="treeTabShow = true;">
             <i class="el-icon-arrow-down"></i>
             <!-- <i class="el-icon-arrow-up"></i> -->
@@ -131,7 +80,6 @@
               </div>
             </div>
           </div>
-          </div>
           <!-- 时间 -->
           <div class="time-search">
             <el-date-picker
@@ -146,6 +94,56 @@
               @change="dateChange"
             ></el-date-picker>
           </div>
+          <!-- 下划线 -->
+          <div class="line"></div>
+          <!-- 上传 -->
+          <div class="vl_judge_tc_c_item" v-show="selectIndex === 0">
+            <el-upload
+              :class="{'vl_jtc_upload': true}"
+              :show-file-list="false"
+              accept="image/*"
+              :action="uploadAcion"
+              list-type="picture-card"
+              :before-upload="beforeAvatarUpload"
+              :on-success="uploadSucess"
+              :on-error="handleError"
+            >
+              <i v-if="uploading" class="el-icon-loading"></i>
+              <img v-else-if="curImageUrl" :src="curImageUrl">
+              <div v-else>
+                <i
+                  style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                  class="vl_icon vl_icon_vehicle_01"
+                ></i>
+                <span>点击上传图片</span>
+              </div>
+            </el-upload>
+            <p @click="showHistoryPic">从上传记录中选择</p>
+            <div v-show="curImageUrl" class="del_icon">
+              <i class="el-icon-delete" @click="delPic"></i>
+            </div>
+          </div>
+          <div v-show="selectIndex === 1">
+            <!-- 车牌号搜索 -->
+            <div class="license-plate-search">
+              <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
+            </div>
+            <!-- 车牌颜色搜索 -->
+            <div class="license-plate-color">
+              <el-select v-model="searchData.licensePlateColor" clearable placeholder="全部车牌颜色">
+                <el-option
+                  v-for="item in colorList"
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumField"
+                ></el-option>
+              </el-select>
+            </div>
+          </div>
+          <!-- 切换查询条件 -->
+          <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
+          <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>
+          
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
             <el-button type="primary" :loading="searching" @click="getVehicleDetail">确定</el-button>
@@ -1228,6 +1226,7 @@ export default {
         background-color: #f2f2f2;
         border: 1px solid #d3d3d3;
         border-radius: 4px;
+        margin-bottom: 10px;
         cursor: pointer;
         &:hover {
           color: #0c70f8;
@@ -1259,7 +1258,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         position: relative;
         width: 232px;
         height: 40px;
