@@ -169,3 +169,30 @@ export function MapGetPortraitsByName(params) {
   })
 }
 /*--------------------------  研判end  ---------------------------------*/
+
+/*--------------------------  车辆侦查--尾随分析start  ---------------------------------*/
+/**
+ * 查询车辆抓拍设备接口
+ * @param {object} params
+ */
+export function getShotDevice(params) {
+  return request({
+    url: '/vehicle/shot-dev',
+    method: 'get',
+    params,
+    mode: 'control'
+  });
+}
+/**
+ * 查询尾随记录列表接口
+ * @param {object} params
+ */
+export function getTailBehindList(params) {
+  return request({
+    url: '/vehicle/tail-behind/list',
+    method: 'get',
+    params,
+    mode: 'control'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/

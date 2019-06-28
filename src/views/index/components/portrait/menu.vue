@@ -4,21 +4,21 @@
       <router-link :to="{name: 'vehicle_search_clcx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_101"></span>
-        <span class="ptt_li_text">人脸检索</span>
+        <span class="ptt_li_text">特征搜人</span>
       </router-link>
     </li>
     <li>
       <router-link :to="{name: 'vehicle_search_clcx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_102"></span>
-        <span class="ptt_li_text">身份识别</span>
+        <span class="ptt_li_text">身份核实</span>
       </router-link>
     </li>
     <li>
       <router-link :to="{name: 'vehicle_search_clcx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_103"></span>
-        <span class="ptt_li_text">抓拍检索</span>
+        <span class="ptt_li_text">以图搜人</span>
       </router-link>
     </li>
     <li>
@@ -36,10 +36,10 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_pfcm'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_106"></span>
-        <span class="ptt_li_text">人员徘徊</span>
+        <span class="ptt_li_text">频繁出没</span>
       </router-link>
     </li>
     <li>
@@ -57,7 +57,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_qyryfx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_109"></span>
         <span class="ptt_li_text">区域人群分析</span>
