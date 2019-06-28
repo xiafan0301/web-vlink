@@ -20,7 +20,7 @@
               <i class="el-icon-arrow-down"></i>
               <!-- <i class="el-icon-arrow-up"></i> -->
               <div class="device_list" v-if="selectDeviceArr.length > 0">
-                <span>{{ selectDeviceArr[0]['name'] }}</span>
+                <span>{{ selectDeviceArr[0]['label'] }}</span>
                 <span
                   v-show="selectDeviceArr.length > 1"
                   title="展开选中的设备"
@@ -44,54 +44,44 @@
                   <vue-scroll>
                     <div class="checked_all">
                       <el-checkbox
-                        :indeterminate="isIndeterminateVideo"
-                        v-model="checkAllTreeVideo"
-                        @change="handleVideoCheckedAll"
+                        :indeterminate="isIndeterminate"
+                        v-model="checkAllTree"
+                        @change="handleCheckedAll"
                       >全选</el-checkbox>
                     </div>
                     <el-tree
-                      @check="listenCheckedVideo"
-                      :data="videoTree"
-                      show-checkbox
-                      default-expand-all
-                      ref="videotree"
-                      highlight-current
-                      :props="mapTreeProps"
-                      node-key="infoName"
-                    >
-                    <span class="custom-tree-node" slot-scope="{ node, data }" @click.stop="mapInfoListTap(data)">
-                    <span>{{ node.label }}</span>
-                    <span v-if="data.areaType === '5' && data.dataType === 0" class="vl_icon vl_icon_map_002 change_node_pos" style="vertical-align: middle;" :class="{'vl_icon_map_001': data.deviceStatus === 1}"></span>
-                    <span class="change_node_pos" v-else-if="!data.infoList"></span>
-                    <!--<span class="change_node_pos" v-else-if="data.areaType === '5'"></span>-->
-                    <!--<div class="map_tree_tab" v-if="data['isFirst']">-->
-                      <!--<span v-for="(item, index) in constObj"  @click.stop="switchTab(data, index, $event)" :key="item.id">{{item.name}}</span>-->
-                    <!--</div>-->
-                  </span>
-                    </el-tree>
+                    @check="listenChecked"
+                    :data="cameraTree"
+                    show-checkbox
+                    default-expand-all
+                    node-key="id"
+                    ref="cameraTree"
+                    highlight-current
+                    :props="defaultProps"
+                  ></el-tree>
                   </vue-scroll>
                 </div>
-                <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
+                <div class="tree_content" v-show="selectedTreeTab === 1">
                   <vue-scroll>
                     <div class="checked_all">
                       <el-checkbox
-                        :indeterminate="isIndeterminateBayonet"
-                        v-model="checkAllTreeBayonet"
-                        @change="handleBayonetCheckedAll"
+                        :indeterminate="isIndeterminateBay"
+                        v-model="checkAllTreeBay"
+                        @change="handleCheckedAllBay"
                       >全选</el-checkbox>
                     </div>
                     <el-tree
-                      @check="listenCheckedBayonet"
-                      :data="bayonetTree"
-                      show-checkbox
-                      default-expand-all
-                      node-key="id"
-                      ref="bayonettree"
-                      highlight-current
-                      :props="defaultProps"
-                    ></el-tree>
+                        @check="listenCheckedBay"
+                        :data="bayonetTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="id"
+                        ref="bayonetTree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
                   </vue-scroll>
-                </div> -->
+                </div>
               </div>
             </div>
 
@@ -457,7 +447,7 @@
   </div>
 </template>
 <script>
-import { ajaxCtx } from "@/config/config";
+import { ajaxCtx, mapXupuxian } from "@/config/config";
 import BigImg from "@/components/common/bigImg.vue";
 import {
   JtcPOSTAppendixInfo,
@@ -511,7 +501,6 @@ export default {
           label: "双皮奶"
         }
       ],
-
       /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
@@ -524,10 +513,10 @@ export default {
 
       /* 选择设备变量 */
       treeTabShow: false,
-      isIndeterminateVideo: false, // 是否处于全选与全不选之间(摄像头)
-      isIndeterminateBayonet: false, // 是否处于全选与全不选之间(卡口)
-      checkAllTreeVideo: false, // 树是否全选(摄像头)
-      checkAllTreeBayonet: false, // 树是否全选(卡口)
+      isIndeterminate: false, // 是否处于全选与全不选之间(摄像头)
+      isIndeterminateBay: false, // 是否处于全选与全不选之间(卡口)
+      checkAllTree: false, // 树是否全选(摄像头)
+      checkAllTreeBay: false, // 树是否全选(卡口)
       bayonetTree: [
         {
           id: 1,
@@ -564,26 +553,16 @@ export default {
           ]
         }
       ], // 卡口树
-       mapTreeProps: { // 树的配置
-        children: 'infoList',
-        label: 'infoName'
-      },
-      videoTree: [],
+      cameraTree: [], // 摄像头树
       videoTreeNodeCount: 0, // 摄像头节点数量
       bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
         children: "children",
         label: "label"
       },
-      selectDeviceArr: [
-        // 选中的设备数组
-        {
-          name: "摄像头1"
-        },
-        {
-          name: "摄像头2"
-        }
-      ],
+      selectDeviceArr: [], // 选中的设备数组
+      selectCameraArr: [], // 选中的摄像头数组
+      selectBayonetArr: [], // 选中的卡口数组
       selectedTreeTab: 0, // 当前选中的
       treeTabArr: [
         {
@@ -673,21 +652,8 @@ export default {
     }
   },
   mounted() {
-    // this.getLeafCountTree(this.videoTree, "video");
-    // this.getLeafCountTree(this.bayonetTree, "bayonet");
-    let params = {
-      areaUid: "431224"
-    };
-    MapGETmonitorList(params).then(res => {
-      if (res) {
-        // 根据当前登录部门，做车辆组对象
-        // console.log(res.data);
-        this.videoTree = this.switchData(res.data);
-        this.getLeafCountTree(this.videoTree, "video");
-        console.log("videoTree", this.videoTree);
-        console.log("videoTree", this.videoTreeNodeCount);
-      }
-    });
+    //获取摄像头卡口数据
+    this.getMonitorList();
   },
   methods: {
     getCharacter() {
@@ -707,23 +673,79 @@ export default {
       this.sortType = 2;
     },
     /*选择设备的方法*/
-    handleVideoCheckedAll(val) {
-      // 全选所有设备节点
-      this.isIndeterminateVideo = false;
-      if (val) {
-        this.$refs.videotree.setCheckedNodes(this.videoTree);
-      } else {
-        this.$refs.videotree.setCheckedNodes([]);
-      }
+    // 选中的设备数量处理
+    handleData() {
+      this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType);
+      console.log('选中的数据', this.selectDeviceArr);
     },
-    handleBayonetCheckedAll(val) {
-      // 全选所有设备节点
-      this.isIndeterminateBayonet = false;
-      if (val) {
-        this.$refs.bayonettree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonettree.setCheckedNodes([]);
+    getMonitorList() { //获取摄像头卡口信息列表
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.bayonetTree = this.getBayTreeList(bayonet);
+          this.getLeafCountTree(this.cameraTree, 'video');
+          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+        }
+      });
+    },
+    getTreeList(data) { //获取摄像头数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+            key['treeType'] = 1
+          }
+        }
       }
+      return data;
+    },
+    getBayTreeList(data) { //获取卡口数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          item['children'] = item.bayonetList
+          delete(item.bayonetList)
+          for(let key of item['children']) {
+            key['label'] = key.bayonetName
+            key['id'] = key.uid
+            key['treeType'] = 2
+          }
+        }
+      }
+      return data;
+    },
+    handleCheckedAll(val) {
+      // 全选所有摄像头树节点
+     this.isIndeterminate = false;
+      if (val) {
+        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
+      } else {
+        this.$refs.cameraTree.setCheckedNodes([]);
+      }
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    handleCheckedAllBay(val) {
+      // 全选所有设备节点
+      this.isIndeterminateBay = false;
+      if (val) {
+        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+      } else {
+        this.$refs.bayonetTree.setCheckedNodes([]);
+      }
+      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
     },
     getLeafCountTree(json, type) {
       // 获取树节点的数量
@@ -735,138 +757,47 @@ export default {
             this.bayonetTreeNodeCount++;
           }
         }
-        if (json[i].hasOwnProperty("infoList")) {
-          this.getLeafCountTree(json[i].infoList, type);
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTree(json[i].children, type);
         } else {
           continue;
         }
       }
     },
-    listenCheckedVideo(val, val1) {
-      // 监听树的checkbox
+    listenChecked(val, val1) {
+      // 监听摄像头树的checkbox
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminateVideo = false;
-        this.checkAllTreeVideo = true;
-      } else if (
-        val1.checkedNodes.length < this.videoTreeNodeCount &&
-        val1.checkedNodes.length > 0
-      ) {
-        this.checkAllTreeVideo = false;
-        this.isIndeterminateVideo = true;
+        this.isIndeterminate = false;
+        this.checkAllTree = true;
+      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = true;
       } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeVideo = false;
-        this.isIndeterminateVideo = false;
+        this.checkAllTree = false;
+        this.isIndeterminate = false;
       }
-      console.log(val, val1);
     },
-    listenCheckedBayonet(val, val1) {
+    listenCheckedBay(val, val1) {
       // 监听卡口树的checkbox
+     this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
       if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
-        this.isIndeterminateBayonet = false;
-        this.checkAllTreeBayonet = true;
-      } else if (
-        val1.checkedNodes.length < this.bayonetTreeNodeCount &&
-        val1.checkedNodes.length > 0
-      ) {
-        this.checkAllTreeBayonet = false;
-        this.isIndeterminateBayonet = true;
+        this.isIndeterminateBay = false;
+        this.checkAllTreeBay = true;
+      } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = true;
       } else if (val1.checkedNodes.length === 0) {
-        this.isIndeterminateBayonet = false;
-        this.checkAllTreeBayonet = false;
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = false;
       }
     },
     chooseDevice() {
       // 确定选中设备（计算选中的树节点）
-      console.log(this.$refs.videotree.getCheckedNodes());
+      // console.log(this.$refs.videotree.getCheckedNodes());
       this.treeTabShow = false;
-    },
-    switchData(data) {
-      // 处理树的结构数据
-      let numObj = {
-        deviceBasicListNum: 0,
-        carListNum: 0,
-        bayonetListNum: 0,
-        sysUserExtendListNum: 0
-      };
-      data["infoList"] = data.areaTreeList;
-      data["infoName"] = data.areaName;
-      data["infoList"].map(x => {
-        // 假的卡口，车辆
-        let carList;
-        carList = [];
-        x["infoName"] = x.areaName;
-        x["isShow"] = true;
-        // dataType = 0 摄像头，2车辆，1卡口，3人员,
-        x["deviceBasicList"] = this.objSetItem(x["deviceBasicList"], {
-          infoName: "deviceName",
-          areaType: "5",
-          dataType: 0,
-          isShow: true
-        });
-        if (x["carList"]) {
-          x["carList"] = this.objSetItem(x["carList"], {
-            infoName: "vehicleNumber",
-            areaType: "5",
-            dataType: 2,
-            areaUid: x.areaId,
-            isShow: true
-          });
-        } else {
-          x["carList"] = this.objSetItem(carList, {
-            infoName: "name",
-            areaType: "5",
-            dataType: 2,
-            areaUid: x.areaId,
-            isShow: true
-          });
-        }
-        x["bayonetList"] = this.objSetItem(x["bayonetList"], {
-          infoName: "bayonetName",
-          areaType: "5",
-          dataType: 1,
-          areaUid: x.areaId,
-          isShow: true
-        });
-        x["sysUserExtendList"] = this.objSetItem(x["sysUserExtendList"], {
-          infoName: "userName",
-          areaType: "5",
-          dataType: 3,
-          areaUid: x.areaId,
-          isShow: true
-        });
-        let oldArr = [
-          ...x["deviceBasicList"],
-          ...x["carList"],
-          ...x["bayonetList"],
-          ...x["sysUserExtendList"]
-        ];
-        let newArr = objDeepCopy(oldArr);
-        x["infoList"] = newArr;
-        // 给第一个元素加识别号
-        if (x["infoList"].length) {
-          x["infoList"][0]["isFirst"] = true;
-        } else {
-          x["infoList"].push({ infoName: "无相关数据" });
-        }
-        // 设置一个数组，判断当前map_tree_tab点了哪几个
-        x["tabActiveList"] = []; // 为空时，全显示，不为空时显示数组内的项，里面的值就是dataType
-        // 计算各个类型的数量，
-        for (let _num in numObj) {
-          numObj[_num] += x[_num.slice(0, -3)].length;
-        }
-        return x;
-      });
-      this.objSetItem([data], numObj);
-      return [data];
-    },
-    objSetItem(list, obj) {
-      list.map(z => {
-        for (let key in obj) {
-          z[key] = z[obj[key]] ? z[obj[key]] : obj[key];
-        }
-        return z;
-      });
-      return list;
     },
     // 绘制地图
     drawPoint(data) {
