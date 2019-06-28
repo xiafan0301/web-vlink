@@ -160,9 +160,6 @@ export default {
         organId: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
-        // desci: [
-        //   { max: 150, message: '最多输入150个字', trigger: 'blur' }
-        // ]
       },
       userInfo: {}, // 用户信息
       departmentList: [], // 部门列表
@@ -364,7 +361,6 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
-      console.log('this.$route.query.organObj', this.$route.query.organObj)
       const params = {
         'where.proKey': this.userInfo.proKey,
         'where.organPid': this.$route.query.organObj.uid,
@@ -387,7 +383,6 @@ export default {
                 this.addRoom.organName = val.organName;
               } 
             });
-            console.log(this.departmentList)
           }
         })
     },

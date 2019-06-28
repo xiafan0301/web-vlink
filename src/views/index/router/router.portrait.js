@@ -9,6 +9,12 @@ export default {
       path: 'menu',
       name: 'portrait_menu',
       component: () => import('@/views/index/components/portrait/menu.vue')
+    },
+    // 身份确认
+    {
+      path: 'indenty',
+      name: 'indenty_recog',
+      component: () => import('@/views/index/components/portrait/identRecog/indenty.vue')
     }
   ]
 }

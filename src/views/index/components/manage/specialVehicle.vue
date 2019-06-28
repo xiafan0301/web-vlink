@@ -115,8 +115,24 @@
                   <span v-show="item.desci">{{item.desci && item.desci}}</span>
                 </div>
                 <div class="info_list" v-show="item.groupList && item.groupList.length > 0">
-                  <span v-for="(item, index) in item.groupList" :key="index">{{item.groupName}}</span>
-                  <span>更多组</span>
+                  <span v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
+                  <div class="more">
+                    <el-popover
+                      placement="top-start"
+                      width="220"
+                      popper-class="more_popover_box"
+                      trigger="hover">
+                      <vue-scroll>
+                        <template>
+                          <div class="more_popover">
+                            <span :title="val.groupName" v-for="(val, index) in item.groupList" :key="index + val">{{val.groupName}}</span>
+                          </div>
+                        </template>
+                      </vue-scroll>
+                      <span slot="reference" class="more_hover">更多组</span>
+                    </el-popover>
+                  </div>
+                  <!-- <span>更多组</span> -->
                 </div>
               </div>
             </li>
@@ -258,7 +274,7 @@
                 <el-input type="textarea" :show-word-limit="true" maxlength="100" rows="3" style="width: 85%;" v-model="carForm.desci" placeholder="描述" :disabled="isAddDisabled"></el-input>
               </el-form-item>
               <el-form-item style="margin-left: 20px;">
-                <el-button class="reset_btn" style="width: 140px;" @click="cancalOperation('carForm')">取消</el-button>
+                <el-button class="reset_btn" style="width: 140px;" @click="cancelOperation('carForm')">取消</el-button>
                 <template v-if="isAddVehicle">
                   <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
                 </template>
@@ -296,15 +312,15 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <el-form :model="groupForm" ref="groupForm" :rules="groupRules" >
+        <el-form :model="groupForm" ref="groupForm" :rules="groupRules" class="group_form">
           <el-form-item label="组名:" prop="groupName" label-width="70px">
-            <el-input placeholder="请输入组名称" v-model="groupForm.groupName" style="width: 100%;" maxlength="6" @blur="handleCheckGroupName"></el-input>
-            <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+            <el-input placeholder="请输入组名称" :class="[isShowError ? 'error_input' : '']" v-model="groupForm.groupName" style="width: 100%;" maxlength="6" @blur="handleCheckGroupName"></el-input>
+            <span class="group_error_tip" v-show="isShowError">分组名称不允许重复</span>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelOperation('groupForm')">取消</el-button>
+        <el-button @click="cancelOperationGroup('groupForm')">取消</el-button>
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroup('groupForm')" v-if="dialogTitle === '新增组'">新增</el-button>
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
       </div>
@@ -317,7 +333,7 @@ import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkVelRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
@@ -507,14 +523,46 @@ export default {
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
               item.isDelete = false;
+              this.vehicleTypeList.map(val => {
+                if (val.enumField === item.vehicleType) {
+                  item.vehicleType = val.enumValue;
+                }
+              });
+              this.vehicleColorList.map(val => {
+                if (val.enumField === item.vehicleColor) {
+                  item.vehicleColor = val.enumValue;
+                }
+              });
+              this.numberTypeList.map(val => {
+                if (val.enumField === item.numberType) {
+                  item.numberType = val.enumValue;
+                }
+              });
+              this.numColorList.map(val => {
+                if (val.value === item.numberColor) {
+                  item.numberColor = val.label;
+                }
+              });
             });
           }
         })
     },
     // 判断分组名称是否重复
-    handleCheckGroupName (val) {
-      if (val) {
-        
+    handleCheckGroupName () {
+      if (this.groupForm.groupName) {
+        const params = {
+          groupName: this.groupForm.groupName
+        };
+        checkRename(params)
+          .then(res => {
+            if (res && res.data) {
+              this.isShowError = true;
+            } else {
+              this.isShowError = false;
+            }
+          })
+      } else {
+        this.isShowError = false;
       }
     },
     // change  勾选duoxuankuang
@@ -580,15 +628,19 @@ export default {
       }
     },
     // 取消添加/编辑组
-    cancelOperation (form) {
+    cancelOperationGroup (form) {
       this.$refs[form].resetFields();
       this.groupForm.groupName = null;
       this.showGroupDialog = false;
+      this.isShowError = false;
     },
     // 新增组
     addGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (this.isShowError) {
+            return;
+          }
           const params = {
             groupName: this.groupForm.groupName,
             groupType: 9 // 9---特殊车辆
@@ -617,6 +669,9 @@ export default {
     editGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (this.isShowError) {
+            return;
+          }
           const params = {
             uid: this.currentGroupId,
             groupName: this.groupForm.groupName,
@@ -834,14 +889,19 @@ export default {
                   this.carForm.groupList.push(item.uid);
                 });
               }
-              this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
-              this.carForm.vehicleType = vehicleType && vehicleType.toString();
-              this.carForm.numberType = numberType && numberType.toString();
+              this.carForm.vehicleColor = res.data.vehicleColor;;
+              this.carForm.vehicleType = res.data.vehicleType;
+              this.carForm.numberType = res.data.numberType;
               this.carForm.numberColor = numberColor && numberColor.toString();
 
             }
           })
       }
+    },
+    // 取消新增--修改车辆
+    cancelOperation (form) {
+      this.$refs[form].resetFields();
+      this.dialogVisiable = false;
     },
     // 根据搜索条件查询车辆
     searchData () {
@@ -1012,12 +1072,20 @@ export default {
               
             }
             .info_list {
-              // margin: 5px 0;
               display: flex;
               flex-wrap: wrap;
-              // width: 100%;
+              .more{
+                position: relative;
+                padding-top: 6px;
+                .more_hover{
+                  margin-bottom: 10px;
+                  cursor: pointer;
+                  color: #0C70F8;
+                  border: none;
+                  padding: 0;
+                }
+              }
               >span {
-                // width: 100%;
                 display: inline-block;
                 background-color: #FAFAFA;
                 color: #333333;
@@ -1125,6 +1193,20 @@ export default {
 .dialog_comp {
   .content_body {
     margin-top: 20px;
+    /deep/ .el-dialog__body {
+      padding: 0px 20px 10px;
+    }
+    .group_form {
+      .error_input {
+        /deep/ .el-input__inner {
+          border-color: #F56C6C;
+        }
+      }
+    }
+    .group_error_tip {
+      font-size: 12px;
+      color: #F56C6C;
+    }
   }
 }
 </style>
