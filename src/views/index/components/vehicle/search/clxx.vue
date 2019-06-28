@@ -437,6 +437,7 @@ export default {
       color: #999;
       background: #fff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      animation: fadeInLeft .4s ease-out .3s both;
       .vl_judge_tc_c_item {
           width: 232px;
           height: 232px;

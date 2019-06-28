@@ -4,6 +4,39 @@
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="vc_gcck_l">
+          <ul>
+            <li :class="{'vc_gcck_lt_sed': showType === 1}" @click="changeShowType(1)">实时过车</li>
+            <li :class="{'vc_gcck_lt_sed': showType === 2}" @click="changeShowType(2)">历史过车</li>
+            <div :class="{'vc_gcck_lt_l2': showType === 2}"></div>
+          </ul>
+          <div v-show="showType === 1">
+            <div class="gcck_ll_s">
+              <el-input
+                placeholder="搜索"
+                size="small"
+                @keyup.enter.native="getTreeList1()"
+                v-model="searchVal1">
+                <i slot="suffix" @click="getTreeList1()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+              </el-input>
+            </div>
+            <div class="gcck_ll_l">
+              <div></div>
+            </div>
+          </div>
+          <div v-show="showType === 2">
+            <div class="gcck_ll_s">
+              <el-input
+                placeholder="搜索"
+                size="small"
+                @keyup.enter.native="getTreeList2()"
+                v-model="searchVal2">
+                <i slot="suffix" @click="getTreeList2()" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+              </el-input>
+            </div>
+            <div class="gcck_ll_l">
+              <div></div>
+            </div>
+          </div>
         </div>
         <div class="vc_gcck_r">
           <ul class="vc_gcck_rt" :class="'video_list_' + videoTotal">
@@ -22,7 +55,7 @@
               <div class="vc_gcck_rbc">
                 <p>今日告警</p>
                 <h2>2354</h2>
-                <el-button size="small">查看更多</el-button>
+                <el-button size="small" @click="goToZP">查看更多</el-button>
               </div>
             </li>
             <li v-for="item in 10" :key="item">
@@ -45,6 +78,7 @@ export default {
   components: {vehicleBreadcrumb, flvplayer},
   data () {
     return {
+      showType: 1, // 1实时过车  2历史过车
       videoTotal: 2, // 1 / 2 / 8
       videoList: [
         { type: 1, title: '测试设备1', record: false, video: { uid: 3 } },
@@ -78,10 +112,24 @@ export default {
         { type: 1, title: '测试设备9', record: false, video: { uid: 3 } },
         { type: 1, title: '测试设备10', record: false, video: { uid: 3 } }
       ],
+      searchVal1: '',
+      searchVal2: '',
       bResize: {}
     }
   },
   methods: {
+    goToZP () {
+      this.$router.push({name: 'vehicle_search_gcck_zp'});
+    },
+    changeShowType (type) {
+      if (type !== this.showType) {
+        this.showType = type;
+      }
+    },
+    getTreeList1 () {
+    },
+    getTreeList2 () {
+    }
   }
 }
 </script>
@@ -98,6 +146,50 @@ export default {
       border-right: 1px solid #f6f6f6;
       box-shadow: 0 0 5px #ddd;
       background-color: #fff;
+      > ul {
+        position: absolute; top: 0; left: 0; z-index: 2;
+        width: 100%;
+        overflow: hidden;
+        border-bottom: 1px solid #ddd;
+        > li {
+          width: 50%; height: 49px; line-height: 49px;
+          float: left;
+          text-align: center; color: #666;
+          cursor: pointer;
+          &.vc_gcck_lt_sed {
+            cursor: default;
+            color: #0C70F8;
+          }
+        }
+        > div {
+          position: absolute; left: 0; bottom: 0px;
+          height: 2px; width: 50%;
+          background-color: #0C70F8;
+          transition: all .2s ease-out;
+          &.vc_gcck_lt_l2 {
+            left: 50%;
+          }
+        }
+      }
+      > div {
+        position: relative;
+        padding-top: 50px;
+        height: 100%;
+        overflow: hidden;
+        > .gcck_ll_s {
+          position: absolute; top: 50px; left: 0;
+          width: 100%; height: 65px;
+          padding: 15px 20px 0 15px;
+        }
+        > .gcck_ll_l {
+          height: 100%;
+          padding-top: 65px;
+          > div {
+            height: 100%;
+            overflow: auto;
+          }
+        }
+      }
     }
     > .vc_gcck_r {
       position: relative;
