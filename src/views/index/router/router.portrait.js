@@ -9,6 +9,11 @@ export default {
       path: 'menu',
       name: 'portrait_menu',
       component: () => import('@/views/index/components/portrait/menu.vue')
+    },
+    {
+      path: 'pfcm',
+      name: 'portrait_pfcm',
+      component: () => import('@/views/index/components/portrait/pfcm.vue')
     }
   ]
 }

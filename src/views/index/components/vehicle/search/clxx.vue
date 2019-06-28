@@ -53,7 +53,7 @@
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
-            <el-button type="primary" :loading="searching" @click="getVehicleDetail">确定</el-button>
+            <el-button type="primary" @click="getSearchData">查询</el-button>
           </div>
         </vue-scroll>
       </div>
@@ -384,18 +384,29 @@ export default {
         this.imgData = null;
         this.curImageUrl = '';
         this.setDTime();
-        this.getVehicleDetail();
+        this.getSearchData();
     },
     //查询
-    getVehicleDetail() {
-      this.searching = true;
-      console.log("======getVehicleDetail=====",this.searchData,this.imgData)
-      let params = {
-
+    getSearchData() {
+      let params = {};
+      if(this.searchData.time && this.searchData.time.length > 0) {
+        params['startDate'] = this.searchData.time[0];
+        params['endDate'] = this.searchData.time[1];
       }
+      if(this.searchData.licensePlateNum) {
+        params['plateNo'] = this.searchData.licensePlateNum
+      }else {
+        this.$message.error("请输入车牌号码");
+        return false;
+      }
+      if(this.imgData) {
+        params['vehicleNumberPic'] = this.imgData.path;
+      }
+      this.searching = true;
+      console.log("======getSearchData=====", this.searchData, this.imgData,params);
       setTimeout(() => {
         this.searching = false;
-      },3000)
+      }, 3000);
     },
     // 图片放大
     openBigImg (index, data) {
