@@ -15,18 +15,31 @@ export default {
       path: 'clcx', // 车辆查询
       name: 'vehicle_search_clcx',
       component: () => import('@/views/index/components/vehicle/search/clcx.vue')
+    },{
+      path: 'clcxdetail', // 车辆详情
+      name: 'vehicle_search_clcxdetail', 
+      component: () => import('@/views/index/components/vehicle/search/clcxdetail.vue')
     }, {
       path: 'tzsc', // 特征搜车
       name: 'vehicle_search_tzsc',
       component: () => import('@/views/index/components/vehicle/search/tzsc.vue')
     }, {
-      path: 'ycsc', // 以车搜车
+      path: 'ycsc', // 以图搜车
       name: 'vehicle_search_ycsc',
       component: () => import('@/views/index/components/vehicle/search/ycsc.vue')
+    },
+       {
+      path: 'mhsc', // 模糊搜车
+      name: 'vehicle_search_mhsc',
+      component: () => import('@/views/index/components/vehicle/search/mhsc.vue')
     }, {
       path: 'gcck', // 过车查看
       name: 'vehicle_search_gcck',
       component: () => import('@/views/index/components/vehicle/search/gcck.vue')
+    }, {
+      path: 'gcck-zp', // 过车查看
+      name: 'vehicle_search_gcck_zp',
+      component: () => import('@/views/index/components/vehicle/search/gcck-zp.vue')
     }, {
       path: 'clxx', // 车辆信息
       name: 'vehicle_search_clxx',
@@ -35,7 +48,11 @@ export default {
       path: 'lxwf', // 连续违法
       name: 'vehicle_search_lxwf',
       component: () => import('@/views/index/components/vehicle/search/lxwf.vue')
-    }, {
+    },{
+      path: 'lxwfdetail', // 连续违法详情
+      name: 'vehicle_search_lxwfdetail',
+      component: () => import('@/views/index/components/vehicle/search/lxwfdetail.vue')
+    },{
       path: 'pfgc', // 频繁过车
       name: 'vehicle_search_pfgc',
       component: () => import('@/views/index/components/vehicle/search/pfgc.vue')
@@ -48,7 +65,10 @@ export default {
     }, {
       path: 'ljd', // 落脚点分析
       name: 'vehicle_search_ljd',
-      component: () => import('@/views/index/components/vehicle/analysis/ljd.vue')
+      component: () => import('@/views/index/components/vehicle/analysis/ljd.vue'),
+      meta: {
+        unrequireLogin: true
+      }
     }, {
       path: 'qy', // 区域分析
       name: 'vehicle_search_qy',
@@ -69,6 +89,10 @@ export default {
       path: 'ws', // 尾随分析
       name: 'vehicle_search_ws',
       component: () => import('@/views/index/components/vehicle/analysis/ws.vue')
+    }, { 
+      path: 'wsRecord', // 尾随分析记录
+      name: 'ws_record',
+      component: () => import('@/views/index/components/vehicle/analysis/ws/wsRecord.vue'),
     }, {
       path: 'dctx', // 多车同行分析
       name: 'vehicle_search_dctx',
@@ -93,6 +117,14 @@ export default {
       component: () => import('@/views/index/components/vehicle/statistics/gcsj.vue')
     }, {
       path: 'ycxc', // 夜车行车统计
+      name: 'vehicle_search_ycxc',
+      component: () => import('@/views/index/components/vehicle/statistics/ycxc.vue')
+    }, {
+      path: 'ycxc-record', // 夜车行车抓拍记录
+      name: 'vehicle_search_ycxc_record',
+      component: () => import('@/views/index/components/vehicle/statistics/ycxc-record.vue')
+    }, {
+      path: 'yjxc', // 夜车行车统计
       name: 'vehicle_search_yjxc',
       component: () => import('@/views/index/components/vehicle/statistics/yjxc.vue')
     }

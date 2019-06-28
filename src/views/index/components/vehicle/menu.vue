@@ -20,6 +20,11 @@
             </router-link>
           </li>
           <li>
+            <router-link :to="{name: 'vehicle_search_mhsc'}">
+              <i class="vl_icon2 vl_icon2_003"></i><span>模糊搜车</span>
+            </router-link>
+          </li>
+          <li>
             <router-link :to="{name: 'vehicle_search_gcck'}">
               <i class="vl_icon2 vl_icon2_004"></i><span>过车查看</span>
             </router-link>
@@ -110,7 +115,7 @@
             </router-link>
           </li>
           <li>
-            <router-link :to="{name: 'vehicle_search_yjxc'}">
+            <router-link :to="{name: 'vehicle_search_ycxc'}">
               <i class="vl_icon2 vl_icon2_025"></i><span>夜车行车统计</span>
             </router-link>
           </li>
@@ -184,27 +189,33 @@ export default {
       &:nth-child(5) { animation-delay: 0.5s; }
       &:nth-child(6) { animation-delay: 0.6s; }
       &:nth-child(7) { animation-delay: 0.7s; }
+      &:nth-child(8) { animation-delay: 0.8s; }
+      &:nth-child(9) { animation-delay: 0.9s; }
     }
   }
   .ji_anm2 {
     > li {
-      &:nth-child(1) { animation-delay: 0.6s; }
-      &:nth-child(2) { animation-delay: 0.7s; }
-      &:nth-child(3) { animation-delay: 0.8s; }
-      &:nth-child(4) { animation-delay: 0.9s; }
-      &:nth-child(5) { animation-delay: 1s; }
-      &:nth-child(6) { animation-delay: 1.1s; }
-      &:nth-child(7) { animation-delay: 1.2s; }
-      &:nth-child(8) { animation-delay: 1.3s; }
+      &:nth-child(1) { animation-delay: 0.5s; }
+      &:nth-child(2) { animation-delay: 0.6s; }
+      &:nth-child(3) { animation-delay: 0.7s; }
+      &:nth-child(4) { animation-delay: 0.8s; }
+      &:nth-child(5) { animation-delay: 0.9s; }
+      &:nth-child(6) { animation-delay: 1s; }
+      &:nth-child(7) { animation-delay: 1.1s; }
+      &:nth-child(8) { animation-delay: 1.2s; }
+      &:nth-child(9) { animation-delay: 1.3s; }
+      &:nth-child(10) { animation-delay: 1.4s; }
     }
   }
   .ji_anm3 {
     > li {
-      &:nth-child(1) { animation-delay: 1.1s; }
-      &:nth-child(2) { animation-delay: 1.2s; }
-      &:nth-child(3) { animation-delay: 1.3s; }
-      &:nth-child(4) { animation-delay: 1.4s; }
-      &:nth-child(5) { animation-delay: 1.5s; }
+      &:nth-child(1) { animation-delay: 0.8s; }
+      &:nth-child(2) { animation-delay: 0.9s; }
+      &:nth-child(3) { animation-delay: 1s; }
+      &:nth-child(4) { animation-delay: 1.1s; }
+      &:nth-child(5) { animation-delay: 1.2s; }
+      &:nth-child(6) { animation-delay: 1.3s; }
+      &:nth-child(7) { animation-delay: 1.4s; }
     }
   }
 </style>

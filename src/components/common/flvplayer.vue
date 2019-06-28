@@ -570,7 +570,7 @@ export default {
       }
     },
     // 普通播放（录像）
-    initPlayerDoForNormal (surl) {
+    initPlayerDoForNormal () {
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
       videoElement.src = this.oData.video.downUrl;
@@ -824,7 +824,8 @@ export default {
         endTime: formatDate(this.download.startTime.getTime() + this.download.currentM * 60 * 1000)
       }).then(res => {
         if (res && res.data) {
-          let params = [], rData = {}, rDataSize = 0;
+          // let params = [], rData = {}, rDataSize = 0;
+          let rData = {};
           this.download.recordDataSize = res.data.length;
           for (let i = 0; i < res.data.length; i++) {
             let _obj = res.data[i];
@@ -1150,7 +1151,7 @@ export default {
         console.log("apiSignContentList error：", error);
       });
     },
-    signSubmit (formName) {
+    signSubmit () {
       // this.$refs[formName].validateField("content", (errorMessage) => {
       //   // errorMessage 为空就是验证成功了
       //   if (!errorMessage) {

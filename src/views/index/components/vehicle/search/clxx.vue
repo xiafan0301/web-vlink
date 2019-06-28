@@ -9,6 +9,7 @@
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
+        <vue-scroll>
         <p>可选择一个或多个条件进行搜索</p>
         <!-- 上传 -->
         <div class="vl_judge_tc_c_item">
@@ -52,11 +53,13 @@
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
-            <el-button type="primary" :loading="searching" @click="getVehicleDetail">确定</el-button>
+            <el-button type="primary" @click="getSearchData">查询</el-button>
           </div>
+        </vue-scroll>
       </div>
       <!-- 车辆信息 -->
       <div class="info-right" v-loading="searching">
+        <vue-scroll>
         <div class="info-r-content">
           <!-- 车辆信息 -->
           <div class="info-card">
@@ -168,6 +171,7 @@
             </div>
           </div>
         </div>
+        </vue-scroll>
       </div>
     </div>
 
@@ -380,18 +384,29 @@ export default {
         this.imgData = null;
         this.curImageUrl = '';
         this.setDTime();
-        this.getVehicleDetail();
+        this.getSearchData();
     },
     //查询
-    getVehicleDetail() {
-      this.searching = true;
-      console.log("======getVehicleDetail=====",this.searchData,this.imgData)
-      let params = {
-
+    getSearchData() {
+      let params = {};
+      if(this.searchData.time && this.searchData.time.length > 0) {
+        params['startDate'] = this.searchData.time[0];
+        params['endDate'] = this.searchData.time[1];
       }
+      if(this.searchData.licensePlateNum) {
+        params['plateNo'] = this.searchData.licensePlateNum
+      }else {
+        this.$message.error("请输入车牌号码");
+        return false;
+      }
+      if(this.imgData) {
+        params['vehicleNumberPic'] = this.imgData.path;
+      }
+      this.searching = true;
+      console.log("======getSearchData=====", this.searchData, this.imgData,params);
       setTimeout(() => {
         this.searching = false;
-      },3000)
+      }, 3000);
     },
     // 图片放大
     openBigImg (index, data) {
@@ -433,6 +448,7 @@ export default {
       color: #999;
       background: #fff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      animation: fadeInLeft .4s ease-out .3s both;
       .vl_judge_tc_c_item {
           width: 232px;
           height: 232px;
@@ -667,6 +683,9 @@ html {
           padding: 0;
         }
       }
+    }
+    .__view {
+      width: 100% !important; // vue-scroll样式重置
     }
 }
 </style>

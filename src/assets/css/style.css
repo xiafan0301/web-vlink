@@ -125,7 +125,7 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 20px; height: 28px; background-position: -100px -132px;}
+.vl_icon_control_09{width: 18px; height: 22px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
@@ -263,6 +263,10 @@
 .vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
 .vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
 
+/** 车辆侦查  --尾随分析   **/
+.vl_icon_tail_1{width: 17px; height: 17px;background-position: -785px -373px;} /*时间图标*/
+.vl_icon_tail_2{width: 18px; height: 18px;background-position: -936px -526px;} /*车辆图标*/
+
 .vl_icon2 {
   display: inline-block;
   width: 102px; height: 108px;
@@ -338,7 +342,13 @@
 .vl_icon2_112:hover { background-position: -23px -933px; }
 
 /* 车辆侦查 */
-.vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -988px -1296px;}
+.vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}
+.vl_icon_vehicle_02 {width: 26px; height: 162px; background-position: -976px -1280px;}  
+.vl_icon_vehicle_02:hover {width: 26px; height: 162px; background-position: -1036px -1280px;}     
+.vl_icon_vehicle_03 {width: 26px; height: 162px; background-position: -1096px -1280px;}
+.vl_icon_vehicle_03:hover {width: 26px; height: 162px; background-position: -1156px -1280px;}
+.vl_icon_vehicle_04 {width: 40px; height: 50px; background-position: -1244px -188px;}
+
 
 .vl_content_pad { padding: 10px; }
 
@@ -952,3 +962,29 @@
  /* .address_input .el-input__inner:hover .el-input-group__append {
   border-color: #0C70F8 !important;
 } */
+
+/* th css style create by th */
+.th-breadcrumb {
+  width: 100%; height: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 0 18px;
+  border-bottom: 1px solid #D3D3D3;
+}
+.th-button-export {
+  width: 100px; height: 40px;
+  font-size: 14px;
+}
+.the-table .el-table__header tr{
+  height: 54px;
+}
+.the-table .el-table__body .el-table__row {
+  height: 55px;
+}
+.the-table .el-table__body .el-table__row:hover td {
+  background: #E6F7FF;
+}
+/* th css style create by th */
