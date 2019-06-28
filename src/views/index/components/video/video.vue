@@ -22,9 +22,9 @@
       <li>
         <router-link :to="{name: 'video_download'}">下载记录</router-link>
       </li>
-      <!-- <li>
+      <li>
         <router-link :to="{name: 'video_statistics'}">设备概览</router-link>
-      </li> -->
+      </li>
     </ul>
     <div class="vi_content">
       <router-view></router-view>
