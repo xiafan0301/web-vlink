@@ -125,7 +125,7 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 20px; height: 28px; background-position: -100px -132px;}
+.vl_icon_control_09{width: 18px; height: 22px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
@@ -262,6 +262,10 @@
 .vl_icon_archives_5{width: 117px; height: 117px;background-position: -234px -1732px;} /*在库状态*/
 .vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
 .vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
+
+/** 车辆侦查  --尾随分析   **/
+.vl_icon_tail_1{width: 17px; height: 17px;background-position: -785px -373px;} /*时间图标*/
+.vl_icon_tail_2{width: 18px; height: 18px;background-position: -936px -526px;} /*车辆图标*/
 
 .vl_icon2 {
   display: inline-block;

@@ -37,35 +37,53 @@
           prop="roomNumber"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.roomNumber && scope.row.roomNumber ? scope.row.roomNumber : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="名称"
           prop="roomName"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.roomName && scope.row.roomName ? scope.row.roomName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="地址"
           prop="address"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.address && scope.row.address ? scope.row.address : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="所属单位"
           prop="organName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.organName && scope.row.organName ? scope.row.organName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="责任人"
           prop="dutyUserName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.dutyUserName && scope.row.dutyUserName ? scope.row.dutyUserName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="电话"
           prop="userMobile"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userMobile && scope.row.userMobile ? scope.row.userMobile : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="使用状况"
@@ -115,7 +133,6 @@
 </template>
 <script>
 import { getRoomData, delRoom } from '@/views/index/api/api.archives.js';
-// import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
     return {
@@ -150,29 +167,6 @@ export default {
     this.getList();
   },
   methods: {
-    // // 获取当前部门及子级部门
-    // getDepartList () {
-    //   let organId = null;
-    //   if (this.$store.state.currentOrganObj) {
-    //     organId = this.$store.state.currentOrganObj.uid;
-    //   } else {
-    //     organId = this.userInfo.organList[0].uid;
-    //   }
-    //   const params = {
-    //     'where.proKey': this.userInfo.proKey,
-    //     'where.organPid': organId,
-    //     pageSize: 0
-    //   };
-    //   getDepartmentList(params)
-    //     .then(res => {
-    //       if (res) {
-    //         this.departmentList.push(this.userInfo.organList[0]);
-    //         res.data.list.map(item => {
-    //           this.departmentList.push(item);
-    //         });
-    //       }
-    //     })
-    // },
     // 获取列表数据
     getList () {
       let organId = null;
@@ -208,7 +202,13 @@ export default {
     },
     // 跳至详情页
     skipSelectDetail (obj) {
-      this.$router.push({name: 'room_detail', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'room_detail', query: { id: obj.uid, organObj: organObj }});
     },
     // 跳至新增点室页面
     skipAddPage () {

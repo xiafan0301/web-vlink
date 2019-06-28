@@ -240,7 +240,7 @@ export default {
     },
     // 跳至编辑信息页面
     skipEditInfoPage () {
-      this.$router.push({name: 'member_edit', query: { id: this.$route.query.id }});
+      this.$router.push({name: 'member_edit', query: { id: this.$route.query.id, organObj: this.$route.query.organObj }});
     },
     // 显示删除弹出框
     showDeleteDialog () {
