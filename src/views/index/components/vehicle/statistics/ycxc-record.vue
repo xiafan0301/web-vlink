@@ -162,7 +162,7 @@
         // this.map.setZoomAndCenter(iZoom, aCenter);
         let map = new window.AMap.Map('container', {
           zoom: 14, // 级别
-          center: [110.595111, 27.90289], // 中心点坐标
+          center: [this.strucInfoList[0].longitude, this.strucInfoList[0].latitude], // 中心点坐标
         });
         map.setMapStyle('amap://styles/whitesmoke');
         this.map = map;
