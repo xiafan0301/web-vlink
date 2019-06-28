@@ -9,6 +9,11 @@ export default {
       path: 'menu',
       name: 'portrait_menu',
       component: () => import('@/views/index/components/portrait/menu.vue')
+    },
+    {
+      path: 'qyryfx', // 区域人员分析
+      name: 'portrait_qyryfx',
+      component: () => import('@/views/index/components/portrait/qyryfx.vue')
     }
   ]
 }
