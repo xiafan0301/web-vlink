@@ -25,8 +25,9 @@
             </ul>
             <ul class="db_tree_cul db_tree_cb">
               <template v-if="sitem.bayonetList && sitem.bayonetList.length > 0">
-                <li v-for="(bitem, bindex) in sitem.bayonetList" :key="'bl_' + index + '_' + sindex + '_' + bindex">
+                <li @click="selectItem(2, bitem, $event)" v-for="(bitem, bindex) in sitem.bayonetList" :key="'bl_' + index + '_' + sindex + '_' + bindex">
                   {{bitem.bayonetName}}
+                  <i class="vl_icon db_tree_cul_ck"></i>
                 </li>
               </template>
               <template v-else>
@@ -238,6 +239,10 @@ export default {
     }
   }
 }
+.db_tree_cul_ck { 
+  width: 16px; height: 18px;
+  background-position: -69px -375px;
+ }
 </style>
 
 

@@ -42,8 +42,8 @@
             </div>
           </div>
         </div>
-        <div class="vc_gcck_r">
-          <ul v-if="videoTotal > 0" class="vc_gcck_rt" :class="'video_list_' + videoTotal">
+        <div class="vc_gcck_r" v-if="videoTotal > 0">
+          <ul class="vc_gcck_rt" :class="'video_list_' + videoTotal">
             <li v-for="item in videoTotal" :key="'video_list_' + item">
               <div v-if="videoList[item - 1]">
                 <div is="flvplayer" :oData="videoList[item - 1]" :bResize="bResize"
@@ -70,6 +70,9 @@
               </div>
             </li>
           </ul>
+        </div>
+        <div class="vc_gcck_r" v-else>
+          <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
         </div>
       </div>
     </div>
@@ -263,6 +266,11 @@ export default {
             }
           }
         }
+      }
+      > .vc_gcck_r_empty {
+        padding-top: 20px;
+        text-align: center;
+        color: #999;
       }
     }
   }
