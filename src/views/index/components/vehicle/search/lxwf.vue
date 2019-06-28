@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>信息查询</el-breadcrumb-item>
+        <el-breadcrumb-item>连续违法</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
@@ -58,31 +58,9 @@
                 <span>大众-捷达-2009</span>
               </div>
             </div>
-            <!-- 时间 -->
-            <div class="time-search">
-              <el-date-picker
-                v-model="data1"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="选择日期"
-                class="full"
-              ></el-date-picker>
-            </div>
-            <div class="license-plate-search">
-              <el-row :gutter="5">
-                <el-col :span="22">
-                  <div>
-                    <el-input placeholder="多少" v-model="input4" class="insetIput">
-                      <i slot="prefix" class="inset">违章次数大于</i>
-                    </el-input>
-                  </div>
-                </el-col>
-                <el-col :span="2">
-                  <div class="line40">次</div>
-                </el-col>
-              </el-row>
-            </div>
           </div>
+           
+          
           <div v-if="input5 == 2" class="chbox" >
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
                 <el-form-item label="号牌类型" label-width="90px" prop>
@@ -165,6 +143,32 @@
                 </el-form-item>
             </el-form>
               </div>
+          
+           <!-- 时间 -->
+            <div class="time-search">
+              <el-date-picker
+                v-model="data1"
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="选择日期"
+                class="full"
+              ></el-date-picker>
+            </div>
+            <div class="license-plate-search">
+              <el-row :gutter="5">
+                <el-col :span="22">
+                  <div>
+                    <el-input placeholder="多少" v-model="input4" class="insetIput">
+                      <i slot="prefix" class="inset">违章次数大于</i>
+                    </el-input>
+                  </div>
+                </el-col>
+                <el-col :span="2">
+                  <div class="line40">次</div>
+                </el-col>
+              </el-row>
+            </div>
+          
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
@@ -191,10 +195,14 @@
             <div class="table_box">
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
-                <el-table-column label="违法时间" prop="date" show-overflow-tooltip></el-table-column>
-                <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                <el-table-column label="违法行为" prop="name" show-overflow-tooltip></el-table-column>
-                <el-table-column label="处理机关" prop="name" show-overflow-tooltip></el-table-column>
+                <el-table-column label="车牌号码" prop="date" show-overflow-tooltip></el-table-column>
+                <el-table-column label="违法次数" sortable prop="address" show-overflow-tooltip></el-table-column>
+                <el-table-column label="操作"  show-overflow-tooltip>
+ <template slot-scope="scope">
+        <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
+      </template>
+
+                </el-table-column>
               </el-table>
             </div>
             <template v-if="pagination.total > 0">
@@ -362,6 +370,10 @@ export default {
     this.setDTime();
   },
   methods: {
+    //查看详情
+    handleClick(v){
+ this.$router.push({name: 'vehicle_search_lxwfdetail', query: {}});
+    },
     // 上传图片
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg" || file.type === "image/png";
