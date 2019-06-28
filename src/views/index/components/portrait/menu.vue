@@ -57,7 +57,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_qyryfx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_109"></span>
         <span class="ptt_li_text">区域人群分析</span>
