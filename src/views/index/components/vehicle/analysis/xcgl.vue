@@ -59,9 +59,78 @@
           <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>
           <!-- 下划线 -->
           <div class="line"></div>
-          <!-- 车牌号搜索 -->
-          <div class="license-plate-search">
-            <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
+          <!-- 设备搜索 -->
+          
+          <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
+          <div :class="{'is_show': treeTabShow}">
+          <div class="selected_device" @click="treeTabShow = true;">
+            <i class="el-icon-arrow-down"></i>
+            <!-- <i class="el-icon-arrow-up"></i> -->
+            <div class="device_list" v-if="selectDeviceArr.length > 0">
+              <span>{{ selectDeviceArr[0].label }}</span>
+              <span
+                v-show="selectDeviceArr.length > 1"
+                title="展开选中的设备"
+                class="device_count"
+              >+{{ selectDeviceArr.length - 1 }}</span>
+            </div>
+            <div class="no_device" v-else>选择设备</div>
+            <!-- 树tab页面 -->
+            <div class="device_tree_tab" v-show="treeTabShow">
+              <div style="overflow: hidden;">
+                <div
+                  class="tab_title"
+                  :class="{ 'current_title': index === selectedTreeTab }"
+                  @click="selectedTreeTab = index;"
+                  v-for="(item, index) in treeTabArr"
+                  :key="'tab_title' + index"
+                >{{ item.name }}</div>
+              </div>
+              <!-- 摄像头树 -->
+              <div class="tree_content" v-show="selectedTreeTab === 0">
+                <vue-scroll>
+                  <div class="checked_all">
+                    <el-checkbox
+                      :indeterminate="isIndeterminate"
+                      v-model="checkAllTree"
+                      @change="handleCheckedAll"
+                    >全选</el-checkbox>
+                  </div>
+                  <el-tree
+                    @check="listenChecked"
+                    :data="cameraTree"
+                    show-checkbox
+                    default-expand-all
+                    node-key="id"
+                    ref="cameraTree"
+                    highlight-current
+                    :props="defaultProps"
+                  ></el-tree>
+                </vue-scroll>
+              </div>
+              <div class="tree_content" v-show="selectedTreeTab === 1">
+                    <vue-scroll>
+                      <div class="checked_all">
+                        <el-checkbox
+                          :indeterminate="isIndeterminateBay"
+                          v-model="checkAllTreeBay"
+                          @change="handleCheckedAllBay"
+                        >全选</el-checkbox>
+                      </div>
+                      <el-tree
+                        @check="listenCheckedBay"
+                        :data="bayonetTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="id"
+                        ref="bayonetTree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
+                    </vue-scroll>
+              </div>
+            </div>
+          </div>
           </div>
           <!-- 时间 -->
           <div class="time-search">
@@ -74,6 +143,7 @@
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+              @change="dateChange"
             ></el-date-picker>
           </div>
           <div class="search-btn">
@@ -181,14 +251,15 @@
   </div>
 </template>
 <script>
-import { ajaxCtx } from "@/config/config";
+import { ajaxCtx, mapXupuxian } from "@/config/config";
 import { dataList } from "@/utils/data.js";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder
 } from "../../../api/api.judge.js";
-import {random14} from '../../../../../utils/util.js';
+import { MapGETmonitorList } from "../../../api/api.map.js";
+import { random14, objDeepCopy } from "../../../../../utils/util.js";
 export default {
   data() {
     return {
@@ -223,6 +294,7 @@ export default {
             start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
+          let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -236,43 +308,43 @@ export default {
           label: "全部时刻",
           value: 0,
           checked: true,
-          key: 'allRecords'
+          key: "allRecords"
         },
         {
           label: "00:00 - 04:00",
           value: 1,
           checked: false,
-          key: 'period0_4Records'
+          key: "period0_4Records"
         },
         {
           label: "04:00 - 08:00",
           value: 2,
           checked: false,
-          key: 'period4_8Records'
+          key: "period4_8Records"
         },
         {
           label: "08:00 - 12:00",
           value: 3,
           checked: false,
-          key: 'period8_12Records'
+          key: "period8_12Records"
         },
         {
           label: "12:00 - 16:00",
           value: 4,
           checked: false,
-          key: 'period12_16Records'
+          key: "period12_16Records"
         },
         {
           label: "16:00 - 20:00",
           value: 5,
           checked: false,
-          key: 'period16_20Records'
+          key: "period16_20Records"
         },
         {
           label: "20:00 - 24:00",
           value: 6,
           checked: false,
-          key: 'period20_24Records'
+          key: "period20_24Records"
         }
       ],
       selectTimeList: [], //选中的时间段
@@ -506,11 +578,35 @@ export default {
           }
         ],
         period16_20Records: [],
-        period20_24Records: [],
+        period20_24Records: []
       },
+      doubleDeviceList: {},
       videoMenuStatus: true, // 菜单状态
       cameraMapMarkers: [], // 地图标记
       selAreaPolygon: null,
+      treeTabShow: false,
+      selectDeviceArr: [],    // 选中的设备数组
+      selectedTreeTab: 0, // 当前选中的
+      treeTabArr: [
+        {
+          name: "摄像头"
+        },
+        {
+          name: "卡口"
+        }
+      ],
+      isIndeterminate: false, // 是否处于全选与全不选之间
+      isIndeterminateBay: false,   //卡口
+      checkAllTree: false, // 树是否全选
+      checkAllTreeBay: false,    
+      bayonetTree: [], // 卡口树
+      cameraTree: [],
+      videoTreeNodeCount: 0, // 摄像头节点数量
+      bayonetTreeNodeCount: 0, // 卡口节点数量
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
     };
   },
   computed: {
@@ -526,6 +622,9 @@ export default {
 
     //加载地图
     this.initMap();
+    //获取摄像头卡口数据
+    this.getMonitorList();
+    this.doubleDeviceList = objDeepCopy(this.list);
     //获取数据
     this.getData();
   },
@@ -634,7 +733,7 @@ export default {
     setDTime() {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 30 * 24 * 3600 * 1000;
+      let curS = 1 * 24 * 3600 * 1000;
       let _s =
         new Date(curDate - curS).getFullYear() +
         "-" +
@@ -643,7 +742,20 @@ export default {
         new Date(curDate - curS).getDate();
       let _e =
         date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      this.searchData.time = [_s, _e];
+      this.searchData.time = [_s, _s];
+    },
+    //日期选择
+    dateChange(val) {
+      console.log("-------------val-----------", typeof new Date(val[1]));
+      if (
+        new Date(val[1]).getTime() - new Date(val[0]).getTime() >=
+        3 * 24 * 3600 * 1000
+      ) {
+        this.$message.error(
+          "最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!"
+        );
+        this.setDTime();
+      }
     },
     //重置
     resetSearch() {
@@ -698,7 +810,9 @@ export default {
       if (val.value !== 0) {
         this.$set(this.timeSlot[0], "checked", false);
         //去掉全部时刻的选择项
-        this.selectTimeList = this.selectTimeList.filter(key => key.value !== 0);
+        this.selectTimeList = this.selectTimeList.filter(
+          key => key.value !== 0
+        );
         if (this.timeSlot[index].checked) {
           this.selectTimeList.push(this.timeSlot[index]);
         } else {
@@ -717,26 +831,60 @@ export default {
           }
         }
       }
+      this.selectTimeList.sort(this.sortVal);
       console.log(val, this.timeSlot, this.selectTimeList);
       this.getList();
     },
+    //排序
+    sortVal(a, b) {
+      return a.value - b.value;
+    },
     //接口获取数据
     getData() {
-      this.selectTimeList = [{
+      this.selectTimeList = [
+        {
           label: "全部时刻",
           value: 0,
           checked: true,
-          key: 'allRecords'
-        }];
+          key: "allRecords"
+        }
+      ];
       this.getList();
     },
     //获取数据
     getList() {
       this.deviceList = [];
-      for (let item of this.selectTimeList) {
-        this.deviceList.push(...this.list[item.key])
+      let result = [];
+      this.list = objDeepCopy(this.doubleDeviceList);
+      for (let i = 0; i < this.selectTimeList.length; i++) {
+        let item = this.selectTimeList[i];
+        let temp = result[result.length - 1];
+        if (!i) {
+          result.push([item]);
+          if (this.list[item.key] && this.list[item.key].length > 0) {
+            this.$set(this.list[item.key][0], "timeSlot", "——");
+            this.$set(this.list[item.key][0], "refTime", "——");
+          }
+        } else if (
+          item.value % 1 === 0 &&
+          item.value - temp[temp.length - 1].value == 1
+        ) {
+          temp.push(item);
+        } else {
+          result.push([item]);
+          if (this.list[item.key] && this.list[item.key].length > 0) {
+            this.$set(this.list[item.key][0], "timeSlot", "——");
+            this.$set(this.list[item.key][0], "refTime", "——");
+          }
+        }
+        this.deviceList.push(...this.list[item.key]);
       }
-      console.log("=====deviceList=====",this.deviceList)
+      console.log(
+        "=====deviceList=====",
+        result,
+        this.deviceList,
+        this.doubleDeviceList
+      );
       this.getNDeviceList();
       this.mapClearMarkers(this.cameraMapMarkers);
       this.mapMark(this.nDeviceList, this.cameraMapMarkers);
@@ -798,7 +946,7 @@ export default {
               draggable: false, // 是否可拖动
               extData: obj,
               // 自定义点标记覆盖物内容
-              content: content,
+              content: content
             });
             // myAMap.hoverMarkerHandler(map, marker, obj);
             if (!aMarkers) {
@@ -838,7 +986,6 @@ export default {
     },
     // 清除地图标记
     mapClearMarkers(aMarkers) {
-      console.log("-------aMarkers-------",aMarkers)
       if (this.map && aMarkers && aMarkers.length > 0) {
         this.map.remove(aMarkers);
         aMarkers = [];
@@ -850,6 +997,143 @@ export default {
                  <p class="num">${val.data.length}次</p>
             `;
       return str;
+    },
+    //获取摄像头卡口信息列表
+    getMonitorList() {
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.bayonetTree = this.getBayTreeList(bayonet);
+          this.getLeafCountTree(this.cameraTree);
+          this.getLeafCountTreeBay(this.bayonetTree);
+        }
+      });
+    },
+    //获取摄像头数据
+    getTreeList(data) {
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+            key['treeType'] = 1
+          }
+        }
+      }
+      return data;
+    },
+    //获取卡口数据
+    getBayTreeList(data) {
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          item['children'] = item.bayonetList
+          delete(item.bayonetList)
+          for(let key of item['children']) {
+            key['label'] = key.bayonetName
+            key['id'] = key.uid
+            key['treeType'] = 2
+          }
+        }
+      }
+      return data;
+    },
+    // tab的方法
+    chooseDevice() {
+      // 选择了树的设备
+      this.treeTabShow = false;
+    },
+    // 处理摄像头树全选时间
+    handleCheckedAll(val) {
+      this.isIndeterminate = false;
+      if (val) {
+        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
+      } else {
+        this.$refs.cameraTree.setCheckedNodes([]);
+      }
+      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    getLeafCountTree(json) { // 获取摄像头树节点的数量
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].hasOwnProperty("id")) {
+          this.videoTreeNodeCount++;
+        }
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTree(json[i].children);
+        } else {
+          continue;
+        }
+      }
+      console.log("this.videoTreeNodeCount",this.videoTreeNodeCount)
+    },
+    //摄像头
+    listenChecked(val, val1) {
+      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
+        this.isIndeterminate = false;
+        this.checkAllTree = true;
+      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = false;
+      }
+    },
+    // 处理卡口树全选时间
+    handleCheckedAllBay(val) {
+      this.isIndeterminateBay = false;
+      if (val) {
+        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+      } else {
+        this.$refs.bayonetTree.setCheckedNodes([]);
+      }
+      this.selectDeviceArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    getLeafCountTreeBay(json) { // 获取卡口树节点的数量
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].hasOwnProperty("id")) {
+          this.bayonetTreeNodeCount++;
+        }
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTreeBay(json[i].children);
+        } else {
+          continue;
+        }
+      }
+      console.log("this.getLeafCountTreeBay",this.getLeafCountTreeBay)
+    },
+    //卡口
+    listenCheckedBay(val, val1) {
+      this.selectDeviceArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
+        this.isIndeterminateBay = false;
+        this.checkAllTreeBay = true;
+      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = false;
+      }
+    },
+    //数量处理
+    handleData() {
+      this.selectDeviceArr = this.selectDeviceArr.filter(key => key.treeType)
     }
   }
 };
@@ -879,6 +1163,7 @@ export default {
       color: #999;
       background: #fff;
       box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      animation: fadeInLeft 0.4s ease-out 0.3s both;
       .vl_judge_tc_c_item {
         width: 232px;
         height: 232px;
@@ -960,6 +1245,83 @@ export default {
         width: 232px;
         margin-bottom: 10px;
       }
+      // 关闭设备tab
+      .selected_device_comp {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: auto;
+        margin: 0;
+        opacity: 0;
+        z-index: 10;
+      }
+      // 选择设备下拉
+      .selected_device {
+        margin-bottom: 20px;
+        position: relative;
+        width: 232px;
+        height: 40px;
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        padding-left: 12px;
+        > i {
+          position: absolute;
+          right: 12px;
+          top: 13px;
+        }
+        &:hover,
+        &:focus {
+          border-color: #0c70f8;
+          cursor: pointer;
+        }
+        .device_list {
+          line-height: 40px;
+          font-size: 14px;
+          color: #333;
+          .device_count {
+            color: #0c70f8;
+            margin-left: 20px;
+          }
+        }
+        .no_device {
+          line-height: 40px;
+          color: #999999;
+        }
+        // 树tab
+        .device_tree_tab {
+          position: absolute;
+          top: 50px;
+          left: -1px;
+          z-index: 100;
+          background: #fff;
+          width: 232px;
+          height: 350px;
+          border-radius: 4px;
+          border: 1px solid #d3d3d3;
+          .tab_title {
+            width: 50%;
+            float: left;
+            background: #f2f2f2;
+            text-align: center;
+            color: #666666;
+            line-height: 30px;
+            font-size: 12px;
+          }
+          .current_title {
+            background: #fff;
+          }
+          // 树
+          .tree_content {
+            height: 310px;
+            padding-top: 10px;
+            .checked_all {
+              padding: 0 0 8px 23px;
+            }
+          }
+        }
+      }
     }
     .info-right {
       position: relative;
@@ -976,6 +1338,7 @@ export default {
         padding-left: 20px;
         z-index: 999;
         box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
+        animation: fadeInLeft 0.6s ease-out 0.3s both;
         .title {
           display: flex;
           justify-content: space-between;
@@ -1192,20 +1555,20 @@ html {
   }
   /* 地图标记 hover */
   .vl_map_hover {
-      .vl_map_hover_main {
-          width: 178px;
-          text-align: center;
-          padding: 20px 0;
-          .name {
-            color: #666;
-            padding-bottom: 4px;
-          }
-          .num {
-            color: #333;
-            font-size: 20px;
-            font-weight: 600;
-          }
+    .vl_map_hover_main {
+      width: 178px;
+      text-align: center;
+      padding: 20px 0;
+      .name {
+        color: #666;
+        padding-bottom: 4px;
       }
-  } 
+      .num {
+        color: #333;
+        font-size: 20px;
+        font-weight: 600;
+      }
+    }
+  }
 }
 </style>
