@@ -9,13 +9,13 @@
         <vue-scroll>
           <ul class="temp_detail_info">
             <li
-              :class="[activeId === item.uid ? 'temp_active' : '']"
+              :class="[activeId === item.id ? 'temp_active' : '']"
               v-for="(item, index) in groupList"
               :key="'item' + index"
-              @click="showGroupDeviceInfo(item.uid)"
+              @click="showGroupDeviceInfo(item.id)"
             >
-              <span>{{item.groupName}}  (112)</span>
-              <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.uid)"></i>
+              <span>{{item.name}}  ({{item.portraitNum}})</span>
+              <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.id)"></i>
               <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showOperateGroupDialog('edit', item)"></i>
             </li>
           </ul>
@@ -79,164 +79,65 @@
         <div class="divide"></div>
       </div>
       <div class="button_box">
-        <el-button class="select_btn" @click="showAddVehicleDialog('add')">新增车辆</el-button>
-        <el-button class="reset_btn">导入车辆</el-button>
-        <el-button class="reset_btn">导出车辆</el-button>
-        <el-button class="reset_btn">删除车辆</el-button>
+        <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
+        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导入车辆</el-button>
+        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导出车辆</el-button>
+        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="deleteVehicle">删除车辆</el-button>
       </div>
-      <div class="vehicle_box">
-        <ul>
-          <li>
-            <div class="left">
-              <img src="../../../../assets/img/temp/vis-eg.png" />
-            </div>
-            <div class="right">
-              <div class="title">
-                <p>
-                  <span>详细资料</span>
-                  <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('edit')"></i>
-                </p>
-                <el-checkbox class="check_box"></el-checkbox>
+      <template v-if="vehicleList && vehicleList.length > 0">
+        <div class="vehicle_box">
+          <ul>
+            <li v-for="(item, index) in vehicleList" :key="index">
+              <div class="left">
+                <img :src="item.vehicleImagePath" />
               </div>
-              <div class="info_list">
-                <span>湘A123456</span>
-                <span>车身白色</span>
-                <span>大客车</span>
-                <span>大众旗悦</span>
+              <div class="right">
+                <div class="title">
+                  <p>
+                    <span>详细资料</span>
+                    <i v-show="item.origin !== 1" class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('carForm', 'edit', item)"></i>
+                  </p>
+                  <el-checkbox class="check_box" v-model="item.isDelete" @change="handleChangeCheckBox(index, item.isDelete)"></el-checkbox>
+                </div>
+                <div class="info_list">
+                  <span v-show="item.vehicleNumber">{{item.vehicleNumber && item.vehicleNumber}}</span>
+                  <span v-show="item.vehicleColor">{{item.vehicleColor && item.vehicleColor}}</span>
+                  <span v-show="item.vehicleType">{{item.vehicleType && item.vehicleType}}</span>
+                  <span v-show="item.vehicleModel">{{item.vehicleModel && item.vehicleModel}}</span>
+                </div>
+                <div class="info_list">
+                  <span v-show="item.numberColor">{{item.numberColor}}</span>
+                </div>
+                <div class="info_list">
+                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}</span><span v-show="item.ownerIdCard">（{{item.ownerIdCard}}）</span>
+                </div>
+                <div class="info_list">
+                  <span v-show="item.desci">{{item.desci && item.desci}}</span>
+                </div>
+                <div class="info_list" v-show="item.groupList && item.groupList.length > 0">
+                  <span v-for="(item, index) in item.groupList" :key="index">{{item.groupName}}</span>
+                  <span>更多组</span>
+                </div>
               </div>
-              <div class="info_list">
-                <span>蓝底白字（小型汽车号牌）</span>
-              </div>
-              <div class="info_list">
-                <span>张三（432512199009087653）</span>
-              </div>
-              <div class="info_list">
-                <span>自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12</span>
-              </div>
-              <div class="info_list">
-                <span>红名单</span>
-                <span>网约车</span>
-                <span>遮牌车</span>
-                <span>更多组</span>
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="left">
-              <img src="../../../../assets/img/temp/vis-eg.png" />
-            </div>
-            <div class="right">
-              <div class="title">
-                <p>
-                  <span>详细资料</span>
-                  <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
-                </p>
-                <el-checkbox class="check_box"></el-checkbox>
-              </div>
-              <div class="info_list">
-                <span>湘A123456</span>
-                <span>车身白色</span>
-                <span>大客车</span>
-                <span>大众旗悦</span>
-              </div>
-              <div class="info_list">
-                <span>蓝底白字（小型汽车号牌）</span>
-              </div>
-              <div class="info_list">
-                <span>张三（432512199009087653）</span>
-              </div>
-              <div class="info_list">
-                <span>自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12</span>
-              </div>
-              <div class="info_list">
-                <span>红名单</span>
-                <span>网约车</span>
-                <span>遮牌车</span>
-                <span>更多组</span>
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="left">
-              <img src="../../../../assets/img/temp/vis-eg.png" />
-            </div>
-            <div class="right">
-              <div class="title">
-                <p>
-                  <span>详细资料</span>
-                  <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
-                </p>
-                <el-checkbox class="check_box"></el-checkbox>
-              </div>
-              <div class="info_list">
-                <span>湘A123456</span>
-                <span>车身白色</span>
-                <span>大客车</span>
-                <span>大众旗悦</span>
-              </div>
-              <div class="info_list">
-                <span>蓝底白字（小型汽车号牌）</span>
-              </div>
-              <div class="info_list">
-                <span>张三（432512199009087653）</span>
-              </div>
-              <div class="info_list">
-                <span>自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12</span>
-              </div>
-              <div class="info_list">
-                <span>红名单</span>
-                <span>网约车</span>
-                <span>遮牌车</span>
-                <span>更多组</span>
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="left">
-              <img src="../../../../assets/img/temp/vis-eg.png" />
-            </div>
-            <div class="right">
-              <div class="title">
-                <p>
-                  <span>详细资料</span>
-                  <i class="operation_btn edit_btn vl_icon vl_icon_manage_7"></i>
-                </p>
-                <el-checkbox class="check_box"></el-checkbox>
-              </div>
-              <div class="info_list">
-                <span>湘A123456</span>
-                <span>车身白色</span>
-                <span>大客车</span>
-                <span>大众旗悦</span>
-              </div>
-              <div class="info_list">
-                <span>蓝底白字（小型汽车号牌）</span>
-              </div>
-              <div class="info_list">
-                <span>张三（432512199009087653）</span>
-              </div>
-              <div class="info_list">
-                <span>自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12自定义组名称12</span>
-              </div>
-              <div class="info_list">
-                <span>红名单</span>
-                <span>网约车</span>
-                <span>遮牌车</span>
-                <span>更多组</span>
-              </div>
-            </div>
-          </li>
-        </ul>
-        <el-pagination
-          class="cum_pagination"
-          @current-change="handleCurrentChange"
-          :current-page.sync="pagination.pageNum"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="pagination.pageSize"
-          layout="total, prev, pager, next, jumper"
-          :total="pagination.total">
-        </el-pagination>
-      </div>
+            </li>
+          </ul>
+          <el-pagination
+            class="cum_pagination"
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total">
+          </el-pagination>
+        </div>
+      </template>
+      <template v-else>
+        <div class="not_content">
+          <img src="../../../../assets/img/not-content.png" alt="">
+          <p>暂无相关数据</p>
+        </div>
+      </template>
     </div>
     <!--新建/修改车辆弹出框-->
     <el-dialog
@@ -273,12 +174,12 @@
         </div>
         <div class="right">
           <vue-scroll>
-            <el-form ref="carForm" :model="carForm">
-              <el-form-item label=" ">
-                <el-input v-model="form.name" placeholder="车牌号码" style="width: 85%;"></el-input>
+            <el-form ref="carForm" :model="carForm" :rules="carRules" label-position="right" label-width="10px">
+              <el-form-item label=" " prop="vehicleNumber" >
+                <el-input v-model="carForm.vehicleNumber" placeholder="车牌号码" :disabled="isAddDisabled" style="width: 85%;" @blur="handleCheckVehicle"></el-input>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="form.region" placeholder="请选择车身颜色" style="width: 85%;">
+              <el-form-item prop="vehicleColor">
+                <el-select v-model="carForm.vehicleColor" placeholder="请选择车身颜色" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="(item, index) in vehicleColorList"
                     :key="index"
@@ -287,8 +188,8 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="form.region" placeholder="请选择车辆类型" style="width: 85%;">
+              <el-form-item prop="vehicleType">
+                <el-select v-model="carForm.vehicleType" placeholder="请选择车辆类型" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="(item, index) in vehicleTypeList"
                     :key="index"
@@ -298,17 +199,17 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="">
-                <el-select v-model="form.region" placeholder="请选择品牌" style="width: 37%;">
+                <el-select v-model="carForm.region" placeholder="请选择品牌" style="width: 37%;" :disabled="isAddDisabled">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
-                <el-select v-model="form.region" placeholder="请选择型号" style="width: 45%; margin-left: 3%">
+                <el-select v-model="carForm.vehicleModel" placeholder="请选择型号" style="width: 45%; margin-left: 3%" :disabled="isAddDisabled">
                   <el-option label="区域一" value="shanghai"></el-option>
                   <el-option label="区域二" value="beijing"></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="form.region" placeholder="请选择号牌类型" style="width: 85%;">
+              <el-form-item prop="numberType">
+                <el-select v-model="carForm.numberType" placeholder="请选择号牌类型" style="width: 85%;" :disabled="isAddDisabled" @change="carForm.numberColor = carForm.numberType">
                   <el-option
                     v-for="(item, index) in numberTypeList"
                     :key="index"
@@ -317,39 +218,53 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="form.region" placeholder="请选择号牌颜色" style="width: 85%;">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item prop="numberColor">
+                <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;" disabled>
+                  <el-option
+                    v-for="item in numColorList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label=" ">
-                <el-input v-model="form.name" placeholder="车主姓名" style="width: 85%;"></el-input>
+              <el-form-item prop="ownerName">
+                <el-input v-model="carForm.ownerName" placeholder="车主姓名" style="width: 85%;" :disabled="isAddDisabled"></el-input>
               </el-form-item>
-              <el-form-item label=" ">
-                <el-select v-model="form.region" placeholder="证件类型" style="width: 85%;">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item prop="idType">
+                <el-select v-model="carForm.idType" placeholder="证件类型" style="width: 85%;" :disabled="isAddDisabled">
+                  <el-option
+                    v-for="item in cardTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label=" ">
-                <el-input v-model="form.name" placeholder="证件号码" style="width: 85%;"></el-input>
+              <el-form-item prop="ownerIdCard">
+                <el-input v-model="carForm.ownerIdCard" placeholder="证件号码" style="width: 85%;" :disabled="isAddDisabled"></el-input>
               </el-form-item>
-              <el-form-item label=" ">
-                <el-input v-model="form.name" placeholder="车牌号码" style="width: 85%;"></el-input>
-              </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="form.region" placeholder="所属组" style="width: 85%;">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item prop="groupList">
+                <el-select v-model="carForm.groupList" placeholder="所属组" style="width: 85%;" clearable multiple>
+                  <el-option
+                    v-for="item in groupList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-input type="textarea" show-word-limit maxlength="100" rows="3" style="width: 85%;" v-model="form.name" placeholder="描述"></el-input>
+              <el-form-item prop="desci">
+                <el-input type="textarea" :show-word-limit="true" maxlength="100" rows="3" style="width: 85%;" v-model="carForm.desci" placeholder="描述" :disabled="isAddDisabled"></el-input>
               </el-form-item>
               <el-form-item style="margin-left: 20px;">
-                <el-button class="reset_btn" style="width: 140px;">取消</el-button>
-                <el-button class="disabled_btn"  @click="onSubmit" style="width: 140px;">保存</el-button>
+                <el-button class="reset_btn" style="width: 140px;" @click="cancalOperation('carForm')">取消</el-button>
+                <template v-if="isAddVehicle">
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
+                </template>
+                <template v-else>
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="updateVehicle('carForm')" style="width: 140px;">确定</el-button>
+                </template>
               </el-form-item>
             </el-form>
           </vue-scroll>
@@ -383,26 +298,32 @@
       <div class="content_body">
         <el-form :model="groupForm" ref="groupForm" :rules="groupRules" >
           <el-form-item label="组名:" prop="groupName" label-width="70px">
-            <el-input placeholder="请输入组名称" v-model="groupForm.groupName" style="width: 100%;" maxlength="6"></el-input>
+            <el-input placeholder="请输入组名称" v-model="groupForm.groupName" style="width: 100%;" maxlength="6" @blur="handleCheckGroupName"></el-input>
+            <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancelOperation('groupForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddloading" @click="addGroup('groupForm')" v-if="dialogTitle === '新增组'">新增</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddloading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroup('groupForm')" v-if="dialogTitle === '新增组'">新增</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
 import { ajaxCtx } from '@/config/config.js';
-import { checkPlateNumber} from '@/utils/validator.js';
+import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
+import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
+  getSpecialVehicleList, addGroup, checkVelRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
+import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
+      isDisabled: true, // 导入-导出-删除车辆禁用
+      isShowError: false, // 是否显示错误提示信息
       dialogTitle: null, // 新增/编辑组标题
       vehicleTitle: null, // 新增-修改车辆
       groupForm: {
@@ -413,147 +334,100 @@ export default {
           { required: true, message: '该项内容不可为空', trigger: 'blur' }
         ]
       },
-      deleteId: null, // 要删除的组id
+      isDeleteVehicleLoading: false, // 删除车辆加载中
+      isVehicleLoading: false, // 新增--修改车辆加载中
+      isSubmitData: true, // 是否能提交数据
+      isAddVehicle: true, // 是否是新增车辆
+      isAddGroup: true, // 是否是新增组
+      isAddDisabled: false, // 是否能修改信息
+      currentGroupId: null, // 要修改--删除的组id
       delGroupDialog: false, // 删除组弹出框
       isDeleteLoading: false, // 删除组加载中
       showGroupDialog: false, // 新增/修改组弹出框
-      isAddloading: false, // 新增组弹出框
+      isAddLoading: false, // 新增--修改组加载中
       dialogVisiable: false, // 新建/修改车辆弹出框
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
-      activeId: 1,
+      activeId: null, // 当前选中的分组id
       isAddDisabled: false, // 是否能添加图片
       picHeight: null,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
-      groupList: [
-        {
-          uid: 1,
-          groupName: '红名单(112)'
-        },
-        {
-          uid: 2,
-          groupName: '网约车(101)'
-        },
-        {
-          uid: 3,
-          groupName: '遮牌车(451)'
-        },
-        {
-          uid: 4,
-          groupName: '自定义（0）'
-        },
-        {
-          uid: 1,
-          groupName: '红名单(112)'
-        },
-        {
-          uid: 2,
-          groupName: '网约车(101)'
-        },
-        {
-          uid: 3,
-          groupName: '遮牌车(451)'
-        },
-        {
-          uid: 4,
-          groupName: '自定义（0）'
-        },
-        {
-          uid: 1,
-          groupName: '红名单(112)'
-        },
-        {
-          uid: 2,
-          groupName: '网约车(101)'
-        },
-        {
-          uid: 3,
-          groupName: '遮牌车(451)'
-        },
-        {
-          uid: 4,
-          groupName: '自定义（0）'
-        },
-        {
-          uid: 1,
-          groupName: '红名单(112)'
-        },
-        {
-          uid: 2,
-          groupName: '网约车(101)'
-        },
-        {
-          uid: 3,
-          groupName: '遮牌车(451)'
-        },
-        {
-          uid: 4,
-          groupName: '自定义（0）'
-        },
-        {
-          uid: 2,
-          groupName: '网约车(101)'
-        },
-        {
-          uid: 3,
-          groupName: '遮牌车(451)'
-        },
-        {
-          uid: 4,
-          groupName: '自定义（0）'
-        }
+      groupList: [], // 车辆分组
+      //证件类型列表数据
+      cardTypeList: [
+        {label: '身份证', value: '1'}
       ],
       searchForm: {
         dateTime: [],
         vehicleNo: null, // 车牌号码
-        numType: null, // 号牌类型
-        vehicleType: null, // 车辆类型
-        vehicleColor: null, // 车身颜色
+        numType: '不限', // 号牌类型
+        vehicleType: '不限', // 车辆类型
+        vehicleColor: '不限', // 车身颜色
       },
       // 新增车像参数
       carForm: {
-        vehicleNumber: null,
-        vehicleColor: null,
-        vehicleType: null,
-        numberType: 2,
-        numberColor: 2,
-        groupIds: [],
-        desci: ''
+        vehicleImagePath: null, // 车牌图片地址
+        vehicleNumber: null, // 车牌号码
+        vehicleColor: null, // 车身颜色
+        vehicleType: null, // 车辆类型
+        numberType: null, // 号牌类型
+        numberColor: null, // 号牌颜色
+        ownerName: null, // 车主姓名
+        ownerIdCard: null, // 车主身份证号
+        vehicleModel: null, // 车辆型号
+        groupList: [], // 分组
+        desci: null, // 描述
       },
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+      carRules: {
+        vehicleNumber: [
+          { required: true, message: '该项内容不能为空', trigger: 'blur' },
+          { validator: checkPlateNumber, trigger: 'blur'}
+        ],
+        ownerIdCard: [
+          { validator: checkIdCard, trigger: 'blur'}
+        ]
       },
       numColorList: [
-        {label: '黄底黑字', value: 1},
-        {label: '蓝底白字', value: 2},
-        {label: '蓝底白字', value: 8},
-        {label: '黄底黑字黑框线', value: 15},
-        {label: '白底黑字、红“警”字', value: 23},
-        {label: '白底黑字、红“警”字', value: 24},
-        {label: '渐变绿底黑字', value: 25},
-        {label: '黄绿双拼底黑字', value: 26},
-        // {label: '蓝底白字', value: 27},
-        // {label: '黄底黑字', value: 28},
-        // {label: '黄底黑字', value: 29},
-        {label: '其他', value: 99}
+        {label: '黄底黑字', value: '1'},
+        {label: '蓝底白字', value: '2'},
+        {label: '蓝底白字', value: '8'},
+        {label: '黄底黑字黑框线', value: '15'},
+        {label: '白底黑字、红“警”字', value: '23'},
+        {label: '白底黑字、红“警”字', value: '24'},
+        {label: '渐变绿底黑字', value: '25'},
+        {label: '黄绿双拼底黑字', value: '26'},
+        {label: '其他', value: '99'}
       ],//号牌颜色列表
       vehicleTypeList: [], // 车辆类型列表
       vehicleColorList: [], // 车身颜色列表
       numberTypeList: [], // 号牌种类列表
+      vehicleList: [], // 特殊车辆列表
+    }
+  },
+  watch: {
+    vehicleList (val) {
+      if (val) {
+        let array = [];
+        val.map(item => {
+          if (item.isDelete) {
+            array.push(item.uid);
+          }
+        });
+        if (array.length > 0) {
+          this.isDisabled = false;
+        } else {
+          this.isDisabled = true;
+        }
+      }
     }
   },
   mounted () {
     this.getVehicleTypeList();
     this.getVehicleColor();
     this.getNumberTypeList();
+    this.getGroupList();
+    
   },
   methods: {
     // 获取车辆类型列表
@@ -587,9 +461,123 @@ export default {
           }
         })
     },
+    // 获取所有车辆组
+    getGroupList () {
+      getSpecialGroup()
+        .then(res => {
+          if (res) {
+            this.groupList = res.data;
+            this.activeId = res.data[0].id;
+            this.getVehicleList();
+          }
+        })
+    },
+    // 获取特殊车辆列表
+    getVehicleList () {
+      let vehicleColor, vehicleType, numType;
+      if (this.searchForm.vehicleType === '不限') {
+        vehicleType = null;
+      } else {
+        vehicleType = this.searchForm.vehicleType;
+      }
+      if (this.searchForm.vehicleColor === '不限') {
+        vehicleColor = null;
+      } else {
+        vehicleColor = this.searchForm.vehicleColor;
+      }
+      if (this.searchForm.numType === '不限') {
+        numType = null;
+      } else {
+        numType = this.searchForm.numType;
+      }
+      const params = {
+        'where.startTime': this.searchForm.dateTime[0],
+        'where.endTime': this.searchForm.dateTime[1],
+        'where.vehicleColor': vehicleColor,
+        'where.vehicleType': vehicleType,
+        'where.numberType': numType,
+        'where.vehicleNumber': this.searchForm.vehicleNo,
+        'where.groupId': this.activeId,
+        pageNum: this.pagination.pageNum,
+      };
+      getSpecialVehicleList(params)
+        .then(res => {
+          if (res) {
+            this.vehicleList = res.data.list;
+            this.pagination.total = res.data.total;
+            this.vehicleList.map(item => {
+              item.isDelete = false;
+            });
+          }
+        })
+    },
+    // 判断分组名称是否重复
+    handleCheckGroupName (val) {
+      if (val) {
+        
+      }
+    },
+    // change  勾选duoxuankuang
+    handleChangeCheckBox (index, val) {
+      this.vehicleList[index].isDelete = val;
+      this.vehicleList = JSON.parse(JSON.stringify(this.vehicleList));
+    },
+    // 车牌号check
+    handleCheckVehicle () {
+      const carIdNo = this.Trim(this.carForm.vehicleNumber, 'g');
+       const params = {
+        vehicleNumber: carIdNo
+      };
+      getVehicleByVehicleNumber(params)
+        .then(res => {
+          if (res && res.data && res.data.length > 0) {
+            this.isAddDisabled = true;
+
+            let carInfo = res.data[0];
+
+            let vehicleColor = carInfo.vehicleColor;
+            let vehicleType = carInfo.vehicleType;
+            let numberType = carInfo.numberType;
+            let numberColor = carInfo.numberColor;
+
+            this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
+            this.dialogImageUrl = carInfo.vehicleImagePath;
+
+            this.carForm.vehicleNumber = carInfo.vehicleNumber;
+            this.carForm.desci = carInfo.desci;
+
+            this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
+            this.carForm.vehicleType = vehicleType && vehicleType.toString();
+            this.carForm.numberType = numberType && numberType.toString();
+            this.carForm.numberColor = numberColor && numberColor.toString();
+
+          } else {
+            this.isAddDisabled = false;
+          }
+        })
+    },
     // 确认删除组
     deleteGroup () {
-
+      if (this.currentGroupId) {
+        this.isDeleteLoading = true;
+        delGroup(this.currentGroupId)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除成功',
+                customClass: 'request_tip'
+              });
+              this.isDeleteLoading = false;
+              this.delGroupDialog = false;
+              this.getGroupList();
+              this.getVehicleList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
     },
     // 取消添加/编辑组
     cancelOperation (form) {
@@ -601,7 +589,27 @@ export default {
     addGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
+          const params = {
+            groupName: this.groupForm.groupName,
+            groupType: 9 // 9---特殊车辆
+          };
+          this.isAddLoading = true;
+          addGroup(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                });
+                this.isAddLoading = false;
+                this.showGroupDialog = false;
+                this.getGroupList();
+              } else {
+                this.isAddLoading = false;
+              }
+            })
+            .catch(() => {this.isAddLoading = false;})
         }
       });
     },
@@ -609,11 +617,131 @@ export default {
     editGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-
+          const params = {
+            uid: this.currentGroupId,
+            groupName: this.groupForm.groupName,
+            groupType: 9 // 9---特殊车辆
+          };
+          this.isAddLoading = true;
+          editVeGroup(params)
+            .then(res => {
+              if (res) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                });
+                this.isAddLoading = false;
+                this.showGroupDialog = false;
+                this.getGroupList();
+              } else {
+                this.isAddLoading = false;
+              }
+            })
+            .catch(() => {this.isAddLoading = false;})
         }
       });
     },
-    onSubmit () {},
+    // 添加车辆
+    addVehicle (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message({
+              type: 'error',
+              message: '请先上传车辆照片',
+              customClass: 'request_tip'
+            })
+            return;
+          }
+          this.carForm.vehicleImagePath = this.dialogImageUrl;
+          this.isVehicleLoading = true;
+          addSpecialVehicle(this.carForm)
+            .then(res => {
+              if (res && res.data) {
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                });
+                this.isVehicleLoading = false;
+                this.dialogVisiable = false;
+                this.getGroupList();
+                this.getVehicleList();
+              } else {
+                this.isVehicleLoading = false;
+              }
+              this.$refs[form].resetFields();
+            })
+            .catch(() => {this.isVehicleLoading = false;})
+        }
+      });
+    },
+    // 修改车辆
+    updateVehicle (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          if (!this.dialogImageUrl) {
+            this.$message({
+              type: 'error',
+              message: '请先上传车辆照片',
+              customClass: 'request_tip'
+            })
+            return;
+          }
+          this.carForm.vehicleImagePath = this.dialogImageUrl;
+          this.isVehicleLoading = true;
+          editSpecialVehicle(this.carForm)
+            .then(res => {
+              if (res && res.data) {
+                this.$message({
+                  type: 'success',
+                  message: '修改成功',
+                  customClass: 'request_tip'
+                });
+                this.isVehicleLoading = false;
+                this.dialogVisiable = false;
+                this.getGroupList();
+                this.getVehicleList();
+              } else {
+                this.isVehicleLoading = false;
+              }
+              this.$refs[form].resetFields();
+            })
+            .catch(() => {this.isVehicleLoading = false;})
+        }
+      })
+    },
+    // 删除车辆
+    deleteVehicle () {
+      let deleteIds = [];
+      this.vehicleList.map(item => {
+        if (item.isDelete) {
+          deleteIds.push(item.uid);
+        }
+      });
+      const params = {
+        groupId: this.activeId,
+        vehicleIds: deleteIds.join(',')
+      };
+      this.isDeleteVehicleLoading = true;
+      moveoutGroup(params)
+        .then(res => {
+          if (res) {
+            this.$message({
+              type: 'success',
+              message: '删除成功',
+              customClass: 'request_tip'
+            });
+            this.getGroupList();
+            this.getVehicleList();
+            this.isDeleteVehicleLoading = false;
+          } else {
+            this.isDeleteVehicleLoading = false;
+          }
+        })
+        .catch(() => {this.isDeleteVehicleLoading = false;})
+    },
     handleRemove () {
       this.dialogImageUrl = null;
     },
@@ -623,13 +751,6 @@ export default {
     },
     uploadPicSuccess (file) {
       this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
-      // this.$message.success('上传成功！');
-    },
-    uploadPicError () {
-      this.$message.error('上传失败！');
-    },
-    uploadPicExceed () {
-      this.$message.warning('最多一次可上传1张图片,不能上传非图片文件');
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
@@ -643,65 +764,99 @@ export default {
       }
       return isJPG && isLt4M;
     },
-    // 通过车牌号搜索车辆
-    getVehicleByVehicleNumber () {
-      const carIdNo = this.Trim(this.carForm.vehicleNumber, 'g');
-      if (this.lastCarIdNo === carIdNo) return;
-      this.lastCarIdNo = carIdNo;
-      const params = {
-        vehicleNumber: carIdNo
-      }
-      if (carIdNo) {
-        getVehicleByVehicleNumber(params).then(res => {
-          // 已存在车像
-          if (res && res.data && res.data.length > 0) {
-            let carInfo = res.data[0];
-            if (carInfo.origin === 1) {
-              this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
-              this.dialogImageUrl = carInfo.vehicleImagePath;
-              carInfo.groupIds = carInfo.groupList.filter(f => f.selected).map(m => m.uid);
-              this.isAddDisabled = true;
-              carInfo.uid = this.carForm.uid;
-              carInfo.origin = this.carForm.origin;
-              this.carForm = carInfo;
-            } else {
-              this.isAddDisabled = false;
-              this.$message.warning('布控库已存在，请修改车牌号码');
-            }
-          // 不存在车像
-          } else {
-            this.isAddDisabled = false;
-          }
-        })
-      }
+    // 点击左边分组获取特殊车辆
+    showGroupDeviceInfo (id) {
+      this.activeId = id;
+      this.getVehicleList();
     },
-    showGroupDeviceInfo () {},
     // 显示删除组弹出框
     showDeleteDialog (id) {
-      this.deleteId = id;
+      this.currentGroupId = id;
       this.delGroupDialog = true;
     },
     // 显示新增/编辑组弹出框
     showOperateGroupDialog (type, val) {
+      this.groupForm.groupName = '';
       if (type === 'add') {
+        this.isAddGroup = true;
         this.dialogTitle = '新增组';
       } else {
+        this.currentGroupId = val.id;
+        this.isAddGroup = false;
         this.dialogTitle = '编辑组';
+        this.groupForm.groupName = val.name;
       }
       this.showGroupDialog = true;
     },
     // 显示新增--修改车辆弹出框
-    showAddVehicleDialog (type) {
+    showAddVehicleDialog (form, type, obj) {
+      // 清除已上传的图片
+      if (this.$refs['uploadPic']) {
+        this.$refs['uploadPic'].clearFiles();
+        this.dialogImageUrl = null;
+      }
+      // 清空表单
+      if (this.$refs[form]) {
+        this.$refs[form].resetFields();
+      }
+      this.carForm.uid = null;
       if (type === 'add') {
+        this.isAddVehicle = true;
         this.vehicleTitle = '新增';
       } else {
+        this.isAddVehicle = false;
         this.vehicleTitle = '修改';
+        this.getDetail(obj);
       }
       this.dialogVisiable = true;
     },
-    searchData () {},
-    resetData () {},
-    handleCurrentChange () {}
+    getDetail (obj) {
+      if (obj) {
+        getSpecialVehicleDetail(obj.uid)
+          .then(res => {
+            if (res) {
+              let vehicleColor = res.data.vehicleColor;
+              let vehicleType = res.data.vehicleType;
+              let numberType = res.data.numberType;
+              let numberColor = res.data.numberColor;
+      
+              this.fileList = res.data.vehicleImagePath ? [{url: res.data.vehicleImagePath}] : [];//回填图片
+              this.dialogImageUrl = res.data.vehicleImagePath;
+              this.carForm.uid = res.data.uid;
+              this.carForm.vehicleNumber = res.data.vehicleNumber;
+              this.carForm.desci = res.data.desci;
+              this.carForm.ownerName = res.data.ownerName;
+              this.carForm.ownerIdCard = res.data.ownerIdCard;
+              // this.carForm.groupList = obj.groupList;
+      
+              if (res.data.groupList.length > 0) {
+                res.data.groupList.map(item => {
+                  this.carForm.groupList.push(item.uid);
+                });
+              }
+              this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
+              this.carForm.vehicleType = vehicleType && vehicleType.toString();
+              this.carForm.numberType = numberType && numberType.toString();
+              this.carForm.numberColor = numberColor && numberColor.toString();
+
+            }
+          })
+      }
+    },
+    // 根据搜索条件查询车辆
+    searchData () {
+      this.getVehicleList();
+    },
+    // 重置搜索条件
+    resetData (form) {
+      this.$refs[form].resetFields();
+      this.getVehicleList();
+    },
+    // 分页
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getVehicleList();
+    }
   }
 }
 </script>

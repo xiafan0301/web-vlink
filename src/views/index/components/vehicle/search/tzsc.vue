@@ -14,142 +14,79 @@
         <!-- 菜单表单 -->
         <vue-scroll>
           <div style="padding: 20px;">
-            <!-- 选择搜车的类型 -->
-            <div class="select_type">
-              <el-radio-group v-model="selectType">
-                <el-radio :label="1">从图片提取</el-radio>
-                <el-radio :label="2">自定义特征</el-radio>
-              </el-radio-group>
+            <!-- 选择设备 -->
+            <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
+            <div class="selected_device" @click="treeTabShow = true;">
+              <i class="el-icon-arrow-down"></i>
+              <!-- <i class="el-icon-arrow-up"></i> -->
+              <div class="device_list" v-if="selectDeviceArr.length > 0">
+                <span>{{ selectDeviceArr[0]['label'] }}</span>
+                <span
+                  v-show="selectDeviceArr.length > 1"
+                  title="展开选中的设备"
+                  class="device_count"
+                >+{{ selectDeviceArr.length - 1 }}</span>
+              </div>
+              <div class="no_device" v-else>选择设备</div>
+              <!-- 树tab页面 -->
+              <div class="device_tree_tab" v-show="treeTabShow">
+                <div style="overflow: hidden;">
+                  <div
+                    class="tab_title"
+                    :class="{ 'current_title': index === selectedTreeTab }"
+                    @click="selectedTreeTab = index;"
+                    v-for="(item, index) in treeTabArr"
+                    :key="'tab_title' + index"
+                  >{{ item.name }}</div>
+                </div>
+                <!-- 视频树 -->
+                <div class="tree_content" v-show="selectedTreeTab === 0">
+                  <vue-scroll>
+                    <div class="checked_all">
+                      <el-checkbox
+                        :indeterminate="isIndeterminate"
+                        v-model="checkAllTree"
+                        @change="handleCheckedAll"
+                      >全选</el-checkbox>
+                    </div>
+                    <el-tree
+                    @check="listenChecked"
+                    :data="cameraTree"
+                    show-checkbox
+                    default-expand-all
+                    node-key="id"
+                    ref="cameraTree"
+                    highlight-current
+                    :props="defaultProps"
+                  ></el-tree>
+                  </vue-scroll>
+                </div>
+                <div class="tree_content" v-show="selectedTreeTab === 1">
+                  <vue-scroll>
+                    <div class="checked_all">
+                      <el-checkbox
+                        :indeterminate="isIndeterminateBay"
+                        v-model="checkAllTreeBay"
+                        @change="handleCheckedAllBay"
+                      >全选</el-checkbox>
+                    </div>
+                    <el-tree
+                        @check="listenCheckedBay"
+                        :data="bayonetTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="id"
+                        ref="bayonetTree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
+                  </vue-scroll>
+                </div>
+              </div>
             </div>
 
-            <div v-show="selectType === 1">
-              <!-- 上传车像图片 -->
-              <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
-                <el-upload
-                  @drop="drop($event)"
-                  :class="{'vl_jtc_upload': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError"
-                >
-                  <i v-if="uploading" class="el-icon-loading"></i>
-                  <img v-else-if="curImageUrl" :src="curImageUrl">
-                  <div v-else>
-                    <i
-                      style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                      class="vl_icon vl_icon_vehicle_01"
-                    ></i>
-                    <span>点击上传图片</span>
-                  </div>
-                </el-upload>
-                <p @click="showHistoryPic">从上传记录中选择</p>
-                <div v-show="curImageUrl" class="del_icon">
-                  <i class="el-icon-delete" @click="delPic"></i>
-                </div>
-              </div>
-              <!-- 检索结果 -->
-              <div class="characteristic">
-                <div class="btn">获取特征</div>
-                <div class="characteristic_list" v-if="characteristicList.length > 0">
-                  <div
-                    class="characteristic_item"
-                    :title="item.isChecked ? '取消选择此特征': '选择此特征'"
-                    :class="{ color_blue: item.isChecked }"
-                    v-for="(item, index) in characteristicList"
-                    :key="'characteristic_list' + index"
-                    @click="item.isChecked = !item.isChecked;"
-                  >{{item.desc}}</div>
-                  <!-- 没有特征 -->
-                </div>
-              </div>
-            </div>
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <!-- 自定义特征 -->
-              <div v-show="selectType === 2">
-                <el-form-item label="号牌类型" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="号牌颜色" label-width="90px" prop>
-                  <el-select
-                    v-model="tzscMenuForm.licenseColor"
-                    class="width132"
-                    placeholder="选择选项"
-                  >
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆类型" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆颜色" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆型号" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="遮阳板" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="年检标数量" label-width="90px" prop>
-                  <el-select
-                    v-model="tzscMenuForm.inspectionCount"
-                    class="width132"
-                    placeholder="选择选项"
-                  >
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-              </div>
               <el-form-item label prop="selectDate">
                 <el-date-picker
                   v-model="tzscMenuForm.selectDate"
@@ -159,75 +96,144 @@
                 ></el-date-picker>
               </el-form-item>
 
-              <!-- 选择设备 -->
-              <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
-              <div class="selected_device" @click="treeTabShow = true;">
-                <i class="el-icon-arrow-down"></i>
-                <!-- <i class="el-icon-arrow-up"></i> -->
-                <div class="device_list" v-if="selectDeviceArr.length > 0">
-                  <span>{{ selectDeviceArr[0]['name'] }}</span>
-                  <span
-                    v-show="selectDeviceArr.length > 1"
-                    title="展开选中的设备"
-                    class="device_count"
-                  >+{{ selectDeviceArr.length - 1 }}</span>
+              <!-- 选择搜车的类型 -->
+              <div class="select_type">
+                <el-radio-group v-model="selectType">
+                  <el-radio :label="1">从图片提取</el-radio>
+                  <el-radio :label="2">自定义特征</el-radio>
+                </el-radio-group>
+              </div>
+
+              <div v-show="selectType === 1">
+                <!-- 上传车像图片 -->
+                <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
+                  <el-upload
+                    @drop="drop($event)"
+                    :class="{'vl_jtc_upload': true}"
+                    :show-file-list="false"
+                    accept="image/*"
+                    :action="uploadAcion"
+                    list-type="picture-card"
+                    :before-upload="beforeAvatarUpload"
+                    :on-success="uploadSucess"
+                    :on-error="handleError"
+                  >
+                    <i v-if="uploading" class="el-icon-loading"></i>
+                    <img v-else-if="curImageUrl" :src="curImageUrl">
+                    <div v-else>
+                      <i
+                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                        class="vl_icon vl_icon_vehicle_01"
+                      ></i>
+                      <span>点击上传图片</span>
+                    </div>
+                  </el-upload>
+                  <p @click="showHistoryPic">从上传记录中选择</p>
+                  <div v-show="curImageUrl" class="del_icon">
+                    <i class="el-icon-delete" @click="delPic"></i>
+                  </div>
                 </div>
-                <div class="no_device" v-else>选择设备</div>
-                <!-- 树tab页面 -->
-                <div class="device_tree_tab" v-show="treeTabShow">
-                  <div style="overflow: hidden;">
+                <!-- 检索结果 -->
+                <div class="characteristic">
+                  <div class="btn" @click="getCharacter">获取特征</div>
+                  <div class="characteristic_list" v-if="characteristicList.length > 0">
                     <div
-                      class="tab_title"
-                      :class="{ 'current_title': index === selectedTreeTab }"
-                      @click="selectedTreeTab = index;"
-                      v-for="(item, index) in treeTabArr"
-                      :key="'tab_title' + index"
-                    >{{ item.name }}</div>
+                      class="characteristic_item"
+                      :title="item.isChecked ? '取消选择此特征': '选择此特征'"
+                      :class="{ color_blue: item.isChecked }"
+                      v-for="(item, index) in characteristicList"
+                      :key="'characteristic_list' + index"
+                      @click="item.isChecked = !item.isChecked;"
+                    >{{item.desc}}</div>
+                    <!-- 没有特征 -->
                   </div>
-                  <!-- 视频树 -->
-                  <div class="tree_content" v-show="selectedTreeTab === 0">
-                    <vue-scroll>
-                      <div class="checked_all">
-                        <el-checkbox
-                          :indeterminate="isIndeterminate"
-                          v-model="checkAllTree"
-                          @change="handleCheckedAll"
-                        >全选</el-checkbox>
-                      </div>
-                      <el-tree
-                        @check="listenChecked"
-                        :data="videoTree"
-                        show-checkbox
-                        default-expand-all
-                        node-key="id"
-                        ref="videotree"
-                        highlight-current
-                        :props="defaultProps"
-                      ></el-tree>
-                    </vue-scroll>
-                  </div>
-                  <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
-                    <vue-scroll>
-                      <div class="checked_all">
-                        <el-checkbox
-                          :indeterminate="isIndeterminate"
-                          v-model="checkAllTree"
-                          @change="handleCheckedAll"
-                        >全选</el-checkbox>
-                      </div>
-                      <el-tree
-                        @check="listenChecked"
-                        :data="bayonetTree"
-                        show-checkbox
-                        default-expand-all
-                        node-key="id"
-                        ref="tree"
-                        highlight-current
-                        :props="defaultProps"
-                      ></el-tree>
-                    </vue-scroll>
-                  </div> -->
                 </div>
+              </div>
+
+              <!-- 自定义特征 -->
+              <div v-show="selectType === 2">
+                <el-form-item prop="licenseType">
+                  <el-select
+                    v-model="tzscMenuForm.licenseType"
+                    class="width232"
+                    placeholder="选择号牌类型"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="'licenseType' + item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="licenseColor">
+                  <el-select
+                    v-model="tzscMenuForm.licenseColor"
+                    class="width232"
+                    placeholder="选择号牌颜色"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carType">
+                  <el-select v-model="tzscMenuForm.carType" class="width232" placeholder="选择车辆类型">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carColor">
+                  <el-select v-model="tzscMenuForm.carColor" class="width232" placeholder="选择车辆颜色">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carModel">
+                  <el-select v-model="tzscMenuForm.carModel" class="width232" placeholder="选择车辆型号">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="sunVisor">
+                  <el-select v-model="tzscMenuForm.sunVisor" class="width232" placeholder="选择遮阳板">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="inspectionCount">
+                  <el-select
+                    v-model="tzscMenuForm.inspectionCount"
+                    class="width232"
+                    placeholder="选择年检标数量"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
               </div>
             </el-form>
             <!-- 按钮样式 -->
@@ -337,17 +343,18 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
+            <!-- <span>{{showSim ? '上传图' : '全景图'}}</span> -->
             <img :src="showSim ? sturcDetail.uploadPath : sturcDetail.panoramaPath" alt>
-            <span>{{showSim ? '上传图' : '全景图'}}</span>
+            <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
-            <div class="struc_c_d_img">
+            <div class="struc_c_d_img struc_c_d_img_green">
               <img :src="sturcDetail.photoPath" alt>
-              <i v-show="showSim">全景图</i>
+              <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
               <h2>
-                对比信息
+                抓拍信息
                 <div class="vl_jfo_sim" v-show="showSim">
                   <i class="vl_icon vl_icon_retrieval_03"></i>
                   {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
@@ -356,30 +363,40 @@
                   >%</span>
                 </div>
               </h2>
+              <!-- 特征展示框 -->
               <div class="struc_cdi_line">
                 <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
               </div>
+
+              <!-- 车辆的信息栏 -->
               <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.shotTime}}
-                  <i class="vl_icon vl_icon_retrieval_01"></i>
-                </span>
+                <p>
+                  <span class="val">大众捷达</span>
+                  <span class="key">车辆型号</span>
+                </p>
               </div>
               <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.deviceName}}
-                  <i class="vl_icon vl_icon_retrieval_02"></i>
-                </span>
+                <p>
+                  <!-- <span class="val">{{sturcDetail.deviceName}}</span> -->
+                  <span class="val">2018-11-12 13:14:16</span>
+                  <span class="key">抓拍时间</span>
+                </p>
               </div>
               <div class="struc_cdi_line">
-                <span>
-                  {{sturcDetail.address}}
-                  <i class="vl_icon vl_icon_retrieval_04"></i>
-                </span>
+                <p>
+                  <!-- <span class="val">{{sturcDetail.address}}</span> -->
+                  <span class="val">溆浦县政府1</span>
+                  <span class="key">抓拍设备</span>
+                </p>
               </div>
-              <div class="struc_cdi_line"></div>
+              <div class="struc_cdi_line">
+                <p>
+                  <!-- <span class="val">{{sturcDetail.address}}</span> -->
+                  <span class="val">长沙市天心区上街广发银行北门003</span>
+                  <span class="key" title="抓拍地点">抓拍地点</span>
+                </p>
+              </div>
             </div>
-            <span>抓拍信息</span>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -403,7 +420,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
+          <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + item.id">
             <div
               class="swiper_img_item"
               :class="{'active': index === curImgIndex}"
@@ -430,21 +447,24 @@
   </div>
 </template>
 <script>
-import { ajaxCtx } from "@/config/config";
+import { ajaxCtx, mapXupuxian } from "@/config/config";
 import BigImg from "@/components/common/bigImg.vue";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
 } from "../../../api/api.judge.js";
-import { setTimeout } from 'timers';
+import { MapGETmonitorList } from "../../../api/api.map.js";
+import { objDeepCopy } from "../../../../../utils/util.js";
+
+import { setTimeout } from "timers";
 export default {
   data() {
     return {
-      selectType: 1,
+      selectType: 1, // 图片提取或者自定义提取
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间正序， false为时间倒序
       characteristicList: [
-        // "湘H3A546", "红色", "有挂饰"
+        // 特征数组
         {
           desc: "湘H3A546",
           isChecked: false
@@ -457,7 +477,7 @@ export default {
           desc: "有挂饰",
           isChecked: false
         }
-      ], // 车辆的特征数组
+      ],
       // 菜单表单变量
       tzscMenuForm: {
         selectDate: "",
@@ -481,19 +501,22 @@ export default {
           label: "双皮奶"
         }
       ],
-      stucOrder: 2, // 1升序，2降序，3监控，4相似度
-      // 上传图片变量
+      /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
-      uploadFileList: [],
+      // uploadFileList: [],
       curImageUrl: "", // 当前上传的图片
       historyPicList: [], // 上传历史记录
       historyPicDialog: false,
       loadingHis: false,
       imgData: null,
-      // 选择设备的数据
-      isIndeterminate: false, // 是否处于全选与全不选之间
-      checkAllTree: false, // 树是否全选
+
+      /* 选择设备变量 */
+      treeTabShow: false,
+      isIndeterminate: false, // 是否处于全选与全不选之间(摄像头)
+      isIndeterminateBay: false, // 是否处于全选与全不选之间(卡口)
+      checkAllTree: false, // 树是否全选(摄像头)
+      checkAllTreeBay: false, // 树是否全选(卡口)
       bayonetTree: [
         {
           id: 1,
@@ -530,85 +553,16 @@ export default {
           ]
         }
       ], // 卡口树
-      videoTree: [
-        {
-          id: 1,
-          label: "一级 1",
-          children: [
-            {
-              id: 4,
-              label: "二级 1-1",
-              children: [
-                {
-                  id: 9,
-                  label: "三级 1-1-1"
-                },
-                {
-                  id: 10,
-                  label: "三级 1-1-2"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: "一级 2",
-          children: [
-            {
-              id: 5,
-              label: "二级 2-1"
-            },
-            {
-              id: 6,
-              label: "二级 2-2"
-            }
-          ]
-        },
-        {
-          id: 3,
-          label: "一级 3",
-          children: [
-            {
-              id: 7,
-              label: "二级 3-1"
-            },
-            {
-              id: 8,
-              label: "二级 3-2"
-            }
-          ]
-        },
-        {
-          id: 13,
-          label: "一级 4",
-          children: [
-            {
-              id: 17,
-              label: "二级 4-1"
-            },
-            {
-              id: 18,
-              label: "二级 4-2"
-            }
-          ]
-        }
-      ],
+      cameraTree: [], // 摄像头树
       videoTreeNodeCount: 0, // 摄像头节点数量
       bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
         children: "children",
         label: "label"
       },
-      selectDeviceArr: [
-        // 选中的设备数组
-        {
-          name: "摄像头1"
-        },
-        {
-          name: "摄像头2"
-        }
-      ],
+      selectDeviceArr: [], // 选中的设备数组
+      selectCameraArr: [], // 选中的摄像头数组
+      selectBayonetArr: [], // 选中的卡口数组
       selectedTreeTab: 0, // 当前选中的
       treeTabArr: [
         {
@@ -618,9 +572,8 @@ export default {
           name: "卡口"
         }
       ],
-      treeTabShow: false,
-      // 检索详情弹窗变量
       strucInfoList: [
+        // 检索结果arr
         {
           time: "18-12-27  15:46:07",
           video: "环保路摄像头002",
@@ -666,8 +619,10 @@ export default {
           video: "环保路摄像头002",
           id: ""
         }
-      ], // 检索列表数据
+      ],
+      /* 检索详情弹窗变量 */
       swiperOption: {
+        // swiper配置
         slidesPerView: 10,
         spaceBetween: 18,
         slidesPerGroup: 10,
@@ -679,6 +634,9 @@ export default {
           prevEl: ".swiper-button-prev"
         }
       },
+      amap: null, // 地图实例
+      markerPoint: null, // 地图点集合
+      InfoWindow: null,
       strucDetailDialog: false, // 弹窗是否展示
       playing: false, // 视频播放是否
       strucCurTab: 1,
@@ -694,31 +652,122 @@ export default {
     }
   },
   mounted() {
-    this.getLeafCountTree(this.videoTree);
+    //获取摄像头卡口数据
+    this.getMonitorList();
   },
   methods: {
-    // 处理树全选时间
-    handleCheckedAll(val) {
-      this.isIndeterminate = false;
-      if (val) {
-        this.$refs.videotree.setCheckedNodes(this.videoTree);
-      } else {
-        this.$refs.videotree.setCheckedNodes([]);
+    getCharacter() {
+      // 获取特征
+    },
+    /*sort排序方法*/
+    clickTime() {
+      // 点击时间排序
+      if (this.sortType === 1) {
+        this.timeSortType = !this.timeSortType;
+      } else if (this.sortType === 2) {
+        this.sortType = 1;
       }
     },
-    getLeafCountTree(json) { // 获取树节点的数量
+    clickVideo() {
+      // 点击监控排序
+      this.sortType = 2;
+    },
+    /*选择设备的方法*/
+    // 选中的设备数量处理
+    handleData() {
+      this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType);
+      console.log('选中的数据', this.selectDeviceArr);
+    },
+    getMonitorList() { //获取摄像头卡口信息列表
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.bayonetTree = this.getBayTreeList(bayonet);
+          this.getLeafCountTree(this.cameraTree, 'video');
+          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+        }
+      });
+    },
+    getTreeList(data) { //获取摄像头数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+            key['treeType'] = 1
+          }
+        }
+      }
+      return data;
+    },
+    getBayTreeList(data) { //获取卡口数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          item['children'] = item.bayonetList
+          delete(item.bayonetList)
+          for(let key of item['children']) {
+            key['label'] = key.bayonetName
+            key['id'] = key.uid
+            key['treeType'] = 2
+          }
+        }
+      }
+      return data;
+    },
+    handleCheckedAll(val) {
+      // 全选所有摄像头树节点
+     this.isIndeterminate = false;
+      if (val) {
+        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
+      } else {
+        this.$refs.cameraTree.setCheckedNodes([]);
+      }
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    handleCheckedAllBay(val) {
+      // 全选所有设备节点
+      this.isIndeterminateBay = false;
+      if (val) {
+        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+      } else {
+        this.$refs.bayonetTree.setCheckedNodes([]);
+      }
+      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    getLeafCountTree(json, type) {
+      // 获取树节点的数量
       for (let i = 0; i < json.length; i++) {
         if (json[i].hasOwnProperty("id")) {
-          this.videoTreeNodeCount++;
+          if (type === "video") {
+            this.videoTreeNodeCount++;
+          } else {
+            this.bayonetTreeNodeCount++;
+          }
         }
         if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTree(json[i].children);
+          this.getLeafCountTree(json[i].children, type);
         } else {
           continue;
         }
       }
     },
     listenChecked(val, val1) {
+      // 监听摄像头树的checkbox
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
         this.isIndeterminate = false;
         this.checkAllTree = true;
@@ -730,21 +779,56 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    // tab的方法
-    chooseDevice() {
-      // 选择了树的设备
-      console.log(this.$refs.videotree.getCheckedNodes());
-      this.treeTabShow = false;
-    },
-    clickTime() {
-      if (this.sortType === 1) {
-        this.timeSortType = !this.timeSortType;
-      } else if (this.sortType === 2) {
-        this.sortType = 1;
+    listenCheckedBay(val, val1) {
+      // 监听卡口树的checkbox
+     this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+      if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
+        this.isIndeterminateBay = false;
+        this.checkAllTreeBay = true;
+      } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = false;
       }
     },
-    clickVideo() {
-      this.sortType = 2;
+    chooseDevice() {
+      // 确定选中设备（计算选中的树节点）
+      // console.log(this.$refs.videotree.getCheckedNodes());
+      this.treeTabShow = false;
+    },
+    // 绘制地图
+    drawPoint(data) {
+      this.$nextTick(() => {
+        $(".struc_c_address").append($("#capMap"));
+      });
+      if (this.markerPoint) {
+        this.amap.remove(this.markerPoint);
+      }
+      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
+      this.markerPoint = new AMap.Marker({
+        // 添加自定义点标记
+        map: this.amap,
+        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        // 自定义点标记覆盖物内容
+        content: _content
+      });
+      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      let sConent = `<div class="cap_info_win"><p>设备名称：${
+        data.deviceName
+      }</p><p>抓拍地址：${data.address}</p></div>`;
+      this.infoWindow = new AMap.InfoWindow({
+        map: this.amap,
+        isCustom: true,
+        closeWhenClickMap: false,
+        position: [data.longitude, data.latitude],
+        offset: new AMap.Pixel(0, -70),
+        content: sConent
+      });
     },
     videoTap() {
       // 播放视频
@@ -761,18 +845,21 @@ export default {
       this.playing = !this.playing;
     },
     showStrucInfo(data, index) {
+      // 打开抓拍详情
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       // this.sturcDetail = data;
       // this.drawPoint(data);
     },
     imgListTap(data, index) {
+      // 点击swiper图片
       this.curImgIndex = index;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      // this.drawPoint(data); // 重新绘制地图
     },
-    // 上传图片
+    /* 上传图片方法 */
     beforeAvatarUpload(file) {
+      // 上传图片控制
       const isJPG = file.type === "image/jpeg" || file.type === "image/png";
       const isLt = file.size / 1024 / 1024 < 100;
       if (!isJPG) {
@@ -784,11 +871,9 @@ export default {
       this.uploading = true;
       return isJPG && isLt;
     },
-    //上传成功
     uploadSucess(response, file, fileList) {
+      //上传成功
       this.uploading = false;
-      /* this.compSim = '';
-      this.compSimWord = ''; */
       if (response && response.data) {
         let oRes = response.data;
         if (oRes) {
@@ -818,15 +903,15 @@ export default {
           this.curImageUrl = x.path;
         }
       }
-      this.uploadFileList = fileList;
+      // this.uploadFileList = fileList;
     },
-    //上传失败
     handleError() {
+      //上传失败
       this.uploading = false;
       this.$message.error("上传失败");
     },
-    //获取上传记录
     showHistoryPic() {
+      //获取上传记录
       this.loadingHis = true;
       this.historyPicDialog = true;
       let params = {
@@ -845,32 +930,19 @@ export default {
           this.historyPicDialog = false;
         });
     },
-    //删除图片
     delPic() {
-      this.uploadFileList.splice(0, 1);
+      //删除图片
+      // this.uploadFileList.splice(0, 1);
       this.curImageUrl = "";
     },
-    //选择最近上传的图片
     chooseHisPic(item) {
+      //选择最近上传的图片
       this.historyPicList.forEach(x => {
         x.checked = false;
       });
       item.checked = true;
     },
-    //从历史上传图片中上传
-    // addHisToImg () {
-    //   this.historyPicDialog = false;
-    //   let _ids = [];
-    //   this.choosedHisPic.forEach(x => {
-    //     _ids.push(x.uid)
-    //     this.curImageUrl = x.path;
-    //     this.imgData = x;
-    //   })
-    //   let _obj = {
-    //     appendixInfoIds: _ids.join(',')
-    //   }
-    //   JtcPUTAppendixsOrder(_obj);
-    // },
+    /* 拖拽图片上传的方法 */
     drag(ev) {
       ev.dataTransfer.setData("Text", ev.target.currentSrc);
     },
@@ -890,6 +962,16 @@ export default {
     },
     allowDrop(e) {
       e.preventDefault();
+    }
+  },
+  watch: {
+    strucCurTab(e) {
+      // 监听当前的详情模态框的tab index
+      if (e === 2) {
+        this.drawPoint(this.sturcDetail); // 绘制地图
+      } else if (e === 3) {
+        this.videoUrl = document.getElementById("capVideo").src;
+      }
     }
   }
 };
@@ -924,8 +1006,8 @@ export default {
       .width232 {
         width: 232px;
       }
-      .width132 {
-        width: 132px;
+      .el-form-item {
+        margin-bottom: 12px;
       }
       // 选择搜车类型
       .select_type {
@@ -973,7 +1055,7 @@ export default {
       }
       // 选择设备下拉
       .selected_device {
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         position: relative;
         width: 232px;
         height: 40px;
@@ -1050,7 +1132,6 @@ export default {
       }
       // 按钮
       .btn_warp {
-        padding-bottom: 350px;
         .select_btn {
           background: #0c70f8;
           color: #ffffff;
@@ -1327,6 +1408,7 @@ html {
         > div {
           float: left;
         }
+        // 默认为蓝色
         .struc_c_d_img {
           width: 3.6rem;
           height: 3.6rem;
@@ -1356,6 +1438,40 @@ html {
             color: #0c70f8;
             font-size: 12px;
             padding: 0 0.1rem;
+          }
+        }
+        // 绿色标签
+        .struc_c_d_img_green {
+          &:before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            transform: rotate(-45deg);
+            border: 0.5rem solid #50cc62;
+            border-color: transparent transparent #50cc62;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: 0.1rem;
+            left: 0.1rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
+          i {
+            color: #50cc62;
           }
         }
         .struc_c_d_qj {
@@ -1421,8 +1537,7 @@ html {
               }
             }
             .struc_cdi_line {
-              span {
-                /*position: relative;*/
+              p {
                 max-width: 100%;
                 display: inline-block;
                 height: 0.3rem;
@@ -1438,52 +1553,143 @@ html {
                 overflow: hidden;
                 padding: 0 0.1rem;
                 margin-right: 0.08rem;
-                > i {
-                  vertical-align: middle;
-                  margin-left: 0.1rem;
+                .key {
+                  color: #999999;
+                  padding-left: 10px;
+                }
+                .val {
+                  padding-right: 9px;
+                  position: relative;
+                  &::before {
+                    content: "";
+                    width: 1px;
+                    height: 14px;
+                    position: absolute;
+                    right: 0px;
+                    top: 1px;
+                    background: #f2f2f2;
+                  }
                 }
               }
             }
           }
-          &:before {
-            display: block;
-            content: "";
-            position: absolute;
-            top: -0.7rem;
-            right: -0.7rem;
-            transform: rotate(-46deg);
-            border: 0.7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0c70f8;
+          // &:before {
+          //   display: block;
+          //   content: "";
+          //   position: absolute;
+          //   top: -0.7rem;
+          //   right: -0.7rem;
+          //   transform: rotate(-46deg);
+          //   border: 0.7rem solid #0c70f8;
+          //   border-color: transparent transparent transparent #0c70f8;
+          // }
+          // &:after {
+          //   display: block;
+          //   content: "";
+          //   position: absolute;
+          //   top: -0.4rem;
+          //   right: -0.4rem;
+          //   transform: rotate(-45deg);
+          //   border: 0.4rem solid #ffffff;
+          //   border-color: transparent transparent transparent #ffffff;
+          // }
+          // > span {
+          //   display: block;
+          //   position: absolute;
+          //   top: 0.19rem;
+          //   right: 0.19rem;
+          //   width: 1rem;
+          //   height: 1rem;
+          //   text-align: center;
+          //   color: #ffffff;
+          //   font-size: 0.12rem;
+          //   -webkit-transform: rotate(45deg);
+          //   -moz-transform: rotate(45deg);
+          //   -ms-transform: rotate(45deg);
+          //   -o-transform: rotate(45deg);
+          //   transform: rotate(45deg);
+          //   z-index: 99;
+          // }
+        }
+      }
+      // 抓拍视频
+      .struc_c_video {
+        .struc_c_d_box {
+          background: #e9e7e8;
+          height: 100%;
+          text-align: center;
+          &:hover {
+            .play_btn {
+              display: block !important;
+            }
           }
-          &:after {
-            display: block;
-            content: "";
+          .play_btn {
             position: absolute;
-            top: -0.4rem;
-            right: -0.4rem;
-            transform: rotate(-45deg);
-            border: 0.4rem solid #ffffff;
-            border-color: transparent transparent transparent #ffffff;
-          }
-          > span {
-            display: block;
-            position: absolute;
-            top: 0.19rem;
-            right: 0.19rem;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.4);
             width: 1rem;
             height: 1rem;
             text-align: center;
+            line-height: 1rem;
+            -webkit-border-radius: 50%;
+            -moz-border-radius: 50%;
+            border-radius: 50%;
+            cursor: pointer;
+            i {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
+              height: 22px !important;
+            }
+          }
+          > video {
+            width: auto;
+            height: 100%;
+          }
+          &:after {
+            content: none !important;
+          }
+          &:before {
+            content: none !important;
+          }
+          -webkit-box-shadow: 0 0 0 !important;
+          -moz-box-shadow: 0 0 0 !important;
+          box-shadow: 0 0 0 !important;
+        }
+        .download_btn {
+          text-align: center;
+          width: 1.1rem;
+          height: 0.4rem;
+          float: right !important;
+          margin-top: 0.2rem;
+          background: rgba(246, 248, 249, 1);
+          border: 1px solid rgba(211, 211, 211, 1);
+          border-radius: 4px;
+          line-height: 0.4rem;
+          cursor: pointer;
+          color: #666666;
+          position: relative;
+          &:hover {
             color: #ffffff;
-            font-size: 0.12rem;
-            -webkit-transform: rotate(45deg);
-            -moz-transform: rotate(45deg);
-            -ms-transform: rotate(45deg);
-            -o-transform: rotate(45deg);
-            transform: rotate(45deg);
-            z-index: 99;
+            background: #0c70f8;
+            border-color: #0c70f8;
+          }
+          a {
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
           }
         }
       }
+
       .struc_c_address {
         height: 100%;
         #capMap {

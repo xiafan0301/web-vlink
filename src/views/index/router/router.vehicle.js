@@ -15,6 +15,10 @@ export default {
       path: 'clcx', // 车辆查询
       name: 'vehicle_search_clcx',
       component: () => import('@/views/index/components/vehicle/search/clcx.vue')
+    },{
+      path: 'clcxdetail', // 车辆详情
+      name: 'vehicle_search_clcxdetail', 
+      component: () => import('@/views/index/components/vehicle/search/clcxdetail.vue')
     }, {
       path: 'tzsc', // 特征搜车
       name: 'vehicle_search_tzsc',
@@ -33,6 +37,10 @@ export default {
       name: 'vehicle_search_gcck',
       component: () => import('@/views/index/components/vehicle/search/gcck.vue')
     }, {
+      path: 'gcck-zp', // 过车查看
+      name: 'vehicle_search_gcck_zp',
+      component: () => import('@/views/index/components/vehicle/search/gcck-zp.vue')
+    }, {
       path: 'clxx', // 车辆信息
       name: 'vehicle_search_clxx',
       component: () => import('@/views/index/components/vehicle/search/clxx.vue')
@@ -40,7 +48,11 @@ export default {
       path: 'lxwf', // 连续违法
       name: 'vehicle_search_lxwf',
       component: () => import('@/views/index/components/vehicle/search/lxwf.vue')
-    }, {
+    },{
+      path: 'lxwfdetail', // 连续违法详情
+      name: 'vehicle_search_lxwfdetail',
+      component: () => import('@/views/index/components/vehicle/search/lxwfdetail.vue')
+    },{
       path: 'pfgc', // 频繁过车
       name: 'vehicle_search_pfgc',
       component: () => import('@/views/index/components/vehicle/search/pfgc.vue')
