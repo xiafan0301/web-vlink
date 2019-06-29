@@ -27,4 +27,5 @@ export default {
 </style>
 <!-- 人像检索公用CSS -->
 <style lang="scss">
+.portrait_content { height: 100%; }
 </style>

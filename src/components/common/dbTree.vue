@@ -218,7 +218,7 @@ export default {
       > li {
         position: relative;
         height: 36px; line-height: 36px;
-        padding: 0 30px 0 30px;
+        padding: 0 30px 0 40px;
         color: #666;
         cursor: default;
         &:hover {
