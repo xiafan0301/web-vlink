@@ -2,8 +2,8 @@
   <div class="driving-rules">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>行车规律分析</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item>频繁出没</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="driving-rules-content">
@@ -255,9 +255,9 @@ import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder
-} from "../../../api/api.judge.js";
-import { MapGETmonitorList } from "../../../api/api.map.js";
-import { random14, objDeepCopy } from "../../../../../utils/util.js";
+} from "../../api/api.judge.js";
+import { MapGETmonitorList } from "../../api/api.map.js";
+import { random14, objDeepCopy } from "../../../../utils/util.js";
 export default {
   data() {
     return {

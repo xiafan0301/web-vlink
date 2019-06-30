@@ -1,17 +1,399 @@
 <template>
-  <div>
-    尾随分析
+  <div class="tail_analysis">
+    <div class="breadcrumb_heaer">
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>尾随分析</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <div class="content_box">
+      <div class="left">
+        <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
+          <el-form-item prop="plateNo">
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @change="handlePlateNo"></el-input>
+          </el-form-item>
+          <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
+            <el-date-picker
+              v-model="searchForm.shotTime"
+              type="datetime"
+              :clearable="false"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              style="width: 100%"
+              @change="handleStartTime"
+              :picker-options="pickerStart"
+              placeholder="开始时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="结束" label-width="20px" class="date_time" prop="dateEnd">
+            <el-date-picker
+              v-model="searchForm.dateEnd"
+              style="width: 100%"
+              :clearable="false"
+              @change="handleEndTime"
+              :picker-options="pickerEnd"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              type="datetime"
+              placeholder="结束时间"
+              >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item prop="deviceCode">
+            <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode">
+              <el-option label="区域一" value="shanghai"></el-option>
+              <el-option label="区域二" value="beijing"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="vehicleClass">
+            <el-select placeholder="请选择尾随车辆类型" style="width: 100%" v-model="searchForm.vehicleClass" multiple clearable>
+              <el-option
+                v-for="(item, index) in vehicleTypeList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.enumField"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="interval">
+            <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="searchForm.interval">
+              <el-option
+                v-for="(item, index) in intervalList"
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
+            <el-button class="select_btn" @click="searchData('searchForm')">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="right">
+        <div class="content_top">
+          <p>
+            <span>查询结果</span>
+            <span>（{{dataList.length}}）</span>
+          </p>
+          <el-button class="select_btn">导出</el-button>
+        </div>
+        <div class="result_detail">
+          <ul class="clearfix">
+            <li v-for="(item, index) in dataList" :key="index">
+              <div class="de_left">
+                <img :src="item.subStoragePath" alt="">
+              </div>
+              <div class="de_right">
+                <span class="title">查询资料</span>
+                <p>
+                  <span>
+                    <i class="vl_icon_tail_2 vl_icon"></i>
+                    {{item.plateNo}}
+                  </span>
+                  <span class="vehicle_type">{{item.vehicleClass}}</span>
+                </p>
+                <p>
+                  <i class="vl_icon_tail_1 vl_icon"></i>
+                  <span>{{item.shotTime}}</span>
+                </p>
+                <div class="record_btn" @click="skipWsReocrdPage">尾随记录</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
+import { checkPlateNumber } from '@/utils/validator.js';
+import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 export default {
   data () {
+    const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      searchForm: {
+        plateNo: null, // 车牌号码
+        deviceCode: null, // 起点设备编号
+        shotTime: new Date(startTime), // 开始时间
+        dateEnd: new Date(), // 结束时间
+        vehicleClass: [], // 车辆类型
+        interval: 3 // 尾随间隔
+      },
+      intervalList: [
+        { label: '1分钟', value: 1 },
+        { label: '2分钟', value: 2 },
+        { label: '3分钟', value: 3 },
+        { label: '5分钟', value: 5 },
+        { label: '10分钟', value: 10 }
+      ],
+      rules: {
+        plateNo: [
+          { validator: checkPlateNumber, trigger: 'blur' }
+        ]
+      },
+      pickerStart: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
+      pickerEnd: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
+      deviceList: [], // 抓拍设备列表
+      vehicleTypeList: [], // 车辆类型列表
+      dataList: [
+        {
+          plateNo: '湘A12345',
+          vehicleClass: '货车',
+          subStoragePath: null,
+          shotTime: '2018-12-31: 13:45:23'
+        },
+        {
+          plateNo: '湘A12345',
+          vehicleClass: '面包车',
+          subStoragePath: null,
+          shotTime: '2018-12-31: 13:45:23'
+        },
+        {
+          plateNo: '湘A12345',
+          vehicleClass: '货车',
+          subStoragePath: null,
+          shotTime: '2018-12-31: 13:45:23'
+        },
+        {
+          plateNo: '湘A12345',
+          vehicleClass: '货车',
+          subStoragePath: null,
+          shotTime: '2018-12-31: 13:45:23'
+        }
+      ], // 查询的抓拍结果列表
     }
   },
+  created () {
+    this.getVehicleTypeList();
+  },
   methods: {
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.vehicleTypeList = res.data;
+          }
+        })
+    },
+    // 车牌号码change
+    handlePlateNo (val) {
+      if (val && this.searchForm.startTime && this.searchForm.endTime) {
+        this.getDeviceList();
+      }
+    },
+    // 开始时间change
+    handleStartTime (val) {
+      if (val) {
+        this.pickerEnd.disabledDate = function (time) {
+          return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
+        }
+        if (this.searchForm.plateNo && this.searchForm.endTime) {
+          this.getDeviceList();
+        }
+      }
+    },
+    // 结束时间change
+    handleEndTime (val) {
+      if (val) {
+        this.pickerStart.disabledDate = function (time) {
+          return time.getTime() > new Date(val).getTime();
+        }
+        if (this.searchForm.startTime && this.searchForm.plateNo) {
+          this.getDeviceList();
+        }
+      }
+    },
+    // 获取抓拍设备列表
+    getDeviceList () {
+      const shotTime = this.searchForm.shotTime + '_' + this.searchForm.dateEnd;
+      const params = {
+        plateNo: this.searchForm.plateNo,
+        shotTime: shotTime
+      };
+      // getShotDevice(params)
+      //   .then(res => {
+      //     if (res) {
+      //       this.deviceList = res.data;
+      //     }
+      //   })
+    },
+    // 跳至尾随记录页面
+    skipWsReocrdPage () {
+      this.$router.push({name: 'ws_record'});
+    },
+    // 重置查询条件
+    resetData (form) {
+      this.$refs[form].resetFields();
+    },
+    // 搜索数据
+    searchData (form) {
+      this.$refs[form].validate(valid => {
+        if (valid) {
+          const vehicleType = this.searchForm.vehicleClass.join(':');
+          const params = {
+            deviceCode: this.searchForm.deviceCode,
+            shotTime: this.searchForm.shotTime,
+            plateNo: this.searchForm.plateNo,
+            dateEnd: this.searchForm.dateEnd,
+            vehicleClass: vehicleType,
+            interval: this.searchForm.interval
+          };
+          console.log(params)
+          // getTailBehindList(params)
+          //   .then(res => {
+          //     if (res) {
+          //       this.dataList = res.data;
+          //     }
+          //   })
+        }
+      });
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
+.tail_analysis {
+  height: 100%;
+  .breadcrumb_heaer {
+    background-color: #ffffff;
+    border-bottom:1px solid #D3D3D3;
+  }
+  .content_box {
+    width: 100%;
+    height: calc(100% - 55px);
+    display: flex;
+    .left {
+      width: 272px;
+      height: 100%;
+      background-color: #ffffff;
+      box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
+      .left_form {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 12px !important;
+        /deep/ .el-form-item {
+          margin-bottom: 20px;
+        }
+        .date_time {
+          /deep/ .el-form-item__label {
+            line-height: 20px;
+            color: #999999;
+          }
+        }
+      }
+    }
+    .right {
+      width: calc(100% - 272px);
+      padding: 10px 15px;
+      .content_top {
+        display: flex;
+        justify-content: space-between;
+        >p {
+          span:first-child {
+            color: #333333;
+          }
+          span:last-child {
+            color: #666666;
+          }
+        }
+      }
+      .result_detail {
+        width: 100%;
+        >ul {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          margin-top: 15px;
+          >li {
+            background-color: #ffffff;
+            height: 180px;
+            width: 375px;
+            max-width: 32%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            margin-right: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0px 5px 16px 0px #A9A9A9;
+            .de_left {
+              width: 50%;
+              img {
+                width: 140px;
+                height: 140px;
+              }
+            }
+            .de_right {
+              width: 50%;
+              line-height: 30px;
+              .title {
+                color: #999999;
+              }
+              > p {
+                // width:186px;
+                // height:26px;
+                margin-bottom: 10px;
+                padding-left: 5px;
+                background:rgba(250,250,250,1);
+                border:1px solid rgba(242,242,242,1);
+                border-radius:3px;
+                color: #333333;
+                font-size: 12px;
+                i {
+                  margin-right: 5px;
+                }
+                .vehicle_type {
+                  margin-left: 10px;
+                }
+              }
+              .record_btn {
+                width:80px;
+                height:30px;
+                background:rgba(246,248,249,1);
+                border:1px solid rgba(211,211,211,1);
+                border-radius:4px;
+                text-align: center;
+                cursor: pointer;
+                &:hover {
+                  background-color: #ffffff;
+                  color: #0C70F8;
+                  border-color: #0C70F8;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .reset_btn {
+    width: 110px;
+    background-color: #D3D3D3;
+    color: #666666;
+    border-radius: 4px;
+    &:hover {
+      background-color: #ffffff;
+      color: #0C70F8;
+      border-color: #0C70F8;
+    }
+  }
+  .select_btn {
+    width: 110px;
+    background-color: #0C70F8;
+    color: #ffffff;
+    border-radius: 4px;
+  }
+}
 </style>

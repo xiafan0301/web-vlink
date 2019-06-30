@@ -1,9 +1,12 @@
 <template>
   <div class="ljd point">
-    <ul class="menu">
-      <li>侦查</li>
-      <li>>落脚点分析</li>
-    </ul>
+    <div class="breadcrumb_heaer">
+        <el-breadcrumb separator=">">
+          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+          <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
@@ -330,15 +333,9 @@ export default {
   width: 100%;
   height: 100%;
 }
-.menu {
+.breadcrumb_heaer {
   background: #ffffff;
-  height: 40px;
-  padding: 0px 10px;
-  li {
-    float: left;
-    line-height: 40px;
-    font-size: 14px;
-  }
+  
 }
 .full {
   width: 100%;
@@ -348,17 +345,17 @@ export default {
 }
 .right.hide {
   width: calc(100% - 272px);
-  height: calc(100% - 40px);
+  height: calc(100% - 54px);
   float: right;
 }
 .right {
   width: 100%;
-  height: calc(100% - 40px);
+  height: calc(100% - 54px);
   float: right;
 }
 .reselt {
   width: 272px;
-  height: calc(100% - 40px);
+  height: calc(100% - 54px);
   background-color: #ffffff;
   position: absolute;
   left: 275px;
@@ -373,22 +370,24 @@ export default {
   }
 }
 .left.hide {
-  left: -272px;
-  transition: left 0.3s ease-in;
+  margin-left: -272px;
+  transition: marginLeft 0.3s ease-in;
+  position: relative;
+    z-index: 2;
   // animation: fadeOutLeft 0.4s ease-out 0.3s both;
 }
 .left {
+  position: relative;
   width: 272px;
-  height: calc(100% - 40px);
+  height: calc(100% - 54px);
   background-color: #ffffff;
-  position: absolute;
-  top: 40px;
-  left: 0;
+  float: left;
   z-index: 1;
+  margin-left: 0px;
   box-shadow: 4px 0px 10px 0px #838383;
   box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
   animation: fadeInLeft 0.4s ease-out 0.3s both;
-  transition: left 0.3s ease-in;
+  transition: marginLeft 0.3s ease-in;
   .plane {
     padding: 10px;
     position: relative;

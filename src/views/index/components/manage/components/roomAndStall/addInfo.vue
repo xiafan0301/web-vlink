@@ -72,7 +72,17 @@
                   >
                   </el-option>
               </el-select>
-              <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="addRoom.address" @input="changeAddress"></el-input>
+              <el-input 
+                type="text" 
+                style="width: 80%;margin-top:20px;" 
+                :class="[isShowAddressTip ? 'input_address' : '']" 
+                id="inputAddress" 
+                placeholder="请输入详细地址" 
+                v-model="addRoom.address"
+                @input="changeAddress"
+                @blur="handleBlurAddress"
+              ></el-input>
+              <span class="address_tip" v-show="isShowAddressTip">请输入正确的地址</span>
               <div class="map_select" @click="initMap">
                 <i class="vl_icon vl_icon_archives_4"></i>
                 <span>地图选择</span>
@@ -110,6 +120,7 @@ import { addRoomInfo } from '@/views/index/api/api.archives.js';
 export default {
   data () {
     return {
+      isShowAddressTip: false, // 是否显示地址错误提示
       isShowClose: false, // 是否显示关闭地图按钮
       isAddLoading: false, // 添加加载中
       addRoom: {
@@ -245,11 +256,39 @@ export default {
         _this.newMarker.setMap(_this.map);
       }
     },
+    // 事件地址失焦
+    handleBlurAddress () {
+      let _this = this;
+      if (!_this.addRoom.address) {
+        this.isShowAddressTip = false;
+      } else {
+        let placeSearch = new window.AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          // city: '010'
+        });
+        placeSearch.search(_this.addRoom.address, function (status, result) {
+          // 查询成功时，result即对应匹配的POI信息
+          if (status === 'complete' && result.info === 'OK') {
+            _this.isShowAddressTip = false;
+  
+            _this.addRoom.longitude = result.poiList.pois[0].location.lng;
+            _this.addRoom.latitude = result.poiList.pois[0].location.lat;
+          } else {
+            _this.isShowAddressTip = true;
+          }
+        })
+      }
+    },
     // 事件地址change
     changeAddress () {
       let _this = this;
+
+      _this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+
       window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
-        _this.addRoom.eventAddress = e.poi.name;
+        _this.addRoom.address = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
           var geocoder = new window.AMap.Geocoder({});
           geocoder.getLocation(e.poi.name, (status, result) => {
@@ -325,6 +364,7 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
+      console.log('this.$route.query.organObj', this.$route.query.organObj)
       const params = {
         'where.proKey': this.userInfo.proKey,
         'where.organPid': this.$route.query.organObj.uid,
@@ -333,7 +373,11 @@ export default {
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.$route.query.organObj);
+            const data = {
+              uid: this.$route.query.organObj.uid,
+              organName: this.$route.query.organObj.organName
+            };
+            this.departmentList.push(data);
             res.data.list.map(item => {
               this.departmentList.push(item);
             });
@@ -343,6 +387,7 @@ export default {
                 this.addRoom.organName = val.organName;
               } 
             });
+            console.log(this.departmentList)
           }
         })
     },
@@ -409,6 +454,20 @@ export default {
           width: 100%;
           .address_select {
             position: relative;
+            .input_address {
+              border-color: #F56C6C;
+            }
+            .address_tip {
+              position: absolute;
+              display: block;
+              color: #F56C6C;
+              font-size: 12px;
+              line-height: 1;
+              padding-top: 4px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
             .map_select {
               position: absolute;
               right: 0;

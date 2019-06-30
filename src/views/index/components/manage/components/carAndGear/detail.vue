@@ -55,6 +55,10 @@
           <span>{{detailInfo.organName ? detailInfo.organName : '无'}}</span>
         </li>
         <li>
+          <span>运营公司:</span>
+          <span>{{detailInfo.brandName ? detailInfo.brandName : '无'}}</span>
+        </li>
+        <li>
           <span>号牌:</span>
           <span>{{detailInfo.numberType ? detailInfo.numberTypeName : '无'}}</span>
         </li>
@@ -303,10 +307,12 @@ export default {
       vehicleTypeList: [], // 车辆类型
       numberTypeList: [], // 号牌种类
       vehicleColorList: [], // 车身颜色
+      operateCompanyList: [], // 运营公司列表
     }
   },
   mounted () {
     // this.initMap();
+    this.getOperateCompanyList();
     this.getVehicleColor();
     this.getVehicleTypeList();
     this.getNumberTypeList();
@@ -316,6 +322,16 @@ export default {
     }, 500)
   },
   methods: {
+    // 获取运营公司列表
+    getOperateCompanyList () {
+      const operate = dataList.operateCompany;
+      getDiciData(operate)
+        .then(res => {
+          if (res) {
+            this.operateCompanyList = res.data;
+          }
+        })
+    },
     // 获取车身颜色
     getVehicleColor () {
       const color = dataList.vehicleColor;
@@ -380,6 +396,11 @@ export default {
               this.vehicleColorList.map(val => {
                 if (this.detailInfo.vehicleColor == val.enumField) {
                   this.detailInfo.vehicleColorName = val.enumValue;
+                }
+              });
+              this.operateCompanyList.map(val => {
+                if (this.detailInfo.brandNo == val.enumField) {
+                  this.detailInfo.brandName = val.enumValue;
                 }
               });
             }
@@ -469,7 +490,7 @@ export default {
     },
     // 跳至编辑页面
     skipEditPage () {
-      this.$router.push({name: 'car_edit', query: { id: this.detailInfo.uid }});
+      this.$router.push({name: 'car_edit', query: { id: this.detailInfo.uid, organObj: this.$route.query.organObj }});
     },
     // 显示删除弹出框
     showDeleteDialog () {

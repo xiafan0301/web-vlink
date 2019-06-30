@@ -51,7 +51,6 @@ export default {
   padding-left: 90px;
  
 }
-
-} 
+}
 
 </style>

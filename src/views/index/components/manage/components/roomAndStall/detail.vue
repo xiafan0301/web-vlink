@@ -181,7 +181,7 @@ export default {
     },
     // 跳至编辑页面
     skipEditPage () {
-      this.$router.push({name: 'room_edit', query: { id: this.$route.query.id }});
+      this.$router.push({name: 'room_edit', query: { id: this.$route.query.id, organObj: this.$route.query.organObj }});
     },
     // 显示删除弹出框
     showDeleteDialog () {
