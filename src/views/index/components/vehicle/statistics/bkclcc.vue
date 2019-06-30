@@ -28,33 +28,20 @@
           style="width: 100%;"
           v-model="queryForm.devIdData"
           multiple
+          filterable
           popper-class="statistics_select_list"
           @remove-tag="removeSeletedDev"
           @click.native="showChange"
           collapse-tags
           placeholder="请选择卡口">
-          <el-option value="0" label=" "></el-option>
+          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
         </el-select>
-        <div class="search_item" v-show="isShowSelectList">
-          <div class="tab_box">
-            <div @click="changeTab(1)">摄像头</div>
-            <div @click="changeTab(2)">卡口</div>
-          </div>
-          <vue-scroll>
+        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
+          <vue-scroll style="height: 90px;">
             <el-tree
-              v-show="tabIndex === 1"
               :data="data1"
               class="select_tree"
               ref="selectTree1"
-              @check-change="changeSeletedStatus"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-            <el-tree
-              v-show="tabIndex === 2" 
-              :data="data2"
-              class="select_tree"
-              ref="selectTree2"
               @check-change="changeSeletedStatus"
               show-checkbox
               node-key="label">
@@ -175,7 +162,6 @@ export default {
         radio: null
       },
       isShowSelectList: false,
-      tabIndex: 1, // select 下拉 tab 切换下标
       data1: [{
         id: 1,
         label: '一级 1',
@@ -204,34 +190,6 @@ export default {
             label: '二级 3-2'
         }]
       }],
-      data2: [{
-        id: 1,
-        label: '一级 3',
-        children: [{
-            id: 4,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 2,
-        label: '一级 4',
-        children: [{
-            id: 5,
-            label: '二级 2-1'
-        }, {
-            id: 6,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 3,
-        label: '一级 5',
-        children: [{
-            id: 7,
-            label: '二级 3-1'
-        }, {
-            id: 8,
-            label: '二级 3-2'
-        }]
-      }],
       provinceList: [],
       loading: false,
       bkclccList: [{name: 'xxxxxxx'}],
@@ -241,39 +199,35 @@ export default {
     }
   },
   methods: {
+    // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
     },
-    changeTab (tabIndex) {
-      this.tabIndex = tabIndex;
-      // this.cameraData = this.tabIndex === 1 ? this.data1 : this.data2;
-    },
+    // 移除已选择的下拉列表项
     removeSeletedDev (data) {
-      console.log(data, 'removeSeletedDev')
       this.$refs.selectTree1.setChecked(data, false);
     },
-    changeSeletedStatus (data, isSelNode1, isSelNode2) {
-      console.log(data, isSelNode1, isSelNode2, 'changeSeletedStatus');
-      setTimeout(() => {
-        if (!isSelNode1) {
-          if (data.children) {
-            for (let item of data.children) {
-              this.devIdData = this.devIdData.filter(f => f !== item.label);
-            }
-          } else {
-            this.devIdData = this.devIdData.filter(f => f !== data.label);
-          }
-          return;
-        };
-      })
-      if (!data.children) return;
-      const labelList = data.children.map(m => m.label);
-      setTimeout(() => {
-        for (let f of labelList) {
-          this.devIdData.push(f);
+    // 数组去重
+    unique (array) {
+      let obj = {}, resultArray = [];
+      resultArray = array.reduce((item, next) => {
+        if (!obj[next.id]) {
+          obj[next.id] = true;
+          item.push(next);
         }
-        console.log(this.devIdData, 'this.devIdData')
+        return item;
+      }, []);
+      return resultArray;
+    },
+    // 切换下拉列表的选中状态并关联到select上
+    changeSeletedStatus () {
+      let data = [], obj = null;
+      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
+        data.push(f);
       })
+      data = this.unique(data);
+      data = data.filter(f => !f.children);
+      this.queryForm.devIdData = data;
     },
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
@@ -311,15 +265,8 @@ export default {
       .search_item {
         height: 120px;
         width: 232px;
-        .tab_box{
-          width: 100%;
-          display: flex;
-          > div{
-            width: 50%;
-            text-align: center;
-            border: 1px solid #e6e6e6;
-          }
-        }
+        overflow: hidden;
+        transition: all .3s linear;
         .select_tree {
           border: 1px solid #e4e7ed;
           border-radius: 4px;

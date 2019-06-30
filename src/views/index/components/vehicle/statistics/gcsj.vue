@@ -17,20 +17,20 @@
           @click.native="showChange"
           collapse-tags
           placeholder="请选择设备">
-          <el-option value="0" label=" "></el-option>
+          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
         </el-select>
-        <div class="search_item" v-show="isShowSelectList">
+        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
           <div class="tab_box">
-            <div @click="changeTab(1)">摄像头</div>
-            <div @click="changeTab(2)">卡口</div>
+            <div @click="changeTab(1)" :class="{'active': tabIndex === 1}">摄像头</div>
+            <div @click="changeTab(2)" :class="{'active': tabIndex === 2}">卡口</div>
           </div>
-          <vue-scroll>
+          <vue-scroll style="height: 90px;">
             <el-tree
               v-show="tabIndex === 1"
               :data="data1"
               class="select_tree"
               ref="selectTree1"
-              @check-change="changeSeletedStatus"
+              @check-change="changeSeletedStatus1"
               show-checkbox
               node-key="label">
             </el-tree>
@@ -39,7 +39,7 @@
               :data="data2"
               class="select_tree"
               ref="selectTree2"
-              @check-change="changeSeletedStatus"
+              @check-change="changeSeletedStatus2"
               show-checkbox
               node-key="label">
             </el-tree>
@@ -136,7 +136,10 @@ export default {
         provinceName: null,
         radio: null
       },
+      currentNode: null,
       isShowSelectList: false,
+      selSelectedData1: [],
+      selSelectedData2: [],
       tabIndex: 1, // select 下拉 tab 切换下标
       data1: [{
         id: 1,
@@ -167,30 +170,30 @@ export default {
         }]
       }],
       data2: [{
-        id: 1,
+        id: 9,
         label: '一级 3',
         children: [{
-            id: 4,
+            id: 12,
             label: '二级 1-1'
         }]
         }, {
-        id: 2,
+        id: 10,
         label: '一级 4',
         children: [{
-            id: 5,
+            id: 13,
             label: '二级 2-1'
         }, {
-            id: 6,
+            id: 14,
             label: '二级 2-2'
         }]
         }, {
-        id: 3,
+        id: 11,
         label: '一级 5',
         children: [{
-            id: 7,
+            id: 15,
             label: '二级 3-1'
         }, {
-            id: 8,
+            id: 16,
             label: '二级 3-2'
         }]
       }],
@@ -247,40 +250,59 @@ export default {
     this.drawChart4();
   },
   methods: {
+    // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
     },
+    // 下拉列表的tab切换
     changeTab (tabIndex) {
       this.tabIndex = tabIndex;
-      // this.cameraData = this.tabIndex === 1 ? this.data1 : this.data2;
     },
+    // 移除已选择的下拉列表项
     removeSeletedDev (data) {
-      console.log(data, 'removeSeletedDev')
-      this.$refs.selectTree1.setChecked(data, false);
+      // 判断是否是删除的第一个数中的数据
+      if (this.selSelectedData1.some(s => s.id === data.id)) {
+        this.$refs.selectTree1.setChecked(data, false);
+      // 判断是否是删除的第二个树中的数据  
+      } else if (this.selSelectedData2.some(s => s.id === data.id)) {
+        this.$refs.selectTree2.setChecked(data, false);
+      }
     },
-    changeSeletedStatus (data, isSelNode1, isSelNode2) {
-      console.log(data, isSelNode1, isSelNode2, 'changeSeletedStatus');
-      setTimeout(() => {
-        if (!isSelNode1) {
-          if (data.children) {
-            for (let item of data.children) {
-              this.devIdData = this.devIdData.filter(f => f !== item.label);
-            }
-          } else {
-            this.devIdData = this.devIdData.filter(f => f !== data.label);
-          }
-          return;
-        };
-      })
-      if (!data.children) return;
-      const labelList = data.children.map(m => m.label);
-      setTimeout(() => {
-        for (let f of labelList) {
-          this.devIdData.push(f);
+    // 数组去重
+    unique (array) {
+      let obj = {}, resultArray = [];
+      resultArray = array.reduce((item, next) => {
+        if (!obj[next.id]) {
+          obj[next.id] = true;
+          item.push(next);
         }
-        console.log(this.devIdData, 'this.devIdData')
-      })
+        return item;
+      }, []);
+      return resultArray;
     },
+    // 切换下拉列表的选中状态并关联到select上
+    changeSeletedStatus1 () {
+      let data = [], obj = null;
+      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
+        data.push(f);
+      })
+      data = this.unique(data);
+      data = data.filter(f => !f.children);
+      this.selSelectedData1 = data;
+      this.queryForm.devIdData = [...this.selSelectedData2, ...data];
+    },
+    // 切换下拉列表的选中状态并关联到select上
+    changeSeletedStatus2 () {
+      let data = [], obj = null;
+      this.$refs.selectTree2.getCheckedNodes().forEach(f => {
+        data.push(f);
+      })
+      data = this.unique(data);
+      data = data.filter(f => !f.children);
+      this.selSelectedData2 = data;
+      this.queryForm.devIdData = [...this.selSelectedData1, ...data];
+    },
+   
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
@@ -595,15 +617,25 @@ export default {
         padding-top: 10px; 
       }
       .search_item {
-        height: 120px;
         width: 232px;
+        height: 0;
+        overflow: hidden;
+        transition: all .3s linear;
         .tab_box{
           width: 100%;
+          height: 30px;
           display: flex;
           > div{
             width: 50%;
+            line-height: 30px;
             text-align: center;
-            border: 1px solid #e6e6e6;
+            border:1px solid #D3D3D3;
+            border-radius:3px 0px 0px 3px;
+            cursor: pointer;
+            &:hover, &.active{
+              background:#E0F2FF;
+              color: #0C70F8;
+            }
           }
         }
         .select_tree {
@@ -632,7 +664,7 @@ export default {
     .con_right{
       width: calc(100% - 2.72rem);
       height: 100%;
-      padding: 20px 20px 20px 20px;
+      padding: .2rem .2rem .2rem .25rem;
       background: #F7F9F9;
       .chart_top{
         width: 100%;
@@ -643,7 +675,7 @@ export default {
           margin-left: .2rem;
         }
         > div{
-          width: 25%;
+          width: 24.1%;
           height: 1.1rem;
           box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
           line-height: 1.1rem!important;
