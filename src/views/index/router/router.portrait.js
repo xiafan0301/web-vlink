@@ -15,6 +15,18 @@ export default {
       path: 'indenty',
       name: 'indenty_recog',
       component: () => import('@/views/index/components/portrait/identRecog/indenty.vue')
+    },
+    // 跟踪尾随
+    {
+      path: 'gzws',
+      name: 'gzws_portrait',
+      component: () => import('@/views/index/components/portrait/gzws/gzws.vue')
+    },
+    // 跟踪尾随详情
+    {
+      path: 'detail',
+      name: 'gzws_detail',
+      component: () => import('@/views/index/components/portrait/gzws/detail.vue')
     }
   ]
 }

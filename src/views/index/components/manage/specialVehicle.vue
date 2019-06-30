@@ -95,7 +95,7 @@
                 <div class="title">
                   <p>
                     <span>详细资料</span>
-                    <i v-show="item.origin !== 1" class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('carForm', 'edit', item)"></i>
+                    <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('carForm', 'edit', item)"></i>
                   </p>
                   <el-checkbox class="check_box" v-model="item.isDelete" @change="handleChangeCheckBox(index, item.isDelete)"></el-checkbox>
                 </div>
@@ -109,30 +109,31 @@
                   <span v-show="item.numberColor">{{item.numberColor}}</span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}</span><span v-show="item.ownerIdCard">（{{item.ownerIdCard}}）</span>
+                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}</span><span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span>
                 </div>
                 <div class="info_list">
                   <span v-show="item.desci">{{item.desci && item.desci}}</span>
                 </div>
                 <div class="info_list" v-show="item.groupList && item.groupList.length > 0">
-                  <span v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
-                  <div class="more">
-                    <el-popover
-                      placement="top-start"
-                      width="220"
-                      popper-class="more_popover_box"
-                      trigger="hover">
-                      <vue-scroll>
-                        <template>
-                          <div class="more_popover">
-                            <span :title="val.groupName" v-for="(val, index) in item.groupList" :key="index + val">{{val.groupName}}</span>
-                          </div>
-                        </template>
-                      </vue-scroll>
-                      <span slot="reference" class="more_hover">更多组</span>
-                    </el-popover>
-                  </div>
-                  <!-- <span>更多组</span> -->
+                  <span v-show="index < 2" v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
+                  <template v-if="item.groupList.length > 2">
+                    <div class="more">
+                      <el-popover
+                        placement="top-start"
+                        width="220"
+                        popper-class="more_popover_box"
+                        trigger="hover">
+                        <vue-scroll>
+                          <template>
+                            <div class="more_popover">
+                              <span :title="val.groupName" v-for="(val, index) in item.groupList" :key="index + val">{{val.groupName}}</span>
+                            </div>
+                          </template>
+                        </vue-scroll>
+                        <span slot="reference" class="more_hover">更多组</span>
+                      </el-popover>
+                    </div>
+                  </template>
                 </div>
               </div>
             </li>
@@ -168,12 +169,11 @@
         <div class="left">
           <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
             <el-upload
-              :disabled="isAddDisabled"
+              :disabled="isAddImgDisabled"
               ref="uploadPic"
               accept="image/*"
               :limit="1"
               :action="uploadUrl"
-              :data="{projectType: 2}"
               list-type="picture-card"
               :on-success="uploadPicSuccess"
               :on-preview="handlePictureCardPreview"
@@ -183,7 +183,7 @@
               <i class="vl_icon vl_icon_control_14"></i>
             </el-upload>
           </div>
-          <template v-if="!isAddDisabled">
+          <template v-if="!isAddImgDisabled">
             <h1 class="vl_f_999">点击修改车像</h1>
             <p>请上传车辆图片</p>
           </template>
@@ -364,9 +364,9 @@ export default {
       dialogVisiable: false, // 新建/修改车辆弹出框
       fileList: [],
       dialogImageUrl: null,
-      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       activeId: null, // 当前选中的分组id
-      isAddDisabled: false, // 是否能添加图片
+      isAddImgDisabled: false, // 是否能添加图片
       picHeight: null,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       groupList: [], // 车辆分组
@@ -721,12 +721,13 @@ export default {
                 });
                 this.isVehicleLoading = false;
                 this.dialogVisiable = false;
+                this.isAddDisabled = false;
                 this.getGroupList();
                 this.getVehicleList();
               } else {
                 this.isVehicleLoading = false;
               }
-              this.$refs[form].resetFields();
+              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -756,12 +757,13 @@ export default {
                 });
                 this.isVehicleLoading = false;
                 this.dialogVisiable = false;
+                this.isAddDisabled = false;
                 this.getGroupList();
                 this.getVehicleList();
               } else {
                 this.isVehicleLoading = false;
               }
-              this.$refs[form].resetFields();
+              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -805,7 +807,7 @@ export default {
       this.dialogVisible = true;
     },
     uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
+      this.dialogImageUrl = file.data.fileFullPath;
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
@@ -861,6 +863,11 @@ export default {
       } else {
         this.isAddVehicle = false;
         this.vehicleTitle = '修改';
+        if (obj.origin === 1) { // 底库的基础数据不可修改，只能修改所属组
+          this.isAddDisabled = true;
+        } else {
+          this.isAddDisabled = false;
+        }
         this.getDetail(obj);
       }
       this.dialogVisiable = true;
@@ -1074,15 +1081,24 @@ export default {
             .info_list {
               display: flex;
               flex-wrap: wrap;
-              .more{
-                position: relative;
-                padding-top: 6px;
-                .more_hover{
-                  margin-bottom: 10px;
+              .more {
+                >span {
+                  background-color: #FAFAFA;
+                  color: #333333;
+                  font-size: 12px;
+                  border-radius:3px;
+                  padding: 5px 8px;
+                  overflow: hidden;
+                  text-overflow:ellipsis;
+                  white-space: nowrap;
+                  border: 1px solid #F2F2F2;
+                  display: inline-block;
                   cursor: pointer;
-                  color: #0C70F8;
-                  border: none;
-                  padding: 0;
+                  &:hover {
+                    border-color: #0C70F8;
+                    color: #0C70F8;
+                    background-color: #ffffff;
+                  }
                 }
               }
               >span {
@@ -1207,6 +1223,27 @@ export default {
       font-size: 12px;
       color: #F56C6C;
     }
+  }
+}
+// 重置布控库popover
+.more_popover_box .more_popover{
+  max-height: 240px;
+  display: flex;
+  flex-wrap: wrap;
+  > span{
+    background-color: #FAFAFA;
+    color: #333333;
+    font-size: 12px;
+    border-radius:3px;
+    padding: 5px 8px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    border: 1px solid #F2F2F2;
+    margin-bottom: 10px;
+    margin-right: 5px;
+    display: inline-block;
+    cursor: pointer;
   }
 }
 </style>

@@ -180,7 +180,7 @@ export function getShotDevice(params) {
     url: '/vehicle/shot-dev',
     method: 'get',
     params,
-    mode: 'control'
+    mode: 'judge'
   });
 }
 /**
@@ -192,7 +192,19 @@ export function getTailBehindList(params) {
     url: '/vehicle/tail-behind/list',
     method: 'get',
     params,
-    mode: 'control'
+    mode: 'judge'
+  });
+}
+/**
+ * 查询尾随记录详情接口
+ * @param {object} params
+ */
+export function getTailBehindDetail(params) {
+  return request({
+    url: '/vehicle/tail-behind/detail',
+    method: 'get',
+    params,
+    mode: 'judge'
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/

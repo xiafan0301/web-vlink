@@ -1,57 +1,41 @@
 <template>
-  <div class="ws_record">
-    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws'}, {name: '尾随记录'}]"></Breadcrumb>
+  <div class="gzws_record">
+    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
-        <h2>湘A10987</h2>
+        <h2>尾随人员的库信息</h2>
         <ul>
           <li>
-            <span>归属地：</span>
-            <span>长沙</span>
+            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
           </li>
           <li>
-            <span>中文品牌：</span>
+            <span>姓名：</span>
             <span>雪佛兰科鲁兹</span>
           </li>
           <li>
-            <span>车身颜色：</span>
+            <span>性别：</span>
             <span>红色</span>
-          </li>
-          <li>
-            <span>机动车状态：</span>
-            <span>正常</span>
-          </li>
-          <li>
-            <span>所有人：</span>
-            <span>你猜咯</span>
           </li>
           <li>
             <span>身份证号：</span>
             <span>430322199709831112</span>
           </li>
           <li>
-            <span>核定载客：</span>
-            <span>123人</span>
+            <span>布控组：</span>
+            <span>你猜咯</span>
           </li>
           <li>
-            <span>有效期：</span>
-            <span>2020-12-12</span>
-          </li>
-          <li>
-            <span>车辆登记照片：</span>
-            <span>
-              <img src="../../../../../../assets/img/temp/vis-eg.png" alt="">
-            </span>
+            <span>身份证号：</span>
+            <span>430322199709831112</span>
           </li>
         </ul>
       </div>
       <div class="right">
         <div class="operation_box">
-          <p>查看违章记录</p>
-          <p>车辆布控</p>
-          <p>轨迹分析</p>
+          <p>人员布控</p>
+          <p>人脸检索</p>
+          <p>轨迹碰撞</p>
           <p>落脚点分析</p>
-          <p>一车搜车</p>
         </div>
         <div id="rightMap"></div>
       </div>
@@ -74,8 +58,8 @@
 </template>
 <script>
 // import { testData } from './testData.js';
-import Breadcrumb from '../../breadcrumb.vue';
-import { getTailBehindDetail } from '@/views/index/api/api.judge.js'
+import { getTailBehindDetail } from '@/views/index/api/api.judge.js';
+import Breadcrumb from '../breadcrumb.vue';
 export default {
   components: { Breadcrumb },
   data () {
@@ -91,9 +75,9 @@ export default {
   },
   mounted () {
     this.initMap();
-    setTimeout(() => {
-      this.getDetail();
-    }, 500)
+    // setTimeout(() => {
+    //   this.getDetail();
+    // }, 500)
   },
   methods: {
     // 获取尾随车辆详情
@@ -315,12 +299,13 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-.ws_record {
+.gzws_record {
   height: 100%;
   .content_box {
     display: flex;
     height: 100%;
     padding-top: 50px;
+    // height: calc(100% - 55px);
     .left {
       width: 272px;
       background-color: #ffffff;
@@ -335,17 +320,15 @@ export default {
         margin-top: 15px;
         >li {
           line-height: 30px;
+          > img {
+            width: 160px;
+            height: 160px;
+          }
           span:first-child {
             color: #666666;
           }
           span:last-child {
             color: #222222;
-            img {
-              width:60px;
-              height:60px;
-              border-radius:2px;
-              vertical-align: text-top;
-            }
           }
         }
       }
@@ -359,7 +342,7 @@ export default {
         top: 0;
         left: 0;
         position: absolute;
-        height: 60px;
+        height: 50px;
         box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
         background-color: #ffffff;
         display: flex;
