@@ -34,3 +34,28 @@ export const apiAreaList = (data) => {
     mode: baseModeName
   })
 }
+
+/**
+ * getAllMonitorList 通过行政编码所有监控设备列表   
+ * @param {object} params
+ */
+export function getAllMonitorList(params) {
+  return request({
+    url: '/device-service/all-monitor-list',
+    method: 'get',
+    params,
+    mode: baseModeName
+  })
+}
+/**
+ * getAllMonitorList 通过行政编码所有监控设备列表   
+ * @param {object} params
+ */
+export function getAllBayonetList(params) {
+  return request({
+    url: '/bayonet-service/areaId',
+    method: 'get',
+    params,
+    mode: baseModeName
+  })
+}

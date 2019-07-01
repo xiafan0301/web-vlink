@@ -147,7 +147,7 @@ export default {
         childList: []
       }, // 当前被放大播放的video
       curSXT: {}, // 当前显示摄像头数据
-      showVideoList: false,
+      showVideoList: true,
       rightSex: null,
       rightMinZ: null,
       sexList: [

@@ -1,12 +1,12 @@
 <template>
   <div class="ljd point">
     <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
-        </el-breadcrumb>
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
-    
+
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
@@ -53,27 +53,40 @@
           <el-form-item label="区域：" label-width="60px">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
+              <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio label="1">列表选择</el-radio>
                 </el-col>
-                <el-col :span="12" >
-                  <div @click="clickTab"><el-radio label="2">地图选择</el-radio></div>
-                  
+                <el-col :span="12">
+                  <div @click="clickTab">
+                    <el-radio label="2">地图选择</el-radio>
+                  </div>
                 </el-col>
               </el-row>
-              
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple class="full" placeholder="请选择">
+            <!-- <el-select v-model="value1" multiple class="full" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
               ></el-option>
-            </el-select>
+            </el-select> --> 
+            <el-select v-model="value1" multiple collapse-tags placeholder="请选择">
+            <el-option-group
+              v-for="group in options"
+              :key="group.areaName"
+              :label="group.areaName">
+              <el-option
+                v-for="item in group.areaTreeList"
+                :key="item.areaId"
+                :label="item.areaName"
+                :value="item.areaId">
+              </el-option>
+            </el-option-group>
+          </el-select>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -117,6 +130,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import { JfoGETSurveillanceObject } from "@/views/index/api/api.judge.js";
+import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapselect from "@/views/index/components/common/mapSelect";
 export default {
   components: {
@@ -158,32 +172,10 @@ export default {
           address: "上海市普陀区金沙江路 1516 弄"
         }
       ],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
-      ],
+       options: [],
       evData: []
     };
   },
-
   mounted() {
     //this.getControlMap(1);
     let map = new window.AMap.Map("mapBox", {
@@ -192,6 +184,7 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    this.getMapGETmonitorList()//查询行政区域
   },
   methods: {
     hideResult() {
@@ -204,12 +197,10 @@ export default {
         this.reselt = true;
       }
     },
-    clickTab(){
-      if(!this.dialogVisible){
-        this.dialogVisible=true
+    clickTab() {
+      if (!this.dialogVisible) {
+        this.dialogVisible = true;
       }
-      
-      
     },
     changeTab(v) {
       //console.log(v);
@@ -226,6 +217,19 @@ export default {
         dateEnd: "2019-6-25",
         type: 1
       });
+    },
+    //查询行政区域
+    getMapGETmonitorList(){
+      let d={
+        areaUid:mapXupuxian.adcode
+      }
+      MapGETmonitorList(d).then(res=>{
+        if(res && res.data){
+          
+          
+          this.options.push(res.data)
+        }
+      })
     },
     JfoGETSurveillanceObject(d) {
       JfoGETSurveillanceObject(d).then(res => {
@@ -335,7 +339,6 @@ export default {
 }
 .breadcrumb_heaer {
   background: #ffffff;
-  
 }
 .full {
   width: 100%;
@@ -373,7 +376,7 @@ export default {
   margin-left: -272px;
   transition: marginLeft 0.3s ease-in;
   position: relative;
-    z-index: 2;
+  z-index: 2;
   // animation: fadeOutLeft 0.4s ease-out 0.3s both;
 }
 .left {
@@ -491,16 +494,15 @@ export default {
     }
   }
 }
-.ljd{
-  .el-dialog__wrapper .el-dialog__body{
-  padding: 0px;
+.ljd {
+  .el-dialog__wrapper .el-dialog__body {
+    padding: 0px;
+  }
+  .el-dialog__header {
+    padding: 0px 20px 3px;
+  }
+  .el-dialog__headerbtn {
+    z-index: 1;
+  }
 }
-.el-dialog__header{
-  padding: 0px 20px 3px;
-}
-.el-dialog__headerbtn{
-  z-index: 1;
-}
-}
-
 </style>

@@ -6,11 +6,13 @@
         <div class="gcck_s">
           <el-form :inline="true" :model="formInline" ref="formInline" class="dl_hi_sf" size="small">
             <el-form-item>
-              <el-date-picker
+              <el-date-picker style="width: 250px;"
                 v-model="formInline.time"
                 type="daterange"
                 align="left"
                 unlink-panels
+                :editable="false"
+                :clearable="false"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期">
@@ -27,12 +29,12 @@
                 <el-option v-for="(item, index) in lxList" :label="item.name" :key="'user-list-' + index" :value="item.uid"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-checkbox v-model="formInline.no">非</el-checkbox>
+            <el-form-item style="margin-right: 2px;">
+              <el-checkbox class="gcck_ck_f" v-model="formInline.no">非</el-checkbox>
             </el-form-item>
             <el-form-item>
-              <el-input placeholder="请输入车牌" v-model="formInline.cp">
-                <el-select v-model="formInline.cpp" slot="prepend" placeholder="">
+              <el-input placeholder="请输入车牌" style="width: 200px;" v-model="formInline.cp">
+                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="">
                   <el-option label="湘" value="1"></el-option>
                   <el-option label="京" value="2"></el-option>
                   <el-option label="沪" value="3"></el-option>
@@ -173,5 +175,12 @@ export default {
     }
   }
   &.gcck_ll_hide { display: none; }
+}
+</style>
+<style lang="scss">
+.gcck_ck_f {
+  padding-left: 5px;
+  color: #000;
+  .el-checkbox__label { padding-left: 1px; }
 }
 </style>
