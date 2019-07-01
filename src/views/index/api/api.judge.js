@@ -208,3 +208,18 @@ export function getTailBehindDetail(params) {
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+/*--------------------------  人脸检索--身份核实start  ---------------------------------*/
+/**
+ * 查询身份核实列表接口
+ * @param {object} params
+ */
+export function getIdNoList(params) {
+  return request({
+    url: '/portrait/identify',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  人脸检索--身份核实send  ---------------------------------*/

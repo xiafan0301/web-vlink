@@ -785,6 +785,10 @@
   top: 50%;
   left: 50%;
 }
+.left_error_tip {
+  top: 300px !important;
+  left: 130px;
+}
 /*部门管理--删除部门的提示样式*/
 .delete_depart {
   top: 350px;

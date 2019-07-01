@@ -15,8 +15,10 @@
               @click="showGroupDeviceInfo(item.id)"
             >
               <span>{{item.name}}  ({{item.portraitNum}})</span>
-              <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.id)"></i>
-              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showOperateGroupDialog('edit', item)"></i>
+              <template v-if="!item.isDefault">
+                <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.id)"></i>
+                <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showOperateGroupDialog('edit', item)"></i>
+              </template>
             </li>
           </ul>
         </vue-scroll>
@@ -109,17 +111,18 @@
                   <span v-show="item.numberColor">{{item.numberColor}}</span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}</span><span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span>
+                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
+                  <!-- <span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span> -->
                 </div>
                 <div class="info_list">
-                  <span v-show="item.desci">{{item.desci && item.desci}}</span>
+                  <span v-show="item.desci" :title="item.desci">{{item.desci && item.desci}}</span>
                 </div>
-                <div class="info_list" v-show="item.groupList && item.groupList.length > 0">
+                <div class="info_list group_list" v-show="item.groupList && item.groupList.length > 0">
                   <span v-show="index < 2" v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
                   <template v-if="item.groupList.length > 2">
                     <div class="more">
                       <el-popover
-                        placement="top-start"
+                        placement="left-start"
                         width="220"
                         popper-class="more_popover_box"
                         trigger="hover">
@@ -247,8 +250,8 @@
               <el-form-item prop="ownerName">
                 <el-input v-model="carForm.ownerName" placeholder="车主姓名" style="width: 85%;" :disabled="isAddDisabled"></el-input>
               </el-form-item>
-              <el-form-item prop="idType">
-                <el-select v-model="carForm.idType" placeholder="证件类型" style="width: 85%;" :disabled="isAddDisabled">
+              <el-form-item prop="ownerIdType">
+                <el-select v-model="carForm.ownerIdType" placeholder="证件类型" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="item in cardTypeList"
                     :key="item.value"
@@ -368,11 +371,11 @@ export default {
       activeId: null, // 当前选中的分组id
       isAddImgDisabled: false, // 是否能添加图片
       picHeight: null,
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      pagination: { total: 0, pageSize: 4, pageNum: 1 },
       groupList: [], // 车辆分组
       //证件类型列表数据
       cardTypeList: [
-        {label: '身份证', value: '1'}
+        {label: '身份证', value: 1}
       ],
       searchForm: {
         dateTime: [],
@@ -386,10 +389,12 @@ export default {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
         vehicleColor: null, // 车身颜色
+        vehicleBrand: null, // 车辆品牌
         vehicleType: null, // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
+        ownerIdType: null, // 证件类型
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
@@ -515,6 +520,7 @@ export default {
         'where.vehicleNumber': this.searchForm.vehicleNo,
         'where.groupId': this.activeId,
         pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
       };
       getSpecialVehicleList(params)
         .then(res => {
@@ -709,6 +715,14 @@ export default {
             })
             return;
           }
+          if (this.carForm.groupList.length === 0) {
+            this.$message({
+              type: 'error',
+              message: '请先选择所属组',
+              customClass: 'request_tip'
+            })
+            return;
+          }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
           this.isVehicleLoading = true;
           addSpecialVehicle(this.carForm)
@@ -741,6 +755,14 @@ export default {
             this.$message({
               type: 'error',
               message: '请先上传车辆照片',
+              customClass: 'request_tip'
+            })
+            return;
+          }
+          if (this.carForm.groupList.length === 0) {
+            this.$message({
+              type: 'error',
+              message: '请先选择所属组',
               customClass: 'request_tip'
             })
             return;
@@ -889,7 +911,7 @@ export default {
               this.carForm.desci = res.data.desci;
               this.carForm.ownerName = res.data.ownerName;
               this.carForm.ownerIdCard = res.data.ownerIdCard;
-              // this.carForm.groupList = obj.groupList;
+              this.carForm.ownerIdType = res.data.ownerIdType;
       
               if (res.data.groupList.length > 0) {
                 res.data.groupList.map(item => {
@@ -1114,6 +1136,11 @@ export default {
                 text-overflow:ellipsis;
                 white-space: nowrap;
                 border: 1px solid #F2F2F2;
+              }
+            }
+            .group_list {
+              >span {
+                max-width: 80px;
               }
             }
           }

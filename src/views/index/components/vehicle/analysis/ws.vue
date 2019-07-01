@@ -16,9 +16,9 @@
           <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
             <el-date-picker
               v-model="searchForm.shotTime"
-              type="date"
+              type="datetime"
               :clearable="false"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 100%"
               @blur="handleStartTime"
               :picker-options="pickerStart"
@@ -32,8 +32,8 @@
               :clearable="false"
               @blur="handleEndTime"
               :picker-options="pickerEnd"
-              value-format="yyyy-MM-dd"
-              type="date"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              type="datetime"
               placeholder="结束时间"
               >
             </el-date-picker>
@@ -124,7 +124,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDateTime } from '@/utils/util.js';
+import { formatDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -211,7 +211,7 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatDateTime(this.searchForm.shotTime) + '_' + formatDateTime(this.searchForm.dateEnd);
+      const shotTime = formatDate(this.searchForm.shotTime) + '-》' + formatDate(this.searchForm.dateEnd);
       const params = {
         plateNo: this.searchForm.plateNo,
         shotTime: shotTime

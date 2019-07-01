@@ -3,7 +3,7 @@
     <div class="event-ctc-detail">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件处理</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.eventId, status: $route.query.evt_status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>查看调度指挥</el-breadcrumb-item>
         </el-breadcrumb>

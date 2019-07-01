@@ -11,7 +11,7 @@
       <router-link :to="{name: 'indenty_recog'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_102"></span>
-        <span class="ptt_li_text">身份识别</span>
+        <span class="ptt_li_text">身份核实</span>
       </router-link>
     </li>
     <li>

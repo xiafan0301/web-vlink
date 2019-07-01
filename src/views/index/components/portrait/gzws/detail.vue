@@ -24,10 +24,6 @@
             <span>布控组：</span>
             <span>你猜咯</span>
           </li>
-          <li>
-            <span>身份证号：</span>
-            <span>430322199709831112</span>
-          </li>
         </ul>
       </div>
       <div class="right">
