@@ -61,8 +61,8 @@
           <el-input v-model="queryForm.provinceName"></el-input>
         </div>
         <div class="left_btn">
-          <el-button class="reset_btn">重置</el-button>
-          <el-button class="select_btn">统计</el-button>
+          <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
+          <el-button class="select_btn" @click="getControlCarSta">统计</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -235,6 +235,21 @@ export default {
     handleCurrentChange (page) {
       
     },
+    // 重置表单
+    resetQueryForm () {
+      this.queryForm = {
+        startTime: null,
+        endTime: null,
+        devIdData: [],
+        provinceId: null,
+        provinceName: null,
+        radio: null
+      };
+    },
+    // 获取布控车辆出城统计
+    getControlCarSta () {
+
+    }
   }
 }
 </script>

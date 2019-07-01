@@ -62,60 +62,76 @@
           </el-date-picker>
         </div>
         <div class="left_btn">
-          <el-button class="reset_btn">重置</el-button>
-          <el-button class="select_btn">查询</el-button>
+          <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
+          <el-button class="select_btn" @click="getCarBeforeSta">查询</el-button>
         </div>
       </div>
       <div class="con_right">
-        <div class="chart_top">
-          <div>
+        <ul class="chart_top">
+          <li>
             <div>
-              <i class="el-icon-camera-solid"></i>
-              <span>设备数</span>
+              <div>
+                <i class="vl_icon vl_icon_vehicle_gcsj_01"></i>
+                <span>设备数</span>
+              </div>
+              <span>19个</span>
             </div>
-            <span>19个</span>
-          </div>
-          <div>
+          </li>
+          <li>
             <div>
-              <i class="el-icon-camera-solid"></i>
-              <span>过车总数</span>
+              <div>
+                <i class="vl_icon vl_icon_vehicle_gcsj_02"></i>
+                <span>过车总数</span>
+              </div>
+              <span>19万次</span>
             </div>
-            <span>19万次</span>
-          </div>
-          <div>
+          </li>
+          <li>
             <div>
-              <i class="el-icon-camera-solid"></i>
-              <span>车辆总数</span>
+              <div>
+                <i class="vl_icon vl_icon_vehicle_gcsj_03"></i>
+                <span>车辆总数</span>
+              </div>
+              <span>19辆</span>
             </div>
-            <span>19辆</span>
-          </div>
-          <div>
+          </li>
+          <li>
             <div>
-              <i class="el-icon-camera-solid"></i>
-              <span>外地车数</span>
+              <div>
+                <i class="vl_icon vl_icon_vehicle_gcsj_04"></i>
+                <span>外地车数</span>
+              </div>
+              <span>19辆</span>
             </div>
-            <span>19辆</span>
-          </div>
-        </div>
+          </li>
+        </ul>
         <div class="chart_bottom">
-          <div class="chart_item">
-            <h1>设备过车数（Top5）</h1>
-            <p>数量（万次）</p>
-            <div id="chartContainer1"></div>
+          <div>
+            <div class="chart_item">
+              <h1>设备过车数（Top5）</h1>
+              <p>数量（万次）</p>
+              <div id="chartContainer1"></div>
+            </div>
           </div>
-          <div class="chart_item">
-            <h1>车辆的品牌排名（Top5）</h1>
-            <div id="chartContainer2"></div>
+          <div>
+            <div class="chart_item">
+              <h1>车辆的品牌排名（Top5）</h1>
+              <div id="chartContainer2"></div>
+            </div>
           </div>
-          <div class="chart_item">
-            <h1>各时间段的车数</h1>
-            <p>设备数量（辆）</p>
-            <div id="chartContainer3"></div>
+          <div>
+            <div class="chart_item">
+              <h1>各时间段的车数</h1>
+              <p>设备数量（辆）</p>
+              <div id="chartContainer3"></div>
+            </div>
           </div>
-          <div class="chart_item">
-            <h1>各车辆类型过车情况</h1>
-            <p>数量（辆）</p>
-            <div id="chartContainer4"></div>
+          <div>
+            <div class="chart_item">
+              <h1>各车辆类型过车情况</h1>
+              <p>数量（辆）</p>
+              <div id="chartContainer4"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -131,10 +147,7 @@ export default {
       queryForm: {
         startTime: null,
         endTime: null,
-        devIdData: [],
-        provinceId: null,
-        provinceName: null,
-        radio: null
+        devIdData: []
       },
       currentNode: null,
       isShowSelectList: false,
@@ -240,7 +253,14 @@ export default {
         { carType: '面包车', count: 5252, count1: 1 },
         { carType: '摩托车', count: 4525, count1: 1 },
         { carType: '轿车', count: 1235, count1: 1 }
-      ]
+      ],
+      // 保存生成的图表用来删除
+      charts: {
+        chart1: null,
+        chart2: null,
+        chart3: null,
+        chart4: null  
+      }
     }
   },
   mounted () {
@@ -302,7 +322,6 @@ export default {
       this.selSelectedData2 = data;
       this.queryForm.devIdData = [...this.selSelectedData1, ...data];
     },
-   
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
@@ -311,14 +330,20 @@ export default {
     },
     // 画图表
     drawChart1 () {
-      let temp = document.getElementById('chartContainer1');
-      let chart = new G2.Chart({
-        container: 'chartContainer1',
-        forceFit: true,
-        padding: [ 20, 0, 25, 25 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let chart = null;
+      if (this.charts.chart1) {
+        this.charts.chart1.clear();
+        chart = this.charts.chart1;
+      } else {
+        let temp = document.getElementById('chartContainer1');
+        chart = new G2.Chart({
+          container: 'chartContainer1',
+          forceFit: true,
+          padding: [ 20, 0, 25, 25 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData1);
       dv.transform({
         type: 'fold',
@@ -389,17 +414,23 @@ export default {
         },
       });
       chart.render();
+      this.charts.chart1 = chart;
     },
     drawChart2 () {
-      let _this = this;
-      let temp = document.getElementById('chartContainer2');
-      let chart = new G2.Chart({
-        container: 'chartContainer2',
-        forceFit: true,
-        padding: [ 20, 0, 20, 0 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let _this = this, chart = null;
+      if (this.charts.chart2) {
+        this.charts.chart2.clear();
+        chart = this.charts.chart2;
+      } else {
+        let temp = document.getElementById('chartContainer2');
+        chart = new G2.Chart({
+          container: 'chartContainer2',
+          forceFit: true,
+          padding: [ 20, 0, 20, 0 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData2);
       dv.transform({
         type: 'percent',
@@ -465,17 +496,23 @@ export default {
         }
       });
       chart.render();
+      this.charts.chart2 = chart;
     },
     drawChart3 () {
-      let _this = this;
-      let temp = document.getElementById('chartContainer3');
-      let chart = new G2.Chart({
-        container: 'chartContainer3',
-        forceFit: true,
-        padding: [ 20, 24, 80, 60 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let _this = this, chart = null;
+      if (this.charts.chart3) {
+        this.charts.chart3.clear();
+        chart = this.charts.chart3;
+      } else {
+        let temp = document.getElementById('chartContainer3');
+        chart = new G2.Chart({
+          container: 'chartContainer3',
+          forceFit: true,
+          padding: [ 20, 24, 80, 60 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData3);
       dv.transform({
         type: 'fold',
@@ -520,16 +557,23 @@ export default {
       chart.line().position('time*value').color('type', [ '#00C4FC']).size(4).shape('smooth');
       chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
+      this.charts.chart3 = chart;
     },
     drawChart4 () {
-      let temp = document.getElementById('chartContainer4');
-      let chart = new G2.Chart({
-        container: 'chartContainer4',
-        forceFit: true,
-        padding: [ 0, 40, 20, 60 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let chart = null;
+      if (this.charts.chart4) {
+        this.charts.chart4.clear();
+        chart = this.charts.chart4;
+      } else {
+        let temp = document.getElementById('chartContainer4');
+        chart = new G2.Chart({
+          container: 'chartContainer4',
+          forceFit: true,
+          padding: [ 0, 40, 20, 60 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData4);
       dv.transform({
         type: 'fold',
@@ -581,10 +625,23 @@ export default {
         offset: 10
       });
       chart.render();
+      this.charts.chart4 = chart;
     },
     // 转换时间间隔
     transformTime (title) {
       return title.length === 2 ? parseInt(title.slice(0, 1)) - 2 : parseInt(title.slice(0, 2)) - 2;
+    },
+    // 重置表单
+    resetQueryForm () {
+      this.queryForm = {
+        startTime: null,
+        endTime: null,
+        devIdData: []
+      };
+    },
+    // 获取过车数据统计
+    getCarBeforeSta () {
+
     }
   }
 }
@@ -662,95 +719,95 @@ export default {
       }
     }
     .con_right{
-      width: calc(100% - 2.72rem);
+      width: calc(100% - 272px);
       height: 100%;
-      padding: .2rem .2rem .2rem .25rem;
       background: #F7F9F9;
       .chart_top{
         width: 100%;
-        height: 1.3rem;
-        padding-bottom: .2rem;
         display: flex;
-        > div:not(:nth-child(1)){
-          margin-left: .2rem;
-        }
-        > div{
-          width: 24.1%;
-          height: 1.1rem;
-          box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
-          line-height: 1.1rem!important;
-          display: flex;
-          flex-wrap: nowrap;
-          justify-content: space-between;
-          padding: 0 35px;
+        padding: 5px;
+        li{
+          width: 25%;
+          height: 110px;
+          padding: 5px;
           > div{
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+            line-height: 80px!important;
             display: flex;
             flex-wrap: nowrap;
-            > i{
-              line-height: 1.1rem!important;
-              font-size: .5rem;
+            justify-content: space-between;
+            > div{
+              display: flex;
+              flex-wrap: nowrap;
+              > span{
+                color: #fff;
+              }
+              > i{
+                flex: 0 1 83px;
+              }
             }
-            > span{
-              margin-left: 10px;
+            > span:nth-child(2){
+              font-size: 28px;
+              font-family:Adobe Heiti Std R;
+              font-weight:normal;
               color: #fff;
             }
+            &:nth-child(1){
+              background: #0C70F8;
+            }
+            &:nth-child(2){
+              background: #00C4FC;
+            }
+            &:nth-child(3){
+              background: #8E62FF;
+            }
+            &:nth-child(4){
+              background: #00C888;
+            }
           }
-          > span:nth-child(2){
-            font-size: 34px;
-            font-family:Adobe Heiti Std R;
-            font-weight:normal;
-            color: #fff;
-          }
-        }
-        > div:nth-child(1){
-          background: #0C70F8;
-        }
-        > div:nth-child(2){
-          background: #00C4FC;
-        }
-        > div:nth-child(3){
-          background: #8E62FF;
-        }
-        > div:nth-child(4){
-          background: #00C888;
         }
       }
       .chart_bottom{
         width: 100%;
+        height: calc(100% - 120px);
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-start;
-        flex-flow: row wrap;
-        .chart_item{
-          width: 49.3%;
-          height: 3.78rem;
-          padding: 30px;
-          margin-bottom: .2rem;
-          background: #fff;
-          box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
-          &:nth-child(2), &:nth-child(4){
-            margin-left: .1rem;
+        padding: 0 5px 5px;
+        > div{
+          width: 50%;
+          height: 50%;
+          min-height: 300px;
+          padding: 5px;
+          &:nth-child(1), &:nth-child(2){
+            padding: 0 5px 5px;
           }
-          &:nth-child(1), &:nth-child(3){
-            margin-right: .1rem;
-          }
-          > h1{
-            color: #333;
-            font-size: 16px;
-            font-family:MicrosoftYaHei-Bold;
-            font-weight:bold;
-            padding-bottom: 12px;
-          }
-          > p{
-            color: #999;
-            font-size: 12px;
-          }
-          > div{
+          .chart_item{
             width: 100%;
-            height: calc(100% - 50px);
-          }
-          #chartContainer2{
-            width: 50%;
+            height: 100%;
+            padding: 20px;
+            background: #fff;
+            box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+            > h1{
+              color: #333;
+              font-size: 16px;
+              font-family:MicrosoftYaHei-Bold;
+              font-weight:bold;
+              padding-bottom: 12px;
+            }
+            > p{
+              color: #999;
+              font-size: 12px;
+            }
+            > div{
+              width: 100%;
+              height: calc(100% - 49px);
+            }
+            #chartContainer2{
+              width: 50%;
+            }
           }
         }
       }
