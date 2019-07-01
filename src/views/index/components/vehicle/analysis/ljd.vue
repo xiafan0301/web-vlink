@@ -1,12 +1,12 @@
 <template>
   <div class="ljd point">
     <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
-        </el-breadcrumb>
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
-    
+
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
@@ -53,16 +53,16 @@
           <el-form-item label="区域：" label-width="60px">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="input5" @change="changeTab">
-               <el-row :gutter="10">
+              <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio label="1">列表选择</el-radio>
                 </el-col>
-                <el-col :span="12" >
-                  <div @click="clickTab"><el-radio label="2">地图选择</el-radio></div>
-                  
+                <el-col :span="12">
+                  <div @click="clickTab">
+                    <el-radio label="2">地图选择</el-radio>
+                  </div>
                 </el-col>
               </el-row>
-              
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
@@ -176,7 +176,6 @@ export default {
       evData: []
     };
   },
-
   mounted() {
     //this.getControlMap(1);
     let map = new window.AMap.Map("mapBox", {
@@ -198,12 +197,10 @@ export default {
         this.reselt = true;
       }
     },
-    clickTab(){
-      if(!this.dialogVisible){
-        this.dialogVisible=true
+    clickTab() {
+      if (!this.dialogVisible) {
+        this.dialogVisible = true;
       }
-      
-      
     },
     changeTab(v) {
       //console.log(v);
@@ -342,7 +339,6 @@ export default {
 }
 .breadcrumb_heaer {
   background: #ffffff;
-  
 }
 .full {
   width: 100%;
@@ -380,7 +376,7 @@ export default {
   margin-left: -272px;
   transition: marginLeft 0.3s ease-in;
   position: relative;
-    z-index: 2;
+  z-index: 2;
   // animation: fadeOutLeft 0.4s ease-out 0.3s both;
 }
 .left {
@@ -498,16 +494,15 @@ export default {
     }
   }
 }
-.ljd{
-  .el-dialog__wrapper .el-dialog__body{
-  padding: 0px;
+.ljd {
+  .el-dialog__wrapper .el-dialog__body {
+    padding: 0px;
+  }
+  .el-dialog__header {
+    padding: 0px 20px 3px;
+  }
+  .el-dialog__headerbtn {
+    z-index: 1;
+  }
 }
-.el-dialog__header{
-  padding: 0px 20px 3px;
-}
-.el-dialog__headerbtn{
-  z-index: 1;
-}
-}
-
 </style>
