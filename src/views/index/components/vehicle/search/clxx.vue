@@ -3,16 +3,16 @@
     <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>信息查询</el-breadcrumb-item>
+          <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
         </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-        <p>可选择一个或多个条件进行搜索</p>
-        <!-- 上传 -->
-        <div class="vl_judge_tc_c_item">
+        <p class="tip">可选择一个或多个条件进行搜索</p>
+        <!-- 上传 (原型改版去掉)-->
+        <!-- <div class="vl_judge_tc_c_item">
             <el-upload
               :class="{'vl_jtc_upload': true}"
               :show-file-list="false"
@@ -33,7 +33,7 @@
             <div v-show="curImageUrl" class="del_icon">
               <i class="el-icon-delete" @click="delPic"></i>
             </div>
-          </div>
+          </div> -->
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
             <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
@@ -53,7 +53,7 @@
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
-            <el-button type="primary" @click="getSearchData">查询</el-button>
+            <el-button type="primary" @click="search">查询</el-button>
           </div>
         </vue-scroll>
       </div>
@@ -67,37 +67,65 @@
             <div class="card-row">
               <div class="card-item">
                 <label class="title">车牌号牌：</label>
-                <span>湘A51790</span>
+                <span>{{vehicleArch.plateno}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车辆所有人：</label>
+                <span>{{vehicleArch.owner}}</span>
               </div>
               <div class="card-item">
                 <label class="title">中文品牌：</label>
-                <span>雪佛兰科鲁兹</span>
+                <span>{{vehicleArch.vehicleBrand}}</span>
               </div>
               <div class="card-item">
                 <label class="title">车身颜色：</label>
-                <span>红色</span>
+                <span>{{vehicleArch.vehicleColor}}</span>
               </div>
               <div class="card-item">
-                <label class="title">机动车状态：</label>
-                <span>正常</span>
+                <label class="title">车身形式：</label>
+                <span>{{vehicleArch.bodyform}}</span>
               </div>
               <div class="card-item">
-                <label class="title">所有人：</label>
-                <span>周全</span>
+                <label class="title">车门数：</label>
+                <span>{{vehicleArch.doornumber}}</span>
               </div>
               <div class="card-item">
-                <label class="title">身份证号：</label>
-                <span>430111199071651322</span>
+                <label class="title">发动机号：</label>
+                <span>{{vehicleArch.engineno}}</span>
               </div>
               <div class="card-item">
-                <label class="title">核定载客：</label>
-                <span>5人</span>
+                <label class="title">车辆类型：</label>
+                <span>{{vehicleArch.platetype}}</span>
               </div>
               <div class="card-item">
-                <label class="title">有效期：</label>
-                <span>2020-02-20</span>
+                <label class="title">年款：</label>
+                <span>{{vehicleArch.model}}</span>
               </div>
-              <div class="card-item vehicle-img">
+              <div class="card-item">
+                <label class="title">座位数：</label>
+                <span>{{vehicleArch.seatnumber}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车辆状态：</label>
+                <span>{{vehicleArch.status}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">使用性质：</label>
+                <span>{{vehicleArch.usecharacter}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车型：</label>
+                <span>{{vehicleArch.vehicletype}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">厂商名称：</label>
+                <span>{{vehicleArch.vendor}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">有效期止：</label>
+                <span>{{vehicleArch.validuntil}}</span>
+              </div>
+              <!-- <div class="card-item vehicle-img">
                 <label class="title">车辆登记照片：</label>
                 <div class='upload_box'>
                   <div class="img-box" v-for="(item, index) in historyPicList" :key="index">
@@ -107,7 +135,7 @@
                     />
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
           <!-- 违章信息 -->
@@ -136,20 +164,44 @@
                   >
                 </el-table-column>
                 <el-table-column
+                  label="城市名称"
+                  prop="name"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="罚款金额"
+                  prop="name"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="违章归属地"
+                  prop="name"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
                   label="违法行为"
                   prop="name"
                   show-overflow-tooltip
                   >
                 </el-table-column>
                 <el-table-column
-                  label="处理机关"
+                  label="分类类型"
+                  prop="name"
+                  show-overflow-tooltip
+                  >
+                </el-table-column>
+                <el-table-column
+                  label="采集机关"
                   prop="name"
                   show-overflow-tooltip
                   >
                 </el-table-column>
               </el-table>
             </div>
-            <template v-if="pagination.total > 0">
+            <!-- <template v-if="pagination.total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
@@ -160,23 +212,23 @@
                 :total="pagination.total"
                 class="cum_pagination">
               </el-pagination>
-            </template>
+            </template> -->
           </div>
           <!-- 年检信息 -->
-          <div class="info-card">
+          <!-- <div class="info-card">
             <p class="card-header">年检信息</p>
             <div class="yearly-inspection">
               <label class="title">年检到期时间：</label>
               <span class="content">2020-01-01</span>
             </div>
-          </div>
+          </div> -->
         </div>
         </vue-scroll>
       </div>
     </div>
 
     <!--上传记录弹窗-->
-    <el-dialog
+   <!--  <el-dialog
       :visible.sync="historyPicDialog"
       class="history-pic-dialog"
       :close-on-click-modal="false"
@@ -196,26 +248,29 @@
       </div>
     </el-dialog>
 
-    <BigImg :imgList="imgList" :imgIndex="imgIndex" :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
+    <BigImg :imgList="imgList" :imgIndex="imgIndex" :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg> -->
   </div>
 </template>
 <script>
-import {ajaxCtx} from '@/config/config';
-import BigImg from '@/components/common/bigImg.vue';
-import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../../api/api.judge.js';
-import { setTimeout } from 'timers';
+/* import {ajaxCtx} from '@/config/config'; */
+/* import BigImg from '@/components/common/bigImg.vue'; */
+/* import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../../api/api.judge.js'; */
+import {getArchives, getViolation} from '../../../api/api.analysis.js';
 export default {
-  components: { BigImg },
+  /* components: { BigImg }, */
   data () {
     return {
-      uploadAcion: ajaxCtx.base + '/new',       //上传路径
+      /* uploadAcion: ajaxCtx.base + '/new',       //上传路径
       uploading: false, // 是否上传中
       uploadFileList: [],
       curImageUrl: '', // 当前上传的图片
       historyPicList: [], // 上传历史记录
       historyPicDialog: false,
       loadingHis: false,
-      imgData: null,
+      imgData: null, */
+      /* imgIndex: 0, // 点击的图片索引
+        isShowImg: false, // 是否放大图片
+        imgList: [], */
       searchData: {                //搜索参数
           time: null,
           licensePlateNum: null, // 车牌号
@@ -238,9 +293,6 @@ export default {
           }
         },
         searching: false,
-        imgIndex: 0, // 点击的图片索引
-        isShowImg: false, // 是否放大图片
-        imgList: [],
         regulationsList: [{
             date: '2016-05-02',
             name: '王小虎',
@@ -259,18 +311,107 @@ export default {
             address: '上海市普陀区金沙江路 1516 弄'
           }],      //违章信息列表
           pagination: { total: 20, pageSize: 10, pageNum: 1 },
+          vehicleArch: {},      //车辆档案
     }
   },
   computed: {
-    choosedHisPic () {
+    /* choosedHisPic () {
       return this.historyPicList.filter(x => x.checked)
-    }
+    } */
   },
   mounted () {
       this.setDTime();
+      this.getSearchData();
   },
   methods: {
-    // 上传图片
+    //设置默认时间
+    setDTime () {
+        let date = new Date();
+        let curDate = date.getTime();
+        let curS = 30 * 24 * 3600 * 1000;
+        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
+        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        this.searchData.time = [_s, _e]
+    },
+    //重置
+    resetSearch () {
+        this.searchData.licensePlateNum = null;
+        this.uploadFileList.splice(0, this.uploadFileList.length);
+        this.imgData = null;
+        this.curImageUrl = '';
+        this.setDTime();
+    },
+    //查询
+    search() {
+      if(this.searchData.licensePlateNum) {
+        this.getSearchData();
+      }else {
+        this.$message.error("请输入车牌号码");
+        return false;
+      }
+    },
+    getSearchData() {
+      let params = {};
+      if(this.searchData.time && this.searchData.time.length > 0) {
+        params['startDate'] = this.searchData.time[0];
+        params['endDate'] = this.searchData.time[1];
+      }
+      if(this.searchData.licensePlateNum) {
+        params['plateNo'] = this.searchData.licensePlateNum
+      }else {
+        return false;
+      }
+      console.log("======getSearchData=====", this.searchData,params);
+      this.getVehicle(params);
+      this.getViolationList(params);
+    },
+    //获取车辆档案
+    getVehicle(params) {
+      const query = {
+        plateNo: params.plateNo
+      }
+      this.searching = true;
+      getArchives(query).then( res => {
+        console.log("0000000000",res)
+        if(res && res.data) {
+          this.vehicleArch = res.data 
+        }
+        this.$nextTick(() => {
+          this.searching = false
+        })
+      }).catch(error => {
+        this.searching = false;
+        console.log(error);
+      })     
+    },
+    //获取违章信息
+    getViolationList(params) {
+      this.regulationsList = []
+      this.searching = true;
+      getViolation(params).then(res => {
+        console.log("----getViolation----",res)
+        if(res && res.data) {
+          this.regulationsList = res.data
+        }
+        this.$nextTick(() => {
+          this.searching = false
+        })
+      }).catch( error => {
+        this.searching = false;
+        console.log(error);
+      })
+    },
+    /* //分页
+    handleSizeChange (val) {
+      this.pagination.pageNum = 1;
+      this.pagination.pageSize = val;
+      this.getSearchData();
+    },
+    onPageChange (page) {
+      this.pagination.pageNum = page;
+      this.getSearchData();
+    }, */
+    /* // 上传图片
     beforeAvatarUpload (file) {
       const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
       const isLt = file.size / 1024 / 1024 < 100;
@@ -286,8 +427,6 @@ export default {
     //上传成功
     uploadSucess (response, file, fileList) {
       this.uploading = false;
-      /* this.compSim = '';
-      this.compSimWord = ''; */
       if (response && response.data) {
         let oRes = response.data;
         if (oRes) {
@@ -367,48 +506,8 @@ export default {
         appendixInfoIds: _ids.join(',')
       }
       JtcPUTAppendixsOrder(_obj);
-    },
-    //设置默认时间
-    setDTime () {
-        let date = new Date();
-        let curDate = date.getTime();
-        let curS = 30 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.searchData.time = [_s, _e]
-    },
-    //重置
-    resetSearch () {
-        this.searchData.licensePlateNum = null;
-        this.uploadFileList.splice(0, this.uploadFileList.length);
-        this.imgData = null;
-        this.curImageUrl = '';
-        this.setDTime();
-        this.getSearchData();
-    },
-    //查询
-    getSearchData() {
-      let params = {};
-      if(this.searchData.time && this.searchData.time.length > 0) {
-        params['startDate'] = this.searchData.time[0];
-        params['endDate'] = this.searchData.time[1];
-      }
-      if(this.searchData.licensePlateNum) {
-        params['plateNo'] = this.searchData.licensePlateNum
-      }else {
-        this.$message.error("请输入车牌号码");
-        return false;
-      }
-      if(this.imgData) {
-        params['vehicleNumberPic'] = this.imgData.path;
-      }
-      this.searching = true;
-      console.log("======getSearchData=====", this.searchData, this.imgData,params);
-      setTimeout(() => {
-        this.searching = false;
-      }, 3000);
-    },
-    // 图片放大
+    }, */
+    /* // 图片放大
     openBigImg (index, data) {
       console.log('--------------',index, data)
       this.imgList = data;
@@ -419,16 +518,7 @@ export default {
     emitCloseImgDialog(data){
       this.imgList = [];
       this.isShowImg = data;
-    },
-    //分页
-    handleSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      this.getTaskData();
-    },
-    onPageChange (page) {
-      this.pagination.pageNum = page;
-    },
+    }, */
   }
 }
 </script>
@@ -449,12 +539,14 @@ export default {
       background: #fff;
       box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
       animation: fadeInLeft .4s ease-out .3s both;
+      .tip {
+        margin-bottom: 36px;
+      }
       .vl_judge_tc_c_item {
           width: 232px;
           height: 232px;
           display: inline-block;
           position: relative;
-          margin-top: 36px;
           margin-bottom: 20px;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
