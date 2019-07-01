@@ -86,11 +86,12 @@
               v-model="searchData.time"
               type="daterange"
               range-separator="-"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               format="yy/MM/dd"
               :picker-options="pickerOptions"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+              :default-time="['00:00:00', '23:59:59']"
               @change="dateChange"
             ></el-date-picker>
           </div>
@@ -135,7 +136,7 @@
                   v-for="item in colorList"
                   :key="item.enumField"
                   :label="item.enumValue"
-                  :value="item.enumField"
+                  :value="item.enumValue"
                 ></el-option>
               </el-select>
             </div>
@@ -774,9 +775,13 @@ export default {
         params['startDate'] = this.searchData.time[0];
         params['endDate'] = this.searchData.time[1];
       }
-      if(this.selectDeviceArr && this.selectDeviceArr.length > 0) {
-        let selectIds = this.selectDeviceArr.map(res => res.id);
-        params['deviceIds'] = selectIds.join(':');
+      if(this.selectCameraArr && this.selectCameraArr.length > 0) {
+        let cameraIds = this.selectCameraArr.map(res => res.id);
+        params['cameraIds'] = cameraIds.join(':');
+      }
+      if(this.selectBayonetArr && this.selectBayonetArr.length > 0) {
+        let bayonentIds = this.selectBayonetArr.map(res => res.id);
+        params['bayonentIds'] = bayonentIds.join(':');
       }
       if(this.selectIndex === 0) {
         if(this.imgData) {
@@ -796,7 +801,7 @@ export default {
       }
       this.params = params
       /* this.searching = true; */
-      console.log("======getSearchData=====", this.searchData, this.imgData,this.params);
+      console.log("======getSearchData=====", this.searchData, this.imgData,JSON.stringify(this.params));
       /* getDrivingAnalysis(this.params).then( res => {
         console.log("-------getDrivingAnalysis------",res)
         if(res && res.data) {

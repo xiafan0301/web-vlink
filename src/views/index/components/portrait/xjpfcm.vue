@@ -3,14 +3,15 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-        <el-breadcrumb-item>频繁出没</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
+        <el-breadcrumb-item>新建分析任务</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="driving-rules-content">
       <!-- 搜索条件 -->
       <div class="info-left" v-show="videoMenuStatus">
         <vue-scroll>
-          <!-- 设备搜索 -->         
+          <!-- 设备搜索 -->
           <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
           <div class="selected_device" @click="treeTabShow = true;">
             <i class="el-icon-arrow-down"></i>
@@ -58,40 +59,50 @@
                 </vue-scroll>
               </div>
               <div class="tree_content" v-show="selectedTreeTab === 1">
-                    <vue-scroll>
-                      <div class="checked_all">
-                        <el-checkbox
-                          :indeterminate="isIndeterminateBay"
-                          v-model="checkAllTreeBay"
-                          @change="handleCheckedAllBay"
-                        >全选</el-checkbox>
-                      </div>
-                      <el-tree
-                        @check="listenCheckedBay"
-                        :data="bayonetTree"
-                        show-checkbox
-                        default-expand-all
-                        node-key="id"
-                        ref="bayonetTree"
-                        highlight-current
-                        :props="defaultProps"
-                      ></el-tree>
-                    </vue-scroll>
+                <vue-scroll>
+                  <div class="checked_all">
+                    <el-checkbox
+                      :indeterminate="isIndeterminateBay"
+                      v-model="checkAllTreeBay"
+                      @change="handleCheckedAllBay"
+                    >全选</el-checkbox>
+                  </div>
+                  <el-tree
+                    @check="listenCheckedBay"
+                    :data="bayonetTree"
+                    show-checkbox
+                    default-expand-all
+                    node-key="id"
+                    ref="bayonetTree"
+                    highlight-current
+                    :props="defaultProps"
+                  ></el-tree>
+                </vue-scroll>
               </div>
             </div>
           </div>
           <!-- 时间 -->
           <div class="time-search">
+            <p>开始</p>
             <el-date-picker
-              v-model="searchData.time"
-              type="daterange"
-              range-separator="-"
-              value-format="yyyy-MM-dd"
-              format="yy/MM/dd"
-              :picker-options="pickerOptions"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              @change="dateChange"
+              v-model="searchData.startTime"
+              type="datetime"
+              :clearable="false"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              :picker-options="startDateOpt"
+              placeholder="开始时间"
+            ></el-date-picker>
+          </div>
+          <div class="time-search">
+            <p>结束</p>
+            <el-date-picker
+              v-model="searchData.endTime"
+              :clearable="false"
+              :picker-options="endDateOpt"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              type="datetime"
+              default-time="23:59:59"
+              placeholder="结束时间"
             ></el-date-picker>
           </div>
           <!-- 下划线 -->
@@ -143,12 +154,21 @@
           <!-- 切换查询条件 -->
           <div class="tab-switching" v-show="selectIndex === 0" @click="selectTab(1)">使用车牌号</div>
           <div class="tab-switching" v-show="selectIndex === 1" @click="selectTab(0)">使用图片</div>
-          
+
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
             <el-button type="primary" @click="getSearchData">查询</el-button>
           </div>
         </vue-scroll>
+      </div>
+      <!-- 关闭按钮 -->
+      <div
+        class="close-menu-c"
+        title="关闭菜单"
+        @click="videoMenuStatus = false;"
+        v-show="videoMenuStatus"
+      >
+        <i class="vl_icon vl_icon_vehicle_02"></i>
       </div>
       <!-- 展开按钮 -->
       <div
@@ -165,29 +185,6 @@
         v-loading="searching"
         :class="{ 'video-menu-close': !videoMenuStatus }"
       >
-        <!-- 行车记录列表 -->
-        <div class="driving-record" v-show="videoMenuStatus">
-          <vue-scroll>
-            <div class="title">
-              <p>该车行驶时经过{{nDeviceList.length}}个设备</p>
-              <div>
-                <el-button type="primary">导出</el-button>
-              </div>
-            </div>
-            <div class="table_box">
-              <el-table :data="deviceList">
-                <el-table-column label="设备名称" prop="deviceName" show-overflow-tooltip></el-table-column>
-                <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-                <el-table-column label="时间间隔" prop="timeSlot" show-overflow-tooltip></el-table-column>
-                <el-table-column label="参考时间" prop="refTime" show-overflow-tooltip></el-table-column>
-              </el-table>
-            </div>
-          </vue-scroll>
-          <!-- 关闭按钮 -->
-          <div class="close-menu-c" title="关闭菜单" @click="videoMenuStatus = false;">
-            <i class="vl_icon vl_icon_vehicle_02"></i>
-          </div>
-        </div>
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
@@ -271,29 +268,39 @@ export default {
       imgData: null,
       searchData: {
         //搜索参数
-        time: null,
+        startTime: "",
+        endTime: "",
         licensePlateNum: null, // 车牌号
         licensePlateColor: "" //车牌颜色
       },
-      pickerOptions: {
-        disabledDate(time) {
-          let date = new Date();
-          let y = date.getFullYear();
-          let m =
-            date.getMonth() + 1 < 10
-              ? "0" + (date.getMonth() + 1)
-              : date.getMonth() + 1;
-          let d = date.getDate();
-          let threeMonths = "";
-          let start = "";
-          if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+      startDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.endTime) {
+            return (
+              time.getTime() > new Date(this.searchData.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
           }
-          threeMonths = new Date(start).getTime();
-          let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+        }
+      },
+      endDateOpt: {
+        disabledDate: time => {
+          if (this.searchData.startTime) {
+            return (
+              time.getTime() < new Date(this.searchData.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
         }
       },
       searching: false,
@@ -583,7 +590,7 @@ export default {
       cameraMapMarkers: [], // 地图标记
       selAreaPolygon: null,
       treeTabShow: false,
-      selectDeviceArr: [],    // 选中的设备数组
+      selectDeviceArr: [], // 选中的设备数组
       selectCameraArr: [], // 选中的摄像头数组
       selectBayonetArr: [], // 选中的卡口数组
       selectedTreeTab: 0, // 当前选中的
@@ -596,17 +603,17 @@ export default {
         }
       ],
       isIndeterminate: false, // 是否处于全选与全不选之间
-      isIndeterminateBay: false,   //卡口
+      isIndeterminateBay: false, //卡口
       checkAllTree: false, // 树是否全选
-      checkAllTreeBay: false,    
+      checkAllTreeBay: false,
       bayonetTree: [], // 卡口树
       cameraTree: [],
       videoTreeNodeCount: 0, // 摄像头节点数量
       bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
-        children: 'children',
-        label: 'label'
-      },
+        children: "children",
+        label: "label"
+      }
     };
   },
   computed: {
@@ -769,32 +776,38 @@ export default {
     //查询
     getSearchData() {
       let params = {};
-      if(this.searchData.time && this.searchData.time.length > 0) {
-        params['startDate'] = this.searchData.time[0];
-        params['endDate'] = this.searchData.time[1];
+      if (this.searchData.time && this.searchData.time.length > 0) {
+        params["startDate"] = this.searchData.time[0];
+        params["endDate"] = this.searchData.time[1];
       }
-      if(this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+      if (this.selectDeviceArr && this.selectDeviceArr.length > 0) {
         let selectIds = this.selectDeviceArr.map(res => res.id);
-        params['deviceIds'] = selectIds.join(':');
+        params["deviceIds"] = selectIds.join(":");
       }
-      if(this.selectIndex === 0) {
-        if(this.imgData) {
-          params['vehicleNumberPic'] = this.imgData.path;
-        }else {
+      if (this.selectIndex === 0) {
+        if (this.imgData) {
+          params["vehicleNumberPic"] = this.imgData.path;
+        } else {
           this.$message.error("请上传车的图片或者输入车牌号");
           return false;
         }
-      }else if(this.selectIndex === 1) {
-        if(this.searchData.licensePlateNum) {
-          params['vehicleNumber'] = this.searchData.licensePlateNum
-        }else {
+      } else if (this.selectIndex === 1) {
+        if (this.searchData.licensePlateNum) {
+          params["vehicleNumber"] = this.searchData.licensePlateNum;
+        } else {
           this.$message.error("请上传车的图片或者输入车牌号");
           return false;
         }
-        this.searchData.licensePlateColor && (params['plateColor'] = this.searchData.licensePlateColor);
+        this.searchData.licensePlateColor &&
+          (params["plateColor"] = this.searchData.licensePlateColor);
       }
       this.searching = true;
-      console.log("======getSearchData=====", this.searchData, this.imgData,params);
+      console.log(
+        "======getSearchData=====",
+        this.searchData,
+        this.imgData,
+        params
+      );
       setTimeout(() => {
         this.searching = false;
       }, 3000);
@@ -1033,23 +1046,23 @@ export default {
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.cameraTree = this.getTreeList(camera);
           this.bayonetTree = this.getBayTreeList(bayonet);
-          this.getLeafCountTree(this.cameraTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          this.getLeafCountTree(this.cameraTree, "camera");
+          this.getLeafCountTree(this.bayonetTree, "bayonet");
         }
       });
     },
     //获取摄像头数据
     getTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
-          item['children'] = item.deviceBasicList
-          delete(item.deviceBasicList)
-          for(let key of item['children']) {
-            key['label'] = key.deviceName
-            key['id'] = key.uid
-            key['treeType'] = 1
+      for (let item of data) {
+        item["id"] = item.areaId;
+        item["label"] = item.areaName;
+        if (item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item["children"] = item.deviceBasicList;
+          delete item.deviceBasicList;
+          for (let key of item["children"]) {
+            key["label"] = key.deviceName;
+            key["id"] = key.uid;
+            key["treeType"] = 1;
           }
         }
       }
@@ -1057,16 +1070,16 @@ export default {
     },
     //获取卡口数据
     getBayTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.bayonetList && item.bayonetList.length > 0) {
-          item['children'] = item.bayonetList
-          delete(item.bayonetList)
-          for(let key of item['children']) {
-            key['label'] = key.bayonetName
-            key['id'] = key.uid
-            key['treeType'] = 2
+      for (let item of data) {
+        item["id"] = item.areaId;
+        item["label"] = item.areaName;
+        if (item.bayonetList && item.bayonetList.length > 0) {
+          item["children"] = item.bayonetList;
+          delete item.bayonetList;
+          for (let key of item["children"]) {
+            key["label"] = key.bayonetName;
+            key["id"] = key.uid;
+            key["treeType"] = 2;
           }
         }
       }
@@ -1112,7 +1125,10 @@ export default {
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
         this.isIndeterminate = false;
         this.checkAllTree = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+      } else if (
+        val1.checkedNodes.length < this.videoTreeNodeCount &&
+        val1.checkedNodes.length > 0
+      ) {
         this.checkAllTree = false;
         this.isIndeterminate = true;
       } else if (val1.checkedNodes.length === 0) {
@@ -1138,7 +1154,10 @@ export default {
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
         this.isIndeterminateBay = false;
         this.checkAllTreeBay = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+      } else if (
+        val1.checkedNodes.length < this.videoTreeNodeCount &&
+        val1.checkedNodes.length > 0
+      ) {
         this.checkAllTreeBay = false;
         this.isIndeterminateBay = true;
       } else if (val1.checkedNodes.length === 0) {
@@ -1148,9 +1167,12 @@ export default {
     },
     // 选中的设备数量处理
     handleData() {
-      this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType);
-      console.log('选中的数据', this.selectDeviceArr);
-    },
+      this.selectDeviceArr = [
+        ...this.selectCameraArr,
+        ...this.selectBayonetArr
+      ].filter(key => key.treeType);
+      console.log("选中的数据", this.selectDeviceArr);
+    }
   }
 };
 </script>
@@ -1174,12 +1196,19 @@ export default {
       z-index: 999;
     }
     .info-left {
+      position: relative;
       width: 272px;
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
       box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
+      .time-search {
+        display: flex;
+        p {
+          width: 20px;
+        }
+      }
       .vl_judge_tc_c_item {
         width: 232px;
         height: 232px;
@@ -1371,11 +1400,7 @@ export default {
           padding-bottom: 20px;
         }
       }
-      //关闭按钮
-      .close-menu-c {
-        @include close_menu;
-        left: 480px;
-      }
+
       //地图样式
       .gis_content {
         height: 100%;
@@ -1439,6 +1464,11 @@ export default {
           }
         }
       }
+    }
+    //关闭按钮
+    .close-menu-c {
+      @include close_menu;
+      left: 272px;
     }
     .close-menu-o {
       @include close_menu;
@@ -1510,11 +1540,8 @@ html {
   //时间搜索
   .time-search {
     margin-bottom: 10px;
-    .el-date-editor--daterange.el-input,
-    .el-date-editor--daterange.el-input__inner,
-    .el-date-editor--timerange.el-input,
-    .el-date-editor--timerange.el-input__inner {
-      width: 232px;
+    .el-date-editor.el-input, .el-date-editor.el-input__inner {
+      width: 212px;
     }
   }
   //搜索按钮
