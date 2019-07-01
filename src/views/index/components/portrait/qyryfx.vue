@@ -124,7 +124,83 @@
         <div class="danger_people_wrap">
           <h3 class="camera_name">摄像头名称（50次）</h3>
           <div class="danger_people_list">
+            <div class="people_item">
+              <!-- 上一张 -->
+              <div class="pre_btn"></div>
+              <!-- 下一张 -->
+              <div class="next_btn"></div>
+              <!-- 第一张图 -->
+              <div class="img_warp">
+                <img src alt>
+              </div>
+              <!-- 相似度 -->
+              <div class="similarity">
+                <p class="similarity_count">98.15</p>
+                <p class="similarity_title">相似度</p>
+                <!-- 选择摄像头的时间 -->
+                <div class="select_time">
+                  <el-select v-model="value" placeholder="请选择">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </div>
+              </div>
+              <!-- 第二张图 -->
+              <div class="img_warp">
+                <img src alt>
+              </div>
+              <!-- 危险人物照片信息 -->
+              <div class="people_message">
+                <h2 class="name">范冰冰</h2>
+                <div class="tips_wrap">
+                  <p class="tip">男</p>
+                  <p class="tip">青年</p>
+                </div>
+              </div>
+            </div>
 
+            <div class="people_item">
+              <!-- 上一张 -->
+              <div class="pre_btn"></div>
+              <!-- 下一张 -->
+              <div class="next_btn"></div>
+              <!-- 第一张图 -->
+              <div class="img_warp">
+                <img src alt>
+              </div>
+              <!-- 相似度 -->
+              <div class="similarity">
+                <p class="similarity_count">98.15</p>
+                <p class="similarity_title">相似度</p>
+                <!-- 选择摄像头的时间 -->
+                <div class="select_time">
+                  <el-select v-model="value" placeholder="请选择">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </div>
+              </div>
+              <!-- 第二张图 -->
+              <div class="img_warp">
+                <img src alt>
+              </div>
+              <!-- 危险人物照片信息 -->
+              <div class="people_message">
+                <h2 class="name">范冰冰</h2>
+                <div class="tips_wrap">
+                  <p class="tip">男</p>
+                  <p class="tip">青年</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="right_black"></div>
@@ -518,7 +594,7 @@ export default {
       height: 100%;
       position: relative;
       background: white;
-      >div {
+      > div {
         height: 100%;
         float: left;
       }
@@ -532,19 +608,109 @@ export default {
           line-height: 56px;
           height: 56px;
           color: #333333;
-          border-bottom: 1px solid #D3D3D3;
+          border-bottom: 1px solid #d3d3d3;
         }
         .danger_people_list {
           height: calc(100% -56px);
           padding-top: 28px;
-          .people_item {
 
+          // 人员记录列表
+          .people_item {
+            position: relative;
+            background: #fff;
+            box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+            padding: 30px 0 30px 50px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            // 点击变成上一张
+            .pre_btn {
+              position: absolute;
+              top: 55px;
+              left: 22px;
+              width: 12px;
+              height: 26px;
+              background: url("../../../../assets/img/icons.png") no-repeat;
+              background-position: -477px -1520px;
+              &:hover {
+                background-position: -497px -1520px;
+              }
+            }
+            // 点击下一张
+            .next_btn {
+              position: absolute;
+              top: 55px;
+              right: 18px;
+              width: 12px;
+              height: 26px;
+              background: url("../../../../assets/img/icons.png") no-repeat;
+              background-position: -529px -1520px;
+              &:hover {
+                background-position: -548px -1520px;
+              }
+            }
+            .img_warp {
+              position: relative;
+              width: 76px;
+              height: 76px;
+              float: left;
+              border-radius: 3px;
+              background: red;
+              > img {
+                width: 100%;
+                height: 100%;
+                display: block;
+                border-radius: 3px;
+              }
+            }
+            // 相似度
+            .similarity {
+              width: 88px;
+              float: left;
+              text-align: center;
+              .similarity_count {
+                font-size: 26px;
+                line-height: 32px;
+                // font-family:AuroraBT-BoldCondensed;
+                color: #0c70f8;
+              }
+              .similarity_title {
+                color: #333333;
+                font-size: 12px;
+                line-height: 18px;
+                padding-bottom: 2px;
+              }
+            }
+            // 人物信息
+            .people_message {
+              float: left;
+              padding-left: 12px;
+              .name {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+                line-height: 38px;
+              }
+              .tips_wrap {
+                overflow: hidden;
+                .tip {
+                  float: left;
+                  padding: 0 8px;
+                  line-height: 30px;
+                  background: #f2f2f2;
+                  border: 1px solid #f2f2f2;
+                  border-radius: 3px;
+                }
+                .tip + .tip {
+                  margin-left: 8px;
+                }
+              }
+            }
           }
         }
       }
       .right_black {
         width: 20px;
-        background: #EAEBED;
+        background: #eaebed;
       }
     }
     .close-menu-o {
@@ -585,22 +751,6 @@ html {
   }
 }
 .qyryfx_wrap {
-  //车牌颜色
-  .license-plate-color {
-    .el-select {
-      width: 232px;
-    }
-  }
-  //时间搜索
-  .time-search {
-    margin-bottom: 10px;
-    .el-date-editor--daterange.el-input,
-    .el-date-editor--daterange.el-input__inner,
-    .el-date-editor--timerange.el-input,
-    .el-date-editor--timerange.el-input__inner {
-      width: 232px;
-    }
-  }
   // 搜索框
   .search_wrap {
     .el-input__inner {
@@ -615,6 +765,25 @@ html {
     text-align: center;
     .el-button {
       width: 110px;
+    }
+  }
+  // 右边菜单
+  .info_right {
+    .similarity {
+      .select_time {
+        // position: relative;
+        .el-input__inner {
+          position: relative;
+          height: 24px;
+          border-radius: 12px;
+          width: 98px;
+          z-index: 10;
+          left: -5px;
+        }
+        .el-input__icon {
+          line-height: normal;
+        }
+      }
     }
   }
   //弹窗
