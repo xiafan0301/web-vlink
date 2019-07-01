@@ -8,6 +8,12 @@
       </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
+      <vue-scroll>
+      <p class="daochu">
+        <el-button type="primary" :loading="searching"
+                  class="select_btn"
+                >导出</el-button>
+      </p>
       <div class="car-info">
         <!-- <h3 class="title">车辆信息</h3> -->
         <!-- 车辆信息 -->
@@ -117,7 +123,10 @@
           </div>
         </div>
       </div>
-      <div class="bottom">
+      </vue-scroll>
+      
+    </div>
+    <div class="bottom">
         <div class="tablink">
           <a>车辆布控</a>
           <a>轨迹分析</a>
@@ -125,8 +134,6 @@
           <a>同行车分析</a>
         </div>
       </div>
-    </div>
-   
   </div>
 </template>
 <script>
@@ -136,6 +143,7 @@ export default {
   data() {
     return {
       historyPicList: [], // 上传历史记录
+      searching:false,
       regulationsList: [{
             date: '2016-05-02',
             name: '王小虎',
@@ -149,6 +157,36 @@ export default {
             name: '王小虎',
             address: '上海市普陀区金沙江路 1519 弄'
           }, {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市普陀区金沙江路 1516 弄'
+          }
+          , {
             date: '2016-05-03',
             name: '王小虎',
             address: '上海市普陀区金沙江路 1516 弄'
@@ -168,6 +206,7 @@ export default {
       this.pagination.pageNum = 1;
       this.pagination.pageSize = val;
       this.getTaskData();
+
     },
     onPageChange (page) {
       this.pagination.pageNum = page;
@@ -193,6 +232,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.vehicle-info-content{
+  height: calc(100% - 60px);
 }
 .bottom{
   height: 60px;
@@ -313,14 +355,18 @@ export default {
   margin: 15px;
   box-shadow: 3px 3px 5px 1px #dddddd;
   .title{
-  font-size: 16px;
-  font-weight: bold;
-  padding: 20px;
-  border-bottom: solid 1px #eeeeee;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 20px;
+    border-bottom: solid 1px #eeeeee;
+  }
+  .info-card{
+    margin: 15px;
+  }
 }
-.info-card{
-  margin: 15px;
-}
+.daochu{
+  padding:10px 20px ;
+  text-align: right;
 }
 
 </style>

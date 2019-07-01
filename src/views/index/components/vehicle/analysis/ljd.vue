@@ -66,14 +66,27 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple class="full" placeholder="请选择">
+            <!-- <el-select v-model="value1" multiple class="full" placeholder="请选择">
               <el-option
                 v-for="item in options"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
               ></el-option>
-            </el-select>
+            </el-select> --> 
+            <el-select v-model="value1" multiple collapse-tags placeholder="请选择">
+            <el-option-group
+              v-for="group in options"
+              :key="group.areaName"
+              :label="group.areaName">
+              <el-option
+                v-for="item in group.areaTreeList"
+                :key="item.areaId"
+                :label="item.areaName"
+                :value="item.areaId">
+              </el-option>
+            </el-option-group>
+          </el-select>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -117,6 +130,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import { JfoGETSurveillanceObject } from "@/views/index/api/api.judge.js";
+import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapselect from "@/views/index/components/common/mapSelect";
 export default {
   components: {
@@ -158,28 +172,7 @@ export default {
           address: "上海市普陀区金沙江路 1516 弄"
         }
       ],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
-      ],
+       options: [],
       evData: []
     };
   },
@@ -192,6 +185,7 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    this.getMapGETmonitorList()//查询行政区域
   },
   methods: {
     hideResult() {
@@ -226,6 +220,19 @@ export default {
         dateEnd: "2019-6-25",
         type: 1
       });
+    },
+    //查询行政区域
+    getMapGETmonitorList(){
+      let d={
+        areaUid:mapXupuxian.adcode
+      }
+      MapGETmonitorList(d).then(res=>{
+        if(res && res.data){
+          
+          
+          this.options.push(res.data)
+        }
+      })
     },
     JfoGETSurveillanceObject(d) {
       JfoGETSurveillanceObject(d).then(res => {
