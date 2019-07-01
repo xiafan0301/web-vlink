@@ -21,6 +21,11 @@ export default {
       component: () => import('@/views/index/components/portrait/pfcm.vue')
     },
     {
+      path: 'xjpfcm',
+      name: 'portrait_xjpfcm',
+      component: () => import('@/views/index/components/portrait/xjpfcm.vue')
+    },
+    {
       path: 'rlcx',
       name: 'portrait_rlcx',
       component: () => import('@/views/index/components/portrait/rlcx.vue')
