@@ -1,51 +1,51 @@
 <template>
   <div class="point">
     <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>车辆查询</el-breadcrumb-item>
-          <el-breadcrumb-item>过车详情</el-breadcrumb-item>
-        </el-breadcrumb>
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>车辆查询</el-breadcrumb-item>
+        <el-breadcrumb-item>过车详情</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
- 
+
     <div class="left">
       <div class="plane">
         <h3 class="title">车辆详情</h3>
         <div class="infomation">
           <div class="first">
-            <span>湘A3H1456</span>
-            <span>红色</span>
+            <span>{{detailData.plateNo}}</span>
+            <span>{{detailData.vehicleColor}}</span>
           </div>
           <div class="div">
-            <span>雪佛兰科鲁兹</span>
+            <span>{{detailData.vehicleBrand}}</span>
             <label>中文品牌</label>
           </div>
           <div class="div">
-            <span>正常</span>
+            <span>{{detailData.vehicleStatus}}</span>
             <label>机动车状态</label>
           </div>
           <div class="div">
-            <span>长沙</span>
+            <span>{{detailData.vehicleLocation}}</span>
             <label>归属地</label>
           </div>
           <div class="div">
-            <span>周全</span>
+            <span>{{detailData.vehicleOwner}}</span>
             <label>车辆所有人</label>
           </div>
           <div class="div">
-            <span>430681199805241322</span>
+            <span>{{detailData.idCard}}</span>
             <label>身份证</label>
           </div>
           <div class="div">
-            <span>5人</span>
+            <span>{{detailData.approvedPassNum}}人</span>
             <label>核定载客</label>
           </div>
           <div class="div">
-            <span>2020-05-20</span>
+            <span>{{detailData.validityPeriod}}</span>
             <label>有效期</label>
           </div>
           <div class="div">
-            <span>是</span>
+            <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div>
           <p class="blue">查看违章记录</p>
@@ -56,9 +56,19 @@
       <div class="main">
         <div class="infobox">
           <div class="flex1 bkt">
-              <img src="https://inews.gtimg.com/newsapp_bt/0/9489993963/1000" alt="" class="spimg" v-if="showimg">
-              <video  v-if="!showimg" id="capVideo" :src="'http://file.aorise.org/vlink/file/d219bfe6-f66b-4ad9-a300-a143f7b10690.mp4'" class="spimg" autoplay></video>
-              <div class="play_btn" @click="videoTap" v-show="!playing">
+            <img
+              src="https://inews.gtimg.com/newsapp_bt/0/9489993963/1000"
+              class="spimg"
+              v-if="showimg"
+            >
+            <video
+              v-if="!showimg"
+              id="capVideo"
+              :src="'http://file.aorise.org/vlink/file/d219bfe6-f66b-4ad9-a300-a143f7b10690.mp4'"
+              class="spimg"
+              autoplay
+            ></video>
+            <div class="play_btn" @click="videoTap" v-show="!playing">
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
@@ -66,29 +76,27 @@
           <div class="flex1">
             <h3 class="titles">抓拍信息</h3>
             <div class="infom">
-              <div >
-                <p class="div"><span>2018-11-12 13:14:16</span>
-                <label>抓拍时间</label></p>
-                
-              </div>
-              <div >
+              <div>
                 <p class="div">
-                  <span>摄像头3</span>
-                <label>抓拍设备</label>
+                  <span>{{detailData.snapTime}}</span>
+                  <label>抓拍时间</label>
                 </p>
-                
               </div>
-              <div >
+              <div>
                 <p class="div">
-                  <span>长沙市天心区上街广发银行北门003</span>
-                <label>抓拍地址</label>
+                  <span>{{detailData.snapDevice}}</span>
+                  <label>抓拍设备</label>
                 </p>
-                
+              </div>
+              <div>
+                <p class="div">
+                  <span>{{detailData.snapAddress}}</span>
+                  <label>抓拍地址</label>
+                </p>
               </div>
               <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
               <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span>
             </div>
-             
           </div>
         </div>
         <div class="struc-list">
@@ -100,14 +108,16 @@
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 8rem;" :src="item.photoPath" alt>
+                <img style="width: 100%; height: 100%;" :src="item.photoPath" >
                 <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
                     :class="{'vl_icon_retrieval_06':  index === curImgIndex}"
                   ></i>
                   {{item.semblance ? item.semblance : 92}}
-                  <span style="font-size: 12px;">%</span>
+                  <span
+                    style="font-size: 12px;"
+                  >%</span>
                 </div>
               </div>
             </swiper-slide>
@@ -130,55 +140,48 @@
 </template>
 <script>
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
+import { getSnapDetail } from "@/views/index/api/api.judge.js";
 export default {
   data() {
     return {
       curImgIndex: 0,
       showSim: false,
       showimg: true,
-      playing:true,
+      playing: true,
       strucInfoList: [
         {
           id: 1,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 2,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 3,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 4,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 5,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 6,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
         },
         {
           id: 7,
-          photoPath:
-            "http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
-        },
-        
+          photoPath:"http://webdev.aorise.org/web-vlink/assets/img/vl_photo.6f88162c.png"
+        }
       ],
       swiperOption: {
-        slidesPerView: 6,
-        spaceBetween: 18,
-        slidesPerGroup: 6,
+        slidesPerView: 10,
+        spaceBetween: 8,
+        slidesPerGroup: 10,
         loop: false,
         slideToClickedSlide: true,
         loopFillGroupWithBlank: true,
@@ -186,29 +189,42 @@ export default {
           nextEl: ".swiper-button-next",
           prevEl: ".swiper-button-prev"
         }
-      }
+      },
+      detailData:{}
+
     };
   },
   mounted() {
     this.tcDiscuss();
   },
   methods: {
-    imgListTap (data, index) {
-        this.curImgIndex = index;
-       // this.sturcDetail = data;
-        //this.drawPoint(data);
-      },
-    videoTap () {
-      let vDom = document.getElementById('capVideo')
+    //
+    getSnapDetail(){
+      let d={
+
+      }
+      getSnapDetail(d).then(res=>{
+        if(res){
+
+        }
+      })
+    },
+    imgListTap(data, index) {
+      this.curImgIndex = index;
+      // this.sturcDetail = data;
+      //this.drawPoint(data);
+    },
+    videoTap() {
+      let vDom = document.getElementById("capVideo");
       if (this.playing) {
         vDom.pause();
       } else {
         vDom.play();
       }
-      vDom.addEventListener('ended', (e) => {
+      vDom.addEventListener("ended", e => {
         e.target.currentTime = 0;
         this.playing = false;
-      })
+      });
       this.playing = !this.playing;
     },
     tcDiscuss() {
@@ -226,7 +242,7 @@ export default {
           this.$_hideLoading();
           if (res) {
             console.log(res);
-            this.strucInfoList = res.data.list;
+            //this.strucInfoList = res.data.list;
             //console.log(JSON.stringify(this.strucInfoList), 'this.strucInfoList')
           }
         })
@@ -245,7 +261,6 @@ export default {
   height: 54px;
   line-height: 54px;
   background: #ffffff;
- 
 }
 .full {
   width: 100%;
@@ -346,10 +361,9 @@ export default {
         margin-right: 10px;
       }
     }
-    
   }
 }
-.playSee{
+.playSee {
   display: inline-block;
   margin-top: 10px;
   padding: 6px 25px;
@@ -360,98 +374,98 @@ export default {
   color: #ffffff;
 }
 .div {
-      display: inline-block;
-      padding: 5px 10px;
-      margin: 5px 0px;
-      background: rgba(250, 250, 250, 1);
-      border: 1px solid rgba(242, 242, 242, 1);
-      label {
-        font-size: 14px;
-        font-weight: 400;
-        color: rgba(153, 153, 153, 1);
-        line-height: 24px;
-        border-left: solid 1px rgba(242, 242, 242, 1);
-        padding-left: 10px;
-      }
-      span {
-        padding-right: 10px;
-        font-size: 14px;
-        font-weight: 400;
-        color: rgba(51, 51, 51, 1);
-        line-height: 24px;
-      }
-    }
+  display: inline-block;
+  padding: 5px 10px;
+  margin: 5px 0px;
+  background: rgba(250, 250, 250, 1);
+  border: 1px solid rgba(242, 242, 242, 1);
+  label {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(153, 153, 153, 1);
+    line-height: 24px;
+    border-left: solid 1px rgba(242, 242, 242, 1);
+    padding-left: 10px;
+  }
+  span {
+    padding-right: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(51, 51, 51, 1);
+    line-height: 24px;
+  }
+}
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
 }
-.infobox{
-  margin:35px auto;
+.infobox {
+  margin: 35px auto;
   width: 90%;
   height: calc(100% - 270px);
   min-height: 260px;
   box-shadow: 5px 5px 15px 1px #dddddd;
   display: flex;
-  .flex1{
+  .flex1 {
     flex: 1;
   }
-  .spimg{
+  .spimg {
     width: 100%;
     height: 100%;
   }
-  .infom{
+  .infom {
     padding: 0px 20px;
   }
 }
 .bkt {
-            background: #E9E7E8;
-            height: 100%;
-            text-align: center;
-            &:hover {
-              .play_btn {
-                display: block!important;
-              }
-            }
-            .play_btn {
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              margin: auto;
-              background: rgba(0, 0, 0, .4);
-              width: 1rem;
-              height: 1rem;
-              text-align: center;
-              line-height: 1rem;
-              -webkit-border-radius: 50%;
-              -moz-border-radius: 50%;
-              border-radius: 50%;
-              cursor: pointer;
-              i {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                margin: auto;
-                height: 22px!important;
-              }
-            }
-            >video {
-              width: auto;
-              height: 100%;
-            }
-            &:after {
-              content: none!important;
-            }
-            &:before {
-              content: none!important;
-            }
-            -webkit-box-shadow: 0 0 0!important;
-            -moz-box-shadow: 0 0 0!important;
-            box-shadow: 0 0 0!important;
-          }
+  background: #e9e7e8;
+  height: 100%;
+  text-align: center;
+  &:hover {
+    .play_btn {
+      display: block !important;
+    }
+  }
+  .play_btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    background: rgba(0, 0, 0, 0.4);
+    width: 1rem;
+    height: 1rem;
+    text-align: center;
+    line-height: 1rem;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    cursor: pointer;
+    i {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      height: 22px !important;
+    }
+  }
+  > video {
+    width: auto;
+    height: 100%;
+  }
+  &:after {
+    content: none !important;
+  }
+  &:before {
+    content: none !important;
+  }
+  -webkit-box-shadow: 0 0 0 !important;
+  -moz-box-shadow: 0 0 0 !important;
+  box-shadow: 0 0 0 !important;
+}
 .bkt {
   background: #eeeeee;
   // width: 40rem;
@@ -470,8 +484,9 @@ export default {
     align-items: center;
   }
 }
+.point{
 .struc-list {
-
+  // height: 100px;
   width: 90%;
   margin: 0 auto;
   padding: 0.44rem 0 0.34rem 0;
@@ -512,7 +527,7 @@ export default {
         border: 1px solid #ffffff;
         padding: 2px;
         .vl_jfo_sim {
-          font-size:12px;
+          font-size: 12px;
           height: 16px;
           margin-top: 0;
           /*display: inline-block;*/
@@ -532,6 +547,7 @@ export default {
       }
     }
   }
+}
 }
 </style>
 <style lang="scss">
