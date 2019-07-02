@@ -59,3 +59,16 @@ export function getAllBayonetList(params) {
     mode: baseModeName
   })
 }
+
+/**
+ * 根据卡口标识查询设备列表信息   
+ * @param {object} params
+ */
+export function getDeviceByBayonetUid(params) {
+  return request({
+    url: '/device-service/bayonetUid',
+    method: 'get',
+    params,
+    mode: baseModeName
+  })
+}

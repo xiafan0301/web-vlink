@@ -21,11 +21,11 @@ const dataList = {
   taskType: 25, // 任务类型
   ctcStatus: 26, // 调度事件状态
   licensePlateColor: 30, //车牌颜色
-  vehicleType: 31, // 车辆类型
   numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
+  vehicleType: 44, // 车辆类型
 }
 // 处理方式
 const handeMethods = {
@@ -50,5 +50,9 @@ const proccessEventType = {
   acceptId: 4, // 受理
   feedbackId: 5 // 反馈
 }
+const cityCode = [
+  '京','津','冀','晋','蒙','辽','吉','黑','黑','苏','浙','皖','闽','赣','鲁','豫','鄂','湘','粤','桂','琼','川','贵','云','渝','藏','陕','甘','青','宁','新','港','澳','台'
+]
 
-export { dataList, handeMethods, operationType, proccessEventType };
+
+export { dataList, handeMethods, operationType, proccessEventType,cityCode };

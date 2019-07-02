@@ -42,7 +42,7 @@
             </div>
           </div>
         </div>
-        <div class="vc_gcck_r" v-if="videoTotal > 0">
+        <div class="vc_gcck_r" v-if="videoTotal !== null && videoTotal > 0">
           <ul class="vc_gcck_rt" :class="'video_list_' + videoTotal">
             <li v-for="item in videoTotal" :key="'video_list_' + item">
               <div v-if="videoList[item - 1]">
@@ -57,19 +57,24 @@
           <ul class="vc_gcck_rb">
             <li >
               <div class="vc_gcck_rbc">
-                <p>今日告警</p>
-                <h2>2354</h2>
+                <p>今日抓拍</p>
+                <h2>{{zpTotal}}</h2>
                 <el-button size="small" @click="goToZP">查看更多</el-button>
               </div>
             </li>
-            <li v-for="item in 10" :key="item">
+            <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
               <div class="vc_gcck_rbl">
-                <img src="../../../../../assets/img/temp/video_pic.png" alt="">
-                <div><i class="vl_icon gcck_sj"></i>18-12-24 14:12:17</div>
-                <div><i class="vl_icon gcck_sxt"></i>环保路摄像头002</div>
+                <p>
+                  <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
+                </p>
+                <div class="com_ellipsis"><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
+                <div class="com_ellipsis"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
               </div>
             </li>
           </ul>
+        </div>
+        <div class="vc_gcck_r" v-else-if="videoTotal === 0">
+          <p class="vc_gcck_r_empty">暂无设备，请更换摄像头或卡口</p>
         </div>
         <div class="vc_gcck_r" v-else>
           <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
@@ -82,13 +87,16 @@
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
+import {getDeviceByBayonetUid} from '../../../api/api.base.js';
 import {MapGETmonitorList} from '../../../api/api.map.js';
+import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
+import {formatDate} from '@/utils/util.js';
 export default {
   components: {vehicleBreadcrumb, flvplayer, dbTree},
   data () {
     return {
       showType: 1, // 1实时过车  2历史过车
-      videoTotal: 0, // 1 / 2 / 8
+      videoTotal: null, // 1 / 2 / 8
       videoList: [],
       searchVal1: '',
       searchVal2: '',
@@ -96,14 +104,18 @@ export default {
       doSearch2: {},
       treeList1: [],
       treeList2: [],
-      bResize: {}
+      bResize: {},
+
+      zpTotal: 0,
+      zpList: [],
+      zpDeviceIds: ''
     }
   },
   mounted () {
   },
   methods: {
     goToZP () {
-      this.$router.push({name: 'vehicle_search_gcck_zp'});
+      this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds }});
     },
     changeShowType (type) {
       if (type !== this.showType) {
@@ -113,6 +125,7 @@ export default {
 
     selectItem (type, item) {
       console.log(type, item);
+      let ids = '';
       if (type === 1) { // deviceName
         this.videoTotal = 1;
         this.videoList = [
@@ -122,11 +135,77 @@ export default {
             record: false,
             video: Object.assign({}, item)
           }
-        ]
+        ];
+        ids = item.uid;
+        this.getDeviceSnapSum(ids);
+        this.getDeviceSnapPage(ids);
+        this.zpDeviceIds = ids;
       } else if (type === 2) {
-
+        getDeviceByBayonetUid({
+          bayonetUid: item.uid
+        }).then(res => {
+          if (res && res.data) {
+            let dList = res.data;
+            let iLen = dList.length;
+            if (iLen <= 0) {
+              this.videoTotal = 0;
+              this.videoList = [];
+              this.zpTotal = 0;
+              this.zpList = [];
+            } else {
+              if (iLen > 2) { iLen = 8; }
+              this.videoTotal = iLen;
+              let vList = [];
+              for (let i = 0; i < dList.length; i++) {
+                vList.push({
+                  type: 1,
+                  title: dList[i].deviceName,
+                  record: false,
+                  video: Object.assign({}, dList[i])
+                });
+                ids += dList[i].uid + ',';
+              }
+              this.videoList = vList;
+              this.getDeviceSnapSum(ids);
+              this.getDeviceSnapPage(ids);
+              this.zpDeviceIds = ids;
+            }
+            // this.zpTotal = res.data[0].snapImagesCount;
+            // this.zpList = res.data.slice(0, 10);
+            // console.log(this.zpList);
+          }
+        });
       }
     },
+
+    getDeviceSnapSum (dId) {
+      getDeviceSnapImagesSum({
+        deviceIds: dId,
+        startTime: formatDate(new Date(), 'yyyy-MM-dd'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd'),
+      }).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          this.zpTotal = res.data[0].snapImagesCount;
+          // this.zpList = res.data.slice(0, 10);
+          // console.log(this.zpList);
+        }
+      });
+    },
+
+    getDeviceSnapPage (dId) {
+      getDeviceSnapImagesPage({
+        'where.deviceIds': dId,
+        'where.startTime': formatDate(new Date() - 1000 * 60 * 60 * 24, 'yyyy-MM-dd'),
+        'where.endTime': formatDate(new Date(), 'yyyy-MM-dd'),
+        pageNum: 1,
+        pageSize: 10
+      }).then(res => {
+        if (res && res.data) {
+          this.zpList = res.data.list;
+        }
+      });
+    },
+
     getTreeList1 () {
       this.doSearch1 = {};
     },
@@ -246,9 +325,12 @@ export default {
             &.vc_gcck_rbl {
               width: 162px;
               padding: 10px;
-              > img {
+              > p {
                 width: 142px; height: 142px;
                 margin-bottom: 5px;
+                > img {
+                  width: 100%; height: 100%;
+                }
               }
               > div {
                 position: relative;
