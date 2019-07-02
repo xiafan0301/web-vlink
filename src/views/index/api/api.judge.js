@@ -251,6 +251,32 @@ export function getAllDevice(params) {
   });
 }
 /*--------------------------  车辆侦查--车辆落脚点end  ---------------------------------*/
+
+/**
+ * 查询车辆详情
+ * @param {object} params
+ */
+export function getSnapDetail(params) {
+  return request({
+    url: '/vehicle/snap-detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 
+车辆图片分析接口
+ * @param {object} params
+ */
+export function getPhotoAnalysis(params) {
+  return request({
+    url: '/vehicle-investigate/photo-analysis',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
 /**
  * 查询设备抓拍图片汇总信息
  * @param {object} params

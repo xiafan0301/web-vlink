@@ -14,10 +14,10 @@
             <el-radio-group v-model="input5" @change="changeTab">
               <el-row :gutter="10">
                 <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
+                  <el-radio label="1">从图片提取</el-radio>
                 </el-col>
                 <el-col :span="12">
-                  <el-radio label="2">地图选择</el-radio>
+                  <el-radio label="2">自定义特征</el-radio>
                 </el-col>
               </el-row>
             </el-radio-group>
@@ -39,8 +39,8 @@
                 <img v-else-if="curImageUrl" :src="curImageUrl">
                 <div v-else>
                   <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#fefefe; font-size: 100px;"
+                    class="vl_icon el-icon-camera-solid"
                   ></i>
                   <span>点击上传图片</span>
                 </div>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :loading="searching" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
               <div class="chara">
                 <span>湘H3A546</span>
                 <span>红色</span>
@@ -148,11 +148,20 @@
             <div class="time-search">
               <el-date-picker
                 v-model="data1"
+                type="daterange"
+                class="full"
+                    value-format="yyyy-MM-dd"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+              </el-date-picker>
+              <!-- <el-date-picker
+                v-model="data1"
                 type="date"
                 value-format="yyyy-MM-dd"
                 placeholder="选择日期"
                 class="full"
-              ></el-date-picker>
+              ></el-date-picker> -->
             </div>
             <div class="license-plate-search">
               <el-row :gutter="5">
@@ -266,7 +275,7 @@ import BigImg from "@/components/common/bigImg.vue";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
-  JtcPUTAppendixsOrder
+  JtcPUTAppendixsOrder,getPhotoAnalysis
 } from "../../../api/api.judge.js";
 import { setTimeout } from "timers";
 export default {
@@ -370,6 +379,17 @@ export default {
     this.setDTime();
   },
   methods: {
+    //获取图片信息
+    getPhotoAnalysis(){
+      let d={
+        uploadImgUrls:""
+      }
+      getPhotoAnalysis(d).then(res=>{
+        if(res){
+
+        }
+      })
+    },
     //查看详情
     handleClick(v){
  this.$router.push({name: 'vehicle_search_lxwfdetail', query: {}});
@@ -460,6 +480,17 @@ export default {
       });
       item.checked = true;
     },
+    //获取特征
+    getItem(){
+      //this.curImageUrl =
+      getPhotoAnalysis({
+        uploadImgUrls :this.curImageUrl
+      }).then(res=>{
+        if(res){
+
+        }
+      })
+    },
     //从历史上传图片中上传
     addHisToImg() {
       this.historyPicDialog = false;
@@ -487,7 +518,7 @@ export default {
         new Date(curDate - curS).getDate();
       let _e =
         date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      //this.searchData.time = [_s, _e];
+      this.data1 = [_e, _e];
     },
     //重置
     resetSearch() {
@@ -495,8 +526,9 @@ export default {
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
+      this.input4 = null,
       this.setDTime();
-      this.getVehicleDetail();
+    //this.getVehicleDetail();
     },
     //查询
     getVehicleDetail() {
