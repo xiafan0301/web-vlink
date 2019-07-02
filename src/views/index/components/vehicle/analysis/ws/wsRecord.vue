@@ -94,6 +94,7 @@
 // import { testData } from './testData.js';
 import Breadcrumb from '../../breadcrumb.vue';
 import { getTailBehindDetail } from '@/views/index/api/api.judge.js'
+import { formatESDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -117,10 +118,10 @@ export default {
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.query.plateNo;
-      const dateStart = this.$route.query.dateStart;
-      const dateEnd = this.$route.query.dateEnd;
+      const dateStart = formatESDate(this.$route.query.dateStart);
+      const dateEnd = formatESDate(this.$route.query.dateEnd);
       const plateNoTb = this.$route.query.plateNoTb;
-      const dateStartTb = this.$route.query.dateStartTb;
+      const dateStartTb = formatESDate(this.$route.query.dateStartTb);
       const params = {
         plateNo,
         dateStart,

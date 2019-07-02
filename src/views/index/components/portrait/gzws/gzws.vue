@@ -182,7 +182,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate } from '@/utils/util.js';
+import { formatESDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -295,7 +295,7 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatDate(this.searchForm.shotTime) + '-》' + formatDate(this.searchForm.dateEnd);
+      const shotTime = formatESDate(this.searchForm.shotTime) + '-' + formatESDate(this.searchForm.dateEnd);
       const params = {
         plateNo: this.searchForm.plateNo,
         shotTime: shotTime
@@ -348,10 +348,10 @@ export default {
           const vehicleType = this.searchForm.vehicleClass.join(':');
           const params = {
             deviceCode: this.searchForm.deviceCode,
-            dateStart: this.searchForm.shotTime,
-            shotTime: this.deviceStartTime,
+            dateStart: formatESDate(this.searchForm.shotTime),
+            shotTime: formatESDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
-            dateEnd: this.searchForm.dateEnd,
+            dateEnd: formatESDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval
           };
