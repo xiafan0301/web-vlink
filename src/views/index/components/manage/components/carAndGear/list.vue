@@ -13,14 +13,14 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="organId">
-          <el-select style="width: 240px;" v-model="searchForm.organId" placeholder="单位">
+        <el-form-item prop="brandNo">
+          <el-select style="width: 240px;" v-model="searchForm.brandNo" placeholder="单位">
             <el-option value='全部运营公司'></el-option>
             <el-option
-              v-for="(item, index) in departmentList"
+              v-for="(item, index) in operateCompanyList"
               :key="index"
-              :label="item.organName"
-              :value="item.uid"
+              :label="item.enumValue"
+              :value="item.enumField"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -56,11 +56,17 @@
           prop="transportNo"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.transportNo && scope.row.transportNo ? scope.row.transportNo : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="车辆号码"
           prop="vehicleNumber"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.vehicleNumber && scope.row.vehicleNumber ? scope.row.vehicleNumber : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="车辆类型"
@@ -85,14 +91,17 @@
           prop="capacityPeople"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.capacityPeople && scope.row.capacityPeople ? scope.row.capacityPeople : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="运营公司"
-          prop="organName"
+          prop="brandName"
           show-overflow-tooltip
           >
           <template slot-scope="scope">
-            <span>{{scope.row.organName && scope.row.organName ? scope.row.organName : '-'}}</span>
+            <span>{{scope.row.brandNo && scope.row.brandNo ? scope.row.brandName : '-'}}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -154,7 +163,7 @@ export default {
       isDeleteLoading: false, // 删除加载中
       searchForm: {
         vehicleType: '全部车辆类型', // 车辆类型
-        organId: '全部运营公司', // 所属单位
+        brandNo: '全部运营公司', // 运营公司
         vehicleNumber: null // 车牌号码
       },
       dataList: [],
@@ -163,6 +172,7 @@ export default {
       userInfo: {}, // 用户信息
       departmentList: [], // 部门列表
       deleteId: null, // 要删除的车辆id
+      operateCompanyList: [], // 运营公司列表
     }
   },
   watch: {
@@ -180,7 +190,7 @@ export default {
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
-    this.getDepartList();
+    this.getOperateCompanyList();
     this.getVehicleTypeList();
     this.getNumberTypeList();
     setTimeout(() => {
@@ -188,6 +198,16 @@ export default {
     }, 500)
   },
   methods: {
+    // 获取运营公司列表
+    getOperateCompanyList () {
+      const operate = dataList.operateCompany;
+      getDiciData(operate)
+        .then(res => {
+          if (res) {
+            this.operateCompanyList = res.data;
+          }
+        })
+    },
     // 获取号牌种类列表
     getNumberTypeList () {
       const type = dataList.numberType;
@@ -207,29 +227,6 @@ export default {
             this.vehicleTypeList = res.data;
           }
         })
-    },
-    // 获取当前部门及子级部门
-    getDepartList () {
-      // let organId = null;
-      // if (this.$store.state.currentOrganObj) {
-      //   organId = this.$store.state.currentOrganObj.uid;
-      // } else {
-      //   organId = this.userInfo.organList[0].uid;
-      // }
-      // const params = {
-      //   'where.proKey': this.userInfo.proKey,
-      //   'where.organPid': organId,
-      //   pageSize: 0
-      // };
-      // getDepartmentList(params)
-      //   .then(res => {
-      //     if (res) {
-      //       this.departmentList.push(this.userInfo.organList[0]);
-      //       res.data.list.map(item => {
-      //         this.departmentList.push(item);
-      //       });
-      //     }
-      //   })
     },
     // 获取车辆列表
     getList () {
@@ -263,6 +260,7 @@ export default {
             this.dataList.map(item => {
               item.vehicleTypeName = '';
               item.numberTypeName = '';
+              item.brandName = '';
 
               this.vehicleTypeList.map(val => {
                 if (item.vehicleType == val.enumField) {
@@ -272,6 +270,11 @@ export default {
               this.numberTypeList.map(val => {
                 if (item.numberType == val.enumField) {
                   item.numberTypeName = val.enumValue;
+                }
+              });
+              this.operateCompanyList.map(val => {
+                if (item.brandNo == val.enumField) {
+                  item.brandName = val.enumValue;
                 }
               });
             });
@@ -294,7 +297,13 @@ export default {
     },
     // 跳至查看详情页面
     skipSelectDetail (obj) {
-      this.$router.push({name: 'car_detail', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'car_detail', query: { id: obj.uid, organObj: organObj }});
     },
     // 跳至新增车辆页面
     skipAddPage () {
