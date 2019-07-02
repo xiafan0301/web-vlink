@@ -12,7 +12,7 @@
             <el-breadcrumb-item :to="{ path: '/event/alarmCtcDetailInfo', query: { id: $route.query.alarmId, status: $route.query.status, objType: $route.query.objType }}">调度详情</el-breadcrumb-item>
           </template>
           <template v-else>
-            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/event/manage' }">事件处理</el-breadcrumb-item>
             <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: {eventId: $route.query.eventId, status: $route.query.status} }">事件详情</el-breadcrumb-item>
           </template>
           <el-breadcrumb-item>预案详情</el-breadcrumb-item>

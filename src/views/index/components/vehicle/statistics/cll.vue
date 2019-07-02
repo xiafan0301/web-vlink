@@ -15,33 +15,20 @@
         <el-select
           v-model="queryForm.devIdData"
           multiple
+          filterable
           popper-class="statistics_select_list"
           @remove-tag="removeSeletedDev"
           @click.native="showChange"
           collapse-tags
           placeholder="请选择卡口">
-          <el-option value="0" label=" "></el-option>
+          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
         </el-select>
-        <div class="search_item" v-show="isShowSelectList">
-          <div class="tab_box">
-            <div @click="changeTab(1)">摄像头</div>
-            <div @click="changeTab(2)">卡口</div>
-          </div>
-          <vue-scroll>
+        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
+          <vue-scroll style="height: 90px;">
             <el-tree
-              v-show="tabIndex === 1"
               :data="data1"
               class="select_tree"
               ref="selectTree1"
-              @check-change="changeSeletedStatus"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-            <el-tree
-              v-show="tabIndex === 2" 
-              :data="data2"
-              class="select_tree"
-              ref="selectTree2"
               @check-change="changeSeletedStatus"
               show-checkbox
               node-key="label">
@@ -74,17 +61,17 @@
         </el-select>
         <el-input v-model="queryForm.warningNum" placeholder="请输入大于0的警戒数值"></el-input>
         <div class="left_btn">
-          <el-button class="reset_btn">重置</el-button>
-          <el-button class="select_btn">统计</el-button>
+          <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
+          <el-button class="select_btn" @click="getCarTrafficSta">统计</el-button>
         </div>
       </div>
       <div class="con_right">
         <div class="right_box">
           <div class="tab_box">
             <div>
-              <i class="el-icon-s-shop" @click="tabIndex = 1"></i>
-              <i class="el-icon-s-marketing" @click="changeTwo"></i>
-              <i class="el-icon-s-flag" @click="tabIndex = 3"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="tabIndex = 1" :class="{'active': tabIndex === 1}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTwo" :class="{'active': tabIndex === 2}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}"></i>
             </div>
             <h1>(年)车流量统计</h1>
             <el-button class="select_btn btn_100">导出</el-button>
@@ -306,40 +293,12 @@ export default {
             label: '二级 3-2'
         }]
       }],
-      data2: [{
-        id: 1,
-        label: '一级 3',
-        children: [{
-            id: 4,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 2,
-        label: '一级 4',
-        children: [{
-            id: 5,
-            label: '二级 2-1'
-        }, {
-            id: 6,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 3,
-        label: '一级 5',
-        children: [{
-            id: 7,
-            label: '二级 3-1'
-        }, {
-            id: 8,
-            label: '二级 3-2'
-        }]
-      }],
       loading: false,
       bkclccList: [{name: 'xxxxxxx'}],
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
-      // 图标参数
+      // 图表参数
       chartData: [
         { date: '1月份', '车流量': 10, '车流量1': 1 },
         { date: '2月份', '车流量': 20, '车流量1': 1 },
@@ -354,46 +313,46 @@ export default {
         { date: '11月份', '车流量': 30, '车流量1': 1 },
         { date: '12月份', '车流量': 30, '车流量1': 1 }
       ],
-      chart: null,
+      // 保存生成的图表用来删除
+      charts: {
+        chart1: null,
+        chart2: null  
+      }
     }
   },
   mounted () {
     this.drawChart1();
   },
   methods: {
+    // 是否显示下拉列表
     showChange () {
       this.isShowSelectList = !this.isShowSelectList;
     },
-    changeTab (tabIndex) {
-      this.tabIndex = tabIndex;
-      // this.cameraData = this.tabIndex === 1 ? this.data1 : this.data2;
-    },
+    // 移除已选择的下拉列表项
     removeSeletedDev (data) {
-      console.log(data, 'removeSeletedDev')
       this.$refs.selectTree1.setChecked(data, false);
     },
-    changeSeletedStatus (data, isSelNode1, isSelNode2) {
-      console.log(data, isSelNode1, isSelNode2, 'changeSeletedStatus');
-      setTimeout(() => {
-        if (!isSelNode1) {
-          if (data.children) {
-            for (let item of data.children) {
-              this.devIdData = this.devIdData.filter(f => f !== item.label);
-            }
-          } else {
-            this.devIdData = this.devIdData.filter(f => f !== data.label);
-          }
-          return;
-        };
-      })
-      if (!data.children) return;
-      const labelList = data.children.map(m => m.label);
-      setTimeout(() => {
-        for (let f of labelList) {
-          this.devIdData.push(f);
+    // 数组去重
+    unique (array) {
+      let obj = {}, resultArray = [];
+      resultArray = array.reduce((item, next) => {
+        if (!obj[next.id]) {
+          obj[next.id] = true;
+          item.push(next);
         }
-        console.log(this.devIdData, 'this.devIdData')
+        return item;
+      }, []);
+      return resultArray;
+    },
+    // 切换下拉列表的选中状态并关联到select上
+    changeSeletedStatus () {
+      let data = [], obj = null;
+      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
+        data.push(f);
       })
+      data = this.unique(data);
+      data = data.filter(f => !f.children);
+      this.queryForm.devIdData = data;
     },
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
@@ -401,15 +360,22 @@ export default {
     handleCurrentChange (page) {
       
     },
+    // 画图表
     drawChart1 () {
-      let temp = document.getElementById('chartContainer1');
-      let chart = new G2.Chart({
-        container: 'chartContainer1',
-        forceFit: true,
-        padding: [ 20, 0, 60, 30 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let chart = null;
+      if (this.charts.chart1) {
+        this.charts.chart1.clear();
+        chart = this.charts.chart1;
+      } else {
+        let temp = document.getElementById('chartContainer1');
+        chart = new G2.Chart({
+          container: 'chartContainer1',
+          forceFit: true,
+          padding: [ 20, 0, 60, 30 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -475,17 +441,23 @@ export default {
       .color('type', [ 'l(270) 0:#0C70F8 1:#0D9DF4' ])
       .size(30)
       chart.render();
+      this.charts.chart1 = chart;
     },
     drawChart2 () {
-      if (this.chart) return;
-      let temp = document.getElementById('chartContainer2');
-      this.chart = new G2.Chart({
-        container: 'chartContainer2',
-        forceFit: true,
-        padding: [ 20, 20, 60, 30 ],
-        width: G2.DomUtil.getWidth(temp),
-        height: G2.DomUtil.getHeight(temp)
-      });
+      let chart = null;
+      if (this.charts.chart2) {
+        this.charts.chart2.clear();
+        chart = this.charts.chart2;
+      } else {
+        let temp = document.getElementById('chartContainer2');
+        chart = new G2.Chart({
+          container: 'chartContainer2',
+          forceFit: true,
+          padding: [ 20, 20, 60, 30 ],
+          width: G2.DomUtil.getWidth(temp),
+          height: G2.DomUtil.getHeight(temp)
+        });
+      }
       let dv = new View().source(this.chartData);
       dv.transform({
         type: 'fold',
@@ -494,9 +466,9 @@ export default {
         value: 'value', // value字段
         retains: ['date']
       });
-      this.chart.source(dv, {});
+      chart.source(dv, {});
       // 坐标轴刻度
-      this.chart.scale('value', {
+      chart.scale('value', {
         max: 120,
         min: 0,
         tickCount: 7,
@@ -504,7 +476,7 @@ export default {
           offset: 50
         }
       });
-      this.chart.axis('date', {
+      chart.axis('date', {
         label: {
           textStyle: {
             fill: '#999999',
@@ -519,7 +491,7 @@ export default {
           lineWidth: 0
         }
       });
-      this.chart.tooltip({
+      chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
@@ -527,17 +499,34 @@ export default {
             <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
         }
       });
-      this.chart.legend(false);
-      this.chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
-      this.chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
-      this.chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
-      this.chart.render();
+      chart.legend(false);
+      chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
+      chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
+      chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
+      chart.render();
+      this.charts.chart2 = chart;
     },
+    // tab切换
     changeTwo () {
       this.tabIndex = 2;
       this.$nextTick(() => {
         this.drawChart2();
       })
+    },
+    // 重置查询表单
+    resetQueryForm () {
+      this.queryForm = {
+        radio: null,
+        carType: null,
+        devIdData: [],
+        lane: null,
+        statementType: null,
+        warningNum: null
+      };
+    },
+    // 获取车流量统计数据
+    getCarTrafficSta () {
+
     }
   }
 }
@@ -565,17 +554,10 @@ export default {
         padding-bottom: 20px;
       }
       .search_item {
-        height: 120px;
+        height: 0;
         width: 232px;
-        .tab_box{
-          width: 100%;
-          display: flex;
-          > div{
-            width: 50%;
-            text-align: center;
-            border: 1px solid #e6e6e6;
-          }
-        }
+        overflow: hidden;
+        transition: all .3s linear;
         .select_tree {
           border: 1px solid #e4e7ed;
           border-radius: 4px;
@@ -608,6 +590,15 @@ export default {
             > i{
               margin-right: 10px;
               cursor: pointer;
+              &.active.vl_icon_vehicle_cll_01{
+                background-position: -1095px -192px;
+              }
+              &.active.vl_icon_vehicle_cll_02{
+                background-position: -1142px -192px;
+              }
+              &.active.vl_icon_vehicle_cll_03{
+                background-position: -1190px -192px;
+              }
             }
           }
           > h1{
@@ -668,7 +659,7 @@ export default {
       color: #999;
     }
     span{
-      color: #333
+      color: #333 
     }
   }
 }

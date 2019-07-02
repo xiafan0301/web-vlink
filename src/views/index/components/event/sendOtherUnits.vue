@@ -3,7 +3,7 @@
     <div class="send-units">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件处理</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/event/untreatEventDetail', query: { eventId: $route.query.eventId, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           <el-breadcrumb-item>转到其他单位</el-breadcrumb-item>
         </el-breadcrumb>

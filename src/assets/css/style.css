@@ -343,12 +343,33 @@
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}
-.vl_icon_vehicle_02 {width: 26px; height: 162px; background-position: -976px -1280px;}  
-.vl_icon_vehicle_02:hover {width: 26px; height: 162px; background-position: -1036px -1280px;}     
-.vl_icon_vehicle_03 {width: 26px; height: 162px; background-position: -1096px -1280px;}
-.vl_icon_vehicle_03:hover {width: 26px; height: 162px; background-position: -1156px -1280px;}
+.vl_icon_vehicle_02 {width: 30px; height: 162px; background-position: -976px -1280px;}  
+.vl_icon_vehicle_02:hover {width: 30px; height: 162px; background-position: -1036px -1280px;}     
+.vl_icon_vehicle_03 {width: 30px; height: 162px; background-position: -1096px -1280px;}
+.vl_icon_vehicle_03:hover {width: 30px; height: 162px; background-position: -1156px -1280px;}
 .vl_icon_vehicle_04 {width: 40px; height: 50px; background-position: -1244px -188px;}
 
+/* 车辆侦查  --车流量统计 */
+.vl_icon_vehicle_cll_01{width: 40px;height: 40px;background-position: -952px -192px;}
+.vl_icon_vehicle_cll_01:hover{background-position: -1095px -192px;}
+.vl_icon_vehicle_cll_02{width: 40px;height: 40px;background-position: -999px -192px;}
+.vl_icon_vehicle_cll_02:hover{background-position: -1142px -192px;}
+.vl_icon_vehicle_cll_03{width: 40px;height: 40px;background-position: -1046px -192px;}
+.vl_icon_vehicle_cll_03:hover{background-position: -1190px -192px;}
+
+/* 车辆侦查  --过车数据统计 */
+.vl_icon_vehicle_gcsj_01{width: 83px;height: 83px;background-position: -966px -939px;}
+.vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1072px -939px;}
+.vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1177px -939px;}
+.vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1280px -939px;}
+
+/* 人脸检索  --人脸数据分析 */
+.vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1039px;}
+.vl_icon_portrait_rlsjfx_02{width: 70px;height: 70px;background-position: -1026px -1039px;}
+.vl_icon_portrait_rlsjfx_03{width: 70px;height: 70px;background-position: -1131px -1039px;}
+.vl_icon_portrait_rlsjfx_04{width: 70px;height: 70px;background-position: -1235px -1039px;}
+.vl_icon_portrait_rlsjfx_05{width: 70px;height: 70px;background-position: -1338px -1039px;}
+.vl_icon_portrait_rlsjfx_06{width: 70px;height: 70px;background-position: -1442px -1039px;}
 
 .vl_content_pad { padding: 10px; }
 
@@ -784,6 +805,10 @@
 .request_tip {
   top: 50%;
   left: 50%;
+}
+.left_error_tip {
+  top: 300px !important;
+  left: 130px;
 }
 /*部门管理--删除部门的提示样式*/
 .delete_depart {

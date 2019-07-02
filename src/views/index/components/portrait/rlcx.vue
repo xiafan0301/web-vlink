@@ -16,7 +16,7 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item label="区域：" label-width="55px">
-            <el-radio-group v-model="searchForm.type">
+            <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
               <el-radio :value="1" label="列表选择"></el-radio>
               <el-radio :value="2" label="地图选择"></el-radio>
             </el-radio-group>
@@ -105,12 +105,15 @@
         </div>
       </div>
     </div>
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="openMap" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
-  components: {vehicleBreadcrumb},
+  components: {vehicleBreadcrumb, mapSelector},
   data () {
     return {
       searchForm: {
@@ -129,10 +132,22 @@ export default {
         currentPage: 1,
         pageSize: 12,
         total: 2312
-      }
+      },
+
+      openMap: false
     }
   },
   methods: {
+    mapSelectorEmit (result) {
+      console.log('mapSelectorEmit', result);
+    },
+
+    areaTypeChanged (val) {
+      console.log(val);
+      if (val === '地图选择') {
+        this.openMap = !this.openMap;
+      }
+    },
     searchSubmit () {
     },
     searchReset () {
