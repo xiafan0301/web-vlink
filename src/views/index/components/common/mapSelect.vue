@@ -3,8 +3,17 @@
     <div class="mapbox" id="mapSelect"></div>
     <div class="setPost">
       <div>
-        <el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">
-          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+        <!-- <el-input placeholder="请输入地名，快速定位地址" v-model="input3" @keyup.native="seacher()"  class="input-with-select"> -->
+          <el-autocomplete
+      class="inline-input"
+      v-model="input3"
+      :fetch-suggestions="querySearch"
+      placeholder="请输入内容"
+      value-key="name"
+      :trigger-on-focus="false"
+      @select="handleSelect"
+    ></el-autocomplete>
+          <el-button slot="append" icon="el-icon-search" class="select_btn"  @click="setCenter()"></el-button>
         </el-input>
       </div>
       <div class="drawBox">
@@ -38,13 +47,74 @@ export default {
       mouseTool: null,
       selAreaPolygon: null,
       delSelAreaIcon: null,
-      lnglat:null
+      lnglat:null,
+      restaurants: [],
     };
   },
   mounted() {
     this.renderMap();
   },
   methods: {
+     querySearch(queryString, cb) {
+       //this.seacher(queryString)
+        
+         
+         this.$nextTick(() => {
+           this.seacher(queryString).then(v=>{
+             //console.log(v);
+              var restaurants = v
+          //  console.log(restaurants)
+            var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+            // console.log(results)
+             cb(results);
+        // 调用 callback 返回建议列表的数据
+          // clearTimeout(this.timeout);
+          //   this.timeout = setTimeout(() => {
+          //     cb(results);
+          //   }, 3000 * Math.random());
+       // cb(results);
+             
+           })
+          
+            })
+        
+        
+      },
+      handleSelect(item) {
+        // console.log(item);
+        let new_center=item.location
+        this.amap.setZoomAndCenter(16, new_center);
+      },
+      createFilter(queryString) {
+        return (restaurant) => {
+          // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));   
+          
+          return (restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1);
+        };
+      },
+      seacher(v){
+        var placeSearch = new AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          city: '021'
+        })
+        
+      if(!!v){
+           let _this=this
+          return new Promise((resolve, reject)=>{
+           placeSearch.search(v,  (status, result) =>{
+          // 查询成功时，result即对应匹配的POI信息
+           let pois = result.poiList.pois;
+           _this.restaurants=pois
+            resolve(pois);
+            
+
+          })
+
+         })
+     
+      }
+      //return pois
+    },
     clickTab(val){
       this.hover = this.hover==val?'':val
       if(!this.hover){
@@ -120,14 +190,14 @@ export default {
     setCenter(){
        var _this=this
       // console.log(this.input3);
-       var placeSearch = new AMap.PlaceSearch({
+       let placeSearch = new AMap.PlaceSearch({
       // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
       city: '021'
     })
     placeSearch.search(this.input3, function (status, result) {
        // 查询成功时，result即对应匹配的POI信息
       //  console.log(result)
-       var pois = result.poiList.pois;
+       let pois = result.poiList.pois;
        if(pois.length>0){
          let new_center=pois[0].location
         _this.amap.setZoomAndCenter(16, new_center);
