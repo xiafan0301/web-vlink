@@ -384,7 +384,7 @@ export default {
             this.devIdData = this.devIdData.filter(f => f !== data.label);
           }
           return;
-        };
+        }
       })
       if (!data.children) return;
       const labelList = data.children.map(m => m.label);
