@@ -78,6 +78,7 @@ export default {
         this.$emit("selectMap",this.pointData)
     },
     cancelMap(){
+      this.amap.clearMap();
       this.$emit("closeMap")
     },
     querySearch(queryString, cb) {
