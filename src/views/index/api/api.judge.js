@@ -222,4 +222,83 @@ export function getIdNoList(params) {
     mode: 'judge'
   });
 }
-/*--------------------------  人脸检索--身份核实send  ---------------------------------*/
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  车辆侦查--车辆落脚点start  ---------------------------------*/
+/**
+ * 查询车辆落脚点
+ * @param {object} params
+ */
+export function getVehicleShot(params) {
+  return request({
+    url: '/vehicle/shot-num',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询所有的设备
+ * @param {object} params
+ */
+export function getAllDevice(params) {
+  return request({
+    url: '/device-service/all-deviceInfo',
+    method: 'get',
+    params,
+    mode: 'base'
+  });
+}
+/*--------------------------  车辆侦查--车辆落脚点end  ---------------------------------*/
+
+/**
+ * 查询车辆详情
+ * @param {object} params
+ */
+export function getSnapDetail(params) {
+  return request({
+    url: '/vehicle/snap-detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 
+车辆图片分析接口
+ * @param {object} params
+ */
+export function getPhotoAnalysis(params) {
+  return request({
+    url: '/vehicle-investigate/photo-analysis',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesSum(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-sum',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesPage(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
