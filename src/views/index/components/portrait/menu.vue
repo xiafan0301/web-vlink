@@ -1,6 +1,13 @@
 <template>
   <ul class="vl_port_index clearfix">
     <li>
+      <router-link :to="{name: 'portrait_rlcx'}">
+        <img src="../../../../assets/img/portrait_li_bg.png" alt="">
+        <span class="ptt_li_icon vl_icon2 vl_icon2_101"></span>
+        <span class="ptt_li_text">人脸查询</span>
+      </router-link>
+    </li>
+    <li>
       <router-link :to="{name: 'vehicle_search_clcx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_101"></span>
@@ -64,7 +71,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'peer_analysis'}">
+      <router-link :to="{name: 'peer_analysis_list'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_110"></span>
         <span class="ptt_li_text">同行分析</span>

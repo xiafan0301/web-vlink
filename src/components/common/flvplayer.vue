@@ -713,17 +713,19 @@ export default {
       this.tape.loading  = true;
       this.$message('开始录像。');
       this.tape.tapeTime = 0;
-      this.tape.tapeTimeInval = window.setInterval(() => {
-        this.tape.tapeTime += 1;
-      }, 1000);
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
       }).then(res => {
         if (res && res.data) {
+          this.tape.tapeTimeInval = window.setInterval(() => {
+            this.tape.tapeTime += 1;
+          }, 1000);
           // console.log(res.data);
           this.tape.recordId = res.data.recordId;
           this.tape.loading  = false; // 此时才可以触发结束事件
         } else {
+          this.tape.active = false;
+          this.tape.loading  = false;
           if (this.tape.tapeTimeInval) {
             window.clearInterval(this.tape.tapeTimeInval);
           }

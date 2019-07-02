@@ -67,13 +67,13 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="运营公司:" prop="organId">
-            <el-select style="width: 40%;" v-model="addCar.organId" placeholder="请选择运营公司">
+          <el-form-item label="运营公司:" prop="brandNo">
+            <el-select style="width: 40%;" v-model="addCar.brandNo" placeholder="请选择运营公司">
               <el-option
-                v-for="(item, index) in departmentList"
+                v-for="(item, index) in operateCompanyList"
                 :key="index"
-                :label="item.organName"
-                :value="item.uid"
+                :label="item.enumValue"
+                :value="item.enumField"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -114,6 +114,7 @@ export default {
         numberType: null, // 号牌种类
         numberColor: null, // 号牌颜色
         organId: null, // 所属单位
+        brandNo: null, // 运营公司
         deviceAccount: null, // 设备账号
         devicePassword: null // 访问密码
       },
@@ -151,6 +152,7 @@ export default {
       userInfo: {}, // 用户信息
       numberTypeList: [], // 号牌种类
       departmentList: [], // 部门列表
+      operateCompanyList: [], // 运营公司列表
     }
   },
   mounted () {
@@ -159,9 +161,20 @@ export default {
     this.getVehicleTypeList();
     this.getVehicleColor();
     this.getNumberTypeList();
+    this.getOperateCompanyList();
     this.getDepartList();
   },
   methods: {
+    // 获取运营公司列表
+    getOperateCompanyList () {
+      const operate = dataList.operateCompany;
+      getDiciData(operate)
+        .then(res => {
+          if (res) {
+            this.operateCompanyList = res.data;
+          }
+        })
+    },
     // 获取号牌种类列表
     getNumberTypeList () {
       const type = dataList.numberType;

@@ -15,11 +15,12 @@
       <vue-scroll>
         <div class="content">
           <el-tree
+            ref="departTree"
             class="depart_tree_list"
             :data="allDepartmentList"
             node-key="uid"
             highlight-current
-            :current-node-key="activeSelect"
+            current-node-key
             :default-expanded-keys="defaultExpandKey"
             icon-class="el-icon-arrow-right"
             @node-click="handleNodeClick"
@@ -227,6 +228,7 @@ import { apiAreaList } from '@/views/index/api/api.base.js';
 export default {
   data () {
     return {
+      isSearch: false, // 是否搜索部门
       keyWord: null, // 根据部门名称搜索部门
       closeShow: false, // 显示清除输入框图标
       state: 1,
@@ -294,12 +296,34 @@ export default {
       finalData: []
     }
   },
+  // created () {
+  //   this.$nextTick(() => {
+  //     this.$refs.departTree.setCurrentKey(this.userInfo.organList[0].uid);
+  //   });
+  // },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
     this.addUnit.proKey = this.userInfo.proKey;
     this.editUnit.proKey = this.userInfo.proKey;
+    
+    // if (localStorage.getItem('organId')) {
+    //   console.log('3333')
+    //   console.log(localStorage.getItem('organId'))
+    //   // this.activeSelect = localStorage.getItem('organId');
+    //   // this.$nextTick(() => {
+    //   //   console.log('asdasd')
+    //   setTimeout(() => {
+    //     this.$nextTick(() => {
 
+    //       this.$refs.departTree.setCurrentKey(100);
+    //       console.log(this.$refs.departTree.getCurrentKey);
+    //     })
+
+    //   }, 1000)
+    //   // });
+    // }
+    // console.log(this.activeSelect)
     this.getDepartList();
     this.getAreaList();
     this.getUsersData();
@@ -405,10 +429,18 @@ export default {
     },
     // 获取当前部门及子级部门
     getDepartList () {
+       this.allDepartmentList = [];
+       this.departmentList = [];
+       let organPid = null;
+       if (this.isSearch) {
+         organPid = null;
+       } else {
+         organPid = this.userInfo.organList[0].uid;
+       }
       const params = {
         'where.organName': this.keyWord,
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': organPid,
         pageSize: 0
       };
       getDepartmentList(params)
@@ -428,25 +460,42 @@ export default {
               this.departmentList.push(item);
             });
 
-            this.handleDepartData(this.allDepartmentList, this.departmentList);
+            if (this.isSearch) {
+              let departmentList = [];
+              departmentList.push(this.departmentList[0]);
+
+              this.defaultExpandKey.push(this.departmentList[0].uid);
+              
+              this.handleDepartData(departmentList, this.departmentList);
+            } else {
+              this.defaultExpandKey.push(this.allDepartmentList[0].uid);
+
+              this.handleDepartData(this.allDepartmentList, this.departmentList);
+            }
           }
         })
     },
-    
     // 节点被选中
     handleNodeClick (obj) {
       this.activeSelect = obj.uid;
       this.$store.commit('setCurrentOrgan', {
         currentOrganObj: obj
       });
+      // // this.$nextTick(() => {
+      //   this.$refs.departTree.setCurrentKey(obj.uid);
+      // // });
+      // console.log(this.$refs.departTree.getCurrentKey())
+      // localStorage.setItem('organId', obj.uid);
     },
     // 根据部门进行搜索
     searchData () {
+      this.isSearch = true;
       this.getDepartList();
       this.closeShow = true;
     },
     // 清空搜索框
     onClear () {
+      this.isSearch = false;
       this.closeShow = false;
       this.keyWord = null;
       this.getDepartList();

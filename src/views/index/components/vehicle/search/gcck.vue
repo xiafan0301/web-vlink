@@ -20,7 +20,9 @@
               </el-input>
             </div>
             <div class="gcck_ll_l">
-              <div></div>
+              <div>
+                <div is="dbTree" @selectItem="selectItem" :likeKey="searchVal1" :doSearch="doSearch1"></div>
+              </div>
             </div>
           </div>
           <div v-show="showType === 2">
@@ -34,11 +36,13 @@
               </el-input>
             </div>
             <div class="gcck_ll_l">
-              <div></div>
+              <div>
+                <div is="dbTree" @selectItem="selectItem" :likeKey="searchVal2" :doSearch="doSearch2"></div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="vc_gcck_r">
+        <div class="vc_gcck_r" v-if="videoTotal > 0">
           <ul class="vc_gcck_rt" :class="'video_list_' + videoTotal">
             <li v-for="item in videoTotal" :key="'video_list_' + item">
               <div v-if="videoList[item - 1]">
@@ -67,6 +71,9 @@
             </li>
           </ul>
         </div>
+        <div class="vc_gcck_r" v-else>
+          <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
+        </div>
       </div>
     </div>
   </div>
@@ -74,48 +81,25 @@
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
+import dbTree from '@/components/common/dbTree.vue';
+import {MapGETmonitorList} from '../../../api/api.map.js';
 export default {
-  components: {vehicleBreadcrumb, flvplayer},
+  components: {vehicleBreadcrumb, flvplayer, dbTree},
   data () {
     return {
       showType: 1, // 1实时过车  2历史过车
-      videoTotal: 2, // 1 / 2 / 8
-      videoList: [
-        { type: 1, title: '测试设备1', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备2', record: false, video: { uid: 4 } },
-        { type: 1, title: '测试设备3', record: false, video: { uid: 5 } },
-        { type: 1, title: '测试设备4', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备5', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备6', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备7', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备8', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备9', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备10', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备1', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备2', record: false, video: { uid: 4 } },
-        { type: 1, title: '测试设备3', record: false, video: { uid: 5 } },
-        { type: 1, title: '测试设备4', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备5', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备6', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备7', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备8', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备9', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备10', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备1', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备2', record: false, video: { uid: 4 } },
-        { type: 1, title: '测试设备3', record: false, video: { uid: 5 } },
-        { type: 1, title: '测试设备4', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备5', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备6', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备7', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备8', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备9', record: false, video: { uid: 3 } },
-        { type: 1, title: '测试设备10', record: false, video: { uid: 3 } }
-      ],
+      videoTotal: 0, // 1 / 2 / 8
+      videoList: [],
       searchVal1: '',
       searchVal2: '',
+      doSearch1: {},
+      doSearch2: {},
+      treeList1: [],
+      treeList2: [],
       bResize: {}
     }
+  },
+  mounted () {
   },
   methods: {
     goToZP () {
@@ -126,10 +110,29 @@ export default {
         this.showType = type;
       }
     },
+
+    selectItem (type, item) {
+      console.log(type, item);
+      if (type === 1) { // deviceName
+        this.videoTotal = 1;
+        this.videoList = [
+          {
+            type: 1,
+            title: item.deviceName,
+            record: false,
+            video: Object.assign({}, item)
+          }
+        ]
+      } else if (type === 2) {
+
+      }
+    },
     getTreeList1 () {
+      this.doSearch1 = {};
     },
     getTreeList2 () {
-    }
+      this.doSearch2 = {};
+    },
   }
 }
 </script>
@@ -263,6 +266,11 @@ export default {
             }
           }
         }
+      }
+      > .vc_gcck_r_empty {
+        padding-top: 20px;
+        text-align: center;
+        color: #999;
       }
     }
   }
