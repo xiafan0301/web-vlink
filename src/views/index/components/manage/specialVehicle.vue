@@ -15,8 +15,10 @@
               @click="showGroupDeviceInfo(item.id)"
             >
               <span>{{item.name}}  ({{item.portraitNum}})</span>
-              <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.id)"></i>
-              <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showOperateGroupDialog('edit', item)"></i>
+              <template v-if="!item.isDefault">
+                <i class="operation_btn del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog(item.id)"></i>
+                <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showOperateGroupDialog('edit', item)"></i>
+              </template>
             </li>
           </ul>
         </vue-scroll>
@@ -95,7 +97,7 @@
                 <div class="title">
                   <p>
                     <span>详细资料</span>
-                    <i v-show="item.origin !== 1" class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('carForm', 'edit', item)"></i>
+                    <i class="operation_btn edit_btn vl_icon vl_icon_manage_7" @click="showAddVehicleDialog('carForm', 'edit', item)"></i>
                   </p>
                   <el-checkbox class="check_box" v-model="item.isDelete" @change="handleChangeCheckBox(index, item.isDelete)"></el-checkbox>
                 </div>
@@ -109,14 +111,32 @@
                   <span v-show="item.numberColor">{{item.numberColor}}</span>
                 </div>
                 <div class="info_list">
-                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}</span><span v-show="item.ownerIdCard">（{{item.ownerIdCard}}）</span>
+                  <span v-show="item.ownerName">{{item.ownerName && item.ownerName}}<span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span></span>
+                  <!-- <span v-show="item.ownerIdCard">({{item.ownerIdCard}})</span> -->
                 </div>
                 <div class="info_list">
-                  <span v-show="item.desci">{{item.desci && item.desci}}</span>
+                  <span v-show="item.desci" :title="item.desci">{{item.desci && item.desci}}</span>
                 </div>
-                <div class="info_list" v-show="item.groupList && item.groupList.length > 0">
-                  <span v-for="(item, index) in item.groupList" :key="index">{{item.groupName}}</span>
-                  <span>更多组</span>
+                <div class="info_list group_list" v-show="item.groupList && item.groupList.length > 0">
+                  <span v-show="index < 2" v-for="(item, index) in item.groupList" :key="index" :title="item.groupName">{{item.groupName}}</span>
+                  <template v-if="item.groupList.length > 2">
+                    <div class="more">
+                      <el-popover
+                        placement="left-start"
+                        width="220"
+                        popper-class="more_popover_box"
+                        trigger="hover">
+                        <vue-scroll>
+                          <template>
+                            <div class="more_popover">
+                              <span :title="val.groupName" v-for="(val, index) in item.groupList" :key="index + val">{{val.groupName}}</span>
+                            </div>
+                          </template>
+                        </vue-scroll>
+                        <span slot="reference" class="more_hover">更多组</span>
+                      </el-popover>
+                    </div>
+                  </template>
                 </div>
               </div>
             </li>
@@ -152,12 +172,11 @@
         <div class="left">
           <div :class="['upload_pic', {'hidden': dialogImageUrl}]">
             <el-upload
-              :disabled="isAddDisabled"
+              :disabled="isAddImgDisabled"
               ref="uploadPic"
               accept="image/*"
               :limit="1"
               :action="uploadUrl"
-              :data="{projectType: 2}"
               list-type="picture-card"
               :on-success="uploadPicSuccess"
               :on-preview="handlePictureCardPreview"
@@ -167,7 +186,7 @@
               <i class="vl_icon vl_icon_control_14"></i>
             </el-upload>
           </div>
-          <template v-if="!isAddDisabled">
+          <template v-if="!isAddImgDisabled">
             <h1 class="vl_f_999">点击修改车像</h1>
             <p>请上传车辆图片</p>
           </template>
@@ -231,8 +250,8 @@
               <el-form-item prop="ownerName">
                 <el-input v-model="carForm.ownerName" placeholder="车主姓名" style="width: 85%;" :disabled="isAddDisabled"></el-input>
               </el-form-item>
-              <el-form-item prop="idType">
-                <el-select v-model="carForm.idType" placeholder="证件类型" style="width: 85%;" :disabled="isAddDisabled">
+              <el-form-item prop="ownerIdType">
+                <el-select v-model="carForm.ownerIdType" placeholder="证件类型" style="width: 85%;" :disabled="isAddDisabled">
                   <el-option
                     v-for="item in cardTypeList"
                     :key="item.value"
@@ -258,7 +277,7 @@
                 <el-input type="textarea" :show-word-limit="true" maxlength="100" rows="3" style="width: 85%;" v-model="carForm.desci" placeholder="描述" :disabled="isAddDisabled"></el-input>
               </el-form-item>
               <el-form-item style="margin-left: 20px;">
-                <el-button class="reset_btn" style="width: 140px;" @click="cancalOperation('carForm')">取消</el-button>
+                <el-button class="reset_btn" style="width: 140px;" @click="cancelOperation('carForm')">取消</el-button>
                 <template v-if="isAddVehicle">
                   <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
                 </template>
@@ -296,15 +315,15 @@
       class="dialog_comp"
       >
       <div class="content_body">
-        <el-form :model="groupForm" ref="groupForm" :rules="groupRules" >
+        <el-form :model="groupForm" ref="groupForm" :rules="groupRules" class="group_form">
           <el-form-item label="组名:" prop="groupName" label-width="70px">
-            <el-input placeholder="请输入组名称" v-model="groupForm.groupName" style="width: 100%;" maxlength="6" @blur="handleCheckGroupName"></el-input>
-            <p class="group_error_tip" v-show="isShowError">分组名称不允许重复</p>
+            <el-input placeholder="请输入组名称" :class="[isShowError ? 'error_input' : '']" v-model="groupForm.groupName" style="width: 100%;" maxlength="6" @blur="handleCheckGroupName"></el-input>
+            <span class="group_error_tip" v-show="isShowError">分组名称不允许重复</span>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelOperation('groupForm')">取消</el-button>
+        <el-button @click="cancelOperationGroup('groupForm')">取消</el-button>
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="addGroup('groupForm')" v-if="dialogTitle === '新增组'">新增</el-button>
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
       </div>
@@ -317,7 +336,7 @@ import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkVelRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
@@ -348,15 +367,15 @@ export default {
       dialogVisiable: false, // 新建/修改车辆弹出框
       fileList: [],
       dialogImageUrl: null,
-      uploadUrl: ajaxCtx.base + '/appendix', // 图片上传地址
+      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       activeId: null, // 当前选中的分组id
-      isAddDisabled: false, // 是否能添加图片
+      isAddImgDisabled: false, // 是否能添加图片
       picHeight: null,
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      pagination: { total: 0, pageSize: 4, pageNum: 1 },
       groupList: [], // 车辆分组
       //证件类型列表数据
       cardTypeList: [
-        {label: '身份证', value: '1'}
+        {label: '身份证', value: 1}
       ],
       searchForm: {
         dateTime: [],
@@ -370,10 +389,12 @@ export default {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
         vehicleColor: null, // 车身颜色
+        vehicleBrand: null, // 车辆品牌
         vehicleType: null, // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
+        ownerIdType: null, // 证件类型
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
@@ -499,6 +520,7 @@ export default {
         'where.vehicleNumber': this.searchForm.vehicleNo,
         'where.groupId': this.activeId,
         pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
       };
       getSpecialVehicleList(params)
         .then(res => {
@@ -507,14 +529,46 @@ export default {
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
               item.isDelete = false;
+              this.vehicleTypeList.map(val => {
+                if (val.enumField === item.vehicleType) {
+                  item.vehicleType = val.enumValue;
+                }
+              });
+              this.vehicleColorList.map(val => {
+                if (val.enumField === item.vehicleColor) {
+                  item.vehicleColor = val.enumValue;
+                }
+              });
+              this.numberTypeList.map(val => {
+                if (val.enumField === item.numberType) {
+                  item.numberType = val.enumValue;
+                }
+              });
+              this.numColorList.map(val => {
+                if (val.value === item.numberColor) {
+                  item.numberColor = val.label;
+                }
+              });
             });
           }
         })
     },
     // 判断分组名称是否重复
-    handleCheckGroupName (val) {
-      if (val) {
-        
+    handleCheckGroupName () {
+      if (this.groupForm.groupName) {
+        const params = {
+          groupName: this.groupForm.groupName
+        };
+        checkRename(params)
+          .then(res => {
+            if (res && res.data) {
+              this.isShowError = true;
+            } else {
+              this.isShowError = false;
+            }
+          })
+      } else {
+        this.isShowError = false;
       }
     },
     // change  勾选duoxuankuang
@@ -580,15 +634,19 @@ export default {
       }
     },
     // 取消添加/编辑组
-    cancelOperation (form) {
+    cancelOperationGroup (form) {
       this.$refs[form].resetFields();
       this.groupForm.groupName = null;
       this.showGroupDialog = false;
+      this.isShowError = false;
     },
     // 新增组
     addGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (this.isShowError) {
+            return;
+          }
           const params = {
             groupName: this.groupForm.groupName,
             groupType: 9 // 9---特殊车辆
@@ -617,6 +675,9 @@ export default {
     editGroup (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (this.isShowError) {
+            return;
+          }
           const params = {
             uid: this.currentGroupId,
             groupName: this.groupForm.groupName,
@@ -654,6 +715,14 @@ export default {
             })
             return;
           }
+          if (this.carForm.groupList.length === 0) {
+            this.$message({
+              type: 'error',
+              message: '请先选择所属组',
+              customClass: 'request_tip'
+            })
+            return;
+          }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
           this.isVehicleLoading = true;
           addSpecialVehicle(this.carForm)
@@ -666,12 +735,13 @@ export default {
                 });
                 this.isVehicleLoading = false;
                 this.dialogVisiable = false;
+                this.isAddDisabled = false;
                 this.getGroupList();
                 this.getVehicleList();
               } else {
                 this.isVehicleLoading = false;
               }
-              this.$refs[form].resetFields();
+              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -689,6 +759,14 @@ export default {
             })
             return;
           }
+          if (this.carForm.groupList.length === 0) {
+            this.$message({
+              type: 'error',
+              message: '请先选择所属组',
+              customClass: 'request_tip'
+            })
+            return;
+          }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
           this.isVehicleLoading = true;
           editSpecialVehicle(this.carForm)
@@ -701,12 +779,13 @@ export default {
                 });
                 this.isVehicleLoading = false;
                 this.dialogVisiable = false;
+                this.isAddDisabled = false;
                 this.getGroupList();
                 this.getVehicleList();
               } else {
                 this.isVehicleLoading = false;
               }
-              this.$refs[form].resetFields();
+              // this.$refs[form].resetFields();
             })
             .catch(() => {this.isVehicleLoading = false;})
         }
@@ -750,7 +829,7 @@ export default {
       this.dialogVisible = true;
     },
     uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.sysCommonImageInfo.fileFullPath;
+      this.dialogImageUrl = file.data.fileFullPath;
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
@@ -806,6 +885,11 @@ export default {
       } else {
         this.isAddVehicle = false;
         this.vehicleTitle = '修改';
+        if (obj.origin === 1) { // 底库的基础数据不可修改，只能修改所属组
+          this.isAddDisabled = true;
+        } else {
+          this.isAddDisabled = false;
+        }
         this.getDetail(obj);
       }
       this.dialogVisiable = true;
@@ -827,21 +911,26 @@ export default {
               this.carForm.desci = res.data.desci;
               this.carForm.ownerName = res.data.ownerName;
               this.carForm.ownerIdCard = res.data.ownerIdCard;
-              // this.carForm.groupList = obj.groupList;
+              this.carForm.ownerIdType = res.data.ownerIdType;
       
               if (res.data.groupList.length > 0) {
                 res.data.groupList.map(item => {
                   this.carForm.groupList.push(item.uid);
                 });
               }
-              this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
-              this.carForm.vehicleType = vehicleType && vehicleType.toString();
-              this.carForm.numberType = numberType && numberType.toString();
+              this.carForm.vehicleColor = res.data.vehicleColor;;
+              this.carForm.vehicleType = res.data.vehicleType;
+              this.carForm.numberType = res.data.numberType;
               this.carForm.numberColor = numberColor && numberColor.toString();
 
             }
           })
       }
+    },
+    // 取消新增--修改车辆
+    cancelOperation (form) {
+      this.$refs[form].resetFields();
+      this.dialogVisiable = false;
     },
     // 根据搜索条件查询车辆
     searchData () {
@@ -1012,12 +1101,29 @@ export default {
               
             }
             .info_list {
-              // margin: 5px 0;
               display: flex;
               flex-wrap: wrap;
-              // width: 100%;
+              .more {
+                >span {
+                  background-color: #FAFAFA;
+                  color: #333333;
+                  font-size: 12px;
+                  border-radius:3px;
+                  padding: 5px 8px;
+                  overflow: hidden;
+                  text-overflow:ellipsis;
+                  white-space: nowrap;
+                  border: 1px solid #F2F2F2;
+                  display: inline-block;
+                  cursor: pointer;
+                  &:hover {
+                    border-color: #0C70F8;
+                    color: #0C70F8;
+                    background-color: #ffffff;
+                  }
+                }
+              }
               >span {
-                // width: 100%;
                 display: inline-block;
                 background-color: #FAFAFA;
                 color: #333333;
@@ -1030,6 +1136,11 @@ export default {
                 text-overflow:ellipsis;
                 white-space: nowrap;
                 border: 1px solid #F2F2F2;
+              }
+            }
+            .group_list {
+              >span {
+                max-width: 80px;
               }
             }
           }
@@ -1125,6 +1236,41 @@ export default {
 .dialog_comp {
   .content_body {
     margin-top: 20px;
+    /deep/ .el-dialog__body {
+      padding: 0px 20px 10px;
+    }
+    .group_form {
+      .error_input {
+        /deep/ .el-input__inner {
+          border-color: #F56C6C;
+        }
+      }
+    }
+    .group_error_tip {
+      font-size: 12px;
+      color: #F56C6C;
+    }
+  }
+}
+// 重置布控库popover
+.more_popover_box .more_popover{
+  max-height: 240px;
+  display: flex;
+  flex-wrap: wrap;
+  > span{
+    background-color: #FAFAFA;
+    color: #333333;
+    font-size: 12px;
+    border-radius:3px;
+    padding: 5px 8px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    border: 1px solid #F2F2F2;
+    margin-bottom: 10px;
+    margin-right: 5px;
+    display: inline-block;
+    cursor: pointer;
   }
 }
 </style>
