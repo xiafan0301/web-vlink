@@ -18,7 +18,7 @@
             <i v-if="treeTabShow" class="el-icon-arrow-up"></i>
             <i v-else class="el-icon-arrow-down"></i>
             <div class="device_list" v-if="selectDeviceArr.length > 0">
-              <span>{{ selectDeviceArr[0]['name'] }}</span>
+              <span>{{ selectDeviceArr[0].label }}</span>
               <span v-show="selectDeviceArr.length > 1" title="展开选中的设备" class="device_count">+{{ selectDeviceArr.length - 1 }}</span>
             </div>
             <!-- placeholder -->
@@ -83,7 +83,7 @@
           <div class="left_time">
             <el-date-picker
               placeholder="请选择日期"
-              v-model="queryForm.queryDate"
+              v-model="queryDate"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"
@@ -97,11 +97,11 @@
             <el-time-select
              style="width: 208px;"
               placeholder="起始时间"
-              v-model="queryForm.startTime"
+              v-model="startTime"
               :picker-options="{
                 start: '19:00',
-                step: '00:30',
-                end: '23:59'
+                step: '01:00',
+                end: '24:00'
               }">
             </el-time-select>
             <span class="left_time_separator">-</span>
@@ -109,21 +109,21 @@
             <el-time-select
               placeholder="结束时间"
               class="end_time_select"
-              v-model="queryForm.endTime"
+              v-model="endTime"
               :picker-options="{
-                start: '00:00',
-                step: '00:30',
+                start: '01:00',
+                step: '01:00',
                 end: '07:00'
               }">
             </el-time-select>
           </div>
           <div class="left_num">
-            <el-input class="left-none-border" v-model="queryForm.queryNum">
+            <el-input class="left-none-border" v-model="queryForm.minShotTimes">
               <template slot="prepend">过车次数</template>
             </el-input>
             <span>次（范围2-100）</span>
           </div>
-          <el-select v-model="queryForm.carType" placeholder="请选择车辆类型" style="width: 100%;">
+          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;">
             <el-option
               v-for="item in carTypeList"
               :key="item.value"
@@ -131,17 +131,17 @@
               :value="item.value">
             </el-option>
           </el-select>
-          <el-select v-model="queryForm.controlCarId" placeholder="请选择布控车辆" style="width: 100%;">
+          <el-select v-model="queryForm.surveillanceId" placeholder="请选择布控车辆" style="width: 100%;">
             <el-option
               v-for="item in controlCarList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.uid"
+              :label="item.name"
+              :value="item.uid">
             </el-option>
           </el-select>
           <div class="left_btn">
-            <el-button class="reset_btn">重置</el-button>
-            <el-button class="select_btn">查询</el-button>
+            <el-button class="reset_btn" :loading="resetLoading" @click="onReset">重置</el-button>
+            <el-button class="select_btn" :loading="searchLoading" @click="onSearch">查询</el-button>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@
                   <span>{{ scope.row.vehicleType }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="过车次数" prop="vehicleCount"></el-table-column>
+              <el-table-column label="过车次数" prop="shotTimes"></el-table-column>
               <el-table-column label="操作">
                 <template slot-scope="scope">
                   <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
@@ -181,6 +181,10 @@
   </div>
 </template>
 <script>
+import { mapXupuxian } from "@/config/config";
+import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+import { objDeepCopy, formatDate } from "@/utils/util.js";
+// formatDate
 export default {
   data () {
     return {
@@ -190,109 +194,54 @@ export default {
         }
       },
       queryForm: {
-        devIdData: [],
-        queryDate: null,
+        startDate: null,
+        endDate: null,
+        cameraIds: null,
+        bayonetIds: null,
         startTime: null,
         endTime: null,
-        queryNum: 5,
-        carType: null,
-        controlCarId: null
+        minShotTimes: 5,
+        vehicleTypes: null,
+        surveillanceId: null
       },
+      queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
+      startTime: null,
+      endTime: null,
       carTypeList: [],
-      controlCarList: [],
+      controlCarList: [
+        {
+          uid: 0,
+          name: '不限'
+        }, {
+          uid: 1,
+          name: '布控库全部车像'
+        }, {
+          uid: 2,
+          name: '各自定义的布控组名'
+        }, {
+          uid: 3,
+          name: '非布控库数据'
+        },
+      ],
       // 选择设备的数据
       isIndeterminate: false, // 是否处于全选与全不选之间
       checkAllTree: false, // 树是否全选
       isIndeterminateBayonet: false, // 是否处于全选与全不选之间
       checkAllTreeBayonet: false, // 树是否全选
-      bayonetTree: [
-        {
-          id: 1,
-          label: "卡口一级 1",
-          children: [
-            {
-              id: 4,
-              label: "二级 1-1",
-              children: [
-                {
-                  id: 9,
-                  label: "三级 1-1-1"
-                },
-                {
-                  id: 10,
-                  label: "三级 1-1-2"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: "一级 2",
-          children: [
-            {
-              id: 5,
-              label: "二级 2-1"
-            },
-            {
-              id: 6,
-              label: "二级 2-2"
-            }
-          ]
-        }
-      ], // 卡口树
-      videoTree: [
-        {
-          id: 1,
-          label: "一级 1",
-          children: [
-            {
-              id: 4,
-              label: "二级 1-1",
-              children: [
-                {
-                  id: 9,
-                  label: "三级 1-1-1"
-                },
-                {
-                  id: 10,
-                  label: "三级 1-1-2"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: "一级 2",
-          children: [
-            {
-              id: 5,
-              label: "二级 2-1"
-            },
-            {
-              id: 6,
-              label: "二级 2-2"
-            }
-          ]
-        }
-      ],
+      bayonetTree: [], // 卡口树
+      videoTree: [],
       videoTreeNodeCount: 0, // 摄像头节点数量
       bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
         children: "children",
         label: "label"
       },
-      selectDeviceArr: [
-        // 选中的设备数组
-        {
-          name: "摄像头1"
-        },
-        {
-          name: "摄像头2"
-        }
-      ],
+      selectDeviceArr: [], // 选中的设备数组
+      selectVedioArr: [], // 选中的摄像头数组
+      selectBayonetArr: [], // 选中的卡口数组
       selectedTreeTab: 0, // 当前选中的
+      resetLoading: false,
+      searchLoading: false,
       treeTabArr: [
         {
           name: "摄像头"
@@ -308,52 +257,52 @@ export default {
             uid: 1,
             vehicleNumber: '湘A99999',
             vehicleType: 1,
-            vehicleCount: 3
+            shotTimes: 3
           }, {
             uid: 2,
             vehicleNumber: '湘A99999',
             vehicleType: 2,
-            vehicleCount: 2
+            shotTimes: 2
           }, {
             uid: 3,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 4,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 5,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 6,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 7,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 8,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 9,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }, {
             uid: 10,
             vehicleNumber: '湘A99999',
             vehicleType: 3,
-            vehicleCount: 1
+            shotTimes: 1
           }
         ],
         total: 10
@@ -367,17 +316,14 @@ export default {
     }
   },
   mounted() {
-    this.getLeafCountTree(this.videoTree);
-    this.getLeafCountTreeBayonet(this.bayonetTree)
+    //获取摄像头卡口数据
+    this.getMonitorList()
   },
   watch: {
-    'queryForm.queryDate': {
+    queryDate: {
       handler (val) {
         if (val && val[1] - val[0] > 2 * 24 * 60 *60 *1000) {
-          this.$message({
-            type: 'warning',
-            message: '日期间隔建议在范围三天以内'
-          })
+          this.$message.error("最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!")
           this.$set(val, 1, val[0] + 2 * 24 * 60 *60 *1000)
         }
       },
@@ -385,6 +331,64 @@ export default {
     }
   },
   methods: {
+    /**
+     * 获取摄像头卡口信息列表
+     */
+    getMonitorList() {
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.videoTree = this.getTreeList(camera);
+          this.bayonetTree = this.getBayTreeList(bayonet);
+          this.getLeafCountTree(this.videoTree, 'camera');
+          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+          // this.$refs.videotree.setCheckedNodes(this.videoTree);
+        }
+      });
+    },
+    /**
+     * 获取摄像头数据
+     */
+    getTreeList(data) {
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+            key['treeType'] = 1
+          }
+        }
+      }
+      return data;
+    },
+    /**
+     * 获取卡口数据
+     */
+    getBayTreeList(data) {
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          item['children'] = item.bayonetList
+          delete(item.bayonetList)
+          for(let key of item['children']) {
+            key['label'] = key.bayonetName
+            key['id'] = key.uid
+            key['treeType'] = 2
+          }
+        }
+      }
+      return data;
+    },
     /**
      * 摄像头树全选按钮点击
      */
@@ -395,6 +399,8 @@ export default {
       } else {
         this.$refs.videotree.setCheckedNodes([]);
       }
+      this.selectVedioArr = this.$refs.videotree.getCheckedNodes(true);
+      this.handleData();
     },
     /**
      * 处理摄像头树全选按钮
@@ -402,6 +408,8 @@ export default {
     listenCheckedVideo(val, val1) {
       console.log(val)
       // console.log(val1)
+      this.selectVedioArr = this.$refs.videotree.getCheckedNodes(true);
+      this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
         this.isIndeterminate = false;
         this.checkAllTree = true;
@@ -423,11 +431,15 @@ export default {
       } else {
         this.$refs.bayonetTree.setCheckedNodes([]);
       }
+      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
     },
     /**
      * 处理卡口树全选按钮
      */
     listenCheckedBayonet(val, val1) {
+      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
       if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
         this.isIndeterminateBayonet = false;
         this.checkAllTreeBayonet = true;
@@ -442,13 +454,18 @@ export default {
     /**
      * 获取摄像头树节点的数量
      */
-    getLeafCountTree(json) {
+    getLeafCountTree(json, type) {
+      // 获取树节点的数量
       for (let i = 0; i < json.length; i++) {
         if (json[i].hasOwnProperty("id")) {
-          this.videoTreeNodeCount++;
+          if (type === "camera") {
+            this.videoTreeNodeCount++;
+          } else {
+            this.bayonetTreeNodeCount++;
+          }
         }
         if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTree(json[i].children);
+          this.getLeafCountTree(json[i].children, type);
         } else {
           continue;
         }
@@ -469,13 +486,54 @@ export default {
         }
       }
     },
+    // 选中的设备数量处理
+    handleData() {
+      this.selectDeviceArr = [...this.selectVedioArr, ...this.selectBayonetArr].filter(key => key.treeType);
+      // console.log('选中的数据', this.selectDeviceArr);
+    },
+    onReset () {
+      this.resetLoading = true
+      this.queryForm = Object.assign({
+        startDate: null,
+        endDate: null,
+        cameraIds: null,
+        bayonetIds: null,
+        startTime: null,
+        endTime: null,
+        minShotTimes: null,
+        vehicleTypes: null,
+        surveillanceId: null
+      })
+      this.selectDeviceArr.splice(0, this.selectDeviceArr.length)
+      this.$refs.videotree.setCheckedNodes([]);
+      this.$refs.bayonetTree.setCheckedNodes([]);
+      this.isIndeterminate = false
+      this.isIndeterminateBayonet = false
+      this.queryDate = null
+      this.startTime = null
+      this.endTime = null
+      this.resetLoading = false
+    },
+    onSearch () {
+      this.searchLoading = true
+      let arr = [], arr1 = []
+      this.selectVedioArr.filter(key => key.treeType).forEach(item => {arr.push(item.uid)})
+      this.queryForm.cameraIds = arr.join(',')
+      this.selectBayonetArr.filter(key => key.treeType).forEach(item => {arr1.push(item.uid)})
+      this.queryForm.bayonetIds = arr1.join(',')
+      this.queryForm.startTime = this.startTime && parseInt(this.startTime.substr(0, 2))
+      this.queryForm.endTime = this.endTime && parseInt(this.endTime.substr(0, 2))
+      this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
+      this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
+      console.log(this.queryForm)
+      this.searchLoading = false
+    },
     /**
      * 树选择框关闭
      */
     chooseDevice() {
-      console.log(this.$refs.videotree.getCheckedNodes());
-      console.log(this.$refs.bayonetTree.getCheckedNodes());
-      this.treeTabShow = false;
+      this.treeTabShow = false
+      console.log('选中的数据', this.selectDeviceArr)
     },
     /**
      * 导出按钮
@@ -539,7 +597,7 @@ export default {
             position: absolute;
             left: 120px;
             line-height: 40px;
-            z-index: 10000000;
+            z-index: 99;
             color: #333;
           }
           .el-date-editor{
@@ -697,9 +755,9 @@ export default {
   } 
 }
 .left_time {
-  .el-range-editor {
-    padding-left: 0px;
-  }
+  // .el-range-editor {
+  //   padding-left: 0px;
+  // }
   .el-date-editor {
     .el-input__inner {
       padding-left: 15px;

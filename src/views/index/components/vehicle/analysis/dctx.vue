@@ -12,11 +12,11 @@
           <vue-scroll>
             <div class="input-box-line">
               <p class="title"><span>开</span><span>始</span></p>
-              <el-date-picker align="right"  v-model="filterObj.startTime" type="date" placeholder="选择日期"></el-date-picker>
+              <el-date-picker align="right" :picker-options="pickerOptions1" v-model="startDate" type="date" placeholder="选择日期" value-format="timestamp"></el-date-picker>
             </div>
             <div class="input-box-line">
               <p class="title"><span>结</span><span>束</span></p>
-              <el-date-picker v-model="filterObj.endTime" type="date" placeholder="选择日期"></el-date-picker>
+              <el-date-picker v-model="endDate" :picker-options="pickerOptions2" :disabled="isSelect" type="date" placeholder="选择日期" value-format="timestamp"></el-date-picker>
             </div>
             <div class="input-box-line" v-for="(item, index) in filterObj.vehicleNumberList" :key="index + 'ssd'">
               <!-- <span class="vehicle-index">车辆1</span> -->
@@ -37,7 +37,7 @@
         </div>
       </div>
       <div class="the-right-result">
-        <div class="the-result-box">
+        <div class="the-result-box-dctx">
           <vue-scroll>
             <div class="list-box">
               <div class="list-item" v-for="item in '123123123123123'" :key="item.id" @click="onOpenDetail(item)">
@@ -151,12 +151,24 @@
 </template>
 <script>
   import flvplayer from '@/components/common/flvplayer.vue';
+  import { formatDate } from "@/utils/util.js";
   export default {
   components: {
     flvplayer
   },
   data () {
     return {
+      pickerOptions1: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        }
+      },
+      pickerOptions2: {
+        disabledDate(time) {
+          return time.getTime() > Date.now();
+        }
+      },
+      isSelect: false,
       pagination: {
         pageNum: 1,
         pageSize: 15
@@ -175,13 +187,16 @@
       videoUrl: null, // 下载地址
       map: null,
       filterObj: {
-        startTime: '',
-        endTime: '',
+        startDate: null,
+        endDate: null,
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
-        ]
+        ],
+        vehicleNumbers: null
       },
+      startDate: new Date() - (24 * 60 * 60 * 1000),
+      endDate: new Date() - (24 * 60 * 60 * 1000),
       resetLoading: false,
       searchLoading: false,
       swiperOption: {
@@ -196,6 +211,31 @@
           prevEl: '.swiper-button-prev',
         },
       },
+    }
+  },
+  watch: {
+    startDate: {
+      handler (val) {
+        if (val) {
+          this.isSelect = false
+        } else {
+          this.isSelect = true
+        }
+      },
+      deep: true
+    },
+    endDate: {
+      handler (val) {
+        if (val && val - this.startDate > 2 * 24 * 60 *60 *1000) {
+          this.$message.error("最大时间段为3天，超过开始时间3天（72小时）后的时间不可选择!")
+          this.endDate = this.startDate + 2 * 24 * 60 *60 *1000
+        }
+        if (val && val - this.startDate < 0) {
+          this.$message.error("结束时间必须大于开始时间！")
+          this.endDate = this.startDate
+        }
+      },
+      deep: true
     }
   },
   methods: {
@@ -257,13 +297,17 @@
      */
     onReset () {
       this.resetLoading = true
+      this.isSelect = true
+      this.startDate = null
+      this.endDate = null
       let obj = {
-        startTime: '',
-        endTime: '',
+        startDate: null,
+        endDate: null,
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
-        ]
+        ],
+        vehicleNumbers: null
       }
       this.filterObj = Object.assign({}, obj)
       this.resetLoading = false
@@ -273,6 +317,11 @@
      */
     onSearch () {
       this.searchLoading = true
+      let arr = []
+      this.filterObj.startDate = formatDate(this.startDate, 'yyyy-MM-dd')
+      this.filterObj.endDate = formatDate(this.endDate, 'yyyy-MM-dd')
+      this.filterObj.vehicleNumberList.forEach(item => {arr.push(item.vehicleNumber)})
+      this.filterObj.vehicleNumbers = arr.join(',')
       console.log(this.filterObj)
       this.searchLoading = false
     },
@@ -369,7 +418,7 @@
       background: #F7F9F9;
       padding: 15px 12px 25px 0;
       overflow-y: hidden;
-      .the-result-box {
+      .the-result-box-dctx {
         width: 100%; height: 100%;
         background: #F6F8F9;
         .list-box {
