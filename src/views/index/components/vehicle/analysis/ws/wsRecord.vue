@@ -6,7 +6,7 @@
         <h2>湘A10987</h2>
         <ul>
           <li>
-            <span>归属地：</span>
+            <span>车辆所有人：</span>
             <span>长沙</span>
           </li>
           <li>
@@ -18,30 +18,48 @@
             <span>红色</span>
           </li>
           <li>
-            <span>机动车状态：</span>
+            <span>车身形式：</span>
             <span>正常</span>
           </li>
           <li>
-            <span>所有人：</span>
+            <span>车门数：</span>
             <span>你猜咯</span>
           </li>
           <li>
-            <span>身份证号：</span>
+            <span>发动机号：</span>
             <span>430322199709831112</span>
           </li>
           <li>
-            <span>核定载客：</span>
+            <span>使用性质：</span>
             <span>123人</span>
           </li>
           <li>
-            <span>有效期：</span>
+            <span>车辆类型：</span>
             <span>2020-12-12</span>
           </li>
           <li>
-            <span>车辆登记照片：</span>
-            <span>
-              <img src="../../../../../../assets/img/temp/vis-eg.png" alt="">
-            </span>
+            <span>年款：</span>
+            <span>2020-12-12</span>
+          </li>
+          <li>
+            <span>车型：</span>
+            <span>2020-12-12</span>
+          </li>
+          <li>
+            <span>座位数：</span>
+            <span>2020-12-12</span>
+          </li>
+          <li>
+            <span>车辆状态：</span>
+            <span>2020-12-12</span>
+          </li>
+          <li>
+            <span>厂商名称：</span>
+            <span>2020-12-12</span>
+          </li>
+          <li>
+            <span>有效期止：</span>
+            <span>2020-12-12</span>
           </li>
         </ul>
       </div>
@@ -51,7 +69,7 @@
           <p>车辆布控</p>
           <p>轨迹分析</p>
           <p>落脚点分析</p>
-          <p>一车搜车</p>
+          <p>以车搜车</p>
         </div>
         <div id="rightMap"></div>
       </div>

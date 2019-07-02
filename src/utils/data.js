@@ -21,11 +21,11 @@ const dataList = {
   taskType: 25, // 任务类型
   ctcStatus: 26, // 调度事件状态
   licensePlateColor: 30, //车牌颜色
-  vehicleType: 31, // 车辆类型
   numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
+  vehicleType: 44, // 车辆类型
 }
 // 处理方式
 const handeMethods = {
