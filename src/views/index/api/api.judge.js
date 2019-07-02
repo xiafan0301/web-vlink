@@ -196,3 +196,29 @@ export function getTailBehindList(params) {
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesSum(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-sum',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesPage(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
