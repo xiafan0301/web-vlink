@@ -47,6 +47,11 @@ export default {
       path: 'rlcx',
       name: 'portrait_rlcx',
       component: () => import('@/views/index/components/portrait/rlcx.vue')
+    },
+    {
+      path: 'rlsjfx',
+      name: 'portrait_rlsjfx',
+      component: () => import('@/views/index/components/portrait/rlsjfx.vue')
     }
   ]
 }

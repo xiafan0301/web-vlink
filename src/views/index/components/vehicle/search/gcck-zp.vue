@@ -15,6 +15,7 @@
                 :clearable="false"
                 range-separator="至"
                 start-placeholder="开始日期"
+                :picker-options="pickerOptions"
                 end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
@@ -46,22 +47,36 @@
               <el-button @click="searchReset('formInline')">重置</el-button>
             </el-form-item>
           </el-form>
-          <el-button class="gcck_s_dc" size="small" type="primary" @click="searchSubmit">导出</el-button>
+          <el-button class="gcck_s_dc" size="small" type="primary" :disabled="true">导出</el-button>
         </div>
         <ul class="gcck_l">
-          <li>
-            <div class="gcck_lt"><i class="el-icon-caret-right gcck_lt_op"></i>今天&nbsp;2019-6-27&nbsp;<span>(31231张)</span></div>
-            <ul class="gcck_ll">
-              <li v-for="item in 10" :key="item">
-                <div class="vc_gcck_rbl">
-                  <img src="../../../../../assets/img/temp/video_pic.png" alt="">
-                  <div><i class="vl_icon gcck_sxt"></i>环保路摄像头002</div>
-                  <div><i class="vl_icon gcck_sj"></i>18-12-24 14:12:17</div>
-                </div>
-              </li>
-            </ul>
+          <li v-for="(item, index) in aDay" :class="{'gcck_l_sed': daysList[item] && daysList[item].slider === 2}" :key="'day_list_' + index">
+            <div class="gcck_lt" @click="selRow(item)"><i class="el-icon-caret-right gcck_lt_op"></i>{{item | dayFormat}}&nbsp;<span>({{daysList[item] ? daysList[item].total : ' - '}}张)</span></div>
+            <div class="gcck_l_con">
+              <ul class="gcck_ll" v-if="daysList[item] && daysList[item].list">
+                <li v-for="(sitem, sindex) in daysList[item].list" :key="'dlf_' + sindex">
+                  <div class="vc_gcck_rbl">
+                    <div class="gcck_rbl_i">
+                      <div>
+                        <div>
+                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.imagePath">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName"><i class="vl_icon gcck_sxt"></i>{{sitem.deviceName}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.snapTime"><i class="vl_icon gcck_sj"></i>{{sitem.snapTime}}</div>
+                  </div>
+                </li>
+              </ul>
+              <div class="gcck_ld" v-if="!daysList[item] || daysList[item].state === 1">
+                <div><i class="el-icon-loading"></i>正在加载中，请稍后...</div>
+              </div>
+              <div class="gcck_lb" v-if="daysList[item] && daysList[item].pageNum < daysList[item].pages">
+                <span @click="doSearch(item, daysList[item].pageNum + 1)">加载更多</span>
+              </div>
+            </div>
           </li>
-          <li>
+          <!-- <li>
             <div class="gcck_lt"><i class="el-icon-caret-right"></i>昨天&nbsp;2019-6-26&nbsp;<span>(31231张)</span></div>
             <ul class="gcck_ll gcck_ll_hide">
               <li v-for="item in 10" :key="item">
@@ -72,7 +87,7 @@
                 </div>
               </li>
             </ul>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>
@@ -81,12 +96,15 @@
 <script>
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
+import {formatDate} from '@/utils/util.js';
+import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 export default {
   components: {vehicleBreadcrumb, flvplayer},
   data () {
+    let nDate = new Date();
     return {
       formInline: {
-        time: '',
+        time: [new Date(nDate.getTime() - 6 * 24 * 60 * 60 * 1000), nDate],
         lb: '',
         lx: '',
         no: false,
@@ -95,13 +113,139 @@ export default {
       },
       searchLoading: false,
       lbList: [{name: '类别1', uid: '1'}],
-      lxList: [{name: '类型1', uid: '1'}]
+      lxList: [{name: '类型1', uid: '1'}],
+      aDay: [],
+      daysList: {
+        // state 1 未查询 2 查询中  3
+        // '2019-1-1': {state: 1, list: [], pageSize: 10, pageNum: 1, pages: 1, total: 100 }
+      },
+      pickerOptions: {
+        disabledDate (d) {
+          return d > new Date();
+        }
+      }
     }
   },
+  filters: {
+    dayFormat (val) {
+      if (val === formatDate(new Date(), 'yyyy-MM-dd')) {
+        val = '今日';
+      } else if (val === formatDate(new Date() - 1000 * 60 * 60 * 24, 'yyyy-MM-dd')) {
+        val = '昨日';
+      }
+      return val;
+    }
+  },
+  mounted () {
+    this.searchSubmit();
+  },
   methods: {
+
+    selRow (item) {
+      if (this.daysList[item]) {
+        if (this.daysList[item].slider === 2) {
+          this.daysList[item].slider = 1;
+        } else {
+          this.daysList[item].slider = 2;
+          if (this.daysList[item].state === 1) {
+            this.doSearch (item, 1);
+          }
+        }
+      }
+    },
+
     searchSubmit () {
+      let sT = this.formInline.time[0].getTime(), eT = this.formInline.time[1].getTime();
+      let ii = eT - sT;
+      let iD = Math.floor(ii / (1000 * 60 * 60 * 24)) + 1;
+      let aDay = [], oDayList = {};
+      for (let i = iD - 1; i >= 0; i--) {
+        let _SD = formatDate(sT + i * (1000 * 60 * 60 * 24), 'yyyy-MM-dd');
+        aDay.push(_SD);
+        oDayList[_SD] = {
+          state: 1, // 1 加载中，2加载完毕
+          slider: 1, // 1 slideUp 2 slideDown
+          list: null,
+          ageSize: 16,
+          pageNum: 0,
+          pages: 0,
+          total: 0
+        };
+      }
+      this.aDay = aDay;
+      this.daysList = oDayList;
+      this.$set(this.daysList);
+      // console.log('aDay', aDay);
+      this.$nextTick(() => {
+        this.getDeviceSnapSum();
+        this.selRow(aDay[0]);
+        // $('.gcck_ll').first().show(300);
+      });
+    },
+    getDeviceSnapSum (dId) {
+      getDeviceSnapImagesSum({
+        deviceIds: this.$route.query.deviceIds,
+        startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
+        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd')
+      }).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          for (let key in this.daysList) {
+            for (let i = 0; i < res.data.length; i++) {
+              if (key === res.data[i].snapImagesDate) {
+                this.daysList[key].total = res.data[i].snapImagesCount;
+                break;
+              }
+            }
+          }
+        }
+      });
+    },
+    doSearch (sDay, pageNum) {
+      if (!this.daysList[sDay]) {
+        this.daysList[sDay] = {
+          state: 1
+        };
+        this.$set(this.daysList);
+      }
+      let dId = this.$route.query.deviceIds;
+      if (!pageNum) { pageNum = 1; }
+      getDeviceSnapImagesPage({
+        'where.deviceIds': dId,
+        'where.startTime': sDay,
+        'where.endTime': sDay,
+        pageNum: pageNum,
+        pageSize: 16
+      }).then(res => {
+        if (res && res.data) {
+          // this.$set(this.daysList);
+          // this.$set(this.daysList[sDay], 'list', res.data.list);
+          /* this.$nextTick(() => {
+            this.$set(this.daysList, sDay, {
+              list: res.data.list
+            });
+          }); */
+          this.daysList[sDay].state = 2;
+          this.daysList[sDay].total = res.data.total;
+          this.daysList[sDay].pageNum = res.data.pageNum; // 当前页数
+          this.daysList[sDay].pages = res.data.pages; // 总页数
+          if (!this.daysList[sDay].list) {
+            this.daysList[sDay].list = [];
+          }
+          this.daysList[sDay].list = this.daysList[sDay].list.concat(res.data.list);
+          console.log('this.daysList', this.daysList);
+        }
+      });
     },
     searchReset () {
+      let nDate = new Date();
+      this.formInline = {
+        time: [new Date(nDate.getTime() - 6 * 24 * 60 * 60 * 1000), nDate],
+        lb: '',
+        lx: '',
+        no: false,
+        cpp: '1',
+        cp: ''
+      }
     }
   }
 }
@@ -133,48 +277,112 @@ export default {
   color: #333;
   background-color: #fff;
   box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+  cursor: pointer;
+  transition: all .4s ease-out;
   > i {
     position: absolute; top: 10px; left: 20px;
     font-size: 20px; color: #666; cursor: pointer;
     transition: all .4s ease-out;
     &.gcck_lt_op {
-      transform: rotate(90deg);
-      top: 8px;
+      top: 10px;
     }
   }
   > span { color: #999; }
+  &:hover {
+    color: #0C70F8;
+    > i {
+      color: #0C70F8;
+    }
+  }
 }
-.gcck_ll {
-  overflow: hidden;
-  padding: 5px;
+.gcck_l {
   > li {
-    float: left;
-    padding: 5px;
-    > div {
-      width: 205px;
-      padding: 10px;
-      background-color: #fff;
-      box-shadow:0px 2px 10px 0px rgba(131,131,131,0.12);
-      > img {
-        width: 185px; height: 185px;
-        margin-bottom: 5px;
+    &.gcck_l_sed {
+      > .gcck_l_con {
+        display: block;
       }
-      > div {
-        position: relative;
-        text-align: left;
-        padding-left: 18px;
-        color: #999; font-size: 12px;
-        height: 22px; line-height: 22px;
-        > i {
-          position: absolute; top: 3px; left: 0;
-          width: 12px; height: 15px;
-          &.gcck_sxt { background-position: -325px -377px; }
-          &.gcck_sj { background-position: -787px -376px; }
-        }
+      .gcck_lt_op {
+        transform: rotate(90deg);
+        top: 8px;
       }
     }
   }
-  &.gcck_ll_hide { display: none; }
+}
+.gcck_l_con {
+  display: none;
+  .gcck_ll {
+    display: block;
+    overflow: hidden;
+    padding: 5px;
+    > li {
+      width: 12.5%;
+      float: left;
+      padding: 5px;
+      > div {
+        width: 100%;
+        padding: 10px;
+        background-color: #fff;
+        box-shadow:0px 2px 10px 0px rgba(131,131,131,0.12);
+        > .gcck_rbl_i {
+          position: relative;
+          width: 100%; height: 0;
+          padding-top: 100%; margin-bottom: 5px;
+          > div {
+            position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            > div {
+              width: 100%; height: 100%;
+              display: flex; justify-content: center; align-items: center;
+              position: relative;
+              > img {
+                visibility: visible;
+                width: 100%; height: 100%;
+              }
+            }
+          }
+        }
+        > .gcck_rbl_t {
+          position: relative;
+          text-align: left;
+          padding-left: 18px;
+          color: #999; font-size: 12px;
+          height: 22px; line-height: 22px;
+          > i {
+            position: absolute; top: 3px; left: 0;
+            width: 12px; height: 15px;
+            &.gcck_sxt { background-position: -325px -377px; }
+            &.gcck_sj { background-position: -787px -376px; }
+          }
+        }
+      }
+    }
+    &.gcck_ll_hide { display: none; }
+  }
+  .gcck_lb {
+    text-align: center;
+    padding-bottom: 5px;
+    > span {
+      display: inline-block;
+      background-color: #eee;
+      color: #666;
+      cursor: pointer;
+      padding: 3px 50px 5px 50px;
+      border-radius: 2px;
+    }
+  }
+  .gcck_ld {
+    position: relative;
+    height: 40px; width: 100%;
+    > div {
+      position: absolute; left: 50%; top: 0;
+      height: 40px;
+      color: #666;
+      padding-left: 25px; padding-top: 10px; margin-left: -85px;
+      > i {
+        position: absolute; top: 10px; left: 0px;
+        font-size: 20px;
+      }
+    }
+  }
 }
 </style>
 <style lang="scss">
