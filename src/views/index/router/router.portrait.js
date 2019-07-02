@@ -19,6 +19,11 @@ export default {
       path: 'pfcm',
       name: 'portrait_pfcm',
       component: () => import('@/views/index/components/portrait/pfcm.vue')
+    },
+    {
+      path: 'peer-analysis', // 同行分析
+      name: 'peer_analysis',
+      component: () => import('@/views/index/components/portrait/peer-analysis.vue')
     }
   ]
 }

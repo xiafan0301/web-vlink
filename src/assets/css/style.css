@@ -974,6 +974,18 @@
   width: 100px; height: 40px;
   font-size: 14px;
 }
+.th-button-export-color {
+  width: 100px; height: 40px;
+  font-size: 14px;
+  background-color: #0C70F8;
+  color: #fff;
+}
+.th-button-export-color:focus,
+.th-button-export-color:hover {
+  background-color: #0C70F8;
+  color: #fff;
+  border-color: #0C70F8;
+}
 .the-table .el-table__header tr{
   height: 54px;
 }
