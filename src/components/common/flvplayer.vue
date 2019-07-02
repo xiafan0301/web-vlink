@@ -570,7 +570,7 @@ export default {
       }
     },
     // 普通播放（录像）
-    initPlayerDoForNormal (surl) {
+    initPlayerDoForNormal () {
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
       videoElement.src = this.oData.video.downUrl;
@@ -713,17 +713,19 @@ export default {
       this.tape.loading  = true;
       this.$message('开始录像。');
       this.tape.tapeTime = 0;
-      this.tape.tapeTimeInval = window.setInterval(() => {
-        this.tape.tapeTime += 1;
-      }, 1000);
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
       }).then(res => {
         if (res && res.data) {
+          this.tape.tapeTimeInval = window.setInterval(() => {
+            this.tape.tapeTime += 1;
+          }, 1000);
           // console.log(res.data);
           this.tape.recordId = res.data.recordId;
           this.tape.loading  = false; // 此时才可以触发结束事件
         } else {
+          this.tape.active = false;
+          this.tape.loading  = false;
           if (this.tape.tapeTimeInval) {
             window.clearInterval(this.tape.tapeTimeInval);
           }
@@ -824,7 +826,8 @@ export default {
         endTime: formatDate(this.download.startTime.getTime() + this.download.currentM * 60 * 1000)
       }).then(res => {
         if (res && res.data) {
-          let params = [], rData = {}, rDataSize = 0;
+          // let params = [], rData = {}, rDataSize = 0;
+          let rData = {};
           this.download.recordDataSize = res.data.length;
           for (let i = 0; i < res.data.length; i++) {
             let _obj = res.data[i];
@@ -1150,7 +1153,7 @@ export default {
         console.log("apiSignContentList error：", error);
       });
     },
-    signSubmit (formName) {
+    signSubmit () {
       // this.$refs[formName].validateField("content", (errorMessage) => {
       //   // errorMessage 为空就是验证成功了
       //   if (!errorMessage) {

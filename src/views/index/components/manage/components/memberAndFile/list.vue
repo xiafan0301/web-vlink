@@ -202,7 +202,13 @@ export default {
     },
     // 跳至查看档案页面
     skipSelectDetail (obj) {
-      this.$router.push({name: 'member_detail', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'member_detail', query: { id: obj.uid, organObj: organObj }});
     },
     // 跳至新增成员页面
     skipAddPage () {

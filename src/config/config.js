@@ -6,8 +6,8 @@ const oDomains = {
     // 默认ajax地址
     base: {
         dev: 'https://apidev.aorise.org/vlink-base',
-        // dev: 'http://10.116.64.107:8081',
-        // dev: 'http://10.116.64.142:8082',
+        // dev: 'http://10.116.64.23:8081',
+        // dev: 'http://10.116.64.142:8081',
         // dev: 'http://10.116.66.29:8082',// 钟赞
         test: 'https://apirel.aorise.org/vlink-base',
         prod: 'https://apirel.aorise.org/vlink-base'
@@ -103,6 +103,12 @@ const oDomains = {
       dev: 'https://apidev.aorise.org/vlink-gis',
       test: 'https://apirel.aorise.org/vlink-gis',
       prod: 'https://apidev.aorise.org/vlink-gis'
+    },
+    //研判分析服务
+    analysis: {
+      dev: 'https://apidev.aorise.org/vlink-buz-judge-analysis',
+      test: 'http://10.116.65.15:8081',
+      prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

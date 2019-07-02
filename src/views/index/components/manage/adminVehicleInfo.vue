@@ -16,8 +16,8 @@
             <i class="del_btn vl_icon vl_icon_manage_8" @click="showDeleteDialog"></i>
           </div>
           <div class="bnt_box_right">
-            <el-button class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = !showGroup">复制</el-button>
-            <el-button class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</el-button>
+            <div class="oper_btn copy_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showGroup = true">复制</div>
+            <div class="oper_btn move_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" :disabled="multipleSelection.length === 0 ? true : false" @click="showMoveoutDialog">移出</div>
             <div class="copy_info" v-show="showGroup">
               <div class="copy_info_list">
                 <vue-scroll>
@@ -339,6 +339,12 @@ export default {
     }
   },
   mounted () {
+    document.addEventListener('click', (e)=> {
+      if (e.target.className != 'oper_btn copy_btn') {
+        this.showGroup = false;
+      }
+    });
+
     this.groupId = this.$route.query.id;
     this.getList();
     this.getVeGroupInfo();
@@ -698,6 +704,7 @@ export default {
       }
       .bnt_box_right {
         position: relative;
+        display: flex;
         .copy_info {
           z-index: 1;
           width: auto;
@@ -734,8 +741,17 @@ export default {
           }
         }
         .oper_btn {
+          cursor: pointer;
           width:80px;
+          height: 40px;
+          line-height: 40px;
+          text-align: center;
           border-radius:4px;
+        }
+        .move_btn {
+          border: 1px solid #D3D3D3;
+          color: #666666;
+          margin-left: 10px;
         }
         .copy_btn {
           background-color: #0C70F8;

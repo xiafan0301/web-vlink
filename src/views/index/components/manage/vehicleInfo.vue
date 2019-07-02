@@ -93,8 +93,8 @@
         <div class="table_box">
           <div class="add_btn_box">
             <div class="add_event_btn" :class="[multipleSelection.length === 0 ? 'disabled_btn' : '']" @click="showGroupDialog">
-              <span>+</span>
-              <span>加入组</span>
+              <span class="add_class">+</span>
+              <span class="add_class">加入组</span>
             </div>
             <div class="group_info" v-show="showGroup">
               <div class="group_info_list">
@@ -478,6 +478,11 @@ export default {
     }
   },
   mounted () {
+    document.addEventListener('click', (e)=> {
+      if ((e.target.className != 'add_event_btn') && (e.target.className != 'add_class')) {
+        this.showGroup = false;
+      }
+    });
     this.getVeGroupInfo();
     this.getVelBottomNameInfo();
   },
@@ -816,7 +821,7 @@ export default {
     // 显示加入组弹框
     showGroupDialog () {
       if (this.multipleSelection.length > 0) {
-        this.showGroup = !this.showGroup;
+        this.showGroup = true;
       } else {
         this.showGroup = false;
       }

@@ -28,6 +28,7 @@ export default {
 
 <!-- 车辆侦察公用CSS -->
 <style lang="scss">
+.vehicle_content { height: 100%; }
 .my_tooltip{
   position: absolute;
   background:rgba(255,255,255,1);
@@ -40,4 +41,16 @@ export default {
   line-height: 20px;
   padding: 10px 10px 6px;
 }
+  .input-with-select{
+    .el-select .el-input {
+      width: 60px;
+    }
+  }
+.insetIput{
+  .el-input__inner{
+  padding-left: 90px;
+ 
+}
+}
+
 </style>

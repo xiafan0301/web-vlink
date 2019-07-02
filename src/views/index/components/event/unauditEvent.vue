@@ -2,8 +2,8 @@
   <div class="unaudit">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>受理核实</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">受理核实</el-breadcrumb-item>
+        <el-breadcrumb-item>详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box">

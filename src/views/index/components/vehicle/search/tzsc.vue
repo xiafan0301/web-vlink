@@ -14,108 +14,79 @@
         <!-- 菜单表单 -->
         <vue-scroll>
           <div style="padding: 20px;">
-            <!-- 选择搜车的类型 -->
-            <div class="select_type">
-              <el-radio-group v-model="selectType">
-                <el-radio :label="1">从图片提取</el-radio>
-                <el-radio :label="2">自定义特征</el-radio>
-              </el-radio-group>
-            </div>
-
-            <div v-show="selectType === 1">
-              <!-- 上传车像图片 -->
-              <div class="upload_warp"></div>
-              <!-- 检索结果 -->
-              <div class="characteristic">
-                <div class="btn">获取特征</div>
-                <div class="characteristic_list"></div>
+            <!-- 选择设备 -->
+            <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
+            <div class="selected_device" @click="treeTabShow = true;">
+              <i class="el-icon-arrow-down"></i>
+              <!-- <i class="el-icon-arrow-up"></i> -->
+              <div class="device_list" v-if="selectDeviceArr.length > 0">
+                <span>{{ selectDeviceArr[0]['label'] }}</span>
+                <span
+                  v-show="selectDeviceArr.length > 1"
+                  title="展开选中的设备"
+                  class="device_count"
+                >+{{ selectDeviceArr.length - 1 }}</span>
+              </div>
+              <div class="no_device" v-else>选择设备</div>
+              <!-- 树tab页面 -->
+              <div class="device_tree_tab" v-show="treeTabShow">
+                <div style="overflow: hidden;">
+                  <div
+                    class="tab_title"
+                    :class="{ 'current_title': index === selectedTreeTab }"
+                    @click="selectedTreeTab = index;"
+                    v-for="(item, index) in treeTabArr"
+                    :key="'tab_title' + index"
+                  >{{ item.name }}</div>
+                </div>
+                <!-- 视频树 -->
+                <div class="tree_content" v-show="selectedTreeTab === 0">
+                  <vue-scroll>
+                    <div class="checked_all">
+                      <el-checkbox
+                        :indeterminate="isIndeterminate"
+                        v-model="checkAllTree"
+                        @change="handleCheckedAll"
+                      >全选</el-checkbox>
+                    </div>
+                    <el-tree
+                    @check="listenChecked"
+                    :data="cameraTree"
+                    show-checkbox
+                    default-expand-all
+                    node-key="id"
+                    ref="cameraTree"
+                    highlight-current
+                    :props="defaultProps"
+                  ></el-tree>
+                  </vue-scroll>
+                </div>
+                <div class="tree_content" v-show="selectedTreeTab === 1">
+                  <vue-scroll>
+                    <div class="checked_all">
+                      <el-checkbox
+                        :indeterminate="isIndeterminateBay"
+                        v-model="checkAllTreeBay"
+                        @change="handleCheckedAllBay"
+                      >全选</el-checkbox>
+                    </div>
+                    <el-tree
+                        @check="listenCheckedBay"
+                        :data="bayonetTree"
+                        show-checkbox
+                        default-expand-all
+                        node-key="id"
+                        ref="bayonetTree"
+                        highlight-current
+                        :props="defaultProps"
+                      ></el-tree>
+                  </vue-scroll>
+                </div>
               </div>
             </div>
 
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-              <!-- 自定义特征 -->
-              <div v-show="selectType === 2">
-                <el-form-item label="号牌类型" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="号牌颜色" label-width="90px" prop>
-                  <el-select
-                    v-model="tzscMenuForm.licenseColor"
-                    class="width132"
-                    placeholder="选择选项"
-                  >
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆类型" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆颜色" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="车辆型号" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="遮阳板" label-width="90px" prop>
-                  <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="年检标数量" label-width="90px" prop>
-                  <el-select
-                    v-model="tzscMenuForm.inspectionCount"
-                    class="width132"
-                    placeholder="选择选项"
-                  >
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
-                  </el-select>
-                </el-form-item>
-              </div>
-
               <el-form-item label prop="selectDate">
                 <el-date-picker
                   v-model="tzscMenuForm.selectDate"
@@ -124,18 +95,147 @@
                   placeholder="选择日期"
                 ></el-date-picker>
               </el-form-item>
-              <el-form-item label prop="selectDevice">
-                <el-select v-model="tzscMenuForm.selectDevice" class="width232" placeholder="选择设备">
-                  <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  ></el-option>
-                </el-select>
-              </el-form-item>
-            </el-form>
 
+              <!-- 选择搜车的类型 -->
+              <div class="select_type">
+                <el-radio-group v-model="selectType">
+                  <el-radio :label="1">从图片提取</el-radio>
+                  <el-radio :label="2">自定义特征</el-radio>
+                </el-radio-group>
+              </div>
+
+              <div v-show="selectType === 1">
+                <!-- 上传车像图片 -->
+                <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
+                  <el-upload
+                    @drop="drop($event)"
+                    :class="{'vl_jtc_upload': true}"
+                    :show-file-list="false"
+                    accept="image/*"
+                    :action="uploadAcion"
+                    list-type="picture-card"
+                    :before-upload="beforeAvatarUpload"
+                    :on-success="uploadSucess"
+                    :on-error="handleError"
+                  >
+                    <i v-if="uploading" class="el-icon-loading"></i>
+                    <img v-else-if="curImageUrl" :src="curImageUrl">
+                    <div v-else>
+                      <i
+                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                        class="vl_icon vl_icon_vehicle_01"
+                      ></i>
+                      <span>点击上传图片</span>
+                    </div>
+                  </el-upload>
+                  <p @click="showHistoryPic">从上传记录中选择</p>
+                  <div v-show="curImageUrl" class="del_icon">
+                    <i class="el-icon-delete" @click="delPic"></i>
+                  </div>
+                </div>
+                <!-- 检索结果 -->
+                <div class="characteristic">
+                  <div class="btn" @click="getCharacter">获取特征</div>
+                  <div class="characteristic_list" v-if="characteristicList.length > 0">
+                    <div
+                      class="characteristic_item"
+                      :title="item.isChecked ? '取消选择此特征': '选择此特征'"
+                      :class="{ color_blue: item.isChecked }"
+                      v-for="(item, index) in characteristicList"
+                      :key="'characteristic_list' + index"
+                      @click="item.isChecked = !item.isChecked;"
+                    >{{item.desc}}</div>
+                    <!-- 没有特征 -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- 自定义特征 -->
+              <div v-show="selectType === 2">
+                <el-form-item prop="licenseType">
+                  <el-select
+                    v-model="tzscMenuForm.licenseType"
+                    class="width232"
+                    placeholder="选择号牌类型"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="'licenseType' + item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="licenseColor">
+                  <el-select
+                    v-model="tzscMenuForm.licenseColor"
+                    class="width232"
+                    placeholder="选择号牌颜色"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carType">
+                  <el-select v-model="tzscMenuForm.carType" class="width232" placeholder="选择车辆类型">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carColor">
+                  <el-select v-model="tzscMenuForm.carColor" class="width232" placeholder="选择车辆颜色">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="carModel">
+                  <el-select v-model="tzscMenuForm.carModel" class="width232" placeholder="选择车辆型号">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="sunVisor">
+                  <el-select v-model="tzscMenuForm.sunVisor" class="width232" placeholder="选择遮阳板">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item prop="inspectionCount">
+                  <el-select
+                    v-model="tzscMenuForm.inspectionCount"
+                    class="width232"
+                    placeholder="选择年检标数量"
+                  >
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </div>
+            </el-form>
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn">重置</el-button>
@@ -166,29 +266,218 @@
         <!-- 图片列表 -->
         <div class="img_list">
           <vue-scroll>
-            <div class="img_item" v-for="(item, index) in strucInfoList" :key="'img_list' + index">
+            <div
+              class="img_item"
+              @click="showStrucInfo"
+              v-for="(item, index) in strucInfoList"
+              :key="'img_list' + index"
+            >
               <div class="img_wrap">
-                <img src="../../../../../assets/img/not-content.png">
+                <img
+                  @dragstart="drag($event)"
+                  title="拖动图片上传"
+                  draggable="true"
+                  src="../../../../../assets/img/not-content.png"
+                >
               </div>
               <div class="text_wrap">
                 <h3 class="text_name">检索资料</h3>
-                <div class="text_message">{{item.time}}</div>
-                <div class="text_message">{{item.video}}</div>
+                <div class="text_message">
+                  <i class="vl_icon vl_icon_retrieval_01"></i>
+                  <span>{{item.time}}</span>
+                </div>
+                <div class="text_message">
+                  <i class="vl_icon vl_icon_retrieval_02"></i>
+                  <span>{{item.video}}</span>
+                </div>
               </div>
             </div>
           </vue-scroll>
         </div>
       </div>
     </div>
+    <!--上传记录弹窗-->
+    <el-dialog
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      title="最近上传的图片"
+    >
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis">
+        <i class="el-icon-loading"></i>
+      </div>
+      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
+        <div
+          class="his-pic-item"
+          :class="{'active': item.checked}"
+          v-for="item in historyPicList"
+          :key="item.uid"
+          @click="chooseHisPic(item)"
+        >
+          <img :src="item.path" alt>
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <!-- <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button> -->
+      </div>
+    </el-dialog>
+
+    <!--检索详情弹窗-->
+    <el-dialog
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false"
+    >
+      <div class="struc_tab">
+        <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
+        <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
+        <span :class="{'active': strucCurTab === 3}" @click="strucCurTab = 3">视频回放</span>
+        <i class="el-icon-close" @click="strucDetailDialog = false"></i>
+      </div>
+      <div class="struc_main">
+        <div v-show="strucCurTab === 1" class="struc_c_detail">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <!-- <span>{{showSim ? '上传图' : '全景图'}}</span> -->
+            <img :src="showSim ? sturcDetail.uploadPath : sturcDetail.panoramaPath" alt>
+            <span>全景图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <div class="struc_c_d_img struc_c_d_img_green">
+              <img :src="sturcDetail.photoPath" alt>
+              <span>抓拍图</span>
+            </div>
+            <div class="struc_c_d_info">
+              <h2>
+                抓拍信息
+                <div class="vl_jfo_sim" v-show="showSim">
+                  <i class="vl_icon vl_icon_retrieval_03"></i>
+                  {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
+                  <span
+                    style="font-size: 12px;"
+                  >%</span>
+                </div>
+              </h2>
+              <!-- 特征展示框 -->
+              <div class="struc_cdi_line">
+                <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
+              </div>
+
+              <!-- 车辆的信息栏 -->
+              <div class="struc_cdi_line">
+                <p>
+                  <span class="val">大众捷达</span>
+                  <span class="key">车辆型号</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <!-- <span class="val">{{sturcDetail.deviceName}}</span> -->
+                  <span class="val">2018-11-12 13:14:16</span>
+                  <span class="key">抓拍时间</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <!-- <span class="val">{{sturcDetail.address}}</span> -->
+                  <span class="val">溆浦县政府1</span>
+                  <span class="key">抓拍设备</span>
+                </p>
+              </div>
+              <div class="struc_cdi_line">
+                <p>
+                  <!-- <span class="val">{{sturcDetail.address}}</span> -->
+                  <span class="val">长沙市天心区上街广发银行北门003</span>
+                  <span class="key" title="抓拍地点">抓拍地点</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-show="strucCurTab === 2" class="struc_c_address"></div>
+        <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <img :src="sturcDetail.photoPath" alt>
+            <span>抓拍图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <video id="capVideo" :src="sturcDetail.videoPath"></video>
+            <div class="play_btn" @click="videoTap" v-show="!playing">
+              <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
+              <i class="vl_icon vl_icon_control_09" v-else></i>
+            </div>
+          </div>
+          <div class="download_btn">
+            <a download="视频" :href="videoUrl"></a>下载视频
+          </div>
+        </div>
+      </div>
+      <div class="struc-list">
+        <swiper :options="swiperOption" ref="mySwiper">
+          <!-- slides -->
+          <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + item.id">
+            <div
+              class="swiper_img_item"
+              :class="{'active': index === curImgIndex}"
+              @click="imgListTap(item, index)"
+            >
+              <img style="width: 100%; height: .88rem;" :src="item.photoPath" alt>
+              <div class="vl_jfo_sim" v-show="showSim">
+                <i
+                  class="vl_icon vl_icon_retrieval_05"
+                  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"
+                ></i>
+                {{item.semblance ? item.semblance : 92}}
+                <span
+                  style="font-size: 12px;"
+                >%</span>
+              </div>
+            </div>
+          </swiper-slide>
+          <div class="swiper-button-prev" slot="button-prev"></div>
+          <div class="swiper-button-next" slot="button-next"></div>
+        </swiper>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { ajaxCtx, mapXupuxian } from "@/config/config";
+import BigImg from "@/components/common/bigImg.vue";
+import {
+  JtcPOSTAppendixInfo,
+  JtcGETAppendixInfoList
+} from "../../../api/api.judge.js";
+import { MapGETmonitorList } from "../../../api/api.map.js";
+import { objDeepCopy } from "../../../../../utils/util.js";
+
+import { setTimeout } from "timers";
 export default {
   data() {
     return {
-      selectType: 1,
+      selectType: 1, // 图片提取或者自定义提取
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间正序， false为时间倒序
+      characteristicList: [
+        // 特征数组
+        {
+          desc: "湘H3A546",
+          isChecked: false
+        },
+        {
+          desc: "红色",
+          isChecked: false
+        },
+        {
+          desc: "有挂饰",
+          isChecked: false
+        }
+      ],
       // 菜单表单变量
       tzscMenuForm: {
         selectDate: "",
@@ -212,50 +501,167 @@ export default {
           label: "双皮奶"
         }
       ],
-      stucOrder: 2, // 1升序，2降序，3监控，4相似度
-      strucInfoList: [
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        },
-        {
-          time: "18-12-27  15:46:07",
-          video: "环保路摄像头002"
-        }
+      /* 上传图片变量 */
+      uploadAcion: ajaxCtx.base + "/new", //上传路径
+      uploading: false, // 是否上传中
+      // uploadFileList: [],
+      curImageUrl: "", // 当前上传的图片
+      historyPicList: [], // 上传历史记录
+      historyPicDialog: false,
+      loadingHis: false,
+      imgData: null,
 
-      ] // 检索列表数据
+      /* 选择设备变量 */
+      treeTabShow: false,
+      isIndeterminate: false, // 是否处于全选与全不选之间(摄像头)
+      isIndeterminateBay: false, // 是否处于全选与全不选之间(卡口)
+      checkAllTree: false, // 树是否全选(摄像头)
+      checkAllTreeBay: false, // 树是否全选(卡口)
+      bayonetTree: [
+        {
+          id: 1,
+          label: "卡口一级 1",
+          children: [
+            {
+              id: 4,
+              label: "二级 1-1",
+              children: [
+                {
+                  id: 9,
+                  label: "三级 1-1-1"
+                },
+                {
+                  id: 10,
+                  label: "三级 1-1-2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: "一级 2",
+          children: [
+            {
+              id: 5,
+              label: "二级 2-1"
+            },
+            {
+              id: 6,
+              label: "二级 2-2"
+            }
+          ]
+        }
+      ], // 卡口树
+      cameraTree: [], // 摄像头树
+      videoTreeNodeCount: 0, // 摄像头节点数量
+      bayonetTreeNodeCount: 0, // 卡口节点数量
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
+      selectDeviceArr: [], // 选中的设备数组
+      selectCameraArr: [], // 选中的摄像头数组
+      selectBayonetArr: [], // 选中的卡口数组
+      selectedTreeTab: 0, // 当前选中的
+      treeTabArr: [
+        {
+          name: "摄像头"
+        },
+        {
+          name: "卡口"
+        }
+      ],
+      strucInfoList: [
+        // 检索结果arr
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        },
+        {
+          time: "18-12-27  15:46:07",
+          video: "环保路摄像头002",
+          id: ""
+        }
+      ],
+      /* 检索详情弹窗变量 */
+      swiperOption: {
+        // swiper配置
+        slidesPerView: 10,
+        spaceBetween: 18,
+        slidesPerGroup: 10,
+        loop: false,
+        slideToClickedSlide: true,
+        loopFillGroupWithBlank: true,
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev"
+        }
+      },
+      amap: null, // 地图实例
+      markerPoint: null, // 地图点集合
+      InfoWindow: null,
+      strucDetailDialog: false, // 弹窗是否展示
+      playing: false, // 视频播放是否
+      strucCurTab: 1,
+      showSim: false, // 展示相似度排序
+      curImgIndex: 0, // 当前图片index
+      sturcDetail: {},
+      videoUrl: "" // 弹窗视频回放里的视频
     };
   },
+  computed: {
+    choosedHisPic() {
+      return this.historyPicList.filter(x => x.checked);
+    }
+  },
+  mounted() {
+    //获取摄像头卡口数据
+    this.getMonitorList();
+  },
   methods: {
+    getCharacter() {
+      // 获取特征
+    },
+    /*sort排序方法*/
     clickTime() {
+      // 点击时间排序
       if (this.sortType === 1) {
         this.timeSortType = !this.timeSortType;
       } else if (this.sortType === 2) {
@@ -263,7 +669,309 @@ export default {
       }
     },
     clickVideo() {
+      // 点击监控排序
       this.sortType = 2;
+    },
+    /*选择设备的方法*/
+    // 选中的设备数量处理
+    handleData() {
+      this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType);
+      console.log('选中的数据', this.selectDeviceArr);
+    },
+    getMonitorList() { //获取摄像头卡口信息列表
+      let params = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(params).then(res => {
+        if (res && res.data) {
+          let camera = objDeepCopy(res.data.areaTreeList);
+          let bayonet = objDeepCopy(res.data.areaTreeList);
+          this.cameraTree = this.getTreeList(camera);
+          this.bayonetTree = this.getBayTreeList(bayonet);
+          this.getLeafCountTree(this.cameraTree, 'video');
+          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+        }
+      });
+    },
+    getTreeList(data) { //获取摄像头数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
+          item['children'] = item.deviceBasicList
+          delete(item.deviceBasicList)
+          for(let key of item['children']) {
+            key['label'] = key.deviceName
+            key['id'] = key.uid
+            key['treeType'] = 1
+          }
+        }
+      }
+      return data;
+    },
+    getBayTreeList(data) { //获取卡口数据
+      for(let item of data) {
+        item['id'] = item.areaId
+        item['label'] = item.areaName
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          item['children'] = item.bayonetList
+          delete(item.bayonetList)
+          for(let key of item['children']) {
+            key['label'] = key.bayonetName
+            key['id'] = key.uid
+            key['treeType'] = 2
+          }
+        }
+      }
+      return data;
+    },
+    handleCheckedAll(val) {
+      // 全选所有摄像头树节点
+     this.isIndeterminate = false;
+      if (val) {
+        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
+      } else {
+        this.$refs.cameraTree.setCheckedNodes([]);
+      }
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    handleCheckedAllBay(val) {
+      // 全选所有设备节点
+      this.isIndeterminateBay = false;
+      if (val) {
+        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+      } else {
+        this.$refs.bayonetTree.setCheckedNodes([]);
+      }
+      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+    },
+    getLeafCountTree(json, type) {
+      // 获取树节点的数量
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].hasOwnProperty("id")) {
+          if (type === "video") {
+            this.videoTreeNodeCount++;
+          } else {
+            this.bayonetTreeNodeCount++;
+          }
+        }
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTree(json[i].children, type);
+        } else {
+          continue;
+        }
+      }
+    },
+    listenChecked(val, val1) {
+      // 监听摄像头树的checkbox
+      this.selectCameraArr = this.$refs.cameraTree.getCheckedNodes(true);
+      this.handleData();
+      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
+        this.isIndeterminate = false;
+        this.checkAllTree = true;
+      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTree = false;
+        this.isIndeterminate = false;
+      }
+    },
+    listenCheckedBay(val, val1) {
+      // 监听卡口树的checkbox
+     this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+      this.handleData();
+      if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
+        this.isIndeterminateBay = false;
+        this.checkAllTreeBay = true;
+      } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = true;
+      } else if (val1.checkedNodes.length === 0) {
+        this.checkAllTreeBay = false;
+        this.isIndeterminateBay = false;
+      }
+    },
+    chooseDevice() {
+      // 确定选中设备（计算选中的树节点）
+      // console.log(this.$refs.videotree.getCheckedNodes());
+      this.treeTabShow = false;
+    },
+    // 绘制地图
+    drawPoint(data) {
+      this.$nextTick(() => {
+        $(".struc_c_address").append($("#capMap"));
+      });
+      if (this.markerPoint) {
+        this.amap.remove(this.markerPoint);
+      }
+      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
+      this.markerPoint = new AMap.Marker({
+        // 添加自定义点标记
+        map: this.amap,
+        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        // 自定义点标记覆盖物内容
+        content: _content
+      });
+      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      let sConent = `<div class="cap_info_win"><p>设备名称：${
+        data.deviceName
+      }</p><p>抓拍地址：${data.address}</p></div>`;
+      this.infoWindow = new AMap.InfoWindow({
+        map: this.amap,
+        isCustom: true,
+        closeWhenClickMap: false,
+        position: [data.longitude, data.latitude],
+        offset: new AMap.Pixel(0, -70),
+        content: sConent
+      });
+    },
+    videoTap() {
+      // 播放视频
+      let vDom = document.getElementById("capVideo");
+      if (this.playing) {
+        vDom.pause();
+      } else {
+        vDom.play();
+      }
+      vDom.addEventListener("ended", e => {
+        e.target.currentTime = 0;
+        this.playing = false;
+      });
+      this.playing = !this.playing;
+    },
+    showStrucInfo(data, index) {
+      // 打开抓拍详情
+      this.curImgIndex = index;
+      this.strucDetailDialog = true;
+      // this.sturcDetail = data;
+      // this.drawPoint(data);
+    },
+    imgListTap(data, index) {
+      // 点击swiper图片
+      this.curImgIndex = index;
+      this.sturcDetail = data;
+      // this.drawPoint(data); // 重新绘制地图
+    },
+    /* 上传图片方法 */
+    beforeAvatarUpload(file) {
+      // 上传图片控制
+      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
+      const isLt = file.size / 1024 / 1024 < 100;
+      if (!isJPG) {
+        this.$message.error("只能上传 JPG / PNG 格式图片!");
+      }
+      if (!isLt) {
+        this.$message.error("上传图片大小不能超过 100MB!");
+      }
+      this.uploading = true;
+      return isJPG && isLt;
+    },
+    uploadSucess(response, file, fileList) {
+      //上传成功
+      this.uploading = false;
+      if (response && response.data) {
+        let oRes = response.data;
+        if (oRes) {
+          let x = {
+            cname: oRes.fileName, // 附件名称 ,
+            contentUid: this.$store.state.loginUser.uid,
+            // desci: '', // 备注 ,
+            filePathName: oRes.fileName, // 附件保存名称 ,
+            fileType: 1, // 文件类型 ,
+            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+            // otherFlag: '', // 其他标识 ,
+            path: oRes.fileFullPath, // 附件路径 ,
+            // path: oRes.path,
+            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+            // uid: '' //  附件标识
+          };
+          JtcPOSTAppendixInfo(x).then(jRes => {
+            if (jRes) {
+              x["uid"] = jRes.data;
+              console.log(x);
+            }
+          });
+          this.imgData = x;
+          this.curImageUrl = x.path;
+        }
+      }
+      // this.uploadFileList = fileList;
+    },
+    handleError() {
+      //上传失败
+      this.uploading = false;
+      this.$message.error("上传失败");
+    },
+    showHistoryPic() {
+      //获取上传记录
+      this.loadingHis = true;
+      this.historyPicDialog = true;
+      let params = {
+        userId: this.$store.state.loginUser.uid,
+        fileType: 1
+      };
+      JtcGETAppendixInfoList(params)
+        .then(res => {
+          if (res) {
+            this.loadingHis = false;
+            res.data.forEach(x => (x.checked = false));
+            this.historyPicList = res.data;
+          }
+        })
+        .catch(() => {
+          this.historyPicDialog = false;
+        });
+    },
+    delPic() {
+      //删除图片
+      // this.uploadFileList.splice(0, 1);
+      this.curImageUrl = "";
+    },
+    chooseHisPic(item) {
+      //选择最近上传的图片
+      this.historyPicList.forEach(x => {
+        x.checked = false;
+      });
+      item.checked = true;
+    },
+    /* 拖拽图片上传的方法 */
+    drag(ev) {
+      ev.dataTransfer.setData("Text", ev.target.currentSrc);
+    },
+    drop(e) {
+      let x = {
+        contentUid: this.$store.state.loginUser.uid,
+        cname: "拖拽图片" + Math.random(),
+        filePathName: "拖拽图片" + Math.random(),
+        path: e.dataTransfer.getData("Text")
+      };
+      JtcPOSTAppendixInfo(x).then(jRes => {
+        if (jRes) {
+          x["uid"] = jRes.data;
+          console.log(x);
+        }
+      });
+    },
+    allowDrop(e) {
+      e.preventDefault();
+    }
+  },
+  watch: {
+    strucCurTab(e) {
+      // 监听当前的详情模态框的tab index
+      if (e === 2) {
+        this.drawPoint(this.sturcDetail); // 绘制地图
+      } else if (e === 3) {
+        this.videoUrl = document.getElementById("capVideo").src;
+      }
     }
   }
 };
@@ -294,13 +1002,12 @@ export default {
       background: #fff;
       box-shadow: 2px 3px 10px 0px rgba(131, 131, 131, 0.28);
       height: 100%;
-      // padding: 20px;
       // 菜单的表单
       .width232 {
         width: 232px;
       }
-      .width132 {
-        width: 132px;
+      .el-form-item {
+        margin-bottom: 12px;
       }
       // 选择搜车类型
       .select_type {
@@ -309,7 +1016,6 @@ export default {
       // 特征
       .characteristic {
         margin: 10px 0 38px 0;
-        border-bottom: 1px solid #d3d3d3;
         .btn {
           line-height: 30px;
           height: 30px;
@@ -318,10 +1024,111 @@ export default {
           border-radius: 4px;
           text-align: center;
           color: #666666;
+          cursor: pointer;
         }
         .characteristic_list {
           min-height: 40px;
+          padding-bottom: 20px;
+          overflow: hidden;
+          border-bottom: 1px solid #d3d3d3;
+          .characteristic_item {
+            float: left;
+            padding: 8px 16px;
+            font-size: 12px;
+            background: #fafafa;
+            border: 1px solid #f2f2f2;
+            border-radius: 3px;
+            margin: 10px 10px 0 0;
+            cursor: pointer;
+            color: #999;
+          }
+          .no_characteristic_list {
+            line-height: 40px;
+            text-align: center;
+            font-size: 16px;
+            color: #999;
+          }
+          .color_blue {
+            color: #0c70f8;
+          }
         }
+      }
+      // 选择设备下拉
+      .selected_device {
+        margin-bottom: 12px;
+        position: relative;
+        width: 232px;
+        height: 40px;
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        padding-left: 12px;
+        > i {
+          position: absolute;
+          right: 12px;
+          top: 13px;
+        }
+        &:hover,
+        &:focus {
+          border-color: #0c70f8;
+          cursor: pointer;
+        }
+        .device_list {
+          line-height: 40px;
+          font-size: 14px;
+          color: #333;
+          .device_count {
+            color: #0c70f8;
+            margin-left: 20px;
+          }
+        }
+        .no_device {
+          line-height: 40px;
+          color: #999999;
+        }
+        // 树tab
+        .device_tree_tab {
+          position: absolute;
+          top: 50px;
+          left: -1px;
+          z-index: 100;
+          background: #fff;
+          width: 232px;
+          height: 350px;
+          border-radius: 4px;
+          border: 1px solid #d3d3d3;
+          .tab_title {
+            width: 50%;
+            float: left;
+            background: #f2f2f2;
+            text-align: center;
+            color: #666666;
+            line-height: 30px;
+            font-size: 12px;
+          }
+          .current_title {
+            background: #fff;
+          }
+          // 树
+          .tree_content {
+            height: 310px;
+            padding-top: 10px;
+            .checked_all {
+              padding: 0 0 8px 23px;
+            }
+          }
+        }
+      }
+      // 关闭设备tab
+      .selected_device_comp {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: auto;
+        margin: 0;
+        opacity: 0;
+        z-index: 10;
       }
       // 按钮
       .btn_warp {
@@ -339,9 +1146,77 @@ export default {
       }
       // 上传
       .upload_warp {
+        position: relative;
         height: 232px;
-        background: #f2f2f2;
+        cursor: pointer;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
         border-radius: 10px;
+        &:hover {
+          background: #2981f8;
+          > p {
+            display: block;
+          }
+          .del_icon {
+            display: block;
+          }
+        }
+        .vl_jtc_upload {
+          width: 100%;
+          height: 100%;
+          background: none;
+        }
+        > p {
+          display: none;
+          position: absolute;
+          bottom: 0;
+          text-align: center;
+          width: 100%;
+          color: #ffffff;
+          height: 40px;
+          line-height: 40px;
+          -webkit-border-radius: 0 0 10px 10px;
+          -moz-border-radius: 0 0 10px 10px;
+          border-radius: 0 0 10px 10px;
+          background: #0c70f8;
+        }
+        .vl_jtc_ic_input {
+          position: absolute;
+          top: 0.2rem;
+          width: 3rem;
+          height: 0.26rem;
+          left: 0.2rem;
+          border: 1px solid #d3d3d3;
+          -webkit-border-radius: 0.13rem;
+          -moz-border-radius: 0.13rem;
+          border-radius: 0.13rem;
+          padding: 0 0.02rem;
+          background: #ffffff;
+          .el-form-item__content {
+            height: 0.23rem;
+            line-height: 0.23rem;
+          }
+          input {
+            border: none !important;
+            height: 0.23rem;
+            line-height: 0.23rem;
+          }
+        }
+        .del_icon {
+          display: none;
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 24px;
+          height: 24px;
+          line-height: 24px;
+          text-align: center;
+          background: rgba(0, 0, 0, 0.4);
+          -webkit-border-radius: 4px;
+          -moz-border-radius: 4px;
+          border-radius: 4px;
+          color: #ffffff;
+        }
       }
     }
     // 右边图片列表
@@ -385,7 +1260,8 @@ export default {
       .img_list {
         height: calc(100% - 19px);
         .img_item {
-          width: 330px;
+          cursor: pointer;
+          width: 380px;
           padding: 20px;
           margin: 20px 20px 0 0;
           background: #fff;
@@ -393,19 +1269,20 @@ export default {
           float: left;
           // 图片包裹
           .img_wrap {
-            width: 118px;
-            height: 118px;
+            width: 138px;
+            height: 138px;
             float: left;
             position: relative;
             img {
               width: 100%;
               height: 100%;
               display: block;
+              cursor: move;
             }
           }
           // 文字的包裹
           .text_wrap {
-            padding-left: 8px;
+            padding-left: 10px;
             float: left;
             // 标题
             .text_name {
@@ -418,11 +1295,18 @@ export default {
               margin-top: 8px;
               padding: 0 12px;
               font-size: 12px;
-              line-height: 26px;
-              height: 26px;
               background: #fafafa;
               border: 1px solid #f2f2f2;
               border-radius: 3px;
+              overflow: hidden;
+              > i {
+                margin-top: 3px;
+                float: left;
+              }
+              > span {
+                line-height: 26px;
+                float: left;
+              }
             }
           }
         }
@@ -433,4 +1317,491 @@ export default {
 </style>
 
 <style lang="scss">
+html {
+  font-size: 100px;
+}
+@media screen and (min-width: 960px) and (max-width: 1119px) {
+  html {
+    font-size: 60px !important;
+  }
+}
+@media screen and (min-width: 1200px) and (max-width: 1439px) {
+  html {
+    font-size: 70px !important;
+  }
+}
+@media screen and (min-width: 1440px) and (max-width: 1679px) {
+  html {
+    font-size: 80px !important;
+  }
+}
+@media screen and (min-width: 1680px) and (max-width: 1919px) {
+  html {
+    font-size: 90px !important;
+  }
+}
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 100px !important;
+  }
+}
+.tzsc_wrap {
+  // 上传
+  .upload_warp .vl_jtc_upload {
+    .el-upload {
+      width: 100%;
+      height: 100%;
+      background: #f2f2f2;
+      border: none;
+      span {
+        color: #999;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+      }
+    }
+  }
+  // 抓拍详情弹窗
+  .struc_detail_dialog {
+    .el-dialog {
+      max-width: 13.06rem;
+      width: 100% !important;
+    }
+    .el-dialog__header {
+      display: none;
+    }
+    .struc_tab {
+      height: 1.16rem;
+      padding: 0.3rem 0;
+      position: relative;
+      color: #999999;
+      span {
+        display: inline-block;
+        margin-right: 0.55rem;
+        padding-bottom: 0.1rem;
+        cursor: pointer;
+      }
+      .active {
+        color: #0c70f8;
+        border-bottom: 2px solid #0c70f8;
+      }
+      i {
+        display: block;
+        position: absolute;
+        top: 0.3rem;
+        right: 0px;
+        cursor: pointer;
+      }
+    }
+    .struc_main {
+      width: 11.46rem;
+      height: 4.4rem;
+      margin: 0 auto;
+      border-bottom: 1px solid #f2f2f2;
+      .struc_c_detail {
+        width: 100%;
+        height: 3.6rem;
+        > div {
+          float: left;
+        }
+        // 默认为蓝色
+        .struc_c_d_img {
+          width: 3.6rem;
+          height: 3.6rem;
+          background: #eaeaea;
+          position: relative;
+          img {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+          }
+          i {
+            display: block;
+            position: absolute;
+            top: 0.1rem;
+            right: 0.1rem;
+            line-height: 0.26rem;
+            height: 0.26rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 0.13rem;
+            font-style: normal;
+            color: #0c70f8;
+            font-size: 12px;
+            padding: 0 0.1rem;
+          }
+        }
+        // 绿色标签
+        .struc_c_d_img_green {
+          &:before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            transform: rotate(-45deg);
+            border: 0.5rem solid #50cc62;
+            border-color: transparent transparent #50cc62;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: 0.1rem;
+            left: 0.1rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
+          i {
+            color: #50cc62;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: 0.3rem;
+          &:before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: -0.5rem;
+            left: -0.5rem;
+            transform: rotate(-45deg);
+            border: 0.5rem solid #0c70f8;
+            border-color: transparent transparent #0c70f8;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: 0.1rem;
+            left: 0.1rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
+        }
+        .struc_c_d_box {
+          width: calc(100% - 3.9rem);
+          box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+          border-radius: 1px;
+          position: relative;
+          overflow: hidden;
+          > div {
+            float: left;
+          }
+          .struc_c_d_info {
+            width: calc(100% - 3.6rem);
+            padding-left: 0.24rem;
+            color: #333333;
+            h2 {
+              font-weight: bold;
+              line-height: 0.74rem;
+              padding-right: 1rem;
+              .vl_jfo_sim {
+                color: #0c70f8;
+                font-weight: bold;
+                font-size: 0.24rem;
+                float: right;
+                i {
+                  vertical-align: text-bottom;
+                  margin-right: 0.1rem;
+                }
+                span {
+                  font-weight: normal;
+                }
+              }
+            }
+            .struc_cdi_line {
+              p {
+                max-width: 100%;
+                display: inline-block;
+                height: 0.3rem;
+                line-height: 0.3rem;
+                margin-bottom: 0.08rem;
+                border: 1px solid #f2f2f2;
+                background: #fafafa;
+                color: #333333;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                border-radius: 3px;
+                font-size: 12px;
+                overflow: hidden;
+                padding: 0 0.1rem;
+                margin-right: 0.08rem;
+                .key {
+                  color: #999999;
+                  padding-left: 10px;
+                }
+                .val {
+                  padding-right: 9px;
+                  position: relative;
+                  &::before {
+                    content: "";
+                    width: 1px;
+                    height: 14px;
+                    position: absolute;
+                    right: 0px;
+                    top: 1px;
+                    background: #f2f2f2;
+                  }
+                }
+              }
+            }
+          }
+          // &:before {
+          //   display: block;
+          //   content: "";
+          //   position: absolute;
+          //   top: -0.7rem;
+          //   right: -0.7rem;
+          //   transform: rotate(-46deg);
+          //   border: 0.7rem solid #0c70f8;
+          //   border-color: transparent transparent transparent #0c70f8;
+          // }
+          // &:after {
+          //   display: block;
+          //   content: "";
+          //   position: absolute;
+          //   top: -0.4rem;
+          //   right: -0.4rem;
+          //   transform: rotate(-45deg);
+          //   border: 0.4rem solid #ffffff;
+          //   border-color: transparent transparent transparent #ffffff;
+          // }
+          // > span {
+          //   display: block;
+          //   position: absolute;
+          //   top: 0.19rem;
+          //   right: 0.19rem;
+          //   width: 1rem;
+          //   height: 1rem;
+          //   text-align: center;
+          //   color: #ffffff;
+          //   font-size: 0.12rem;
+          //   -webkit-transform: rotate(45deg);
+          //   -moz-transform: rotate(45deg);
+          //   -ms-transform: rotate(45deg);
+          //   -o-transform: rotate(45deg);
+          //   transform: rotate(45deg);
+          //   z-index: 99;
+          // }
+        }
+      }
+      // 抓拍视频
+      .struc_c_video {
+        .struc_c_d_box {
+          background: #e9e7e8;
+          height: 100%;
+          text-align: center;
+          &:hover {
+            .play_btn {
+              display: block !important;
+            }
+          }
+          .play_btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.4);
+            width: 1rem;
+            height: 1rem;
+            text-align: center;
+            line-height: 1rem;
+            -webkit-border-radius: 50%;
+            -moz-border-radius: 50%;
+            border-radius: 50%;
+            cursor: pointer;
+            i {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
+              height: 22px !important;
+            }
+          }
+          > video {
+            width: auto;
+            height: 100%;
+          }
+          &:after {
+            content: none !important;
+          }
+          &:before {
+            content: none !important;
+          }
+          -webkit-box-shadow: 0 0 0 !important;
+          -moz-box-shadow: 0 0 0 !important;
+          box-shadow: 0 0 0 !important;
+        }
+        .download_btn {
+          text-align: center;
+          width: 1.1rem;
+          height: 0.4rem;
+          float: right !important;
+          margin-top: 0.2rem;
+          background: rgba(246, 248, 249, 1);
+          border: 1px solid rgba(211, 211, 211, 1);
+          border-radius: 4px;
+          line-height: 0.4rem;
+          cursor: pointer;
+          color: #666666;
+          position: relative;
+          &:hover {
+            color: #ffffff;
+            background: #0c70f8;
+            border-color: #0c70f8;
+          }
+          a {
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+
+      .struc_c_address {
+        height: 100%;
+        #capMap {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+    .struc-list {
+      width: 12.46rem;
+      margin: 0 auto;
+      padding: 0.44rem 0 0.34rem 0;
+      .swiper-container {
+        padding: 0.02rem 0.5rem;
+        &:before {
+          display: block;
+          content: "";
+          width: 0.5rem;
+          height: 110%;
+          background: #ffffff;
+          position: absolute;
+          left: 0;
+          z-index: 9;
+          border: 1px solid #ffffff;
+        }
+        &:after {
+          display: block;
+          content: "";
+          width: 0.5rem;
+          height: 110%;
+          background: #ffffff;
+          position: absolute;
+          right: 0;
+          top: 0;
+          z-index: 9;
+          border: 1px solid #ffffff;
+        }
+        .swiper-button-next {
+          right: 0;
+        }
+        .swiper-button-prev {
+          left: 0;
+        }
+        .swiper-slide {
+          .swiper_img_item {
+            cursor: pointer;
+            border: 1px solid #ffffff;
+            padding: 2px;
+            .vl_jfo_sim {
+              font-size: 0.14rem;
+              height: 0.3rem;
+              margin-top: 0;
+              /*display: inline-block;*/
+              white-space: nowrap;
+              text-align: center;
+              color: #999999;
+              i {
+                margin-right: 0;
+              }
+            }
+          }
+          .active {
+            border-color: #0c70f8;
+            .vl_jfo_sim {
+              color: #0c70f8;
+            }
+          }
+        }
+      }
+    }
+  }
+  // 历史图片弹窗
+  .history-pic-dialog {
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100% !important;
+    }
+    .el-dialog__title {
+      font-size: 0.16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 0.76rem 0.3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem !important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: 0.02rem solid #ffffff;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .active {
+        border-color: #0c70f8;
+      }
+    }
+    .el-dialog__footer {
+      button {
+        width: 1.4rem !important;
+        height: 0.4rem;
+        line-height: 0.4rem;
+        padding: 0;
+      }
+    }
+  }
+}
 </style>

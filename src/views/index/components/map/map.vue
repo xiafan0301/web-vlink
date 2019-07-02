@@ -823,6 +823,7 @@ export default {
               this.defaultExpand.push(res.data.areaName);
               res.data.areaTreeList.push(__obj);
               this.mapTreeData = this.switchData(res.data);
+              console.log('树的数据', this.mapTreeData);
               this.$_hideLoading();
               this.mapMark(this.mapTreeData[0].infoList);
               // this.moveDom();
