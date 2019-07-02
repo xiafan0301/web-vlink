@@ -220,10 +220,10 @@ export default {
         plateNo:this.select+ this.ruleForm.input3 ,
       }
       if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-        pg.areaCodes=this.ruleForm.value1.join(":")
+        pg.areaCodes=this.ruleForm.value1.join("-")
       }
       if(this.ruleForm.input5==2){
-         pg.deviceCodes=this.selectDevice.join(":")
+         pg.deviceCodes=this.selectDevice.join("-")
       }
         
       this.getVehicleShot(pg);
@@ -248,6 +248,23 @@ export default {
         }
       })
     },
+    compare  (prop) {
+        return function (obj1, obj2) {
+        var val1 = obj1[prop];
+        var val2 = obj2[prop];
+        if (!isNaN(Number(val1)) && !isNaN(Number(val2))) {
+            val1 = Number(val1);
+            val2 = Number(val2);
+        }
+        if (val1 < val2) {
+            return 1;
+        } else if (val1 > val2) {
+            return -1;
+        } else {
+            return 0;
+        }            
+      } 
+    },
     getVehicleShot(d) {
       getVehicleShot(d).then(res => {
         if (res) {
@@ -266,6 +283,7 @@ export default {
         //  console.log(this.evData);
           
           this.amap.clearMap();
+          this.evData.sort(this.compare("shotNum"))
           this.drawMarkers(this.evData);
           //this.showEventList();
         }
@@ -283,25 +301,32 @@ export default {
     },
     drawMarkers(data) {
       //console.log(data);
-
+      let limit = 0
+      if(data.length > 3){
+         limit= data[2].shotNum
+      }
+      
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = "vlJfoImg" + i;
+        let isBig = obj.shotNum >= limit?true:false
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><p>${
-            obj.deviceName
-          }</p><p class="big">${obj.shotNum}次</p></div>`;
-          // 窗体
-          new AMap.Marker({
-            // 添加自定义点标记
-            map: this.amap,
-            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-90, -124), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            extData: obj,
-            // 自定义点标记覆盖物内容
-            content: _sContent
-          });
+          if( isBig){
+            let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><p>${
+              obj.deviceName
+            }</p><p class="big">${obj.shotNum}次</p></div>`;
+            // 窗体
+            new AMap.Marker({
+              // 添加自定义点标记
+              map: this.amap,
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+              offset: new AMap.Pixel(-90, -124), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: obj,
+              // 自定义点标记覆盖物内容
+              content: _sContent
+            });
+          }
           // 摄像头
           let _id = "vlJfoSxt" + i;
           let _content =
