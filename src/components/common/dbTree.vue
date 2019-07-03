@@ -207,6 +207,7 @@ export default {
           border-left: 0;
         }
         &.db_tree_ct_sed {
+          background-color: #F2F2F2;
           color: #0C70F8;
           cursor: default;
         }
