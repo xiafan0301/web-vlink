@@ -13,6 +13,8 @@
               type="datetime"
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              :default-time="['00:00:00', '23:59:59']"
               style="width: 100%"
               @blur="handleStartTime"
               :picker-options="pickerStart"
@@ -27,6 +29,8 @@
               @blur="handleEndTime"
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              :default-time="['00:00:00', '23:59:59']"
               type="datetime"
               placeholder="结束时间"
               >
