@@ -44,6 +44,11 @@
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_qyph'}">
+              <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>

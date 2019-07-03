@@ -196,3 +196,34 @@ export function getTailBehindList(params) {
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  vehicle区域徘徊碰撞start  ---------------------------------*/
+/**
+ * 区域徘徊
+ * @param {object} params
+ */
+export function QyphGetAreaWander(params) {
+  return request({
+    url: '/vehicle-analysis/area-wander',
+    method: 'get',
+    params: params,
+    mode: 'noServe'
+  });
+}
+/*--------------------------  区域徘徊碰撞end  ---------------------------------*/
+/**
+ * 区域碰撞
+ * @param {object} params
+ */
+export function QypzGetAreaCross(params) {
+  return request({
+    url: '/vehicle-analysis/area-cross',
+    method: 'get',
+    params: params,
+    mode: 'noServe'
+  });
+}
+/*--------------------------  车辆轨迹start  ---------------------------------*/
+
+/*--------------------------  车辆轨迹end  ---------------------------------*/

@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>区域碰撞</el-breadcrumb-item>
+        <el-breadcrumb-item>区域徘徊</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
 
@@ -15,58 +15,55 @@
             <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
           </el-input>
         </div>
-        <div style="width: 272px;height: calc(100% - 40px)">
+        <div style="width: 272px;height: 100%;">
           <vue-scroll>
             <div class="search_main">
-              <div class="search_top">
-                <span>区域列表</span>
-                <i class="el-icon-delete" @click="delAllArea"></i>
-                <i class="el-icon-circle-plus-outline" @click="addArea"></i>
-              </div>
               <!--区域选择-->
-              <div class="search_item" v-for="(item, index) in searchData" :key="item.id">
-                <div class="search_line">
-                  <span class="red_star">区域:</span>
-                  <span @click="item.activeArea = true" class="choose_btn vl_icon vl_icon_041"></span>
-                  <span class="choose_btn el-icon-delete" @click="clearArea(index)"></span>
-                  <span class="choose_btn el-icon-location-outline" :class="{'not-active': !item.area}"></span>
-                  <div class="drawBox" v-show="item.activeArea">
-                    <div class="items">
-                      <span class="el-icon-arrow-left" @click="item.activeArea = false"></span>
-                      <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-                      <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                      <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
-                      <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                      <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
-                    </div>
+              <div class="search_line">
+                <span class="red_star">区域:</span>
+                <span @click="activeArea = true" class="choose_btn vl_icon vl_icon_041"></span>
+                <span class="choose_btn el-icon-delete" @click="clearArea"></span>
+                <span class="choose_btn el-icon-location-outline" :class="{'not-active': !searchData.area}"></span>
+                <div class="drawBox" v-show="activeArea">
+                  <div class="items">
+                    <span class="el-icon-arrow-left" @click="activeArea = false"></span>
+                    <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
+                    <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
+                    <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
+                    <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
+                    <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
                   </div>
                 </div>
-                <div class="search_line">
-                  <span class="time">开始</span>
-                  <el-date-picker
-                          v-model="item.startTime"
-                          style="width: 212px;"
-                          :picker-options="pickerOptions"
-                          type="datetime"
-                          placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-                <p class="red_star"></p>
-                <div class="search_line">
-                  <span class="time">结束</span>
-                  <el-date-picker
-                          style="width: 212px;"
-                          :picker-options="pickerOptions1"
-                          v-model="item.endTime"
-                          type="datetime"
-                          placeholder="选择日期时间">
-                  </el-date-picker>
-                </div>
-                <el-divider></el-divider>
               </div>
+              <div class="search_line">
+                <span class="time">开始</span>
+                <el-date-picker
+                        v-model="searchData.startTime"
+                        style="width: 212px;"
+                        :picker-options="pickerOptions"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                </el-date-picker>
+              </div>
+              <p class="red_star"></p>
+              <div class="search_line">
+                <span class="time">结束</span>
+                <el-date-picker
+                        style="width: 212px;"
+                        :picker-options="pickerOptions1"
+                        v-model="searchData.endTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                </el-date-picker>
+              </div>
+              <div class="search_line">
+                <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,'')" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
+              </div>
+              <el-divider></el-divider>
               <!--按钮-->
               <div class="search_btn">
-                <el-button type="primary" @click="tcDiscuss">获取特征</el-button>
+                <el-button>重置</el-button>
+                <el-button type="primary" @click="tcDiscuss">徘徊分析</el-button>
               </div>
             </div>
           </vue-scroll>
@@ -86,26 +83,17 @@
         input3: null,
         hover:null,
         // 选择区域
+        activeArea: false,
         mouseTool: null,
         selAreaPolygon: null,
         delSelAreaIcon: null,
         lnglat:null,
-        searchData: [
-          {
-            activeArea: false,
-            area: null, // 区域
-            startTime: '',
-            endTime: '',
-            cameraIds: '3'
-          },
-          {
-            activeArea: false,
-            area: null, // 区域
-            startTime: '',
-            endTime: '',
-            cameraIds: '4'
-          }
-        ],
+        searchData: {
+          area: null, // 区域
+          startTime: '',
+          endTime: '',
+          minTimes: ''// 最少次数
+        },
         pickerOptions: {
           disabledDate (time) {
             let date = new Date();
@@ -149,10 +137,6 @@
     mounted() {
       this.renderMap();
       this.setDTime();
-      this.searchData.forEach(x => {
-        x.startTime = this.setDTime().startTime;
-        x.endTime = this.setDTime().endTime;
-      })
       this.getMapInfoList();
     },
     methods: {
@@ -284,6 +268,7 @@
               radius: 5000, //半径
               borderWeight: 3,
               strokeColor: "#FF33FF",
+              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillOpacity: 0.4,
@@ -355,26 +340,14 @@
         return str;
       },
 
-      delAllArea() {
-        this.searchData.splice(2)
-      },
-      addArea () {
-        this.searchData.push(
-            {
-              activeArea: false,
-              area: null, // 区域
-              startTime: this.setDTime().startTime,
-              endTime:  this.setDTime().endTime,
-            }
-        )
-      },
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
         let curS = 3 * 24 * 3600 * 1000;
         let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
         let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        return {startTime: _s,endTime: _e}
+        this.searchData.startTime = _s;
+        this.searchData.endTime = _e;
       },
       // 选择区域
       selArea (v) {
@@ -394,6 +367,7 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
+              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -437,21 +411,11 @@
 
       },
       // 清除区域
-      clearArea (index) {
-        if (this.searchData.length > 2) {
-          this.searchData.splice(index, 1)
-        } else{
-          this.$message.info("最少保持2个")
-        }
-      },
+      clearArea () {},
       tcDiscuss () {
-        let supQuery = {};
-        this.searchData.forEach((x, index) => {
-          supQuery['where.dtoList[' + index + '].cameraIds'] = x.cameraIds;
-          supQuery['where.dtoList[' + index + '].startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
-          supQuery['where.dtoList[' + index + '].endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
-        })
-        this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+        let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
+        let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
+        this.$router.push({name: 'vehicle_search_qyph_jg', query: {'where.cameraIds': '3,4','where.startTime': sT, 'where.endTime': eT,'where.frequence': this.searchData.minTimes}})
       }
     }
   };
@@ -486,28 +450,12 @@
       }
       .search_main {
         width: 272px;
-        min-height: 569px;
+        height: 569px;
         margin-top: 20px;
         background: #ffffff;
-        .search_top {
-          height: 48px;
-          line-height: 48px;
-          color: #666666;
-          border-bottom: 1px solid #DCDCDC;
-          padding-right: 12px;
-          padding-left: 20px;
-          i {
-            float: right;
-            display: inline-block;
-            height: 48px;
-            line-height: 48px;
-            margin-left: 20px;
-            cursor: pointer;
-          }
-        }
         .search_btn {
           text-align: center;
-          /*margin-top: 255px;*/
+          margin-top: 255px;
         }
         >p {
           padding-left: 10px;
@@ -608,22 +556,26 @@
           }
         }
       }
-
+     
     }
   }
 </style>
 <style lang="scss">
-  .red_star {
-    &:before {
-      content: '*';
-      color: #FF0000;
+.red_star {
+  &:before {
+    content: '*';
+    color: #FF0000;
+  }
+}
+.search_line {
+  .el-date-editor {
+    .el-input__suffix {
+     &:last-child {
+       i {
+         display: none;
+       }
+     }
     }
   }
-  .search_line {
-    /deep/.el-date-editor {
-      > i {
-        display: none!important;
-      }
-    }
-  }
+}
 </style>
