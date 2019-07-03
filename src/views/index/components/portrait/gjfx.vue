@@ -2,8 +2,8 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆轨迹</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item>轨迹分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
 
@@ -423,7 +423,7 @@
     display: inline-block;
     background-repeat: no-repeat;
     transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
+    background-image: url(../../../../assets/img/icons.png);
     background-position: -380px -1269px;
     cursor: pointer;
   }
@@ -443,7 +443,7 @@
     display: inline-block;
     background-repeat: no-repeat;
     transform: rotate(180deg);
-    background-image: url(../../../../../assets/img/icons.png);
+    background-image: url(../../../../assets/img/icons.png);
     background-position: -318px -1269px;
     cursor: pointer;
   }

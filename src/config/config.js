@@ -104,6 +104,13 @@ const oDomains = {
       test: 'https://apirel.aorise.org/vlink-gis',
       prod: 'https://apidev.aorise.org/vlink-gis'
     },
+    // 无服务
+    noServe: {
+      // dev: 'https://apidev.aorise.org',
+      dev: 'http://10.116.64.142:8087',
+      test: 'https://apirel.aorise.org',
+      prod: 'https://apidev.aorise.org'
+    },
     //研判分析服务
     analysis: {
       dev: 'https://apidev.aorise.org/vlink-judge',
