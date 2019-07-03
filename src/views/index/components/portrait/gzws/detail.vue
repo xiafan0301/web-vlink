@@ -1,6 +1,6 @@
 <template>
   <div class="gzws_record">
-    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '尾随记录'}]"></Breadcrumb>
+    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
         <h2>尾随人员的库信息</h2>
