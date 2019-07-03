@@ -44,6 +44,11 @@
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_search_qyph'}">
+              <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>
@@ -87,6 +92,11 @@
           <li>
             <router-link :to="{name: 'vehicle_search_dctx'}">
               <i class="vl_icon2 vl_icon2_018"></i><span>多车同行分析</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'vehicle_report'}">
+              <i class="vl_icon2 vl_icon2_027"></i><span>车辆侦察报告</span>
             </router-link>
           </li>
         </ul>

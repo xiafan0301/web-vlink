@@ -19,11 +19,11 @@ export default {
   html {
     font-size: 100px;
   }
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
+  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px;}}
+  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px;}}
+  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px;}}
+  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px;}}
+  @media screen and (min-width: 1920px) {html {font-size: 100px;} }
 .vl_map_main { height: 100%; overflow: hidden; }
 .vl_map {
   position: relative;
@@ -228,7 +228,7 @@ export default {
       margin-left: -2.22rem;
       overflow: hidden;
       padding: .15rem .3rem;
-      background:rgba(255,255,255,1); 
+      background:rgba(255,255,255,1);
       box-shadow:0px 3px 10px 0px rgba(99,99,99,0.39);
       animation: fadeInDown .4s ease-out .4s both;
       > li {
@@ -320,7 +320,7 @@ export default {
           > video {
             display: inline-block;
             position: absolute; top: 50%;
-            max-width: 100%; max-height: 100%; 
+            max-width: 100%; max-height: 100%;
             vertical-align: middle;
           }
           > i {

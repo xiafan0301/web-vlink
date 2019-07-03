@@ -32,7 +32,7 @@
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="请选择">
-                <el-option v-for="item in pricecode" :label="item" :value="item"></el-option>
+                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
           </el-form-item>
@@ -83,7 +83,6 @@
           <el-form-item v-if="ruleForm.input5=='2'" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
-          </el-select>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -219,17 +218,19 @@ export default {
     submitForm(v) {
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
       let pg={
-        shotTime:this.ruleForm.data1[0]+"-00-00-00"+"_"+this.ruleForm.data1[1]+"-23-59-59",
+        //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
+        startTime:this.ruleForm.data1[0]+" 00:00:00",
+        endTime:this.ruleForm.data1[1]+" 23:59:59",
         //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
         minSnapNum: this.ruleForm.input4 || 0,
         plateNo:this.select+ this.ruleForm.input3 ,
       }
       if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-        pg.areaCodes=this.ruleForm.value1.join("-")
+        pg.areaIds=this.ruleForm.value1.join(",")
       }
       if(this.ruleForm.input5==2){
-         pg.deviceCodes=this.selectDevice.join("-")
-         pg.bayonetIds=this.selectBayonet.join("-")
+         pg.deviceIds=this.selectDevice.join(",")
+         pg.bayonetIds=this.selectBayonet.join(",")
       }
         
       this.getVehicleShot(pg);
