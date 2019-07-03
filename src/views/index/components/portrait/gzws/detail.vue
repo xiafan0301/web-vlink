@@ -1,6 +1,6 @@
 <template>
   <div class="gzws_record">
-    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '尾随记录'}]"></Breadcrumb>
+    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
         <h2>尾随人员的库信息</h2>
@@ -56,6 +56,7 @@
 // import { testData } from './testData.js';
 import { getTailBehindDetail } from '@/views/index/api/api.judge.js';
 import Breadcrumb from '../breadcrumb.vue';
+import { formatESDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -79,10 +80,10 @@ export default {
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.query.plateNo;
-      const dateStart = this.$route.query.dateStart;
-      const dateEnd = this.$route.query.dateEnd;
+      const dateStart = formatESDate(this.$route.query.dateStart);
+      const dateEnd = formatESDate(this.$route.query.dateEnd);
       const plateNoTb = this.$route.query.plateNoTb;
-      const dateStartTb = this.$route.query.dateStartTb;
+      const dateStartTb = formatESDate(this.$route.query.dateStartTb);
       const params = {
         plateNo,
         dateStart,

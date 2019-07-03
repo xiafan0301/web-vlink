@@ -56,6 +56,14 @@ export default {
       path: 'pfgc', // 频繁过车
       name: 'vehicle_search_pfgc',
       component: () => import('@/views/index/components/vehicle/search/pfgc.vue')
+    },{
+      path: 'qyph', // 区域徘徊
+      name: 'vehicle_search_qyph',
+      component: () => import('@/views/index/components/vehicle/search/qyph.vue')
+    },{
+      path: 'qyph-jg', // 区域徘徊-分析结果
+      name: 'vehicle_search_qyph_jg',
+      component: () => import('@/views/index/components/vehicle/search/qyph-jg.vue')
     },
     /* 分析 */
     {
@@ -73,6 +81,10 @@ export default {
       path: 'qy', // 区域分析
       name: 'vehicle_search_qy',
       component: () => import('@/views/index/components/vehicle/analysis/qy.vue')
+    }, {
+      path: 'qy-jg', // 区域碰撞结果
+      name: 'vehicle_search_qy_jg',
+      component: () => import('@/views/index/components/vehicle/analysis/qy-jg.vue')
     }, {
       path: 'xcgl', // 行车规律分析
       name: 'vehicle_search_xcgl',
@@ -97,6 +109,10 @@ export default {
       path: 'dctx', // 多车同行分析
       name: 'vehicle_search_dctx',
       component: () => import('@/views/index/components/vehicle/analysis/dctx.vue')
+    }, {
+      path: 'report', // 车辆侦察报告
+      name: 'vehicle_report',
+      component: () => import('@/views/index/components/vehicle/analysis/report.vue')
     },
     /* 统计 */
     {

@@ -22,6 +22,12 @@ export default {
       name: 'gzws_portrait',
       component: () => import('@/views/index/components/portrait/gzws/gzws.vue')
     },
+    // 跟踪尾随分析结果
+    {
+      path: 'gzwsResult',
+      name: 'gzws_result',
+      component: () => import('@/views/index/components/portrait/gzws/result.vue')
+    },
     // 跟踪尾随详情
     {
       path: 'detail',
@@ -59,6 +65,20 @@ export default {
       component: () => import('@/views/index/components/portrait/rlcx.vue')
     },
     {
+      path: 'rxbd', // 人像比对
+      name: 'portrait_rxbd',
+      component: () => import('@/views/index/components/portrait/rxbd.vue')
+    },
+    {
+      path: 'ytsr', // 意图搜人
+      name: 'portrait_ytsr',
+      component: () => import('@/views/index/components/portrait/ytsr.vue')
+    },
+    {
+      path: 'gjfx', // 轨迹分析
+      name: 'portrait_gjfx',
+      component: () => import('@/views/index/components/portrait/gjfx.vue')
+    }, {
       path: 'rlsjfx',
       name: 'portrait_rlsjfx',
       component: () => import('@/views/index/components/portrait/rlsjfx.vue')
@@ -68,5 +88,10 @@ export default {
       name: 'portrait_zdgz',
       component: () => import('@/views/index/components/portrait/zdgz.vue')
     },
+    {
+      path: 'fxjg',
+      name: 'portrait_fxjg',
+      component: () => import('@/views/index/components/portrait/fxjg.vue')
+    }
   ]
 }
