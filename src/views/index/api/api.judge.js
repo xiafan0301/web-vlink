@@ -109,6 +109,19 @@ export function JfoGETGroup(params) {
   })
 }
 /**
+ * JfoGETGroup 分组列表查询接口
+ * @param {object} params
+ */
+export function JfoGETCity(params) {
+  return request({
+    url: '/vehicle-investigate/first-enter-city',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+/**
  * JfoGETSurveillanceObject 布控范围内监控设备列表查询接口
  * @param {object} params
  */
@@ -277,6 +290,18 @@ export function getSnapDetail(params) {
   });
 }
 /**
+ * 查询车辆
+ * @param {object} params
+ */
+export function getSnapList(params) {
+  return request({
+    url: '/vehicle/snap',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
  * 
 车辆图片分析接口
  * @param {object} params
@@ -299,6 +324,18 @@ export function getDeviceSnapImagesSum(params) {
     method: 'get',
     params: params,
     mode: 'judge'
+  })
+}
+/**
+ * 查询特殊组
+ * @param {object} params
+ */
+export function getGroups(params) {
+  return request({
+    url: '/groups',
+    method: 'get',
+    params: params,
+    mode: 'base'
   })
 }
 

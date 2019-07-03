@@ -1,5 +1,40 @@
 <template>
   <div class="qyryfx_wrap">
+    <!-- 搜索的内容 -->
+    <div class="search_comp" v-if="isSearchResult" @click="isSearchResult = false;"></div>
+    <div class="search_result" v-show="isSearchResult">
+      <vue-scroll>
+        <div
+          class="result_item"
+          v-for="(item, index) in searchResultList"
+          :key="'result_item' + index"
+        >
+          <!-- 序号icon -->
+          <p class="index_icon"></p>
+          <!-- 摄像机icon -->
+          <p class="camera_icon"></p>
+          <div class="address_content">
+            <!-- 左边的地址信息 -->
+            <div class="left">
+              <!-- 地标名 -->
+              <div class="add_name">创谷-长沙天心文化广告产业园</div>
+              <!-- 详情地址 -->
+              <div class="add_detail">
+                长沙市天心区雀园路568号长沙市
+                天心区雀园路568号
+              </div>
+              <!-- Tel -->
+              <div class="add_tel">
+                <span class="key">电话：</span>
+                <span class="value">0731-88610018</span>
+              </div>
+            </div>
+            <!-- 右边的地址图片信息 -->
+            <div class="add_img"></div>
+          </div>
+        </div>
+      </vue-scroll>
+    </div>
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
@@ -18,6 +53,7 @@
                 v-model="searchCamera"
                 suffix-icon="el-icon-search"
                 placeholder="请输入内容"
+                @focus="isSearchResult = true;"
               ></el-input>
             </div>
             <!-- 搜索条件 -->
@@ -120,12 +156,55 @@
         </div>
       </div>
       <!-- 页面的右边 -->
-      <div class="info_right" v-show="infoRightShow" @click="infoRightShow = false;">
+      <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
-          <h3 class="camera_name">摄像头名称（50次）</h3>
-          <div class="danger_people_list">
-
-          </div>
+          <vue-scroll>
+            <h3 class="camera_name">摄像头名称（50次）</h3>
+            <div class="danger_people_list">
+              <div
+                class="people_item"
+                v-for="(item, index) in cameraPhotoList"
+                :key="'people_item' + index"
+              >
+                <!-- 上一张 -->
+                <div class="change_img pre_btn" @click="preImg(index)"></div>
+                <!-- 下一张 -->
+                <div class="change_img next_btn" @click="nextImg(index)"></div>
+                <!-- 第一张图 -->
+                <div class="img_warp">
+                  <img src alt />
+                </div>
+                <!-- 相似度 -->
+                <div class="similarity">
+                  <p class="similarity_count">98.15</p>
+                  <p class="similarity_title">相似度 {{item.currentPeople.index}}</p>
+                  <!-- 选择摄像头的时间 -->
+                  <div class="select_time">
+                    <el-select v-model="searchCamera" placeholder="请选择">
+                      <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      ></el-option>
+                    </el-select>
+                  </div>
+                </div>
+                <!-- 第二张图 -->
+                <div class="img_warp">
+                  <img src alt />
+                </div>
+                <!-- 危险人物照片信息 -->
+                <div class="people_message">
+                  <h2 class="name">范冰冰</h2>
+                  <div class="tips_wrap">
+                    <p class="tip">男</p>
+                    <p class="tip">青年</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </vue-scroll>
         </div>
         <div class="right_black"></div>
       </div>
@@ -140,6 +219,32 @@ export default {
     return {
       /*左边搜索表单变量 */
       searchCamera: "",
+      cameraPhotoList: [
+        {
+          currentPeople: {
+            index: 0
+          },
+          imgArr: [0, 1, 2, 3]
+        },
+        {
+          currentPeople: {
+            index: 0
+          },
+          imgArr: [0, 1, 2, 3]
+        },
+        {
+          currentPeople: {
+            index: 0
+          },
+          imgArr: [0, 1, 2, 3]
+        },
+        {
+          currentPeople: {
+            index: 0
+          },
+          imgArr: [0, 1, 2, 3]
+        }
+      ],
       options: [
         {
           value: "选项1",
@@ -162,6 +267,8 @@ export default {
           label: "北京烤鸭"
         }
       ],
+      isSearchResult: false, // 搜索框是否打开
+      searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: true, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       // 选择地图
@@ -179,8 +286,50 @@ export default {
     this.renderMap();
   },
   methods: {
+    enters() {
+      this.isSearchResult = true;
+      console.log("触发了吗");
+    },
+    play() {
+      console.log("是否可以了");
+    },
     resetSearch() {},
     getVehicleDetail() {},
+    /* 切换危险人图片方法 */
+    preImg(index) {
+      // 上一张
+      const cameraObj = this.cameraPhotoList[index];
+      const len = this.cameraPhotoList[index].imgArr.length - 1;
+      if (len <= 0) {
+        return;
+      }
+      if (cameraObj.currentPeople.index === 0) {
+        this.$set(this.cameraPhotoList[index].currentPeople, "index", len);
+      } else {
+        this.$set(
+          this.cameraPhotoList[index].currentPeople,
+          "index",
+          cameraObj.currentPeople.index - 1
+        );
+      }
+    },
+    nextImg(index) {
+      // 下一张
+      const cameraObj = this.cameraPhotoList[index];
+      const len = this.cameraPhotoList[index].imgArr.length - 1;
+      if (len <= 0) {
+        return;
+      }
+      if (cameraObj.currentPeople.index === len) {
+        this.$set(this.cameraPhotoList[index].currentPeople, "index", 0);
+      } else {
+        this.$set(
+          this.cameraPhotoList[index].currentPeople,
+          "index",
+          cameraObj.currentPeople.index + 1
+        );
+      }
+    },
     // 选择地图的方法
     clickTab(val) {
       this.hover = this.hover == val ? "" : val;
@@ -326,6 +475,95 @@ export default {
 .qyryfx_wrap {
   height: calc(100% - 54px);
   font-size: 14px;
+  position: relative;
+  // 搜索结果展示
+  .search_result {
+    position: absolute;
+    left: 26px;
+    top: 123px;
+    z-index: 100;
+    width: 368px;
+    height: 390px;
+    background: #fff;
+    box-shadow: 0px 5px 20px 0px rgba(169, 169, 169, 0.3);
+    padding: 13px 0 13px 13px;
+    font-size: 14px;
+    .result_item {
+      width: 341px;
+      padding: 16px 12px 16px 39px;
+      height: 120px;
+      position: relative;
+      &:hover {
+        background: #f6f6f6;
+      }
+      .index_icon {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 20px;
+        height: 26px;
+        background: red;
+      }
+      .camera_icon {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 12px;
+        height: 16px;
+        background: red;
+      }
+      // 地址详情
+      .address_content {
+        overflow: hidden;
+        .left {
+          float: left;
+          width: 206px;
+          .add_name {
+            color: #0c70f8;
+            padding-bottom: 12px;
+          }
+          .add_detail {
+            line-height: 20px;
+            color: #999999;
+          }
+          .add_tel {
+            padding-top: 12px;
+            .key {
+              color: #999999;
+            }
+            .value {
+              color: #666666;
+            }
+          }
+        }
+        .add_img {
+          float: left;
+          width: 70px;
+          height: 58px;
+          margin-top: 18px;
+          background: yellow;
+          position: relative;
+          img {
+            display: block;
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+  // 搜索遮罩
+  .search_comp {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: auto;
+    margin: 0;
+    opacity: 0;
+    z-index: 1;
+  }
   .breadcrumb_heaer {
     background: #fff;
   }
@@ -340,7 +578,7 @@ export default {
       font-size: 24px;
       box-shadow: 0px 0px 4px 0px rgba (0, 0, 0, 0.1);
       cursor: pointer;
-      z-index: 999;
+      z-index: 99;
     }
     // 页面左边
     .info_left {
@@ -355,6 +593,7 @@ export default {
         padding: 20px 0;
         // 搜索框
         .search_wrap {
+          position: relative;
           padding-bottom: 28px;
           border-bottom: 1px solid #d3d3d3;
         }
@@ -518,33 +757,123 @@ export default {
       height: 100%;
       position: relative;
       background: white;
-      >div {
+      > div {
+        position: relative;
         height: 100%;
         float: left;
       }
       // 危险人物列表
       .danger_people_wrap {
         width: 476px;
-        padding: 0 28px 20px 20px;
+        // margin-right: 28px;
+        padding: 0 0px 20px 20px;
         // 摄像头名称
         .camera_name {
           font-size: 14px;
           line-height: 56px;
           height: 56px;
           color: #333333;
-          border-bottom: 1px solid #D3D3D3;
+          border-bottom: 1px solid #d3d3d3;
+          width: 428px;
         }
         .danger_people_list {
-          height: calc(100% -56px);
           padding-top: 28px;
+          // 人员记录列表
           .people_item {
-
+            width: 428px;
+            position: relative;
+            background: #fff;
+            box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
+            padding: 30px 0 30px 50px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            .change_img {
+              position: absolute;
+              top: 55px;
+              width: 12px;
+              height: 26px;
+              background: url("../../../../assets/img/icons.png") no-repeat;
+              cursor: pointer;
+            }
+            // 点击变成上一张
+            .pre_btn {
+              left: 22px;
+              background-position: -990px -133px;
+              &:hover {
+                background-position: -972px -133px;
+              }
+            }
+            // 点击下一张
+            .next_btn {
+              right: 18px;
+              background-position: -1038px -133px;
+              &:hover {
+                background-position: -1019px -133px;
+              }
+            }
+            .img_warp {
+              position: relative;
+              width: 76px;
+              height: 76px;
+              float: left;
+              border-radius: 3px;
+              background: red;
+              > img {
+                width: 100%;
+                height: 100%;
+                display: block;
+                border-radius: 3px;
+              }
+            }
+            // 相似度
+            .similarity {
+              width: 88px;
+              float: left;
+              text-align: center;
+              .similarity_count {
+                font-size: 26px;
+                line-height: 32px;
+                // font-family:AuroraBT-BoldCondensed;
+                color: #0c70f8;
+              }
+              .similarity_title {
+                color: #333333;
+                font-size: 12px;
+                line-height: 18px;
+                padding-bottom: 2px;
+              }
+            }
+            // 人物信息
+            .people_message {
+              float: left;
+              padding-left: 12px;
+              .name {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+                line-height: 38px;
+              }
+              .tips_wrap {
+                overflow: hidden;
+                .tip {
+                  float: left;
+                  padding: 0 8px;
+                  line-height: 30px;
+                  background: #f2f2f2;
+                  border: 1px solid #f2f2f2;
+                  border-radius: 3px;
+                }
+                .tip + .tip {
+                  margin-left: 8px;
+                }
+              }
+            }
           }
         }
       }
       .right_black {
         width: 20px;
-        background: #EAEBED;
+        background: #eaebed;
       }
     }
     .close-menu-o {
@@ -585,22 +914,6 @@ html {
   }
 }
 .qyryfx_wrap {
-  //车牌颜色
-  .license-plate-color {
-    .el-select {
-      width: 232px;
-    }
-  }
-  //时间搜索
-  .time-search {
-    margin-bottom: 10px;
-    .el-date-editor--daterange.el-input,
-    .el-date-editor--daterange.el-input__inner,
-    .el-date-editor--timerange.el-input,
-    .el-date-editor--timerange.el-input__inner {
-      width: 232px;
-    }
-  }
   // 搜索框
   .search_wrap {
     .el-input__inner {
@@ -615,6 +928,25 @@ html {
     text-align: center;
     .el-button {
       width: 110px;
+    }
+  }
+  // 右边菜单
+  .info_right {
+    .similarity {
+      .select_time {
+        // position: relative;
+        .el-input__inner {
+          position: relative;
+          height: 24px;
+          border-radius: 12px;
+          // width: 98px;
+          // z-index: 10;
+          // left: -5px;
+        }
+        .el-input__icon {
+          line-height: normal;
+        }
+      }
     }
   }
   //弹窗

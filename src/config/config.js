@@ -107,7 +107,7 @@ const oDomains = {
     },
     //研判分析服务
     analysis: {
-      dev: 'https://apidev.aorise.org/vlink-buz-judge-analysis',
+      dev: 'https://apidev.aorise.org/vlink-judge',
       test: 'http://10.116.65.15:8081',
       prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
     }

@@ -68,6 +68,11 @@ export default {
       path: 'rlsjfx',
       name: 'portrait_rlsjfx',
       component: () => import('@/views/index/components/portrait/rlsjfx.vue')
-    }
+    },{
+
+      path: 'zdgz', // 重点关注
+      name: 'portrait_zdgz',
+      component: () => import('@/views/index/components/portrait/zdgz.vue')
+    },
   ]
 }

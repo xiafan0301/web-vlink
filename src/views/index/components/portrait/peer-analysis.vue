@@ -3,7 +3,8 @@
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-        <el-breadcrumb-item>同行分析</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-list' }">同行分析</el-breadcrumb-item>
+        <el-breadcrumb-item>分析结果</el-breadcrumb-item>
       </el-breadcrumb>
       <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button>
     </div>
