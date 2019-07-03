@@ -708,7 +708,6 @@ export default {
     getListBayonet() {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
-          console.log("111111111111",res)
           this.listBayonet = res.data;
           this.setMarks();
         }

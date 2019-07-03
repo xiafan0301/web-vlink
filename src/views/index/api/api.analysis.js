@@ -101,3 +101,55 @@ export function getVagueSearch(params) {
     params: params
   })
 }
+
+/*-------------------------- 频繁出没start -------------------------------*/
+/**
+ * getTaskInfosPage
+ * 离线分析任务分页查询接口
+ * @param {object} params
+ */
+export function getTaskInfosPage(params) {
+  return request({
+    url: '/analysisTaskInfos/page',
+    method: 'get',
+    mode: 'judge',
+    params: params
+  })
+}
+/**
+ * getTaskInfosDetail
+ * 离线分析任务详情查询接口
+ * @param {object} uid
+ */
+export function getTaskInfosDetail(uid) {
+  return request({
+    url: '/analysisTaskInfos/' + uid,
+    method: 'get',
+    mode: 'judge',
+  })
+}
+/**
+ * putAnalysisTask 
+ * 离线分析任务更新(中断、删除)接口
+ * @param {object} data
+ */
+export function putAnalysisTask(data) {
+  return request({
+    url: '/analysisTaskInfos',
+    method: 'put',
+    mode: 'judge',
+    data,
+  })
+}
+/**
+ * putTaskInfosResume 
+ * 离线分析任务恢复接口
+ * @param {object} uid
+ */
+export function putTaskInfosResume(uid) {
+  return request({
+    url: '/analysisTaskInfos/resume/' + uid,
+    method: 'put',
+    mode: 'judge',
+  })
+}
