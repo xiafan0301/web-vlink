@@ -890,12 +890,12 @@ export default {
                 });
                 this.carMarks.passedLine.push(passedLine);
               }
+              _carL.carList.splice(oldDIndex, 1);
             } else {
               x['lineArr'] = [[x.gpsLongitude, x.gpsLatitude]];
               // 把新增的车放入地图
               this.mapMark([{infoList:[x]}], true)
             }
-            _carL.carList.splice(oldDIndex, 1);
           })
           // _carL.carList里剩下的是，消失的车子,移除掉
           if (_carL.carList.length) {
@@ -909,7 +909,8 @@ export default {
               }
             })
           }
-          _carL.carList = objDeepCopy(_supData);
+          // _carL.carList = objDeepCopy(_supData);
+          _carL.carList = _supData;
           // 判断顶部车辆有没有勾选
           if (this.mapTypeList.includes(2)) {
             _carL.infoList = [];
@@ -1053,118 +1054,6 @@ export default {
           $(x).parent().parent().css('padding-left', '40px');
         })
       })
-    },
-    moveDom () {
-      this.$nextTick(() => {
-        let tabDom = document.getElementsByClassName('map_tree_tab');
-        tabDom = Array.from(tabDom);
-        tabDom.forEach(dom => {
-          let parent = dom.parentNode.parentNode.parentNode.parentNode;
-          parent.insertBefore(dom, parent.childNodes[0])
-        })
-      })
-    },
-    switchTab (node, dataType, event) {
-      // 判断 当前dataType是否在mapTypeLit里，
-      if (!this.mapTypeList.includes(dataType)) {
-        return false;
-      }
-      if (event.target.classList.contains('active')) {
-       event.target.classList.remove('active')
-      } else {
-        event.target.classList.add('active')
-      }
-      // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
-      let key = this.key2Type[dataType];
-      // 找到父级的数据;
-      let curData = {};
-      curData = this.findParentData(node)
-      if (curData.tabActiveList.includes(dataType)) {
-        // 'delete'
-        curData.tabActiveList.splice(curData.tabActiveList.indexOf(dataType), 1);
-        if (curData.tabActiveList.length) {
-          curData.infoList = curData.infoList.filter(u => u.dataType !== dataType);
-          if (curData.infoList.length === 0) {
-            curData.infoList.push({infoName: '无相关数据'})
-          }
-        } else {
-          // '重置'
-          let oldArr = []
-          console.log(this.mapTypeList)
-          this.mapTypeList.forEach(x => {
-            oldArr.push(...curData[this.key2Type[x]])
-          })
-          console.log(oldArr)
-          // let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
-          let ss;
-          if (this.selAreaPolygon) {
-            ss = objDeepCopy(oldArr.filter(y => y.isInArea && y.isShow))
-          } else {
-            ss = objDeepCopy(oldArr.filter(y => y.isShow))
-          }
-          if (ss.length === 0) ss.push({infoName: '无相关数据'})
-          curData.infoList = ss;
-        }
-      } else {
-        // 'add'
-        curData.tabActiveList.push(dataType);
-        if (curData.tabActiveList.length === 1) {
-          // '第一次'
-          let _ar = [];
-          if (curData[key].length && curData[key].find(x => x.isShow)) {
-            if (this.selAreaPolygon) {
-              _ar = objDeepCopy(curData[key].filter(y => y.isInArea))
-            } else {
-              _ar = objDeepCopy(curData[key].filter(y => y.isShow))
-            }
-            _ar.forEach(k => {
-              k.infoName += ' ';
-            })
-            if (_ar.length === 0) _ar.push({infoName: '无相关数据'})
-          } else {
-            _ar.push({infoName: '无相关数据'})
-          }
-          curData.infoList = [..._ar]
-        } else {
-          // '已经有了再添加'
-          let _arr3 = [];
-          // 判断目前显示的是不是 无相关数据
-          if (this.selAreaPolygon) {
-            _arr3 = objDeepCopy(curData[key].filter(y => y.isInArea))
-          } else {
-            _arr3 = objDeepCopy(curData[key].filter(y => y.isShow))
-          }
-          if (curData.infoList[0].infoName === '无相关数据') {
-            if (curData[key].length && curData[key].find(x => x.isShow)) {
-              curData.infoList = [];
-              // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
-              _arr3.forEach(m => {
-                curData.infoList.unshift(m)
-              })
-              // _arr3 = _arr3.filter(x => x.isShow)
-            }
-          } else {
-            // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
-            _arr3.forEach(m => {
-              curData.infoList.unshift(m)
-            })
-            // _arr3 = _arr3.filter(x => x.isShow)
-          }
-          if (curData.infoList.length === 0) curData.infoList.push({infoName: '无相关数据'})
-        }
-      }
-      this.updateDom();
-    },
-    findParentData (node) {
-      let obj;
-      this.mapTreeData.forEach(item => {
-        item.infoList.forEach(x => {
-          if (x.areaId === node.areaUid) {
-            obj = x;
-          }
-        })
-      })
-      return obj;
     },
     // 地图标记
     mapMark (data, isSetView) {
@@ -2275,7 +2164,6 @@ export default {
       x.detachMediaElement();
       x.destroy();
     })
-    console.log('----------->', this.vehicleTimer)
   }
 }
 </script>

@@ -45,8 +45,9 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
-        // dev: 'http://10.116.64.127:8082/',
         dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'http://10.116.65.15:8081',
+        // dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
         prod: 'https://apirel.aorise.org/vlink-judge/',
     },
@@ -103,6 +104,13 @@ const oDomains = {
       dev: 'https://apidev.aorise.org/vlink-gis',
       test: 'https://apirel.aorise.org/vlink-gis',
       prod: 'https://apidev.aorise.org/vlink-gis'
+    },
+    // 无服务
+    noServe: {
+      // dev: 'https://apidev.aorise.org',
+      dev: 'http://10.116.64.142:8087',
+      test: 'https://apirel.aorise.org',
+      prod: 'https://apidev.aorise.org'
     },
     //研判分析服务
     analysis: {

@@ -81,7 +81,6 @@
               <span>查询结果</span>
               <span>（{{dataList.length}}）</span>
             </p>
-            <el-button class="select_btn">导出</el-button>
           </div>
           <div class="result_detail">
             <ul class="clearfix">
@@ -124,7 +123,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate } from '@/utils/util.js';
+import { formatESDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -211,7 +210,7 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatDate(this.searchForm.shotTime) + '-》' + formatDate(this.searchForm.dateEnd);
+      const shotTime = formatESDate(this.searchForm.shotTime) + '_' + formatESDate(this.searchForm.dateEnd);
       const params = {
         plateNo: this.searchForm.plateNo,
         shotTime: shotTime
@@ -238,10 +237,10 @@ export default {
     skipWsReocrdPage (obj) {
       this.$router.push({name: 'ws_record', query: { 
         plateNo: this.searchForm.plateNo,
-        dateStart: this.deviceStartTime,
-        dateEnd: this.searchForm.dateEnd,
+        dateStart: formatESDate(this.deviceStartTime),
+        dateEnd: formatESDate(this.searchForm.dateEnd),
         plateNoTb: obj.plateNo,
-        dateStartTb: obj.shotTime
+        dateStartTb: formatESDate(obj.shotTime)
        }});
     },
     // 重置查询条件
@@ -252,10 +251,18 @@ export default {
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (!this.searchForm.plateNo) {
+            this.$message({
+              type: 'warning',
+              message: '请先设置目标车辆',
+              customClass: 'request_tip'
+            });
+            return;
+          };
           if (!this.searchForm.deviceCode) {
             this.$message({
               type: 'warning',
-              message: '请先选择起点设备',
+              message: '请设置分析起点',
               customClass: 'request_tip'
             });
             return;
@@ -263,10 +270,10 @@ export default {
           const vehicleType = this.searchForm.vehicleClass.join(':');
           const params = {
             deviceCode: this.searchForm.deviceCode,
-            dateStart: this.searchForm.shotTime,
-            shotTime: this.deviceStartTime,
+            dateStart: formatESDate(this.searchForm.shotTime),
+            shotTime: formatESDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
-            dateEnd: this.searchForm.dateEnd,
+            dateEnd: formatESDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval
           };
