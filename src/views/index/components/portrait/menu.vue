@@ -57,7 +57,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_zdgz'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_108"></span>
         <span class="ptt_li_text">重点人群关注</span>
