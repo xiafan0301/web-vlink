@@ -22,12 +22,12 @@
             <el-form-item>
               <!-- deptList -->
               <el-select v-model="formInline.lb" placeholder="请选择车辆类别" style="width: 150px;">
-                <el-option v-for="(item, index) in lbList" :label="item.name" :key="'dept-list-' + index" :value="item.uid"></el-option>
+                <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
               <el-select v-model="formInline.lx" placeholder="请选择车辆类型" style="width: 150px;">
-                <el-option v-for="(item, index) in lxList" :label="item.name" :key="'user-list-' + index" :value="item.uid"></el-option>
+                <el-option v-for="(item, index) in lxList" :label="item.enumValue" :key="'user-list-' + index" :value="item.uid"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">
@@ -35,10 +35,8 @@
             </el-form-item>
             <el-form-item>
               <el-input placeholder="请输入车牌" style="width: 200px;" v-model="formInline.cp">
-                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="">
-                  <el-option label="湘" value="1"></el-option>
-                  <el-option label="京" value="2"></el-option>
-                  <el-option label="沪" value="3"></el-option>
+                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
+                  <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
                 </el-select>
               </el-input>
             </el-form-item>
@@ -47,7 +45,7 @@
               <el-button @click="searchReset('formInline')">重置</el-button>
             </el-form-item>
           </el-form>
-          <el-button class="gcck_s_dc" size="small" type="primary" :disabled="true">导出</el-button>
+          <!-- <el-button class="gcck_s_dc" size="small" type="primary" :disabled="true">导出</el-button> -->
         </div>
         <ul class="gcck_l">
           <li v-for="(item, index) in aDay" :class="{'gcck_l_sed': daysList[item] && daysList[item].slider === 2}" :key="'day_list_' + index">
@@ -70,6 +68,9 @@
               </ul>
               <div class="gcck_ld" v-if="!daysList[item] || daysList[item].state === 1">
                 <div><i class="el-icon-loading"></i>正在加载中，请稍后...</div>
+              </div>
+              <div class="gcck_ld" v-if="daysList[item] && daysList[item].state === 2 && (!daysList[item].list || daysList[item].list.length <= 0)">
+                <div>暂无数据</div>
               </div>
               <div class="gcck_lb" v-if="daysList[item] && daysList[item].pageNum < daysList[item].pages">
                 <span @click="doSearch(item, daysList[item].pageNum + 1)">加载更多</span>
@@ -98,6 +99,7 @@ import vehicleBreadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
+import {getDiciData} from '../../../api/api.js';
 export default {
   components: {vehicleBreadcrumb, flvplayer},
   data () {
@@ -108,12 +110,13 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '1',
+        cpp: '',
         cp: ''
       },
       searchLoading: false,
-      lbList: [{name: '类别1', uid: '1'}],
-      lxList: [{name: '类型1', uid: '1'}],
+      lbList: [],
+      lxList: [],
+      cppList: [],
       aDay: [],
       daysList: {
         // state 1 未查询 2 查询中  3
@@ -138,8 +141,33 @@ export default {
   },
   mounted () {
     this.searchSubmit();
+    this.getLxList();
+    this.getLbList();
+    this.getCppList();
   },
   methods: {
+    getLxList () {
+      getDiciData(44).then(res => {
+        if (res && res.data) {
+          this.lxList = res.data;
+        }
+      });
+    },
+    getLbList () {
+      getDiciData(31).then(res => {
+        if (res && res.data) {
+          this.lbList = res.data;
+        }
+      });
+    },
+    getCppList () {
+      getDiciData(48).then(res => {
+        if (res && res.data && res.data.length > 0) {
+          this.cppList = res.data;
+          // this.formInline.cpp = res.data[0].enumValue;
+        }
+      });
+    },
 
     selRow (item) {
       if (this.daysList[item]) {
@@ -186,7 +214,11 @@ export default {
       getDeviceSnapImagesSum({
         deviceIds: this.$route.query.deviceIds,
         startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
-        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd')
+        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+        vehicleClass: this.formInline.lx,
+        vehicleGroupUid: this.formInline.lb,
+        isPlateNo: this.formInline.no ? 2 : 1,
+        plateNo: this.formInline.cpp + this.formInline.cp
       }).then(res => {
         if (res && res.data && res.data.length > 0) {
           for (let key in this.daysList) {
@@ -213,18 +245,15 @@ export default {
         'where.deviceIds': dId,
         'where.startTime': sDay,
         'where.endTime': sDay,
+        'where.vehicleClass': this.formInline.lx,
+        'where.vehicleGroupUid': this.formInline.lb,
+        'where.isPlateNo': this.formInline.no ? 2 : 1,
+        'where.plateNo': this.formInline.cpp + this.formInline.cp,
         pageNum: pageNum,
         pageSize: 16
       }).then(res => {
+        this.daysList[sDay].state = 2;
         if (res && res.data) {
-          // this.$set(this.daysList);
-          // this.$set(this.daysList[sDay], 'list', res.data.list);
-          /* this.$nextTick(() => {
-            this.$set(this.daysList, sDay, {
-              list: res.data.list
-            });
-          }); */
-          this.daysList[sDay].state = 2;
           this.daysList[sDay].total = res.data.total;
           this.daysList[sDay].pageNum = res.data.pageNum; // 当前页数
           this.daysList[sDay].pages = res.data.pages; // 总页数
@@ -255,9 +284,8 @@ export default {
   height: 100%;
   padding-top: 50px;
   > .vc_gcck_con {
-    height: 100%;
     position: relative;
-    padding-top: 10px;
+    padding-top: 10px; padding-bottom: 20px;
   }
 }
 .gcck_s {
