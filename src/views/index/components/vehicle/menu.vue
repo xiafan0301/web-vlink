@@ -94,6 +94,11 @@
               <i class="vl_icon2 vl_icon2_018"></i><span>多车同行分析</span>
             </router-link>
           </li>
+          <li>
+            <router-link :to="{name: 'vehicle_report'}">
+              <i class="vl_icon2 vl_icon2_027"></i><span>车辆侦察报告</span>
+            </router-link>
+          </li>
         </ul>
       </li>
       <li>

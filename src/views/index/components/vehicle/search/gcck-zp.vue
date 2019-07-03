@@ -194,7 +194,7 @@ export default {
           state: 1, // 1 加载中，2加载完毕
           slider: 1, // 1 slideUp 2 slideDown
           list: null,
-          ageSize: 16,
+          pageSize: 16,
           pageNum: 0,
           pages: 0,
           total: 0
@@ -272,7 +272,7 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '1',
+        cpp: '',
         cp: ''
       }
     }
