@@ -45,11 +45,7 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
-<<<<<<< HEAD
         // dev: 'http://10.116.64.127:8082/',
-=======
-        dev: 'https://apidev.aorise.org/vlink-judge/',
->>>>>>> 1733700a52e68c7d4a52eb86d9445f924d67a00d
         // dev: 'http://10.116.65.15:8081',
         dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
