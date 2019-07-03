@@ -10,12 +10,12 @@
     <vue-scroll>
       <div class="analysis-rc-info">
         <div class="analysis-r-content">
-          <div class="img-item" v-for="(item,index) of 18" :key="index">
+          <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
             <div class="img-box">
               <img alt="头像">
               <i class="vl_icon vl_icon_portrait_01"></i>
               <span class="num">
-                {{item+1}}
+                {{index+1}}
                 <span class="text">次</span>
               </span>
             </div>
@@ -38,16 +38,31 @@
 </template>
 
 <script>
+import { getTaskInfosDetail } from "../../api/api.analysis.js";
 export default {
   data() {
     return {
-      pagination: { total: 100, pageSize: 24, pageNum: 1 }
+      uid: '',
+      pagination: { total: 50, pageSize: 24, pageNum: 1 },
+      list: new Array(50)
     };
+  },
+  mounted() {
+    this.uid = this.$route.query.uid
+    this.getDetail();
   },
   methods: {
     handleCurrentChange(page) {
       this.pagination.pageNum = page;
-    }
+    },
+    //分析结果
+    getDetail() {
+      getTaskInfosDetail(this.uid).then(res => {
+        console.log("------getTaskInfosDetail-------",res)
+      }).catch(error => {
+        console.log(error)
+      })
+    },
   }
 };
 </script>
@@ -112,11 +127,19 @@ export default {
       }
     }
     .cum_pagination {
-        padding: 30px 0 40px 0;
-        text-align: center;
+      padding: 30px 0 40px 0;
+      text-align: center;
     }
   }
 }
 </style>
+<style lang="scss">
+.analysis-results {
+  .__view {
+    width: 100% !important; // vue-scroll样式重置
+  }
+}
+</style>
+
 
 

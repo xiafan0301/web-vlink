@@ -398,13 +398,17 @@ export default {
      * 图片切换
      */
     imgListTap (obj, i) {
+      this.sturcDetail = {};
       this.curImgIndex = i;
+      this.sturcDetail = obj;
+      console.log(this.sturcDetail)
     },
     /**
      * 分页赋值
      */
     onPageChange (page) {
       this.pagination.pageNum = page;
+      this.onSearch();
     },
   }
 }

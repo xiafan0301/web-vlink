@@ -775,11 +775,14 @@ export default {
     search() {
       console.log("==================", this.searchData);
       this.emptyData(1);
-      if (this.searchData.licensePlateNum || this.imgData) {
+      if ((this.searchData.licensePlateNum || this.imgData) && (this.selectDeviceArr && this.selectDeviceArr.length > 0)) {
         this.getSearchData();
-      } else {
-        this.$message.error("请上传车的图片或者输入车牌号");
-        return false;
+      }else if(!this.searchData.licensePlateNum && !this.imgData){
+         this.$message.error("请上传车的图片或者输入车牌号");
+         return false;  
+      }else {
+         this.$message.error("请选择设备");
+         return false; 
       }
     },
     //置空数据
