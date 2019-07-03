@@ -1,44 +1,10 @@
 <template>
   <div class="qyryfx_wrap">
-    <!-- 搜索的内容 -->
-    <div class="search_comp" v-if="isSearchResult" @click="isSearchResult = false;"></div>
-    <div class="search_result" v-show="isSearchResult">
-      <vue-scroll>
-        <div
-          class="result_item"
-          v-for="(item, index) in searchResultList"
-          :key="'result_item' + index"
-        >
-          <!-- 序号icon -->
-          <p class="index_icon"></p>
-          <!-- 摄像机icon -->
-          <p class="camera_icon"></p>
-          <div class="address_content">
-            <!-- 左边的地址信息 -->
-            <div class="left">
-              <!-- 地标名 -->
-              <div class="add_name">创谷-长沙天心文化广告产业园</div>
-              <!-- 详情地址 -->
-              <div class="add_detail">
-                长沙市天心区雀园路568号长沙市
-                天心区雀园路568号
-              </div>
-              <!-- Tel -->
-              <div class="add_tel">
-                <span class="key">电话：</span>
-                <span class="value">0731-88610018</span>
-              </div>
-            </div>
-            <!-- 右边的地址图片信息 -->
-            <div class="add_img"></div>
-          </div>
-        </div>
-      </vue-scroll>
-    </div>
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-        <el-breadcrumb-item>区域人员分析</el-breadcrumb-item>
+    <!-- 面包屑通用样式 -->
+    <div class="link_bread" @click="infoRightShow = !infoRightShow">
+      <el-breadcrumb separator=">" class="bread_common">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="qyryfx_content">
@@ -98,14 +64,44 @@
               <i></i>
             </div>
             <!-- 选择地图区域 -->
-            <div class="drawBox">
-              <div class="items">
-                <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-                <span @click="clickTab('cut2')" :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                <span @click="clickTab('cut3')" :class="['cut3',{'hover':hover=='cut3'}]"></span>
-                <span @click="clickTab('cut4')" :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                <span @click="clickTab('cut5')" :class="['cut5',{'hover':hover=='cut5'}]"></span>
-              </div>
+            <div class="sd_opts">
+              <ul>
+                <li>
+                  <div
+                    :class="{'sd_opts_sed': drawTypes.rectangle != null }"
+                    @click="selDrawType(1)"
+                  >
+                    <span class="sd_opts_icon sd_opts_icon1"></span>
+                  </div>
+                </li>
+                <li>
+                  <div :class="{'sd_opts_sed': drawTypes.circle != null }" @click="selDrawType(2)">
+                    <span class="sd_opts_icon sd_opts_icon2"></span>
+                  </div>
+                </li>
+                <li>
+                  <div
+                    :class="{'sd_opts_sed': drawTypes.polyline != null }"
+                    @click="selDrawType(3)"
+                  >
+                    <span class="sd_opts_icon sd_opts_icon3"></span>
+                  </div>
+                </li>
+                <li>
+                  <div :class="{'sd_opts_sed': drawTypes.polygon != null }" @click="selDrawType(4)">
+                    <span class="sd_opts_icon sd_opts_icon4"></span>
+                  </div>
+                </li>
+                <li>
+                  <div
+                    style="cursor: not-allowed;"
+                    :class="{'sd_opts_sed': drawTypes.circle10km != null }"
+                    @click="selDrawType(5)"
+                  >
+                    <span class="sd_opts_icon sd_opts_icon5"></span>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
           <!-- 按钮 -->
@@ -120,39 +116,24 @@
         v-show="!videoMenuStatus"
         class="close-menu-o"
         title="展开菜单"
-        @click="videoMenuStatus = true;"
+        @click="openMenu"
       >
         <i class="vl_icon vl_icon_vehicle_03"></i>
       </div>
       <!-- 页面的中部 -->
-      <div
-        class="info_center"
-        :class="{ both_show: infoRightShow && videoMenuStatus, none_show: !infoRightShow && !videoMenuStatus, right_show: infoRightShow && !videoMenuStatus}"
-      >
+      <div class="info_center">
         <!-- 关闭按钮 -->
         <div
           class="close-menu-c"
-          v-show="videoMenuStatus"
           title="关闭菜单"
-          @click="videoMenuStatus = false;"
+          v-show="videoMenuStatus"
+          @click="closeMenu"
         >
           <i class="vl_icon vl_icon_vehicle_02"></i>
         </div>
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
-          <div class="map_rm" id="mapSelect"></div>
-          <!-- 地图控制按钮（放大，缩小，定位） -->
-          <ul class="map_rrt_u2">
-            <li @click="resetZoom">
-              <i class="el-icon-aim"></i>
-            </li>
-            <li>
-              <i class="el-icon-plus" @click="mapZoomSet(1)"></i>
-            </li>
-            <li>
-              <i class="el-icon-minus" @click="mapZoomSet(-1)"></i>
-            </li>
-          </ul>
+          <div class="map_rm" id="mapSelector_container"></div>
         </div>
       </div>
       <!-- 页面的右边 -->
@@ -269,29 +250,47 @@ export default {
       ],
       isSearchResult: false, // 搜索框是否打开
       searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
-      infoRightShow: true, // 右边菜单状态
+      infoRightShow: false, // 右边菜单状态
       videoMenuStatus: true, // 左边菜单状态
       // 选择地图
+      treeList: [],
+      // selectorId: 'db_tree_' + random14(),
       amap: null,
-      input3: null,
-      hover: null,
-      mouseTool: null,
-      selAreaPolygon: null,
-      delSelAreaIcon: null,
-      lnglat: null
+      config: {
+        _name: "",
+        zoom: 11,
+        center: [110.596015, 27.907662],
+        zooms: [2, 18]
+      },
+      searchVal: "",
+      listDevice: [], // 设备
+      listBayonet: [], // 卡口
+      drawType: 0,
+      drawTypes: {
+        rectangle: null, // 1
+        circle: null, // 2
+        polyline: null, // 3
+        polygon: null, // 4
+        circle10km: null // 5
+      },
+      submitLoading: false
     };
   },
   mounted() {
     //加载地图
-    this.renderMap();
+    this.initMap();
   },
   methods: {
+    openMenu() {
+      this.videoMenuStatus = true;
+    },
+    closeMenu() {
+      this.videoMenuStatus = false;
+    },
     enters() {
       this.isSearchResult = true;
-      console.log("触发了吗");
     },
     play() {
-      console.log("是否可以了");
     },
     resetSearch() {},
     getVehicleDetail() {},
@@ -330,152 +329,478 @@ export default {
         );
       }
     },
-    // 选择地图的方法
-    clickTab(val) {
-      this.hover = this.hover == val ? "" : val;
-      if (!this.hover) {
-        this.amap.setDefaultCursor();
-        this.mouseTool.close(false);
-      } else {
-        this.selArea(val);
-      }
-    },
-    // 选择区域
-    selArea(v) {
-      this.amap.setDefaultCursor("crosshair");
-      switch (v) {
-        case "cut1":
-          this.mouseTool.rectangle({
-            strokeColor: "#FA453A",
-            strokeOpacity: 1,
-            strokeWeight: 1,
-            fillColor: "#FA453A",
-            fillOpacity: 0.2,
-            strokeStyle: "solid"
-          });
-          break;
-        case "cut2":
-          this.mouseTool.circle({
-            strokeColor: "#FA453A",
-            // strokeOpacity: 1,
-            strokeWeight: 1,
-            strokeOpacity: 0.2,
-            fillColor: "#FA453A",
-            fillOpacity: 0.2,
-            strokeStyle: "solid"
-            // 线样式还支持 'dashed'
-            // strokeDasharray: [30,10],
-          });
-          break;
-        case "cut3":
-          this.mouseTool.polyline({
-            strokeColor: "#FA453A",
-            strokeOpacity: 1,
-            strokeWeight: 2,
-            // 线样式还支持 'dashed'
-            strokeStyle: "solid"
-            // strokeStyle是dashed时有效
-            // strokeDasharray: [10, 5],
-          });
-          break;
-        case "cut4":
-          this.mouseTool.polygon({
-            zIndex: 13,
-            strokeColor: "#FA453A",
-            strokeOpacity: 1,
-            bubble: true,
-            strokeWeight: 1,
-            fillColor: "#FA453A",
-            fillOpacity: 0.2,
-            isRing: false
-          });
-          break;
-        case "cut5":
-          break;
-      }
-    },
-    setCenter() {
-      var _this = this;
-      var placeSearch = new window.AMap.PlaceSearch({
-        // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
-        city: "021"
-      });
-      placeSearch.search(this.input3, function(status, result) {
-        // 查询成功时，result即对应匹配的POI信息
-        //  console.log(result)
-        var pois = result.poiList.pois;
-        if (pois.length > 0) {
-          let new_center = pois[0].location;
-          _this.amap.setZoomAndCenter(16, new_center);
-        }
-        // for(var i = 0; i < pois.length; i++){
-        //     var poi = pois[i];
-        //     var marker = [];
-        //     marker[i] = new AMap.Marker({
-        //         position: poi.location,   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        //         title: poi.name
-        //     });
-        //     // 将创建的点标记添加到已有的地图实例：
-        //     _this.amap.add(marker[i]);
-        // }
-        // _this.amap.setFitView();
-      });
-    },
-    // 地图定位
-    resetZoom() {
+    /** 选择地图的方法 */
+    initMap() {
       if (this.amap) {
-        this.amap.setZoomAndCenter(14, this.mapCenter);
+        return;
       }
-    },
-    mapZoomSet(val) {
-      if (this.amap) {
-        this.amap.setZoom(this.amap.getZoom() + val);
-      }
-    },
-    renderMap() {
-      let map = new window.AMap.Map("mapSelect", {
-        zoom: 10,
-        center: mapXupuxian.center
-      });
-      map.setMapStyle("amap://styles/whitesmoke");
-      this.amap = map;
-      // 在地图中添加MouseTool插件
-      this.mouseTool = new window.AMap.MouseTool(map);
       let _this = this;
-      this.amap.on("click", function(e) {
-        //lnglatInput.value = e.lnglat.toString();
-        if (_this.hover == "cut5") {
-          var circle = new window.AMap.Circle({
-            center: e.lnglat,
-            radius: 5000, //半径
-            borderWeight: 3,
-            strokeColor: "#FF33FF",
-            // strokeOpacity: 1,
-            strokeWeight: 1,
-            strokeOpacity: 0.2,
-            fillOpacity: 0.4,
-            strokeStyle: "solid",
-            // strokeDasharray: [10, 10],
-            // 线样式还支持 'dashed'
-            fillColor: "#1791fc",
-            zIndex: 50
-          });
-          circle.setMap(_this.amap);
+      let map = new window.AMap.Map(
+        "mapSelector_container",
+        Object.assign({}, _this.config)
+      );
+      map.setMapStyle("amap://styles/light");
+      // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
+      // console.log('_config', _config)
+      _this.amap = map;
+      /* _this.$nextTick(() => {
+        _this.setMap(_config);
+      }); */
+      // 注册监听，当选中某条记录时会触发
+      // let auto = new window.AMap.Autocomplete({
+      //   input: "map_sd_search_input"
+      // });
+      // window.AMap.event.addListener(auto, "select", _this.selectArea);
+      // _this.setMarks();
+      //输入提示
+      // window.AMap.plugin('AMap.Autocomplete', function () {
+      //   var auto = new AMap.Autocomplete({
+      //     input: "map_sd_search_input"
+      //   });
+      //   // AMap.event.addListener(auto, 'select', _this.selectArea);
+      // });
+    },
+    selectArea(e) {
+      console.log(e);
+      if (e.poi && e.poi.location) {
+        this.amap.setZoom(15);
+        this.amap.setCenter(e.poi.location);
+      }
+    },
+    selDrawType(drawType) {
+      this.drawType = drawType;
+      if (drawType === 1) {
+        // 矩形
+        this.drawRectangle();
+      } else if (drawType === 2) {
+        // 圆形
+        this.drawCircle();
+      } else if (drawType === 3) {
+        // 折线
+        this.drawPolyline();
+      } else if (drawType === 4) {
+        // 多边形
+        this.drawPolygon();
+      }
+    },
+    // 圆形
+    drawCircle() {
+      if (this.drawTypes.circle !== null) {
+        this.closeDraw(2);
+      } else {
+        let circle = new AMap.Circle({
+          center: this.amap.getCenter(),
+          radius: 1000, //半径
+          borderWeight: 3,
+          strokeColor: "#FA453A",
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10],
+          // 线样式还支持 'dashed'
+          fillColor: "#FA453A",
+          zIndex: 50
+        });
+        circle.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([circle]);
+        let circleEditor = new window.AMap.CircleEditor(this.amap, circle);
+        circleEditor.on("end", function(event) {
+          console.log("触发事件： end");
+          // event.target 即为编辑后的圆形对象
+        });
+        circleEditor.open();
+        this.drawTypes.circle = {
+          obj: circle,
+          editor: circleEditor
+        };
+      }
+    },
+    // 矩形
+    drawRectangle() {
+      if (this.drawTypes.rectangle !== null) {
+        this.closeDraw(1);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var southWest = new AMap.LngLat(
+          oCneter.lng - 0.008,
+          oCneter.lat - 0.005
+        );
+        var northEast = new AMap.LngLat(
+          oCneter.lng + 0.008,
+          oCneter.lat + 0.005
+        );
+        var bounds = new window.AMap.Bounds(southWest, northEast);
+        var rectangle = new window.AMap.Rectangle({
+          bounds: bounds,
+          strokeColor: "#FA453A",
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10],
+          // 线样式还支持 'dashed'
+          fillColor: "#FA453A",
+          cursor: "pointer",
+          zIndex: 50
+        });
+        rectangle.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([rectangle]);
+        var rectangleEditor = new window.AMap.RectangleEditor(
+          this.amap,
+          rectangle
+        );
+        rectangleEditor.on("end", function(event) {
+          // log.info('触发事件： end')
+          // event.target 即为编辑后的矩形对象
+        });
+        rectangleEditor.open();
+        this.drawTypes.rectangle = {
+          obj: rectangle,
+          editor: rectangleEditor
+        };
+      }
+    },
+    // 折线
+    drawPolyline() {
+      if (this.drawTypes.polyline !== null) {
+        this.closeDraw(3);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var path = [
+          [oCneter.lng - 0.008, oCneter.lat],
+          [oCneter.lng + 0.008, oCneter.lat]
+        ];
+        var polyline = new window.AMap.Polyline({
+          path: path,
+          isOutline: true,
+          outlineColor: "#ffeeff",
+          borderWeight: 3,
+          strokeColor: "#3366FF",
+          strokeOpacity: 1,
+          strokeWeight: 3,
+          // 折线样式还支持 'dashed'
+          strokeStyle: "solid",
+          // strokeStyle是dashed时有效
+          strokeDasharray: [10, 5],
+          lineJoin: "round",
+          lineCap: "round",
+          zIndex: 50
+        });
+        polyline.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([polyline]);
+        var polyEditor = new window.AMap.PolyEditor(this.amap, polyline);
+        polyEditor.on("end", function(event) {
+          // log.info('触发事件： end')
+          // event.target 即为编辑后的折线对象
+        });
+        polyEditor.open();
+        this.drawTypes.polyline = {
+          obj: polyline,
+          editor: polyEditor
+        };
+      }
+    },
+    // 多边形
+    drawPolygon() {
+      if (this.drawTypes.polygon !== null) {
+        this.closeDraw(4);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var path = [
+          [oCneter.lng - 0.005, oCneter.lat - 0.005],
+          [oCneter.lng + 0.005, oCneter.lat - 0.005],
+          [oCneter.lng + 0.005, oCneter.lat + 0.005],
+          [oCneter.lng - 0.005, oCneter.lat + 0.005]
+        ];
+        let polygon = new window.AMap.Polygon({
+          path: path,
+          strokeColor: "#FA453A",
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10],
+          // 线样式还支持 'dashed'
+          fillColor: "#FA453A",
+          zIndex: 50
+        });
+        this.amap.add(polygon);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([polygon]);
+
+        var polyEditor = new window.AMap.PolyEditor(this.amap, polygon);
+        polyEditor.on("end", function(event) {
+          // log.info('触发事件： end')
+          // event.target 即为编辑后的多边形对象
+        });
+        polyEditor.open();
+        this.drawTypes.polygon = {
+          obj: polygon,
+          editor: polyEditor
+        };
+      }
+    },
+    closeDraw(drawType) {
+      if (drawType === 1 && this.drawTypes.rectangle !== null) {
+        if (this.drawTypes.rectangle.editor) {
+          this.drawTypes.rectangle.editor.close();
+        }
+        this.amap.remove(this.drawTypes.rectangle.obj);
+        this.drawTypes.rectangle = null;
+      } else if (drawType === 2 && this.drawTypes.circle !== null) {
+        if (this.drawTypes.circle.editor) {
+          this.drawTypes.circle.editor.close();
+        }
+        this.amap.remove(this.drawTypes.circle.obj);
+        this.drawTypes.circle = null;
+      } else if (drawType === 3 && this.drawTypes.polyline !== null) {
+        if (this.drawTypes.polyline.editor) {
+          this.drawTypes.polyline.editor.close();
+        }
+        this.amap.remove(this.drawTypes.polyline.obj);
+        this.drawTypes.polyline = null;
+      } else if (drawType === 4 && this.drawTypes.polygon !== null) {
+        if (this.drawTypes.polygon.editor) {
+          this.drawTypes.polygon.editor.close();
+        }
+        this.amap.remove(this.drawTypes.polygon.obj);
+        this.drawTypes.polygon = null;
+      } else if (drawType === 5 && this.drawTypes.pocircle10kmlygon !== null) {
+        if (this.drawTypes.pocircle10kmlygon.editor) {
+          this.drawTypes.pocircle10kmlygon.editor.close();
+        }
+        this.amap.remove(this.drawTypes.circle10km.obj);
+        this.drawTypes.circle10km = null;
+      }
+    },
+
+    selSubmit() {
+      this.submitLoading = true;
+      let dObj = {},
+        bObj = {};
+      if (this.listDevice && this.listDevice.length > 0) {
+        for (let i = 0; i < this.listDevice.length; i++) {
+          let o = this.listDevice[i];
+          if (this.drawTypes.rectangle && this.drawTypes.rectangle.obj) {
+            if (
+              this.drawTypes.rectangle.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              dObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.circle && this.drawTypes.circle.obj) {
+            if (
+              this.drawTypes.circle.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              dObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.polyline && this.drawTypes.polyline.obj) {
+            // distanceToLine closestOnLine
+            var closestPositionOnLine = window.AMap.GeometryUtil.distanceToLine(
+              new window.AMap.LngLat(o.longitude, o.latitude),
+              this.drawTypes.polyline.obj.getPath()
+            );
+            console.log(closestPositionOnLine);
+            if (closestPositionOnLine < 200) {
+              dObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.polygon && this.drawTypes.polygon.obj) {
+            if (
+              this.drawTypes.polygon.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              dObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.circle10km && this.drawTypes.circle10km.obj) {
+            if (
+              this.drawTypes.circle10km.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              dObj[o.uid] = o;
+            }
+          }
+        }
+      }
+      if (this.listBayonet && this.listBayonet.length > 0) {
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          let o = this.listBayonet[i];
+          if (this.drawTypes.rectangle && this.drawTypes.rectangle.obj) {
+            if (
+              this.drawTypes.rectangle.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              bObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.circle && this.drawTypes.circle.obj) {
+            if (
+              this.drawTypes.circle.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              bObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.polyline && this.drawTypes.polyline.obj) {
+            var closestPositionOnLine = window.AMap.GeometryUtil.distanceToLine(
+              new window.AMap.LngLat(o.longitude, o.latitude),
+              this.drawTypes.polyline.obj.getPath()
+            );
+            if (closestPositionOnLine < 200) {
+              bObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.polygon && this.drawTypes.polygon.obj) {
+            if (
+              this.drawTypes.polygon.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              bObj[o.uid] = o;
+            }
+          }
+          if (this.drawTypes.circle10km && this.drawTypes.circle10km.obj) {
+            if (
+              this.drawTypes.circle10km.obj.contains(
+                new window.AMap.LngLat(o.longitude, o.latitude)
+              )
+            ) {
+              bObj[o.uid] = o;
+            }
+          }
+        }
+      }
+      let ad = [],
+        ab = [];
+      for (let k in dObj) {
+        ad.push(dObj[k]);
+      }
+      for (let k in bObj) {
+        ab.push(bObj[k]);
+      }
+      console.log("设备 ad", ad);
+      console.log("卡口 ab", ab);
+      this.$emit("mapSelectorEmit", {
+        deviceList: dObj,
+        bayonetList: bObj
+      });
+      this.dialogVisible = false;
+      window.setTimeout(() => {
+        this.submitLoading = false;
+        this.closeDraw(1);
+        this.closeDraw(2);
+        this.closeDraw(3);
+        this.closeDraw(4);
+        this.closeDraw(5);
+      }, 200);
+    },
+
+    getTreeList() {
+      if (this.showTypes.indexOf("D") >= 0) {
+        this.getListDevice();
+      }
+      if (this.showTypes.indexOf("B") >= 0) {
+        this.getListBayonet();
+      }
+    },
+    // 设备
+    getListDevice() {
+      getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
+        if (res) {
+          this.listDevice = res.data;
         }
       });
     },
-    // 关闭图片放大弹出框
-    closeImgDialog() {
-      this.$emit("emitCloseImgDialog", false);
+    // 卡口
+    getListBayonet() {
+      getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
+        if (res) {
+          this.listBayonet = res.data;
+        }
+      });
+    },
+    // D设备 B卡口
+    setMarks() {
+      if (this.showTypes.indexOf("D") >= 0) {
+        for (let i = 0; i < this.listDevice.length; i++) {
+          this.doMark(this.listDevice[i], "vl_icon vl_icon_sxt");
+        }
+      }
+      if (this.showTypes.indexOf("B") >= 0) {
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
+        }
+      }
+    },
+    //
+    doMark(obj, sClass) {
+      // console.log('doMark', obj);
+      let marker = new window.AMap.Marker({
+        // 添加自定义点标记
+        map: this.amap,
+        position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+        offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        // extData: obj,
+        // 自定义点标记覆盖物内容
+        content: '<div class="map_icons ' + sClass + '"></div>'
+      });
+    },
+    setMapStatus(status) {
+      if (this.amap) {
+        if (status === 1) {
+          this.amap.setZoom(this.amap.getZoom() + 1);
+        } else if (status === 2) {
+          this.amap.setZoom(this.amap.getZoom() - 1);
+        }
+      }
+    }
+  },
+  beforeDestroy() {
+    if (this.amap) {
+      this.amap.destroy();
     }
   }
 };
 </script>
 <style lang="scss" scoped>
+@mixin close_menu {
+  position: absolute;
+  top: calc(50% - 81px);
+  font-size: 24px;
+  box-shadow: 0px 0px 4px 0px rgba (0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 99;
+}
 .qyryfx_wrap {
-  height: calc(100% - 54px);
-  font-size: 14px;
   position: relative;
+    height: calc(100% - 60px);  
+  font-size: 14px;
+  // 面包屑样式
+  .link_bread {
+    height: 60px;
+    background: #fff;
+    .bread_common {
+      padding: 23px 0 0 20px;
+    }
+  }
   // 搜索结果展示
   .search_result {
     position: absolute;
@@ -568,25 +893,25 @@ export default {
     background: #fff;
   }
   .qyryfx_content {
-    height: 100%;
-    display: flex;
+    position: relative;
     border-top: 1px solid #d3d3d3;
+    height: 100%;
+    // height: calc(100% - 60px);
+    overflow: hidden;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
     // 关闭展开菜单按钮
-    @mixin close_menu {
-      position: absolute;
-      top: calc(50% - 81px);
-      font-size: 24px;
-      box-shadow: 0px 0px 4px 0px rgba (0, 0, 0, 0.1);
-      cursor: pointer;
-      z-index: 99;
-    }
     // 页面左边
     .info_left {
+      position: relative;
+      height: 100%;
       width: 272px;
       color: #999;
       background: #fff;
       box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
       animation: fadeInLeft 0.4s ease-out 0.3s both;
+      z-index: 100;
       .left_top {
         width: 232px;
         margin: 0 20px;
@@ -618,78 +943,72 @@ export default {
           line-height: 46px;
           text-indent: 28px;
         }
-        // .select_place {
-        //   width: 230px;
-        //   background: red;
-        //   height: 100px;
-        //   margin: 0 auto;
-        //   border: 1px solid #d3d3d3;
-        // }
-
-        .drawBox {
-          width: 230px;
-          height: 100px;
-          margin: 0 auto;
-          border: 1px solid #d3d3d3;
-          .items {
-            padding-top: 20px;
-            span {
-              display: inline-block;
-              width: 45px;
-              height: 46px;
-              text-align: center;
-              line-height: 46px;
-              cursor: pointer;
+        .sd_opts {
+          > ul {
+            padding: 0 5px 5px 5px;
+            overflow: hidden;
+            > li {
+              padding: 5px;
+              float: left;
+              > div {
+                // padding: 5px;
+                &.sd_opts_sed {
+                  background-color: #f2f9ff;
+                  > .sd_opts_icon1 {
+                    background-image: url("../../../../assets/img/vehicle/cut1m.png");
+                  }
+                  > .sd_opts_icon2 {
+                    background-image: url(../../../../assets/img/vehicle/cut2m.png);
+                  }
+                  > .sd_opts_icon3 {
+                    background-image: url(../../../../assets/img/vehicle/cut3m.png);
+                  }
+                  > .sd_opts_icon4 {
+                    background-image: url(../../../../assets/img/vehicle/cut4m.png);
+                  }
+                  > .sd_opts_icon5 {
+                    background-image: url(../../../../assets/img/vehicle/cut5m.png);
+                  }
+                }
+              }
             }
-            .cut1 {
-              background: url(../../../../assets/img/vehicle/cut1.png) center
-                no-repeat;
-              background-size: 100% 100%;
+          }
+        }
+        .sd_opts_icon {
+          display: inline-block;
+          width: 38px;
+          height: 44px;
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: 100% 100%;
+          &.sd_opts_icon1 {
+            background-image: url(../../../../assets/img/vehicle/cut1.png);
+            &:hover {
+              background-image: url(../../../../assets/img/vehicle/cut1m.png);
             }
-            .cut1.hover {
-              background: #f2f9ff url(../../../../assets/img/vehicle/cut1m.png)
-                center no-repeat;
-              background-size: 100% 100%;
+          }
+          &.sd_opts_icon2 {
+            background-image: url(../../../../assets/img/vehicle/cut2.png);
+            &:hover {
+              background-image: url(../../../../assets/img/vehicle/cut2m.png);
             }
-            .cut2 {
-              background: url(../../../../assets/img/vehicle/cut2.png) center
-                no-repeat;
-              background-size: 100% 100%;
+          }
+          &.sd_opts_icon3 {
+            background-image: url(../../../../assets/img/vehicle/cut3.png);
+            &:hover {
+              background-image: url(../../../../assets/img/vehicle/cut3m.png);
             }
-            .cut2.hover {
-              background: #f2f9ff url(../../../../assets/img/vehicle/cut2m.png)
-                center no-repeat;
-              background-size: 100% 100%;
+          }
+          &.sd_opts_icon4 {
+            background-image: url(../../../../assets/img/vehicle/cut4.png);
+            &:hover {
+              background-image: url(../../../../assets/img/vehicle/cut4m.png);
             }
-            .cut3 {
-              background: url(../../../../assets/img/vehicle/cut3.png) center
-                no-repeat;
-              background-size: 100% 100%;
-            }
-            .cut4 {
-              background: url(../../../../assets/img/vehicle/cut4.png) center
-                no-repeat;
-              background-size: 100% 100%;
-            }
-            .cut5 {
-              background: url(../../../../assets/img/vehicle/cut5.png) center
-                no-repeat;
-              background-size: 80% 80%;
-            }
-            .cut3.hover {
-              background: #f2f9ff url(../../../../assets/img/vehicle/cut3m.png)
-                center no-repeat;
-              background-size: 100% 100%;
-            }
-            .cut4.hover {
-              background: #f2f9ff url(../../../../assets/img/vehicle/cut4m.png)
-                center no-repeat;
-              background-size: 100% 100%;
-            }
-            .cut5.hover {
-              background: #f2f9ff url(../../../../assets/img/vehicle/cut5m.png)
-                center no-repeat;
-              background-size: 80% 80%;
+          }
+          &.sd_opts_icon5 {
+            background-image: url(../../../../assets/img/vehicle/cut5.png);
+            &:hover {
+              background-image: url(../../../../assets/img/vehicle/cut5m.png);
             }
           }
         }
@@ -701,7 +1020,10 @@ export default {
     // 页面中部
     .info_center {
       position: relative;
-      width: calc(100% - 272px);
+      overflow: hidden;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
       height: 100%;
       //关闭按钮
       .close-menu-c {
@@ -712,6 +1034,7 @@ export default {
       .gis_content {
         height: 100%;
         position: relative;
+        overflow: hidden;
         .map_rm {
           width: 100%;
           height: 100%;
@@ -742,15 +1065,18 @@ export default {
         }
       }
     }
-    .right_show {
-      width: calc(100% - 496px);
-    }
-    .both_show {
-      width: calc(100% - 768px);
-    }
-    .none_show {
-      width: 100%;
-    }
+    // .right_show {
+    //   width: calc(100% - 496px);
+    // }
+    // .both_show {
+    //   width: calc(100% - 768px);
+    // }
+    // .none_show {
+    //   width: 100%;
+    // }
+    // .left_show {
+    //   width: calc(100% - 272px);
+    // }
     .info_right {
       // 页面右边
       width: 496px;
