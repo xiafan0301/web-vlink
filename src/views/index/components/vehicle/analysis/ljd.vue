@@ -32,7 +32,7 @@
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="请选择">
-                <el-option v-for="item in pricecode" :label="item" :value="item"></el-option>
+                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
               </el-select>
             </el-input>
           </el-form-item>
@@ -80,11 +80,11 @@
             </el-option-group>
           </el-select>
           </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
+          <!-- <el-form-item v-if="ruleForm.input5=='2'" >
             <el-input  v-model="selectValue" :disabled="true">
             </el-input>
           </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item>
             <el-row :gutter="10">
               <el-col :span="12">
