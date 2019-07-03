@@ -52,7 +52,7 @@
             </div>
           </div>
           <div class="table_box">
-            <el-table :data="list">
+            <el-table :data="list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="任务名称" prop="name" show-overflow-tooltip></el-table-column>
               <el-table-column label="创建时间" prop="date" show-overflow-tooltip></el-table-column>
@@ -133,11 +133,6 @@
   </vue-scroll>
 </template>
 <script>
-import { formatDate } from "@/utils/util.js";
-import { dataList } from "@/utils/data.js";
-import { getEventList } from "@/views/index/api/api.event.js";
-import { getDepartmentList } from "@/views/index/api/api.manage.js";
-import { getDiciData } from "@/views/index/api/api.js";
 export default {
   data() {
     return {
@@ -152,12 +147,36 @@ export default {
         }
       ],
       selectIndex: 0,
-      pagination: { total: 20, pageSize: 10, pageNum: 1 },
+      pagination: { total: 8, pageSize: 5, pageNum: 1 },
       taskForm: {
         reportTime: "", // 日期
         taskName: "" // 任务名称
       },
       list: [
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1518 弄",
+          status: true
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1517 弄",
+          status: false
+        },
+        {
+          date: "2016-05-01",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1519 弄",
+          status: false
+        },
+        {
+          date: "2016-05-03",
+          name: "王小虎",
+          address: "上海市普陀区金沙江路 1516 弄",
+          status: true
+        },
         {
           date: "2016-05-02",
           name: "王小虎",
@@ -196,6 +215,7 @@ export default {
     //tab切换
     selectTab(val) {
       this.selectIndex = val;
+      this.pagination.pageNum = 1;
     },
     handleCurrentChange(page) {
       this.pagination.pageNum = page;
@@ -212,7 +232,7 @@ export default {
     },
     // 跳至详情页面
     skipDetailPage(obj) {
-      this.$router.push({ name: "portrait_xjpfcm" });
+      this.$router.push({ name: "portrait_fxjg" });
     }
   }
 };

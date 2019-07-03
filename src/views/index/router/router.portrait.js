@@ -87,6 +87,11 @@ export default {
       path: 'zdgz', // 重点关注
       name: 'portrait_zdgz',
       component: () => import('@/views/index/components/portrait/zdgz.vue')
+    },
+    {
+      path: 'fxjg',
+      name: 'portrait_fxjg',
+      component: () => import('@/views/index/components/portrait/fxjg.vue')
     }
   ]
 }

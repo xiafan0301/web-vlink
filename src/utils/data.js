@@ -26,6 +26,7 @@ const dataList = {
   numberType: 45, // 号牌种类
   licensePlateColor: 46, //车牌颜色
   vehicleColor: 47, // 车身颜色
+  plateColor: 46,     //号牌颜色
 }
 // 处理方式
 const handeMethods = {
