@@ -11,7 +11,7 @@ export function getArchives(params) {
   return request({
     url: '/vehicle/archives',
     method: 'get',
-    mode: 'analysis',
+    mode: 'judge',
     params: params
   })
 }
@@ -24,7 +24,7 @@ export function getViolation(params) {
   return request({
     url: '/vehicle/violation',
     method: 'get',
-    mode: 'analysis',
+    mode: 'judge',
     params: params
   })
 }
@@ -33,13 +33,13 @@ export function getViolation(params) {
 /**
  * getDrivingAnalysis
  * 行车规律分析接口
- * @param {object} params
+ * @param {object} data
  */
-export function getDrivingAnalysis(params) {
+export function getDrivingAnalysis(data) {
   return request({
     url: '/driving-discipline-analysis',
-    method: 'get',
-    mode: 'analysis',
-    params: params
+    method: 'post',
+    mode: 'judge',
+    data
   })
 }

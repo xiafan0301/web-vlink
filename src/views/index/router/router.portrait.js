@@ -29,6 +29,11 @@ export default {
       path: 'rlcx',
       name: 'portrait_rlcx',
       component: () => import('@/views/index/components/portrait/rlcx.vue')
+    },
+    {
+      path: 'fxjg',
+      name: 'portrait_fxjg',
+      component: () => import('@/views/index/components/portrait/fxjg.vue')
     }
   ]
 }
