@@ -32,7 +32,7 @@
             <p class="carCold">车牌：</p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="请选择">
-                <el-option v-for="item in pricecode" :label="item" :value="item"></el-option>
+                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
           </el-form-item>
