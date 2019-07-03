@@ -487,7 +487,8 @@ export default {
         uploadImgUrls :this.curImageUrl
       }).then(res=>{
         if(res){
-
+          console.log(res);
+          
         }
       })
     },
@@ -616,6 +617,7 @@ export default {
           width: 100%;
           height: 100%;
           background: none;
+          overflow: hidden;
         }
         > p {
           display: none;

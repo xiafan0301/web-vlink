@@ -114,13 +114,7 @@
 
     <!-- 地图选择 -->
     <el-dialog :visible.sync="dialogVisible" width="80%">
-      <!-- <div> -->
-        <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
-      <!-- </div> -->
-      <!-- <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button class="select_btn" type="primary" @click="dialogVisible = false">确 认</el-button>
-      </span> -->
+        <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
     </el-dialog>
   </div>
 </template>
@@ -128,6 +122,7 @@
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
+import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapselect from "@/views/index/components/common/mapSelect";
 export default {
@@ -139,7 +134,9 @@ export default {
       dialogVisible: false,
       amap: null,
       allDevice:[],
+      allBayonet:[],
       selectDevice:[],
+      selectBayonet:[],
       selectValue:"已选设备0个",
       select: "",
       reselt: false,
@@ -166,7 +163,8 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice()
+    this.getAllDevice() //查询所有的设备
+    this.getAllBayonetList() //查询所有的卡口
   },
   methods: {
     hideResult() {
@@ -187,15 +185,24 @@ export default {
     hideMap(){
       this.dialogVisible=false
     },
-    mapPoint(v){
+    mapPoint(data){
+      let v = data.dev;
+      let p = data.boy;
       this.dialogVisible=false;
+      this.selectDevice=[]
+      this.selectBayonet=[]
       //返回有效点集合
       if(v && v.length>0){
         v.forEach(element => {
           this.selectDevice.push(element.uid)
         });
       }
-      this.selectValue="已选设备"+this.selectDevice.length+"个"
+      if(p && p.length>0){
+        p.forEach(element => {
+          this.selectBayonet.push(element.uid)
+        });
+      }
+      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
 
       // console.log(this.selectDevice);
@@ -211,11 +218,9 @@ export default {
     },
     submitForm(v) {
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
-
-      
       let pg={
-        //shotTime:this.ruleForm.data1[0]+"-00-00-00"+"_"+this.ruleForm.data1[0]+"-23-59-59",
-        shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
+        shotTime:this.ruleForm.data1[0]+"-00-00-00"+"_"+this.ruleForm.data1[1]+"-23-59-59",
+        //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
         minSnapNum: this.ruleForm.input4 || 0,
         plateNo:this.select+ this.ruleForm.input3 ,
       }
@@ -224,6 +229,7 @@ export default {
       }
       if(this.ruleForm.input5==2){
          pg.deviceCodes=this.selectDevice.join("-")
+         pg.bayonetIds=this.selectBayonet.join("-")
       }
         
       this.getVehicleShot(pg);
@@ -233,7 +239,14 @@ export default {
     },
     resetForm(v){
       this.select=""
-      this.$refs[v].resetFields();
+      this.ruleForm= {
+        data1:null,
+        input3: null,
+        input4: null,
+        input5: "1",
+        value1: null,
+      }
+      //this.$refs[v].resetFields();
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -295,6 +308,18 @@ export default {
           // console.log(res);
           if(res.data && res.data.length>0){
             this.allDevice=res.data
+          }
+          
+      })
+    },
+    //查询所有的卡口设备
+    getAllBayonetList(){
+      getAllBayonetList({
+        areaId:mapXupuxian.adcode
+      }).then(res=>{
+           console.log(res.data);
+          if(res.data && res.data.length>0){
+            this.allBayonet=res.data
           }
           
       })
