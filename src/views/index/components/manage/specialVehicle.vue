@@ -155,7 +155,7 @@
       <template v-else>
         <div class="not_content">
           <img src="../../../../assets/img/not-content.png" alt="">
-          <p>暂无相关数据</p>
+          <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
         </div>
       </template>
     </div>

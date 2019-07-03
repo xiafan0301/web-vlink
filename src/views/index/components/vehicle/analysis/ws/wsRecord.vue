@@ -104,7 +104,7 @@
 <script>
 import Breadcrumb from '../../breadcrumb.vue';
 import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
-import { formatESDate, random14 } from '@/utils/util.js';
+import { random14 } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -155,16 +155,16 @@ export default {
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.query.plateNo;
-      const dateStart = this.$route.query.dateStart;
-      const dateEnd = this.$route.query.dateEnd;
+      const startTime = this.$route.query.dateStart;
+      const endTime = this.$route.query.dateEnd;
       const plateNoTb = this.$route.query.plateNoTb;
-      const dateStartTb = this.$route.query.dateStartTb;
+      const startTimeTb = this.$route.query.dateStartTb;
       const params = {
         plateNo,
-        dateStart,
-        dateEnd,
+        startTime,
+        endTime,
         plateNoTb,
-        dateStartTb
+        startTimeTb
       };
       getTailBehindDetail(params)
         .then(res => {

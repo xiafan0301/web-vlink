@@ -123,88 +123,96 @@
     </el-dialog>
     <!--新建任务弹出框-->
     <el-dialog
-      title="新建任务"
+      title="新建分析任务"
       :visible.sync="addTaskDialog"
-      width="482px"
+      width="720px"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       class="dialog_comp dialog_comp_add"
     >
       <div class="content_body">
-        <div class="upload_box">
-          <el-upload
-            :disabled="isAddImgDisabled"
-            ref="uploadPic"
-            accept="image/*"
-            :action="uploadUrl"
-            :show-file-list="false"
-            list-type="picture-card"
-            :on-success="uploadPicSuccess"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-            :before-upload="beforeAvatarUpload"
-            :file-list="fileList">
-            <i class="vl_icon vl_icon_control_14"></i>
-            <p class="upload_text">点击上传图片</p>
-          </el-upload>
-          <div class="img_list">
-            <div class="img_box"></div>
-            <div class="img_box"></div>
-            <div class="img_box"></div>
-          </div>
-          <div class="divide"></div>
-        </div>
-        <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-          <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
-            <el-date-picker
-              v-model="addForm.shotTime"
-              type="datetime"
-              :clearable="false"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              style="width: 100%"
-              @blur="handleStartTime"
-              :picker-options="pickerStart"
-              placeholder="开始时间">
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="结束" label-width="20px" class="date_time" prop="dateEnd">
-            <el-date-picker
-              v-model="addForm.dateEnd"
-              style="width: 100%"
-              :clearable="false"
-              @blur="handleEndTime"
-              :picker-options="pickerEnd"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              type="datetime"
-              placeholder="结束时间"
+        <div class="left">
+          <div class="upload_box">
+            <el-upload
+              :disabled="isAddImgDisabled"
+              ref="uploadPic"
+              accept="image/*"
+              :action="uploadUrl"
+              :show-file-list="false"
+              :limit="3"
+              list-type="picture-card"
+              :on-success="uploadPicSuccess"
+              :on-exceed="uploadPicExceed"
+              :before-upload="beforeAvatarUpload"
               >
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item prop="deviceCode">
-            <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
-              <el-option
-                v-for="(item, index) in deviceList"
-                :key="index"
-                :label="item.deviceName"
-                :value="item.deviceID"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item prop="interval">
-            <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
-              <el-option
-                v-for="(item, index) in intervalList"
-                :key="index"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <!-- <el-form-item>
-            <el-button class="reset_btn" style="width: 100px;" @click="resetData('addForm')">取消</el-button>
-            <el-button class="select_btn" style="width: 100px;" @click="searchData('addForm')">保存</el-button>
-          </el-form-item> -->
-        </el-form>
+              <i v-if="uploading" class="el-icon-loading"></i>
+              <img v-else-if="curImageUrl" :src="curImageUrl">
+              <i v-else class="vl_icon vl_icon_vehicle_01"></i>
+              <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
+            </el-upload>
+            <div class="img_list">
+              <div class="img_box" v-for="(item, index) in fileList" :key="index">
+                <img :src="item.path ? item.path : ''" alt="">
+                <div class="delete_box" v-show="item.path">
+                  <i class="vl_icon vl_icon_manage_8" @click="deleteImg(index)"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="right">
+          <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
+            <el-form-item>
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20"></el-input>
+            </el-form-item>
+            <!-- <el-form-item  prop="shotTime">
+              <el-date-picker
+                v-model="addForm.shotTime"
+                type="datetime"
+                :clearable="false"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                style="width: 100%"
+                @blur="handleStartTime"
+                :picker-options="pickerStart"
+                placeholder="开始时间">
+              </el-date-picker>
+            </el-form-item> -->
+            <el-form-item  prop="dateEnd">
+              <el-date-picker
+                v-model="addForm.dateEnd"
+                style="width: 100%"
+                :clearable="false"
+                @blur="handleEndTime"
+                :picker-options="pickerEnd"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                type="datetimerange"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                >
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item prop="deviceCode">
+              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
+                <el-option
+                  v-for="(item, index) in deviceList"
+                  :key="index"
+                  :label="item.deviceName"
+                  :value="item.deviceID"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item prop="interval">
+              <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
+                <el-option
+                  v-for="(item, index) in intervalList"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="resetData('addForm')">取消</el-button>
@@ -232,7 +240,7 @@ export default {
           value: 0
         },
         {
-          label: "进行中任务",
+          label: "未完成任务",
           value: 1
         }
       ],
@@ -309,6 +317,9 @@ export default {
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
+      curImgNum: 0, // 图片数量
+      curImageUrl: null,
+      uploading: false
     }
   },
   created () {
@@ -319,15 +330,55 @@ export default {
     selectTab(val) {
       this.selectIndex = val;
     },
-    handleRemove () {
-      this.dialogImageUrl = null;
+    // 删除图片
+    deleteImg (index) {
+      this.curImgNum --;
+      this.fileList.splice(index, 1);
+      this.curImageUrl = null;
     },
-    handlePictureCardPreview (file) {
-      this.dialogImageUrl = file.url;
-      // this.dialogVisible = true;
+     // 上传图片
+    uploadPicExceed () {
+      this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
     },
-    uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.fileFullPath;
+    uploadPicSuccess (res) {
+      this.uploading = true;
+      if (res && res.data) {
+        let oRes = res.data;
+
+        if (this.curImgNum >= 3) {
+          this.$message.error('最多上传3张，请先删掉再上传');
+          return;
+        }
+        this.curImgNum ++;
+
+        this.uploading = false;
+
+        this.curImageUrl = oRes.fileFullPath;
+
+        // if (oRes) {
+        let x = {
+          cname: oRes.fileName, // 附件名称 ,
+          contentUid: this.$store.state.loginUser.uid,
+          // desci: '', // 备注 ,
+          filePathName: oRes.fileName, // 附件保存名称 ,
+          fileType: 1, // 文件类型 ,
+          imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+          imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+          imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+          // otherFlag: '', // 其他标识 ,
+          path: oRes.fileFullPath, // 附件路径 ,
+          // path: oRes.path,
+          thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+          thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+          // uid: '' //  附件标识
+        };
+        // JtcPOSTAppendixInfo(x).then(jRes => {
+        //   if (jRes) {
+        //     x['uid'] = jRes.data;
+        //   }
+        // })
+        this.fileList.push(x);
+      }
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
@@ -555,67 +606,101 @@ export default {
 }
 .dialog_comp_add {
   .content_body {
-    .upload_box {
-      padding: 15px 20px;
-        .img_list {
-          display: flex;
-          margin-top: 10px;
-          .img_box {
-          width: 70px;
-          height: 70px;
-          background:rgba(255,255,255,1);
-          border:1px dashed rgba(211,211,211,1);
-          border-radius:1px;
-          &:not(:last-child) {
-            margin-right: 5px;
-          }
-          }
-        }
-        .divide {
-          height: 1px;
-          border-bottom: 1px solid #D3D3D3;
-          margin-top: 20px;
-        }
-        /deep/ .el-upload {
-        width: 225px;
-        height: 225px;
-        .upload_text {
-          line-height: 0;
-          color: #999999;
-          margin-top: -30px;
-        }
-        i {
-          margin-top: 20px;
-          width: 120px;
-          height: 120px;
-        }
-        &:hover {
-          background: #0C70F8;
-          i.vl_icon_control_14{
-            background-position: -228px -570px;
-          }
+    display: flex;
+    .left {
+      border-right: 1px dashed #F2F2F2;
+      .upload_box {
+        padding: 15px 20px;
+         .img_list {
+           display: flex;
+           margin-top: 10px;
+           .img_box {
+            width: 70px;
+            height: 70px;
+            background:rgba(255,255,255,1);
+            border:1px dashed rgba(211,211,211,1);
+            border-radius:1px;
+            position: relative;
+            &:hover {
+              .delete_box {
+                display: block;
+              }
+            }
+            .delete_box {
+              display: none;
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background-color: #000;
+              opacity: 0.7;
+              text-align: center;
+              i {
+                margin-top: 35%;
+                cursor: pointer; 
+              }
+            }
+            &:not(:last-child) {
+              margin-right: 5px;
+            }
+            img {
+              width: 100%;
+              height: 100%;
+            }
+           }
+         }
+         /deep/ .el-upload {
+          width: 225px;
+          height: 225px;
+          position: relative;
           .upload_text {
-            color: #ffffff;
+            line-height: 0;
+            color: #999999;
+            margin-top: -60px;
+          }
+          >img {
+            width: 100%;
+            height: 100%;
+          }
+          i {
+            margin-top: 40px;
+            margin-left: 15px;
+            width: 120px;
+            height: 120px;
+          }
+          &:hover {
+            background: #2981F8;
+            // i.vl_icon_control_14{
+            //   background-position: -228px -570px;
+            // }
+            .upload_text {
+              color: #ffffff;
+            }
           }
         }
-      }
-      &.hidden /deep/ .el-upload--picture-card {
-        display: none!important;
+        &.hidden /deep/ .el-upload--picture-card {
+          display: none!important;
+        }
       }
     }
-    .left_form {
+    .right {
       width: 100%;
-      padding: 15px 20px;
-      font-size: 12px !important;
-      /deep/ .el-form-item {
-        margin-bottom: 20px;
-      }
-      .date_time {
-        /deep/ .el-form-item__label {
-          line-height: 20px;
-          color: #999999;
+      .left_form {
+        width: 100%;
+        padding: 50px 20px 0;
+        font-size: 12px !important;
+        /deep/ .el-form-item {
+          margin-bottom: 20px;
+        }
+        .date_time {
+          /deep/ .el-form-item__label {
+            line-height: 20px;
+            color: #999999;
+          }
         }
       }
+
     }
   }
 }
