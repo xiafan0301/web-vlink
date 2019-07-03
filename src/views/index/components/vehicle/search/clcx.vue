@@ -33,8 +33,8 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <el-form-item prop="vehicleGroup" >
-            <el-select v-model="ruleForm.vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
+          <el-form-item prop="_vehicleGroup" >
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -188,7 +188,7 @@ export default {
       ruleForm: {
         dateStart:'',
         dateEnd:'',
-        vehicleGroup:'',
+        _vehicleGroup:'',
         vehicleClass:'',
         devIds:'',
         include:1,
@@ -272,8 +272,18 @@ export default {
     },
     //查询车辆
     getSnapList(){
-      console.log(this.ruleForm);
       
+      if(this.input5==1){
+        this.ruleForm.areaIds =this.value1.join(",")
+      }else{
+        /*   this.selectDevice=[]
+      this.selectBayonet=[] */
+        this.ruleForm.deviceIds  = this.selectDevice.join(",")
+        this.ruleForm.bayonetIds = this.selectBayonet.join(",")
+      }
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
+      
+        console.log(this.ruleForm);
       let d=this.ruleForm
       getSnapList(d).then(res=>{
         if(res.data && res.data.list.length>0){
