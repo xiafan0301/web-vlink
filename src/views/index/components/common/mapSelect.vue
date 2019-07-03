@@ -85,10 +85,13 @@ export default {
     confirmMap(){
       //console.log(this.pointData);
         this.amap.clearMap();
+        this.addMarket()
         this.$emit("selectMap",{
           dev:this.pointData,
           boy:this.boyData
         })
+        this.pointData=[]
+        this.boyData=[]
     },
     cancelMap(){
       this.amap.clearMap();
@@ -302,10 +305,10 @@ export default {
               
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.pointData.push(el)
               }
               
@@ -321,10 +324,10 @@ export default {
               
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.boyData.push(el)
               }
               
@@ -340,10 +343,10 @@ export default {
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.pointData.push(el)
               }
         })
@@ -356,10 +359,10 @@ export default {
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.boyData.push(el)
               }
         })
