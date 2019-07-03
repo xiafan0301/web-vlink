@@ -26,6 +26,7 @@ const dataList = {
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
+  ownership: 48, //号牌归属
 }
 // 处理方式
 const handeMethods = {

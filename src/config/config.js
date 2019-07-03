@@ -9,7 +9,7 @@ const oDomains = {
         // dev: 'http://10.116.64.23:8081',
         // dev: 'http://10.116.64.142:8081',
         // dev: 'http://10.116.66.29:8082',// 钟赞
-        test: 'https://apirel.aorise.org/vlink-base',
+        test: 'https://apidev.aorise.org/vlink-base',
         prod: 'https://apirel.aorise.org/vlink-base'
     },
     // 视频服务地址
@@ -47,7 +47,7 @@ const oDomains = {
     judge: {
         // dev: 'http://10.116.64.127:8082/',
         dev: 'https://apidev.aorise.org/vlink-judge/',
-        test: 'https://apirel.aorise.org/vlink-judge/',
+        test: 'https://apidev.aorise.org/vlink-judge/',
         prod: 'https://apirel.aorise.org/vlink-judge/',
     },
     // 调度和预案部分地址
