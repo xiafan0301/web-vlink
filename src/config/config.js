@@ -104,12 +104,18 @@ const oDomains = {
       test: 'https://apirel.aorise.org/vlink-gis',
       prod: 'https://apidev.aorise.org/vlink-gis'
     },
-  //   无服务
+    // 无服务
     noServe: {
       // dev: 'https://apidev.aorise.org',
       dev: 'http://10.116.64.142:8087',
       test: 'https://apirel.aorise.org',
       prod: 'https://apidev.aorise.org'
+    },
+    //研判分析服务
+    analysis: {
+      dev: 'https://apidev.aorise.org/vlink-judge',
+      test: 'http://10.116.65.15:8081',
+      prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;
