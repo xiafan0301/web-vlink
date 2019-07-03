@@ -14,18 +14,18 @@ const dataList = {
   alarmLevel: 11, //告警级别
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
-  vehicleColor: 17, // 车身颜色
   eventType: 20, // 事件类型
   distanceId: 23, // 推送距离
   taskStatus: 24, // 任务状态,
   taskType: 25, // 任务类型
   ctcStatus: 26, // 调度事件状态
-  licensePlateColor: 30, //车牌颜色
-  numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
   vehicleType: 44, // 车辆类型
+  numberType: 45, // 号牌种类
+  licensePlateColor: 46, //车牌颜色
+  vehicleColor: 47, // 车身颜色
 }
 // 处理方式
 const handeMethods = {

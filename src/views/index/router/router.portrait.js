@@ -22,6 +22,12 @@ export default {
       name: 'gzws_portrait',
       component: () => import('@/views/index/components/portrait/gzws/gzws.vue')
     },
+    // 跟踪尾随分析结果
+    {
+      path: 'gzwsResult',
+      name: 'gzws_result',
+      component: () => import('@/views/index/components/portrait/gzws/result.vue')
+    },
     // 跟踪尾随详情
     {
       path: 'detail',

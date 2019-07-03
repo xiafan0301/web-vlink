@@ -220,6 +220,18 @@ export function getTailBehindDetail(params) {
     mode: 'judge'
   });
 }
+/**
+ * 根据车牌号码查询车辆详情接口
+ * @param {object} params
+ */
+export function getVehicleArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
 
 /*--------------------------  人脸检索--身份核实start  ---------------------------------*/
