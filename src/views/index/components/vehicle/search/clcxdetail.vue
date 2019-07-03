@@ -140,7 +140,7 @@
 </template>
 <script>
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
-import { getSnapDetail } from "@/views/index/api/api.judge.js";
+import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
   data() {
     return {
@@ -198,8 +198,20 @@ export default {
   mounted() {
     // this.tcDiscuss();
     this.getSnapDetail()
+    this.getArchives()
   },
   methods: {
+    getArchives(){
+      let d={
+        plateNo:this.$route.query.plateNo || "湘AN8888"
+      }
+      getArchives(d).then(res=>{
+        if(res && res.data){
+          // console.log(res);
+          this.detailData=res.data
+        }
+      })
+    },
     //
     getSnapDetail(){
       let d={
@@ -210,7 +222,7 @@ export default {
       }
       getSnapDetail(d).then(res=>{
         if(res){
-          this.detailData=res.data
+          //this.detailData=res.data
           if(res.data.snapDtoList && res.data.snapDtoList.length>0)
           this.strucInfoList = res.data.snapDtoList;
           this.snapObj=res.data.snapDtoList[0]
