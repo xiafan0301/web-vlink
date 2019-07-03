@@ -66,9 +66,9 @@ export default {
       path: 'ljd', // 落脚点分析
       name: 'vehicle_search_ljd',
       component: () => import('@/views/index/components/vehicle/analysis/ljd.vue'),
-      meta: {
-        unrequireLogin: true
-      }
+      // meta: {
+      //   unrequireLogin: true
+      // }
     }, {
       path: 'qy', // 区域分析
       name: 'vehicle_search_qy',

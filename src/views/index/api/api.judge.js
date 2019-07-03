@@ -241,13 +241,14 @@ export function getIdNoList(params) {
 /*--------------------------  车辆侦查--车辆落脚点start  ---------------------------------*/
 /**
  * 查询车辆落脚点
- * @param {object} params
+ * @param {object} data
  */
-export function getVehicleShot(params) {
+
+export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'judge'
   });
 }
@@ -272,6 +273,42 @@ export function getAllDevice(params) {
 export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登记信息
+ * @param {object} params
+ */
+export function getArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登违章信息
+ * @param {object} params
+ */
+export function getViolationInfo(params) {
+  return request({
+    url: '/vehicle/violation',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询连续违章
+ * @param {object} params
+ */
+export function getViolation(params) {
+  return request({
+    url: '/vehicle/continuous-violation',
     method: 'get',
     params,
     mode: 'judge'
