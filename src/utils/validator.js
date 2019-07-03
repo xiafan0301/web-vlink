@@ -130,4 +130,18 @@ export const validatePatrolTime = (rule, value, callback) => {
   }
   callback();
 };
+/**
+ * 支持正整数
+ */
+export const validateInteger = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('请输入正整数'));
+    } else {
+      callback();
+    }
+  }
+  callback();
+};
 

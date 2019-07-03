@@ -1,16 +1,17 @@
 <template>
   <div class="tail_analysis">
-    <div class="breadcrumb_heaer">
+    <Breadcrumb :oData="[{name: '尾随分析'}]"></Breadcrumb>
+    <!-- <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>尾随分析</el-breadcrumb-item>
       </el-breadcrumb>
-    </div>
+    </div> -->
     <div class="content_box">
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
           <el-form-item prop="plateNo">
-            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @change="handlePlateNo"></el-input>
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo"></el-input>
           </el-form-item>
           <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
             <el-date-picker
@@ -19,7 +20,7 @@
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 100%"
-              @change="handleStartTime"
+              @blur="handleStartTime"
               :picker-options="pickerStart"
               placeholder="开始时间">
             </el-date-picker>
@@ -29,7 +30,7 @@
               v-model="searchForm.dateEnd"
               style="width: 100%"
               :clearable="false"
-              @change="handleEndTime"
+              @blur="handleEndTime"
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
               type="datetime"
@@ -38,9 +39,13 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item prop="deviceCode">
-            <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+            <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode" @change="handleChangeDeviceCode">
+              <el-option
+                v-for="(item, index) in deviceList"
+                :key="index"
+                :label="item.deviceName"
+                :value="item.deviceID"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
@@ -70,50 +75,61 @@
         </el-form>
       </div>
       <div class="right">
-        <div class="content_top">
-          <p>
-            <span>查询结果</span>
-            <span>（{{dataList.length}}）</span>
-          </p>
-          <el-button class="select_btn">导出</el-button>
-        </div>
-        <div class="result_detail">
-          <ul class="clearfix">
-            <li v-for="(item, index) in dataList" :key="index">
-              <div class="de_left">
-                <img :src="item.subStoragePath" alt="">
-              </div>
-              <div class="de_right">
-                <span class="title">查询资料</span>
-                <p>
-                  <span>
-                    <i class="vl_icon_tail_2 vl_icon"></i>
-                    {{item.plateNo}}
-                  </span>
-                  <span class="vehicle_type">{{item.vehicleClass}}</span>
-                </p>
-                <p>
-                  <i class="vl_icon_tail_1 vl_icon"></i>
-                  <span>{{item.shotTime}}</span>
-                </p>
-                <div class="record_btn" @click="skipWsReocrdPage">尾随记录</div>
-              </div>
-            </li>
-          </ul>
-        </div>
+        <template v-if="dataList && dataList.length > 0">
+          <div class="content_top">
+            <p>
+              <span>查询结果</span>
+              <span>（{{dataList.length}}）</span>
+            </p>
+          </div>
+          <div class="result_detail">
+            <ul class="clearfix">
+              <li v-for="(item, index) in dataList" :key="index">
+                <div class="de_left">
+                  <img :src="item.subStoragePath" alt="">
+                </div>
+                <div class="de_right">
+                  <span class="title">查询资料</span>
+                  <p>
+                    <span>
+                      <i class="vl_icon_tail_2 vl_icon"></i>
+                      {{item.plateNo}}
+                    </span>
+                    <span class="vehicle_type">{{item.vehicleClass}}</span>
+                  </p>
+                  <p>
+                    <i class="vl_icon_tail_1 vl_icon"></i>
+                    <span>{{item.shotTime}}</span>
+                  </p>
+                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </template>
+        <template v-else>
+          <div class="not_content">
+            <img src="../../../../../assets/img/not-content.png" alt="">
+            <p>暂无相关数据</p>
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 <script>
+import Breadcrumb from '../breadcrumb.vue';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
+import { formatESDate } from '@/utils/util.js';
 export default {
+  components: { Breadcrumb },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      deviceStartTime: null, // 起点设备抓拍时间
       searchForm: {
         plateNo: null, // 车牌号码
         deviceCode: null, // 起点设备编号
@@ -135,43 +151,18 @@ export default {
         ]
       },
       pickerStart: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
+        // disabledDate (time) {
+        //   return time.getTime() > (new Date().getTime());
+        // }
       },
       pickerEnd: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
+        // disabledDate (time) {
+        //   return time.getTime() > (new Date().getTime());
+        // }
       },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
-      dataList: [
-        {
-          plateNo: '湘A12345',
-          vehicleClass: '货车',
-          subStoragePath: null,
-          shotTime: '2018-12-31: 13:45:23'
-        },
-        {
-          plateNo: '湘A12345',
-          vehicleClass: '面包车',
-          subStoragePath: null,
-          shotTime: '2018-12-31: 13:45:23'
-        },
-        {
-          plateNo: '湘A12345',
-          vehicleClass: '货车',
-          subStoragePath: null,
-          shotTime: '2018-12-31: 13:45:23'
-        },
-        {
-          plateNo: '湘A12345',
-          vehicleClass: '货车',
-          subStoragePath: null,
-          shotTime: '2018-12-31: 13:45:23'
-        }
-      ], // 查询的抓拍结果列表
+      dataList: [], // 查询的抓拍结果列表
     }
   },
   created () {
@@ -189,50 +180,68 @@ export default {
         })
     },
     // 车牌号码change
-    handlePlateNo (val) {
-      if (val && this.searchForm.startTime && this.searchForm.endTime) {
+    handlePlateNo () {
+      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
         this.getDeviceList();
       }
     },
     // 开始时间change
-    handleStartTime (val) {
-      if (val) {
-        this.pickerEnd.disabledDate = function (time) {
-          return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
-        }
-        if (this.searchForm.plateNo && this.searchForm.endTime) {
+    handleStartTime () {
+      if (this.searchForm.shotTime) {
+        // this.pickerEnd.disabledDate = function (time) {
+        //   return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
+        // }
+        if (this.searchForm.plateNo && this.searchForm.dateEnd) {
           this.getDeviceList();
         }
       }
     },
     // 结束时间change
-    handleEndTime (val) {
-      if (val) {
-        this.pickerStart.disabledDate = function (time) {
-          return time.getTime() > new Date(val).getTime();
-        }
-        if (this.searchForm.startTime && this.searchForm.plateNo) {
+    handleEndTime () {
+      if (this.searchForm.dateEnd) {
+        // this.pickerStart.disabledDate = function (time) {
+        //   return time.getTime() > new Date(val).getTime();
+        // }
+        if (this.searchForm.shotTime && this.searchForm.plateNo) {
           this.getDeviceList();
         }
       }
     },
     // 获取抓拍设备列表
     getDeviceList () {
-      const shotTime = this.searchForm.shotTime + '_' + this.searchForm.dateEnd;
+      this.deviceList = [];
+      const shotTime = formatESDate(this.searchForm.shotTime) + '_' + formatESDate(this.searchForm.dateEnd);
       const params = {
         plateNo: this.searchForm.plateNo,
         shotTime: shotTime
       };
-      // getShotDevice(params)
-      //   .then(res => {
-      //     if (res) {
-      //       this.deviceList = res.data;
-      //     }
-      //   })
+      console.log('params', params)
+      getShotDevice(params)
+        .then(res => {
+          if (res) {
+            this.deviceList = res.data;
+          }
+        })
+    },
+    // 起点设备change
+    handleChangeDeviceCode (obj) {
+      if (obj) {
+        this.deviceList.map(item => {
+          if (item.deviceID === obj) {
+            this.deviceStartTime = item.shotTime;
+          }
+        })
+      }
     },
     // 跳至尾随记录页面
-    skipWsReocrdPage () {
-      this.$router.push({name: 'ws_record'});
+    skipWsReocrdPage (obj) {
+      this.$router.push({name: 'ws_record', query: { 
+        plateNo: this.searchForm.plateNo,
+        dateStart: formatESDate(this.deviceStartTime),
+        dateEnd: formatESDate(this.searchForm.dateEnd),
+        plateNoTb: obj.plateNo,
+        dateStartTb: formatESDate(obj.shotTime)
+       }});
     },
     // 重置查询条件
     resetData (form) {
@@ -242,22 +251,38 @@ export default {
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
+          if (!this.searchForm.plateNo) {
+            this.$message({
+              type: 'warning',
+              message: '请先设置目标车辆',
+              customClass: 'request_tip'
+            });
+            return;
+          };
+          if (!this.searchForm.deviceCode) {
+            this.$message({
+              type: 'warning',
+              message: '请设置分析起点',
+              customClass: 'request_tip'
+            });
+            return;
+          };
           const vehicleType = this.searchForm.vehicleClass.join(':');
           const params = {
             deviceCode: this.searchForm.deviceCode,
-            shotTime: this.searchForm.shotTime,
+            dateStart: formatESDate(this.searchForm.shotTime),
+            shotTime: formatESDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
-            dateEnd: this.searchForm.dateEnd,
+            dateEnd: formatESDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval
           };
-          console.log(params)
-          // getTailBehindList(params)
-          //   .then(res => {
-          //     if (res) {
-          //       this.dataList = res.data;
-          //     }
-          //   })
+          getTailBehindList(params)
+            .then(res => {
+              if (res && res.data) {
+                this.dataList = res.data;
+              }
+            })
         }
       });
     }
@@ -267,13 +292,11 @@ export default {
 <style lang="scss" scoped>
 .tail_analysis {
   height: 100%;
-  .breadcrumb_heaer {
-    background-color: #ffffff;
-    border-bottom:1px solid #D3D3D3;
-  }
   .content_box {
     width: 100%;
-    height: calc(100% - 55px);
+    height: 100%;
+    padding-top: 50px;
+    // height: calc(100% - 55px);
     display: flex;
     .left {
       width: 272px;

@@ -14,10 +14,10 @@
             <el-radio-group v-model="input5" @change="changeTab">
               <el-row :gutter="10">
                 <el-col :span="12">
-                  <el-radio label="1">列表选择</el-radio>
+                  <el-radio label="1">从图片提取</el-radio>
                 </el-col>
                 <el-col :span="12">
-                  <el-radio label="2">地图选择</el-radio>
+                  <el-radio label="2">自定义特征</el-radio>
                 </el-col>
               </el-row>
             </el-radio-group>
@@ -39,8 +39,8 @@
                 <img v-else-if="curImageUrl" :src="curImageUrl">
                 <div v-else>
                   <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
-                    class="vl_icon vl_icon_vehicle_01"
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#fefefe; font-size: 100px;"
+                    class="vl_icon el-icon-camera-solid"
                   ></i>
                   <span>点击上传图片</span>
                 </div>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :loading="searching" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
               <div class="chara">
                 <span>湘H3A546</span>
                 <span>红色</span>
@@ -66,10 +66,10 @@
                 <el-form-item label="号牌类型" label-width="90px" prop>
                   <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in plateType"
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -80,30 +80,30 @@
                     placeholder="选择选项"
                   >
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in plateColor"
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="车辆类型" label-width="90px" prop>
                   <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in vehicleType"
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="车辆颜色" label-width="90px" prop>
                   <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in carColor"
+                      :key="item.enumField"
+                      :label="item.enumValue"
+                      :value="item.enumField"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -119,12 +119,8 @@
                 </el-form-item>
                 <el-form-item label="遮阳板" label-width="90px" prop>
                   <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
-                    <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    ></el-option>
+                    <el-option   key="收起" label="收起" value="收起"></el-option>
+                    <el-option   key="放下" label="放下" value="放下"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="年检标数量" label-width="90px" prop>
@@ -148,11 +144,20 @@
             <div class="time-search">
               <el-date-picker
                 v-model="data1"
+                type="daterange"
+                class="full"
+                    value-format="yyyy-MM-dd"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+              </el-date-picker>
+              <!-- <el-date-picker
+                v-model="data1"
                 type="date"
                 value-format="yyyy-MM-dd"
                 placeholder="选择日期"
                 class="full"
-              ></el-date-picker>
+              ></el-date-picker> -->
             </div>
             <div class="license-plate-search">
               <el-row :gutter="5">
@@ -195,8 +200,8 @@
             <div class="table_box">
               <el-table :data="regulationsList">
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
-                <el-table-column label="车牌号码" prop="date" show-overflow-tooltip></el-table-column>
-                <el-table-column label="违法次数" sortable prop="address" show-overflow-tooltip></el-table-column>
+                <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
+                <el-table-column label="违法次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
                 <el-table-column label="操作"  show-overflow-tooltip>
  <template slot-scope="scope">
         <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
@@ -266,13 +271,18 @@ import BigImg from "@/components/common/bigImg.vue";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
-  JtcPUTAppendixsOrder
+  JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
 } from "../../../api/api.judge.js";
 import { setTimeout } from "timers";
+import { dataList } from '@/utils/data.js';
 export default {
   components: { BigImg },
   data() {
     return {
+      plateType:[],// 号牌类型
+      plateColor:[],// 号牌颜色
+      vehicleType:[],// 车辆类型
+      carColor:[],// 车辆颜色
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
       uploadFileList: [],
@@ -328,37 +338,29 @@ export default {
       rules: {},
       options: [
         {
-          value: "选项1",
-          label: "黄金糕"
+          value: "1个",
+          label: "1"
         },
         {
-          value: "选项2",
-          label: "双皮奶"
-        }
+          value: "2个",
+          label: "2"
+        },
+        {
+          value: "3个",
+          label: "3"
+        },
+        {
+          value: "4个",
+          label: "4"
+        },
+        {
+          value: "5个",
+          label: "5"
+        },
       ],
       regulationsList: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
       ], //违章信息列表
-      pagination: { total: 20, pageSize: 10, pageNum: 1 }
+      pagination: { total: 0, pageSize: 10, pageNum: 1 }
     };
   },
   computed: {
@@ -367,12 +369,35 @@ export default {
     }
   },
   mounted() {
+    let dic=this.dicFormater(dataList.vehicleType);
+    let dic1=this.dicFormater(dataList.plateType);
+    let dic2=this.dicFormater(dataList.plateColor);
+    let dic3=this.dicFormater(dataList.carColor);
+     
+    this.plateType= [...dic1[0].dictList]// 号牌类型
+    this.plateColor= [...dic2[0].dictList]// 号牌颜色
+    this.vehicleType= [...dic[0].dictList]// 车辆类型
+    this.carColor= [...dic3[0].dictList]// 车辆颜色
     this.setDTime();
   },
   methods: {
+    //获取图片信息
+    getPhotoAnalysis(){
+      let d={
+        uploadImgUrls:""
+      }
+      getPhotoAnalysis(d).then(res=>{
+        if(res){
+
+        }
+      })
+    },
     //查看详情
     handleClick(v){
- this.$router.push({name: 'vehicle_search_lxwfdetail', query: {}});
+      console.log(v);
+      v.datastart=this.data1[0]
+      v.dataend=this.data1[1]
+      this.$router.push({name: 'vehicle_search_lxwfdetail', query: v});
     },
     // 上传图片
     beforeAvatarUpload(file) {
@@ -460,6 +485,18 @@ export default {
       });
       item.checked = true;
     },
+    //获取特征
+    getItem(){
+      //this.curImageUrl =
+      getPhotoAnalysis({
+        uploadImgUrls :this.curImageUrl
+      }).then(res=>{
+        if(res){
+          console.log(res);
+          
+        }
+      })
+    },
     //从历史上传图片中上传
     addHisToImg() {
       this.historyPicDialog = false;
@@ -487,7 +524,7 @@ export default {
         new Date(curDate - curS).getDate();
       let _e =
         date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      //this.searchData.time = [_s, _e];
+      this.data1 = [_e, _e];
     },
     //重置
     resetSearch() {
@@ -495,17 +532,40 @@ export default {
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
+      this.input4 = null,
       this.setDTime();
-      this.getVehicleDetail();
+    //this.getVehicleDetail();
     },
     //查询
     getVehicleDetail() {
       this.searching = true;
       console.log("======getVehicleDetail=====", this.searchData, this.imgData);
-      let params = {};
-      setTimeout(() => {
-        this.searching = false;
-      }, 3000);
+
+      let params = {
+        dateStart:this.data1[0] || "2019-01-01",
+        dateEnd:this.data1[1] || "2019-07-01",
+      };
+
+      this.getViolation(params)
+      // setTimeout(() => {
+      //   this.searching = false;
+      // }, 3000);
+    },
+    //按条件查询违章
+    getViolation(d){
+      getViolation(d).then(res=>{
+        console.log(res.data);
+        
+        if(res.data){
+
+           this.searching = false;
+          // pagination: { total: 20, pageSize: 10, pageNum: 1 }
+          this.pagination.total=res.data.total
+          this.pagination.pageNum=res.data.pageNum
+          // this.pagination.total=res.data.total
+          this.regulationsList=res.data.list
+        }
+      })
     },
     // 图片放大
     openBigImg(index, data) {
@@ -584,6 +644,7 @@ export default {
           width: 100%;
           height: 100%;
           background: none;
+          overflow: hidden;
         }
         > p {
           display: none;
