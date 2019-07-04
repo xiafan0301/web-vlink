@@ -364,6 +364,7 @@
         </swiper>
       </div>
     </el-dialog>
+    <div id="capMap"></div>
   </div>
 </template>
 <script>
@@ -498,6 +499,13 @@ export default {
     //获取摄像头卡口数据
     this.getMonitorList();
     this.setDTime();
+    // 初始化地图
+    let map = new AMap.Map("capMap", {
+      center: [112.974691, 28.093846],
+      zoom: 16
+    });
+    map.setMapStyle("amap://styles/whitesmoke");
+    this.amap = map;
   },
   computed: {
     choosedHisPic() {
@@ -539,7 +547,9 @@ export default {
               "where.endTime": this.ytscMenuForm.selectDate[1] || null, // 结束时间
               "where.uploadImgUrl": this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
               "where.deviceUid": deviceUidArr.join(), // 摄像头标识
-              "where.bayonetUid": bayonetUidArr.join() // 卡口标识
+              "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
+              pageNum: this.pageNum,
+              pageSize: this.pageSize
             };
             // 处理排序字段
             if (this.sortType === 1) {
@@ -564,7 +574,7 @@ export default {
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
-                    this.pageNum = res.data.pageNum;
+                    // this.pageNum = res.data.pageNum;
                     this.total = res.data.total;
                   }
                 }
@@ -633,23 +643,23 @@ export default {
         this.amap.remove(this.markerPoint);
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new window.AMap.Marker({
+      this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
-        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
-      this.infoWindow = new window.AMap.InfoWindow({
+      this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
         isCustom: true,
         closeWhenClickMap: false,
-        position: [data.longitude, data.latitude],
-        offset: new window.AMap.Pixel(0, -70),
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+        offset: new AMap.Pixel(0, -70),
         content: sConent
       });
     },
@@ -672,13 +682,13 @@ export default {
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data); // 重新绘制地图
     },
     imgListTap(data, index) {
       // 点击swiper图片
       this.curImgIndex = index;
       this.sturcDetail = data;
-      // this.drawPoint(data); // 重新绘制图片
+      this.drawPoint(data); // 重新绘制地图
     },
     /*选择设备的方法*/
     getMonitorList() {
@@ -853,7 +863,7 @@ export default {
       this.uploading = true;
       return isJPG && isLt;
     },
-    uploadSucess(response, file) {
+    uploadSucess(response) {
       //上传成功
       this.uploading = false;
       /* this.compSim = '';
@@ -959,7 +969,19 @@ export default {
     allowDrop(e) {
       e.preventDefault();
     }
-  }
+  },
+  watch: {
+      // stucOrder () {
+      //   this.tcDiscuss(true);
+      // },
+      strucCurTab (e) {
+        if (e === 2) {
+          this.drawPoint(this.sturcDetail)
+        } else if (e === 3) {
+          this.videoUrl = document.getElementById('capVideo').src;
+        }
+      }
+    }
 };
 </script>
 <style lang="scss" scoped>

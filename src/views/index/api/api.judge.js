@@ -260,7 +260,7 @@ export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
     method: 'post',
-    data,
+    params:data,
     mode: 'judge'
   });
 }
