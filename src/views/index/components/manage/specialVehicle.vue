@@ -32,8 +32,11 @@
               style="width: 250px;"
               v-model="searchForm.dateTime"
               type="daterange"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               start-placeholder="开始日期"
+              :default-time="['00:00:00', '23:59:59']"
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
@@ -73,7 +76,8 @@
           <el-form-item prop="vehicleNo">
             <el-input style="width: 250px;" type="text" placeholder="请输入车牌号码" v-model="searchForm.vehicleNo" />
           </el-form-item>
-          <el-form-item class="operation_form_btn" style="width: 250px;">
+          <el-form-item class="operation_form_btn" style="width: 260px;">
+            <el-button class="reset_btn" @click="exportVehicle">导出车辆</el-button>
             <el-button class="select_btn" @click="searchData">查询</el-button>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
           </el-form-item>
@@ -82,8 +86,7 @@
       </div>
       <div class="button_box">
         <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导入车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导出车辆</el-button>
+        <el-button class="reset_btn">导入车辆</el-button>
         <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="deleteVehicle">删除车辆</el-button>
       </div>
       <template v-if="vehicleList && vehicleList.length > 0">
@@ -155,7 +158,7 @@
       <template v-else>
         <div class="not_content">
           <img src="../../../../assets/img/not-content.png" alt="">
-          <p>暂无相关数据</p>
+          <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
         </div>
       </template>
     </div>
@@ -328,6 +331,21 @@
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
       </div>
     </el-dialog>
+    <!--导入弹出框-->
+    <el-dialog
+      title="是否确定删除该组?"
+      :visible.sync="delGroupDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">删除后数据不可恢复。</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delGroupDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteGroup">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -336,7 +354,7 @@ import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
@@ -846,6 +864,7 @@ export default {
     // 点击左边分组获取特殊车辆
     showGroupDeviceInfo (id) {
       this.activeId = id;
+      this.pagination.pageNum = 1;
       this.getVehicleList();
     },
     // 显示删除组弹出框
@@ -934,10 +953,12 @@ export default {
     },
     // 根据搜索条件查询车辆
     searchData () {
+      this.pagination.pageNum = 1;
       this.getVehicleList();
     },
     // 重置搜索条件
     resetData (form) {
+      this.pagination.pageNum = 1;
       this.$refs[form].resetFields();
       this.getVehicleList();
     },
@@ -945,7 +966,54 @@ export default {
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getVehicleList();
-    }
+    },
+    // 导出车辆
+    exportVehicle () {
+      let vehicleColor, vehicleType, numberType;
+      if (this.searchForm.vehicleType === '不限') {
+        vehicleType = null;
+      } else {
+        vehicleType = this.searchForm.vehicleType;
+      }
+      if (this.searchForm.vehicleColor === '不限') {
+        vehicleColor = null;
+      } else {
+        vehicleColor = this.searchForm.vehicleColor;
+      }
+      if (this.searchForm.numType === '不限') {
+        numberType = null;
+      } else {
+        numberType = this.searchForm.numType;
+      }
+      const params = {
+        viewType: 1, // 1--特殊车辆
+        vehicleQueryDto: {
+          endTime: this.searchForm.dateTime[1],
+          startTime: this.searchForm.dateTime[0],
+          vehicleColor,
+          vehicleType,
+          numberType,
+          vehicleNumber: this.searchForm.vehicleNo,
+          groupId: this.activeId
+        }
+      };
+      vehicleExport(params)
+        .then(res => {
+          if (res) {
+            // console.log('res', res)
+            // let a = document.createElement('a');
+            // a.setAttribute('href', res.data);
+            // a.setAttribute('id', 'export_id');
+            // a.setAttribute('target', '_blank');
+            // // 防止反复添加
+            // if (document.getElementById('export_id')) {
+            //   document.body.removeChild(document.getElementById('export_id'));
+            // }
+            // document.body.appendChild(a);
+            // a.click();
+          }
+        })
+    },
   }
 }
 </script>
@@ -1027,11 +1095,11 @@ export default {
       .search_form {
         width: 100%;
         .select_btn, .reset_btn {
-          width: 80px;
+          // width: 80px;
         }
         .operation_form_btn {
-          float: right;
-          margin-right: 40px;
+          // float: right;
+          // margin-right: 40px;
         }
       }
       .divide {

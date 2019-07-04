@@ -30,7 +30,6 @@
                     end-placeholder="结束日期"
                   ></el-date-picker>
                 </el-form-item>
-
                 <!-- 选择设备 -->
                 <div class="selected_device_comp" v-if="treeTabShow" @click="chooseDevice"></div>
                 <div class="selected_device" @click="treeTabShow = true;">
@@ -125,14 +124,18 @@
                     class="input-with-select width232"
                   >
                     <el-select
+                      clearable
                       v-model="mhscMenuForm.provice"
                       style="width: 70px;"
                       slot="prepend"
                       placeholder
                     >
-                      <el-option label="京" value="1"></el-option>
-                      <el-option label="湘" value="2"></el-option>
-                      <el-option label="鲁" value="3"></el-option>
+                      <el-option
+                        v-for="item in vehicleBelongOptions"
+                        :key="item.enumValue"
+                        :label="item.enumValue"
+                        :value="item.enumValue"
+                      ></el-option>
                     </el-select>
                   </el-input>
                 </el-form-item>
@@ -150,7 +153,7 @@
       <div class="right_img_list">
         <!-- 排序和结果 -->
         <div class="result_sort">
-          <h3 class="result">检索结果（{{ strucInfoList.length }}）</h3>
+          <h3 class="result">检索结果（{{ total }}）</h3>
           <div class="sort">
             <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
               时间排序
@@ -179,7 +182,7 @@
                 @click="showStrucInfo(item, index)"
               >
                 <div class="img_wrap">
-                  <img :src="item.storagePath"/>
+                  <img :src="item.subStoragePath" />
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
@@ -257,7 +260,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -325,7 +328,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -349,7 +352,7 @@
               :class="{'active': index === curImgIndex}"
               @click="imgListTap(item, index)"
             >
-              <img style="width: 100%; height: .88rem;" :src="item.storagePath" alt />
+              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
               <!-- <div class="vl_jfo_sim" v-show="showSim">
                 <i
                   class="vl_icon vl_icon_retrieval_05"
@@ -367,10 +370,13 @@
         </swiper>
       </div>
     </el-dialog>
+    <div id="capMap"></div>
   </div>
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import { formatDate } from "@/utils/util.js";
+
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
@@ -399,6 +405,7 @@ export default {
         ]
       },
       vehicleClassOptions: [], // 车辆类型下拉
+      vehicleBelongOptions: [], // 车辆归属地下拉
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -491,13 +498,20 @@ export default {
   mounted() {
     this.getMonitorList();
     this.setDTime();
-
     this.vehicleClassOptions = this.dicFormater(44)[0].dictList; // 获取到车辆类别下拉数组
+    this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
       this.handleCheckedAll(true);
     });
+    // 初始化地图
+    let map = new AMap.Map("capMap", {
+      center: [112.974691, 28.093846],
+      zoom: 16
+    });
+    map.setMapStyle("amap://styles/whitesmoke");
+    this.amap = map;
   },
   methods: {
     getStrucInfo() {
@@ -515,14 +529,26 @@ export default {
           let bayonetUidArr = this.selectBayonetArr.map(item => {
             return item.id;
           });
+          // console.log('车牌号码', this.mhscMenuForm);
+          if (
+            (!this.mhscMenuForm.provice && this.mhscMenuForm.carNumber) ||
+            (this.mhscMenuForm.provice && !this.mhscMenuForm.carNumber)
+          ) {
+            this.$message.warning("请您填写完整的车牌号码");
+          }
           const queryParams = {
-            "where.startTime": this.mhscMenuForm.selectDate[0] || "", // 开始时间
-            "where.endTime": this.mhscMenuForm.selectDate[1] || "", // 结束时间
+            "where.startTime":
+              this.mhscMenuForm.selectDate[0] + " 00:00:00" || null, // 开始时间
+            "where.endTime":
+              this.mhscMenuForm.selectDate[1] + " 23:59:59" || null, // 结束时间
             "where.deviceUid": deviceUidArr.join(), // 摄像头标识
             "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
             "where.vehicleClass": this.mhscMenuForm.carType, // 车辆类型
-            // "where.vehicleNumber": this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
-            "where.unvehicleFlag": this.mhscMenuForm.isNegate // 非车辆标志
+            "where.vehicleNumber":
+              this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
+            "where.unvehicleFlag": this.mhscMenuForm.isNegate, // 非车辆标志
+            pageNum: this.pageNum,
+            pageSize: this.pageSize
           };
           // 处理排序字段
           if (this.sortType === 1) {
@@ -547,7 +573,7 @@ export default {
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
-                  this.pageNum = res.data.pageNum;
+                  // this.pageNum = res.data.pageNum;
                   this.total = res.data.total;
                 }
               }
@@ -625,19 +651,22 @@ export default {
       this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
-        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
         offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [
+        data.shotPlaceLongitude,
+        data.shotPlaceLatitude
+      ]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
       this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
         isCustom: true,
         closeWhenClickMap: false,
-        position: [data.longitude, data.latitude],
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
         offset: new AMap.Pixel(0, -70),
         content: sConent
       });
@@ -800,12 +829,6 @@ export default {
       this.selectBayonetArr = [...this.selectDeviceArr].filter(
         key => key.treeType === 2
       );
-      console.log(
-        "选中的数据",
-        this.selectDeviceArr,
-        this.selectBayonetArr,
-        this.selectCameraArr
-      );
     },
     videoTap() {
       // 播放视频
@@ -825,12 +848,24 @@ export default {
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data);
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data);
+    }
+  },
+  watch: {
+    // stucOrder () {
+    //   this.tcDiscuss(true);
+    // },
+    strucCurTab(e) {
+      if (e === 2) {
+        this.drawPoint(this.sturcDetail);
+      } else if (e === 3) {
+        this.videoUrl = document.getElementById("capVideo").src;
+      }
     }
   }
 };

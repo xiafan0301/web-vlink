@@ -9,23 +9,23 @@
           </li>
           <li>
             <span>任务名称：</span>
-            <span>雪佛兰科鲁兹</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
             <span>分析时间：</span>
-            <span>红色</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
             <span>起点设备：</span>
-            <span>430322199709831112</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
             <span>尾随间隔：</span>
-            <span>你猜咯</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
             <span>创建时间：</span>
-            <span>你猜咯</span>
+            <span>{{taskDetail.createTime ? taskDetail.createTime : '无'}}</span>
           </li>
         </ul>
       </div>
@@ -126,145 +126,30 @@
 </template>
 <script>
 import Breadcrumb from '../breadcrumb.vue';
-import { ajaxCtx } from '@/config/config.js';
-import { checkPlateNumber } from '@/utils/validator.js';
-import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
-import { dataList } from '@/utils/data.js';
-import { getDiciData } from '@/views/index/api/api.js';
-import { formatESDate } from '@/utils/util.js';
+import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 export default {
   components: { Breadcrumb },
   data () {
-    const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
-      dialogImageUrl: null,
-      fileList: [],
-      isAddImgDisabled: false, // 图片上传禁用
-      uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
-      deviceStartTime: null, // 起点设备抓拍时间
-      searchForm: {
-        plateNo: null, // 车牌号码
-        deviceCode: null, // 起点设备编号
-        shotTime: new Date(startTime), // 开始时间
-        dateEnd: new Date(), // 结束时间
-        vehicleClass: [], // 车辆类型
-        interval: 3 // 尾随间隔
-      },
-      intervalList: [
-        { label: '1分钟', value: 1 },
-        { label: '2分钟', value: 2 },
-        { label: '3分钟', value: 3 },
-        { label: '5分钟', value: 5 },
-        { label: '10分钟', value: 10 }
-      ],
-      rules: {
-        plateNo: [
-          { validator: checkPlateNumber, trigger: 'blur' }
-        ]
-      },
-      pickerStart: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
-      },
-      pickerEnd: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
-      },
-      deviceList: [], // 抓拍设备列表
-      vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
+      taskDetail: {} // 离线任务详情
     }
   },
-  created () {
-    this.getVehicleTypeList();
+  mounted () {
+    this.getDetail();
   },
   methods: {
-    handleRemove () {
-      this.dialogImageUrl = null;
-    },
-    handlePictureCardPreview (file) {
-      this.dialogImageUrl = file.url;
-      // this.dialogVisible = true;
-    },
-    uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.fileFullPath;
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
-      const isLt4M = file.size / 1024 / 1024 < 4;
-
-      if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
-      }
-      if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
-      }
-      return isJPG && isLt4M;
-    },
-    // 获取车辆类型列表
-    getVehicleTypeList () {
-      const type = dataList.vehicleType;
-      getDiciData(type)
-        .then(res => {
-          if (res) {
-            this.vehicleTypeList = res.data;
-          }
-        })
-    },
-    // 车牌号码change
-    handlePlateNo () {
-      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
-        this.getDeviceList();
-      }
-    },
-    // 开始时间change
-    handleStartTime () {
-      if (this.searchForm.shotTime) {
-        // this.pickerEnd.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
-        // }
-        if (this.searchForm.plateNo && this.searchForm.dateEnd) {
-          this.getDeviceList();
-        }
-      }
-    },
-    // 结束时间change
-    handleEndTime () {
-      if (this.searchForm.dateEnd) {
-        // this.pickerStart.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime();
-        // }
-        if (this.searchForm.shotTime && this.searchForm.plateNo) {
-          this.getDeviceList();
-        }
-      }
-    },
-    // 获取抓拍设备列表
-    getDeviceList () {
-      this.deviceList = [];
-      const shotTime = formatESDate(this.searchForm.shotTime) + '-' + formatESDate(this.searchForm.dateEnd);
-      const params = {
-        plateNo: this.searchForm.plateNo,
-        shotTime: shotTime
-      };
-      console.log('params', params)
-      getShotDevice(params)
-        .then(res => {
-          if (res) {
-            this.deviceList = res.data;
-          }
-        })
-    },
-    // 起点设备change
-    handleChangeDeviceCode (obj) {
-      if (obj) {
-        this.deviceList.map(item => {
-          if (item.deviceID === obj) {
-            this.deviceStartTime = item.shotTime;
-          }
-        })
+    // 获取离线任务详情
+    getDetail () {
+      const id = this.$route.query.id;
+      if (id) {
+        getTaskInfosDetail(id)
+          .then(res => {
+            if (res) {
+              this.taskDetail = res.data;
+            }
+          })
       }
     },
     // 跳至尾随记录页面
@@ -278,41 +163,7 @@ export default {
       //   dateStartTb: obj.shotTime
       //  }});
     },
-    // 重置查询条件
-    resetData (form) {
-      this.$refs[form].resetFields();
-    },
-    // 搜索数据
-    searchData (form) {
-      this.$refs[form].validate(valid => {
-        if (valid) {
-          if (!this.searchForm.deviceCode) {
-            this.$message({
-              type: 'warning',
-              message: '请先选择起点设备',
-              customClass: 'request_tip'
-            });
-            return;
-          };
-          const vehicleType = this.searchForm.vehicleClass.join(':');
-          const params = {
-            deviceCode: this.searchForm.deviceCode,
-            dateStart: formatESDate(this.searchForm.shotTime),
-            shotTime: formatESDate(this.deviceStartTime),
-            plateNo: this.searchForm.plateNo,
-            dateEnd: formatESDate(this.searchForm.dateEnd),
-            vehicleClass: vehicleType,
-            interval: this.searchForm.interval
-          };
-          getTailBehindList(params)
-            .then(res => {
-              if (res && res.data) {
-                this.dataList = res.data;
-              }
-            })
-        }
-      });
-    }
+    
   }
 }
 </script>

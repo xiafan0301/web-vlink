@@ -186,6 +186,7 @@ import {
   getAllBayonetList
 } from "@/views/index/api/api.base.js";
 import { validatePersonNum, validateInteger } from '@/utils/validator.js';
+import { postTaskAnalysis } from "../../api/api.analysis.js";
 export default {
   data() {
     return {
@@ -265,7 +266,9 @@ export default {
       selAreaPolygon: null,
       listDevice: [], // 设备
       listBayonet: [], // 卡口
-      showTypes: "DB" //设备类型
+      showTypes: "DB", //设备类型
+      cameraIds: [],    //摄像头
+      bayonetIds: [],    //卡口
     };
   },
   computed: {},
@@ -286,27 +289,45 @@ export default {
       this.closeDraw(4);
       /* this.closeDraw(5); */
     },
-    //查询
+    //新建
     submitForm(formName) {
       this.selSubmit();
       this.$refs[formName].validate((valid) => {
           if (valid) {
             let params = {
-              startDate: this.searchData.time[0],
-              endDate: this.searchData.time[1],
+              jobName: this.searchData.taskName,
+              startDate: this.searchData.startTime,
+              endDate: this.searchData.endTime,
               semblance: this.searchData.similarity,
               frequency: this.searchData.frequency,
             };
+            if((this.cameraIds && this.cameraIds.length > 0) || (this.bayonetIds && this.bayonetIds.length > 0)) {
+              (this.cameraIds && this.cameraIds.length > 0) && (params['deviceIds'] = this.cameraIds.join(","));
+              (this.bayonetIds && this.bayonetIds.length > 0) && (params['bayonetIds'] = this.bayonetIds.join(","));
+            }else {
+              this.$message.error("请选择区域")
+              return false;
+            }
             console.log("-------submitForm-------",params)
             this.searching = true;
-            window.setTimeout(() => {
-              this.searching = false;
-              this.closeDraw(1);
-              this.closeDraw(2);
-              this.closeDraw(3);
-              this.closeDraw(4);
-              /* this.closeDraw(5); */
-            }, 200);
+            postTaskAnalysis(params).then(res => {
+              console.log(res)
+              if(res) {
+                window.setTimeout(() => {
+                this.closeDraw(1);
+                this.closeDraw(2);
+                this.closeDraw(3);
+                this.closeDraw(4);
+                /* this.closeDraw(5); */
+              }, 200);
+              }
+              this.$nextTick(() => {
+                this.searching = false;
+              })
+            }).catch(error => {
+              console.log(error)
+              this.searching = false
+            }) 
           } else {
             console.log('error submit!!');
             return false;
@@ -686,6 +707,8 @@ export default {
       }
       console.log("设备 ad", ad, dObj, bObj);
       console.log("卡口 ab", ab);
+      this.cameraIds = ad;
+      this.bayonetIds = ab;
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
@@ -1082,6 +1105,10 @@ html {
     text-align: center;
     .el-button {
       width: 45%;
+    }
+    .el-button--primary {
+      background-color: #0c70f8;
+      border-color: #0c70f8;
     }
   }
   .info-left {

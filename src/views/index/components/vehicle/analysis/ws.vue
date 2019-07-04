@@ -1,12 +1,6 @@
 <template>
   <div class="tail_analysis">
     <Breadcrumb :oData="[{name: '尾随分析'}]"></Breadcrumb>
-    <!-- <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>尾随分析</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div> -->
     <div class="content_box">
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
@@ -19,6 +13,8 @@
               type="datetime"
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              :default-time="['00:00:00', '23:59:59']"
               style="width: 100%"
               @blur="handleStartTime"
               :picker-options="pickerStart"
@@ -33,6 +29,8 @@
               @blur="handleEndTime"
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              :default-time="['00:00:00', '23:59:59']"
               type="datetime"
               placeholder="结束时间"
               >
@@ -110,7 +108,7 @@
         <template v-else>
           <div class="not_content">
             <img src="../../../../../assets/img/not-content.png" alt="">
-            <p>暂无相关数据</p>
+            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
           </div>
         </template>
       </div>
@@ -123,7 +121,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatESDate } from '@/utils/util.js';
+import { formatDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -151,14 +149,14 @@ export default {
         ]
       },
       pickerStart: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
       },
       pickerEnd: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
       },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
@@ -187,33 +185,35 @@ export default {
     },
     // 开始时间change
     handleStartTime () {
-      if (this.searchForm.shotTime) {
-        // this.pickerEnd.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
-        // }
-        if (this.searchForm.plateNo && this.searchForm.dateEnd) {
-          this.getDeviceList();
+      let _this = this;
+      if (_this.searchForm.shotTime) {
+        _this.pickerEnd.disabledDate = function (time) {
+          return time.getTime() > new Date(_this.searchForm.shotTime).getTime() + 3 * 24 * 3600 * 1000;
+        }
+        if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
+          _this.getDeviceList();
         }
       }
     },
     // 结束时间change
     handleEndTime () {
-      if (this.searchForm.dateEnd) {
-        // this.pickerStart.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime();
-        // }
-        if (this.searchForm.shotTime && this.searchForm.plateNo) {
-          this.getDeviceList();
+      let _this = this;
+      if (_this.searchForm.dateEnd) {
+        _this.pickerStart.disabledDate = function (time) {
+          return time.getTime() > new Date(_this.searchForm.dateEnd).getTime();
+        }
+        if (_this.searchForm.shotTime && _this.searchForm.plateNo) {
+          _this.getDeviceList();
         }
       }
     },
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatESDate(this.searchForm.shotTime) + '_' + formatESDate(this.searchForm.dateEnd);
       const params = {
         plateNo: this.searchForm.plateNo,
-        shotTime: shotTime
+        startTime: formatDate(this.searchForm.shotTime),
+        endTime: formatDate(this.searchForm.dateEnd)
       };
       console.log('params', params)
       getShotDevice(params)
@@ -237,10 +237,10 @@ export default {
     skipWsReocrdPage (obj) {
       this.$router.push({name: 'ws_record', query: { 
         plateNo: this.searchForm.plateNo,
-        dateStart: formatESDate(this.deviceStartTime),
-        dateEnd: formatESDate(this.searchForm.dateEnd),
+        dateStart: formatDate(this.deviceStartTime),
+        dateEnd: formatDate(this.searchForm.dateEnd),
         plateNoTb: obj.plateNo,
-        dateStartTb: formatESDate(obj.shotTime)
+        dateStartTb: formatDate(obj.shotTime)
        }});
     },
     // 重置查询条件
@@ -270,10 +270,10 @@ export default {
           const vehicleType = this.searchForm.vehicleClass.join(':');
           const params = {
             deviceCode: this.searchForm.deviceCode,
-            dateStart: formatESDate(this.searchForm.shotTime),
-            shotTime: formatESDate(this.deviceStartTime),
+            startTime: formatDate(this.searchForm.shotTime),
+            shotTime: formatDate(this.deviceStartTime),
             plateNo: this.searchForm.plateNo,
-            dateEnd: formatESDate(this.searchForm.dateEnd),
+            endTime: formatDate(this.searchForm.dateEnd),
             vehicleClass: vehicleType,
             interval: this.searchForm.interval
           };
