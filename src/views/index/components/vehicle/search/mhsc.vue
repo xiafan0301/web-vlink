@@ -132,7 +132,7 @@
                     >
                       <el-option
                         v-for="item in vehicleBelongOptions"
-                        :key="item.enumValue"
+                        :key="item.enumField"
                         :label="item.enumValue"
                         :value="item.enumValue"
                       ></el-option>
@@ -198,7 +198,7 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <template v-if="total > 0">
+            <!-- <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
@@ -209,7 +209,7 @@
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>
+            </template> -->
           </vue-scroll>
         </div>
       </div>
@@ -570,11 +570,11 @@ export default {
           }
           getVagueSearch(queryParams)
             .then(res => {
-              if (res.data && res.data.list) {
-                if (res.data.list.length > 0) {
-                  this.strucInfoList = res.data.list;
+              if (res.data) {
+                if (res.data.length > 0) {
+                  this.strucInfoList = res.data;
                   // this.pageNum = res.data.pageNum;
-                  this.total = res.data.total;
+                  this.total = res.data.length;
                 }
               }
             })
@@ -599,6 +599,9 @@ export default {
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
       this.strucInfoList = []; // 清空检索结果数据
+      if (this.$refs.mhscMenuForm) {
+        this.$refs.mhscMenuForm.resetFields();
+      }
       this.setDTime(); // 重置时间
       this.initCheckTree(); // 初始化全选树节点
     },
