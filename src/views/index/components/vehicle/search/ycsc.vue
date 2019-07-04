@@ -142,7 +142,7 @@
       <div class="right_img_list">
         <!-- 排序和结果 -->
         <div class="result_sort">
-          <h3 class="result">检索结果（{{ strucInfoList.length }}）</h3>
+          <h3 class="result">检索结果（{{ total }}）</h3>
           <div class="sort">
             <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
               时间排序
@@ -175,7 +175,7 @@
                     @dragstart="drag($event)"
                     title="拖动图片上传"
                     draggable="true"
-                    :src="item.storagePath"
+                    :src="item.subStoragePath"
                   />
                 </div>
                 <div class="text_wrap">
@@ -234,7 +234,7 @@
       <p v-else>暂无历史记录</p>
       <div slot="footer">
         <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" :disabled="choosedHisPic.length === 0">确认</el-button>
+        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
       </div>
     </el-dialog>
     <!--检索详情弹窗-->
@@ -254,7 +254,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -322,7 +322,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -346,7 +346,7 @@
               :class="{'active': index === curImgIndex}"
               @click="imgListTap(item, index)"
             >
-              <img style="width: 100%; height: .88rem;" :src="item.storagePath" alt />
+              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
               <!-- <div class="vl_jfo_sim" v-show="showSim">
                 <i
                   class="vl_icon vl_icon_retrieval_05"
@@ -364,10 +364,12 @@
         </swiper>
       </div>
     </el-dialog>
+    <div id="capMap"></div>
   </div>
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import {formatDate} from '@/utils/util.js';
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -433,6 +435,7 @@ export default {
       uploading: false, // 是否上传中
       curImageUrl: "", // 当前上传的图片
       historyPicList: [], // 上传历史记录
+      selectedHistoryPic: null,
       historyPicDialog: false,
       loadingHis: false,
       imgData: null,
@@ -498,6 +501,13 @@ export default {
     //获取摄像头卡口数据
     this.getMonitorList();
     this.setDTime();
+    // 初始化地图
+    let map = new AMap.Map("capMap", {
+      center: [112.974691, 28.093846],
+      zoom: 16
+    });
+    map.setMapStyle("amap://styles/whitesmoke");
+    this.amap = map;
   },
   computed: {
     choosedHisPic() {
@@ -535,11 +545,13 @@ export default {
               return item.id;
             });
             const queryParams = {
-              "where.startTime": this.ytscMenuForm.selectDate[0] || null, // 开始时间
-              "where.endTime": this.ytscMenuForm.selectDate[1] || null, // 结束时间
+              "where.startTime": this.ytscMenuForm.selectDate[0] + ' 00:00:00' || null, // 开始时间
+              "where.endTime": this.ytscMenuForm.selectDate[1] + ' 23:59:59' || null, // 结束时间
               "where.uploadImgUrl": this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
               "where.deviceUid": deviceUidArr.join(), // 摄像头标识
-              "where.bayonetUid": bayonetUidArr.join() // 卡口标识
+              "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
+              pageNum: this.pageNum,
+              pageSize: this.pageSize
             };
             // 处理排序字段
             if (this.sortType === 1) {
@@ -564,7 +576,7 @@ export default {
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
-                    this.pageNum = res.data.pageNum;
+                    // this.pageNum = res.data.pageNum;
                     this.total = res.data.total;
                   }
                 }
@@ -633,23 +645,26 @@ export default {
         this.amap.remove(this.markerPoint);
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new window.AMap.Marker({
+      this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
-        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+        offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [
+        data.shotPlaceLongitude,
+        data.shotPlaceLatitude
+      ]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
-      this.infoWindow = new window.AMap.InfoWindow({
+      this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
         isCustom: true,
         closeWhenClickMap: false,
-        position: [data.longitude, data.latitude],
-        offset: new window.AMap.Pixel(0, -70),
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
+        offset: new AMap.Pixel(0, -70),
         content: sConent
       });
     },
@@ -672,13 +687,13 @@ export default {
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data); // 重新绘制地图
     },
     imgListTap(data, index) {
       // 点击swiper图片
       this.curImgIndex = index;
       this.sturcDetail = data;
-      // this.drawPoint(data); // 重新绘制图片
+      this.drawPoint(data); // 重新绘制地图
     },
     /*选择设备的方法*/
     getMonitorList() {
@@ -853,7 +868,7 @@ export default {
       this.uploading = true;
       return isJPG && isLt;
     },
-    uploadSucess(response, file) {
+    uploadSucess(response) {
       //上传成功
       this.uploading = false;
       /* this.compSim = '';
@@ -893,6 +908,7 @@ export default {
       this.uploading = false;
       this.$message.error("上传失败");
     },
+    /**从历史记录中上传图片 */
     showHistoryPic() {
       //获取上传记录
       this.loadingHis = true;
@@ -919,30 +935,19 @@ export default {
     },
     chooseHisPic(item) {
       //选择最近上传的图片
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      });
       item.checked = true;
+      this.selectedHistoryPic = item;
     },
-    //从历史上传图片中上传
-    // addHisToImg () {
-    //   this.historyPicDialog = false;
-    //   let _ids = [];
-    //   this.choosedHisPic.forEach(x => {
-    //     _ids.push(x.uid)
-    //     this.curImageUrl = x.path;
-    //     this.imgData = x;
-    //   })
-    //   let _obj = {
-    //     appendixInfoIds: _ids.join(',')
-    //   }
-    //   JtcPUTAppendixsOrder(_obj);
-    // },
+    addHisToImg() {
+      this.curImageUrl = this.selectedHistoryPic.path;
+      this.historyPicDialog = false; // 关闭模态框
+    },
     /* 拖拽图片上传的方法 */
     drag(ev) {
       ev.dataTransfer.setData("Text", ev.target.currentSrc);
     },
     drop(e) {
+      this.curImageUrl = e.dataTransfer.getData("Text");
       let x = {
         contentUid: this.$store.state.loginUser.uid,
         cname: "拖拽图片" + Math.random(),
@@ -958,6 +963,18 @@ export default {
     },
     allowDrop(e) {
       e.preventDefault();
+    }
+  },
+  watch: {
+    // stucOrder () {
+    //   this.tcDiscuss(true);
+    // },
+    strucCurTab(e) {
+      if (e === 2) {
+        this.drawPoint(this.sturcDetail);
+      } else if (e === 3) {
+        this.videoUrl = document.getElementById("capVideo").src;
+      }
     }
   }
 };

@@ -1,12 +1,6 @@
 <template>
   <div class="th-driving-night">
-    <div class="th-breadcrumb">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>夜间行车分析</el-breadcrumb-item>
-      </el-breadcrumb>
-      <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export">导出</el-button>
-    </div>
+    <Breadcrumb :oData="[{name: '夜间行车分析'}]"></Breadcrumb>
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="con_left">
@@ -123,15 +117,15 @@
             </el-input>
             <span>次（范围2-100）</span>
           </div>
-          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;">
+          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable>
             <el-option
               v-for="item in carTypeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.enumField"
+              :label="item.enumValue"
+              :value="item.enumValue">
             </el-option>
           </el-select>
-          <el-select v-model="queryForm.surveillanceId" placeholder="请选择布控车辆" style="width: 100%;">
+          <el-select v-model="queryForm.surveillanceId" placeholder="请选择布控车辆" style="width: 100%;" clearable>
             <el-option
               v-for="item in controlCarList"
               :key="item.uid"
@@ -146,36 +140,45 @@
         </div>
       </div>
       <div class="the-right-result">
-        <vue-scroll>
-          <div class="the-table">
-            <el-table
-              class="data_table" :data="oData.list">
-              <el-table-column label="序号" width="150px" type="index" :index="indexMethod"></el-table-column>
-              <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
-              <el-table-column label="车辆类型" prop="vehicleType">
-                <template slot-scope="scope">
-                  <span>{{ scope.row.vehicleType }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="过车次数" prop="shotTimes"></el-table-column>
-              <el-table-column label="操作">
-                <template slot-scope="scope">
-                  <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
-                  <span class="operation_btn" @click="onOpenVehicleInfo(scope.row)">车辆信息</span>
-                </template>
-              </el-table-column>
-            </el-table>
-            <el-pagination
-              class="cum_pagination"
-              @current-change="onPageChange"
-              :current-page.sync="currentPage"
-              :page-sizes="[100, 200, 300, 400]"
-              :page-size="pagination.pageSize"
-              layout="total, prev, pager, next, jumper"
-              :total="oData.total">
-            </el-pagination>
+        <template v-if="dataList.length > 0">
+          <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export">导出</el-button>
+          <vue-scroll>
+            <div class="the-table">
+              <el-table
+                class="data_table" :data="dataList">
+                <el-table-column label="序号" width="150px" type="index" :index="indexMethod"></el-table-column>
+                <el-table-column label="车牌号码" prop="vehicleNumber" show-overflow-tooltip></el-table-column>
+                <el-table-column label="车辆类型" prop="vehicleType">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row.vehicleType }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="过车次数" prop="shotTimes"></el-table-column>
+                <el-table-column label="操作">
+                  <template slot-scope="scope">
+                    <span class="operation_btn th-separator" @click="onOpenRecord(scope.row)">抓拍记录</span>
+                    <span class="operation_btn" @click="onOpenVehicleInfo(scope.row)">车辆信息</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-pagination
+                class="cum_pagination"
+                @current-change="onPageChange"
+                :current-page.sync="currentPage"
+                :page-sizes="[100, 200, 300, 400]"
+                :page-size="pagination.pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="pagination.total">
+              </el-pagination>
+            </div>
+          </vue-scroll>
+        </template>
+        <template v-else>
+          <div class="not_content">
+            <img src="../../../../../assets/img/not-content.png" alt="">
+            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
           </div>
-        </vue-scroll>
+        </template>
       </div>
     </div> 
   </div>
@@ -183,9 +186,14 @@
 <script>
 import { mapXupuxian } from "@/config/config";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
+import { getNightVehicleList  }from "@/views/index/api/api.judge.js";
+import { dataList } from '@/utils/data.js';
+import { getDiciData } from '@/views/index/api/api.js';
 import { objDeepCopy, formatDate } from "@/utils/util.js";
+import Breadcrumb from '../breadcrumb.vue';
 // formatDate
 export default {
+  components: { Breadcrumb },
   data () {
     return {
       pickerOptions: {
@@ -207,7 +215,7 @@ export default {
       queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
       startTime: null,
       endTime: null,
-      carTypeList: [],
+      // carTypeList: [],
       controlCarList: [
         {
           uid: 0,
@@ -251,71 +259,20 @@ export default {
         }
       ],
       treeTabShow: false,
-      oData: {
-        list: [
-          {
-            uid: 1,
-            vehicleNumber: '湘A99999',
-            vehicleType: 1,
-            shotTimes: 3
-          }, {
-            uid: 2,
-            vehicleNumber: '湘A99999',
-            vehicleType: 2,
-            shotTimes: 2
-          }, {
-            uid: 3,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 4,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 5,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 6,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 7,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 8,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 9,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }, {
-            uid: 10,
-            vehicleNumber: '湘A99999',
-            vehicleType: 3,
-            shotTimes: 1
-          }
-        ],
-        total: 10
-      },
+      dataList: [],
       pagination: {
         pageNum: 1,
-        pageSize: 10
+        pageSize: 10,
+        total: 0,
       },
       currentPage: 1,
       exportLoadingbtn: false, // 导出按钮loading
+      carTypeList: [], // 车辆类型列表
+      searchStr: '', // 传到抓拍记录页面的数据
     }
   },
   mounted() {
+    this.getVehicleTypeList();
     //获取摄像头卡口数据
     this.getMonitorList()
   },
@@ -331,6 +288,16 @@ export default {
     }
   },
   methods: {
+    // 获取车辆类型列表
+    getVehicleTypeList () {
+      const type = dataList.vehicleType;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.carTypeList = res.data;
+          }
+        })
+    },
     /**
      * 获取摄像头卡口信息列表
      */
@@ -515,18 +482,47 @@ export default {
       this.resetLoading = false
     },
     onSearch () {
-      this.searchLoading = true
-      let arr = [], arr1 = []
+      this.searchLoading = true;
+      let arr = [], arr1 = [];
       this.selectVedioArr.filter(key => key.treeType).forEach(item => {arr.push(item.uid)})
-      this.queryForm.cameraIds = arr.join(',')
+      this.queryForm.cameraIds = arr.join('-')
       this.selectBayonetArr.filter(key => key.treeType).forEach(item => {arr1.push(item.uid)})
-      this.queryForm.bayonetIds = arr1.join(',')
+      this.queryForm.bayonetIds = arr1.join('-')
       this.queryForm.startTime = this.startTime && parseInt(this.startTime.substr(0, 2))
       this.queryForm.endTime = this.endTime && parseInt(this.endTime.substr(0, 2))
       this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
       this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
       console.log(this.queryForm)
-      this.searchLoading = false
+      const params = {
+        bayonetIds: this.queryForm.bayonetIds,
+        cameraIds: this.queryForm.cameraIds,
+        endDate: this.queryForm.endDate + ' 23:59:59',
+        endhour: this.queryForm.endTime,
+        startDate: this.queryForm.startDate + ' 00:00:00',
+        startHour: this.queryForm.startTime,
+        minShotTimes: parseInt(this.queryForm.minShotTimes),
+        vehicleTypes: this.queryForm.vehicleTypes,
+        surveillanceId: this.queryForm.surveillanceId,
+        isNextDay: true,
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'shotTime'
+      };
+
+      this.searchStr = JSON.stringify(params);
+
+      getNightVehicleList(params)
+        .then(res => {
+          if (res && res.data) {
+            console.log('dsasd', res)
+            this.dataList = res.data.list;
+            this.pagination.total = res.data.total;
+            this.searchLoading = false;
+          } else {}
+          this.searchLoading = false;
+        })
+        .catch(() => {this.searchLoading = false;})
     },
     /**
      * 树选择框关闭
@@ -545,7 +541,7 @@ export default {
      * 查看抓拍记录
      */
     onOpenRecord (obj) {
-      this.$router.push({name: 'vehicle_search_ycxc_record', query: {uid: obj.uid}})
+      this.$router.push({name: 'vehicle_search_ycxc_record', query: {obj: this.searchStr, number: obj.vehicleNumber}});
     },
     /**
      * 查看车辆信息
@@ -558,6 +554,7 @@ export default {
      */
     onPageChange (page) {
       this.pagination.pageNum = page;
+      this.onSearch();
     },
     /**
      * 序号数字翻页递增
@@ -571,6 +568,7 @@ export default {
 <style lang="scss" scoped>
 .th-driving-night {
   width: 100%; height: 100%;
+  padding-top: 50px;
   .the-bottom {
     width: 100%;height: calc(100% - 60px);
     display: flex;
@@ -720,6 +718,13 @@ export default {
       background: #F7F9F9;
       padding: 15px 12px 25px 0;
       overflow-y: hidden;
+      .th-button-export {
+        float: right;
+        margin-bottom: 10px;
+        background:rgba(12,112,248,1);
+        border-radius:4px;
+        color: #ffffff;
+      }
       .the-table {
         width: 100%; height: 100%;
         background: #fff;
@@ -744,7 +749,7 @@ export default {
 <style lang="scss">
 .the-right-result {
   .__view {
-    background: #fff;
+    // background: #fff;
     box-shadow: 5px 0px 16px 0px rgba(169,169,169,0.2);
   }
 }

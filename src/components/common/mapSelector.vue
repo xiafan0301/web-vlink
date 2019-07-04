@@ -595,7 +595,7 @@ export default {
     }
     .el-dialog__footer { padding: 20px 0; }
   }
-  .amap-sug-result { z-index: 3000; }
+  .amap-sug-result { z-index: 3000; display: none; }
 </style>
 
 

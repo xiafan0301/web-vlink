@@ -14,6 +14,18 @@ export function JtcPOSTAppendixInfo(data) {
   })
 }
 /**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function JtcPOSTAppendtpInfo(data) {
+  return request({
+    url: '/fake-plate-vehicle',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
  * JtcGETAppendixInfoList 历史上传图片
  * @param {object} params
  */
@@ -260,7 +272,7 @@ export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
     method: 'post',
-    data,
+    params:data,
     mode: 'judge'
   });
 }
@@ -420,3 +432,44 @@ export function getDeviceSnapImagesPage(params) {
     mode: 'judge'
   })
 }
+/*--------------------------  车辆侦查--多车同行分析start  ---------------------------------*/
+/**
+ * 多车同行查询接口
+ * @param {object} params
+ */
+export function getMultiVehicleList(params) {
+  return request({
+    url: '/multi-vehicle-peer',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆侦查--多车同行分析end  ---------------------------------*/
+
+/*--------------------------  车辆侦查--夜间行车分析start  ---------------------------------*/
+/**
+ * 夜间行车查询接口
+ * @param {object} params
+ */
+export function getNightVehicleList(params) {
+  return request({
+    url: '/night-driving-vehicle',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 夜间行车抓拍记录查询接口
+ * @param {object} params
+ */
+export function getNightVehicleRecordList(params) {
+  return request({
+    url: '/night-driving-vehicle/records',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/

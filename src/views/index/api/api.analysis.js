@@ -153,3 +153,16 @@ export function putTaskInfosResume(uid) {
     mode: 'judge',
   })
 }
+/**
+ * postTaskAnalysis
+ * 频繁出没新建任务接口
+ * @param {object} data
+ */
+export function postTaskAnalysis(data) {
+  return request({
+    url: '/face-retrieval/add-frequently-haunt-job',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}

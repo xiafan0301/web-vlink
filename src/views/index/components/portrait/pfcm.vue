@@ -78,12 +78,12 @@
                   >中断任务</span>
                   <span
                     class="operation_btn"
-                    @click="recovery(scope.row)"
+                    @click="recoveryOrRestart(scope.row)"
                     v-if="selectIndex === 0 && scope.row.taskStatus === 4"
                   >恢复任务</span>
                   <span
                     class="operation_btn"
-                    @click="restart(scope.row)"
+                    @click="recoveryOrRestart(scope.row)"
                     v-if="selectIndex === 0 && scope.row.taskStatus === 3"
                   >重启任务</span>
                   <span
@@ -265,24 +265,20 @@ export default {
         }
         putAnalysisTask(params).then(res => {
             console.log(res);
-            if(res && res.data) {
+            if(res) {
                 this.selectDataList();
             }
         }).catch(() => {})
     },
-    //恢复任务
-    recovery(obj) {
+    //恢复任务,重启任务
+    recoveryOrRestart(obj) {
         putTaskInfosResume(obj.uid).then(res => {
             console.log(res)
-            if(res && res.data) {
+            if(res) {
                 this.selectDataList();
             }
         }).catch(() => {})
     },
-    //重启任务
-    restart(obj) {
-
-    }
   }
 };
 </script>
