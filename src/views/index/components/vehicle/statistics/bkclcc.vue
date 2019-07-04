@@ -170,7 +170,7 @@ export default {
       }),
       loading: false,
       loadingBtn: false,
-      bkclccList: [{name: 'xxxxxxx'}],
+      bkclccList: [],
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
@@ -242,8 +242,8 @@ export default {
     // 获取布控车辆出城统计
     getControlCarSta () {
       const params = {
-        'where.startTime': this.queryForm.startTime,
-        'where.endTime': this.queryForm.endTime,
+        'where.startTime': this.queryForm.startTime + ' 00:00:00',
+        'where.endTime': this.queryForm.endTime + ' 23:59:59',
         'where.bayonetUid': this.queryForm.bayonet.value,
         'where.vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
         'where.unvehicleFlag': this.queryForm.radio,
