@@ -36,6 +36,7 @@
                 :clearable="false"
                 range-separator="至"
                 start-placeholder="开始日期"
+                @change="pickerChanged"
                 :picker-options="pickerOptions"
                 end-placeholder="结束日期">
               </el-date-picker>
@@ -163,7 +164,7 @@ export default {
       searchVal2: '',
       doSearch1: {},
       doSearch2: {},
-      searchTime2: [new Date(nDate.getTime() - 2 * 24 * 60 * 60 * 1000), nDate],
+      searchTime2: [new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000), new Date(nDate.getTime() - 1 * 24 * 60 * 60 * 1000)],
       treeList1: [],
       treeList2: [],
       bResize: {},
@@ -459,6 +460,12 @@ export default {
     getTreeList2 () {
       this.doSearch2 = {};
     },
+    pickerChanged () {
+      if ((this.searchTime2[1].getTime() - this.searchTime2[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
+        this.searchTime2[1] = new Date(this.searchTime2[0].getTime() + 2 * 24 * 60 * 60 * 1000);
+        this.$message('最多不能超过72小时.');
+      }
+    }
   },
   beforeDestroy () {
     if (this.picAntoPlayInval) {
@@ -642,12 +649,12 @@ export default {
   padding: 20px;
   > div {
     position: relative;
-    width: 100%; height: 100%;
+    width: 100%; height: 100%; min-height: 520px;
     background:rgba(255,255,255,1);
     box-shadow:0px -4px 10px 0px rgba(131,131,131,0.28);
     border-radius:3px;
     > .gcck_rh_tos {
-      position: absolute; left: 10px; top: 10px;
+      position: absolute; left: 10px; top: 10px; z-index: 2;
     }
     > .gcck_rh_list {
       position: absolute; top: 50%; left: 50%;
