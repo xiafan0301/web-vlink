@@ -132,7 +132,7 @@
     </el-dialog>
     <!--新建任务弹出框-->
     <el-dialog
-      :title="[isAddTaskTitle ? '新增分析任务' : '重启分析任务']"
+      :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
       :visible.sync="addTaskDialog"
       width="720px"
       :close-on-click-modal="false"
@@ -186,12 +186,12 @@
                 placeholder="开始时间">
               </el-date-picker>
             </el-form-item> -->
-            <el-form-item  prop="dateEnd">
+            <el-form-item  prop="dateTime">
               <el-date-picker
-                v-model="addForm.dateEnd"
+                v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
-                @blur="handleEndTime"
+                @blur="handleDateTime"
                 :picker-options="pickerEnd"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 type="datetimerange"
@@ -235,6 +235,7 @@ import Breadcrumb from '../breadcrumb.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
@@ -275,8 +276,9 @@ export default {
       addForm: {
         plateNo: null, // 车牌号码
         deviceCode: null, // 起点设备编号
-        shotTime: new Date(startTime), // 开始时间
-        dateEnd: new Date(), // 结束时间
+        dateTime: [],
+        // shotTime: new Date(startTime), // 开始时间
+        // dateEnd: new Date(), // 结束时间
         vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔
       },
@@ -316,6 +318,10 @@ export default {
     this.getDataList();
   },
   methods: {
+    // 时间选择失焦
+    handleDateTime () {
+      
+    },
     // 获取离线任务
     getDataList () {
       const params = {

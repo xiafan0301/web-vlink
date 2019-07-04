@@ -20,37 +20,37 @@
             <!-- 树tab页面 -->
             <div class="device_tree_tab" v-show="treeTabShow">
               <div style="overflow: hidden;">
-                <div
+                <!-- <div
                   class="tab_title"
                   :class="{ 'current_title': index === selectedTreeTab }"
                   @click="selectedTreeTab = index;"
                   v-for="(item, index) in treeTabArr"
                   :key="'tab_title' + index"
-                >{{ item.name }}</div>
+                >{{ item.name }}</div> -->
               </div>
               <!-- 视频树 -->
-              <div class="tree_content" v-show="selectedTreeTab === 0">
+              <div class="tree_content">
                 <vue-scroll>
                   <div class="checked_all">
                     <el-checkbox
                       :indeterminate="isIndeterminate"
                       v-model="checkAllTree"
-                      @change="handleCheckedAllVideo"
+                      @change="handleCheckedAll"
                     >全选</el-checkbox>
                   </div>
                   <el-tree
-                    @check="listenCheckedVideo"
-                    :data="videoTree"
+                    @check="listenChecked"
+                    :data="cameraTree"
                     show-checkbox
                     default-expand-all
                     node-key="id"
-                    ref="videotree"
+                    ref="cameraTree"
                     highlight-current
                     :props="defaultProps"
                   ></el-tree>
                 </vue-scroll>
               </div>
-              <div class="tree_content" v-show="selectedTreeTab === 1">
+              <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
                 <vue-scroll>
                   <div class="checked_all">
                     <el-checkbox
@@ -70,7 +70,7 @@
                     :props="defaultProps"
                   ></el-tree>
                 </vue-scroll>
-              </div>
+              </div> -->
             </div>
           </div>
 
@@ -213,8 +213,8 @@ export default {
         surveillanceId: null
       },
       queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
-      startTime: null,
-      endTime: null,
+      startTime: '19:00',
+      endTime: '07:00',
       // carTypeList: [],
       controlCarList: [
         {
@@ -237,7 +237,7 @@ export default {
       isIndeterminateBayonet: false, // 是否处于全选与全不选之间
       checkAllTreeBayonet: false, // 树是否全选
       bayonetTree: [], // 卡口树
-      videoTree: [],
+      cameraTree: [],
       videoTreeNodeCount: 0, // 摄像头节点数量
       bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
@@ -308,11 +308,11 @@ export default {
       MapGETmonitorList(params).then(res => {
         if (res && res.data) {
           let camera = objDeepCopy(res.data.areaTreeList);
-          let bayonet = objDeepCopy(res.data.areaTreeList);
-          this.videoTree = this.getTreeList(camera);
-          this.bayonetTree = this.getBayTreeList(bayonet);
-          this.getLeafCountTree(this.videoTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          /* let bayonet = objDeepCopy(res.data.areaTreeList); */
+          this.cameraTree = this.getTreeList(camera);
+          /* this.bayonetTree = this.getBayTreeList(bayonet); */
+          this.getLeafCountTree(this.cameraTree);
+          // this.getLeafCountTree(this.bayonetTree, 'bayonet');
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
           // this.$refs.videotree.setCheckedNodes(this.videoTree);
         }
@@ -322,65 +322,91 @@ export default {
      * 获取摄像头数据
      */
     getTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.deviceBasicList && item.deviceBasicList.length > 0) {
-          item['children'] = item.deviceBasicList
-          delete(item.deviceBasicList)
-          for(let key of item['children']) {
-            key['label'] = key.deviceName
-            key['id'] = key.uid
-            key['treeType'] = 1
+      for (let item of data) {
+        item["id"] = item.areaId;
+        item["label"] = item.areaName;
+        let children = [],
+          deviceBasic = [],
+          bayonet = [];
+        if (item.deviceBasicList && item.deviceBasicList.length > 0) {
+          deviceBasic = item.deviceBasicList;
+          for (let key of deviceBasic) {
+            key["label"] = key.deviceName;
+            key["id"] = key.uid;
+            key["treeType"] = 1;
           }
+          delete item.deviceBasicList;
         }
+        if (item.bayonetList && item.bayonetList.length > 0) {
+          bayonet = item.bayonetList;
+          for (let key of bayonet) {
+            key["label"] = key.bayonetName;
+            key["id"] = key.uid;
+            key["treeType"] = 2;
+          }
+          delete item.bayonetList;
+        }
+        children.push(...deviceBasic, ...bayonet);
+        item["children"] = children;
       }
       return data;
     },
     /**
      * 获取卡口数据
      */
-    getBayTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.bayonetList && item.bayonetList.length > 0) {
-          item['children'] = item.bayonetList
-          delete(item.bayonetList)
-          for(let key of item['children']) {
-            key['label'] = key.bayonetName
-            key['id'] = key.uid
-            key['treeType'] = 2
-          }
-        }
-      }
-      return data;
-    },
+    // getBayTreeList(data) {
+    //   for(let item of data) {
+    //     item['id'] = item.areaId
+    //     item['label'] = item.areaName
+    //     if(item.bayonetList && item.bayonetList.length > 0) {
+    //       item['children'] = item.bayonetList
+    //       delete(item.bayonetList)
+    //       for(let key of item['children']) {
+    //         key['label'] = key.bayonetName
+    //         key['id'] = key.uid
+    //         key['treeType'] = 2
+    //       }
+    //     }
+    //   }
+    //   return data;
+    // },
     /**
      * 摄像头树全选按钮点击
      */
-    handleCheckedAllVideo(val) {
+    handleCheckedAll(val) {
       this.isIndeterminate = false;
       if (val) {
-        this.$refs.videotree.setCheckedNodes(this.videoTree);
+        this.$refs.cameraTree.setCheckedNodes(this.cameraTree);
       } else {
-        this.$refs.videotree.setCheckedNodes([]);
+        this.$refs.cameraTree.setCheckedNodes([]);
       }
-      this.selectVedioArr = this.$refs.videotree.getCheckedNodes(true);
+      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
       this.handleData();
     },
-    /**
-     * 处理摄像头树全选按钮
-     */
-    listenCheckedVideo(val, val1) {
-      console.log(val)
-      // console.log(val1)
-      this.selectVedioArr = this.$refs.videotree.getCheckedNodes(true);
+    getLeafCountTree(json) {
+      // 获取树节点的数量
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].hasOwnProperty("id")) {
+          this.videoTreeNodeCount++;
+        }
+        if (json[i].hasOwnProperty("children")) {
+          this.getLeafCountTree(json[i].children);
+        } else {
+          continue;
+        }
+      }
+    },
+    //摄像头
+    listenChecked(val, val1) {
+      this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
       this.handleData();
       if (val1.checkedNodes.length === this.videoTreeNodeCount) {
         this.isIndeterminate = false;
         this.checkAllTree = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
+      } else if (
+        val1.checkedNodes.length < this.videoTreeNodeCount &&
+        val1.checkedNodes.length > 0
+      ) {
         this.checkAllTree = false;
         this.isIndeterminate = true;
       } else if (val1.checkedNodes.length === 0) {
@@ -388,75 +414,24 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    /**
-     * 卡口树全选按钮点击
-     */
-    handleCheckedAllBayonet(val) {
-      this.isIndeterminateBayonet = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    /**
-     * 处理卡口树全选按钮
-     */
-    listenCheckedBayonet(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
-        this.isIndeterminateBayonet = false;
-        this.checkAllTreeBayonet = true;
-      } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBayonet = false;
-        this.isIndeterminateBayonet = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBayonet = false;
-        this.isIndeterminateBayonet = false;
-      }
-    },
-    /**
-     * 获取摄像头树节点的数量
-     */
-    getLeafCountTree(json, type) {
-      // 获取树节点的数量
-      for (let i = 0; i < json.length; i++) {
-        if (json[i].hasOwnProperty("id")) {
-          if (type === "camera") {
-            this.videoTreeNodeCount++;
-          } else {
-            this.bayonetTreeNodeCount++;
-          }
-        }
-        if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTree(json[i].children, type);
-        } else {
-          continue;
-        }
-      }
-    },
-    /**
-     * 获取卡口树节点的数量
-     */
-    getLeafCountTreeBayonet(json) {
-      for (let i = 0; i < json.length; i++) {
-        if (json[i].hasOwnProperty("id")) {
-          this.bayonetTreeNodeCount++;
-        }
-        if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTreeBayonet(json[i].children);
-        } else {
-          continue;
-        }
-      }
-    },
     // 选中的设备数量处理
     handleData() {
-      this.selectDeviceArr = [...this.selectVedioArr, ...this.selectBayonetArr].filter(key => key.treeType);
-      // console.log('选中的数据', this.selectDeviceArr);
+      /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
+      this.selectDeviceArr = [...this.selectDeviceArr].filter(
+        key => key.treeType
+      );
+      this.selectCameraArr = [...this.selectDeviceArr].filter(
+        key => key.treeType === 1
+      );
+      this.selectBayonetArr = [...this.selectDeviceArr].filter(
+        key => key.treeType === 2
+      );
+      console.log(
+        "选中的数据",
+        this.selectDeviceArr,
+        this.selectBayonetArr,
+        this.selectCameraArr
+      );
     },
     onReset () {
       this.resetLoading = true
@@ -484,10 +459,16 @@ export default {
     onSearch () {
       this.searchLoading = true;
       let arr = [], arr1 = [];
-      this.selectVedioArr.filter(key => key.treeType).forEach(item => {arr.push(item.uid)})
-      this.queryForm.cameraIds = arr.join('-')
-      this.selectBayonetArr.filter(key => key.treeType).forEach(item => {arr1.push(item.uid)})
-      this.queryForm.bayonetIds = arr1.join('-')
+      if (!this.checkAllTree) {
+        if (this.selectCameraArr && this.selectCameraArr.length > 0) {
+          let cameraIds = this.selectCameraArr.map(res => res.id);
+         this.queryForm.cameraIds = cameraIds.join(",");
+        }
+        if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
+          let bayonentIds = this.selectBayonetArr.map(res => res.id);
+          this.queryForm.bayonetIds = bayonentIds.join(",");
+        }
+      }
       this.queryForm.startTime = this.startTime && parseInt(this.startTime.substr(0, 2))
       this.queryForm.endTime = this.endTime && parseInt(this.endTime.substr(0, 2))
       this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
@@ -507,7 +488,7 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
-        orderBy: 'shotTime'
+        // orderBy: 'shotTime'
       };
 
       this.searchStr = JSON.stringify(params);

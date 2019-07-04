@@ -86,8 +86,8 @@
       </div>
       <div class="button_box">
         <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
-        <el-button class="reset_btn">导入车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="deleteVehicle">删除车辆</el-button>
+        <el-button class="reset_btn" @click="importVehicle">导入车辆</el-button>
+        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="showDeleteVehicleDialog">删除车辆</el-button>
       </div>
       <template v-if="vehicleList && vehicleList.length > 0">
         <div class="vehicle_box">
@@ -308,6 +308,21 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteGroup">确认</el-button>
       </div>
     </el-dialog>
+    <!--删除车辆弹出框-->
+    <el-dialog
+      title="删除提示"
+      :visible.sync="delVehicleDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <p style="color: #999999;">是否删除已选的{{deleteIds.length}}辆车?</p>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delVehicleDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteVehicleLoading" @click="deleteVehicle">确认</el-button>
+      </div>
+    </el-dialog>
     <!--新增/编辑组弹出框-->
     <el-dialog
       :title="dialogTitle"
@@ -333,18 +348,49 @@
     </el-dialog>
     <!--导入弹出框-->
     <el-dialog
-      title="是否确定删除该组?"
-      :visible.sync="delGroupDialog"
+      title="导入车辆"
+      :visible.sync="importDialog"
       width="482px"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
-      class="dialog_comp"
+      class="dialog_comp dialog_comp_import"
       >
-      <span style="color: #999999;">删除后数据不可恢复。</span>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="delGroupDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteGroup">确认</el-button>
+      <div class="content_body">
+        <p>请先下载模板文件并按要求填写相关信息，再上传进行批量新增</p>
+          <ul class="upload_box">
+            <li>
+              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <div class="main_content download_box">
+                <i class="vl_icon_manage_17 vl_icon"></i>
+                <span>下载模板</span>
+              </div>
+            </li>
+            <li>
+              <p class="header">2、上传已填写的用户信息表。</p>
+              <div class="main_content">
+                <el-upload
+                  accept=".xls,.xlsx"
+                  :auto-upload="false"
+                  :action="importUrl"
+                  :on-change="handleChange"
+                  :on-success="handleSuccess"
+                  :file-list="fileList"
+                  :limit="1"
+                  >
+                  <el-button size="small" class="upload-btn" icon="vl_icon_manage_18 vl_icon">上传文件</el-button>
+                </el-upload>
+              </div>
+            </li>
+          </ul>
       </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="importDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isImportLoading" @click="sureImportFile">导入</el-button>
+      </div>
+    </el-dialog>
+    <!--图片放大-->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
   </div>
 </template>
@@ -359,10 +405,13 @@ import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
+      importUrl: ajaxCtx.base, // 导入请求地址
+      fileList: [], // 要导入的文件
       isDisabled: true, // 导入-导出-删除车辆禁用
       isShowError: false, // 是否显示错误提示信息
       dialogTitle: null, // 新增/编辑组标题
       vehicleTitle: null, // 新增-修改车辆
+      dialogVisible: false,
       groupForm: {
         groupName: null
       },
@@ -383,6 +432,9 @@ export default {
       showGroupDialog: false, // 新增/修改组弹出框
       isAddLoading: false, // 新增--修改组加载中
       dialogVisiable: false, // 新建/修改车辆弹出框
+      isImportLoading: false, // 导入加载中
+      importDialog: false, // 导入弹出框
+      delVehicleDialog: false, // 删除车辆弹出框
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -406,13 +458,13 @@ export default {
       carForm: {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
-        vehicleColor: null, // 车身颜色
+        vehicleColor: '0', // 车身颜色
         vehicleBrand: null, // 车辆品牌
-        vehicleType: null, // 车辆类型
+        vehicleType: '0', // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
-        ownerIdType: null, // 证件类型
+        ownerIdType: 1, // 证件类型
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
@@ -442,6 +494,7 @@ export default {
       vehicleColorList: [], // 车身颜色列表
       numberTypeList: [], // 号牌种类列表
       vehicleList: [], // 特殊车辆列表
+      deleteIds: [], // 要删除的车辆
     }
   },
   watch: {
@@ -538,7 +591,9 @@ export default {
         'where.vehicleNumber': this.searchForm.vehicleNo,
         'where.groupId': this.activeId,
         pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
       };
       getSpecialVehicleList(params)
         .then(res => {
@@ -617,9 +672,10 @@ export default {
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
+            this.carForm.ownerIdType = carInfo.ownerIdType || null;
 
-            this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
-            this.carForm.vehicleType = vehicleType && vehicleType.toString();
+            this.carForm.vehicleColor = vehicleColor && vehicleColor.toString() || null;
+            this.carForm.vehicleType = vehicleType && vehicleType.toString() || null;
             this.carForm.numberType = numberType && numberType.toString();
             this.carForm.numberColor = numberColor && numberColor.toString();
 
@@ -809,17 +865,22 @@ export default {
         }
       })
     },
-    // 删除车辆
-    deleteVehicle () {
-      let deleteIds = [];
+    // 显示删除车辆弹出框
+    showDeleteVehicleDialog () {
+      this.deleteIds = [];
       this.vehicleList.map(item => {
         if (item.isDelete) {
-          deleteIds.push(item.uid);
+          // deleteIds.push(item.uid);
+          this.deleteIds.push(item.uid);
         }
       });
+      this.delVehicleDialog = true;
+    },
+    // 删除车辆
+    deleteVehicle () {
       const params = {
         groupId: this.activeId,
-        vehicleIds: deleteIds.join(',')
+        vehicleIds: this.deleteIds.join(',')
       };
       this.isDeleteVehicleLoading = true;
       moveoutGroup(params)
@@ -833,6 +894,7 @@ export default {
             this.getGroupList();
             this.getVehicleList();
             this.isDeleteVehicleLoading = false;
+            this.delVehicleDialog = false;
           } else {
             this.isDeleteVehicleLoading = false;
           }
@@ -898,8 +960,12 @@ export default {
         this.$refs[form].resetFields();
       }
       this.carForm.uid = null;
+      this.carForm.groupList = [];
+      this.isAddDisabled = false;
+      
       if (type === 'add') {
         this.isAddVehicle = true;
+        this.carForm.groupList.push(this.activeId);
         this.vehicleTitle = '新增';
       } else {
         this.isAddVehicle = false;
@@ -999,21 +1065,67 @@ export default {
       };
       vehicleExport(params)
         .then(res => {
-          if (res) {
-            // console.log('res', res)
-            // let a = document.createElement('a');
-            // a.setAttribute('href', res.data);
-            // a.setAttribute('id', 'export_id');
-            // a.setAttribute('target', '_blank');
-            // // 防止反复添加
-            // if (document.getElementById('export_id')) {
-            //   document.body.removeChild(document.getElementById('export_id'));
-            // }
-            // document.body.appendChild(a);
-            // a.click();
+          if (res && res.data) {
+            const eleA = document.getElementById('export_id');
+            if (eleA) {
+              document.body.removeChild(eleA);
+            }
+            let a = document.createElement('a');
+            a.setAttribute('href', res.data.fileUrl);
+            a.setAttribute('target', '_blank');
+            a.setAttribute('id', 'export_id');
+
+            document.body.appendChild(a);
+            a.click();
+          
           }
         })
     },
+    // 显示导入车辆弹出框
+    importVehicle () {
+      this.importDialog = true;
+    },
+    // 导入
+    sureImportFile () {
+      // let form = document.createElement('form');
+      // document.body.appendChild(form);
+
+      // const inputId = this.createForm('groupId', this.activeId);
+      // const fileName = this.createForm('file');
+
+      // form.appendChild(inputId);
+      // form.appendChild(fileName);
+
+      // form.method = 'post';
+      // form.action = this.importUrl + '/special-vehicle/import';
+      // // form.submit();
+    },
+    handleChange (file, fileList) {
+      console.log(fileList)
+      if (file && fileList) {
+        this.fileList = fileList;
+      }
+    },
+    // 上传成功
+    handleSuccess (res) {
+      this.isImportLoading = true;
+      console.log(res);
+    },
+    // 模拟创建一个表单
+    createForm (name, value) {
+      let tempInput = document.createElement('input');
+      if (name === 'file') {
+        console.log('aaaaaa')
+        tempInput.type = 'file';
+      } else {
+        console.log('bbbbbbbbbb')
+        tempInput.type = 'hidden';
+      }
+      tempInput.value = value;
+      tempInput.name = name;
+
+      return tempInput;
+    }
   }
 }
 </script>
@@ -1339,6 +1451,48 @@ export default {
     margin-right: 5px;
     display: inline-block;
     cursor: pointer;
+  }
+}
+.dialog_comp_import {
+  .content_body {
+    >p {
+        color: #999999;
+        margin-bottom: 20px;
+      }
+      .upload_box {
+        > li {
+          line-height: 40px;
+          .header {
+            color: #333333;
+          }
+          .main_content {
+            width: 250px;
+            margin-left: 30px;
+            .upload-btn {
+              color: #333333;
+              border:1px solid #D3D3D3;
+              display: flex;
+              align-items: center;
+            }
+          }
+          .download_box {
+            cursor: pointer;
+            text-align: center;
+            width: 98px;
+            height: 32px;
+            line-height: 32px;
+            color: #333333;
+            border-radius:4px;
+            border:1px solid #D3D3D3;
+            i {
+              vertical-align: middle;
+            }
+          }
+          &:last-child {
+            margin-top: 20px;
+          }
+        }
+      }
   }
 }
 </style>
