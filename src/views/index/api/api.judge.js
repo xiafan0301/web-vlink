@@ -109,6 +109,19 @@ export function JfoGETGroup(params) {
   })
 }
 /**
+ * JfoGETGroup 分组列表查询接口
+ * @param {object} params
+ */
+export function JfoGETCity(params) {
+  return request({
+    url: '/vehicle-investigate/first-enter-city',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+/**
  * JfoGETSurveillanceObject 布控范围内监控设备列表查询接口
  * @param {object} params
  */
@@ -180,7 +193,7 @@ export function getShotDevice(params) {
     url: '/vehicle/shot-dev',
     method: 'get',
     params,
-    mode: 'control'
+    mode: 'judge'
   });
 }
 /**
@@ -192,7 +205,218 @@ export function getTailBehindList(params) {
     url: '/vehicle/tail-behind/list',
     method: 'get',
     params,
-    mode: 'control'
+    mode: 'judge'
+  });
+}
+/**
+ * 查询尾随记录详情接口
+ * @param {object} params
+ */
+export function getTailBehindDetail(params) {
+  return request({
+    url: '/vehicle/tail-behind/detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 根据车牌号码查询车辆详情接口
+ * @param {object} params
+ */
+export function getVehicleArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
   });
 }
 /*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+/*--------------------------  人脸检索--身份核实start  ---------------------------------*/
+/**
+ * 查询身份核实列表接口
+ * @param {object} params
+ */
+export function getIdNoList(params) {
+  return request({
+    url: '/portrait/identify',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  车辆侦查--车辆落脚点start  ---------------------------------*/
+/**
+ * 查询车辆落脚点
+ * @param {object} data
+ */
+
+export function getVehicleShot(data) {
+  return request({
+    url: '/vehicle/shot-num',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询所有的设备
+ * @param {object} params
+ */
+export function getAllDevice(params) {
+  return request({
+    url: '/device-service/all-deviceInfo',
+    method: 'get',
+    params,
+    mode: 'base'
+  });
+}
+/*--------------------------  车辆侦查--车辆落脚点end  ---------------------------------*/
+
+/**
+ * 查询车辆详情
+ * @param {object} params
+ */
+export function getSnapDetail(params) {
+  return request({
+    url: '/vehicle/snap-detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登记信息
+ * @param {object} params
+ */
+export function getArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登违章信息
+ * @param {object} params
+ */
+export function getViolationInfo(params) {
+  return request({
+    url: '/vehicle/violation',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询连续违章
+ * @param {object} params
+ */
+export function getViolation(params) {
+  return request({
+    url: '/vehicle/continuous-violation',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆
+ * @param {object} params
+ */
+export function getSnapList(params) {
+  return request({
+    url: '/vehicle/snap',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 
+车辆图片分析接口
+ * @param {object} params
+ */
+export function getPhotoAnalysis(params) {
+  return request({
+    url: '/vehicle-investigate/photo-analysis',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  vehicle区域徘徊碰撞start  ---------------------------------*/
+/**
+ * 区域徘徊
+ * @param {object} params
+ */
+export function QyphGetAreaWander(params) {
+  return request({
+    url: '/vehicle-analysis/area-wander',
+    method: 'get',
+    params: params,
+    mode: 'noServe'
+  });
+}
+/*--------------------------  区域徘徊碰撞end  ---------------------------------*/
+/**
+ * 区域碰撞
+ * @param {object} params
+ */
+export function QypzGetAreaCross(params) {
+  return request({
+    url: '/vehicle-analysis/area-cross',
+    method: 'get',
+    params: params,
+    mode: 'noServe'
+  });
+}
+/*--------------------------  车辆轨迹start  ---------------------------------*/
+
+/*--------------------------  车辆轨迹end  ---------------------------------*/
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesSum(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-sum',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 查询特殊组
+ * @param {object} params
+ */
+export function getGroups(params) {
+  return request({
+    url: '/groups',
+    method: 'get',
+    params: params,
+    mode: 'base'
+  })
+}
+
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesPage(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-page',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}

@@ -315,6 +315,9 @@
 .vl_icon2_024:hover { background-position: -1398px -148px; }
 .vl_icon2_025 { background-position: -1126px -293px; }
 .vl_icon2_025:hover { background-position: -1126px -418px; }
+
+.vl_icon2_027 { background-position: -1398px -293px; }
+.vl_icon2_027:hover { background-position: -1398px -418px; }
 /**人像检索**/
 .vl_icon2_101 { background-position: -23px -566px; }
 .vl_icon2_101:hover { background-position: -23px -684px; }
@@ -370,6 +373,10 @@
 .vl_icon_portrait_rlsjfx_04{width: 70px;height: 70px;background-position: -1235px -1039px;}
 .vl_icon_portrait_rlsjfx_05{width: 70px;height: 70px;background-position: -1338px -1039px;}
 .vl_icon_portrait_rlsjfx_06{width: 70px;height: 70px;background-position: -1442px -1039px;}
+
+/* 人像检索 */
+.vl_icon_portrait_01 {width: 62px; height: 56px; background-position: -858px -1168px;}
+.vl_icon_portrait_02 {width: 14px; height: 19px; background-position: -964px -376px;}
 
 .vl_content_pad { padding: 10px; }
 
@@ -806,6 +813,10 @@
   top: 50%;
   left: 50%;
 }
+.left_error_tip {
+  top: 300px !important;
+  left: 130px;
+}
 /*部门管理--删除部门的提示样式*/
 .delete_depart {
   top: 350px;
@@ -999,6 +1010,19 @@
   width: 100px; height: 40px;
   font-size: 14px;
 }
+.th-button-export-color {
+  min-width: 100px; height: 40px;
+  padding: 0 15px;
+  font-size: 14px;
+  background-color: #0C70F8;
+  color: #fff;
+}
+.th-button-export-color:focus,
+.th-button-export-color:hover {
+  background-color: #0C70F8;
+  color: #fff;
+  border-color: #0C70F8;
+}
 .the-table .el-table__header tr{
   height: 54px;
 }
@@ -1009,3 +1033,11 @@
   background: #E6F7FF;
 }
 /* th css style create by th */
+html {
+    font-size: 100px;
+}
+@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px;}}
+@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px;}}
+@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px;}}
+@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px;}}
+@media screen and (min-width: 1920px) {html {font-size: 100px;} }

@@ -51,6 +51,7 @@ service.interceptors.response.use(function (response) {
       store.commit('setLoginToken', {
         loginToken: false
       });
+      return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
     } else {
