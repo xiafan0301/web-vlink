@@ -50,7 +50,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_ljd'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_107"></span>
         <span class="ptt_li_text">落脚点分析</span>

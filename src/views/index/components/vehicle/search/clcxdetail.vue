@@ -128,11 +128,11 @@
       </div>
       <div class="ment">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>尾随分析</a>
-          <a>以车搜车</a>
+          <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_ws')">尾随分析</a>
+          <a @click="goToPage('vehicle_search_ycsc')">以图搜车</a>
         </div>
       </div>
     </div>
@@ -201,6 +201,9 @@ export default {
     this.getArchives()
   },
   methods: {
+    goToPage(v){
+        this.$router.push({name:v });
+    },
     getArchives(){
       let d={
         plateNo:this.$route.query.plateNo || "湘AN8888"

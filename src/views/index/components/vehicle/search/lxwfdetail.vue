@@ -125,10 +125,10 @@
     </div>
     <div class="bottom">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>同行车分析</a>
+           <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_txcl')">同行车分析</a>
         </div>
       </div>
   </div>
@@ -157,11 +157,18 @@ export default {
     this.getViolationInfo()
   },
   methods: {
+    goToPage(v){
+        this.$router.push({name:v });
+    },
     getViolationInfo(){
       let today = new Date()
+      let y = today.getFullYear()
+      let m = today.getMonth()+1
+      let r = today.getDay()
+      let day= y +"-"+ m +"-" + r
       let d={
-        dateStart:this.$route.query.datastart,
-        dateEnd:this.$route.query.dataend,
+        dateStart:(this.$route.query.datastart || day) + " 00:00:00",
+        dateEnd:(this.$route.query.dataend || day) + " 23:59:59",
         plateNo:this.$route.query.plateNo
       }
       getViolationInfo(d).then(res=>{
