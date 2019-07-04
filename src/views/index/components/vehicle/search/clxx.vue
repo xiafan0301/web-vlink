@@ -418,6 +418,10 @@ html {
     .el-button {
       width: 45%;
     }
+    .el-button--primary {
+      background-color: #0c70f8;
+      border-color: #0c70f8;
+    }
   }
   //弹窗
   .history-pic-dialog {
