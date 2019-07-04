@@ -48,11 +48,18 @@ export default {
       default:()=>{
         return []
       }
+    },
+    allBayonets:{
+      type:Array,
+      default:()=>{
+        return []
+      }
     }
   },
   data() {
     return {
       pointData:[],
+      boyData:[],
       amap: null,
       input3: null,
       hover: null,
@@ -62,20 +69,29 @@ export default {
       delSelAreaIcon: null,
       lnglat: null,
       restaurants: [],
-      devices:[]
+      devices:[],
+      allboy:[],
     };
   },
   mounted() {
     this.renderMap();
     this.devices=this.allPoints
+    this.allboy=this.allBayonets
    //console.log(this.devices);
+   this.addMarket()
     
   },
   methods: {
     confirmMap(){
       //console.log(this.pointData);
         this.amap.clearMap();
-        this.$emit("selectMap",this.pointData)
+        this.addMarket()
+        this.$emit("selectMap",{
+          dev:this.pointData,
+          boy:this.boyData
+        })
+        this.pointData=[]
+        this.boyData=[]
     },
     cancelMap(){
       this.amap.clearMap();
@@ -224,17 +240,6 @@ export default {
           _this.amap.setZoomAndCenter(16, new_center);
         }
 
-        // for(var i = 0; i < pois.length; i++){
-        //     var poi = pois[i];
-        //     var marker = [];
-        //     marker[i] = new AMap.Marker({
-        //         position: poi.location,   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        //         title: poi.name
-        //     });
-        //     // 将创建的点标记添加到已有的地图实例：
-        //     _this.amap.add(marker[i]);
-        // }
-        // _this.amap.setFitView();
       });
     },
     mapZoomSet(val) {
@@ -294,17 +299,32 @@ export default {
           let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
       
             //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
-              var isPointInRing = obj.contains(myLngLat);
+              let isPointInRing = obj.contains(myLngLat);
           // console.log(marker.getPosition());
           if(isPointInRing){//如果点在圆内则输出
               
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.pointData.push(el)
+              }
+              
+          }
+        })
+        this.allboy.forEach(el=>{
+          let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+      
+            //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
+              let isPointInRing = obj.contains(myLngLat);
+          // console.log(marker.getPosition());
+          if(isPointInRing){//如果点在圆内则输出
+              
+              let id = this.pointData.findIndex(item=>item.uid==el.uid)
+              if(id==-1){
+                this.boyData.push(el)
               }
               
           }
@@ -312,22 +332,44 @@ export default {
       }else{
         this.devices.forEach(el=>{
           let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
-          let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
+         // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
          // console.log(closestPositionOnLine);
 
-          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.C.path));
+          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
                 this.pointData.push(el)
+              }
+        })
+        this.allboy.forEach(el=>{
+          let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+         // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
+         // console.log(closestPositionOnLine);
+
+          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
+          // console.log(distance);
+              let id = this.pointData.findIndex(item=>item.uid==el.uid)
+              if(id==-1 && distance <=1000){
+                this.boyData.push(el)
               }
         })
         
       }
+    },
+    addMarket(){
+        this.devices.forEach(el=>{
+          let marker = new AMap.Marker({
+            position: [el.longitude,el.latitude],
+            map: this.amap
+          });
+        })
+        this.allboy.forEach(el=>{
+           let marker = new AMap.Marker({
+              position: [el.longitude,el.latitude],
+              map: this.amap
+            });
+        })
     }
     // 关闭图片放大弹出框
     // closeImgDialog() {

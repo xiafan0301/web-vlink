@@ -72,3 +72,4 @@ export function getDeviceByBayonetUid(params) {
     mode: baseModeName
   })
 }
+

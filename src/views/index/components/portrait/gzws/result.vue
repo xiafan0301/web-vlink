@@ -1,0 +1,316 @@
+<template>
+  <div class="result_container">
+    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果'}]"></Breadcrumb>
+    <div class="content_box">
+      <div class="left">
+        <ul>
+          <li>
+            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+          </li>
+          <li>
+            <span>任务名称：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
+            <span>分析时间：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
+            <span>起点设备：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
+            <span>尾随间隔：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
+            <span>创建时间：</span>
+            <span>{{taskDetail.createTime ? taskDetail.createTime : '无'}}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="right">
+        <template v-if="dataList && dataList.length === 0">
+          <div class="content_top">
+            <p>
+              <span>检索结果</span>
+              <span>（{{dataList.length}}）</span>
+            </p>
+          </div>
+          <div class="result_detail">
+            <ul class="clearfix">
+              <li>
+                <div class="de_left">
+                  <img src="" alt="">
+                </div>
+                <div class="de_right">
+                  <span class="title">检索资料</span>
+                  <p class="time">
+                    <i class="vl_icon_tail_1 vl_icon"></i>
+                    <span>2018-12-12 12:12:12</span>
+                  </p>
+                  <p class="detail_info">
+                    <span>男性</span>
+                    <span>青年</span>
+                    <span>带有帽子阿萨达萨达</span>
+                  </p>
+                  <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
+                </div>
+              </li>
+              <li>
+                <div class="de_left">
+                  <img src="" alt="">
+                </div>
+                <div class="de_right">
+                  <span class="title">检索资料</span>
+                  <p class="time">
+                    <i class="vl_icon_tail_1 vl_icon"></i>
+                    <span>2018-12-12 12:12:12</span>
+                  </p>
+                  <p class="detail_info">
+                    <span>男性</span>
+                    <span>青年</span>
+                    <span>带有帽子阿萨达萨达</span>
+                  </p>
+                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
+                </div>
+              </li>
+              <li>
+                <div class="de_left">
+                  <img src="" alt="">
+                </div>
+                <div class="de_right">
+                  <span class="title">检索资料</span>
+                  <p class="time">
+                    <i class="vl_icon_tail_1 vl_icon"></i>
+                    <span>2018-12-12 12:12:12</span>
+                  </p>
+                  <p class="detail_info">
+                    <span>男性</span>
+                    <span>青年</span>
+                    <span>带有帽子阿萨达萨达</span>
+                  </p>
+                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
+                </div>
+              </li>
+              <li>
+                <div class="de_left">
+                  <img src="" alt="">
+                </div>
+                <div class="de_right">
+                  <span class="title">检索资料</span>
+                  <p class="time">
+                    <i class="vl_icon_tail_1 vl_icon"></i>
+                    <span>2018-12-12 12:12:12</span>
+                  </p>
+                  <p class="detail_info">
+                    <span>男性</span>
+                    <span>青年</span>
+                    <span>带有帽子阿萨达萨达</span>
+                  </p>
+                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </template>
+        <template v-else>
+          <div class="not_content">
+            <img src="../../../../../assets/img/not-content.png" alt="">
+            <p>暂无相关数据</p>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import Breadcrumb from '../breadcrumb.vue';
+import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
+export default {
+  components: { Breadcrumb },
+  data () {
+    return {
+      dataList: [], // 查询的抓拍结果列表
+      taskDetail: {} // 离线任务详情
+    }
+  },
+  mounted () {
+    this.getDetail();
+  },
+  methods: {
+    // 获取离线任务详情
+    getDetail () {
+      const id = this.$route.query.id;
+      if (id) {
+        getTaskInfosDetail(id)
+          .then(res => {
+            if (res) {
+              this.taskDetail = res.data;
+            }
+          })
+      }
+    },
+    // 跳至尾随记录页面
+    skipWsReocrdPage (obj) {
+      this.$router.push({name: 'gzws_detail'})
+      // this.$router.push({name: 'gzws_detail', query: { 
+      //   plateNo: this.searchForm.plateNo,
+      //   dateStart: this.deviceStartTime,
+      //   dateEnd: this.searchForm.dateEnd,
+      //   plateNoTb: obj.plateNo,
+      //   dateStartTb: obj.shotTime
+      //  }});
+    },
+    
+  }
+}
+</script>
+<style lang="scss" scoped>
+.result_container {
+  height: 100%;
+  .content_box {
+    width: 100%;
+    height: 100%;
+    padding-top: 50px;
+    display: flex;
+    .left {
+      width: 265px;
+      height: 100%;
+      background-color: #ffffff;
+      padding: 20px;
+      box-shadow: 2px 3px 10px 0px rgba(131,131,131,0.28);
+      >ul {
+        margin-top: 15px;
+        >li {
+          line-height: 30px;
+          > img {
+            width: 160px;
+            height: 160px;
+          }
+          span:first-child {
+            color: #666666;
+          }
+          span:last-child {
+            color: #222222;
+          }
+        }
+      }
+    }
+    .right {
+      width: calc(100% - 265px);
+      padding: 10px 15px;
+      .content_top {
+        display: flex;
+        justify-content: space-between;
+        >p {
+          span:first-child {
+            color: #333333;
+          }
+          span:last-child {
+            color: #666666;
+          }
+        }
+      }
+      .result_detail {
+        width: 100%;
+        >ul {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          margin-top: 15px;
+          >li {
+            background-color: #ffffff;
+            height: 180px;
+            width: 375px;
+            max-width: 32%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            margin-right: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0px 5px 16px 0px #A9A9A9;
+            .de_left {
+              width: 50%;
+              img {
+                width: 140px;
+                height: 140px;
+              }
+            }
+            .de_right {
+              width: 50%;
+              line-height: 30px;
+              .title {
+                color: #999999;
+              }
+              .time {
+                margin-bottom: 10px;
+                padding-left: 5px;
+                background:rgba(250,250,250,1);
+                border:1px solid rgba(242,242,242,1);
+                border-radius:3px;
+                color: #333333;
+                font-size: 12px;
+                
+                i {
+                  margin-right: 5px;
+                }
+              }
+              .detail_info {
+                >span {
+                  background-color: #FAFAFA;
+                  color: #333333;
+                  font-size: 12px;
+                  margin-right: 5px;
+                  border-radius:3px;
+                  // padding: 5px 8px;
+                  padding: 0 3px;
+                  max-width: 50px;
+                  cursor: pointer;
+                  overflow: hidden;
+                  text-overflow:ellipsis;
+                  white-space: nowrap;
+                  border: 1px solid #F2F2F2;
+                  display: inline-block;
+                }
+              }
+              .record_btn {
+                width:100px;
+                height:30px;
+                background:rgba(246,248,249,1);
+                border:1px solid rgba(211,211,211,1);
+                border-radius:4px;
+                text-align: center;
+                cursor: pointer;
+                &:hover {
+                  background-color: #ffffff;
+                  color: #0C70F8;
+                  border-color: #0C70F8;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .reset_btn {
+    width: 110px;
+    background-color: #D3D3D3;
+    color: #666666;
+    border-radius: 4px;
+    &:hover {
+      background-color: #ffffff;
+      color: #0C70F8;
+      border-color: #0C70F8;
+    }
+  }
+  .select_btn {
+    width: 110px;
+    background-color: #0C70F8;
+    color: #ffffff;
+    border-radius: 4px;
+  }
+}
+</style>

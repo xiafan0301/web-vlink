@@ -57,14 +57,14 @@
         <div class="infobox">
           <div class="flex1 bkt">
             <img
-              src="https://inews.gtimg.com/newsapp_bt/0/9489993963/1000"
+              :src="snapObj.storagePath"
               class="spimg"
               v-if="showimg"
             >
             <video
               v-if="!showimg"
               id="capVideo"
-              :src="'http://file.aorise.org/vlink/file/d219bfe6-f66b-4ad9-a300-a143f7b10690.mp4'"
+              :src="snapObj.videoPath"
               class="spimg"
               autoplay
             ></video>
@@ -78,19 +78,19 @@
             <div class="infom">
               <div>
                 <p class="div">
-                  <span>{{detailData.snapTime}}</span>
+                  <span>{{snapObj.snapTime}}</span>
                   <label>抓拍时间</label>
                 </p>
               </div>
               <div>
                 <p class="div">
-                  <span>{{detailData.snapDevice}}</span>
+                  <span>{{snapObj.snapDevice}}</span>
                   <label>抓拍设备</label>
                 </p>
               </div>
               <div>
                 <p class="div">
-                  <span>{{detailData.snapAddress}}</span>
+                  <span>{{snapObj.snapAddress}}</span>
                   <label>抓拍地址</label>
                 </p>
               </div>
@@ -108,8 +108,8 @@
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 100%;" :src="item.photoPath" >
-                <div class="vl_jfo_sim" v-show="showSim">
+                <img style="width: 100%; height: 100%;" :src="item.subStoragePath" >
+                <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
                     :class="{'vl_icon_retrieval_06':  index === curImgIndex}"
@@ -118,7 +118,7 @@
                   <span
                     style="font-size: 12px;"
                   >%</span>
-                </div>
+                </div> -->
               </div>
             </swiper-slide>
             <div class="swiper-button-prev" slot="button-prev"></div>
@@ -140,7 +140,7 @@
 </template>
 <script>
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
-import { getSnapDetail } from "@/views/index/api/api.judge.js";
+import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
   data() {
     return {
@@ -148,6 +148,7 @@ export default {
       showSim: false,
       showimg: true,
       playing: true,
+      snapObj:{},
       strucInfoList: [
         {
           id: 1,
@@ -195,22 +196,45 @@ export default {
     };
   },
   mounted() {
-    this.tcDiscuss();
+    // this.tcDiscuss();
+    this.getSnapDetail()
+    this.getArchives()
   },
   methods: {
+    getArchives(){
+      let d={
+        plateNo:this.$route.query.plateNo || "湘AN8888"
+      }
+      getArchives(d).then(res=>{
+        if(res && res.data){
+          // console.log(res);
+          this.detailData=res.data
+        }
+      })
+    },
     //
     getSnapDetail(){
       let d={
-
+        dateStart:'2019-06-01',
+        dateEnd:'2019-07-02',
+        devIds:'',
+        plateNo:'湘A77777',
       }
       getSnapDetail(d).then(res=>{
         if(res){
-
+          //this.detailData=res.data
+          if(res.data.snapDtoList && res.data.snapDtoList.length>0)
+          this.strucInfoList = res.data.snapDtoList;
+          this.snapObj=res.data.snapDtoList[0]
+          // console.log(res.data);
+          
         }
       })
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
+      console.log(index);
+      this.snapObj = this.detailData.snapDtoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);
     },
@@ -227,28 +251,7 @@ export default {
       });
       this.playing = !this.playing;
     },
-    tcDiscuss() {
-      let params = {
-        pageNum: 1,
-        pageSize: 16,
-        "where.sortType": "2",
-        "where.startTime": "2019-6-12",
-        "where.endTime": "2019-6-27",
-        "where.targetType": 1
-      };
-
-      ScpGETstrucInfoList(params)
-        .then(res => {
-          this.$_hideLoading();
-          if (res) {
-            console.log(res);
-            //this.strucInfoList = res.data.list;
-            //console.log(JSON.stringify(this.strucInfoList), 'this.strucInfoList')
-          }
-        })
-        .catch(() => {});
-      //console.log(this.searchData.time)
-    }
+   
   }
 };
 </script>
