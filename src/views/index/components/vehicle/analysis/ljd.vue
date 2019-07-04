@@ -155,6 +155,9 @@ export default {
   },
   mounted() {
     //this.getControlMap(1);
+    let pNo=this.$route.query.plateNo
+    this.select = pNo?pNo.substring(0,1):"";
+    this.ruleForm.input3 = pNo?pNo.substr(1,6):"";
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center

@@ -499,7 +499,7 @@ export default {
   display: inline-block;
   background-repeat: no-repeat;
   transform: rotate(180deg);
-  background-image: url(../../../../../assets/img/icons.png);
+  background-image: url(../../../../assets/img/icons.png);
   background-position: -380px -1269px;
   cursor: pointer;
 }
@@ -519,7 +519,7 @@ export default {
   display: inline-block;
   background-repeat: no-repeat;
   transform: rotate(180deg);
-  background-image: url(../../../../../assets/img/icons.png);
+  background-image: url(../../../../assets/img/icons.png);
   background-position: -318px -1269px;
   cursor: pointer;
 }
