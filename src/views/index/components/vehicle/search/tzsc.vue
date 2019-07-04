@@ -367,7 +367,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -435,7 +435,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -482,6 +482,8 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
+import {formatDate} from '@/utils/util.js';
+
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -697,8 +699,8 @@ export default {
             return item.id;
           });
           let queryParams = {
-            "where.startTime": this.tzscMenuForm.selectDate[0], // 开始时间
-            "where.endTime": this.tzscMenuForm.selectDate[1], // 结束时间
+            "where.startTime": this.tzscMenuForm.selectDate[0] + ' 00:00:00', // 开始时间
+            "where.endTime": this.tzscMenuForm.selectDate[1] + ' 23:59:59', // 结束时间
             "where.deviceUid":
               deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             "where.bayonetUid":

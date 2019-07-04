@@ -322,7 +322,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -369,6 +369,7 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import {formatDate} from '@/utils/util.js';
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -544,8 +545,8 @@ export default {
               return item.id;
             });
             const queryParams = {
-              "where.startTime": this.ytscMenuForm.selectDate[0] || null, // 开始时间
-              "where.endTime": this.ytscMenuForm.selectDate[1] || null, // 结束时间
+              "where.startTime": this.ytscMenuForm.selectDate[0] + ' 00:00:00' || null, // 开始时间
+              "where.endTime": this.ytscMenuForm.selectDate[1] + ' 23:59:59' || null, // 结束时间
               "where.uploadImgUrl": this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
               "where.deviceUid": deviceUidArr.join(), // 摄像头标识
               "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
