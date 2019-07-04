@@ -785,7 +785,6 @@ export default {
         this.$refs.tzscMenuForm.resetFields();
       }
       this.initCheckTree(); // 初始化全选树节点
-
       this.$nextTick(() => {
         this.setDTime(); // 重置时间
       });
