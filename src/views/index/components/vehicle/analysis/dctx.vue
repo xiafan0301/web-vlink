@@ -58,9 +58,9 @@
             <vue-scroll>
               <div class="list-box">
                 <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-                  <img :src="item.subStoragePath" alt="">
-                  <p class="time"><i></i>{{item.shotTime}}</p>
-                  <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
+                  <img :src="item.shotRecord.subStoragePath" alt="">
+                  <p class="time"><i></i>{{item.shotRecord.shotTime}}</p>
+                  <p class="address"><i></i>抓拍设备:{{item.shotRecord.deviceName}}</p>
                 </div>
                 <template v-if="pagination.total > 8">
                   <el-pagination
@@ -110,7 +110,7 @@
                   <span>{{ sturcDetail.deviceName }}</span>
                 </p>
                 <p class="line">
-                  <span>同行车辆（{{ vehicleList.length }}）</span>
+                  <span>同行车辆（{{ vehicleList && vehicleList.length }}）</span>
                 </p>
               </div>
               <div class="struc_cdi_box">
@@ -119,7 +119,16 @@
                     <div class="left">车辆{{ index + 1 }}</div>
                     <div class="right">
                       <p>{{ item.vehicleNumber }}</p>
-                      <p><span>{{ item.feature }}<b>特征</b></span></p>
+                      <p>
+                        <span>{{ item.vehicleBrand }}</span>
+                        <span>{{ item.vehicleColor }}</span>
+                        <span>{{ item.vehicleModel }}</span>
+                        <span>{{ item.vehicleStyles }}</span>
+                        <span>{{ item.peerTimes }}</span>
+                        <span>{{ item.plateColor }}</span>
+                        <span>{{ item.registrationInfo }}</span>
+                        <b>特征</b>
+                      </p>
                     </div>
                   </div>
                 </vue-scroll>
@@ -193,7 +202,7 @@ export default {
       curImgIndex: 0, // 当前选择的图片index
       strucInfoList: [],
       sturcDetail: {},
-      vehicleList: [{"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},{"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},{"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},{"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},{"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'}],
+      vehicleList: [], // 同行车辆
       bResize: {},
       markerPoint: null, // 地图icon
       playUrl: {},
@@ -319,7 +328,7 @@ export default {
       this.searchLoading = true;
       let arr = [];
       this.filterObj.vehicleNumberList.forEach(item => {arr.push(item.vehicleNumber)});
-      this.filterObj.vehicleNumbers = arr.join(':');
+      this.filterObj.vehicleNumbers = arr.join('-');
       const params = {
         // startDate: formatDate(this.filterObj.startDate),
         startDate: '2019-07-01 00:12:12',
@@ -349,15 +358,18 @@ export default {
       this.$_showLoading({text: '加载中...'});
       console.log(obj)
       console.log(this.sturcDetail.videoPath)
-      this.videoUrl = this.sturcDetail.videoPath;
-      this.playUrl = {
-        type: 3,
-        title: '',
-        video: {
-          uid: 1,
-          downUrl: this.sturcDetail.videoPath
-        }
+      if (obj.peerVehicleInfoDtoList && obj.peerVehicleInfoDtoList.length > 0) {
+        this.vehicleList = obj.peerVehicleInfoDtoList;
       }
+      // this.videoUrl = this.sturcDetail.videoPath;
+      // this.playUrl = {
+      //   type: 3,
+      //   title: '',
+      //   video: {
+      //     uid: 1,
+      //     downUrl: this.sturcDetail.videoPath
+      //   }
+      // }
       this.strucDetailDialog = true;
       this.$nextTick(() => {
         this.getVehicleDetail(obj);
@@ -792,7 +804,11 @@ html {font-size: 100px;}
                 color: #333;
                 p:nth-child(2) {
                   padding-top: 2px;
+                  >span {
+                    margin-right: 5px;
+                  }
                   b {
+                    // float: right;
                     padding-left: 10px;
                     color: #999;
                     font-weight: normal;
@@ -800,28 +816,6 @@ html {font-size: 100px;}
                 }
               }
             }
-            // span {
-            //   max-width: 100%;
-            //   display: inline-block;
-            //   height: .3rem;
-            //   line-height: .3rem;
-            //   margin-bottom: .08rem;
-            //   border: 1px solid #F2F2F2;
-            //   background: #FAFAFA;
-            //   color: #333333;
-            //   white-space: nowrap;
-            //   text-overflow: ellipsis;
-            //   border-radius:3px;
-            //   font-size: 12px;
-            //   overflow: hidden;
-            //   padding: 0 .3rem 0 .1rem;
-            //   margin-right: .08rem;
-            //   > b {
-            //     color: #999;
-            //     font-weight: normal;
-            //     padding-left: 18px;
-            //   }
-            // }
           }
         }
       }

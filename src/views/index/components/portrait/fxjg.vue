@@ -12,10 +12,10 @@
         <div class="analysis-r-content">
           <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
             <div class="img-box">
-              <img alt="头像">
+              <img alt="头像" :src="item.personDetailList[0].subStoragePath">
               <i class="vl_icon vl_icon_portrait_01"></i>
               <span class="num">
-                {{index+1}}
+                {{item.appearTotal}}
                 <span class="text">次</span>
               </span>
             </div>
@@ -44,11 +44,20 @@ export default {
     return {
       uid: '',
       pagination: { total: 50, pageSize: 24, pageNum: 1 },
-      list: new Array(50)
+      list: []
     };
   },
   mounted() {
     this.uid = this.$route.query.uid
+    for(let i=0; i<50; i++) {
+      this.list.push({
+        "appearTotal": i,
+        "personDetailList": [{
+          "subStoragePath": "http://file.aorise.org/vlink/image/f93bdaff-e12c-4a08-a596-402fcdd1a10d.png",
+        }]
+      })
+    }
+    this.list.sort(this.sortVal)
     this.getDetail();
   },
   methods: {
@@ -62,6 +71,11 @@ export default {
       }).catch(error => {
         console.log(error)
       })
+    },
+    //排序
+    sortVal(a, b) {
+      console.log(a,b)
+      return b.appearTotal - a.appearTotal;
     },
   }
 };
@@ -93,6 +107,10 @@ export default {
           height: 185px;
           background-color: #999;
           margin: 16px;
+          >img {
+            width: 185px;
+            height: 185px;
+          }
           i {
             position: absolute;
             top: -1px;

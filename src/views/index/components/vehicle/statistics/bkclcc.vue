@@ -12,8 +12,8 @@
           <span>开始</span>
           <el-date-picker
             v-model="queryForm.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
@@ -22,9 +22,9 @@
           <el-date-picker
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
-            type="date"
+            type="datetime"
             @focus="getEndTime"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
@@ -46,7 +46,7 @@
             :value="item">
           </el-option>
         </el-select>
-        <div class="left_radio"><span>车牌：</span><el-radio v-model="queryForm.radio" :label="true">非</el-radio></div>
+        <div class="left_radio"><span>车牌：</span><el-checkbox v-model="queryForm.radio" :label="true">非</el-checkbox></div>
         <div class="left_province">
           <el-select v-model="queryForm.province">
             <el-option
@@ -93,12 +93,6 @@
               >
             </el-table-column>
             <el-table-column
-              label="车道"
-              prop=""
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
               label="车牌颜色"
               prop="vehicleColor"
               show-overflow-tooltip
@@ -117,17 +111,11 @@
               >
             </el-table-column>
             <el-table-column
-              label="车速"
-              prop=""
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
               label="操作"
               show-overflow-tooltip
               >
-              <template>
-                <span class="operation_btn" @click="skip">查看</span>
+              <template slot-scope="scope">
+                <span class="operation_btn" @click="skip(scope.row.plateNo)">查看</span>
               </template>
             </el-table-column>
           </el-table>
@@ -146,6 +134,8 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import {getAllBayonetListByName, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
 import {dataList} from '@/utils/data.js';
 import {formatDate} from '@/utils/util.js';
@@ -153,10 +143,10 @@ export default {
   data () {
     return {
       queryForm: {
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        startTime: startTime,
+        endTime: endTime,
         bayonet: {value: ''},
-        province: {label: ''},
+        province: {label: '湘', value: 9},
         provinceName: '',
         radio: false
       },
@@ -170,7 +160,7 @@ export default {
       }),
       loading: false,
       loadingBtn: false,
-      bkclccList: [{name: 'xxxxxxx'}],
+      bkclccList: [],
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
@@ -179,9 +169,9 @@ export default {
   },
   watch: {
     'queryForm.startTime' () {
-      const threeDays = 2 * 3600 * 24 * 1000;
+      const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
       const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
-      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
+      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
     }
   },
   mounted () {
@@ -189,15 +179,16 @@ export default {
   },
   methods: { 
     getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime()
+      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
       this.pickerOptions1 = {
         disabledDate(time) {
-          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
+          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
         },
       }
     },
-    skip () {
-      this.$router.push({name: 'vehicle_search_clxx'});
+    skip (plateNo) {
+      console.log(plateNo)
+      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo}});
     },
     // 模糊搜索卡口
     getListBayonet (query) {
@@ -230,8 +221,8 @@ export default {
       this.pageNum = 1;
       this.currentPage = 1;
       this.queryForm = {
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        startTime: startTime,
+        endTime: endTime,
         bayonet: {value: ''},
         province: {label: ''},
         provinceName: '',
