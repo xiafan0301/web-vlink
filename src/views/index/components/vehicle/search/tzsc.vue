@@ -718,7 +718,7 @@ export default {
           // 处理排序字段
           if (this.sortType === 1) {
             // 时间排序
-            queryParams.orderBy = "startTime";
+            queryParams.orderBy = "shotTime";
             if (this.timeSortType) {
               queryParams.order = "desc";
             } else {
