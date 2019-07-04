@@ -1,4 +1,4 @@
-<!-- 请选择设备下拉列表/请选择卡口下拉列表  通用组件 -->
+<!-- 设备下拉列表 通用组件 -->
 <template>
   <div class="dev_select">
     <el-select
@@ -30,7 +30,6 @@
 <script>
 import {MapGETmonitorList} from '@/views/index/api/api.map.js';
 export default {
-  props: ['type'],//1为卡口，2为设备和卡口
   data () {
     return {
       likeKey: null,

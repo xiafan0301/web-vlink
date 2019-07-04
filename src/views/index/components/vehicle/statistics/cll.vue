@@ -407,8 +407,8 @@ export default {
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
         startTime: this.queryForm.startTime,
-        endTime: this.queryForm.endTime,
-        carType: this.queryForm.carType
+        endTime: this.queryForm.endTime + ' 00:00:00',
+        carType: this.queryForm.carType + ' 23:59:59'  
       }
       this.queryForm.statementType !== 5 && (params.reportType = this.queryForm.statementType);
       this.loadingBtn = true;
