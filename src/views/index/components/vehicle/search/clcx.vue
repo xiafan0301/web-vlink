@@ -149,7 +149,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
@@ -158,7 +158,7 @@
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
-    </el-pagination>
+    </el-pagination> -->
     </div>
      <!-- 地图选择 -->
     <el-dialog :visible.sync="dialogVisible" width="80%">
@@ -282,7 +282,8 @@ export default {
         this.ruleForm.bayonetIds = this.selectBayonet.join(",")
       }
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
-      
+      this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
         console.log(this.ruleForm);
       let d=this.ruleForm
       getSnapList(d).then(res=>{
@@ -347,7 +348,19 @@ export default {
       }
     },
     resetForm (){
-
+      this.value1=null
+      this.selectValue="已选设备0个",
+      this.select=""
+        this.ruleForm = {
+        dateStart:'',
+        dateEnd:'',
+        _vehicleGroup:'',
+        vehicleClass:'',
+        devIds:'',
+        include:1,
+        _include:0,
+        plateNo:'',
+      }
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1

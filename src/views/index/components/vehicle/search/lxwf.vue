@@ -542,8 +542,8 @@ export default {
       console.log("======getVehicleDetail=====", this.searchData, this.imgData);
 
       let params = {
-        dateStart:this.data1[0] || "2019-01-01",
-        dateEnd:this.data1[1] || "2019-07-01",
+        dateStart:this.data1[0] + "00:00:00",
+        dateEnd:this.data1[1] + " 23:59:59" ,
       };
 
       this.getViolation(params)
