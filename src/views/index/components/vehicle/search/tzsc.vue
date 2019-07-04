@@ -726,7 +726,7 @@ export default {
             }
           } else if (this.sortType === 2) {
             // 监控排序
-            queryParams.orderBy = null;
+            queryParams.orderBy = "shotTime";
             if (this.cameraSortType) {
               queryParams.order = "desc";
             } else {
