@@ -28,17 +28,7 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
-        <el-select
-          style="width: 100%;"
-          @clear="listBayonet = []"
-          v-model="queryForm.bayonet"
-          filterable
-          remote
-          value-key="value"
-          clearable
-          placeholder="请输入关键字搜索选择卡口"
-          :remote-method="getListBayonet"
-          :loading="loading">
+        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
             :key="item.value"
@@ -175,6 +165,7 @@ export default {
     }
   },
   mounted () {
+    this.getListBayonet();
     this.getControlCarSta();
   },
   methods: { 
@@ -191,13 +182,8 @@ export default {
       this.$router.push({name: 'vehicle_search_clxx', query: {plateNo}});
     },
     // 模糊搜索卡口
-    getListBayonet (query) {
-      const _query = this.Trim(query, 'g');
-      if (!_query) return;
-      const params = {
-        name: query
-      }
-      getAllBayonetListByName(params).then(res => {
+    getListBayonet () {
+      getAllBayonetListByName().then(res => {
         if (res) {
           this.listBayonet = res.data.map(m => {
             return {
@@ -206,7 +192,7 @@ export default {
             }
           });
         }
-      });
+      })
     },  
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
@@ -232,6 +218,7 @@ export default {
     },
     // 获取布控车辆出城统计
     getControlCarSta () {
+      console.log(this.queryForm.bayonet, 'this.queryForm.bayonet')
       const params = {
         'where.startTime': this.queryForm.startTime,
         'where.endTime': this.queryForm.endTime,

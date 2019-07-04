@@ -263,6 +263,10 @@
 .vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
 .vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
 
+.vl_icon_map_o01 { width: 34px; height: 34px; background-position: -640px -130px; }
+.vl_icon_map_o02 { width: 34px; height: 34px; background-position: -686px -130px; }
+.vl_icon_map_o03 { width: 34px; height: 34px; background-position: -780px -130px; }
+
 .vl_icon_sm_sj { width: 14px; height: 15px; background-position: -786px -376px; }
 .vl_icon_sm_sxt { width: 14px; height: 15px; background-position: -324px -377px; }
 .vl_icon_sm_cl { width: 14px; height: 15px; background-position: -939px -530px; }

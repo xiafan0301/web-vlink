@@ -473,3 +473,16 @@ export function getNightVehicleRecordList(params) {
   })
 }
 /*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/
+
+/**
+ * 车辆侦查报告查询接口
+ * @param {object} params
+ */
+export function getVehicleInvestigationReport(params) {
+  return request({
+    url: '/vehicle-investigation-report-service/report',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
