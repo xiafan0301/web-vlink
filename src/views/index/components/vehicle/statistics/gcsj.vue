@@ -2,7 +2,7 @@
   <div class="gcsj_container">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>过车数据统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
