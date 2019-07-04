@@ -14,7 +14,6 @@
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']"
               style="width: 100%"
               @blur="handleStartTime"
               :picker-options="pickerStart"
@@ -30,7 +29,6 @@
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']"
               type="datetime"
               placeholder="结束时间"
               >
@@ -52,7 +50,7 @@
                 v-for="(item, index) in vehicleTypeList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.enumField"
+                :value="item.enumValue"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -165,6 +163,24 @@ export default {
   },
   created () {
     this.getVehicleTypeList();
+
+    const plateNo = this.$route.query.plateNo;
+    const dateStart = this.$route.query.dateStart;
+    const dateEnd = this.$route.query.dateEnd;
+    if (plateNo && dateStart && dateEnd) {
+      this.searchForm.plateNo = plateNo;
+      this.searchForm.shotTime = dateStart;
+      this.searchForm.dateEnd = dateEnd;
+      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.deviceCode = this.$route.query.deviceCode;
+      this.searchForm.vehicleClass = this.$route.query.vehicleClass && this.$route.query.vehicleClass.join(',');
+      this.getDeviceList();
+    }
+  },
+  mounted () {
+    setTimeout(() => {
+      this.searchData('searchForm');
+    }, 1000)
   },
   methods: {
     // 获取车辆类型列表
@@ -215,11 +231,18 @@ export default {
         startTime: formatDate(this.searchForm.shotTime),
         endTime: formatDate(this.searchForm.dateEnd)
       };
-      console.log('params', params)
       getShotDevice(params)
         .then(res => {
           if (res) {
             this.deviceList = res.data;
+            if (this.$route.query.deviceCode) {
+              this.deviceList.map(item => {
+                if (item.deviceID === this.$route.query.deviceCode) {
+                  console.log('asdasdasd')
+                  this.deviceStartTime = item.shotTime;
+                }
+              })
+            }
           }
         })
     },
@@ -240,6 +263,9 @@ export default {
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
         plateNoTb: obj.plateNo,
+        vehicleClass: this.searchForm.vehicleClass.join(',') || null,
+        interval: this.searchForm.interval,
+        deviceCode: this.searchForm.deviceCode,
         dateStartTb: formatDate(obj.shotTime)
        }});
     },
@@ -249,6 +275,7 @@ export default {
     },
     // 搜索数据
     searchData (form) {
+      this.dataList = [];
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.searchForm.plateNo) {
@@ -267,7 +294,7 @@ export default {
             });
             return;
           };
-          const vehicleType = this.searchForm.vehicleClass.join(':');
+          const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
             deviceCode: this.searchForm.deviceCode,
             startTime: formatDate(this.searchForm.shotTime),

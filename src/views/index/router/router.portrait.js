@@ -30,7 +30,7 @@ export default {
     },
     // 跟踪尾随详情
     {
-      path: 'detail',
+      path: 'gzwsDetail',
       name: 'gzws_detail',
       component: () => import('@/views/index/components/portrait/gzws/detail.vue')
     },

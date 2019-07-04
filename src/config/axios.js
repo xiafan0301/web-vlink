@@ -42,10 +42,9 @@ service.interceptors.request.use((config) => {
 });
 // axios添加一个响应拦截器
 service.interceptors.response.use(function (response) {
-  console.log('response', response)
+  // console.log('response', response)
   if (response && response.data) {
     const contenType = response.headers['content-type'];
-    console.log(contenType)
     let _data = response.data;
     if (_data.code === '00000000') {
       return _data;
