@@ -1,7 +1,7 @@
 <template>
   <div class="qyryfx_wrap">
     <!-- 面包屑通用样式 -->
-    <div class="link_bread" @click="infoRightShow = !infoRightShow">
+    <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
@@ -20,6 +20,7 @@
                 suffix-icon="el-icon-search"
                 placeholder="请输入内容"
                 @focus="isSearchResult = true;"
+                id="map-sd-search-input"
               ></el-input>
             </div>
             <!-- 搜索条件 -->
@@ -188,7 +189,7 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3 class="camera_name">摄像头名称（50次）</h3>
+            <h3 class="camera_name">{{ selectedDevice.deviceName }}（50次）</h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
@@ -366,7 +367,8 @@ export default {
       listDevice: [], // 设备
       listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
-      totalData: []
+      totalData: [],
+      selectedDevice: {}
     };
   },
   mounted() {
@@ -387,7 +389,7 @@ export default {
       for (let i = 0; i < this.drawTypesArr.length; i++) {
         this.selSubmit(i);
       }
-      console.log('total', this.totalData);
+      console.log("total", this.totalData);
     },
     /*处理删除或者添加一个时间区域*/
     addArea() {
@@ -409,30 +411,30 @@ export default {
       ];
     },
     delArea(val) {
-     for(let item in this.drawTypesArr[val]) {
-       if (this.drawTypesArr[val][item] !== null) {
-        switch(item) {
-          case 'rectangle':
-            this.closeDraw(1, val);
-          break;
-          case 'circle':
-            this.closeDraw(2, val);
-          break;
-          case 'polyline':
-            this.closeDraw(3, val);
-          break;
-          case 'polygon':
-            this.closeDraw(4, val);
-          break;
-          case 'circle10km':
-            this.closeDraw(5, val);
-          break;
-          default:
-          break;
+      for (let item in this.drawTypesArr[val]) {
+        if (this.drawTypesArr[val][item] !== null) {
+          switch (item) {
+            case "rectangle":
+              this.closeDraw(1, val);
+              break;
+            case "circle":
+              this.closeDraw(2, val);
+              break;
+            case "polyline":
+              this.closeDraw(3, val);
+              break;
+            case "polygon":
+              this.closeDraw(4, val);
+              break;
+            case "circle10km":
+              this.closeDraw(5, val);
+              break;
+            default:
+              break;
+          }
         }
-       }
-     }
-     this.drawTypesArr.splice(val, 1);
+      }
+      this.drawTypesArr.splice(val, 1);
     },
     /* 切换危险人图片方法 */
     preImg(index) {
@@ -469,6 +471,8 @@ export default {
         );
       }
     },
+    /** 获取到右边危险人物的数据 */
+
     /** 选择地图的方法 */
     // 地图定位
     resetZoom() {
@@ -499,7 +503,7 @@ export default {
       window.AMap.event.addListener(auto, "select", _this.selectArea);
     },
     selectArea(e) {
-      console.log(e);
+      console.log(e, '获取到地点');
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
@@ -698,7 +702,7 @@ export default {
         this.amap.remove(this.drawTypesArr[index].rectangle.obj);
         this.drawTypesArr[index].rectangle = null;
       } else if (drawType === 2 && this.drawTypesArr[index].circle !== null) {
-          // console.log('进来关闭一波啊', this.drawTypesArr[index].circle);
+        // console.log('进来关闭一波啊', this.drawTypesArr[index].circle);
         if (this.drawTypesArr[index].circle.editor) {
           this.drawTypesArr[index].circle.editor.close();
         }
@@ -873,10 +877,10 @@ export default {
         ab.push(k);
       }
       const device = {
-        'ad': ad,
-        'dObj': dObj,
-        'bObj': bObj,
-        'ab': ab
+        ad: ad,
+        dObj: dObj,
+        bObj: bObj,
+        ab: ab
       };
       this.totalData = [...this.totalData, device];
       // console.log("设备 ad", ad, dObj, bObj);
@@ -935,6 +939,13 @@ export default {
         // extData: obj,
         // 自定义点标记覆盖物内容
         content: '<div class="map_icons ' + sClass + '"></div>'
+      });
+      let _this = this;
+      marker.on("click", function() {
+        _this.infoRightShow = !_this.infoRightShow;
+        if (_this.infoRightShow) {
+          _this.selectedDevice = obj;
+        }
       });
     }
   },
