@@ -81,8 +81,8 @@
                   <p>
                     <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
                   </p>
-                  <div class="com_ellipsis"><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
-                  <div class="com_ellipsis"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
+                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
+                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
                 </div>
               </li>
             </ul>
@@ -101,10 +101,10 @@
           <div class="gcck_rh" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
-                <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="2" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
+                <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="1" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
                 <el-button size="small" :disabled="picIndex === ((picPageNum - 1) * picPages + picTotal)" type="primary" @click="picAutoPlay(false)">
                   <template v-if="picAutoPlayActive">
-                    停止自动播放
+                    暂停播放
                   </template>
                   <template v-else>
                     自动播放
@@ -180,7 +180,7 @@ export default {
 
       picTotal: 0,
       picIndex: 1,
-      picPlayTime: 5,
+      picPlayTime: 3,
       picPageSize: 100,
       picPageNum: 1,
       picPages: 0,
@@ -306,10 +306,10 @@ export default {
     getDeviceSnapPage (dId) {
       getDeviceSnapImagesPage({
         'where.deviceIds': dId,
-        'where.startTime': formatDate(new Date(), 'yyyy-MM-dd'),
+        'where.startTime': formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
         'where.endTime': formatDate(new Date(), 'yyyy-MM-dd'),
         pageNum: 1,
-        pageSize: 10
+        pageSize: 8
       }).then(res => {
         if (res && res.data) {
           this.zpList = res.data.list;
@@ -636,9 +636,6 @@ export default {
       }
     }
   }
-  .gcck_cl { width: 14px; height: 15px; background-position: -939px -530px; }
-  .gcck_sxt { width: 14px; height: 15px; background-position: -324px -377px; }
-  .gcck_sj { width: 14px; height: 15px; background-position: -786px -376px; }
 }
 .gcck_rh {
   width: 100%; height: 100%;
