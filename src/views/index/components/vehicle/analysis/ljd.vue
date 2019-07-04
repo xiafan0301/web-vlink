@@ -104,7 +104,7 @@
         <h3 class="title">分析结果</h3>
         <el-table :data="evData" style="width: 100%">
           <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
-          <el-table-column width="80px" prop="address" :show-overflow-tooltip="true" label="地址"></el-table-column>
+          <el-table-column  prop="address" :show-overflow-tooltip="true" label="地址"></el-table-column>
           <el-table-column prop="shotNum" width="80px" sortable label="次数"></el-table-column>
         </el-table>
         <div class="insetLeft2" @click="hideResult"></div>
