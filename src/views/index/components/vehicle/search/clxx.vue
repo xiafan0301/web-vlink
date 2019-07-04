@@ -165,6 +165,9 @@ export default {
   },
   computed: {},
   mounted() {
+    if(this.$route.query.plateNo) {
+      this.searchData.licensePlateNum = this.$route.query.plateNo
+    }
     this.setDTime();
     this.getSearchData();
   },
