@@ -193,13 +193,9 @@ export default {
     }
   },
   mounted () {
-    // this.drawChart1();
-    // this.drawChart2();
-    // this.drawChart3();
-    // this.drawChart4();
     setTimeout(() => {
       this.getCarBeforeSta();
-    }, 500);
+    }, 2000);
   },
   methods: {
     getEndTime(time) {
@@ -212,14 +208,7 @@ export default {
     },
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
-      console.log(data, 'data');
       this.queryForm.devIdData = data;
-    },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
     },
     // 画图表
     drawChart1 () {

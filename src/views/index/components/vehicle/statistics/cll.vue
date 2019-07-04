@@ -229,12 +229,6 @@ export default {
       this.queryForm.startTime = null;
       this.queryForm.endTime = null;
     },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
-    },
     // 画图表
     drawChart1 () {
       let chart = null;

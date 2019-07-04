@@ -55,6 +55,7 @@ export default {
       }else{
         //取消选中
         this.$refs.selectTree.setCheckedKeys([]);
+        this.devIdData = [];
       }
     },
     getTreeList () {
@@ -94,7 +95,6 @@ export default {
           this.$nextTick(() => {
             this.checkedAll();//  全选
           })
-          console.log(this.treeList, 'this.treeList')
         }
       });
     },
@@ -120,17 +120,17 @@ export default {
       this.$emit('sendSelectData', this.selObj);
     },
     // 数组去重
-    unique (array) {
-      let obj = {}, resultArray = [];
-      resultArray = array.reduce((item, next) => {
-        if (!obj[next.id]) {
-          obj[next.id] = true;
-          item.push(next);
-        }
-        return item;
-      }, []);
-      return resultArray;
-    },
+    // unique (array) {
+    //   let obj = {}, resultArray = [];
+    //   resultArray = array.reduce((item, next) => {
+    //     if (!obj[next.id]) {
+    //       obj[next.id] = true;
+    //       item.push(next);
+    //     }
+    //     return item;
+    //   }, []);
+    //   return resultArray;
+    // },
     // 切换下拉列表的选中状态并关联到select上
     changeSeletedStatus () {
       let data = [], obj = null;

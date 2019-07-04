@@ -23,7 +23,7 @@
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
-                <p>男性：女性</p>
+                <p>男性:女性</p>
                 <h1>{{rlsjfxDetail.malePerInSur}}:{{rlsjfxDetail.femalePerInSur}}</h1>
               </div>
             </div>
@@ -58,7 +58,7 @@
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
-                <p>男性：女性</p>
+                <p>男性:女性</p>
                 <h1>{{rlsjfxDetail.malePerInBase}}:{{rlsjfxDetail.femalePerInBase}}</h1>
               </div>
             </div>
@@ -76,7 +76,7 @@
         <div class="box">
           <div class="title">
             <h1>人脸抓拍统计</h1>
-            <span>查看更多></span>
+            <span @click="skip">查看更多></span>
           </div>
           <div class="face_snap_form">
             <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
@@ -92,7 +92,7 @@
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceSnapForm">重置</el-button>
-              <el-button class="select_btn" @click="getFaceSnapSta">统计</el-button>
+              <el-button class="select_btn" @click="getFaceSnapSta" :loading="loadingBtn1">统计</el-button>
             </div>
           </div>
           <div class="snap_snap">
@@ -124,7 +124,7 @@
         <div class="box">
           <div class="title">
             <h1>人脸布控告警数据分析</h1>
-            <span>查看更多></span>
+            <span @click="skip">查看更多></span>
           </div>
           <div class="face_control_form">
             <el-date-picker
@@ -139,7 +139,7 @@
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceControlDate">重置</el-button>
-              <el-button class="select_btn" @click="getFaceControlSta">统计</el-button>
+              <el-button class="select_btn" @click="getFaceControlSta" :loading="loadingBtn2">统计</el-button>
             </div>
           </div>
           <div class="face_control_info">
@@ -187,11 +187,6 @@ export default {
         queryDate: [startTime, endTime]
       },
       faceControlQueryDate: [startTime, endTime],
-      // pickerOptions1: {
-      //   disabledDate(time) {
-      //     return (time.getTime() < Date.now() - 8.64e7 - 1 * 3600 * 24 * 1000);
-      //   }
-      // },
       devList: [],//人脸抓拍统计设备列表
       // 图表参数
       chartData1: [
@@ -255,17 +250,26 @@ export default {
         faceNums: '',
         peakValues: '',
         timeDto: []
-      }
+      },
+      loadingBtn1: false,
+      loadingBtn2: false
     }
   },
   mounted () {
     this.getFaceTotal();
     this.getFaceControlSta();
+    setTimeout(() => {
+      this.getFaceSnapSta();
+    }, 2000)
 
     this.drawChart1();
     this.drawChart2();
   },
   methods: {
+    // 查看更多
+    skip () {
+      this.$router.push({name: ''});
+    },
     // 验证所选时间是否符合要求
     validationDate (obj) {
       let _startTime, _endTime;
@@ -289,7 +293,6 @@ export default {
     getSelectData (data) {
       console.log(data, 'data');
       this.faceSnapForm.devIdData = data;
-      this.getFaceSnapSta();
     },
     // 重置人脸抓拍统计表单
     resetFaceSnapForm () {
@@ -301,10 +304,12 @@ export default {
         },
         queryDate: [startTime, endTime]
       }
+      this.getFaceSnapSta();
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
       this.faceControlQueryDate = [startTime, endTime];
+      this.getFaceControlSta();
     },
     // 获取人脸数据汇总分析
     getFaceTotal () {
@@ -316,23 +321,26 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
-      const params = {
-        deviceIds: '9',
-        bayonetIds: null,
-        startTime: this.faceSnapForm.queryDate[0],
-        endTime: this.faceSnapForm.queryDate[1]
-      }
       // const params = {
-      //   deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
-      //   bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+      //   deviceIds: '9',
+      //   bayonetIds: null,
       //   startTime: this.faceSnapForm.queryDate[0],
       //   endTime: this.faceSnapForm.queryDate[1]
       // }
+      const params = {
+        deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
+        bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+        startTime: this.faceSnapForm.queryDate[0],
+        endTime: this.faceSnapForm.queryDate[1]
+      }
       console.log(params)
+      this.loadingBtn1 = true;
       apiFaceSnap(params).then(res => {
         if (res) {
           this.faceSnapSta = res.data;
         }
+      }).finally(() => {
+        this.loadingBtn1 = false;
       })
     },
     // 获取人脸布控告警数据分析
@@ -341,10 +349,13 @@ export default {
         startTime: this.faceControlQueryDate[0],
         endTime: this.faceControlQueryDate[1],
       }
+      this.loadingBtn2 = true;
       apiFaceWarning(params).then(res => {
         if (res) {
           this.faceControlSta = res.data;
         }
+      }).finally(() => {
+        this.loadingBtn2 = false;
       })
     },
     // 画抓拍人脸数图表
@@ -677,10 +688,13 @@ export default {
   }
   .el-date-editor{
     .el-range-input{
-      width: 40%!important;
+      width: 42%!important;
     }
     .el-input__icon{
       display: none;
+    }
+    .el-range-separator{
+      width: 16px!important;
     }
   } 
   .my_tooltip{
