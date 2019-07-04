@@ -14,6 +14,18 @@ export function JtcPOSTAppendixInfo(data) {
   })
 }
 /**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function JtcPOSTAppendtpInfo(data) {
+  return request({
+    url: '/fake-plate-vehicle',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
  * JtcGETAppendixInfoList 历史上传图片
  * @param {object} params
  */
