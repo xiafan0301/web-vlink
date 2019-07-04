@@ -45,11 +45,15 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
+<<<<<<< HEAD
         // dev: 'https://apidev.aorise.org/vlink-judge/',
         // dev: 'http://10.116.64.127:8082',
+=======
+        // dev: 'http://10.116.64.127:8082/',
+>>>>>>> 0e6ecfe3063ae0e0721f67e523c0fcb8c9f69ab0
         dev: 'https://apidev.aorise.org/vlink-judge/',
         test: 'https://apirel.aorise.org/vlink-judge/',
-        prod: 'https://apirel.aorise.org/vlink-judge/',
+        prod: 'https://apirel.aorise.org/vlink-judge/'
     },
     // 调度和预案部分地址
     ctc: {

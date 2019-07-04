@@ -98,11 +98,11 @@
           <!-- <div class="vc_gcck_r">
             <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
           </div> -->
-          <div class="gcck_rh" v-if="zpDeviceIdsHis">
+          <div class="gcck_rh" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
-                <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="3" :max="30" label="描述文字"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
-                <el-button size="small" type="primary" @click="picAutoPlay">
+                <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="2" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
+                <el-button size="small" :disabled="picIndex === ((picPageNum - 1) * picPages + picTotal)" type="primary" @click="picAutoPlay(false)">
                   <template v-if="picAutoPlayActive">
                     停止自动播放
                   </template>
@@ -112,22 +112,28 @@
                 </el-button>
               </div>
               <div class="gcck_rh_list" :class="{'gcck_rh_list': picShowType === 2}">
-                <ul :style="{'margin-left': (-500 * ((picIndex % 10) - 1) + 'px')}">
+                <ul :style="{'margin-left': (-500 * ((picIndex - 1) % picPageSize) + 'px')}">
                   <li v-for="(item, index) in picList" :key="'p_l_' + index">
                     <div>
                       <p>
                         <img :title="item.plateNo" :alt="item.plateNo" :src="item.imagePath">
                       </p>
                       <div class="gcck_rh_ft"><i class="vl_icon gcck_sxt"></i>{{item.deviceName}}</div>
-                      <div><i class="vl_icon gcck_sxt"></i>{{item.plateNo}}</div>
+                      <div><i class="vl_icon gcck_cl"></i>{{item.plateNo}}</div>
                       <div><i class="vl_icon gcck_sj"></i>{{item.snapTime}}</div>
                     </div>
                   </li>
                 </ul>
               </div>
-              <i @click="picPrep" class="el-icon-arrow-left"></i>
-              <i @click="picNext" class="el-icon-arrow-right"></i>
+              <i @click="picPrep(true)" class="el-icon-arrow-left" :class="{'el-icon-arrow-dis': picIndex === 1}"></i>
+              <i @click="picNext(true)" class="el-icon-arrow-right" :class="{'el-icon-arrow-dis': picIndex === ((picPageNum - 1) * picPages + picTotal)}"></i>
             </div>
+          </div>
+          <div class="vc_gcck_r" v-else-if="zpDeviceIdsHis && picList.length <= 0">
+            <p class="vc_gcck_r_empty">暂无数据</p>
+          </div>
+          <div class="vc_gcck_r" v-else-if="!zpDeviceIdsHis && picCKEmpty">
+            <p class="vc_gcck_r_empty">该卡口没有摄像头</p>
           </div>
           <div class="vc_gcck_r" v-else>
             <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
@@ -175,11 +181,12 @@ export default {
       picTotal: 0,
       picIndex: 1,
       picPlayTime: 5,
-      picPageSize: 10,
+      picPageSize: 100,
       picPageNum: 1,
       picPages: 0,
       picAutoPlayActive: false,
       picAntoPlayInval: null,
+      picCKEmpty: false,
 
       pickerOptions: {
         disabledDate (d) {
@@ -230,7 +237,7 @@ export default {
               this.zpTotal = 0;
               this.zpList = [];
             } else {
-              if (iLen > 2) { iLen = 8; }
+              if (iLen > 8) { iLen = 8; }
               this.videoTotal = iLen;
               let vList = [];
               for (let i = 0; i < dList.length; i++) {
@@ -242,6 +249,30 @@ export default {
                 });
                 ids += dList[i].uid + '-';
               }
+              vList.push({
+                type: 1,
+                title: dList[0].deviceName,
+                record: false,
+                video: Object.assign({}, dList[0])
+              });
+              vList.push({
+                type: 1,
+                title: dList[0].deviceName,
+                record: false,
+                video: Object.assign({}, dList[0])
+              });
+              vList.push({
+                type: 1,
+                title: dList[0].deviceName,
+                record: false,
+                video: Object.assign({}, dList[0])
+              });
+              vList.push({
+                type: 1,
+                title: dList[0].deviceName,
+                record: false,
+                video: Object.assign({}, dList[0])
+              });
               if (ids && ids.length > 0) { ids = ids.substring(0, ids.length - 1); }
               this.videoList = vList;
               this.getDeviceSnapSum(ids);
@@ -266,6 +297,8 @@ export default {
           this.zpTotal = res.data[0].snapImagesCount;
           // this.zpList = res.data.slice(0, 10);
           // console.log(this.zpList);
+        } else {
+          this.zpTotal = 0;
         }
       });
     },
@@ -280,12 +313,15 @@ export default {
       }).then(res => {
         if (res && res.data) {
           this.zpList = res.data.list;
+        } else {
+          this.zpList = [];
         }
       });
     },
 
     selectItem2 (type, item) {
       console.log(type, item);
+      this.picAutoPlay(true);
       let ids = '';
       if (type === 1) { // deviceName
         this.picShowType = 1;
@@ -297,7 +333,7 @@ export default {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
         }).then(res => {
-          if (res && res.data) {
+          if (res && res.data && res.data.length > 0) {
             let dList = res.data;
             let iLen = dList.length;
             if (iLen <= 0) {
@@ -312,17 +348,21 @@ export default {
                 ids += dList[i].uid + '-';
               }
               if (ids && ids.length > 0) { ids = ids.substring(0, ids.length - 1); }
-              this.zpDeviceIdsHis = ids;
-              this.getDeviceSnapPage2();
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
             // console.log(this.zpList);
+          } else {
+            this.picCKEmpty = true;
+          }
+          this.zpDeviceIdsHis = ids;
+          if (this.zpDeviceIdsHis) {
+            this.getDeviceSnapPage2();
           }
         });
       }
     },
-    getDeviceSnapPage2 (pageNum) {
+    getDeviceSnapPage2 (pageNum, bPrep) {
       if (!pageNum) { pageNum = 1; }
       // this.picTotal = 0;
       getDeviceSnapImagesPage({
@@ -332,51 +372,82 @@ export default {
         pageNum: pageNum,
         pageSize: this.picPageSize
       }).then(res => {
-        if (res && res.data) {
-          let rData = res.data;
-          if (rData.list) {
-            this.picList = [];
+        if (res && res.data && res.data.list && res.data.list.length > 0) {
+          let rlist = res.data.list;
+          if (!bPrep) {
+            this.picList =rlist[0];
             this.$nextTick(() => {
-              this.picIndex = 1;
-              this.picList = res.data.list;
+              // this.picIndex = (pageNum - 1) * this.picPageSize + 1;
+              this.picIndex = pageNum === 1 ? 1 : (this.picIndex + 1);
+              this.picList = rlist;
+              this.picTotal = this.picList.length;
+            });
+          } else {
+            this.picList =rlist[rlist.length - 1];
+            this.$nextTick(() => {
+              this.picIndex = this.picIndex - 1;
+              this.picList = rlist;
               this.picTotal = this.picList.length;
             });
           }
-          this.picPages = rData.pages;
-          this.picPageNum = rData.pageNum;
-        } 
+          this.picPages = res.data.pages;
+          // this.picPages = 100;
+          this.picPageNum = pageNum;
+          // console.log('this.picIndex', this.picIndex);
+          // this.picPageNum = rData.pageNum;
+        } else {
+          if (pageNum > 1) {
+            this.picAutoPlay(true);
+          } else {
+            this.picIndex = 1;
+            this.picList = [];
+            this.picPages = 0;
+            this.picPageNum = 1;
+          }
+        }
       });
     },
 
-    picPrep () {
-      if (this.picIndex > 1) {
+    picPrep (bStopAni) {
+      // bStopAni: true 关闭动画
+      if (bStopAni) { this.picAutoPlay(true); }
+      // console.log(this.picIndex);
+      // console.log(this.picPageSize * (this.picPageNum - 1) + this.picTotal);
+      if ((this.picIndex % this.picPageSize) > 1 || (this.picIndex % this.picPageSize) === 0) {
         this.picIndex = this.picIndex - 1;
+      } else if ((this.picIndex % this.picPageSize) === 1) {
+        if (this.picPageNum > 1) {
+          this.getDeviceSnapPage2(this.picPageNum - 1, true);
+        }
       }
     },
-    picNext () {
-      if (this.picIndex < this.picTotal) {
+    picNext (bStopAni) {
+      // bStopAni: true 关闭动画
+      if (bStopAni) { this.picAutoPlay(true); }
+      // console.log(this.picIndex);
+      // console.log(this.picPageSize * (this.picPageNum - 1) + this.picTotal);
+      if (this.picIndex < (this.picPageSize * (this.picPageNum - 1) + this.picTotal)) {
         this.picIndex = this.picIndex + 1;
       } else {
         if (this.picPageNum < this.picPages) {
           this.getDeviceSnapPage2(this.picPageNum + 1);
         } else {
-          if (this.picAntoPlayInval) {
-            window.clearInterval(this.picAntoPlayInval);
-          }
+          this.picAutoPlay(true);
         }
       }
     },
-
-    picAutoPlay () {
+    picAutoPlay (bStop) {
       if (this.picAntoPlayInval) {
         window.clearInterval(this.picAntoPlayInval);
       }
-      if (!this.picAutoPlayActive) {
+      if (this.picAutoPlayActive || bStop) {
+        this.picAutoPlayActive = false;
+      } else {
+        this.picAutoPlayActive = true;
         this.picAntoPlayInval =  window.setInterval(() => {
           this.picNext();
         }, this.picPlayTime * 1000);
       }
-      this.picAutoPlayActive = !this.picAutoPlayActive;
     },
 
     picPlayChange (val) {
@@ -388,6 +459,11 @@ export default {
     getTreeList2 () {
       this.doSearch2 = {};
     },
+  },
+  beforeDestroy () {
+    if (this.picAntoPlayInval) {
+      window.clearInterval(this.picAntoPlayInval);
+    }
   }
 }
 </script>
@@ -470,11 +546,38 @@ export default {
           &.video_list_2 {
             > li { float: left; width: 50%; height: 100%; }
           }
-          &.video_list_8 {
-            > li { float: left; width: 25%; height: 50%; }
+          &.video_list_3 {
+            > li { float: left; width: 33.33%; height: 100%; }
           }
-          &.video_list_32 {
-            > li { float: left; width: 12.5%; height: 25%; }
+          &.video_list_4 {
+            > li { 
+              float: left; width: 30%; height: 50%;
+              &:nth-child(1) { margin-left: 15%; }
+              &:nth-child(2) { margin-right: 15%; }
+              &:nth-child(3) { margin-left: 15%; }
+              &:nth-child(4) { margin-right: 15%; }
+            }
+          }
+          &.video_list_5 {
+            > li { 
+              float: left; width: 33.33%; height: 50%;
+              &:nth-child(1) { margin-left: 15%; }
+              &:nth-child(2) { margin-right: 15%; }
+            }
+          }
+          &.video_list_6 {
+            > li { float: left; width: 33.33%; height: 50%; }
+          }
+          &.video_list_7 {
+            > li { 
+              float: left; width: 25%; height: 50%;
+              &:nth-child(5) { margin-left: 12%; }
+            }
+          }
+          &.video_list_8 {
+            > li { 
+              float: left; width: 25%; height: 50%;
+            }
           }
         }
         > .vc_gcck_rb {
@@ -533,9 +636,9 @@ export default {
       }
     }
   }
-  
-  .gcck_sxt { width: 12px; height: 15px; background-position: -325px -377px; }
-  .gcck_sj { width: 12px; height: 15px; background-position: -787px -376px; }
+  .gcck_cl { width: 14px; height: 15px; background-position: -939px -530px; }
+  .gcck_sxt { width: 14px; height: 15px; background-position: -324px -377px; }
+  .gcck_sj { width: 14px; height: 15px; background-position: -786px -376px; }
 }
 .gcck_rh {
   width: 100%; height: 100%;
@@ -555,7 +658,7 @@ export default {
       width: 520px; overflow: hidden;
       > ul {
         padding: 0 20px;
-        width: 10000px;
+        width: 60000px;
         overflow: hidden;
         transition: all .4s ease-in;
         > li {
@@ -596,10 +699,12 @@ export default {
       margin-top: -20px;
       cursor: pointer;
       color: #0C70F8;
+      &.el-icon-arrow-dis { color: #999; cursor: default; }
     }
     > .el-icon-arrow-left {
       left: 50%;
       margin-left: -290px;
+      
     }
     > .el-icon-arrow-right {
       right: 50%;

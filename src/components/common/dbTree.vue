@@ -115,7 +115,7 @@ export default {
           $cld.slideDown(300);
           $li.addClass('db_tree_sli_sed');
         } else {
-          $cld.slideUp(300);
+          $cld.slideUp(300);  
           $li.removeClass('db_tree_sli_sed');
         }
       }
