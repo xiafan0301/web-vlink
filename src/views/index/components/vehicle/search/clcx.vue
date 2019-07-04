@@ -284,15 +284,17 @@ export default {
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
       this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
       this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
-        console.log(this.ruleForm);
+        //console.log(this.ruleForm);
       let d=this.ruleForm
       getSnapList(d).then(res=>{
-        if(res.data && res.data.list.length>0){
-          console.log(res.data);
+        if(res.data && res.data.length>0){
+          // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
           this.pagination.total=res.data.total
           this.pagination.pageSize =res.data.pageNum
-          this.tableData= res.data.list
+          this.tableData= res.data
+          // console.log(this.tableData);
+          
         }
       })
     },
@@ -337,7 +339,9 @@ export default {
     },
     handleClick(v){
       // console.log(v);
-      this.$router.push({name: 'vehicle_search_clcxdetail', query: {}});
+      v.dateStart = this.ruleForm.dateStart
+      v.dateEnd = this.ruleForm.dateEnd
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: v});
     },
     changeTab(v) {
       //console.log(v);

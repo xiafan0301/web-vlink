@@ -67,9 +67,9 @@
                   <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in plateType"
-                      :key="item.enumField"
+                      :key="item.enumValue"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -81,9 +81,9 @@
                   >
                     <el-option
                       v-for="item in plateColor"
-                      :key="item.enumField"
+                      :key="item.enumValue"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -91,9 +91,9 @@
                   <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in vehicleType"
-                      :key="item.enumField"
+                      :key="item.enumValue"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -101,9 +101,9 @@
                   <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in carColor"
-                      :key="item.enumField"
+                      :key="item.enumValue"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -123,7 +123,7 @@
                     <el-option   key="放下" label="放下" value="放下"></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="年检标数量" label-width="90px" prop>
+                <!-- <el-form-item label="年检标数量" label-width="90px" prop>
                   <el-select
                     v-model="tzscMenuForm.inspectionCount"
                     class="width132"
@@ -136,7 +136,7 @@
                       :value="item.value"
                     ></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
             </el-form>
               </div>
           
@@ -338,23 +338,23 @@ export default {
       rules: {},
       options: [
         {
-          value: "1个",
+          value: "1",
           label: "1"
         },
         {
-          value: "2个",
+          value: "2",
           label: "2"
         },
         {
-          value: "3个",
+          value: "3",
           label: "3"
         },
         {
-          value: "4个",
+          value: "4",
           label: "4"
         },
         {
-          value: "5个",
+          value: "5",
           label: "5"
         },
       ],
@@ -540,10 +540,30 @@ export default {
     getVehicleDetail() {
       this.searching = true;
       console.log("======getVehicleDetail=====", this.searchData, this.imgData);
-
+/* 
+ tzscMenuForm: {
+        selectDate: "",
+        selectDevice: "",
+        licenseType: "",
+        licenseColor: "",
+        carType: "",
+        carColor: "",
+        carModel: "",
+        sunVisor: "",
+        inspectionCount: ""
+      }, */
       let params = {
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
+        vilolationNum:this.input4,
+        plateClass:this.tzscMenuForm.licenseType,
+        plateColor:this.tzscMenuForm.licenseColor,
+        vehicleClass:this.tzscMenuForm.carType,
+        vehicleColor:this.tzscMenuForm.carColor,
+        vehicleModel:this.tzscMenuForm.carModel,
+        sunvisor:this.tzscMenuForm.sunVisor,
+        // plateClass:this.input4,
+
       };
 
       this.getViolation(params)
@@ -554,7 +574,7 @@ export default {
     //按条件查询违章
     getViolation(d){
       getViolation(d).then(res=>{
-        console.log(res.data);
+       // console.log(res.data);
         
         if(res.data){
 
@@ -564,6 +584,8 @@ export default {
           this.pagination.pageNum=res.data.pageNum
           // this.pagination.total=res.data.total
           this.regulationsList=res.data.list
+        }else{
+           this.searching = false;
         }
       })
     },
