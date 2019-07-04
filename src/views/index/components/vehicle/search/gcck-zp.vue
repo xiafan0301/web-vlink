@@ -61,8 +61,8 @@
                         </div>
                       </div>
                     </div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName"><i class="vl_icon gcck_sxt"></i>{{sitem.deviceName}}</div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.snapTime"><i class="vl_icon gcck_sj"></i>{{sitem.snapTime}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.snapTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
                   </div>
                 </li>
               </ul>
@@ -106,7 +106,7 @@ export default {
     let nDate = new Date();
     return {
       formInline: {
-        time: [new Date(nDate.getTime() - 6 * 24 * 60 * 60 * 1000), nDate],
+        time: [nDate, nDate],
         lb: '',
         lx: '',
         no: false,
@@ -124,7 +124,7 @@ export default {
       },
       pickerOptions: {
         disabledDate (d) {
-          return d > new Date();
+          return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
       }
     }
@@ -268,13 +268,14 @@ export default {
     searchReset () {
       let nDate = new Date();
       this.formInline = {
-        time: [new Date(nDate.getTime() - 6 * 24 * 60 * 60 * 1000), nDate],
+        time: [nDate, nDate],
         lb: '',
         lx: '',
         no: false,
         cpp: '',
         cp: ''
       }
+      this.searchSubmit();
     }
   }
 }
@@ -375,10 +376,7 @@ export default {
           color: #999; font-size: 12px;
           height: 22px; line-height: 22px;
           > i {
-            position: absolute; top: 3px; left: 0;
-            width: 12px; height: 15px;
-            &.gcck_sxt { background-position: -325px -377px; }
-            &.gcck_sj { background-position: -787px -376px; }
+            position: absolute; top: 4px; left: 0;
           }
         }
       }
