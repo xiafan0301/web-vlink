@@ -179,7 +179,7 @@
                 @click="showStrucInfo(item, index)"
               >
                 <div class="img_wrap">
-                  <img :src="item.storagePath"/>
+                  <img :src="item.storagePath" />
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
@@ -367,6 +367,7 @@
         </swiper>
       </div>
     </el-dialog>
+    <div id="capMap"></div>
   </div>
 </template>
 <script>
@@ -491,13 +492,19 @@ export default {
   mounted() {
     this.getMonitorList();
     this.setDTime();
-
     this.vehicleClassOptions = this.dicFormater(44)[0].dictList; // 获取到车辆类别下拉数组
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
       this.handleCheckedAll(true);
     });
+    // 初始化地图
+    let map = new AMap.Map("capMap", {
+      center: [112.974691, 28.093846],
+      zoom: 16
+    });
+    map.setMapStyle("amap://styles/whitesmoke");
+    this.amap = map;
   },
   methods: {
     getStrucInfo() {
@@ -522,7 +529,9 @@ export default {
             "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
             "where.vehicleClass": this.mhscMenuForm.carType, // 车辆类型
             // "where.vehicleNumber": this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
-            "where.unvehicleFlag": this.mhscMenuForm.isNegate // 非车辆标志
+            "where.unvehicleFlag": this.mhscMenuForm.isNegate, // 非车辆标志
+            pageNum: this.pageNum,
+            pageSize: this.pageSize
           };
           // 处理排序字段
           if (this.sortType === 1) {
@@ -547,7 +556,7 @@ export default {
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
-                  this.pageNum = res.data.pageNum;
+                  // this.pageNum = res.data.pageNum;
                   this.total = res.data.total;
                 }
               }
@@ -625,19 +634,19 @@ export default {
       this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
-        position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
         offset: new AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
       this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
         isCustom: true,
         closeWhenClickMap: false,
-        position: [data.longitude, data.latitude],
+        position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
         offset: new AMap.Pixel(0, -70),
         content: sConent
       });
@@ -800,12 +809,6 @@ export default {
       this.selectBayonetArr = [...this.selectDeviceArr].filter(
         key => key.treeType === 2
       );
-      console.log(
-        "选中的数据",
-        this.selectDeviceArr,
-        this.selectBayonetArr,
-        this.selectCameraArr
-      );
     },
     videoTap() {
       // 播放视频
@@ -825,12 +828,24 @@ export default {
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data);
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
       this.sturcDetail = data;
-      // this.drawPoint(data);
+      this.drawPoint(data);
+    }
+  },
+  watch: {
+    // stucOrder () {
+    //   this.tcDiscuss(true);
+    // },
+    strucCurTab(e) {
+      if (e === 2) {
+        this.drawPoint(this.sturcDetail);
+      } else if (e === 3) {
+        this.videoUrl = document.getElementById("capVideo").src;
+      }
     }
   }
 };
