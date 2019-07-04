@@ -542,7 +542,7 @@ export default {
       console.log("======getVehicleDetail=====", this.searchData, this.imgData);
 
       let params = {
-        dateStart:this.data1[0] + "00:00:00",
+        dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
       };
 
