@@ -36,3 +36,30 @@ export const apiFaceWarning = (params) => {
     mode: 'judge'
   });
 }
+
+/*================人脸检索 --- 跟踪尾随 start=================== */
+/**
+ * 行人抓拍设备查询接口
+ * @param {*} params 
+ */
+export const getPersonShotDev = (params) => {
+  return request({
+    url: '/person/shot-dev',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  });
+}
+/**
+ * 尾随记录列表 --新建一个跟踪尾随离线任务
+ * @param {*} params 
+ */
+export const getPersonFollowing = (params) => {
+  return request({
+    url: '/person/trace-following',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  });
+}
+/*================人脸检索 --- 跟踪尾随 end=================== */

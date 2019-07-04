@@ -96,7 +96,7 @@
                   label="车牌号码">
               </el-table-column>
               <el-table-column
-                  prop="deviceName"
+                  prop="bayonetName"
                   label="卡口名称"
                   show-overflow-tooltip>
               </el-table-column>
@@ -190,10 +190,13 @@ export default {
       };
       MapGETmonitorList(params).then(res => {
         if (res && res.data) {
+          console.log('原始数据', res.data)
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
+          console.log('lopjhkjjk', bayonet)
           this.videoTree = this.getTreeList(camera);
           this.bayonetTree = this.getBayTreeList(bayonet);
+          console.log('jjjjjjjjjjjjjjjjjjjj',this.bayonetTree)
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
@@ -357,6 +360,8 @@ export default {
       this.vehicleNumber = ''
       this.lll = []
       this.selectDeviceArr = []
+      this.checkAllTreeBayonet = false
+      this.$refs.bayonetTree.setCheckedKeys([]);
     },
     hhh (val) {
       console.log(val)
