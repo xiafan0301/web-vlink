@@ -254,7 +254,7 @@
       <div class="right_img_list">
         <!-- 排序和结果 -->
         <div class="result_sort">
-          <h3 class="result">检索结果（{{ strucInfoList.length }}）</h3>
+          <h3 class="result">检索结果（{{ total }}）</h3>
           <div class="sort">
             <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
               时间排序
@@ -346,7 +346,7 @@
       <p v-else>暂无历史记录</p>
       <div slot="footer">
         <el-button @click="historyPicDialog = false">取消</el-button>
-        <!-- <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button> -->
+        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
       </div>
     </el-dialog>
 
@@ -576,11 +576,11 @@ export default {
       /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
-      // uploadFileList: [],
       curImageUrl: "", // 当前上传的图片
       historyPicList: [], // 上传历史记录
+      selectedHistoryPic: null, // 当前选中的历史图片
       historyPicDialog: false,
-      loadingHis: false,
+      loadingHis: false, // 加载效果
       imgData: null,
       /* 选择设备变量 */
       treeTabShow: false,
@@ -1010,7 +1010,10 @@ export default {
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [
+        data.shotPlaceLongitude,
+        data.shotPlaceLatitude
+      ]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
       this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
@@ -1103,6 +1106,8 @@ export default {
       this.uploading = false;
       this.$message.error("上传失败");
     },
+
+    /**从历史记录中上传图片 */
     showHistoryPic() {
       //获取上传记录
       this.loadingHis = true;
@@ -1129,18 +1134,21 @@ export default {
     },
     chooseHisPic(item) {
       //选择最近上传的图片
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      });
       item.checked = true;
+      this.selectedHistoryPic = item;
+    },
+    addHisToImg() {
+      this.curImageUrl = this.selectedHistoryPic.path;
+      this.historyPicDialog = false; // 关闭模态框
     },
     /* 拖拽图片上传的方法 */
     drag(ev) {
       ev.dataTransfer.setData("Text", ev.target.currentSrc);
     },
     drop(e) {
+      this.curImageUrl = e.dataTransfer.getData("Text");
       let x = {
-        // contentUid: this.$store.state.loginUser.uid,
+        contentUid: this.$store.state.loginUser.uid,
         cname: "拖拽图片" + Math.random(),
         filePathName: "拖拽图片" + Math.random(),
         path: e.dataTransfer.getData("Text")
