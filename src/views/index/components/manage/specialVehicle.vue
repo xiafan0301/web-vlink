@@ -369,6 +369,7 @@
               <p class="header">2、上传已填写的用户信息表。</p>
               <div class="main_content">
                 <el-upload
+                  ref="vehicleImport"
                   accept=".xls,.xlsx"
                   :auto-upload="false"
                   :action="importUrl"
@@ -405,7 +406,7 @@ import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
-      importUrl: ajaxCtx.base, // 导入请求地址
+      importUrl: ajaxCtx.base + '/special-vehicle/import', // 导入请求地址
       fileList: [], // 要导入的文件
       isDisabled: true, // 导入-导出-删除车辆禁用
       isShowError: false, // 是否显示错误提示信息
@@ -1087,45 +1088,26 @@ export default {
     },
     // 导入
     sureImportFile () {
-      // let form = document.createElement('form');
-      // document.body.appendChild(form);
-
-      // const inputId = this.createForm('groupId', this.activeId);
-      // const fileName = this.createForm('file');
-
-      // form.appendChild(inputId);
-      // form.appendChild(fileName);
-
-      // form.method = 'post';
-      // form.action = this.importUrl + '/special-vehicle/import';
-      // // form.submit();
+      if (this.fileList.length > 0) {
+        this.isImportLoading = true;
+        this.$nextTick(() => {
+          this.$refs.vehicleImport.submit();
+        })
+      } else {
+        this.$message.warning('请先选择要导入的文件');
+      }
     },
     handleChange (file, fileList) {
-      console.log(fileList)
       if (file && fileList) {
         this.fileList = fileList;
       }
     },
     // 上传成功
     handleSuccess (res) {
-      this.isImportLoading = true;
+      this.isImportLoading = false;
       console.log(res);
     },
-    // 模拟创建一个表单
-    createForm (name, value) {
-      let tempInput = document.createElement('input');
-      if (name === 'file') {
-        console.log('aaaaaa')
-        tempInput.type = 'file';
-      } else {
-        console.log('bbbbbbbbbb')
-        tempInput.type = 'hidden';
-      }
-      tempInput.value = value;
-      tempInput.name = name;
-
-      return tempInput;
-    }
+    
   }
 }
 </script>

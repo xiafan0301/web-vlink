@@ -378,18 +378,18 @@ export default {
     },
     // 获取车辆抓拍详情
     getVehicleDetail (obj) {
-      // const params = {
-      //   dateStart: formatDate(this.filterObj.startDate),
-      //   dateEnd: formatDate(this.filterObj.endDate),
-      //   devIds: obj.deviceID,
-      //   plateNo: obj.plateNo
-      // }
       const params = {
-        dateStart: '2019-01-01',
-        dateEnd: '2019-09-01',
-        // devIds: obj.deviceID,
-        plateNo: '湘A77777'
+        dateStart: formatDate(this.filterObj.startDate),
+        dateEnd: formatDate(this.filterObj.endDate),
+        devIds: obj.deviceID,
+        plateNo: obj.plateNo
       }
+      // const params = {
+      //   dateStart: '2019-01-01',
+      //   dateEnd: '2019-09-01',
+      //   // devIds: obj.deviceID,
+      //   plateNo: '湘A77777'
+      // }
       getSnapDetail(params)
         .then(res => {
           if (res && res.data) {

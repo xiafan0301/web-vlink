@@ -175,12 +175,10 @@ export default {
       this.searchForm.deviceCode = this.$route.query.deviceCode;
       this.searchForm.vehicleClass = this.$route.query.vehicleClass && this.$route.query.vehicleClass.join(',');
       this.getDeviceList();
+      setTimeout(() => {
+        this.searchData('searchForm');
+      }, 1000)
     }
-  },
-  mounted () {
-    setTimeout(() => {
-      this.searchData('searchForm');
-    }, 1000)
   },
   methods: {
     // 获取车辆类型列表
