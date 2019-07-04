@@ -1,12 +1,6 @@
   <template>
     <div class="th-ycxc-record">
-      <div class="th-breadcrumb">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{name: 'vehicle_search_ycxc'}">夜间行车</el-breadcrumb-item>
-          <el-breadcrumb-item>抓拍记录</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
+      <Breadcrumb :oData="[{name: '夜间行车分析', routerName: 'vehicle_search_ycxc'}, {name: '抓拍记录'}]"></Breadcrumb>
       <div class="th-ycxc-record-list">
         <div class="list-sort">
           <div>
@@ -25,7 +19,7 @@
           </div>
         </div>
         <div class="list-box">
-            <div class="list-item" v-for="item in '123123123123123'" :key="item.id" @click="onOpenDetail(item)">
+            <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
               <img src="../../../../../assets/img/666.jpg" alt="">
               <p class="time"><i></i>2018.-11-12  13:14:15</p>
               <p class="address"><i></i>抓拍设备:抓拍名称京广高速</p>
@@ -36,7 +30,7 @@
               :current-page.sync="currentPage"
               :page-size="pagination.pageSize"
               layout="prev, pager, next"
-              :total="32">
+              :total="pagination.total">
             </el-pagination>
         </div>
       </div>
@@ -116,15 +110,19 @@
   </template>
   <script>
   import flvplayer from '@/components/common/flvplayer.vue';
+  import Breadcrumb from '../breadcrumb.vue';
+  import { getNightVehicleRecordList  }from "@/views/index/api/api.judge.js";
   export default {
     components: {
-      flvplayer
+      flvplayer,
+      Breadcrumb
     },
     data () {
       return {
         pagination: {
           pageNum: 1,
-          pageSize: 15
+          pageSize: 15,
+          total: 0
         },
         currentPage: 1,
         sortTimeType: null, // 时间排序active
@@ -152,9 +150,28 @@
             prevEl: '.swiper-button-prev',
           },
         },
+        dataList: [],
       }
     },
+    mounted () {
+      this.getList();
+    },
     methods: {
+      // 获取抓拍记录
+      getList () {
+        const params = JSON.parse(this.$route.query.obj);
+        params['vehicleNumber'] = this.$route.query.number;
+        console.log(params)
+        getNightVehicleRecordList(params)
+          .then(res => {
+            if (res && res.data) {
+              console.log('dsasd', res)
+              this.dataList = res.data.list;
+              this.pagination.total = res.data.total;
+            }
+          })
+          .catch(() => {})
+      },
       /**
        * 弹框地图初始化
        */
@@ -256,6 +273,7 @@
 .th-ycxc-record {
   width: 100%;
   height: 100%;
+  padding-top: 50px;
   .th-ycxc-record-list {
     width: 100%;
     // height: calc(100% - 55px);

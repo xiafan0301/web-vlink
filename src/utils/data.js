@@ -14,18 +14,22 @@ const dataList = {
   alarmLevel: 11, //告警级别
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
-  vehicleColor: 17, // 车身颜色
   eventType: 20, // 事件类型
   distanceId: 23, // 推送距离
   taskStatus: 24, // 任务状态,
   taskType: 25, // 任务类型
   ctcStatus: 26, // 调度事件状态
-  licensePlateColor: 30, //车牌颜色
-  numberType: 32, // 号牌种类
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
+  ownership: 48, //号牌归属
   vehicleType: 44, // 车辆类型
+  numberType: 45, // 号牌种类
+  licensePlateColor: 46, //车牌颜色
+  vehicleColor: 47, // 车身颜色
+  plateColor: 46,     //号牌颜色
+  plateType: 45, // 号牌类型
+  carColor: 47, // 车辆颜色
 }
 // 处理方式
 const handeMethods = {
@@ -51,7 +55,7 @@ const proccessEventType = {
   feedbackId: 5 // 反馈
 }
 const cityCode = [
-  '京','津','冀','晋','蒙','辽','吉','黑','黑','苏','浙','皖','闽','赣','鲁','豫','鄂','湘','粤','桂','琼','川','贵','云','渝','藏','陕','甘','青','宁','新','港','澳','台'
+  '京','津','沪','冀','晋','蒙','辽','吉','黑','黑','苏','浙','皖','闽','赣','鲁','豫','鄂','湘','粤','桂','琼','川','贵','云','渝','藏','陕','甘','青','宁','新','港','澳','台'
 ]
 
 

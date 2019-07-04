@@ -10,28 +10,28 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_01"></i>
               <div>
                 <p>人像总数</p>
-                <h1>43154</h1>
+                <h1>{{rlsjfxDetail.portraitNumsInSur}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_02"></i>
               <div>
                 <p>已认证数</p>
-                <h1>2345</h1>
+                <h1>{{rlsjfxDetail.authNumsInSur}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性：女性</p>
-                <h1>6:4</h1>
+                <h1>{{rlsjfxDetail.malePerInSur}}:{{rlsjfxDetail.femalePerInSur}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_04"></i>
               <div>
                 <p>布控组数</p>
-                <h1>5</h1>
+                <h1>{{rlsjfxDetail.surGroups}}</h1>
               </div>
             </div>
           </div>
@@ -45,28 +45,28 @@
               <i class="vl_icon vl_icon_portrait_rlsjfx_05"></i>
               <div>
                 <p>库总数</p>
-                <h1>54</h1>
+                <h1>{{rlsjfxDetail.baseGroups}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_01"></i>
               <div>
                 <p>人像总数</p>
-                <h1>43154</h1>
+                <h1>{{rlsjfxDetail.portraitNumsInBase}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
                 <p>男性：女性</p>
-                <h1>6:4</h1>
+                <h1>{{rlsjfxDetail.malePerInBase}}:{{rlsjfxDetail.femalePerInBase}}</h1>
               </div>
             </div>
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_06"></i>
               <div>
                 <p>业务组数</p>
-                <h1>17</h1>
+                <h1>{{rlsjfxDetail.businessGroups}}</h1>
               </div>
             </div>
           </div>
@@ -79,14 +79,7 @@
             <span>查看更多></span>
           </div>
           <div class="face_snap_form">
-            <el-select v-model="faceSnapForm.queryDevId" placeholder="请选择设备">
-              <el-option
-                v-for="item in devList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <div ref="devSelect" is="devSelect" :type="2" @sendSelectData="getSelectData"></div>
             <el-date-picker
               v-model="faceSnapForm.queryDate"
               type="daterange"
@@ -173,14 +166,19 @@
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
+import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import {apiFaceTotal, apiFaceSnap, apiFaceWarning} from '@/views/index/api/api.portrait.js';
 export default {
-  components: {vehicleBreadcrumb},
+  components: {vehicleBreadcrumb, devSelect},
   data () {
     return {
       faceSnapForm: {
-        queryDevId: null,
+        devIdData:  {
+          selSelectedData1: [],
+          selSelectedData2: []
+        },
         queryDate: null
       },
       faceControlQueryDate: null,
@@ -220,18 +218,40 @@ export default {
       charts: {
         chart1: null,
         chart2: null
+      },
+      rlsjfxDetail: {
+        authNumsInSur: null,
+        baseGroups: null,
+        businessGroups: null,
+        femalePerInBase: null,
+        femalePerInSur: null,
+        malePerInBase: null,
+        malePerInSur: null,
+        portraitNumsInBase: null,
+        portraitNumsInSur: null,
+        surGroups: null
       }
     }
   },
   mounted () {
+    this.getFaceTotal();
     this.drawChart1();
     this.drawChart2();
   },
   methods: {
+    // 获得选择设备组件传过来的数据
+    getSelectData (data) {
+      console.log(data, 'data');
+      this.faceSnapForm.devIdData = data;
+    },
     // 重置人脸抓拍统计表单
     resetFaceSnapForm () {
+      this.$refs.devSelect.resetSelect();
       this.faceSnapForm = {
-        queryDevId: null,
+        devIdData: {
+          selSelectedData1: [],
+          selSelectedData2: []
+        },
         queryDate: null
       }
     },
@@ -239,13 +259,35 @@ export default {
     resetFaceControlDate () {
       this.faceControlQueryDate = null;
     },
+    // 获取人脸数据汇总分析
+    getFaceTotal () {
+      apiFaceTotal().then(res => {
+        if (res) {
+          this.rlsjfxDetail = res.data;
+        }
+      })
+    },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
+      const params = {
+        // deviceIds: ,
+        // bayonetIds: ,
+        // startTime: ,
+        // endTime: 
+      }
+      apiFaceSnap().then(res => {
+        if (res) {
 
+        }
+      })
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
+      apiFaceWarning().then(res => {
+        if (res) {
 
+        }
+      })
     },
     // 画抓拍人脸数图表
     drawChart1 () {
@@ -494,8 +536,12 @@ export default {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          .el-select, .el-date-editor{
+          .el-date-editor{
             width: 33%;
+          }
+          > div:nth-child(1){
+            width: 33%;
+            position: relative;
           }
         }
         .title{

@@ -33,18 +33,18 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <el-form-item prop="vehicleGroup" >
-            <el-select v-model="ruleForm.vehicleGroup" multiple collapse-tags class="full" placeholder="车辆类别">
+          <el-form-item prop="_vehicleGroup" >
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="item in grounpOptions"
+                :key="item.uid"
+                :label="item.groupName"
+                :value="item.uid"
               ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass" multiple collapse-tags class="full" placeholder="车辆类型">
+            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="车辆类型">
               <el-option
                 v-for="item in vehicleOptions"
                 :key="item.enumValue"
@@ -70,7 +70,10 @@
                
             </el-radio-group>
           </el-form-item>
-
+<el-form-item v-if="input5=='2'" >
+            <el-input  v-model="selectValue" :disabled="true">
+            </el-input>
+          </el-form-item>
           <el-form-item v-if="input5=='1'">
             <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
@@ -87,10 +90,11 @@
           </el-select>
           </el-form-item>
           <el-form-item prop="plateNo">
-            <p class="carCold">车牌：<el-checkbox v-model="ruleForm.include">非</el-checkbox></p>
+            <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">非</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="请选择">
-               <el-option v-for="item in pricecode" :label="item" :value="item"></el-option>
+               <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
+               <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
           </el-form-item>
@@ -165,7 +169,7 @@
 <script>
 import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
-import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
+import { getVehicleShot,getAllDevice,getGroups,getSnapList} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapselect from "@/views/index/components/common/mapSelect";
 import { dataList } from '@/utils/data.js';
@@ -180,56 +184,53 @@ export default {
       dialogVisible: false,
       value1: null,
       select: "",
+      selectValue:"已选设备0个",
       ruleForm: {
         dateStart:'',
         dateEnd:'',
-        vehicleGroup:'',
+        _vehicleGroup:'',
         vehicleClass:'',
         devIds:'',
-        include:0,
+        include:1,
+        _include:0,
         plateNo:'',
         pageNum:1,
         pageSize:10,
       },
       allDevice:[],
       selectDevice:[],
+      selectBayonet:[],
       tableData: [
-        {
-          date: "2016-05-02",
-          name: "1",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "2",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "3",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "4",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
       ],
-      pagination: { total: 4, pageSize: 10, pageNum: 1 },
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       options: [],
       vehicleOptions: [],
+      grounpOptions: [
+        
+        {
+          groupName:'布控车辆',
+          uid:-2,
+        },
+        {
+          groupName:'无牌车辆',
+          uid:-3,
+        },
+       
+       
+      ],
     }
   },
   mounted() {
    
     this.getMapGETmonitorList()//查询行政区域
     this.getAllDevice()
+    this.getGroups()
     //this.getAllDevice()
     //let dic= JSON.parse(localStorage.getItem("dic"));
     //this.ruleForm.vehicleClass=dic.
      let dic=this.dicFormater(dataList.vehicleType);
      this.vehicleOptions= [...dic[0].dictList]
-    console.log(this.ruleForm.vehicleClass);
+    //console.log(this.ruleForm.vehicleClass);
     
     
   },
@@ -257,18 +258,64 @@ export default {
           
       })
     },
+    //查询特殊组
+    getGroups(){
+      let d={
+        groupType:9
+      }
+      getGroups(d).then(res=>{
+          if(res.data && res.data.length>0){
+            this.grounpOptions.push(...res.data)
+            // console.log(this.grounpOptions);
+          }
+      })  
+    },
+    //查询车辆
+    getSnapList(){
+      
+      if(this.input5==1){
+        this.ruleForm.areaIds =this.value1.join(",")
+      }else{
+        /*   this.selectDevice=[]
+      this.selectBayonet=[] */
+        this.ruleForm.deviceIds  = this.selectDevice.join(",")
+        this.ruleForm.bayonetIds = this.selectBayonet.join(",")
+      }
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
+      
+        console.log(this.ruleForm);
+      let d=this.ruleForm
+      getSnapList(d).then(res=>{
+        if(res.data && res.data.list.length>0){
+          console.log(res.data);
+          // pagination: { total: 4, pageSize: 10, pageNum: 1 },
+          this.pagination.total=res.data.total
+          this.pagination.pageSize =res.data.pageNum
+          this.tableData= res.data.list
+        }
+      })
+    },
     hideMap(){
       this.dialogVisible=false
     },
-    mapPoint(v){
+    mapPoint(data){
+      let v = data.dev;
+      let p = data.boy;
       this.dialogVisible=false;
+      this.selectDevice=[]
+      this.selectBayonet=[]
       //返回有效点集合
       if(v && v.length>0){
         v.forEach(element => {
           this.selectDevice.push(element.uid)
         });
       }
-      this.selectValue="已选设备"+this.selectDevice.length+"个"
+      if(p && p.length>0){
+        p.forEach(element => {
+          this.selectBayonet.push(element.uid)
+        });
+      }
+      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
 
       // console.log(this.selectDevice);
@@ -299,14 +346,28 @@ export default {
         this.dialogVisible = false;
       }
     },
+    resetForm (){
+
+    },
+    submitForm(){
+      this.ruleForm.include=this.ruleForm._include?0:1
+      // console.log(this.ruleForm);
+      this.getSnapList()
+      
+    },
     onPageChange (page) {
+      //console.log(page);
+      
       this.pagination.pageNum = page;
-      this.getEventData();
+      this.grounpOptions.pageNum=page
+      this.getSnapList()
     },
     handleSizeChange (val) {
+      //i没有用到
+      
       this.pagination.pageNum = 1;
       this.pagination.pageSize = val;
-      this.getEventData();
+     // this.getSnapList()
     },
   }
 }
