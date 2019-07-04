@@ -2,13 +2,13 @@
   <div class="gcsj_container">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>过车数据统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="con_box">
       <div class="con_left">
-        <div ref="devSelect" is="devSelect" :type="2" @sendSelectData="getSelectData"></div>
+        <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
         <div class="left_start">
           <span>开始</span>
           <el-date-picker
@@ -193,17 +193,13 @@ export default {
     }
   },
   mounted () {
-    // this.drawChart1();
-    // this.drawChart2();
-    // this.drawChart3();
-    // this.drawChart4();
     setTimeout(() => {
       this.getCarBeforeSta();
-    }, 500);
+    }, 2000);
   },
   methods: {
     getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime()
+      let startTime = new Date(this.queryForm.startTime).getTime();
       this.pickerOptions1 = {
         disabledDate(time) {
           return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
@@ -212,14 +208,7 @@ export default {
     },
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
-      console.log(data, 'data');
       this.queryForm.devIdData = data;
-    },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
     },
     // 画图表
     drawChart1 () {
@@ -562,8 +551,8 @@ export default {
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
-        startTime: this.queryForm.startTime,
-        endTime: this.queryForm.endTime
+        startTime: this.queryForm.startTime + ' 00:00:00',
+        endTime: this.queryForm.endTime + ' 23:59:59'
       }
       this.loadingBtn = true;
       apiPassingCarSta(params).then(res => {

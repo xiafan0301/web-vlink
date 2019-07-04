@@ -5,12 +5,12 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'https://apidev.aorise.org/vlink-base',
-        // dev: 'http://10.116.64.23:8081',
-        // dev: 'http://10.116.64.142:8081',
-        // dev: 'http://10.116.66.29:8082',// 钟赞
-        test: 'https://apirel.aorise.org/vlink-base',
-        prod: 'https://apirel.aorise.org/vlink-base'
+      dev: 'https://apidev.aorise.org/vlink-base',
+      // dev: 'http://10.116.64.23:8081',
+      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.66.29:8082',// 钟赞
+      test: 'https://apirel.aorise.org/vlink-base',
+      prod: 'https://apirel.aorise.org/vlink-base'
     },
     // 视频服务地址
     video: {
@@ -45,8 +45,13 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
+<<<<<<< HEAD
         // dev: 'http://10.116.64.127:8082/',
+=======
+>>>>>>> 7c9eaddff3a4c897bf855750c428d79b7658c369
         dev: 'https://apidev.aorise.org/vlink-judge/',
+        // dev: 'http://10.116.64.127:8082',
+        // dev: 'http://10.116.64.107:8081',
         test: 'https://apirel.aorise.org/vlink-judge/',
         prod: 'https://apirel.aorise.org/vlink-judge/'
     },
@@ -110,12 +115,6 @@ const oDomains = {
       dev: 'http://10.116.64.142:8087',
       test: 'https://apirel.aorise.org',
       prod: 'https://apidev.aorise.org'
-    },
-    //研判分析服务
-    analysis: {
-      dev: 'https://apidev.aorise.org/vlink-judge',
-      test: 'http://10.116.65.15:8081',
-      prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
     }
 };
 let ENV_API = process.env.VUE_APP_API;

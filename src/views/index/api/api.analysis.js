@@ -54,7 +54,7 @@ export function getFeatureSearch(params) {
   return request({
     url: '/vehicle-investigate/feature-search',
     method: 'get',
-    mode: 'analysis',
+    mode: 'judge',
     params: params
   })
 }
@@ -68,7 +68,7 @@ export function getPhotoAnalysis(url) {
   return request({
     url: '/vehicle-investigate/photo-analysis?uploadImgUrls=' + url,
     method: 'get',
-    mode: 'analysis'
+    mode: 'judge'
   })
 }
 
@@ -82,7 +82,7 @@ export function getPhotoSearch(params) {
   return request({
     url: '/vehicle-investigate/photo-search',
     method: 'get',
-    mode: 'analysis',
+    mode: 'judge',
     params: params
   })
 }
@@ -97,7 +97,7 @@ export function getVagueSearch(params) {
   return request({
     url: '/vehicle-investigate/vague-search',
     method: 'get',
-    mode: 'analysis',
+    mode: 'judge',
     params: params
   })
 }
@@ -151,5 +151,18 @@ export function putTaskInfosResume(uid) {
     url: '/analysisTaskInfos/resume/' + uid,
     method: 'put',
     mode: 'judge',
+  })
+}
+/**
+ * postTaskAnalysis
+ * 频繁出没新建任务接口
+ * @param {object} data
+ */
+export function postTaskAnalysis(data) {
+  return request({
+    url: '/face-retrieval/add-frequently-haunt-job',
+    method: 'post',
+    mode: 'judge',
+    data
   })
 }

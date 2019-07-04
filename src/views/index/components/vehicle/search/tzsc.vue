@@ -367,7 +367,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -435,7 +435,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -459,7 +459,7 @@
               :class="{'active': index === curImgIndex}"
               @click="imgListTap(item, index)"
             >
-              <img style="width: 100%; height: .88rem;" :src="item.storagePath" alt />
+              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
               <!-- <div class="vl_jfo_sim" v-show="showSim">
                 <i
                   class="vl_icon vl_icon_retrieval_05"
@@ -482,6 +482,8 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
+import {formatDate} from '@/utils/util.js';
+
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -697,8 +699,8 @@ export default {
             return item.id;
           });
           let queryParams = {
-            "where.startTime": this.tzscMenuForm.selectDate[0], // 开始时间
-            "where.endTime": this.tzscMenuForm.selectDate[1], // 结束时间
+            "where.startTime": this.tzscMenuForm.selectDate[0] + ' 00:00:00', // 开始时间
+            "where.endTime": this.tzscMenuForm.selectDate[1] + ' 23:59:59', // 结束时间
             "where.deviceUid":
               deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             "where.bayonetUid":
@@ -716,7 +718,7 @@ export default {
           // 处理排序字段
           if (this.sortType === 1) {
             // 时间排序
-            queryParams.orderBy = "startTime";
+            queryParams.orderBy = "shotTime";
             if (this.timeSortType) {
               queryParams.order = "desc";
             } else {
@@ -724,7 +726,7 @@ export default {
             }
           } else if (this.sortType === 2) {
             // 监控排序
-            queryParams.orderBy = null;
+            queryParams.orderBy = "shotTime";
             if (this.cameraSortType) {
               queryParams.order = "desc";
             } else {
@@ -783,7 +785,6 @@ export default {
         this.$refs.tzscMenuForm.resetFields();
       }
       this.initCheckTree(); // 初始化全选树节点
-
       this.$nextTick(() => {
         this.setDTime(); // 重置时间
       });

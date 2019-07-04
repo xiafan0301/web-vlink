@@ -165,6 +165,9 @@ export default {
   },
   computed: {},
   mounted() {
+    if(this.$route.query.plateNo) {
+      this.searchData.licensePlateNum = this.$route.query.plateNo
+    }
     this.setDTime();
     this.getSearchData();
   },
@@ -417,6 +420,10 @@ html {
     text-align: center;
     .el-button {
       width: 45%;
+    }
+    .el-button--primary {
+      background-color: #0c70f8;
+      border-color: #0c70f8;
     }
   }
   //弹窗

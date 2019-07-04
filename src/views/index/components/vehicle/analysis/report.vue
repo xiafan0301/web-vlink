@@ -170,8 +170,23 @@
             <div class="vc_rep_cl" id="report_showtype_7">
               <div>
                 <h2>套牌车分析</h2>
-                <div>
-                  套牌车分析
+                <div style="padding: 10px;">
+                  <ul class="rep_tpc_list">
+                    <li v-for="item in 10" :key="'tpc_list_' + item">
+                      <div>
+                        <div class="com_width_to_height" style="margin-bottom: 5px;">
+                          <div>
+                            <div>
+                              <img src="../../../../../assets/img/666.jpg" alt="">
+                            </div>
+                          </div>
+                        </div>
+                        <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;2018-12-24. 14:12:17</p>
+                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;摄像头2</p>
+                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;同牌不同车身颜色</p>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -189,12 +204,14 @@
               <div>
                 <h2>区域碰撞</h2>
                 <div>
-                  区域碰撞
+                  请前往
+                   <router-link :to="{name: 'vehicle_search_qy_jg'}">
+                    区域碰撞
+                  </router-link>
+                  进行操作查看
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
       </div>
@@ -349,7 +366,6 @@ export default {
       }
     }
   }
-
   .rep_yjcm {
     > li {
       overflow: hidden;
@@ -367,6 +383,27 @@ export default {
         > span {
           display: inline-block;
           padding: 0 10px;
+        }
+      }
+    }
+  }
+  .rep_tpc_list {
+    overflow: hidden;
+    > li {
+      float: left;
+      width: 20%;
+      padding: 10px;
+      > div {
+        border-radius:4px;
+        border:1px solid rgba(211,211,211,1);
+        padding-bottom: 10px;
+        > p {
+          padding-left: 10px;
+          height: 24px; line-height: 24px;
+          overflow: hidden;
+          color: #999;
+          &.tpc_list_fst { color: #333; }
+          > i { position: relative; top: 2px; }
         }
       }
     }

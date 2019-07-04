@@ -2,7 +2,7 @@
   <div class="cll_container">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车流量统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -154,7 +154,6 @@ export default {
       ],
       loading: false,
       loadingBtn: false,
-      bkclccList: [{name: 'xxxxxxx'}],
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
@@ -228,12 +227,6 @@ export default {
     clearDate () {
       this.queryForm.startTime = null;
       this.queryForm.endTime = null;
-    },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
     },
     // 画图表
     drawChart1 () {
@@ -406,8 +399,8 @@ export default {
     getCarTrafficSta () {
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
-        startTime: this.queryForm.startTime,
-        endTime: this.queryForm.endTime,
+        startTime: this.queryForm.startTime + ' 00:00:00',
+        endTime: this.queryForm.endTime + ' 23:59:59',
         carType: this.queryForm.carType
       }
       this.queryForm.statementType !== 5 && (params.reportType = this.queryForm.statementType);

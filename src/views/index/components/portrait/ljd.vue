@@ -2,7 +2,7 @@
   <div class="ljd point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">人像</el-breadcrumb-item>
         <el-breadcrumb-item>落脚点分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -155,9 +155,6 @@ export default {
   },
   mounted() {
     //this.getControlMap(1);
-    let pNo=this.$route.query.plateNo
-    this.select = pNo?pNo.substring(0,1):"";
-    this.ruleForm.input3 = pNo?pNo.substr(1,6):"";
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
       center: mapXupuxian.center
@@ -502,7 +499,7 @@ export default {
   display: inline-block;
   background-repeat: no-repeat;
   transform: rotate(180deg);
-  background-image: url(../../../../../assets/img/icons.png);
+  background-image: url(../../../../assets/img/icons.png);
   background-position: -380px -1269px;
   cursor: pointer;
 }
@@ -522,7 +519,7 @@ export default {
   display: inline-block;
   background-repeat: no-repeat;
   transform: rotate(180deg);
-  background-image: url(../../../../../assets/img/icons.png);
+  background-image: url(../../../../assets/img/icons.png);
   background-position: -318px -1269px;
   cursor: pointer;
 }

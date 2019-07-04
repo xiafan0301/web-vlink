@@ -23,7 +23,7 @@
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
-                <p>男性：女性</p>
+                <p>男性:女性</p>
                 <h1>{{rlsjfxDetail.malePerInSur}}:{{rlsjfxDetail.femalePerInSur}}</h1>
               </div>
             </div>
@@ -58,7 +58,7 @@
             <div class="item">
               <i class="vl_icon vl_icon_portrait_rlsjfx_03"></i>
               <div>
-                <p>男性：女性</p>
+                <p>男性:女性</p>
                 <h1>{{rlsjfxDetail.malePerInBase}}:{{rlsjfxDetail.femalePerInBase}}</h1>
               </div>
             </div>
@@ -76,27 +76,28 @@
         <div class="box">
           <div class="title">
             <h1>人脸抓拍统计</h1>
-            <span>查看更多></span>
+            <span @click="skip">查看更多></span>
           </div>
           <div class="face_snap_form">
-            <div ref="devSelect" is="devSelect" :type="2" @sendSelectData="getSelectData"></div>
+            <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
             <el-date-picker
               v-model="faceSnapForm.queryDate"
+              @change="validationDate(faceSnapForm)"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               :default-time="['00:00:00', '23:59:59']">
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceSnapForm">重置</el-button>
-              <el-button class="select_btn" @click="getFaceSnapSta">统计</el-button>
+              <el-button class="select_btn" @click="getFaceSnapSta" :loading="loadingBtn1">统计</el-button>
             </div>
           </div>
           <div class="snap_snap">
             <span>
-              <span>设备总数：20234 个</span>
+              <span>设备总数：{{faceSnapSta.total}} 个</span>
               <el-popover
                 placement="right"
                 popper-class="five_info"
@@ -114,8 +115,8 @@
                 <span slot="reference" class="five">TOP5</span>
               </el-popover>
             </span>
-            <span>抓拍人脸：2484  个</span>
-            <span>抓拍峰值：124 张</span>
+            <span>抓拍人脸：{{faceSnapSta.faceNums}} 个</span>
+            <span>抓拍峰值：{{faceSnapSta.peakValues}} 张</span>
           </div>
         </div>
       </div>
@@ -123,27 +124,28 @@
         <div class="box">
           <div class="title">
             <h1>人脸布控告警数据分析</h1>
-            <span>查看更多></span>
+            <span @click="skip">查看更多></span>
           </div>
           <div class="face_control_form">
             <el-date-picker
               v-model="faceControlQueryDate"
+              @change="validationDate(faceControlQueryDate)"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd HH:mm:ss"
               :default-time="['00:00:00', '23:59:59']">
             </el-date-picker>
             <div>
               <el-button class="reset_btn" @click="resetFaceControlDate">重置</el-button>
-              <el-button class="select_btn" @click="getFaceControlSta">统计</el-button>
+              <el-button class="select_btn" @click="getFaceControlSta" :loading="loadingBtn2">统计</el-button>
             </div>
           </div>
           <div class="face_control_info">
-            <span>告警总数：20234 个</span> 
-            <span>人脸数量：2484 个</span> 
-            <span>告警峰值：124 张</span> 
+            <span>告警总数：{{faceControlSta.total}} 个</span> 
+            <span>人脸数量：{{faceControlSta.faceNums}} 个</span> 
+            <span>告警峰值：{{faceControlSta.peakValues}} 张</span> 
           </div>
         </div>
       </div>
@@ -165,11 +167,14 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import vehicleBreadcrumb from './breadcrumb.vue';
 import devSelect from '@/components/common/devSelect.vue';
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiFaceTotal, apiFaceSnap, apiFaceWarning} from '@/views/index/api/api.portrait.js';
+import {formatDate} from '@/utils/util.js';
 export default {
   components: {vehicleBreadcrumb, devSelect},
   data () {
@@ -179,9 +184,9 @@ export default {
           selSelectedData1: [],
           selSelectedData2: []
         },
-        queryDate: null
+        queryDate: [startTime, endTime]
       },
-      faceControlQueryDate: null,
+      faceControlQueryDate: [startTime, endTime],
       devList: [],//人脸抓拍统计设备列表
       // 图表参数
       chartData1: [
@@ -219,6 +224,7 @@ export default {
         chart1: null,
         chart2: null
       },
+      // 布控和基础数据统计
       rlsjfxDetail: {
         authNumsInSur: null,
         baseGroups: null,
@@ -230,15 +236,59 @@ export default {
         portraitNumsInBase: null,
         portraitNumsInSur: null,
         surGroups: null
-      }
+      },
+      // 人脸抓拍统计和各时间段的抓拍人脸数统计数据
+      faceSnapSta: {
+        total: '',
+        faceNums: '',
+        peakValues: '',
+        device: []
+      },
+      // 人脸布控告警数据分析和各时间的人脸布控告警次数统计
+      faceControlSta: {
+        total: '',
+        faceNums: '',
+        peakValues: '',
+        timeDto: []
+      },
+      loadingBtn1: false,
+      loadingBtn2: false
     }
   },
   mounted () {
     this.getFaceTotal();
+    this.getFaceControlSta();
+    setTimeout(() => {
+      this.getFaceSnapSta();
+    }, 2000)
+
     this.drawChart1();
     this.drawChart2();
   },
   methods: {
+    // 查看更多
+    skip () {
+      this.$router.push({name: ''});
+    },
+    // 验证所选时间是否符合要求
+    validationDate (obj) {
+      let _startTime, _endTime;
+      if ('queryDate' in obj) {
+        _startTime = new Date(obj.queryDate[0]).getTime();
+        _endTime = new Date(obj.queryDate[1]).getTime();
+      } else {
+        _startTime = new Date(obj[0]).getTime();
+        _endTime = new Date(obj[1]).getTime();
+      }
+      if ((_endTime - _startTime) > 3 * 3600 * 24 * 1000) {
+        this.$message.warning('所选时间间隔不能超过三天');
+        if ('queryDate' in obj) {
+          obj.queryDate = [startTime, endTime];
+        } else {
+          this.faceControlQueryDate = [startTime, endTime];
+        }
+      }
+    },
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
       console.log(data, 'data');
@@ -252,12 +302,14 @@ export default {
           selSelectedData1: [],
           selSelectedData2: []
         },
-        queryDate: null
+        queryDate: [startTime, endTime]
       }
+      this.getFaceSnapSta();
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
-      this.faceControlQueryDate = null;
+      this.faceControlQueryDate = [startTime, endTime];
+      this.getFaceControlSta();
     },
     // 获取人脸数据汇总分析
     getFaceTotal () {
@@ -269,24 +321,41 @@ export default {
     },
     // 获取人脸抓拍统计
     getFaceSnapSta () {
+      // const params = {
+      //   deviceIds: '9',
+      //   bayonetIds: null,
+      //   startTime: this.faceSnapForm.queryDate[0],
+      //   endTime: this.faceSnapForm.queryDate[1]
+      // }
       const params = {
-        // deviceIds: ,
-        // bayonetIds: ,
-        // startTime: ,
-        // endTime: 
+        deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
+        bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+        startTime: this.faceSnapForm.queryDate[0],
+        endTime: this.faceSnapForm.queryDate[1]
       }
-      apiFaceSnap().then(res => {
+      console.log(params)
+      this.loadingBtn1 = true;
+      apiFaceSnap(params).then(res => {
         if (res) {
-
+          this.faceSnapSta = res.data;
         }
+      }).finally(() => {
+        this.loadingBtn1 = false;
       })
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
-      apiFaceWarning().then(res => {
+      const params = {
+        startTime: this.faceControlQueryDate[0],
+        endTime: this.faceControlQueryDate[1],
+      }
+      this.loadingBtn2 = true;
+      apiFaceWarning(params).then(res => {
         if (res) {
-
+          this.faceControlSta = res.data;
         }
+      }).finally(() => {
+        this.loadingBtn2 = false;
       })
     },
     // 画抓拍人脸数图表
@@ -617,6 +686,17 @@ export default {
     color: #666666;
     border-color: #DDDDDD;
   }
+  .el-date-editor{
+    .el-range-input{
+      width: 42%!important;
+    }
+    .el-input__icon{
+      display: none;
+    }
+    .el-range-separator{
+      width: 16px!important;
+    }
+  } 
   .my_tooltip{
     > h1{
       color: #999;

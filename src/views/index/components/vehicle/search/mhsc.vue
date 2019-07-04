@@ -124,14 +124,18 @@
                     class="input-with-select width232"
                   >
                     <el-select
+                      clearable
                       v-model="mhscMenuForm.provice"
                       style="width: 70px;"
                       slot="prepend"
                       placeholder
                     >
-                      <el-option label="京" value="1"></el-option>
-                      <el-option label="湘" value="2"></el-option>
-                      <el-option label="鲁" value="3"></el-option>
+                      <el-option
+                        v-for="item in vehicleBelongOptions"
+                        :key="item.enumField"
+                        :label="item.enumValue"
+                        :value="item.enumValue"
+                      ></el-option>
                     </el-select>
                   </el-input>
                 </el-form-item>
@@ -178,7 +182,7 @@
                 @click="showStrucInfo(item, index)"
               >
                 <div class="img_wrap">
-                  <img :src="item.storagePath" />
+                  <img :src="item.subStoragePath" />
                 </div>
                 <div class="text_wrap">
                   <h3 class="text_name">检索资料</h3>
@@ -194,7 +198,7 @@
               </div>
             </div>
             <!-- 分页器 -->
-            <template v-if="total > 0">
+            <!-- <template v-if="total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
@@ -205,7 +209,7 @@
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template>
+            </template> -->
           </vue-scroll>
         </div>
       </div>
@@ -256,7 +260,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -324,7 +328,7 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.storagePath" alt />
+            <img :src="sturcDetail.subStoragePath" alt />
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -348,7 +352,7 @@
               :class="{'active': index === curImgIndex}"
               @click="imgListTap(item, index)"
             >
-              <img style="width: 100%; height: .88rem;" :src="item.storagePath" alt />
+              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt />
               <!-- <div class="vl_jfo_sim" v-show="showSim">
                 <i
                   class="vl_icon vl_icon_retrieval_05"
@@ -371,6 +375,8 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
+import { formatDate } from "@/utils/util.js";
+
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
@@ -399,6 +405,7 @@ export default {
         ]
       },
       vehicleClassOptions: [], // 车辆类型下拉
+      vehicleBelongOptions: [], // 车辆归属地下拉
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -492,6 +499,7 @@ export default {
     this.getMonitorList();
     this.setDTime();
     this.vehicleClassOptions = this.dicFormater(44)[0].dictList; // 获取到车辆类别下拉数组
+    this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
@@ -521,13 +529,23 @@ export default {
           let bayonetUidArr = this.selectBayonetArr.map(item => {
             return item.id;
           });
+          // console.log('车牌号码', this.mhscMenuForm);
+          if (
+            (!this.mhscMenuForm.provice && this.mhscMenuForm.carNumber) ||
+            (this.mhscMenuForm.provice && !this.mhscMenuForm.carNumber)
+          ) {
+            this.$message.warning("请您填写完整的车牌号码");
+          }
           const queryParams = {
-            "where.startTime": this.mhscMenuForm.selectDate[0] || "", // 开始时间
-            "where.endTime": this.mhscMenuForm.selectDate[1] || "", // 结束时间
+            "where.startTime":
+              this.mhscMenuForm.selectDate[0] + " 00:00:00" || null, // 开始时间
+            "where.endTime":
+              this.mhscMenuForm.selectDate[1] + " 23:59:59" || null, // 结束时间
             "where.deviceUid": deviceUidArr.join(), // 摄像头标识
             "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
             "where.vehicleClass": this.mhscMenuForm.carType, // 车辆类型
-            // "where.vehicleNumber": this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
+            "where.vehicleNumber":
+              this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
             "where.unvehicleFlag": this.mhscMenuForm.isNegate, // 非车辆标志
             pageNum: this.pageNum,
             pageSize: this.pageSize
@@ -552,11 +570,11 @@ export default {
           }
           getVagueSearch(queryParams)
             .then(res => {
-              if (res.data && res.data.list) {
-                if (res.data.list.length > 0) {
-                  this.strucInfoList = res.data.list;
+              if (res.data) {
+                if (res.data.length > 0) {
+                  this.strucInfoList = res.data;
                   // this.pageNum = res.data.pageNum;
-                  this.total = res.data.total;
+                  this.total = res.data.length;
                 }
               }
             })
@@ -581,6 +599,9 @@ export default {
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
       this.strucInfoList = []; // 清空检索结果数据
+      if (this.$refs.mhscMenuForm) {
+        this.$refs.mhscMenuForm.resetFields();
+      }
       this.setDTime(); // 重置时间
       this.initCheckTree(); // 初始化全选树节点
     },
@@ -639,7 +660,10 @@ export default {
         // 自定义点标记覆盖物内容
         content: _content
       });
-      this.amap.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+      this.amap.setZoomAndCenter(16, [
+        data.shotPlaceLongitude,
+        data.shotPlaceLatitude
+      ]); // 自适应点位置
       let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`;
       this.infoWindow = new AMap.InfoWindow({
         map: this.amap,
