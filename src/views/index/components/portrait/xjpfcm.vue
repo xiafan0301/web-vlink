@@ -93,7 +93,6 @@
                 <el-date-picker
                   v-model="searchData.startTime"
                   type="datetime"
-                  :clearable="false"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   :picker-options="startDateOpt"
                   placeholder="开始时间"
@@ -105,7 +104,6 @@
                 <p>结束</p>
                 <el-date-picker
                   v-model="searchData.endTime"
-                  :clearable="false"
                   :picker-options="endDateOpt"
                   value-format="yyyy-MM-dd HH:mm:ss"
                   type="datetime"
@@ -185,8 +183,9 @@ import {
   getAllMonitorList,
   getAllBayonetList
 } from "@/views/index/api/api.base.js";
-import { validatePersonNum, validateInteger } from '@/utils/validator.js';
+import { validateSimilarity, validateFrequency } from '@/utils/validator.js';
 import { postTaskAnalysis } from "../../api/api.analysis.js";
+import { formatDate} from '@/utils/util.js';
 export default {
   data() {
     return {
@@ -212,11 +211,11 @@ export default {
         ],
         similarity: [
           { required: true, message: "相似度不能为空", trigger: "blur" },
-          { validator: validatePersonNum, trigger: 'blur' }
+          { validator: validateSimilarity, trigger: 'blur' }
         ],
         frequency: [
           { required: true, message: "频次不能为空", trigger: "blur" },
-          { validator: validateInteger, trigger: "blur"}
+          { validator: validateFrequency, trigger: "blur"}
         ]
       },
       startDateOpt: {
@@ -224,11 +223,11 @@ export default {
           if (this.searchData.endTime) {
             return (
               time.getTime() > new Date(this.searchData.endTime).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
               time.getTime() > new Date().getTime()
             );
           }
@@ -243,7 +242,7 @@ export default {
             );
           } else {
             return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
               time.getTime() > new Date().getTime()
             );
           }
@@ -274,14 +273,23 @@ export default {
   computed: {},
   mounted() {
     //获取数据
+    this.setDate();
     this.getTreeList();
     //加载地图
     this.initMap();
   },
   methods: {
+    //设置时间
+    setDate() {
+      let startTime = new Date() - 3600 * 1000 * 24 * 1;
+      let endTime = new Date();
+      this.searchData.startTime = formatDate(startTime)
+      this.searchData.endTime = formatDate(endTime)
+    },
     //重置
     resetSearch(formName) {
       this.$refs[formName].resetFields();
+      this.setDate();
       this.resetZoom();
       this.closeDraw(1);
       this.closeDraw(2);
@@ -296,8 +304,8 @@ export default {
           if (valid) {
             let params = {
               jobName: this.searchData.taskName,
-              startDate: this.searchData.startTime,
-              endDate: this.searchData.endTime,
+              startDate: formatDate(this.searchData.startTime),
+              endDate: formatDate(this.searchData.endTime),
               semblance: this.searchData.similarity,
               frequency: this.searchData.frequency,
             };
@@ -312,7 +320,8 @@ export default {
             this.searching = true;
             postTaskAnalysis(params).then(res => {
               console.log(res)
-              if(res) {
+              if(res && res.data) {
+                this.$router.push({ name: "portrait_pfcm" });
                 window.setTimeout(() => {
                 this.closeDraw(1);
                 this.closeDraw(2);
@@ -1112,6 +1121,11 @@ html {
     }
   }
   .info-left {
+    .el-form-item {
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
     .el-form-item__content {
       line-height: 1.5;
     }

@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="table_box" v-loading="isLoading">
-            <el-table :data="list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)">
+            <el-table :data="list">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
@@ -145,6 +145,7 @@
 </template>
 <script>
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
+import { formatDate} from '@/utils/util.js';
 export default {
   data() {
     return {
@@ -205,8 +206,8 @@ export default {
         }
         this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
         if(this.taskForm.reportTime && this.taskForm.reportTime.length > 0) {
-            params["where.startTime"] = this.taskForm.reportTime[0];
-            params["where.endTime"] = this.taskForm.reportTime[1];
+            params["where.startTime"] = formatDate(this.taskForm.reportTime[0]);
+            params["where.endTime"] = formatDate(this.taskForm.reportTime[1]);
         }
         console.log("---------params-----------",JSON.stringify(params))
         this.isLoading = true;

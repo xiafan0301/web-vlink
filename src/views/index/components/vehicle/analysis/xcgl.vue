@@ -259,7 +259,7 @@ import {
 } from "../../../api/api.judge.js";
 import { MapGETmonitorList } from "../../../api/api.map.js";
 import { getDrivingAnalysis } from "../../../api/api.analysis.js";
-import { random14, objDeepCopy } from "../../../../../utils/util.js";
+import { random14, objDeepCopy, formatDate } from "../../../../../utils/util.js";
 export default {
   data() {
     return {
@@ -279,7 +279,7 @@ export default {
       },
       pickerOptions: {
         disabledDate(time) {
-          let date = new Date();
+          /* let date = new Date();
           let y = date.getFullYear();
           let m =
             date.getMonth() + 1 < 10
@@ -293,8 +293,8 @@ export default {
           } else {
             start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
           }
-          threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          threeMonths = new Date(start).getTime(); */
+          return time.getTime() > Date.now();
         }
       },
       searching: false,
@@ -761,6 +761,7 @@ export default {
     //重置
     resetSearch() {
       this.searchData.licensePlateNum = null;
+      this.searchData.licensePlateColor = '';
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
@@ -775,14 +776,31 @@ export default {
     search() {
       console.log("==================", this.searchData);
       this.emptyData(1);
-      if ((this.searchData.licensePlateNum || this.imgData) && (this.selectDeviceArr && this.selectDeviceArr.length > 0)) {
-        this.getSearchData();
-      }else if(!this.searchData.licensePlateNum && !this.imgData){
-         this.$message.error("请上传车的图片或者输入车牌号");
-         return false;  
-      }else {
-         this.$message.error("请选择设备");
-         return false; 
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      
+      if(this.selectIndex === 1) {
+        if(this.searchData.licensePlateNum && reg.test(this.searchData.licensePlateNum) && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+          this.getSearchData();
+        }else if(!this.searchData.licensePlateNum) {
+          this.$message.error("请输入车牌号码");
+          return false;  
+        }else if(!reg.test(this.searchData.licensePlateNum)) {
+          this.$message.error('请正确输入车牌号码');
+          return false;
+        }else {
+          this.$message.error("请选择设备");
+          return false; 
+        }
+      }else if(this.selectIndex === 0) {
+        if(this.imgData && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+          this.getSearchData();
+        }else if(!this.imgData) {
+          this.$message.error("请上传带车牌的清晰图片");
+          return false;  
+        }else {
+          this.$message.error("请选择设备");
+          return false; 
+        }
       }
     },
     //置空数据
@@ -799,8 +817,8 @@ export default {
     getSearchData() {
       let params = {};
       if (this.searchData.time && this.searchData.time.length > 0) {
-        params["startDate"] = this.searchData.time[0] + " 00:00:00";
-        params["endDate"] = this.searchData.time[1] + " 23:59:59";
+        params["startDate"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
+        params["endDate"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
       }
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
