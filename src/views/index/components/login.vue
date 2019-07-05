@@ -49,7 +49,7 @@ export default {
       downloadHandler: false,
       dlQRcode: null,
       loginForm: {
-        userMobile: '17769412603',
+        userMobile: '17744444444',
         userPassword: '123456'
       },
       loginBtnLoading: false,

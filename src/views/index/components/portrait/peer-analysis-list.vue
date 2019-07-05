@@ -1,11 +1,12 @@
 <template>
   <vue-scroll>
     <div class="frequent-appearances">
-      <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
+      <div class="th-breadcrumb">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
           <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
-          <el-breadcrumb-item>频繁出没</el-breadcrumb-item>
+          <el-breadcrumb-item>同行分析</el-breadcrumb-item>
         </el-breadcrumb>
+        <el-button :loading="addLoadingbtn" @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
       </div>
       <div class="frequent-a-content">
         <ul class="tab-menu">
@@ -18,21 +19,21 @@
         </ul>
         <div class="search_box">
           <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
-            <el-form-item prop="taskName">
+            <el-form-item label="任务名称：" prop="taskName">
               <el-input
-                style="width: 240px;"
+                style="width: 200px;"
                 type="text"
                 placeholder="请输入任务名称"
                 v-model="taskForm.taskName"
               />
             </el-form-item>
-            <el-form-item prop="reportTime" class="time">
+            <el-form-item label="创建时间：" prop="reportTime">
               <el-date-picker
                 v-model="taskForm.reportTime"
                 type="datetimerange"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm"
-                range-separator="-"
+                range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
               ></el-date-picker>
@@ -45,12 +46,6 @@
           <div class="divide"></div>
         </div>
         <div class="content-box">
-          <div class="button_box">
-            <div class="add_event_btn" @click="skipAddTaskPage">
-              <span>+</span>
-              <span>新增分析任务</span>
-            </div>
-          </div>
           <div class="table_box">
             <el-table :data="list">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -133,10 +128,15 @@
   </vue-scroll>
 </template>
 <script>
+// eslint-disable-next-line no-unused-vars
 import { formatDate } from "@/utils/util.js";
+// eslint-disable-next-line no-unused-vars
 import { dataList } from "@/utils/data.js";
+// eslint-disable-next-line no-unused-vars
 import { getEventList } from "@/views/index/api/api.event.js";
+// eslint-disable-next-line no-unused-vars
 import { getDepartmentList } from "@/views/index/api/api.manage.js";
+// eslint-disable-next-line no-unused-vars
 import { getDiciData } from "@/views/index/api/api.js";
 export default {
   data() {
@@ -147,7 +147,7 @@ export default {
           value: 0
         },
         {
-          label: "未完成任务",
+          label: "进行中任务",
           value: 1
         }
       ],
@@ -185,7 +185,8 @@ export default {
       ], //已完成列表
       userInfo: {}, // 存储的用户信息
       deleteDialog: false,
-      interruptDialog: false //中断任务
+      interruptDialog: false, //中断任务
+      addLoadingbtn: false
     };
   },
   created() {
@@ -208,11 +209,13 @@ export default {
     },
     skipAddTaskPage() {
       // 跳到新增任务页面
-      this.$router.push({ name: "portrait_xjpfcm" });
+      this.addLoadingbtn = true
+      // this.$router.push({ name: "portrait_xjpfcm" });
     },
     // 跳至详情页面
+    // eslint-disable-next-line no-unused-vars
     skipDetailPage(obj) {
-      this.$router.push({ name: "portrait_xjpfcm" });
+      this.$router.push({ name: "peer_analysis" });
     }
   }
 };
@@ -275,27 +278,6 @@ export default {
     }
     .content-box {
       padding: 0 20px;
-      .button_box {
-        display: flex;
-        justify-content: space-between;
-        .add_event_btn {
-          height: 40px;
-          background-color: #0c70f8;
-          color: #ffffff;
-          font-size: 14px;
-          line-height: 40px;
-          text-align: center;
-          border-radius: 3px;
-          padding: 0 16px;
-          cursor: pointer;
-          span:nth-child(1) {
-            font-size: 16px;
-          }
-          span:nth-child(2) {
-            margin-left: 5px;
-          }
-        }
-      }
       .table_box {
         margin-top: 10px;
         .operation_btn {
@@ -314,9 +296,9 @@ export default {
 
 <style lang="scss">
 .frequent-appearances {
-    .__view {
-      width: 100% !important; // vue-scroll样式重置
-    }
+  .__view {
+    width: 100% !important; // vue-scroll样式重置
+  }
 }
 </style>
 

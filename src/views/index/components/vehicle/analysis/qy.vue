@@ -20,7 +20,7 @@
             <div class="search_main">
               <div class="search_top">
                 <span>区域列表</span>
-                <i class="el-icon-delete" @click="delAllArea"></i>
+                <i class="el-icon-delete" @click="clearAllArea"></i>
                 <i class="el-icon-circle-plus-outline" @click="addArea"></i>
               </div>
               <!--区域选择-->
@@ -29,37 +29,37 @@
                   <span class="red_star">区域:</span>
                   <span @click="item.activeArea = true" class="choose_btn vl_icon vl_icon_041"></span>
                   <span class="choose_btn el-icon-delete" @click="clearArea(index)"></span>
-                  <span class="choose_btn el-icon-location-outline" :class="{'not-active': !item.area}"></span>
+                  <span class="choose_btn el-icon-location-outline" @click="setFitV(index)" :class="{'not-active': !item.area}"></span>
                   <div class="drawBox" v-show="item.activeArea">
                     <div class="items">
-                      <span class="el-icon-arrow-left" @click="item.activeArea = false"></span>
-                      <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-                      <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
-                      <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
-                      <span @click="clickTab('cut4')"  :class="['cut4',{'hover':hover=='cut4'}]"></span>
-                      <span @click="clickTab('cut5')"  :class="['cut5',{'hover':hover=='cut5'}]"></span>
+                      <span class="el-icon-arrow-left" @click="item.activeArea = false;"></span>
+                      <span @click="clickTab('cut1', index)" :class="['cut1',{'hover':hover[index]=='cut1' && index === curDrawIndex}]"></span>
+                      <span @click="clickTab('cut2', index)"  :class="['cut2',{'hover':hover[index]=='cut2' && index === curDrawIndex}]"></span>
+                      <span @click="clickTab('cut3', index)"  :class="['cut3',{'hover':hover[index]=='cut3' && index === curDrawIndex}]"></span>
+                      <span @click="clickTab('cut4', index)"  :class="['cut4',{'hover':hover[index]=='cut4' && index === curDrawIndex}]"></span>
+                      <span @click="clickTab('cut5', index)"  :class="['cut5',{'hover':hover[index]=='cut5' && index === curDrawIndex}]"></span>
                     </div>
                   </div>
                 </div>
                 <div class="search_line">
                   <span class="time">开始</span>
                   <el-date-picker
-                          v-model="item.startTime"
-                          style="width: 212px;"
-                          :picker-options="pickerOptions"
-                          type="datetime"
-                          placeholder="选择日期时间">
+                    v-model="item.startTime"
+                    style="width: 212px;"
+                    :picker-options="pickerOptions"
+                    type="datetime"
+                    placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
                 <p class="red_star"></p>
                 <div class="search_line">
                   <span class="time">结束</span>
                   <el-date-picker
-                          style="width: 212px;"
-                          :picker-options="pickerOptions1"
-                          v-model="item.endTime"
-                          type="datetime"
-                          placeholder="选择日期时间">
+                    style="width: 212px;"
+                    :picker-options="pickerOptions1"
+                    v-model="item.endTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
                 <el-divider></el-divider>
@@ -73,22 +73,38 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      title="清除确认"
+      :visible.sync="delDialog"
+      width="30%">
+      <span>是否要清除地图上{{clearAll ? '全部' : '该条'}}已选区域？</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="delDialog = false">取 消</el-button>
+    <el-button type="primary" @click="confirmClear">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 <script>
   import { mapXupuxian } from "@/config/config.js";
-  import {MapGETmonitorList} from '../../../api/api.map.js';
+  import {getAllDevice} from '../../../api/api.judge.js';
+  import {getAllBayonetList} from '../../../api/api.base.js';
   import { objDeepCopy, formatDate} from '../../../../../utils/util.js';
   export default {
     data() {
       return {
         map: null,
         input3: null,
-        hover:null,
+        hover:{
+          0: null,
+          1: null,
+          2: null,
+          3: null,
+          4: null,
+        },
         // 选择区域
         mouseTool: null,
-        selAreaPolygon: null,
-        delSelAreaIcon: null,
         lnglat:null,
         searchData: [
           {
@@ -96,14 +112,12 @@
             area: null, // 区域
             startTime: '',
             endTime: '',
-            cameraIds: '3'
           },
           {
             activeArea: false,
             area: null, // 区域
             startTime: '',
             endTime: '',
-            cameraIds: '4'
           }
         ],
         pickerOptions: {
@@ -140,9 +154,14 @@
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
-        mapTreeData: {},
-        marks: [[], [], [], [], []],
+        mapTreeData: [],
+        marks: [[], []],
         hoverWindow: null,// 全局信息窗口
+        pointData: [[], []],
+        circle: null,
+        delDialog: false,
+        curDrawIndex: 0, // 当前画区域的索引
+        clearAll: false,
       };
     },
 
@@ -153,24 +172,33 @@
         x.startTime = this.setDTime().startTime;
         x.endTime = this.setDTime().endTime;
       })
-      this.getMapInfoList();
+      this.getAllDevice();
     },
     methods: {
-      //获取地图信息列表
-      getMapInfoList () {
-        this.$_showLoading({target: '.vl_ph_content'})
-        let params = {
-          areaUid: '431224'
-        }
-        MapGETmonitorList(params)
-            .then(res => {
-              if (res) {
-                this.mapTreeData = this.switchData(res.data);
-                this.$_hideLoading();
-                this.mapMark(this.mapTreeData.infoList);
-              }
-            })
+      setFitV (index) {
+        this.map.setFitView([this.searchData[index].area]);
       },
+      getAllDevice(){
+        getAllDevice().then(res=>{
+          if(res.data && res.data.length>0){
+//            this.allDevice=res.data
+            console.log(res.data)
+            this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0});
+          }
+          getAllBayonetList({
+            areaId: mapXupuxian.adcode
+          }).then(resBon => {
+            console.log(resBon.data);
+            if(resBon.data && resBon.data.length>0){
+              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 0});
+            }
+            this.mapTreeData = Object.assign([], res.data, resBon.data)
+            console.log(this.mapTreeData)
+            this.mapMark(this.mapTreeData)
+          })
+        })
+      },
+      //获取地图信息列表
       // keys的各个props 代表接口返回的摄像头，人物，车辆，卡口的list的字段名及list里面元素name;;allKey
       switchData(data) {
         data['infoList'] = data.areaTreeList;
@@ -203,67 +231,54 @@
         return list;
       },
       // 地图标记
-      mapMark (data, isSetView) {
+      mapMark (data) {
         if (data && data.length > 0) {
           let _this = this;
-          for (let i = 0; i < data.length; i++) {
-            data[i].infoList.forEach(obj => {
-              if (obj.longitude > 0 && obj.latitude > 0) {
-                let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
-                if (obj.dataType === 0 && obj.deviceStatus !== 1) {
-                  sDataType = 6;
-                }else if (obj.dataType === 2) {
-                  sDataType = '2' + obj.vehicleType
-                } else {
-                  sDataType = obj.dataType;
-                }
-                let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
-                if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
-                  uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
-                }
-                let marker = new window.AMap.Marker({ // 添加自定义点标记
-                  map: _this.map,
-                  position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-                  offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
-                  draggable: false, // 是否可拖动
-                  extData: obj,
-                  // 自定义点标记覆盖物内容
-                  content: uContent
-                });
-                _this.marks[obj.dataType].push(marker);
-                // hover
-                marker.on('mouseover', function () {
-                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
-                  let curP = marker.getPosition();
-                  let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
-                  let _px;
-                  if (obj.dataType === 2) {
-                    _px = -40;
-                  } else {
-                    _px = 0
-                  }
-                  _this.hoverWindow = new window.AMap.InfoWindow({
-                    isCustom: true,
-                    closeWhenClickMap: true,
-                    offset: new window.AMap.Pixel(0, _px), // 相对于基点的偏移位置
-                    content: sContent
-                  });
-                  _this.hoverWindow.on('open', function () { _this.showInfoWin = true; })
-                  _this.hoverWindow.on('close', function () { _this.showInfoWin = false; })
-                  _this.hoverWindow.open(_this.map, new window.AMap.LngLat(curP.lng, curP.lat));
-
-                });
-                marker.on('mouseout', function () {
-                  $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
-                })
+          data.forEach(obj => {
+            if (obj.longitude > 0 && obj.latitude > 0) {
+              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
+              if (obj.dataType === 0 && obj.deviceStatus !== 1) {
+                sDataType = 6;
+              }else if (obj.dataType === 2) {
+                sDataType = '2' + obj.vehicleType
+              } else {
+                sDataType = obj.dataType;
               }
-            })
-          }
-          if (!isSetView) {
-//          setTimeout(() => {
-//            _this.map.setFitView()
-//          }, 100)
-          }
+              let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
+              if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
+                uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
+              }
+              let marker = new window.AMap.Marker({ // 添加自定义点标记
+                map: _this.map,
+                position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+                offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
+                draggable: false, // 是否可拖动
+                extData: obj,
+                bubble: true,
+                // 自定义点标记覆盖物内容
+                content: uContent
+              });
+              _this.marks[obj.dataType].push(marker);
+              // hover
+              marker.on('mouseover', function () {
+//                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
+                let curP = marker.getPosition();
+                let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
+                _this.hoverWindow = new window.AMap.InfoWindow({
+                  isCustom: true,
+                  closeWhenClickMap: true,
+                  offset: new window.AMap.Pixel(9, 34), // 相对于基点的偏移位置
+                  content: sContent,
+                  bubble: true
+                });
+                _this.hoverWindow.open(_this.map, new window.AMap.LngLat(curP.lng, curP.lat));
+
+              });
+              marker.on('mouseout', function () {
+//                  $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
+              })
+            }
+          })
         }
       },
       renderMap() {
@@ -278,8 +293,12 @@
         let _this=this
         this.map.on( 'click',   function (e) {
           //lnglatInput.value = e.lnglat.toString();
-          if(_this.hover=='cut5'){
-            var circle = new AMap.Circle({
+          if(_this.hover[_this.curDrawIndex]=='cut5'){
+            _this.mouseTool.close(false);
+            if (_this.searchData[_this.curDrawIndex].area) {
+              _this.map.remove(_this.searchData[_this.curDrawIndex].area)
+            }
+            let circle = new AMap.Circle({
               center:e.lnglat,
               radius: 5000, //半径
               borderWeight: 3,
@@ -293,10 +312,49 @@
               fillColor: '#1791fc',
               zIndex: 50,
             })
-            circle.setMap(_this.map)
+            circle.setMap(_this.map);
+            _this.searchData[_this.curDrawIndex].area = circle;
+            _this.checkout(circle,'AMap.circle')
           }
 
         });
+        window.AMap.event.addListener(this.mouseTool, 'draw', function (e) {
+          if (_this.searchData[_this.curDrawIndex].area) {_this.map.remove(_this.searchData[_this.curDrawIndex].area);}
+          _this.searchData[_this.curDrawIndex].area = e.obj;
+          let a=e.obj
+          let t=e.obj.CLASS_NAME
+          _this.checkout(a,t)
+        });
+      },
+      checkout(obj , type){
+        this.pointData[this.curDrawIndex] = [];
+        if(type!="AMap.Polyline"){
+          this.mapTreeData.forEach(el=>{
+            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
+            let isPointInRing = obj.contains(myLngLat);
+            // console.log(marker.getPosition());
+            if(isPointInRing){//如果点在圆内则输出
+              let id = this.pointData.findIndex(item=>item.uid==el.uid)
+              if(id == -1){
+                this.pointData[this.curDrawIndex].push(el)
+              }
+            }
+          })
+        }else{
+          this.mapTreeData.forEach(el=>{
+            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
+            // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
+            // console.log(closestPositionOnLine);
+
+            let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
+            // console.log(distance);
+            let id = this.pointData[this.curDrawIndex].findIndex(item=>item.uid==el.uid)
+            if(id==-1 && distance <=1000){
+              this.pointData[this.curDrawIndex].push(el)
+            }
+          })
+        }
       },
       setCenter(){
         var _this=this
@@ -329,10 +387,11 @@
         })
 
       },
-      clickTab(val){
-        this.hover = this.hover==val?'':val
-        if(!this.hover){
-          this.amap.setDefaultCursor();
+      clickTab(val, index){
+        this.curDrawIndex = index;
+        this.hover[index] = this.hover[index]==val?'':val
+        if(!this.hover[index]){
+          this.map.setDefaultCursor();
           this.mouseTool.close(false);
         }else{
           this.selArea(val)
@@ -356,7 +415,14 @@
       },
 
       delAllArea() {
-        this.searchData.splice(2)
+        this.searchData.forEach(x => {
+          if (x.area) {
+            this.map.remove(x.area)
+          }
+        })
+        this.pointData.splice(2);
+        this.searchData.splice(2);
+        this.mouseTool.close(false);
       },
       addArea () {
         this.searchData.push(
@@ -367,6 +433,7 @@
               endTime:  this.setDTime().endTime,
             }
         )
+        this.pointData.push([]);
       },
       setDTime () {
         let date = new Date();
@@ -378,8 +445,7 @@
       },
       // 选择区域
       selArea (v) {
-        var _this=this
-        this.amap.setDefaultCursor('crosshair');
+        this.map.setDefaultCursor('crosshair');
         switch (v){
           case 'cut1' :
             this.mouseTool.rectangle({
@@ -394,6 +460,7 @@
           case 'cut2' :
             this.mouseTool.circle({
               strokeColor: "#FA453A",
+              strokeOpacity: 1,
               strokeWeight: 1,
               strokeOpacity: 0.2,
               fillColor: '#FA453A',
@@ -428,28 +495,37 @@
             });
             break ;
           case 'cut5' :
-
             break ;
-
         }
-
-
-
       },
       // 清除区域
       clearArea (index) {
-        if (this.searchData.length > 2) {
-          this.searchData.splice(index, 1)
-        } else{
-          this.$message.info("最少保持2个")
+        this.delDialog = true;
+        this.clearAll = false;
+        this.curDrawIndex = index;
+      },
+      clearAllArea () {
+        this.delDialog = true;
+        this.clearAll = true;
+      },
+      confirmClear () {
+        this.delDialog = false;
+        if (this.clearAll) {
+          this.delAllArea()
+        } else {
+          this.mouseTool.close(false);
+          this.map.remove(this.searchData[this.curDrawIndex].area)
         }
       },
       tcDiscuss () {
-        let supQuery = {};
-        this.searchData.forEach((x, index) => {
-          supQuery['where.dtoList[' + index + '].cameraIds'] = x.cameraIds;
-          supQuery['where.dtoList[' + index + '].startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
-          supQuery['where.dtoList[' + index + '].endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
+        let supQuery = {'where': {dtoList: []}};
+        supQuery.where['dtoList'] = this.searchData.map((x, index) => {
+          let obj = {}
+          obj['cameraIds'] = this.pointData[index].filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+          obj['bayonetIds'] = this.pointData[index].filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+          obj['startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
+          obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
+          return obj;
         })
         this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
       }
@@ -546,7 +622,7 @@
             background: #ffffff;
             left: 0;
             top: 0;
-            padding: 10px;
+            padding: 0 10px 10px 10px;
             width: 100%;
             animation: fadeInLeft .4s ease-out both;
             .items{
