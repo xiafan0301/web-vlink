@@ -402,8 +402,8 @@ export function QypzGetAreaCross(params) {
 export function getDeviceSnapImagesSum(params) {
   return request({
     url: '/device-snap-service/device-snap-images-sum',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
@@ -427,8 +427,8 @@ export function getGroups(params) {
 export function getDeviceSnapImagesPage(params) {
   return request({
     url: '/device-snap-service/device-snap-images-page',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
@@ -481,8 +481,8 @@ export function getNightVehicleRecordList(params) {
 export function getVehicleInvestigationReport(params) {
   return request({
     url: '/vehicle-investigation-report-service/report',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
