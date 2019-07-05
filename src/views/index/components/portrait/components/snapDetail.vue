@@ -29,8 +29,11 @@
               <h2>
                 对比信息
               </h2>
-              <div class="struc_cdi_line">
-                <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
+              <div class="struc_cdi_line simple_line">
+                <span :title="sturcDetail.feature">{{sturcDetail.age}}</span>
+              </div>
+              <div class="struc_cdi_line simple_line">
+                <span :title="sturcDetail.feature">{{sturcDetail.sex}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>
@@ -555,6 +558,10 @@ export default {
                   margin-left: 0.1rem;
                 }
               }
+            }
+            .simple_line {
+              display: inline-block;
+              margin-right: 8px;
             }
           }
           &:before {
