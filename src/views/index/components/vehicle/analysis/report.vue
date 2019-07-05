@@ -132,11 +132,11 @@
               <div>
                 <h2>夜间活动规律-夜间出没记录</h2>
                 <div>
-                  <el-table :data="yjcmList">
+                  <el-table :data="yjcmList.allRecords">
                     <el-table-column label="设备名称" prop="deviceName"></el-table-column>
-                    <el-table-column label="过车时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="nums" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="nums" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -164,8 +164,23 @@
                           <span>出没次数</span>
                         </div>
                         <ul>
-                          <li v-for="item in 15" :key="item">
-                            <span>99:99-99:99</span><span>39次</span>
+                          <li>
+                            <span>19:00-21:00</span><span>{{yjcmList.period19_21Records ? yjcmList.period19_21Records.length : 0}}次</span>
+                          </li>
+                          <li>
+                            <span>21:00-23:00</span><span>{{yjcmList.period21_23Records ? yjcmList.period21_23Records.length : 0}}次</span>
+                          </li>
+                          <li>
+                            <span>23:00-01:00</span><span>{{yjcmList.period23_1Records ? yjcmList.period23_1Records.length : 0}}次</span>
+                          </li>
+                          <li>
+                            <span>01:00-03:00</span><span>{{yjcmList.period1_3Records ? yjcmList.period1_3Records.length : 0}}次</span>
+                          </li>
+                          <li>
+                            <span>03:00-05:00</span><span>{{yjcmList.period3_5Records ? yjcmList.period3_5Records.length : 0}}次</span>
+                          </li>
+                          <li>
+                            <span>05:00-07:00</span><span>{{yjcmList.period5_7Records ? yjcmList.period5_7Records.length : 0}}次</span>
                           </li>
                         </ul>
                       </div>
@@ -182,11 +197,21 @@
                   <ul class="rep_yjcm">
                     <li>
                       <span>较常在出没时间段：</span>
-                      <div><span>03:00-05:00</span>|<span>05:00-07:00</span></div>
+                      <div>
+                        <template v-for="(item, index) in yjcmjlList">
+                          <template v-if="index != 0">|</template>
+                          <span :key="'yjcmjl1_' + index">{{item.timeSegment}}</span>
+                        </template>
+                      </div>
                     </li>
                     <li>
                       <span>较常出没地点为：</span>
-                      <div><span>摄像头地点1摄像头地点</span>|<span>摄像头地点1摄像头地点2</span></div>
+                      <div>
+                        <template v-for="(item, index) in yjcmjlList">
+                          <template v-if="index != 0">|</template>
+                          <span :key="'yjcmjl2_' + index">{{item.address}}</span>
+                        </template>
+                      </div>
                     </li>
                   </ul>
                 </div>
@@ -297,7 +322,8 @@ export default {
       wzList: [], // 违章信息
       rcList: [], // 入城记录
       ccList: [], // 出城记录
-      yjcmList: [], // 夜间出没记录
+      yjcmList: {}, // 夜间出没记录
+      yjcmjlList: [],  // 夜间出没结论
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
 
@@ -337,7 +363,8 @@ export default {
           this.wzList = data.violationDtoList;
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
-          this.yjcmList = data.nightHauntConclusionList;
+          this.yjcmList = data.analysisResultDto;
+          this.yjcmjlList = data.nightHauntConclusionList;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
@@ -358,38 +385,36 @@ export default {
         let obj = this.clgjList[i];
         let marker = new window.AMap.Marker({ // 添加自定义点标记
           map: this.clgjMap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // extData: obj,
           // 自定义点标记覆盖物内容
           content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
         });
-        gjPath.push([obj.longitude, obj.latitude]);
+        gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
       }
       // 绘制轨迹
       var polyline = new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
-          strokeColor: "#00A",  //线颜色
+          strokeColor: "#61c772",  //线颜色
           strokeOpacity: 1,     //线透明度
-          strokeWeight: 3,      //线宽
-          strokeStyle: "solid"  //线样式
+          strokeWeight: 2,      //线宽
+          strokeStyle: "dashed"  //线样式
       });
       this.clgjMap.setFitView();
 
     },
 
     changeShowType (val) {
-      if (val != this.showType) {
-        this.showType = val;
-        let $tar = $('#report_showtype_' + val);
-        if ($tar && $tar.length > 0) {
-          let osTop = $tar.offset().top -250;
-          let sTop = $('#report_content').scrollTop();
-          // $('#report_content').scrollTop(osTop + sTop);
-          $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
-        }
+      this.showType = val;
+      let $tar = $('#report_showtype_' + val);
+      if ($tar && $tar.length > 0) {
+        let osTop = $tar.offset().top -250;
+        let sTop = $('#report_content').scrollTop();
+        // $('#report_content').scrollTop(osTop + sTop);
+        $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
       }
     },
     initClgjMap () {
