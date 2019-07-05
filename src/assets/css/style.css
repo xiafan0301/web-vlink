@@ -347,10 +347,12 @@
 .vl_icon2_109:hover { background-position: -1111px -684px; }
 .vl_icon2_110 { background-position: -1247px -566px; }
 .vl_icon2_110:hover { background-position: -1247px -684px; }
-.vl_icon2_111 { background-position: -1373px -566px; }
-.vl_icon2_111:hover { background-position: -1373px -684px; }
+.vl_icon2_111 { background-position: -1375px -566px; }
+.vl_icon2_111:hover { background-position: -1375px -684px; }
 .vl_icon2_112 { background-position: -23px -815px; }
 .vl_icon2_112:hover { background-position: -23px -933px; }
+.vl_icon2_113 { background-position: -159px -815px; }
+.vl_icon2_113:hover { background-position: -159px -933px; }
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}

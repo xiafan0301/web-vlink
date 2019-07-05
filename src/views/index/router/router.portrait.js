@@ -98,6 +98,11 @@ export default {
       path: 'fxjg',
       name: 'portrait_fxjg',
       component: () => import('@/views/index/components/portrait/fxjg.vue')
+    },
+    {
+      path: 'report',
+      name: 'portrait_report',
+      component: () => import('@/views/index/components/portrait/report.vue')
     }
   ]
 }
