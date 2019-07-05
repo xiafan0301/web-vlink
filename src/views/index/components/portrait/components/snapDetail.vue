@@ -56,7 +56,7 @@
           </div>
           <div class="operate_btn" @click="spinToRecog()">身份确认</div>
           <div class="operate_btn margin_btn" @click="spinToGJFX()">轨迹分析</div>
-          <div class="operate_btn margin_btn" @click="spinToCtc()">落脚点分析</div>
+          <div class="operate_btn margin_btn" @click="spinToLJD()">落脚点分析</div>
           <div class="operate_btn margin_btn" @click="spinToControl()">新建布控任务</div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -171,6 +171,7 @@ export default {
       this.strucDetailDialog = f;
       if (this.snapObj.personDetailList && this.snapObj.personDetailList.length > 0) {
         console.log("99999999", this.snapObj);
+        this.curImgIndex = 0;
         this.sturcDetail = this.snapObj.personDetailList[0];
         this.strucInfoList = this.snapObj.personDetailList;
         this.drawPoint(this.sturcDetail);
@@ -239,7 +240,7 @@ export default {
       });
     },
     //跳转到落脚点分析页面
-    spinToRecog() {
+    spinToLJD() {
       this.$router.push({
         name: "portrait_gjfx",
         query: { path: this.sturcDetail.subStoragePath }
