@@ -110,10 +110,10 @@
                 <el-form-item label="车辆型号" label-width="90px" prop>
                   <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in carModel"
+                      :key="item.vehicleBrand"
+                      :label="item.vehicleBrand"
+                      :value="item.vehicleBrand"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -273,6 +273,7 @@ import {
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
 } from "../../../api/api.judge.js";
+import { getCarmodelList } from "../../../api/api.base.js";
 import { setTimeout } from "timers";
 import { dataList } from '@/utils/data.js';
 export default {
@@ -358,6 +359,7 @@ export default {
           label: "5"
         },
       ],
+      carModel:[],
       regulationsList: [
       ], //违章信息列表
       pagination: { total: 0, pageSize: 10, pageNum: 1 }
@@ -381,6 +383,13 @@ export default {
     this.setDTime();
   },
   methods: {
+    getCarmodelList(){
+      getCarmodelList().then(res=>{
+        if(res && res.data && res.data.length>0){
+          this.carModel=res.data
+        }
+      })
+    },
     //获取图片信息
     getPhotoAnalysis(){
       let d={
