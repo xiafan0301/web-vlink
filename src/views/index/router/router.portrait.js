@@ -40,7 +40,7 @@ export default {
       component: () => import('@/views/index/components/portrait/qyryfx.vue')
     },
     {
-      path: 'pfcm',
+      path: 'pfcm',    //频繁出没
       name: 'portrait_pfcm',
       component: () => import('@/views/index/components/portrait/pfcm.vue')
     },
@@ -55,7 +55,7 @@ export default {
       component: () => import('@/views/index/components/portrait/peer-analysis.vue')
     },
     {
-      path: 'xjpfcm',
+      path: 'xjpfcm',     //新建分析任务
       name: 'portrait_xjpfcm',
       component: () => import('@/views/index/components/portrait/xjpfcm.vue')
     },
@@ -95,9 +95,14 @@ export default {
       component: () => import('@/views/index/components/portrait/ljd.vue')
     },
     {
-      path: 'fxjg',
+      path: 'fxjg',    //分析结果
       name: 'portrait_fxjg',
       component: () => import('@/views/index/components/portrait/fxjg.vue')
+    },
+    {
+      path: 'report',
+      name: 'portrait_report',
+      component: () => import('@/views/index/components/portrait/report.vue')
     }
   ]
 }

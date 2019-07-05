@@ -11,7 +11,7 @@
       <div class="analysis-rc-info">
         <div class="analysis-r-content">
           <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
-            <div class="img-box">
+            <div class="img-box" @click="toSnapDetail(item)">
               <img alt="头像" :src="item.personDetailList[0].subStoragePath">
               <i class="vl_icon vl_icon_portrait_01"></i>
               <span class="num">
@@ -33,28 +33,72 @@
           ></el-pagination>
         </template>
       </div>
-    </vue-scroll>
+      <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
+    </vue-scroll>  
   </div>
 </template>
 
 <script>
 import { getTaskInfosDetail } from "../../api/api.analysis.js";
+import snapDialog from './components/snapDetail'
 export default {
+  components: { snapDialog },
   data() {
     return {
       uid: '',
       pagination: { total: 50, pageSize: 24, pageNum: 1 },
-      list: []
+      list: [],
+      snapObj: {},
     };
   },
   mounted() {
     this.uid = this.$route.query.uid
     for(let i=0; i<50; i++) {
-      this.list.push({
+      let personDetailList = []
+      for(let k=0; k<4;k++) {
+        personDetailList.push({
+            "feature": "青年，女性",
+            "deviceName": "摄像头k"+k,
+            "deviceNamePinyin": "摄像头3",
+            "address": "长沙市天心区上街广发银行北门003_"+k,
+            "videoPath": "http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4",
+            "shotPlaceLongitude": 110.594419,
+            "shotPlaceLatitude": 27.908869,
+            "subStoragePath": "http://file.aorise.org/vlink/image/f93bdaff-e12c-4a08-a596-402fcdd1a10d.png",
+            "shotTime": "2018-11-12 13:14:16",
+            "personStoragePath": "http://file.aorise.org/vlink/image/9fcfc0db-c70e-4cfa-adbe-4f0f6b9ecee8.png",
+            "bussId": "1111111111111111111111111111111",
+        })
+      personDetailList.push({
+            "feature": "少年，女性",
+            "deviceName": "人像摄像"+k,
+            "deviceNamePinyin": "摄像头3",
+            "address": "湖南省长沙市天心区黑石铺街道九峰路九峰安置小区——"+k,
+            "videoPath": "http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4",
+            "shotPlaceLongitude": 112.973613,
+            "shotPlaceLatitude": 28.095893,
+            "subStoragePath": "http://file.aorise.org/vlink/image/9fcfc0db-c70e-4cfa-adbe-4f0f6b9ecee8.png",
+            "shotTime": "2019-11-12 13:14:16",
+            "personStoragePath": "http://file.aorise.org/vlink/image/40946e56-3292-4c3b-bd34-199f647ac8b8.png",
+            "bussId": "2222222222222222222222222222222",
+        })
+        personDetailList.push({
+            "feature": "少年，男性",
+            "deviceName": "哈哈哈"+k,
+            "deviceNamePinyin": "摄像头3",
+            "address": "湖南省长沙市天心区黑石铺街道黑石铺路——"+k,
+            "videoPath": "http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4",
+            "shotPlaceLongitude": 112.973334,
+            "shotPlaceLatitude": 28.097071,
+            "subStoragePath": "http://file.aorise.org/vlink/image/40946e56-3292-4c3b-bd34-199f647ac8b8.png",
+            "shotTime": "2019-11-12 13:14:16",
+            "personStoragePath": "http://file.aorise.org/vlink/image/f93bdaff-e12c-4a08-a596-402fcdd1a10d.png",
+            "bussId": "33333333333333333333333333333333",
+        })
+    }
+    this.list.push({
         "appearTotal": i,
-        "personDetailList": [{
-          "subStoragePath": "http://file.aorise.org/vlink/image/f93bdaff-e12c-4a08-a596-402fcdd1a10d.png",
-        }]
+        "personDetailList": [...personDetailList]
       })
     }
     this.list.sort(this.sortVal)
@@ -76,6 +120,18 @@ export default {
     sortVal(a, b) {
       console.log(a,b)
       return b.appearTotal - a.appearTotal;
+    },
+    //详情弹窗
+    toSnapDetail(obj) {
+      console.log("obj",obj)
+      this.snapObj = obj;
+      this.$refs["snapDialogComp"].toogleVisiable(true);
+    },
+    showLoading(data) {
+      console.log("---00000------",data)
+      if(data) {
+        this.getAlarm()
+      }
     },
   }
 };
