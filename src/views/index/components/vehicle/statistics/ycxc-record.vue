@@ -104,7 +104,7 @@
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
               <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
+                <img style="display: block; width: 100%; height: .88rem;" :src="item.storagePath" alt="">
               </div>
             </swiper-slide>
             <div class="swiper-button-prev" slot="button-prev"></div>
@@ -255,7 +255,7 @@
           dateStart: data.startDate,
           dateEnd: data.endDate,
           devIds: obj.deviceID,
-          hasPlate: 1, // 1--有牌车 0 --无牌车
+          hasPlate: obj.plateNo ? 1 : 0, // 1--有牌车 0 --无牌车
           plateNo: obj.plateNo
         }
           // const params = {

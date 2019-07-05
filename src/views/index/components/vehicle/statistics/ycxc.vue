@@ -57,6 +57,7 @@
             <el-date-picker
               placeholder="请选择日期"
               v-model="queryDate"
+              :clearable="false"
               type="daterange"
               range-separator="-"
               start-placeholder="开始日期"
@@ -67,19 +68,37 @@
             </el-date-picker>
           </div>
           <div class="left_time">
-            <el-time-select
-             style="width: 208px;"
-              placeholder="起始时间"
-              v-model="startTime"
-              :picker-options="{
-                start: '19:00',
-                step: '01:00',
-                end: '24:00'
-              }">
-            </el-time-select>
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 200px;">
+              <el-option 
+                v-for="(item, index) in startTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+              <!-- <i class="el-icon-time"></i> -->
+            </el-select>
+              <!-- <el-time-select
+              style="width: 208px;"
+                placeholder="起始时间"
+                v-model="startTime"
+                :picker-options="{
+                  start: '19:00',
+                  step: '01:00',
+                  end: '24:00'
+                }">
+              </el-time-select> -->
             <span class="left_time_separator">-</span>
-            <span class="left_time_tomorrow">次日</span>
-            <el-time-select
+            <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
+              <el-option 
+                v-for="(item, index) in endTimeOptions" 
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+            <!-- <el-time-select
               placeholder="结束时间"
               class="end_time_select"
               v-model="endTime"
@@ -88,7 +107,7 @@
                 step: '01:00',
                 end: '07:00'
               }">
-            </el-time-select>
+            </el-time-select> -->
           </div>
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes">
@@ -96,7 +115,7 @@
             </el-input>
             <span>次（范围2-100）</span>
           </div>
-          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable>
+          <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in carTypeList"
               :key="item.enumField"
@@ -143,7 +162,7 @@
               <el-pagination
                 class="cum_pagination"
                 @current-change="onPageChange"
-                :current-page.sync="currentPage"
+                :current-page.sync="pagination.pageNum"
                 :page-sizes="[100, 200, 300, 400]"
                 :page-size="pagination.pageSize"
                 layout="total, prev, pager, next, jumper"
@@ -175,6 +194,82 @@ export default {
   components: { Breadcrumb },
   data () {
     return {
+      startTimeOptions: [
+        {
+          label: '19:00',
+          value: 19
+        },
+        {
+          label: '20:00',
+          value: 20
+        },
+        {
+          label: '21:00',
+          value: 21
+        },
+        {
+          label: '22:00',
+          value: 22
+        },
+        {
+          label: '23:00',
+          value: 23
+        },
+        {
+          label: '24:00',
+          value: 24
+        }
+      ],
+      endTimeOptions: [
+        {
+          label: '20:00',
+          value: 20
+        },
+        {
+          label: '21:00',
+          value: 21
+        },
+        {
+          label: '22:00',
+          value: 22
+        },
+        {
+          label: '23:00',
+          value: 23
+        },
+        {
+          label: '24:00',
+          value: 24
+        },
+        {
+          label: '次日01:00',
+          value: 1
+        },
+        {
+          label: '次日02:00',
+          value: 2
+        },
+        {
+          label: '次日03:00',
+          value: 3
+        },
+        {
+          label: '次日04:00',
+          value: 4
+        },
+        {
+          label: '次日05:00',
+          value: 5
+        },
+        {
+          label: '次日06:00',
+          value: 6
+        },
+        {
+          label: '次日07:00',
+          value: 7
+        }
+      ],
       pickerOptions: {
         disabledDate(time) {
           return time.getTime() > Date.now();
@@ -185,15 +280,15 @@ export default {
         endDate: null,
         cameraIds: null,
         bayonetIds: null,
-        startTime: null,
-        endTime: null,
+        startTime: 19,
+        endTime: 7,
         minShotTimes: 5,
-        vehicleTypes: null,
+        vehicleTypes: [],
         surveillanceId: null
       },
       queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
-      startTime: '19:00',
-      endTime: '07:00',
+      // startTime: '19:00',
+      // endTime: '07:00',
       // carTypeList: [],
       controlCarList: [
         {
@@ -215,10 +310,8 @@ export default {
       checkAllTree: false, // 树是否全选
       isIndeterminateBayonet: false, // 是否处于全选与全不选之间
       checkAllTreeBayonet: false, // 树是否全选
-      bayonetTree: [], // 卡口树
       cameraTree: [],
       videoTreeNodeCount: 0, // 摄像头节点数量
-      bayonetTreeNodeCount: 0, // 卡口节点数量
       defaultProps: {
         children: "children",
         label: "label"
@@ -244,7 +337,7 @@ export default {
         pageSize: 10,
         total: 0,
       },
-      currentPage: 1,
+      // currentPage: 1,
       exportLoadingbtn: false, // 导出按钮loading
       carTypeList: [], // 车辆类型列表
       searchStr: '', // 传到抓拍记录页面的数据
@@ -329,23 +422,6 @@ export default {
       }
       return data;
     },
-    //获取卡口数据
-    /* getBayTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.bayonetList && item.bayonetList.length > 0) {
-          item['children'] = item.bayonetList
-          delete(item.bayonetList)
-          for(let key of item['children']) {
-            key['label'] = key.bayonetName
-            key['id'] = key.uid
-            key['treeType'] = 2
-          }
-        }
-      }
-      return data;
-    }, */
     // tab的方法
     chooseDevice() {
       // 选择了树的设备
@@ -393,32 +469,6 @@ export default {
         this.isIndeterminate = false;
       }
     },
-    // 处理卡口树全选时间
-    /* handleCheckedAllBay(val) {
-      this.isIndeterminateBay = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
-    //卡口
-    listenCheckedBay(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.videoTreeNodeCount) {
-        this.isIndeterminateBay = false;
-        this.checkAllTreeBay = true;
-      } else if (val1.checkedNodes.length < this.videoTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBay = false;
-        this.isIndeterminateBay = false;
-      }
-    }, */
     // 选中的设备数量处理
     handleData() {
       /* this.selectDeviceArr = [...this.selectCameraArr, ...this.selectBayonetArr].filter(key => key.treeType); */
@@ -445,20 +495,19 @@ export default {
         endDate: null,
         cameraIds: null,
         bayonetIds: null,
-        startTime: null,
-        endTime: null,
-        minShotTimes: null,
-        vehicleTypes: null,
+        startTime: 19,
+        endTime: 7,
+        minShotTimes: 5,
+        vehicleTypes: [],
         surveillanceId: null
       })
       this.selectDeviceArr.splice(0, this.selectDeviceArr.length)
       this.$refs.cameraTree.setCheckedNodes([]);
-      // this.$refs.bayonetTree.setCheckedNodes([]);
       this.isIndeterminate = false
       this.isIndeterminateBayonet = false
-      this.queryDate = null
-      this.startTime = null
-      this.endTime = null
+      this.queryDate = [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))];
+      // this.startTime = null
+      // this.endTime = null
       this.resetLoading = false
     },
     onSearch () {
@@ -476,10 +525,14 @@ export default {
           this.queryForm.bayonetIds = bayonentIds.join(",");
         }
       // }
-      this.queryForm.startTime = this.startTime && parseInt(this.startTime.substr(0, 2))
-      this.queryForm.endTime = this.endTime && parseInt(this.endTime.substr(0, 2))
+      // this.queryForm.startTime = this.startTime && parseInt(this.startTime.substr(0, 2))
+      // this.queryForm.endTime = this.endTime && parseInt(this.endTime.substr(0, 2))
       this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
       this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
+
+      // if (this.queryForm.endTime > 7) {
+      //   this.isNextDay = true;
+      // }
 
       const params = {
         bayonetIds: this.queryForm.bayonetIds,
@@ -489,9 +542,9 @@ export default {
         startDate: this.queryForm.startDate + ' 00:00:00',
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
-        vehicleTypes: this.queryForm.vehicleTypes,
+        vehicleTypes: this.queryForm.vehicleTypes.join(':'),
         surveillanceId: this.queryForm.surveillanceId,
-        isNextDay: true,
+        isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
@@ -556,7 +609,8 @@ export default {
   width: 100%; height: 100%;
   padding-top: 50px;
   .the-bottom {
-    width: 100%;height: calc(100% - 60px);
+    width: 100%;
+    height: 100%;
     display: flex;
     position: relative;
     .the-left-search {
@@ -573,6 +627,9 @@ export default {
           display: flex;
           align-items: center;
           position: relative;
+          /deep/ .el-input__suffix {
+            display: none;
+          }
           .left_time_separator {
             color: #999;
             padding: 0 5px;

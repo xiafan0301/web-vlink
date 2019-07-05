@@ -13,7 +13,7 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
-                @blur="handleStartTime"
+                @focus="handleStartTime"
                 :picker-options="pickerStart"
                 v-model="filterObj.startDate"
                 type="datetime"
@@ -29,14 +29,14 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
-                @blur="handleEndTime"
-                :picker-options="pickerStart"
+                @focus="handleEndTime"
+                :picker-options="pickerEnd"
                 type="datetime" 
                 placeholder="选择日期" 
               ></el-date-picker>
             </div>
             <div class="input-box-line" v-for="(item, index) in filterObj.vehicleNumberList" :key="index + 'ssd'">
-              <el-input class="left-none-border" v-model="item.vehicleNumber" placeholder="请输入车牌号码">
+              <el-input class="left-none-border" v-model="item.vehicleNumber" placeholder="请输入车牌号码" @blur="handleChangeVNumber(item.vehicleNumber)">
                 <template slot="prepend">车辆{{ index + 1 }}:</template>
                 <i v-if="index > 1" slot="suffix" class="el-input__icon el-icon-remove" @click="onDeleteVehicleNumber(index)"></i>
               </el-input>
@@ -66,7 +66,7 @@
                   <el-pagination
                     class="cum_pagination th-center-pagination"
                     @current-change="onPageChange"
-                    :current-page.sync="currentPage"
+                    :current-page.sync="pagination.pageNum"
                     :page-size="pagination.pageSize"
                     layout="prev, pager, next"
                     :total="pagination.total">
@@ -156,7 +156,7 @@
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
+              <img style="display: block; width: 100%; height: .88rem;" :src="item.storagePath" alt="">
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -170,32 +170,28 @@
 import Breadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { formatDate } from "@/utils/util.js";
+import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList, getSnapDetail } from '@/views/index/api/api.judge.js';
+const overStartTime = new Date() - 24 * 60 * 60 *1000;
+const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
 export default {
   components: {
     flvplayer,
     Breadcrumb
   },
   data () {
-    const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
       pickerStart: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
-      },
-      isSelect: false,
+      pickerEnd: {},
       pagination: {
         pageNum: 1,
         pageSize: 15,
         total: 0
       },
-      currentPage: 1,
       /* 抓拍记录页面参数 */
       strucDetailDialog: false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -209,7 +205,7 @@ export default {
       videoUrl: null, // 下载地址
       map: null,
       filterObj: {
-        startDate: new Date(startTime),
+        startDate: new Date(overStartTime),
         endDate: new Date(),
         vehicleNumberList: [
           {vehicleNumber: '沪D008CP'},
@@ -217,8 +213,6 @@ export default {
         ],
         vehicleNumbers: null
       },
-      // startDate: new Date(startTime), // 开始时间
-      // endDate: new Date(), // 结束时间
       resetLoading: false,
       searchLoading: false,
       swiperOption: {
@@ -234,6 +228,15 @@ export default {
         },
       },
       dataList: [], // 查询结果列表数据
+      hasError: false, // 是否符合查询条件
+    }
+  },
+  watch: {
+    'filterObj.startDate' () {
+      let _this = this;
+      const threeDays = 2 * 3600 * 24 * 1000;
+      const endTime = new Date(_this.filterObj.startDate).getTime() + threeDays;
+      _this.filterObj.endDate = formatDate(endTime);
     }
   },
   methods: {
@@ -279,17 +282,23 @@ export default {
       })
     },
     // 开始时间change
-    handleStartTime () {
-      let _this = this;
-      _this.pickerEnd.disabledDate = function (time) {
-        return time.getTime() > new Date(_this.filterObj.startDate).getTime() + 3 * 24 * 3600 * 1000;
-      }
+    handleStartTime (val) {
+      // let _this = this;
+      // const endDate = new Date(_this.filterObj.endDate).getTime();
+      // _this.pickerStart = {
+      //   disabledDate (time) {
+      //    return time.getTime() > (endDate - 8.64e7) || time.getTime() < ((endDate - 2 * 3600 * 24 * 1000) - 8.64e6);
+      //   }
+      // }
     },
     // 结束时间change
-    handleEndTime () {
+    handleEndTime (time) {
       let _this = this;
-      _this.pickerStart.disabledDate = function (time) {
-        return time.getTime() > new Date(_this.filterObj.endDate).getTime();
+      const startDate = new Date(_this.filterObj.startDate).getTime();
+      _this.pickerEnd = {
+        disabledDate (time) {
+         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
+        }
       }
     },
     /**
@@ -304,14 +313,28 @@ export default {
     onDeleteVehicleNumber (i) {
       this.filterObj.vehicleNumberList.splice(i, 1);
     },
+    // 车牌号change
+    handleChangeVNumber (number) {
+      if (number) {
+        if (!reg.test(number)) {
+          this.hasError = true;
+          this.$message.warning('请输入正确的车牌号码');
+        } else {
+          this.hasError = false;
+        }
+      } else {
+        this.hasError = true;
+        // this.$message.warning('请输入正确的车牌号码');
+      }
+    },
     /**
      * 重置按钮
      */
     onReset () {
       this.resetLoading = true;
       let obj = {
-        startDate: null,
-        endDate: null,
+        startDate: new Date(overStartTime),
+        endDate: new Date(),
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
@@ -325,23 +348,35 @@ export default {
      * 查询按钮
      */
     onSearch () {
-      this.searchLoading = true;
       let arr = [];
-      this.filterObj.vehicleNumberList.forEach(item => {arr.push(item.vehicleNumber)});
+      this.filterObj.vehicleNumberList.forEach(item => {
+        if (!reg.test(item.vehicleNumber)) {
+          this.hasError = true;
+        }
+        arr.push(item.vehicleNumber)
+      });
+
+      if (this.hasError) {
+        this.$message.warning('请输入正确的车牌号码');
+        return;
+      }
+
       this.filterObj.vehicleNumbers = arr.join('-');
+
+      this.searchLoading = true;
+
       const params = {
-        // startDate: formatDate(this.filterObj.startDate),
-        startDate: '2019-07-01 00:12:12',
+        startDate: formatDate(this.filterObj.startDate),
         endDate: formatDate(this.filterObj.endDate),
         vehicleNumbers: this.filterObj.vehicleNumbers,
         order:"asc",
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
-      }
+      };
+
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            console.log('res', res)
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
             this.searchLoading = false;
@@ -356,20 +391,9 @@ export default {
      */
     onOpenDetail (obj) {
       this.$_showLoading({text: '加载中...'});
-      console.log(obj)
-      console.log(this.sturcDetail.videoPath)
       if (obj.peerVehicleInfoDtoList && obj.peerVehicleInfoDtoList.length > 0) {
         this.vehicleList = obj.peerVehicleInfoDtoList;
       }
-      // this.videoUrl = this.sturcDetail.videoPath;
-      // this.playUrl = {
-      //   type: 3,
-      //   title: '',
-      //   video: {
-      //     uid: 1,
-      //     downUrl: this.sturcDetail.videoPath
-      //   }
-      // }
       this.strucDetailDialog = true;
       this.$nextTick(() => {
         this.getVehicleDetail(obj);
@@ -382,7 +406,8 @@ export default {
         dateStart: formatDate(this.filterObj.startDate),
         dateEnd: formatDate(this.filterObj.endDate),
         devIds: obj.deviceID,
-        plateNo: obj.plateNo
+        plateNo: obj.shotRecord.plateNo,
+        hasPlate: obj.shotRecord.plateNo ? 1 : 0, // 1--有牌车 0 --无牌车
       }
       // const params = {
       //   dateStart: '2019-01-01',
@@ -413,7 +438,6 @@ export default {
       this.sturcDetail = {};
       this.curImgIndex = i;
       this.sturcDetail = obj;
-      console.log(this.sturcDetail)
     },
     /**
      * 分页赋值
