@@ -214,8 +214,8 @@ export default {
     getDeviceSnapSum (dId) {
       getDeviceSnapImagesSum({
         deviceIds: this.$route.query.deviceIds,
-        startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
-        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+        startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
         vehicleClass: this.formInline.lx,
         vehicleGroupUid: this.formInline.lb,
         isPlateNo: this.formInline.no ? 2 : 1,
@@ -243,13 +243,15 @@ export default {
       let dId = this.$route.query.deviceIds;
       if (!pageNum) { pageNum = 1; }
       getDeviceSnapImagesPage({
-        'where.deviceIds': dId,
-        'where.startTime': sDay,
-        'where.endTime': sDay,
-        'where.vehicleClass': this.formInline.lx,
-        'where.vehicleGroupUid': this.formInline.lb,
-        'where.isPlateNo': this.formInline.no ? 2 : 1,
-        'where.plateNo': this.formInline.cpp + this.formInline.cp,
+        where: {
+          deviceIds: dId,
+          startTime: sDay + ' 00:00:00',
+          endTime: sDay + ' 23:59:59',
+          vehicleClass: this.formInline.lx,
+          vehicleGroupUid: this.formInline.lb,
+          isPlateNo: this.formInline.no ? 2 : 1,
+          plateNo: this.formInline.cpp + this.formInline.cp
+        },
         pageNum: pageNum,
         pageSize: 16
       }).then(res => {
