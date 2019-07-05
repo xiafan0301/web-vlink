@@ -322,7 +322,7 @@ export default {
           }, 0)
         })
         this.mapTypeList.forEach(u => {
-          this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+          this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
         })
         this.$refs.mapLeftTree.filter(val);
       }
@@ -362,7 +362,7 @@ export default {
       arr.forEach(u => {
         this.updateNumberss(true, u, bool);
         setTimeout(() => {
-          this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+          this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
         }, 0)
       })
       // 更新子菜单勾选状态
@@ -414,14 +414,15 @@ export default {
     _this.mouseTool = mouseTool;
     // 添加事件
     window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-      if(!e.obj.C.isRing) {
+      console.log(e)
+      if(!e.obj.B.isRing) {
         if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
         if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
         _this.selAreaPolygon = e.obj;
         // delete icon
         _this.delSelAreaIcon = new window.AMap.Marker({
           map: _this.map,
-          position: e.obj.C.path[e.obj.C.path.length - 1],
+          position: e.obj.getPath()[e.obj.getPath().length - 1],
           offset: new window.AMap.Pixel(-15, -16),
           draggable: false, // 是否可拖动
           content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
@@ -435,7 +436,7 @@ export default {
                 position: [y.longitude, y.latitude]
               })
               let point = m.getPosition();
-              if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path) && y.isShow) {
+              if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath()) && y.isShow) {
                 y['isInArea'] = true;
               } else {
                 y['isInArea'] = false;
@@ -451,7 +452,7 @@ export default {
                   position: [y.longitude, y.latitude]
                 })
                 let point = m.getPosition();
-                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path)) {
+                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath())) {
                   y['isInArea'] = true;
                 } else {
                   y['isInArea'] = false;
@@ -469,7 +470,7 @@ export default {
         }, 30)
         // 给范围内的marker加class
         _this.mapTypeList.forEach(u => {
-          _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+          _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
         })
         _this.activeType = 0;
         _this.resetTools(1)
@@ -510,7 +511,7 @@ export default {
         this.updateNumberss();
         this.marks.forEach((x, _index) => {
           if (_index < 4) {
-            this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+            this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
           }
         })
         console.log(this.mapTreeData[0].infoList[9])
@@ -657,7 +658,7 @@ export default {
             if (this.hoverWindow ){this.hoverWindow.close()}
             this.markList = this.markList.filter(x => x.uid !== this.curSignObj.uid);
             this.marks[4].forEach(x => {
-              if (x.Le.extData.uid === this.curSignObj.uid) {
+              if (x.getExtData().uid === this.curSignObj.uid) {
                 this.map.remove(x)
               }
             })
@@ -832,6 +833,7 @@ export default {
               this.carLoop();
 
               this.watchCalling();
+
             })
           }
         })
@@ -1056,7 +1058,7 @@ export default {
       })
     },
     // 地图标记
-    mapMark (data, isSetView) {
+    mapMark (data) {
       if (data && data.length > 0) {
         let _this = this;
         for (let i = 0; i < data.length; i++) {
@@ -1260,11 +1262,7 @@ export default {
             }
           })
         }
-        if (!isSetView) {
-//          setTimeout(() => {
-//            _this.map.setFitView()
-//          }, 100)
-        }
+        this.map.setFitView();
       }
     },
     // 清除车辆路线和图标
@@ -1460,7 +1458,7 @@ export default {
           _this.selAreaPolygon = null;
           _this.updateNumberss(false, '', false, true);
           _this.mapTypeList.forEach(x => {
-            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
           })
         }
         // close small video
@@ -1530,7 +1528,7 @@ export default {
           this.mouseTool.close(true);
           this.updateNumberss(false, '', false, true);
           this.mapTypeList.forEach(x => {
-            this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+            this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
           })
           break;
         case 1: // clear all tap event but selArea
@@ -1556,18 +1554,21 @@ export default {
     // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
     operClassToEL (elList, className, boolean, isSetAera, path) {
       elList.forEach(y => {
-        let _curObj = y.Le.contentDom.classList, point = y.getPosition();
-        let b = this.updateMarkVisible(y.Le.extData)
+        let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
+        let b = this.updateMarkVisible(y.getExtData());
+//        let b = true;
         if (b){
           if (boolean) {
+            console.log('--1')
             if (_curObj.contains(className)) {
+              console.log('--2')
               if (path) {
                 if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
                   _curObj.remove(className);
                 }
               } else {
                 // 判断小菜单有没有勾选
-                let __obj = y.Le.extData;
+                let __obj = y.getExtData();
                 if (__obj.dataType === 1) {
                   _curObj.remove(className);
                 } else {
@@ -1579,7 +1580,7 @@ export default {
             }
           } else {
             //没有className并且dataType 不等于4的元素
-            if (!_curObj.contains(className) && y.Le.extData.dataType !== 4) {
+            if (!_curObj.contains(className) && y.getExtData().dataType !== 4) {
               if (path && isSetAera) {
                 let point = y.getPosition();
                 if (!window.AMap.GeometryUtil.isPointInRing(point, path)) {
@@ -1998,10 +1999,10 @@ export default {
         })
       })
       console.log(this.mapTreeData[0])
-      this.operClassToEL(this.marks[index], this.hideClass, false, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null);
-      let addMark = this.marks[index].filter(x => item.supTypeList.includes(parseFloat(x.Le.extData[this.findType[index]]) - 1))
+      this.operClassToEL(this.marks[index], this.hideClass, false, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
+      let addMark = this.marks[index].filter(x => item.supTypeList.includes(parseFloat(x.getExtData()[this.findType[index]]) - 1))
       console.log(addMark, this.marks[index])
-      this.operClassToEL(addMark, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null);
+      this.operClassToEL(addMark, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
     },
 
     // 视频播放
@@ -2068,16 +2069,16 @@ export default {
             });
             _this.snapMarks.push(marker);
             _this.marks[0].forEach(y => {
-              if (y.C.extData.uid === x.deviceId) {
-                y.Le.contentDom.childNodes[0].classList.add('vl_icon_map_sxt_error')
+              if (y.getExtData().uid === x.deviceId) {
+                document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.add('vl_icon_map_sxt_error')
               }
             })
           })
           _this.timer = setTimeout(() => {
             _this.map.remove(_this.snapMarks);
             _this.marks[0].forEach(y => {
-              if (y.Le.contentDom.childNodes[0].classList.contains('vl_icon_map_sxt_error')) {
-                y.Le.contentDom.childNodes[0].classList.remove('vl_icon_map_sxt_error')
+              if (document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.contains('vl_icon_map_sxt_error')) {
+                document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.remove('vl_icon_map_sxt_error')
               }
             })
             _this.snapMarks = [];

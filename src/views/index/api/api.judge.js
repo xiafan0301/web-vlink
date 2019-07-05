@@ -350,8 +350,9 @@ export function getSnapList(params) {
     mode: 'judge'
   });
 }
+
 /**
- * 
+ *
 车辆图片分析接口
  * @param {object} params
  */
@@ -371,12 +372,12 @@ export function getPhotoAnalysis(params) {
  * 区域徘徊
  * @param {object} params
  */
-export function QyphGetAreaWander(params) {
+export function QyphGetAreaWander(data) {
   return request({
     url: '/vehicle-analysis/area-wander',
-    method: 'get',
-    params: params,
-    mode: 'noServe'
+    method: 'post',
+    data,
+    mode: 'judge'
   });
 }
 /*--------------------------  区域徘徊碰撞end  ---------------------------------*/
@@ -384,16 +385,27 @@ export function QyphGetAreaWander(params) {
  * 区域碰撞
  * @param {object} params
  */
-export function QypzGetAreaCross(params) {
+export function QypzGetAreaCross(data) {
   return request({
     url: '/vehicle-analysis/area-cross',
-    method: 'get',
-    params: params,
-    mode: 'noServe'
+    method: 'post',
+    data,
+    mode: 'judge'
   });
 }
-/*--------------------------  车辆轨迹start  ---------------------------------*/
-
+/*--------------------------  车辆侦查-车辆轨迹start  ---------------------------------*/
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function InvestigateGetTrace(data) {
+  return request({
+    url: '/vehicle-investigate/trace',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
 /*--------------------------  车辆轨迹end  ---------------------------------*/
 /**
  * 查询设备抓拍图片汇总信息
