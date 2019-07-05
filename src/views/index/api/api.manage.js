@@ -828,3 +828,25 @@ export function checkRename (params) {
     method: 'get'
   });
 }
+/**
+ * 特殊车辆导入
+ * @param {*} data
+ */
+export function vehicleImport (params) {
+  return request({
+    url: '/special-vehicle/import',
+    data: params,
+    method: 'post'
+  });
+}
+/**
+ * 特殊车辆导出
+ * @param {*} data
+ */
+export function vehicleExport (params) {
+  return request({
+    url: '/excel-service/export',
+    data: params,
+    method: 'post'
+  });
+}

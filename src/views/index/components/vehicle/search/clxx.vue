@@ -1,39 +1,15 @@
 <template>
   <div class="vehicle-info">
     <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-          <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
-        </el-breadcrumb>
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-        <p class="tip">可选择一个或多个条件进行搜索</p>
-        <!-- 上传 (原型改版去掉)-->
-        <!-- <div class="vl_judge_tc_c_item">
-            <el-upload
-              :class="{'vl_jtc_upload': true}"
-              :show-file-list="false"
-              accept="image/*"
-              :action="uploadAcion"
-              list-type="picture-card"
-              :before-upload="beforeAvatarUpload"
-              :on-success="uploadSucess"
-              :on-error="handleError">
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="curImageUrl" :src="curImageUrl">
-              <div v-else>
-              <i style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_vehicle_01" ></i>
-              <span>点击上传图片</span>
-              </div>
-            </el-upload>
-            <p @click="showHistoryPic">从上传记录中选择</p>
-            <div v-show="curImageUrl" class="del_icon">
-              <i class="el-icon-delete" @click="delPic"></i>
-            </div>
-          </div> -->
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
             <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
@@ -41,328 +17,216 @@
           <!-- 时间 -->
           <div class="time-search">
             <el-date-picker
-                v-model="searchData.time"
-                type="daterange"
-                range-separator="-"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                format="yy/MM/dd"
-                :picker-options="pickerOptions"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                :default-time="['00:00:00', '23:59:59']">
-            </el-date-picker>
+              v-model="searchData.time"
+              type="daterange"
+              range-separator="-"
+              value-format="yyyy-MM-dd"
+              format="yy/MM/dd"
+              :picker-options="pickerOptions"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :clearable="false"
+            ></el-date-picker>
           </div>
           <div class="search-btn">
             <el-button @click="resetSearch">重置</el-button>
-            <el-button type="primary" @click="search">查询</el-button>
+            <el-button type="primary" :loading="searching" @click="search">查询</el-button>
           </div>
         </vue-scroll>
       </div>
       <!-- 车辆信息 -->
       <div class="info-right" v-loading="searching">
         <vue-scroll>
-        <div class="info-r-content">
-          <!-- 车辆信息 -->
-          <div class="info-card">
-            <p class="card-header">车辆信息</p>
-            <div class="card-row">
-              <div class="card-item">
-                <label class="title">车牌号牌：</label>
-                <span>{{vehicleArch.plateno}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车辆所有人：</label>
-                <span>{{vehicleArch.owner}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">中文品牌：</label>
-                <span>{{vehicleArch.vehicleBrand}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车身颜色：</label>
-                <span>{{vehicleArch.vehicleColor}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车身形式：</label>
-                <span>{{vehicleArch.bodyform}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车门数：</label>
-                <span>{{vehicleArch.doornumber}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">发动机号：</label>
-                <span>{{vehicleArch.engineno}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车辆类型：</label>
-                <span>{{vehicleArch.platetype}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">年款：</label>
-                <span>{{vehicleArch.model}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">座位数：</label>
-                <span>{{vehicleArch.seatnumber}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车辆状态：</label>
-                <span>{{vehicleArch.status}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">使用性质：</label>
-                <span>{{vehicleArch.usecharacter}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">车型：</label>
-                <span>{{vehicleArch.vehicletype}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">厂商名称：</label>
-                <span>{{vehicleArch.vendor}}</span>
-              </div>
-              <div class="card-item">
-                <label class="title">有效期止：</label>
-                <span>{{vehicleArch.validuntil}}</span>
-              </div>
-              <!-- <div class="card-item vehicle-img">
-                <label class="title">车辆登记照片：</label>
-                <div class='upload_box'>
-                  <div class="img-box" v-for="(item, index) in historyPicList" :key="index">
-                    <img
-                      :src="item.path"
-                      @click="openBigImg(index, historyPicList)"
-                    />
-                  </div>
+          <div class="info-r-content">
+            <!-- 车辆信息 -->
+            <div class="info-card">
+              <p class="card-header">车辆信息</p>
+              <div class="card-row">
+                <div class="card-item">
+                  <label class="title">车牌号牌：</label>
+                  <span>{{vehicleArch.plateno}}</span>
                 </div>
-              </div> -->
+                <div class="card-item">
+                  <label class="title">车辆所有人：</label>
+                  <span>{{vehicleArch.owner}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">中文品牌：</label>
+                  <span>{{vehicleArch.vehicleBrand}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车身颜色：</label>
+                  <span>{{vehicleArch.vehicleColor}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车身形式：</label>
+                  <span>{{vehicleArch.bodyform}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车门数：</label>
+                  <span>{{vehicleArch.doornumber}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">发动机号：</label>
+                  <span>{{vehicleArch.engineno}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车辆类型：</label>
+                  <span>{{vehicleArch.platetype}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">年款：</label>
+                  <span>{{vehicleArch.model}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">座位数：</label>
+                  <span>{{vehicleArch.seatnumber}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车辆状态：</label>
+                  <span>{{vehicleArch.status}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">使用性质：</label>
+                  <span>{{vehicleArch.usecharacter}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">车型：</label>
+                  <span>{{vehicleArch.vehicletype}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">厂商名称：</label>
+                  <span>{{vehicleArch.vendor}}</span>
+                </div>
+                <div class="card-item">
+                  <label class="title">有效期止：</label>
+                  <span>{{vehicleArch.validuntil}}</span>
+                </div>
+              </div>
+            </div>
+            <!-- 违章信息 -->
+            <div class="info-card">
+              <p class="card-header">违章信息</p>
+              <div class="table_box">
+                <el-table :data="regulationsList">
+                  <el-table-column label="序号" type="index" width="100"></el-table-column>
+                  <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="分类类型" prop="vioCategory" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="采集机关" prop="vioCollectionOffice" show-overflow-tooltip></el-table-column>
+                </el-table>
+              </div>
             </div>
           </div>
-          <!-- 违章信息 -->
-          <div class="info-card">
-            <p class="card-header">违章信息</p>
-            <div class="table_box">
-              <el-table
-                :data="regulationsList"
-                >
-                <el-table-column
-                  label="序号"
-                  type="index"
-                  width="100"
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="违法时间"
-                  prop="date"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="违法地点"
-                  prop="address"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="城市名称"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="罚款金额"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="违章归属地"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="违法行为"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="分类类型"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-                <el-table-column
-                  label="采集机关"
-                  prop="name"
-                  show-overflow-tooltip
-                  >
-                </el-table-column>
-              </el-table>
-            </div>
-            <!-- <template v-if="pagination.total > 0">
-              <el-pagination
-                @size-change="handleSizeChange"
-                @current-change="onPageChange"
-                :current-page.sync="pagination.pageNum"
-                :page-sizes="[100, 200, 300, 400]"
-                :page-size="pagination.pageSize"
-                layout="total, prev, pager, next, jumper"
-                :total="pagination.total"
-                class="cum_pagination">
-              </el-pagination>
-            </template> -->
-          </div>
-          <!-- 年检信息 -->
-          <!-- <div class="info-card">
-            <p class="card-header">年检信息</p>
-            <div class="yearly-inspection">
-              <label class="title">年检到期时间：</label>
-              <span class="content">2020-01-01</span>
-            </div>
-          </div> -->
-        </div>
         </vue-scroll>
       </div>
     </div>
-
-    <!--上传记录弹窗-->
-   <!--  <el-dialog
-      :visible.sync="historyPicDialog"
-      class="history-pic-dialog"
-      :close-on-click-modal="false"
-      top="4vh"
-      title="最近上传的图片">
-      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-        <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.uid" @click="chooseHisPic(item)">
-          <img :src="item.path" alt="">
-        </div>
-        <div style="clear: both;"></div>
-      </vue-scroll>
-      <p v-else>暂无历史记录</p>
-      <div slot="footer">
-        <el-button @click="historyPicDialog = false">取消</el-button>
-        <el-button type="primary" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-      </div>
-    </el-dialog>
-
-    <BigImg :imgList="imgList" :imgIndex="imgIndex" :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg> -->
   </div>
 </template>
 <script>
-/* import {ajaxCtx} from '@/config/config'; */
-/* import BigImg from '@/components/common/bigImg.vue'; */
-/* import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder} from '../../../api/api.judge.js'; */
-import {getArchives, getViolation} from '../../../api/api.analysis.js';
+import { getArchives, getViolation } from "../../../api/api.analysis.js";
+import { formatDate} from '@/utils/util.js';
 export default {
-  /* components: { BigImg }, */
-  data () {
+  data() {
     return {
-      /* uploadAcion: ajaxCtx.base + '/new',       //上传路径
-      uploading: false, // 是否上传中
-      uploadFileList: [],
-      curImageUrl: '', // 当前上传的图片
-      historyPicList: [], // 上传历史记录
-      historyPicDialog: false,
-      loadingHis: false,
-      imgData: null, */
-      /* imgIndex: 0, // 点击的图片索引
-        isShowImg: false, // 是否放大图片
-        imgList: [], */
-      searchData: {                //搜索参数
-          time: null,
-          licensePlateNum: null, // 车牌号
+      searchData: {
+        //搜索参数
+        time: null,
+        licensePlateNum: null // 车牌号
       },
       pickerOptions: {
-          disabledDate (time) {
-            let date = new Date();
-            let y = date.getFullYear();
-            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-            let d = date.getDate();
-            let threeMonths = '';
-            let start = '';
-            if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
-            } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
-            }
-            threeMonths = new Date(start).getTime();
-            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+        disabledDate(time) {
+         /*  let date = new Date();
+          let y = date.getFullYear();
+          let m =
+            date.getMonth() + 1 < 10
+              ? "0" + (date.getMonth() + 1)
+              : date.getMonth() + 1;
+          let d = date.getDate();
+          let threeMonths = "";
+          let start = "";
+          if (parseFloat(m) >= 4) {
+            start = y + "-" + (m - 3) + "-" + d;
+          } else {
+            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
           }
-        },
-        searching: false,
-        regulationsList: [{
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1518 弄'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1517 弄'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1519 弄'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }],      //违章信息列表
-          pagination: { total: 20, pageSize: 10, pageNum: 1 },
-          vehicleArch: {},      //车辆档案
+          threeMonths = new Date(start).getTime(); */
+          return time.getTime() > Date.now();
+        }
+      },
+      searching: false,
+      regulationsList: [], //违章信息列表
+      vehicleArch: {} //车辆档案
+    };
+  },
+  computed: {},
+  mounted() {
+    if(this.$route.query.plateNo) {
+      this.searchData.licensePlateNum = this.$route.query.plateNo
     }
-  },
-  computed: {
-    /* choosedHisPic () {
-      return this.historyPicList.filter(x => x.checked)
-    } */
-  },
-  mounted () {
-      this.setDTime();
-      this.getSearchData();
+    this.setDTime();
+    this.getSearchData();
   },
   methods: {
-    //设置默认时间
-    setDTime () {
-        let date = new Date();
-        let curDate = date.getTime();
-        let curS = 30 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.searchData.time = [_s, _e]
-    },
-    //重置
-    resetSearch () {
-        this.searchData.licensePlateNum = null;
-        this.uploadFileList.splice(0, this.uploadFileList.length);
-        this.imgData = null;
-        this.curImageUrl = '';
-        this.setDTime();
-    },
-    //查询
-    search() {
-      if(this.searchData.licensePlateNum) {
-        this.getSearchData();
+    // 验证车牌号方法
+    checkPlateNumber (value) {
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      if(value) {
+        if(!reg.test(value)) {
+          this.$message.error('请正确输入车牌号码');
+          return false;
+        }else {
+          return true;
+        }
       }else {
         this.$message.error("请输入车牌号码");
         return false;
       }
     },
+    //设置默认时间
+    setDTime() {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 30 * 24 * 3600 * 1000;
+      let _s =
+        new Date(curDate - curS).getFullYear() +
+        "-" +
+        (new Date(curDate - curS).getMonth() + 1) +
+        "-" +
+        new Date(curDate - curS).getDate();
+      let _e =
+        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      this.searchData.time = [_s, _e];
+    },
+    //重置
+    resetSearch() {
+      this.searchData.licensePlateNum = null;
+      this.vehicleArch = {};
+      this.regulationsList = [];
+      this.setDTime();
+    },
+    //查询
+    search() {
+      if(this.checkPlateNumber(this.searchData.licensePlateNum)) {
+        this.getSearchData();
+      }
+    },
     getSearchData() {
       let params = {};
-      if(this.searchData.time && this.searchData.time.length > 0) {
-        params['startDate'] = this.searchData.time[0];
-        params['endDate'] = this.searchData.time[1];
+      if (this.searchData.time && this.searchData.time.length > 0) {
+        params["dateStart"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
+        params["dateEnd"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
       }
-      if(this.searchData.licensePlateNum) {
-        params['plateNo'] = this.searchData.licensePlateNum
-      }else {
+      if (this.searchData.licensePlateNum) {
+        params["plateNo"] = this.searchData.licensePlateNum;
+      } else {
         return false;
       }
-      console.log("======getSearchData=====", this.searchData,params);
+      console.log("======getSearchData=====", this.searchData, params);
       this.getVehicle(params);
       this.getViolationList(params);
     },
@@ -370,158 +234,44 @@ export default {
     getVehicle(params) {
       const query = {
         plateNo: params.plateNo
-      }
+      };
       this.searching = true;
-      getArchives(query).then( res => {
-        console.log("0000000000",res)
-        if(res && res.data) {
-          this.vehicleArch = res.data 
-        }
-        this.$nextTick(() => {
-          this.searching = false
+      getArchives(query)
+        .then(res => {
+          console.log("0000000000", res);
+          if (res && res.data) {
+            this.vehicleArch = res.data;
+          }
+          this.$nextTick(() => {
+            this.searching = false;
+          });
         })
-      }).catch(error => {
-        this.searching = false;
-        console.log(error);
-      })     
+        .catch(error => {
+          this.searching = false;
+          console.log(error);
+        });
     },
     //获取违章信息
     getViolationList(params) {
-      this.regulationsList = []
+      this.regulationsList = [];
       this.searching = true;
-      getViolation(params).then(res => {
-        console.log("----getViolation----",res)
-        if(res && res.data) {
-          this.regulationsList = res.data
-        }
-        this.$nextTick(() => {
-          this.searching = false
+      getViolation(params)
+        .then(res => {
+          console.log("----getViolation----", res);
+          if (res && res.data) {
+            this.regulationsList = res.data;
+          }
+          this.$nextTick(() => {
+            this.searching = false;
+          });
         })
-      }).catch( error => {
-        this.searching = false;
-        console.log(error);
-      })
-    },
-    /* //分页
-    handleSizeChange (val) {
-      this.pagination.pageNum = 1;
-      this.pagination.pageSize = val;
-      this.getSearchData();
-    },
-    onPageChange (page) {
-      this.pagination.pageNum = page;
-      this.getSearchData();
-    }, */
-    /* // 上传图片
-    beforeAvatarUpload (file) {
-      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
-      const isLt = file.size / 1024 / 1024 < 100;
-      if (!isJPG) {
-        this.$message.error('只能上传 JPG / PNG 格式图片!');
-      }
-      if (!isLt) {
-        this.$message.error('上传图片大小不能超过 100MB!');
-      }
-      this.uploading = true;
-      return isJPG && isLt;
-    },
-    //上传成功
-    uploadSucess (response, file, fileList) {
-      this.uploading = false;
-      if (response && response.data) {
-        let oRes = response.data;
-        if (oRes) {
-          let x = {
-            cname: oRes.fileName, // 附件名称 ,
-            contentUid: this.$store.state.loginUser.uid,
-            // desci: '', // 备注 ,
-            filePathName: oRes.fileName, // 附件保存名称 ,
-            fileType: 1, // 文件类型 ,
-            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-            // otherFlag: '', // 其他标识 ,
-            path: oRes.fileFullPath, // 附件路径 ,
-            // path: oRes.path,
-            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-            // uid: '' //  附件标识
-          };
-          JtcPOSTAppendixInfo(x).then(jRes => {
-            if (jRes) {
-              x['uid'] = jRes.data;
-              console.log(x);
-            }
-          })
-          this.imgData = x;
-          this.curImageUrl = x.path;
-        }
-      }
-      this.uploadFileList = fileList;
-    },
-    //上传失败
-    handleError () {
-      this.uploading = false;
-      this.$message.error('上传失败')
-    },
-    //获取上传记录
-    showHistoryPic () {
-      this.loadingHis = true;
-      this.historyPicDialog = true;
-      let params = {
-        userId: this.$store.state.loginUser.uid,
-        fileType: 1
-      }
-      JtcGETAppendixInfoList(params).then(res => {
-        if (res) {
-          this.loadingHis = false;
-          res.data.forEach(x => x.checked = false);
-          this.historyPicList = res.data;
-        }
-      }).catch(() => {
-        this.historyPicDialog = false;
-      })
-    },
-    //删除图片
-    delPic () {
-      this.uploadFileList.splice(0, 1);
-      this.curImageUrl = '';
-    },
-    //选择最近上传的图片
-    chooseHisPic (item) {
-      this.historyPicList.forEach(x => {
-        x.checked = false;
-      })
-      item.checked = true;
-    },
-    //从历史上传图片中上传
-    addHisToImg () {
-      this.historyPicDialog = false;
-      let _ids = [];
-      this.choosedHisPic.forEach(x => {
-        _ids.push(x.uid)
-        this.curImageUrl = x.path;
-        this.imgData = x;
-      })
-      let _obj = {
-        appendixInfoIds: _ids.join(',')
-      }
-      JtcPUTAppendixsOrder(_obj);
-    }, */
-    /* // 图片放大
-    openBigImg (index, data) {
-      console.log('--------------',index, data)
-      this.imgList = data;
-      this.isShowImg = true;
-      this.imgIndex = index;
-    },
-    // 关闭图片放大
-    emitCloseImgDialog(data){
-      this.imgList = [];
-      this.isShowImg = data;
-    }, */
+        .catch(error => {
+          this.searching = false;
+          console.log(error);
+        });
+    }
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .vehicle-info {
@@ -532,76 +282,22 @@ export default {
   .vehicle-info-content {
     height: 100%;
     display: flex;
-    border-top: 1px solid #D3D3D3;
+    border-top: 1px solid #d3d3d3;
     .info-left {
       width: 272px;
       padding: 20px 0 20px 20px;
       color: #999;
       background: #fff;
-      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-      animation: fadeInLeft .4s ease-out .3s both;
+      box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+      animation: fadeInLeft 0.4s ease-out 0.3s both;
       .tip {
         margin-bottom: 36px;
       }
-      .vl_judge_tc_c_item {
-          width: 232px;
-          height: 232px;
-          display: inline-block;
-          position: relative;
-          margin-bottom: 20px;
-          -webkit-border-radius: 10px;
-          -moz-border-radius: 10px;
-          border-radius: 10px;
-          cursor: pointer;
-          &:hover {
-            background: #2981F8;
-            >p {
-              display: block;
-            }
-            .del_icon {
-              display: block;
-            }
-          }
-          .vl_jtc_upload {
-            width: 100%;
-            height: 100%;
-            background: none;
-          }
-          >p {
-            display: none;
-            position: absolute;
-            bottom: 0;
-            text-align: center;
-            width: 100%;
-            color: #FFFFFF;
-            height: 40px;
-            line-height: 40px;
-            -webkit-border-radius: 0 0 10px 10px;
-            -moz-border-radius: 0 0 10px 10px;
-            border-radius: 0 0 10px 10px;
-            background: #0C70F8;
-          }
-          .del_icon {
-            display: none;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            line-height: 24px;
-            text-align: center;
-            background: rgba(0, 0, 0, .4);
-            -webkit-border-radius: 4px;
-            -moz-border-radius: 4px;
-            border-radius: 4px;
-            color: #FFFFFF;
-          }
-        }
-        //车牌号搜索
-        .license-plate-search {
-          width: 232px;
-          margin-bottom: 10px;
-        }
+      //车牌号搜索
+      .license-plate-search {
+        width: 232px;
+        margin-bottom: 10px;
+      }
     }
     .info-right {
       width: calc(100% - 272px);
@@ -613,16 +309,16 @@ export default {
         .info-card {
           width: 100%;
           background: #fff;
-          box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-          border-radius:4px;
+          box-shadow: 5px 0px 16px 0px rgba(169, 169, 169, 0.2);
+          border-radius: 4px;
           margin-bottom: 20px;
           .card-header {
-              font-size: 16px;
-              height: 55px;
-              line-height: 55px;
-              border-bottom: 1px solid #F2F2F2;
-              color: #333;
-              padding-left: 20px;
+            font-size: 16px;
+            height: 55px;
+            line-height: 55px;
+            border-bottom: 1px solid #f2f2f2;
+            color: #333;
+            padding-left: 20px;
           }
           .card-row {
             display: flex;
@@ -692,38 +388,41 @@ export default {
 </style>
 <style lang="scss">
 html {
-    font-size: 100px;
+  font-size: 100px;
+}
+@media screen and (min-width: 960px) and (max-width: 1119px) {
+  html {
+    font-size: 60px !important;
   }
-@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-@media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
+}
+@media screen and (min-width: 1200px) and (max-width: 1439px) {
+  html {
+    font-size: 70px !important;
+  }
+}
+@media screen and (min-width: 1440px) and (max-width: 1679px) {
+  html {
+    font-size: 80px !important;
+  }
+}
+@media screen and (min-width: 1680px) and (max-width: 1919px) {
+  html {
+    font-size: 90px !important;
+  }
+}
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 100px !important;
+  }
+}
 .vehicle-info {
-  .vl_judge_tc_c_item {
-    .vl_jtc_upload {
-      .el-upload {
-            width: 100%;
-            height: 100%;
-            background: #F2F2F2;
-            border: none;
-            span {
-              color: #999;
-            }
-            img {
-              width: 100%;
-              height: 100%;
-              -webkit-border-radius: 10px;
-              -moz-border-radius: 10px;
-              border-radius: 10px;
-            }
-      }
-    }
-  }
   //时间搜索
   .time-search {
     margin-bottom: 10px;
-    .el-date-editor--daterange.el-input, .el-date-editor--daterange.el-input__inner, .el-date-editor--timerange.el-input, .el-date-editor--timerange.el-input__inner {
+    .el-date-editor--daterange.el-input,
+    .el-date-editor--daterange.el-input__inner,
+    .el-date-editor--timerange.el-input,
+    .el-date-editor--timerange.el-input__inner {
       width: 232px;
     }
   }
@@ -734,51 +433,55 @@ html {
     .el-button {
       width: 45%;
     }
+    .el-button--primary {
+      background-color: #0c70f8;
+      border-color: #0c70f8;
+    }
   }
   //弹窗
   .history-pic-dialog {
-      .el-dialog {
-        max-width: 12.6rem;
-        width: 100%!important;
-      }
-      .el-dialog__title {
-        font-size: .16rem;
-        color: #333333;
-      }
-      .el-dialog__body {
-        padding: 0 .76rem .3rem;
-      }
-      .his-pic-box {
-        width: 100%;
-        height: 4.6rem!important;
-        .his-pic-item {
-          float: left;
-          width: 1.38rem;
-          height: 1.38rem;
-          border: .02rem solid #FFFFFF;
-          margin-right: .2rem;
-          margin-bottom: .2rem;
-          cursor: pointer;
-          img {
-            width: 100%;
-            height: 100%;
-          }
-        }
-        .active {
-          border-color: #0C70F8;
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100% !important;
+    }
+    .el-dialog__title {
+      font-size: 0.16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 0.76rem 0.3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem !important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: 0.02rem solid #ffffff;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
         }
       }
-      .el-dialog__footer {
-        button {
-          width: 1.4rem!important;
-          height: .4rem;
-          line-height: .4rem;
-          padding: 0;
-        }
+      .active {
+        border-color: #0c70f8;
       }
     }
-    .__view {
-      width: 100% !important; // vue-scroll样式重置
+    .el-dialog__footer {
+      button {
+        width: 1.4rem !important;
+        height: 0.4rem;
+        line-height: 0.4rem;
+        padding: 0;
+      }
     }
+  }
+  .__view {
+    width: 100% !important; // vue-scroll样式重置
+  }
 }
 </style>

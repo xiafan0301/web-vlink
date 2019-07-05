@@ -1,9 +1,146 @@
 <template>
   <div class="gzws_container">
-    <Breadcrumb :oData="[{name: '跟踪尾随'}]"></Breadcrumb>
+    <div class="pt_breadcrumb">
+      <el-breadcrumb separator=">">
+        <el-breadcrumb-item :to="{ name: 'portrait' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item>跟踪尾随</el-breadcrumb-item>
+      </el-breadcrumb>
+      <el-button class="add_btn" @click="showAddTaskDialog('add')">新建任务</el-button>
+    </div>
     <div class="content_box">
-      <div class="left">
-        <vue-scroll>
+      <ul class="tab-menu">
+        <li
+          v-for="(item,index) in tabList"
+          :key="index"
+          :class="{'is-active': selectIndex === item.value}"
+          @click="selectTab(item.value)"
+        >{{item.label}}</li>
+      </ul>
+      <div class="search_box">
+        <el-form :inline="true" :model="searchForm" class="event_form" ref="searchForm">
+          <el-form-item label="任务名称:" prop="taskName">
+            <el-input
+              style="width: 230px;"
+              type="text"
+              placeholder="请输入任务名称"
+              v-model="searchForm.taskName"
+            />
+          </el-form-item>
+          <el-form-item label="创建时间:" prop="reportTime">
+            <el-date-picker
+              v-model="searchForm.reportTime"
+              type="datetimerange"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="['00:00:00', '23:59:59']"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button class="select_btn" @click="selectDataList">查询</el-button>
+            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+          </el-form-item>
+        </el-form>
+        <div class="divide"></div>
+      </div>
+      <div class="table_box">
+        <el-table :data="list">
+          <el-table-column label="序号" type="index" width="100"></el-table-column>
+          <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+          <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+          <el-table-column label="分析时间范围" prop="taskName" show-overflow-tooltip></el-table-column>
+          <el-table-column label="尾随间隔" prop="taskName" show-overflow-tooltip></el-table-column>
+          <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" fixed="right">
+            <template slot-scope="scope">
+              <span
+                class="operation_btn"
+                @click="skipResultPage(scope.row)"
+                v-if="selectIndex === 1"
+              >查看</span>
+              <span
+                class="operation_btn"
+                @click="showInterruptDialog(scope.row)"
+                v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
+              >中断任务</span>
+              <span
+                class="operation_btn"
+                @click="recoveryTask(scope.row)"
+                v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
+              >恢复任务</span>
+              <span
+                class="operation_btn"
+                @click="showAddTaskDialog('edit', scope.row)"
+                v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+              >重启任务</span>
+              <span
+                class="operation_btn"
+                @click="showDeleteDialog(scope.row)"
+                v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
+              >删除任务</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        <template v-if="pagination.total > 0">
+          <el-pagination
+            class="cum_pagination"
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total"
+          ></el-pagination>
+        </template>
+      </div>
+    </div>
+    <!--删除任务弹出框-->
+    <el-dialog
+      title="删除任务确认"
+      :visible.sync="deleteDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="deleteDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--中断任务弹出框-->
+    <el-dialog
+      title="中断任务确认"
+      :visible.sync="interruptDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="interruptDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isInterruptLoading" @click="sureInterruptTask">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--新建任务弹出框-->
+    <el-dialog
+      :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
+      :visible.sync="addTaskDialog"
+      width="720px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp dialog_comp_add"
+      >
+      <div class="content_body">
+        <div class="left">
           <div class="upload_box">
             <el-upload
               :disabled="isAddImgDisabled"
@@ -11,26 +148,35 @@
               accept="image/*"
               :action="uploadUrl"
               :show-file-list="false"
+              :limit="3"
               list-type="picture-card"
               :on-success="uploadPicSuccess"
-              :on-preview="handlePictureCardPreview"
-              :on-remove="handleRemove"
+              :on-exceed="uploadPicExceed"
               :before-upload="beforeAvatarUpload"
-              :file-list="fileList">
-              <i class="vl_icon vl_icon_control_14"></i>
-              <p class="upload_text">点击上传图片</p>
+              >
+              <i v-if="uploading" class="el-icon-loading"></i>
+              <img v-else-if="curImageUrl" :src="curImageUrl">
+              <i v-else class="vl_icon vl_icon_vehicle_01"></i>
+              <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
             </el-upload>
             <div class="img_list">
-              <div class="img_box"></div>
-              <div class="img_box"></div>
-              <div class="img_box"></div>
+              <div class="img_box" v-for="(item, index) in fileList" :key="index">
+                <img :src="item.path ? item.path : ''" alt="">
+                <div class="delete_box" v-show="item.path">
+                  <i class="vl_icon vl_icon_manage_8" @click="deleteImg(index)"></i>
+                </div>
+              </div>
             </div>
-            <div class="divide"></div>
           </div>
-          <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
-            <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
+        </div>
+        <div class="right">
+          <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
+            <el-form-item>
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20"></el-input>
+            </el-form-item>
+            <!-- <el-form-item  prop="shotTime">
               <el-date-picker
-                v-model="searchForm.shotTime"
+                v-model="addForm.shotTime"
                 type="datetime"
                 :clearable="false"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -39,22 +185,23 @@
                 :picker-options="pickerStart"
                 placeholder="开始时间">
               </el-date-picker>
-            </el-form-item>
-            <el-form-item label="结束" label-width="20px" class="date_time" prop="dateEnd">
+            </el-form-item> -->
+            <el-form-item  prop="dateTime">
               <el-date-picker
-                v-model="searchForm.dateEnd"
+                v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
-                @blur="handleEndTime"
+                @blur="handleDateTime"
                 :picker-options="pickerEnd"
                 value-format="yyyy-MM-dd HH:mm:ss"
-                type="datetime"
-                placeholder="结束时间"
+                type="datetimerange"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
                 >
               </el-date-picker>
             </el-form-item>
             <el-form-item prop="deviceCode">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode" @change="handleChangeDeviceCode">
+              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
                 <el-option
                   v-for="(item, index) in deviceList"
                   :key="index"
@@ -64,7 +211,7 @@
               </el-select>
             </el-form-item>
             <el-form-item prop="interval">
-              <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="searchForm.interval">
+              <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
                 <el-option
                   v-for="(item, index) in intervalList"
                   :key="index"
@@ -73,131 +220,65 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-button class="reset_btn" style="width: 100px;" @click="resetData('searchForm')">重置</el-button>
-              <el-button class="select_btn" style="width: 100px;" @click="searchData('searchForm')">查询</el-button>
-            </el-form-item>
           </el-form>
-        </vue-scroll>
+        </div>
       </div>
-      <div class="right">
-        <template v-if="dataList && dataList.length === 0">
-          <div class="content_top">
-            <p>
-              <span>检索结果</span>
-              <span>（{{dataList.length}}）</span>
-            </p>
-          </div>
-          <div class="result_detail">
-            <ul class="clearfix">
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </template>
-        <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p>暂无相关数据</p>
-          </div>
-        </template>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="resetData('addForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="searchData('addForm')">确认</el-button>
       </div>
-    </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import Breadcrumb from '../breadcrumb.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber } from '@/utils/validator.js';
-import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
+import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
+import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { formatDate } from '@/utils/util.js';
+import { formatESDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
-      dialogImageUrl: null,
+      tabList: [
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
+        }
+      ],
+      isAddTaskTitle: true, // 是否是新增任务
+      selectIndex: 1, // 默认选中已完成的任务
+      taskId: null, // 要操作的任务id
+      deleteDialog: false, // 删除任务弹出框
+      interruptDialog: false, // 中断任务弹出框
+      addTaskDialog: false, // 新建任务弹出框
+      isAddLoading: false, // 新建-恢复任务加载中
+      isDeleteLoading: false, // 删除任务弹出框
+      isInterruptLoading: false, // 中断任务弹出框
       fileList: [],
       isAddImgDisabled: false, // 图片上传禁用
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       deviceStartTime: null, // 起点设备抓拍时间
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       searchForm: {
+        reportTime: [], // 日期
+        taskName: null // 任务名称
+      },
+      addForm: {
         plateNo: null, // 车牌号码
         deviceCode: null, // 起点设备编号
-        shotTime: new Date(startTime), // 开始时间
-        dateEnd: new Date(), // 结束时间
+        dateTime: [],
+        // shotTime: new Date(startTime), // 开始时间
+        // dateEnd: new Date(), // 结束时间
         vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔
       },
@@ -223,24 +304,100 @@ export default {
         //   return time.getTime() > (new Date().getTime());
         // }
       },
+      list: [], // 离线任务列表
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
+      curImgNum: 0, // 图片数量
+      curImageUrl: null,
+      uploading: false
     }
   },
   created () {
     this.getVehicleTypeList();
+    this.getDataList();
   },
   methods: {
-    handleRemove () {
-      this.dialogImageUrl = null;
+    // 时间选择失焦
+    handleDateTime () {
+      
     },
-    handlePictureCardPreview (file) {
-      this.dialogImageUrl = file.url;
-      // this.dialogVisible = true;
+    // 获取离线任务
+    getDataList () {
+      const params = {
+        'where.taskName': this.searchForm.taskName,
+        'where.taskType': 3, // 3：人员跟踪尾随分析
+        'where.dateStart': this.searchForm.reportTime[0],
+        'where.dateEnd': this.searchForm.reportTime[1],
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      };
+      getTaskInfosPage(params)
+        .then(res => {
+          if (res) {
+            this.list = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
     },
-    uploadPicSuccess (file) {
-      this.dialogImageUrl = file.data.fileFullPath;
+    //tab切换
+    selectTab(val) {
+      this.selectIndex = val;
+      this.getDataList();
+    },
+    // 删除图片
+    deleteImg (index) {
+      this.curImgNum --;
+      this.fileList.splice(index, 1);
+      this.curImageUrl = null;
+    },
+     // 上传图片
+    uploadPicExceed () {
+      this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
+    },
+    uploadPicSuccess (res) {
+      this.uploading = true;
+      if (res && res.data) {
+        let oRes = res.data;
+
+        if (this.curImgNum >= 3) {
+          this.$message.error('最多上传3张，请先删掉再上传');
+          return;
+        }
+        this.curImgNum ++;
+
+        this.uploading = false;
+
+        this.curImageUrl = oRes.fileFullPath;
+
+        // if (oRes) {
+        let x = {
+          cname: oRes.fileName, // 附件名称 ,
+          contentUid: this.$store.state.loginUser.uid,
+          // desci: '', // 备注 ,
+          filePathName: oRes.fileName, // 附件保存名称 ,
+          fileType: 1, // 文件类型 ,
+          imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+          imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+          imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+          // otherFlag: '', // 其他标识 ,
+          path: oRes.fileFullPath, // 附件路径 ,
+          // path: oRes.path,
+          thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+          thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+          // uid: '' //  附件标识
+        };
+        // JtcPOSTAppendixInfo(x).then(jRes => {
+        //   if (jRes) {
+        //     x['uid'] = jRes.data;
+        //   }
+        // })
+        this.fileList.push(x);
+      }
     },
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png';
@@ -266,28 +423,28 @@ export default {
     },
     // 车牌号码change
     handlePlateNo () {
-      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
+      if (this.addForm.plateNo && this.addForm.shotTime && this.addForm.dateEnd) {
         this.getDeviceList();
       }
     },
     // 开始时间change
     handleStartTime () {
-      if (this.searchForm.shotTime) {
+      if (this.addForm.shotTime) {
         // this.pickerEnd.disabledDate = function (time) {
         //   return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
         // }
-        if (this.searchForm.plateNo && this.searchForm.dateEnd) {
+        if (this.addForm.plateNo && this.addForm.dateEnd) {
           this.getDeviceList();
         }
       }
     },
     // 结束时间change
     handleEndTime () {
-      if (this.searchForm.dateEnd) {
+      if (this.addForm.dateEnd) {
         // this.pickerStart.disabledDate = function (time) {
         //   return time.getTime() > new Date(val).getTime();
         // }
-        if (this.searchForm.shotTime && this.searchForm.plateNo) {
+        if (this.addForm.shotTime && this.addForm.plateNo) {
           this.getDeviceList();
         }
       }
@@ -295,9 +452,9 @@ export default {
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatDate(this.searchForm.shotTime) + '-》' + formatDate(this.searchForm.dateEnd);
+      const shotTime = formatESDate(this.addForm.shotTime) + '-' + formatESDate(this.addForm.dateEnd);
       const params = {
-        plateNo: this.searchForm.plateNo,
+        plateNo: this.addForm.plateNo,
         shotTime: shotTime
       };
       console.log('params', params)
@@ -322,9 +479,9 @@ export default {
     skipWsReocrdPage (obj) {
       this.$router.push({name: 'gzws_detail'})
       // this.$router.push({name: 'gzws_detail', query: { 
-      //   plateNo: this.searchForm.plateNo,
+      //   plateNo: this.addForm.plateNo,
       //   dateStart: this.deviceStartTime,
-      //   dateEnd: this.searchForm.dateEnd,
+      //   dateEnd: this.addForm.dateEnd,
       //   plateNoTb: obj.plateNo,
       //   dateStartTb: obj.shotTime
       //  }});
@@ -337,7 +494,7 @@ export default {
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          if (!this.searchForm.deviceCode) {
+          if (!this.addForm.deviceCode) {
             this.$message({
               type: 'warning',
               message: '请先选择起点设备',
@@ -345,15 +502,15 @@ export default {
             });
             return;
           };
-          const vehicleType = this.searchForm.vehicleClass.join(':');
+          const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            deviceCode: this.searchForm.deviceCode,
-            dateStart: this.searchForm.shotTime,
-            shotTime: this.deviceStartTime,
-            plateNo: this.searchForm.plateNo,
-            dateEnd: this.searchForm.dateEnd,
+            deviceCode: this.addForm.deviceCode,
+            dateStart: formatESDate(this.addForm.shotTime),
+            shotTime: formatESDate(this.deviceStartTime),
+            plateNo: this.addForm.plateNo,
+            dateEnd: formatESDate(this.addForm.dateEnd),
             vehicleClass: vehicleType,
-            interval: this.searchForm.interval
+            interval: this.addForm.interval
           };
           getTailBehindList(params)
             .then(res => {
@@ -363,6 +520,112 @@ export default {
             })
         }
       });
+    },
+    // 跳至分析结果页面
+    skipResultPage (obj) {
+      this.$router.push({name: 'gzws_result', query: { id: obj.uid }});
+    },
+    // 显示新建任务弹出框
+    showAddTaskDialog (type, obj) {
+      if (type === 'add') {
+        this.isAddTaskTitle = true;
+      } else {
+        this.isAddTaskTitle = false;
+      }
+      this.addTaskDialog = true;
+    },
+    // 显示中断任务弹出框
+    showInterruptDialog (obj) {
+      this.interruptDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 显示删除任务弹出框
+    showDeleteDialog (obj) {
+      this.deleteDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 确认中断任务
+    sureInterruptTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 3, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+        };
+        this.isInterruptLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '中断任务成功',
+                customClass: 'request_tip'
+              });
+              this.interruptDialog = false;
+              this.isInterruptLoading = false;
+              this.getDataList();
+            } else {
+              this.isInterruptLoading = false;
+            }
+          })
+          .catch(() => {this.isInterruptLoading = false;})
+      }
+    },
+    // 确认删除任务
+    sureDeleteTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 3, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          delFlag: true
+        };
+        this.isDeleteLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除任务成功',
+                customClass: 'request_tip'
+              });
+              this.deleteDialog = false;
+              this.isDeleteLoading = false;
+              this.getDataList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    // 恢复任务
+    recoveryTask (obj) {
+      if (obj.uid) {
+        const params = {
+          uid: obj.uid,
+          taskType: 3
+        };
+        putTaskInfosResume(params)
+          .then(res => {
+            if (res) {
+              this.getDataList();
+            }
+          })
+      }
+    },
+    // 查询任务列表数据
+    selectDataList () {
+      this.getDataList();
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getDataList();
+    },
+    // 分页
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getDataList();
     }
   }
 }
@@ -370,17 +633,89 @@ export default {
 <style lang="scss" scoped>
 .gzws_container {
   height: 100%;
+  .pt_breadcrumb {
+    display: flex;
+    justify-content: space-between;
+    height: 50px; width: 100%;
+    padding-left: 20px;
+    align-items: center;
+    border-bottom: 1px solid #f6f6f6;
+    box-shadow: 0 0 5px #ddd;
+    background-color: #fff;
+    .add_btn {
+      background-color: #0C70F8;
+      color: #ffffff;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+  }
   .content_box {
-    width: 100%;
-    height: 100%;
-    padding-top: 50px;
+    height: calc(100% - 100px);
+    margin: 20px;
+    background: #ffffff;
+    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    .tab-menu {
+      background-color: #fff;
+      padding-top: 8px;
+      overflow: hidden;
+      border-bottom: 1px solid #f2f2f2;
+      li {
+        float: left;
+        width: auto;
+        font-size: 16px;
+        margin: 0 20px;
+        height: 44px;
+        line-height: 44px;
+        text-align: center;
+        color: #333;
+        cursor: pointer;
+      }
+      .is-active {
+        color: #0c70f8;
+        border-bottom: 2px solid #0c70f8;
+      }
+    }
+    .search_box {
+      margin: 20px;
+      .divide {
+        border: 1px dashed #fafafa;
+      }
+    }
+    .table_box {
+      margin: 0 20px;
+      .operation_btn {
+        display: inline-block;
+        padding: 0 10px;
+        border-right: 1px solid #f2f2f2;
+        &:last-child {
+          border-right: none;
+        }
+      }
+    }
+  }
+  .reset_btn {
+    // width: 110px;
+    background-color: #D3D3D3;
+    color: #666666;
+    border-radius: 4px;
+    &:hover {
+      background-color: #ffffff;
+      color: #0C70F8;
+      border-color: #0C70F8;
+    }
+  }
+  .select_btn {
+    // width: 110px;
+    background-color: #0C70F8;
+    color: #ffffff;
+    border-radius: 4px;
+  }
+}
+.dialog_comp_add {
+  .content_body {
     display: flex;
     .left {
-      width: 265px;
-      height: 100%;
-      background-color: #ffffff;
-      box-shadow: 2px 3px 10px 0px rgba(131,131,131,0.28);
-        //  padding: 15px 20px;
+      border-right: 1px dashed #F2F2F2;
       .upload_box {
         padding: 15px 20px;
          .img_list {
@@ -392,34 +727,60 @@ export default {
             background:rgba(255,255,255,1);
             border:1px dashed rgba(211,211,211,1);
             border-radius:1px;
+            position: relative;
+            &:hover {
+              .delete_box {
+                display: block;
+              }
+            }
+            .delete_box {
+              display: none;
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background-color: #000;
+              opacity: 0.7;
+              text-align: center;
+              i {
+                margin-top: 35%;
+                cursor: pointer; 
+              }
+            }
             &:not(:last-child) {
               margin-right: 5px;
             }
+            img {
+              width: 100%;
+              height: 100%;
+            }
            }
-         }
-         .divide {
-           height: 1px;
-           border-bottom: 1px solid #D3D3D3;
-           margin-top: 20px;
          }
          /deep/ .el-upload {
           width: 225px;
           height: 225px;
+          position: relative;
           .upload_text {
             line-height: 0;
             color: #999999;
-            margin-top: -30px;
+            margin-top: -60px;
+          }
+          >img {
+            width: 100%;
+            height: 100%;
           }
           i {
-            margin-top: 20px;
+            margin-top: 40px;
+            margin-left: 15px;
             width: 120px;
             height: 120px;
           }
           &:hover {
-            background: #0C70F8;
-            i.vl_icon_control_14{
-              background-position: -228px -570px;
-            }
+            background: #2981F8;
+            // i.vl_icon_control_14{
+            //   background-position: -228px -570px;
+            // }
             .upload_text {
               color: #ffffff;
             }
@@ -429,9 +790,12 @@ export default {
           display: none!important;
         }
       }
+    }
+    .right {
+      width: 100%;
       .left_form {
         width: 100%;
-        padding: 15px 20px;
+        padding: 50px 20px 0;
         font-size: 12px !important;
         /deep/ .el-form-item {
           margin-bottom: 20px;
@@ -443,120 +807,8 @@ export default {
           }
         }
       }
+
     }
-    .right {
-      width: calc(100% - 265px);
-      padding: 10px 15px;
-      .content_top {
-        display: flex;
-        justify-content: space-between;
-        >p {
-          span:first-child {
-            color: #333333;
-          }
-          span:last-child {
-            color: #666666;
-          }
-        }
-      }
-      .result_detail {
-        width: 100%;
-        >ul {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: flex-start;
-          margin-top: 15px;
-          >li {
-            background-color: #ffffff;
-            height: 180px;
-            width: 375px;
-            max-width: 32%;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            margin-right: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0px 5px 16px 0px #A9A9A9;
-            .de_left {
-              width: 50%;
-              img {
-                width: 140px;
-                height: 140px;
-              }
-            }
-            .de_right {
-              width: 50%;
-              line-height: 30px;
-              .title {
-                color: #999999;
-              }
-              .time {
-                margin-bottom: 10px;
-                padding-left: 5px;
-                background:rgba(250,250,250,1);
-                border:1px solid rgba(242,242,242,1);
-                border-radius:3px;
-                color: #333333;
-                font-size: 12px;
-                
-                i {
-                  margin-right: 5px;
-                }
-              }
-              .detail_info {
-                >span {
-                  background-color: #FAFAFA;
-                  color: #333333;
-                  font-size: 12px;
-                  margin-right: 5px;
-                  border-radius:3px;
-                  // padding: 5px 8px;
-                  padding: 0 3px;
-                  max-width: 50px;
-                  cursor: pointer;
-                  overflow: hidden;
-                  text-overflow:ellipsis;
-                  white-space: nowrap;
-                  border: 1px solid #F2F2F2;
-                  display: inline-block;
-                }
-              }
-              .record_btn {
-                width:100px;
-                height:30px;
-                background:rgba(246,248,249,1);
-                border:1px solid rgba(211,211,211,1);
-                border-radius:4px;
-                text-align: center;
-                cursor: pointer;
-                &:hover {
-                  background-color: #ffffff;
-                  color: #0C70F8;
-                  border-color: #0C70F8;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  .reset_btn {
-    width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
-  }
-  .select_btn {
-    width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
   }
 }
 </style>

@@ -44,6 +44,7 @@ service.interceptors.request.use((config) => {
 service.interceptors.response.use(function (response) {
   // console.log('response', response)
   if (response && response.data) {
+    const contenType = response.headers['content-type'];
     let _data = response.data;
     if (_data.code === '00000000') {
       return _data;
@@ -51,8 +52,11 @@ service.interceptors.response.use(function (response) {
       store.commit('setLoginToken', {
         loginToken: false
       });
+      return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
+    } else if ( contenType === 'application/msexcel') {
+      return _data;
     } else {
       let msg = '系统繁忙，请稍后再试！';
       if (_data.viewMsg) {

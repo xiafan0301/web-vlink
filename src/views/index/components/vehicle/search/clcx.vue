@@ -33,8 +33,8 @@
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
-          <el-form-item prop="vehicleGroup" >
-            <el-select v-model="ruleForm.vehicleGroup"class="full" placeholder="车辆类别">
+          <el-form-item prop="_vehicleGroup" >
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -70,7 +70,10 @@
                
             </el-radio-group>
           </el-form-item>
-
+<el-form-item v-if="input5=='2'" >
+            <el-input  v-model="selectValue" :disabled="true">
+            </el-input>
+          </el-form-item>
           <el-form-item v-if="input5=='1'">
             <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
@@ -90,7 +93,8 @@
             <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">非</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
               <el-select v-model="select" slot="prepend" placeholder="请选择">
-               <el-option v-for="item in pricecode" :label="item" :value="item"></el-option>
+               <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
+               <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
             </el-input>
           </el-form-item>
@@ -145,7 +149,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       class="cum_pagination"
       @size-change="handleSizeChange"
       @current-change="onPageChange"
@@ -154,7 +158,7 @@
       :page-size="pagination.pageSize"
       layout="total, prev, pager, next, jumper"
       :total="pagination.total">
-    </el-pagination>
+    </el-pagination> -->
     </div>
      <!-- 地图选择 -->
     <el-dialog :visible.sync="dialogVisible" width="80%">
@@ -180,10 +184,11 @@ export default {
       dialogVisible: false,
       value1: null,
       select: "",
+      selectValue:"已选设备0个",
       ruleForm: {
         dateStart:'',
         dateEnd:'',
-        vehicleGroup:'',
+        _vehicleGroup:'',
         vehicleClass:'',
         devIds:'',
         include:1,
@@ -194,16 +199,14 @@ export default {
       },
       allDevice:[],
       selectDevice:[],
+      selectBayonet:[],
       tableData: [
       ],
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       options: [],
       vehicleOptions: [],
       grounpOptions: [
-        {
-          groupName:'所有类别',
-          uid:-1,
-        },
+        
         {
           groupName:'布控车辆',
           uid:-2,
@@ -262,7 +265,6 @@ export default {
       }
       getGroups(d).then(res=>{
           if(res.data && res.data.length>0){
-            
             this.grounpOptions.push(...res.data)
             // console.log(this.grounpOptions);
           }
@@ -270,29 +272,53 @@ export default {
     },
     //查询车辆
     getSnapList(){
-      let d=this.grounpOptions
+      
+      if(this.input5==1){
+        this.ruleForm.areaIds =this.value1.join(",")
+      }else{
+        /*   this.selectDevice=[]
+      this.selectBayonet=[] */
+        this.ruleForm.deviceIds  = this.selectDevice.join(",")
+        this.ruleForm.bayonetIds = this.selectBayonet.join(",")
+      }
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
+      this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
+        //console.log(this.ruleForm);
+      let d=this.ruleForm
       getSnapList(d).then(res=>{
-        if(res.data && res.data.list.length>0){
-          console.log(res.data);
+        if(res.data && res.data.length>0){
+          // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
           this.pagination.total=res.data.total
           this.pagination.pageSize =res.data.pageNum
-          this.tableData= res.data.list
+          this.tableData= res.data
+          // console.log(this.tableData);
+          
         }
       })
     },
     hideMap(){
       this.dialogVisible=false
     },
-    mapPoint(v){
+    mapPoint(data){
+      let v = data.dev;
+      let p = data.boy;
       this.dialogVisible=false;
+      this.selectDevice=[]
+      this.selectBayonet=[]
       //返回有效点集合
       if(v && v.length>0){
         v.forEach(element => {
           this.selectDevice.push(element.uid)
         });
       }
-      this.selectValue="已选设备"+this.selectDevice.length+"个"
+      if(p && p.length>0){
+        p.forEach(element => {
+          this.selectBayonet.push(element.uid)
+        });
+      }
+      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
       //this.selectDevice=v
 
       // console.log(this.selectDevice);
@@ -313,7 +339,9 @@ export default {
     },
     handleClick(v){
       // console.log(v);
-      this.$router.push({name: 'vehicle_search_clcxdetail', query: {}});
+      v.dateStart = this.ruleForm.dateStart
+      v.dateEnd = this.ruleForm.dateEnd
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: v});
     },
     changeTab(v) {
       //console.log(v);
@@ -324,7 +352,19 @@ export default {
       }
     },
     resetForm (){
-
+      this.value1=null
+      this.selectValue="已选设备0个",
+      this.select=""
+        this.ruleForm = {
+        dateStart:'',
+        dateEnd:'',
+        _vehicleGroup:'',
+        vehicleClass:'',
+        devIds:'',
+        include:1,
+        _include:0,
+        plateNo:'',
+      }
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1

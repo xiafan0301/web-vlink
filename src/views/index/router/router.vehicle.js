@@ -74,9 +74,9 @@ export default {
       path: 'ljd', // 落脚点分析
       name: 'vehicle_search_ljd',
       component: () => import('@/views/index/components/vehicle/analysis/ljd.vue'),
-      meta: {
-        unrequireLogin: true
-      }
+      // meta: {
+      //   unrequireLogin: true
+      // }
     }, {
       path: 'qy', // 区域分析
       name: 'vehicle_search_qy',
@@ -109,6 +109,10 @@ export default {
       path: 'dctx', // 多车同行分析
       name: 'vehicle_search_dctx',
       component: () => import('@/views/index/components/vehicle/analysis/dctx.vue')
+    }, {
+      path: 'report', // 车辆侦察报告
+      name: 'vehicle_report',
+      component: () => import('@/views/index/components/vehicle/analysis/report.vue')
     },
     /* 统计 */
     {

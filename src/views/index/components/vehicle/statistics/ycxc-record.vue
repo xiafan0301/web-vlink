@@ -1,12 +1,6 @@
   <template>
     <div class="th-ycxc-record">
-      <div class="th-breadcrumb">
-        <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{name: 'vehicle_search_ycxc'}">夜间行车</el-breadcrumb-item>
-          <el-breadcrumb-item>抓拍记录</el-breadcrumb-item>
-        </el-breadcrumb>
-      </div>
+      <Breadcrumb :oData="[{name: '夜间行车分析', routerName: 'vehicle_search_ycxc'}, {name: '抓拍记录'}]"></Breadcrumb>
       <div class="th-ycxc-record-list">
         <div class="list-sort">
           <div>
@@ -25,10 +19,10 @@
           </div>
         </div>
         <div class="list-box">
-            <div class="list-item" v-for="item in '123123123123123'" :key="item.id" @click="onOpenDetail(item)">
-              <img src="../../../../../assets/img/666.jpg" alt="">
-              <p class="time"><i></i>2018.-11-12  13:14:15</p>
-              <p class="address"><i></i>抓拍设备:抓拍名称京广高速</p>
+            <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
+              <img :src="item.subStoragePath" alt="">
+              <p class="time"><i></i>{{item.shotTime}}</p>
+              <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
             </div>
             <el-pagination
               class="cum_pagination th-center-pagination"
@@ -36,7 +30,7 @@
               :current-page.sync="currentPage"
               :page-size="pagination.pageSize"
               layout="prev, pager, next"
-              :total="32">
+              :total="pagination.total">
             </el-pagination>
         </div>
       </div>
@@ -55,29 +49,35 @@
         <div class="struc_main">
           <div v-show="strucCurTab === 1" class="struc_c_detail">
             <div class="struc_c_d_qj struc_c_d_img">
-              <img :src="sturcDetail.panoramaPath" alt="">
+              <img :src="sturcDetail.subStoragePath" alt="">
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_box">
               <div class="struc_c_d_qii struc_c_d_img">
-                <img :src="sturcDetail.panoramaPath" alt="">
+                <img :src="sturcDetail.storagePath" alt="">
                 <span>全景图</span>
               </div>
               <div class="struc_c_d_info">
                 <h2>抓拍信息</h2>
                  <div class="struc_cdi_line">
-                  <span>{{sturcDetail.shotTime}}<b>抓拍时间</b></span>
+                  <span>{{sturcDetail.snapTime}}<b>抓拍时间</b></span>
                 </div>
                 <div class="struc_cdi_line">
-                  <span>{{sturcDetail.deviceName}}<b>抓拍设备</b></span>
+                  <span>{{sturcDetail.snapDevice}}<b>抓拍设备</b></span>
                 </div>
                 <div class="struc_cdi_line">
-                  <span>{{sturcDetail.address}}<b>抓拍地址</b></span>
+                  <span>{{sturcDetail.snapAddress}}<b>抓拍地址</b></span>
                 </div>
                 <div class="struc_cdi_line">
-                  <span>{{sturcDetail.vehicleNumber}}<b>车牌号</b></span>
+                  <span>{{sturcDetail.plateNo}}<b>车牌号</b></span>
                 </div>
                 <div class="struc_cdi_line">
+                  <span>{{sturcDetail.vehicleBrand}}</span>
+                  <span>{{sturcDetail.vehicleModel}}</span>
+                  <span>{{sturcDetail.vehicleClass}}</span>
+                  <span>{{sturcDetail.vehicleColor}}</span>
+                  <span>{{sturcDetail.vehicleRoof}}</span>
+                  <span>{{sturcDetail.vehicleStyles}}</span>
                   <span>{{sturcDetail.feature}}<b>特征</b></span>
                 </div>
                 <div class="struc_cdi_line"></div>
@@ -89,14 +89,14 @@
           </div>
           <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
             <div class="struc_c_d_qj struc_c_d_img">
-              <img :src="sturcDetail.photoPath" alt="">
+              <img :src="sturcDetail.subStoragePath" alt="">
               <span>抓拍图</span>
             </div>
             <div class="struc_c_d_box">
               <span class="th-video-text">视频回放</span>
-              <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
+              <div is="flvplayer" :index="1" :oData="sturcDetail.videoPath" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
             </div>
-            <a class="download_btn" target="_blank" download="视频" :href="videoUrl">下载视频</a>
+            <a class="download_btn" target="_blank" download="视频" :href="sturcDetail.videoPath">下载视频</a>
           </div>
         </div>
         <div class="struc-list">
@@ -104,7 +104,7 @@
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
               <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                <img style="display: block; width: 100%; height: .88rem;" :src="item.photoPath" alt="">
+                <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
               </div>
             </swiper-slide>
             <div class="swiper-button-prev" slot="button-prev"></div>
@@ -116,15 +116,19 @@
   </template>
   <script>
   import flvplayer from '@/components/common/flvplayer.vue';
+  import Breadcrumb from '../breadcrumb.vue';
+  import { getNightVehicleRecordList, getSnapDetail  }from "@/views/index/api/api.judge.js";
   export default {
     components: {
-      flvplayer
+      flvplayer,
+      Breadcrumb
     },
     data () {
       return {
         pagination: {
           pageNum: 1,
-          pageSize: 15
+          pageSize: 15,
+          total: 0
         },
         currentPage: 1,
         sortTimeType: null, // 时间排序active
@@ -133,8 +137,8 @@
         strucDetailDialog: false, // 抓拍记录弹窗
         strucCurTab: 1, // 抓拍记录弹窗tab
         curImgIndex: 0, // 当前选择的图片index
-        strucInfoList: [{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-03 16:12:44","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00000.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"龙潭镇神龙大酒店","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-09 01:29:16","panoramaPath":"http://10.116.126.13/parastor300s/public/PJH119/f00007.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县龙潭镇神龙大酒店","longitude":110.542891,"latitude":27.411462,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"长沙创谷广告园44","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 11:41:04","panoramaPath":"http://10.116.126.13/parastor300s/public/PRH259/f00008.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"长沙市创谷广告软件园","longitude":112.973795,"latitude":28.094549,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县第一中学48","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-07 13:25:00","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00026.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县第一中学","longitude":110.612834,"latitude":27.910003,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":94,"shotTime":"2019-06-06 09:28:55","panoramaPath":"http://10.116.126.13/parastor300s/public/PCS113/f00021.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县气象局(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤P8A566；轿车；绿色；大众-捷达-2015","deviceId":null,"address":"溆浦县气象局","longitude":110.604443,"latitude":27.908643,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县张家湾路口(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-07 14:22:36","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00039.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县张家湾路口","longitude":110.587558,"latitude":27.930365,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县兴隆路5号154(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-10 14:24:28","panoramaPath":"http://10.116.126.13/parastor300s/public/PHD376/f00042.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县兴隆路5号","longitude":110.595111,"latitude":27.90289,"cname":null,"uploadPath":null},{"id":null,"deviceCode":null,"structureType":null,"deviceName":"溆浦县龙潭镇汽车站(故障)","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":93,"shotTime":"2019-06-03 04:30:08","panoramaPath":"http://10.116.126.13/parastor300s/public/PYR682/f00033.jpg","feature":"粤P9E163；轿车；白色；现代-瑞纳-2016","deviceId":null,"address":"溆浦县龙潭镇汽车站","longitude":110.539961,"latitude":27.411443,"cname":null,"uploadPath":null}],
-        sturcDetail: {"id":null,"vehicleNumber": "粤PRH259","deviceCode":null,"structureType":null,"deviceName":"溆浦县政府41","photoPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","videoPath":"http://file.aorise.org/vlink/file/544df0f0-dea9-46d8-b02a-3f6c1c86e28a.mp4","semblance":90,"shotTime":"2019-06-10 19:29:55","panoramaPath":"http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg","feature":"粤PRH259；轿车；橘色；福特-福睿斯-2012","deviceId":null,"address":"溆浦县警予东路169号","longitude":110.597638,"latitude":27.910355,"cname":null,"uploadPath":'http://n.sinaimg.cn/news/1_img/upload/cf3881ab/762/w1000h562/20190624/0739-hyvnhqq3896792.jpg'},
+        strucInfoList: [],
+        sturcDetail: {},
         bResize: {},
         markerPoint: null, // 地图icon
         playUrl: {},
@@ -152,9 +156,26 @@
             prevEl: '.swiper-button-prev',
           },
         },
+        dataList: [],
       }
     },
+    mounted () {
+      this.getList();
+    },
     methods: {
+      // 获取抓拍记录
+      getList () {
+        const params = JSON.parse(this.$route.query.obj);
+        params['vehicleNumber'] = this.$route.query.number;
+        getNightVehicleRecordList(params)
+          .then(res => {
+            if (res && res.data) {
+              this.dataList = res.data.list;
+              this.pagination.total = res.data.total;
+            }
+          })
+          .catch(() => {})
+      },
       /**
        * 弹框地图初始化
        */
@@ -162,11 +183,11 @@
         // this.map.setZoomAndCenter(iZoom, aCenter);
         let map = new window.AMap.Map('container', {
           zoom: 14, // 级别
-          center: [this.strucInfoList[0].longitude, this.strucInfoList[0].latitude], // 中心点坐标
+          center: [this.sturcDetail.shotPlaceLongitude, this.sturcDetail.shotPlaceLatitude], // 中心点坐标
         });
         map.setMapStyle('amap://styles/whitesmoke');
         this.map = map;
-        this.drawPoint(this.strucInfoList[0])
+        this.drawPoint(this.sturcDetail)
       },
       /**
        * 地图描点
@@ -179,19 +200,19 @@
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
         this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
           map: this.map,
-          position: [data.longitude, data.latitude], // 基点位置 [116.397428, 39.90923]
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
           offset: new window.AMap.Pixel(-20.5, -50), // 相对于基点的偏移位置
           draggable: false, // 是否可拖动
           // 自定义点标记覆盖物内容
           content: _content
         });
-        this.map.setZoomAndCenter(16, [data.longitude, data.latitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.shotPlaceFullAdress}</p></div>`
         this.infoWindow = new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
-          position: [data.longitude, data.latitude],
+          position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
           offset: new window.AMap.Pixel(0, -70),
           content: sConent
         })
@@ -213,41 +234,60 @@
        */
       onPageChange (page) {
         this.pagination.pageNum = page;
+        this.getList();
       },
       /**
        * 打开抓拍弹框
        */
       onOpenDetail (obj) {
-        this.$_showLoading({text: '加载中...'})
-        console.log(obj)
-        console.log(this.sturcDetail.videoPath)
-        this.videoUrl = this.sturcDetail.videoPath
-        this.playUrl = {
-          type: 3,
-          title: '',
-          video: {
-            uid: 1,
-            downUrl: this.sturcDetail.videoPath
-          }
-        }
-        this.strucDetailDialog = true
+        this.$_showLoading({text: '加载中...'});
+
+        this.strucDetailDialog = true;
         this.$nextTick(() => {
-          this.initMap()
+          this.getVehicleDetail(obj);
         })
-        this.$_hideLoading()
+        this.$_hideLoading();
+      },
+      // 获取车辆抓拍详情
+      getVehicleDetail (obj) {
+        const data = JSON.parse(this.$route.query.obj);
+        const params = {
+          dateStart: data.startDate,
+          dateEnd: data.endDate,
+          devIds: obj.deviceID,
+          hasPlate: 1, // 1--有牌车 0 --无牌车
+          plateNo: obj.plateNo
+        }
+          // const params = {
+          //   dateStart: '2019-01-01 00:00:00',
+          //   dateEnd: '2019-09-01 23:59:59',
+          //   hasPlate: 1, // 1--有牌车 0 --无牌车
+          //   // devIds: obj.deviceID,
+          //   plateNo: '湘A77777'
+          // }
+        getSnapDetail(params)
+          .then(res => {
+            if (res && res.data) {
+              this.strucInfoList = res.data.snapDtoList;
+              this.sturcDetail = res.data.snapDtoList[0];
+              this.initMap();
+            }
+          })
       },
       /**
        * 关闭抓拍弹框
        */
       onCloseDetail () {
-        this.strucCurTab = 1
-        this.strucDetailDialog = false
+        this.strucCurTab = 1;
+        this.strucDetailDialog = false;
       },
       /**
        * 图片切换
        */
       imgListTap (obj, i) {
-        this.curImgIndex = i
+        this.sturcDetail = {};
+        this.curImgIndex = i;
+        this.sturcDetail = obj;
       }
     },
   }
@@ -256,6 +296,7 @@
 .th-ycxc-record {
   width: 100%;
   height: 100%;
+  padding-top: 50px;
   .th-ycxc-record-list {
     width: 100%;
     // height: calc(100% - 55px);

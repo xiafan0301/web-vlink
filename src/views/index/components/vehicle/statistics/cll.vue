@@ -2,40 +2,26 @@
   <div class="cll_container">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车流量统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="con_box">
       <div class="con_left">
         <el-radio-group v-model="queryForm.radio" class="left_type">
-          <el-radio :label="3">按卡口</el-radio>
-          <el-radio :label="6">按单位</el-radio>
+          <el-radio :label="1">按卡口</el-radio>
+          <!-- <el-radio :label="6">按单位</el-radio> -->
         </el-radio-group>
-        <el-select
-          v-model="queryForm.devIdData"
-          multiple
-          filterable
-          popper-class="statistics_select_list"
-          @remove-tag="removeSeletedDev"
-          @click.native="showChange"
-          collapse-tags
-          placeholder="请选择卡口">
-          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
+        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
+          <el-option
+            v-for="item in listBayonet"
+            :key="item.value"
+            :label="item.label"
+            :value="item">
+          </el-option>
         </el-select>
-        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
-          <vue-scroll style="height: 90px;">
-            <el-tree
-              :data="data1"
-              class="select_tree"
-              ref="selectTree1"
-              @check-change="changeSeletedStatus"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-          </vue-scroll>
-        </div>
         <el-select v-model="queryForm.carType" placeholder="选择车辆类型">
+          <el-option value="" label="全部类型"></el-option>
           <el-option
             v-for="item in carTypeList"
             :key="item.value"
@@ -43,14 +29,14 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-select v-model="queryForm.lane" placeholder="选择车道">
+        <!-- <el-select v-model="queryForm.lane" placeholder="选择车道">
           <el-option
             v-for="item in laneList"
             :key="item.value"
             :label="item.label"
             :value="item.value">
           </el-option>
-        </el-select>
+        </el-select> -->
         <el-select v-model="queryForm.statementType" placeholder="选择报表类型">
           <el-option
             v-for="item in statementTypeList"
@@ -60,21 +46,43 @@
           </el-option>
         </el-select>
         <el-input v-model="queryForm.warningNum" placeholder="请输入大于0的警戒数值"></el-input>
+        <!-- 自定义报表类型 -->
+        <div class="left_start" v-show="queryForm.statementType === 5">
+          <span>开始</span>
+          <el-date-picker
+            v-model="queryForm.startTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择开始时间">
+          </el-date-picker>
+        </div>
+        <div class="left_end" v-show="queryForm.statementType === 5">
+          <span>结束</span>
+          <el-date-picker
+            :picker-options="pickerOptions1"
+            v-model="queryForm.endTime"
+            type="datetime"
+            @focus="getEndTime"  
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择结束时间">
+          </el-date-picker>
+        </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getCarTrafficSta">统计</el-button>
+          <el-button class="select_btn" @click="getCarTrafficSta" :disabled="!queryForm.bayonet.value" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
-        <div class="right_box">
+        <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="tabIndex = 1" :class="{'active': tabIndex === 1}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTwo" :class="{'active': tabIndex === 2}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}"></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}"></i>
             </div>
-            <h1>(年)车流量统计</h1>
-            <el-button class="select_btn btn_100">导出</el-button>
+            <h1>({{dateTitle}})车流量统计</h1>
+            <div></div>
+            <!-- <el-button class="select_btn btn_100">导出</el-button> -->
           </div>
           <div class="main_box" v-show="tabIndex === 1">
             <p>车流量（辆）</p>
@@ -85,281 +93,128 @@
             <div id="chartContainer2"></div>
           </div>
           <div class="main_box" v-show="tabIndex === 3">
-            <el-table
-              v-loading="loading"
-              :data="chartData"
-              >
-              <el-table-column
-                label="卡口名称"
-                prop="date"
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="12点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="13点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="14点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="15点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="16点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="17点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="18点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="19点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="20点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="21点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="22点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="23点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="24点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="1点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="2点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="3点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="4点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="5点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="6点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="7点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="8点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="9点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="10点"
-                prop=""
-                show-overflow-tooltip
-                >
-              </el-table-column>
-              <el-table-column
-                label="11点"
-                prop=""
-                show-overflow-tooltip
-                >
+            <el-table :data="bodyList">
+              <el-table-column :label="name" v-for="(name, key) in headerList" :key="name">
+                <template>
+                  <span :style="{'color': parseInt(bodyList[0][key]) > parseInt(queryForm.warningNum) ? 'red' : '#555'}">{{bodyList[0][key]}}</span>
+                </template>
               </el-table-column>
             </el-table>
           </div>
         </div>
+        <div class="not_content" v-else>如需进行车流量统计请先选择卡口</div>
       </div>
     </div>
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import {apiCarFlow} from '@/views/index/api/api.vehicle.js';
+import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
+import {formatDate} from '@/utils/util.js';
+import {dataList} from '@/utils/data.js';
 export default {
   data () {
     return {
       queryForm: {
-        radio: null,
+        radio: 1,
         carType: null,
-        devIdData: [],
-        lane: null,
-        statementType: null,
-        warningNum: null
+        bayonet: {value: ''},
+        // lane: null,
+        statementType: '',
+        warningNum: null,
+        startTime: startTime,
+        endTime: endTime
       },
-      carTypeList: [],
-      laneList: [],
-      statementTypeList: [],
-      isShowSelectList: false,
-      tabIndex: 1, // select 下拉 tab 切换下标
-      data1: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-            id: 4,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 2,
-        label: '一级 2',
-        children: [{
-            id: 5,
-            label: '二级 2-1'
-        }, {
-            id: 6,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 3,
-        label: '一级 3',
-        children: [{
-            id: 7,
-            label: '二级 3-1'
-        }, {
-            id: 8,
-            label: '二级 3-2'
-        }]
-      }],
+      pickerOptions1: [],
+      listBayonet: [],
+      tabIndex: 2,
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
+      // laneList: [],
+      statementTypeList: [
+        {label: '日报表', value: 1},
+        {label: '周报表', value: 2},
+        {label: '月报表', value: 3},
+        {label: '年报表', value: 4},
+        {label: '自定义时间段', value: 5}
+      ],
       loading: false,
-      bkclccList: [{name: 'xxxxxxx'}],
+      loadingBtn: false,
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
       // 图表参数
-      chartData: [
-        { date: '1月份', '车流量': 10, '车流量1': 1 },
-        { date: '2月份', '车流量': 20, '车流量1': 1 },
-        { date: '3月份', '车流量': 40, '车流量1': 1 },
-        { date: '4月份', '车流量': 30, '车流量1': 1 },
-        { date: '5月份', '车流量': 25, '车流量1': 1 },
-        { date: '6月份', '车流量': 35, '车流量1': 1 },
-        { date: '7月份', '车流量': 30, '车流量1': 1 },
-        { date: '8月份', '车流量': 30, '车流量1': 1 },
-        { date: '9月份', '车流量': 30, '车流量1': 1 },
-        { date: '10月份', '车流量': 30, '车流量1': 1 },
-        { date: '11月份', '车流量': 30, '车流量1': 1 },
-        { date: '12月份', '车流量': 30, '车流量1': 1 }
-      ],
+      chartData: [],
       // 保存生成的图表用来删除
       charts: {
         chart1: null,
         chart2: null  
+      },
+      isShowChart: false, // 选择卡口，点统计按钮后，显示右边统计图表
+      headerList: [], // 表格头部数据
+      bodyList: [], // 表格主体数据
+    }
+  },
+  computed: {
+    dateTitle () {
+      const type = this.queryForm.statementType;
+      if (type === 1) {
+        return '日报表';
+      } else if (type === 2) {
+        return '周报表';
+      } else if (type === 3) {
+        return '月报表';
+      } else if (type === 4) {
+        return '年报表';
+      } else if (type === 5) {
+        const startTime = new Date(this.queryForm.startTime).getTime();
+        const endTime = new Date(this.queryForm.endTime).getTime();
+        const threeDays = 3 * 3600 * 24 * 1000;
+        if (endTime - startTime >= threeDays) return '周报表';
+        return '日报表';
       }
     }
   },
+  watch: {
+   'queryForm.startTime' () {
+      const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
+      const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
+      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
+    }
+  },
   mounted () {
-    this.drawChart1();
+    this.getListBayonet();
   },
   methods: {
-    // 是否显示下拉列表
-    showChange () {
-      this.isShowSelectList = !this.isShowSelectList;
+    getEndTime(time) {
+      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
+      this.pickerOptions1 = {
+        disabledDate(time) {
+          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
+        },
+      }
     },
-    // 移除已选择的下拉列表项
-    removeSeletedDev (data) {
-      this.$refs.selectTree1.setChecked(data, false);
-    },
-    // 数组去重
-    unique (array) {
-      let obj = {}, resultArray = [];
-      resultArray = array.reduce((item, next) => {
-        if (!obj[next.id]) {
-          obj[next.id] = true;
-          item.push(next);
+    // 模糊搜索卡口
+    getListBayonet () {
+      getAllBayonetListByName().then(res => {
+        if (res) {
+          this.listBayonet = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.bayonetName
+            }
+          });
         }
-        return item;
-      }, []);
-      return resultArray;
-    },
-    // 切换下拉列表的选中状态并关联到select上
-    changeSeletedStatus () {
-      let data = [], obj = null;
-      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
-        data.push(f);
       })
-      data = this.unique(data);
-      data = data.filter(f => !f.children);
-      this.queryForm.devIdData = data;
-    },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
-    },
+    },  
     // 画图表
     drawChart1 () {
       let chart = null;
@@ -371,7 +226,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer1',
           forceFit: true,
-          padding: [ 20, 0, 60, 30 ],
+          padding: [ 20, 40, 60, 40 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -384,7 +239,6 @@ export default {
         value: 'value', // value字段
         retains: ['date']
       });
-
       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
@@ -393,25 +247,33 @@ export default {
         method: 'value',  // 补全常量
         value: 120     // 补全字段值时执行的规则
       });
+      console.log(dv.rows, 'dv.rows')
       let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
+      view2.source(dv, {
+        
+      });
       chart.interval()
       .position('date*车流量1') 
-      .color('车流量', '#F2F2F2')
+      .color('#F2F2F2')
       .size(30);
-
-      chart.source(dv, {});
+      chart.source(dv, {
+       
+      });
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
       // 坐标轴刻度
-      chart.scale('车流量', {
+      chart.scale('value', {
         max: 120,
         min: 0,
+        alias: '车流量',
         tickCount: 7,
         title: {
           offset: 50
         }
       });
+      chart.axis('车流量1', false);
       chart.axis('date', {
         label: {
           textStyle: {
@@ -432,14 +294,16 @@ export default {
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
             <h1>${title}</h1>
-            <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
+            <span><span>${items[1].name}：</span><span>${items[1].value}辆</span></span></div>`;
         }
       });
       chart.legend(false);
       chart.interval()
       .position('date*value')
-      .color('type', [ 'l(270) 0:#0C70F8 1:#0D9DF4' ])
+      .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30)
+
+     
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -508,25 +372,68 @@ export default {
     },
     // tab切换
     changeTwo () {
-      this.tabIndex = 2;
+      this.tabIndex = 1;
       this.$nextTick(() => {
-        this.drawChart2();
+        this.drawChart1();
       })
     },
     // 重置查询表单
     resetQueryForm () {
       this.queryForm = {
-        radio: null,
+        radio: 1,
         carType: null,
-        devIdData: [],
-        lane: null,
-        statementType: null,
-        warningNum: null
+        bayonet: {value: ''},
+        // lane: null,
+        statementType: 1,
+        warningNum: null,
+        startTime: startTime,
+        endTime: endTime
       };
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
-
+      let params = {
+        bayonetIds: this.queryForm.bayonet.value,
+        carType: this.queryForm.carType
+      }
+      if (this.queryForm.statementType !== 5) {
+        params.reportType = this.queryForm.statementType
+      } else {
+        params.startTime = this.queryForm.startTime;
+        params.endTime = this.queryForm.endTime;
+      }
+      this.loadingBtn = true;
+      apiCarFlow(params).then(res => {
+        if (res) {
+          this.headerList = res.data.map(m => m.name);
+          this.headerList.unshift('卡口名称');
+          this.bodyList[0] = res.data.map(m => m.total);
+          this.bodyList[0].unshift(this.queryForm.bayonet.label);
+          this.chartData = res.data.map(m => {
+            return {
+              date: m.name, '车流量': m.total, '车流量1': 1
+            }
+          });
+          if (this.chartData.length > 0) {
+            this.tabIndex = 2;
+            this.isShowChart = true;
+            this.$nextTick(() => {
+              this.drawChart2();
+            })
+          } else {
+            this.charts = {
+              chart1: null,
+              chart2: null  
+            };
+            this.tabIndex = 2;
+            this.isShowChart = false;
+            this.$message.warning('没有相关卡口的统计数据');
+          } 
+          
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
     }
   }
 }
@@ -548,22 +455,20 @@ export default {
       width: 272px;
       height: 100%;
       padding: 20px;
+      .left_start, .left_end{
+        display: flex;
+        padding-bottom: 10px; 
+        > span{
+          color: #999999;
+        }
+      }
+      .left_start{
+        margin-top: 10px;
+      }
       .left_type{
         display: flex;
         justify-content: space-between;
         padding-bottom: 20px;
-      }
-      .search_item {
-        height: 0;
-        width: 232px;
-        overflow: hidden;
-        transition: all .3s linear;
-        .select_tree {
-          border: 1px solid #e4e7ed;
-          border-radius: 4px;
-          background-color: #fff;
-          box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-        }
       }
       .left_btn{
         padding-top: 10px;
@@ -624,6 +529,13 @@ export default {
           }
         }
       }
+      .not_content{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #999;
+        font-size: 16px;
+      }
     }
   }
 }
@@ -659,11 +571,9 @@ export default {
       color: #999;
     }
     span{
-      color: #333 
+      color: #333!important;
+      font-size: 14px!important;
     }
   }
-}
-.statistics_select_list {
-  display: none!important;
 }
 </style>

@@ -32,8 +32,11 @@
               style="width: 250px;"
               v-model="searchForm.dateTime"
               type="daterange"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
               range-separator="-"
               start-placeholder="开始日期"
+              :default-time="['00:00:00', '23:59:59']"
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
@@ -73,7 +76,8 @@
           <el-form-item prop="vehicleNo">
             <el-input style="width: 250px;" type="text" placeholder="请输入车牌号码" v-model="searchForm.vehicleNo" />
           </el-form-item>
-          <el-form-item class="operation_form_btn" style="width: 250px;">
+          <el-form-item class="operation_form_btn" style="width: 260px;">
+            <el-button class="reset_btn" @click="exportVehicle">导出车辆</el-button>
             <el-button class="select_btn" @click="searchData">查询</el-button>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
           </el-form-item>
@@ -82,9 +86,8 @@
       </div>
       <div class="button_box">
         <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导入车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled">导出车辆</el-button>
-        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="deleteVehicle">删除车辆</el-button>
+        <el-button class="reset_btn" @click="importVehicle">导入车辆</el-button>
+        <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="showDeleteVehicleDialog">删除车辆</el-button>
       </div>
       <template v-if="vehicleList && vehicleList.length > 0">
         <div class="vehicle_box">
@@ -155,7 +158,7 @@
       <template v-else>
         <div class="not_content">
           <img src="../../../../assets/img/not-content.png" alt="">
-          <p>暂无相关数据</p>
+          <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
         </div>
       </template>
     </div>
@@ -305,6 +308,21 @@
         <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="deleteGroup">确认</el-button>
       </div>
     </el-dialog>
+    <!--删除车辆弹出框-->
+    <el-dialog
+      title="删除提示"
+      :visible.sync="delVehicleDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp"
+      >
+      <p style="color: #999999;">是否删除已选的{{deleteIds.length}}辆车?</p>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="delVehicleDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isDeleteVehicleLoading" @click="deleteVehicle">确认</el-button>
+      </div>
+    </el-dialog>
     <!--新增/编辑组弹出框-->
     <el-dialog
       :title="dialogTitle"
@@ -328,6 +346,53 @@
         <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="editGroup('groupForm')" v-if="dialogTitle === '编辑组'">确认</el-button>
       </div>
     </el-dialog>
+    <!--导入弹出框-->
+    <el-dialog
+      title="导入车辆"
+      :visible.sync="importDialog"
+      width="482px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="dialog_comp dialog_comp_import"
+      >
+      <div class="content_body">
+        <p>请先下载模板文件并按要求填写相关信息，再上传进行批量新增</p>
+          <ul class="upload_box">
+            <li>
+              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <div class="main_content download_box">
+                <i class="vl_icon_manage_17 vl_icon"></i>
+                <span>下载模板</span>
+              </div>
+            </li>
+            <li>
+              <p class="header">2、上传已填写的用户信息表。</p>
+              <div class="main_content">
+                <el-upload
+                  ref="vehicleImport"
+                  accept=".xls,.xlsx"
+                  :auto-upload="false"
+                  :action="importUrl"
+                  :on-change="handleChange"
+                  :on-success="handleSuccess"
+                  :file-list="fileList"
+                  :limit="1"
+                  >
+                  <el-button size="small" class="upload-btn" icon="vl_icon_manage_18 vl_icon">上传文件</el-button>
+                </el-upload>
+              </div>
+            </li>
+          </ul>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="importDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isImportLoading" @click="sureImportFile">导入</el-button>
+      </div>
+    </el-dialog>
+    <!--图片放大-->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt="">
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -336,15 +401,18 @@ import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
+      importUrl: ajaxCtx.base + '/special-vehicle/import', // 导入请求地址
+      fileList: [], // 要导入的文件
       isDisabled: true, // 导入-导出-删除车辆禁用
       isShowError: false, // 是否显示错误提示信息
       dialogTitle: null, // 新增/编辑组标题
       vehicleTitle: null, // 新增-修改车辆
+      dialogVisible: false,
       groupForm: {
         groupName: null
       },
@@ -365,6 +433,9 @@ export default {
       showGroupDialog: false, // 新增/修改组弹出框
       isAddLoading: false, // 新增--修改组加载中
       dialogVisiable: false, // 新建/修改车辆弹出框
+      isImportLoading: false, // 导入加载中
+      importDialog: false, // 导入弹出框
+      delVehicleDialog: false, // 删除车辆弹出框
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -388,13 +459,13 @@ export default {
       carForm: {
         vehicleImagePath: null, // 车牌图片地址
         vehicleNumber: null, // 车牌号码
-        vehicleColor: null, // 车身颜色
+        vehicleColor: '0', // 车身颜色
         vehicleBrand: null, // 车辆品牌
-        vehicleType: null, // 车辆类型
+        vehicleType: '0', // 车辆类型
         numberType: null, // 号牌类型
         numberColor: null, // 号牌颜色
         ownerName: null, // 车主姓名
-        ownerIdType: null, // 证件类型
+        ownerIdType: 1, // 证件类型
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
@@ -424,6 +495,7 @@ export default {
       vehicleColorList: [], // 车身颜色列表
       numberTypeList: [], // 号牌种类列表
       vehicleList: [], // 特殊车辆列表
+      deleteIds: [], // 要删除的车辆
     }
   },
   watch: {
@@ -520,7 +592,9 @@ export default {
         'where.vehicleNumber': this.searchForm.vehicleNo,
         'where.groupId': this.activeId,
         pageNum: this.pagination.pageNum,
-        pageSize: this.pagination.pageSize
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
       };
       getSpecialVehicleList(params)
         .then(res => {
@@ -599,9 +673,10 @@ export default {
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
+            this.carForm.ownerIdType = carInfo.ownerIdType || null;
 
-            this.carForm.vehicleColor = vehicleColor && vehicleColor.toString();
-            this.carForm.vehicleType = vehicleType && vehicleType.toString();
+            this.carForm.vehicleColor = vehicleColor && vehicleColor.toString() || null;
+            this.carForm.vehicleType = vehicleType && vehicleType.toString() || null;
             this.carForm.numberType = numberType && numberType.toString();
             this.carForm.numberColor = numberColor && numberColor.toString();
 
@@ -791,17 +866,22 @@ export default {
         }
       })
     },
-    // 删除车辆
-    deleteVehicle () {
-      let deleteIds = [];
+    // 显示删除车辆弹出框
+    showDeleteVehicleDialog () {
+      this.deleteIds = [];
       this.vehicleList.map(item => {
         if (item.isDelete) {
-          deleteIds.push(item.uid);
+          // deleteIds.push(item.uid);
+          this.deleteIds.push(item.uid);
         }
       });
+      this.delVehicleDialog = true;
+    },
+    // 删除车辆
+    deleteVehicle () {
       const params = {
         groupId: this.activeId,
-        vehicleIds: deleteIds.join(',')
+        vehicleIds: this.deleteIds.join(',')
       };
       this.isDeleteVehicleLoading = true;
       moveoutGroup(params)
@@ -815,6 +895,7 @@ export default {
             this.getGroupList();
             this.getVehicleList();
             this.isDeleteVehicleLoading = false;
+            this.delVehicleDialog = false;
           } else {
             this.isDeleteVehicleLoading = false;
           }
@@ -846,6 +927,7 @@ export default {
     // 点击左边分组获取特殊车辆
     showGroupDeviceInfo (id) {
       this.activeId = id;
+      this.pagination.pageNum = 1;
       this.getVehicleList();
     },
     // 显示删除组弹出框
@@ -879,8 +961,12 @@ export default {
         this.$refs[form].resetFields();
       }
       this.carForm.uid = null;
+      this.carForm.groupList = [];
+      this.isAddDisabled = false;
+      
       if (type === 'add') {
         this.isAddVehicle = true;
+        this.carForm.groupList.push(this.activeId);
         this.vehicleTitle = '新增';
       } else {
         this.isAddVehicle = false;
@@ -934,10 +1020,12 @@ export default {
     },
     // 根据搜索条件查询车辆
     searchData () {
+      this.pagination.pageNum = 1;
       this.getVehicleList();
     },
     // 重置搜索条件
     resetData (form) {
+      this.pagination.pageNum = 1;
       this.$refs[form].resetFields();
       this.getVehicleList();
     },
@@ -945,7 +1033,81 @@ export default {
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
       this.getVehicleList();
-    }
+    },
+    // 导出车辆
+    exportVehicle () {
+      let vehicleColor, vehicleType, numberType;
+      if (this.searchForm.vehicleType === '不限') {
+        vehicleType = null;
+      } else {
+        vehicleType = this.searchForm.vehicleType;
+      }
+      if (this.searchForm.vehicleColor === '不限') {
+        vehicleColor = null;
+      } else {
+        vehicleColor = this.searchForm.vehicleColor;
+      }
+      if (this.searchForm.numType === '不限') {
+        numberType = null;
+      } else {
+        numberType = this.searchForm.numType;
+      }
+      const params = {
+        viewType: 1, // 1--特殊车辆
+        vehicleQueryDto: {
+          endTime: this.searchForm.dateTime[1],
+          startTime: this.searchForm.dateTime[0],
+          vehicleColor,
+          vehicleType,
+          numberType,
+          vehicleNumber: this.searchForm.vehicleNo,
+          groupId: this.activeId
+        }
+      };
+      vehicleExport(params)
+        .then(res => {
+          if (res && res.data) {
+            const eleA = document.getElementById('export_id');
+            if (eleA) {
+              document.body.removeChild(eleA);
+            }
+            let a = document.createElement('a');
+            a.setAttribute('href', res.data.fileUrl);
+            a.setAttribute('target', '_blank');
+            a.setAttribute('id', 'export_id');
+
+            document.body.appendChild(a);
+            a.click();
+          
+          }
+        })
+    },
+    // 显示导入车辆弹出框
+    importVehicle () {
+      this.importDialog = true;
+    },
+    // 导入
+    sureImportFile () {
+      if (this.fileList.length > 0) {
+        this.isImportLoading = true;
+        this.$nextTick(() => {
+          this.$refs.vehicleImport.submit();
+        })
+      } else {
+        this.$message.warning('请先选择要导入的文件');
+      }
+    },
+    handleChange (file, fileList) {
+      if (file && fileList) {
+        this.fileList = fileList;
+      }
+    },
+    // 上传成功
+    handleSuccess (res) {
+      this.isImportLoading = false;
+      console.log(res);
+    },
+    
   }
 }
 </script>
@@ -1027,11 +1189,11 @@ export default {
       .search_form {
         width: 100%;
         .select_btn, .reset_btn {
-          width: 80px;
+          // width: 80px;
         }
         .operation_form_btn {
-          float: right;
-          margin-right: 40px;
+          // float: right;
+          // margin-right: 40px;
         }
       }
       .divide {
@@ -1271,6 +1433,48 @@ export default {
     margin-right: 5px;
     display: inline-block;
     cursor: pointer;
+  }
+}
+.dialog_comp_import {
+  .content_body {
+    >p {
+        color: #999999;
+        margin-bottom: 20px;
+      }
+      .upload_box {
+        > li {
+          line-height: 40px;
+          .header {
+            color: #333333;
+          }
+          .main_content {
+            width: 250px;
+            margin-left: 30px;
+            .upload-btn {
+              color: #333333;
+              border:1px solid #D3D3D3;
+              display: flex;
+              align-items: center;
+            }
+          }
+          .download_box {
+            cursor: pointer;
+            text-align: center;
+            width: 98px;
+            height: 32px;
+            line-height: 32px;
+            color: #333333;
+            border-radius:4px;
+            border:1px solid #D3D3D3;
+            i {
+              vertical-align: middle;
+            }
+          }
+          &:last-child {
+            margin-top: 20px;
+          }
+        }
+      }
   }
 }
 </style>

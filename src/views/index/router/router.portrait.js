@@ -22,9 +22,15 @@ export default {
       name: 'gzws_portrait',
       component: () => import('@/views/index/components/portrait/gzws/gzws.vue')
     },
+    // 跟踪尾随分析结果
+    {
+      path: 'gzwsResult',
+      name: 'gzws_result',
+      component: () => import('@/views/index/components/portrait/gzws/result.vue')
+    },
     // 跟踪尾随详情
     {
-      path: 'detail',
+      path: 'gzwsDetail',
       name: 'gzws_detail',
       component: () => import('@/views/index/components/portrait/gzws/detail.vue')
     },
@@ -34,7 +40,7 @@ export default {
       component: () => import('@/views/index/components/portrait/qyryfx.vue')
     },
     {
-      path: 'pfcm',
+      path: 'pfcm',    //频繁出没
       name: 'portrait_pfcm',
       component: () => import('@/views/index/components/portrait/pfcm.vue')
     },
@@ -49,7 +55,7 @@ export default {
       component: () => import('@/views/index/components/portrait/peer-analysis.vue')
     },
     {
-      path: 'xjpfcm',
+      path: 'xjpfcm',     //新建分析任务
       name: 'portrait_xjpfcm',
       component: () => import('@/views/index/components/portrait/xjpfcm.vue')
     },
@@ -72,8 +78,7 @@ export default {
       path: 'gjfx', // 轨迹分析
       name: 'portrait_gjfx',
       component: () => import('@/views/index/components/portrait/gjfx.vue')
-    },
-    {
+    }, {
       path: 'rlsjfx',
       name: 'portrait_rlsjfx',
       component: () => import('@/views/index/components/portrait/rlsjfx.vue')
@@ -83,5 +88,21 @@ export default {
       name: 'portrait_zdgz',
       component: () => import('@/views/index/components/portrait/zdgz.vue')
     },
+    {
+
+      path: 'ljd', // 重点关注
+      name: 'portrait_ljd',
+      component: () => import('@/views/index/components/portrait/ljd.vue')
+    },
+    {
+      path: 'fxjg',    //分析结果
+      name: 'portrait_fxjg',
+      component: () => import('@/views/index/components/portrait/fxjg.vue')
+    },
+    {
+      path: 'report',
+      name: 'portrait_report',
+      component: () => import('@/views/index/components/portrait/report.vue')
+    }
   ]
 }

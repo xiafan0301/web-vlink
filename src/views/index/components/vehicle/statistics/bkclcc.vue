@@ -13,116 +13,90 @@
           <el-date-picker
             v-model="queryForm.startTime"
             type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="left_end">
           <span>结束</span>
           <el-date-picker
+            :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
             type="datetime"
+            @focus="getEndTime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
-        <el-select
-          style="width: 100%;"
-          v-model="queryForm.devIdData"
-          multiple
-          filterable
-          popper-class="statistics_select_list"
-          @remove-tag="removeSeletedDev"
-          @click.native="showChange"
-          collapse-tags
-          placeholder="请选择卡口">
-          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
+        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
+          <el-option
+            v-for="item in listBayonet"
+            :key="item.value"
+            :label="item.label"
+            :value="item">
+          </el-option>
         </el-select>
-        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
-          <vue-scroll style="height: 90px;">
-            <el-tree
-              :data="data1"
-              class="select_tree"
-              ref="selectTree1"
-              @check-change="changeSeletedStatus"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-          </vue-scroll>
-        </div>
-        <div class="left_radio"><span>车牌：</span><el-radio v-model="queryForm.radio" label="1">非</el-radio></div>
+        <div class="left_radio"><span>车牌：</span><el-checkbox v-model="queryForm.radio" :label="true">非</el-checkbox></div>
         <div class="left_province">
-          <el-select v-model="queryForm.provinceId" placeholder="请选择">
+          <el-select v-model="queryForm.province">
             <el-option
               v-for="item in provinceList"
               :key="item.value"
               :label="item.label"
-              :value="item.value">
+              :value="item">
             </el-option>
           </el-select>
           <el-input v-model="queryForm.provinceName"></el-input>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getControlCarSta">统计</el-button>
+          <el-button class="select_btn" @click="getControlCarSta" :loading="loadingBtn">统计</el-button>
         </div>
       </div>
       <div class="con_right">
         <div class="right_box table_box">
           <el-table
             v-loading="loading"
-            :data="bkclccList"
+            :data="bkclccList && bkclccList.list"
             >
             <el-table-column
               type="index"
-              label="序号">
+              label="序号"
+              :index="indexMethod">
             </el-table-column>
             <el-table-column
               label="车牌号码"
-              prop="area"
+              prop="plateNo"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="卡口名称"
-              prop="摄像头"
+              prop="bayonetName"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="抓拍时间"
-              prop="监控箱"
-              show-overflow-tooltip
-              >
-              <template slot-scope="scope">
-                <span class="sta_clickable" @click="$refs.devListDialog.showDialog()">{{scope.row['超时工单比率']}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              label="车道"
-              prop="监控箱"
+              prop="shotTime"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="车牌颜色"
-              prop="监控箱"
+              prop="vehicleColor"
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="布控库"
-              prop="监控箱"
+              prop=""
               show-overflow-tooltip
               >
             </el-table-column>
             <el-table-column
               label="车辆类型"
-              prop="监控箱"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="车速"
-              prop="监控箱"
+              prop="vehicleClass"
               show-overflow-tooltip
               >
             </el-table-column>
@@ -130,8 +104,8 @@
               label="操作"
               show-overflow-tooltip
               >
-              <template>
-                <span class="operation_btn">查看</span>
+              <template slot-scope="scope">
+                <span class="operation_btn" @click="skip(scope.row.plateNo)">查看</span>
               </template>
             </el-table-column>
           </el-table>
@@ -142,7 +116,7 @@
             :page-sizes="[100, 200, 300, 400]"
             :page-size="pageSize"
             layout="total, prev, pager, next, jumper"
-            :total="30">
+            :total="bkclccList.total">
           </el-pagination>
         </div>
       </div>
@@ -150,105 +124,120 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+import {getAllBayonetListByName, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
+import {dataList} from '@/utils/data.js';
+import {formatDate} from '@/utils/util.js';
 export default {
   data () {
     return {
       queryForm: {
-        startTime: null,
-        endTime: null,
-        devIdData: [],
-        provinceId: null,
-        provinceName: null,
-        radio: null
+        startTime: startTime,
+        endTime: endTime,
+        bayonet: {value: ''},
+        province: {label: '湘', value: 9},
+        provinceName: '',
+        radio: false
       },
-      isShowSelectList: false,
-      data1: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-            id: 4,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 2,
-        label: '一级 2',
-        children: [{
-            id: 5,
-            label: '二级 2-1'
-        }, {
-            id: 6,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 3,
-        label: '一级 3',
-        children: [{
-            id: 7,
-            label: '二级 3-1'
-        }, {
-            id: 8,
-            label: '二级 3-2'
-        }]
-      }],
-      provinceList: [],
+      pickerOptions1: {},
+      listBayonet: [],
+      provinceList: this.dicFormater(dataList.ownership)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       loading: false,
-      bkclccList: [{name: 'xxxxxxx'}],
+      loadingBtn: false,
+      bkclccList: [],
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
+      pageNum: 1
     }
   },
-  methods: {
-    // 是否显示下拉列表
-    showChange () {
-      this.isShowSelectList = !this.isShowSelectList;
+  watch: {
+    'queryForm.startTime' () {
+      const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
+      const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
+      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
+    }
+  },
+  mounted () {
+    this.getListBayonet();
+    this.getControlCarSta();
+  },
+  methods: { 
+    getEndTime(time) {
+      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
+      this.pickerOptions1 = {
+        disabledDate(time) {
+          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
+        },
+      }
     },
-    // 移除已选择的下拉列表项
-    removeSeletedDev (data) {
-      this.$refs.selectTree1.setChecked(data, false);
+    skip (plateNo) {
+      console.log(plateNo)
+      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo}});
     },
-    // 数组去重
-    unique (array) {
-      let obj = {}, resultArray = [];
-      resultArray = array.reduce((item, next) => {
-        if (!obj[next.id]) {
-          obj[next.id] = true;
-          item.push(next);
+    // 模糊搜索卡口
+    getListBayonet () {
+      getAllBayonetListByName().then(res => {
+        if (res) {
+          this.listBayonet = res.data.map(m => {
+            return {
+              value: m.uid,
+              label: m.bayonetName
+            }
+          });
         }
-        return item;
-      }, []);
-      return resultArray;
-    },
-    // 切换下拉列表的选中状态并关联到select上
-    changeSeletedStatus () {
-      let data = [], obj = null;
-      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
-        data.push(f);
       })
-      data = this.unique(data);
-      data = data.filter(f => !f.children);
-      this.queryForm.devIdData = data;
-    },
+    },  
     indexMethod (index) {
       return index + 1 + this.pageSize * (this.pageNum - 1);
     },
     handleCurrentChange (page) {
-      
+      this.pageNum = page;
+      this.currentPage = page;
+      this.getControlCarSta();
     },
     // 重置表单
     resetQueryForm () {
+      this.pageNum = 1;
+      this.currentPage = 1;
       this.queryForm = {
-        startTime: null,
-        endTime: null,
-        devIdData: [],
-        provinceId: null,
-        provinceName: null,
-        radio: null
+        startTime: startTime,
+        endTime: endTime,
+        bayonet: {value: ''},
+        province: {label: ''},
+        provinceName: '',
+        radio: false
       };
+      this.getControlCarSta();
     },
     // 获取布控车辆出城统计
     getControlCarSta () {
-
+      console.log(this.queryForm.bayonet, 'this.queryForm.bayonet')
+      const params = {
+        'where.startTime': this.queryForm.startTime,
+        'where.endTime': this.queryForm.endTime,
+        'where.bayonetUid': this.queryForm.bayonet.value,
+        'where.vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
+        'where.unvehicleFlag': this.queryForm.radio,
+        pageNum: this.pageNum,
+        pageSize: this.pageSize,
+        orderBy: 'shotTime',
+        order: 'desc',
+      }
+      this.loadingBtn = true;
+      apiOutCityStatistics(params).then(res => {
+        if (res) {
+          this.bkclccList = res.data;
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
     }
   }
 }
@@ -275,18 +264,6 @@ export default {
         padding-bottom: 10px; 
         > span{
           color: #999999;
-        }
-      }
-      .search_item {
-        height: 120px;
-        width: 232px;
-        overflow: hidden;
-        transition: all .3s linear;
-        .select_tree {
-          border: 1px solid #e4e7ed;
-          border-radius: 4px;
-          background-color: #fff;
-          box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
         }
       }
       .left_radio{
@@ -345,8 +322,5 @@ export default {
       border-right: none;
     }
   }
-}
-.statistics_select_list {
-  display: none!important;
 }
 </style>

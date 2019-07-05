@@ -1,132 +1,181 @@
 <template>
   <div class="ws_record">
-    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws'}, {name: '尾随记录'}]"></Breadcrumb>
+    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws', query: {
+      plateNo: $route.query.plateNo,
+      dateStart: $route.query.dateStart,
+      dateEnd: $route.query.dateEnd,
+      vehicleClass: $route.query.vehicleClass,
+      interval: $route.query.interval,
+      deviceCode: $route.query.deviceCode
+    }}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
-        <h2>湘A10987</h2>
+        <h2>{{vehicleDetail.plateno ? vehicleDetail.plateno : $route.query.plateNoTb}}</h2>
         <ul>
           <li>
             <span>车辆所有人：</span>
-            <span>长沙</span>
+            <span>{{vehicleDetail.owner ? vehicleDetail.owner : '未知'}}</span>
           </li>
           <li>
             <span>中文品牌：</span>
-            <span>雪佛兰科鲁兹</span>
+            <span>{{vehicleDetail.brand ? vehicleDetail.brand : '未知'}}</span>
           </li>
           <li>
             <span>车身颜色：</span>
-            <span>红色</span>
+            <span>{{vehicleDetail.color ? vehicleDetail.color : '未知'}}</span>
           </li>
           <li>
             <span>车身形式：</span>
-            <span>正常</span>
+            <span>{{vehicleDetail.bodyform ? vehicleDetail.bodyform : '未知'}}</span>
           </li>
           <li>
             <span>车门数：</span>
-            <span>你猜咯</span>
+            <span>{{vehicleDetail.doornumber ? vehicleDetail.doornumber : '未知'}}</span>
           </li>
           <li>
             <span>发动机号：</span>
-            <span>430322199709831112</span>
+            <span>{{vehicleDetail.engineno ? vehicleDetail.engineno : '未知'}}</span>
           </li>
           <li>
             <span>使用性质：</span>
-            <span>123人</span>
+            <span>{{vehicleDetail.usecharacter ? vehicleDetail.usecharacter : '未知'}}</span>
           </li>
           <li>
             <span>车辆类型：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.platetype ? vehicleDetail.platetype : '未知'}}</span>
           </li>
           <li>
             <span>年款：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.model ? vehicleDetail.model : '未知'}}</span>
           </li>
           <li>
             <span>车型：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.vehicletype ? vehicleDetail.vehicletype : '未知'}}</span>
           </li>
           <li>
             <span>座位数：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.seatnumber ? vehicleDetail.seatnumber : '未知'}}</span>
           </li>
           <li>
             <span>车辆状态：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.status ? vehicleDetail.status : '未知'}}</span>
           </li>
           <li>
             <span>厂商名称：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.vendor ? vehicleDetail.vendor : '未知'}}</span>
           </li>
           <li>
             <span>有效期止：</span>
-            <span>2020-12-12</span>
+            <span>{{vehicleDetail.validuntil ? vehicleDetail.validuntil : '未知'}}</span>
           </li>
         </ul>
       </div>
       <div class="right">
         <div class="operation_box">
-          <p>查看违章记录</p>
-          <p>车辆布控</p>
-          <p>轨迹分析</p>
-          <p>落脚点分析</p>
-          <p>以车搜车</p>
+          <p @click="skipBreakRecordPage">查看违章记录</p>
+          <p @click="skipVehicleControlPage">车辆布控</p>
+          <p @click="skipTrajectoryPage">轨迹分析</p>
+          <p @click="skipFootholdPage">落脚点分析</p>
+          <!-- <p>以车搜车</p> -->
         </div>
         <div id="rightMap"></div>
       </div>
     </div>
     <!-- 视频全屏放大 -->
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="controlVideo" :src="videoDetail.videoPath"></video>
+      <video id="controlVideo" :src="videoDetail.videoPath" ></video>
       <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
       <div class="control_bottom">
         <div>{{videoDetail.deviceName}}</div>
         <div>
           <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
           <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
-          <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span>
-          <span><a download="视频" :href="videoDetail.videoPath" class="vl_icon vl_icon_event_26"></a></span>
+          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
         </div>
       </div>
     </div>
+    <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button type="primary" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-// import { testData } from './testData.js';
 import Breadcrumb from '../../breadcrumb.vue';
-import { getTailBehindDetail } from '@/views/index/api/api.judge.js'
+import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
+import { random14 } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
     return {
+      cutDialogVisible: false, // 截屏弹出框
       showLarge: false, // 全屏显示
       videoDetail: {}, // 播放视频的信息
       isPlaying: false, // 是否播放视频
       map: null,
-      // testData: testData,
       resultList: [],
+      vehicleDetail: {}, // 尾随车辆详细信息
       marker: {},
+      flvplayerId: 'flv_' + random14(),
     }
   },
   mounted () {
     this.initMap();
+    this.getVehicleDetail();
     setTimeout(() => {
       this.getDetail();
     }, 500)
   },
   methods: {
+    // 跳至新建布控页面
+    skipVehicleControlPage () {
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至查看违章记录页面
+    skipBreakRecordPage () {
+      this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至轨迹分析页面
+    skipTrajectoryPage () {
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至落脚点分析页面
+    skipFootholdPage () {
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 获取车辆信息（车管所）
+    getVehicleDetail () {
+      const plateNo = this.$route.query.plateNoTb;
+      if (plateNo) {
+        getVehicleArchives({plateNo})
+          .then(res => {
+            if (res) {
+              this.vehicleDetail = res.data;
+            }
+          })
+      }
+    },
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.query.plateNo;
-      const dateStart = this.$route.query.dateStart;
-      const dateEnd = this.$route.query.dateEnd;
+      const startTime = this.$route.query.dateStart;
+      const endTime = this.$route.query.dateEnd;
       const plateNoTb = this.$route.query.plateNoTb;
-      const dateStartTb = this.$route.query.dateStartTb;
+      const startTimeTb = this.$route.query.dateStartTb;
       const params = {
         plateNo,
-        dateStart,
-        dateEnd,
+        startTime,
+        endTime,
         plateNoTb,
-        dateStartTb
+        startTimeTb
       };
       getTailBehindDetail(params)
         .then(res => {
@@ -258,9 +307,61 @@ export default {
       }
     },
     // 截屏
-    cutScreen () {
-
+    playerCut () {
+      this.cutDialogVisible = true;
+      this.$nextTick(() => {
+        let $video = $('#controlVideo');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
     },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
+    }
   }
 }
 </script>
@@ -419,7 +520,7 @@ export default {
   left: 0;
   bottom: 0;
   background: #000000;
-  z-index: 9999;
+  z-index: 1111;
   -webkit-transition: all .4s;
   -moz-transition: all .4s;
   -ms-transition: all .4s;

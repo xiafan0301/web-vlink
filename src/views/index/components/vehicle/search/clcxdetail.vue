@@ -13,15 +13,15 @@
         <h3 class="title">车辆详情</h3>
         <div class="infomation">
           <div class="first">
-            <span>{{detailData.plateNo}}</span>
-            <span>{{detailData.vehicleColor}}</span>
+            <span>{{detailData.plateno}}</span>
+            <span>{{detailData.color}}</span>
           </div>
           <div class="div">
-            <span>{{detailData.vehicleBrand}}</span>
+            <span>{{detailData.brand}}</span>
             <label>中文品牌</label>
           </div>
           <div class="div">
-            <span>{{detailData.vehicleStatus}}</span>
+            <span>{{detailData.status}}</span>
             <label>机动车状态</label>
           </div>
           <div class="div">
@@ -29,7 +29,7 @@
             <label>归属地</label>
           </div>
           <div class="div">
-            <span>{{detailData.vehicleOwner}}</span>
+            <span>{{detailData.owner}}</span>
             <label>车辆所有人</label>
           </div>
           <div class="div">
@@ -37,18 +37,18 @@
             <label>身份证</label>
           </div>
           <div class="div">
-            <span>{{detailData.approvedPassNum}}人</span>
+            <span>{{detailData.seatnumber}}人</span>
             <label>核定载客</label>
           </div>
           <div class="div">
-            <span>{{detailData.validityPeriod}}</span>
+            <span>{{detailData.validuntil}}</span>
             <label>有效期</label>
           </div>
           <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div>
-          <p class="blue">查看违章记录</p>
+          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
         </div>
       </div>
     </div>
@@ -90,7 +90,7 @@
               </div>
               <div>
                 <p class="div">
-                  <span>{{snapObj.snapAddress}}</span>
+                  <span>{{snapObj.address}}</span>
                   <label>抓拍地址</label>
                 </p>
               </div>
@@ -108,7 +108,7 @@
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 100%;" :src="item.subStoragePath" >
+                <img style="width: 100%; height: 100%; min-height:0.88rem;" :src="item.subStoragePath" >
                 <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
@@ -128,11 +128,11 @@
       </div>
       <div class="ment">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>尾随分析</a>
-          <a>以车搜车</a>
+          <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_ws')">尾随分析</a>
+          <a @click="goToPage('vehicle_search_ycsc')">以图搜车</a>
         </div>
       </div>
     </div>
@@ -140,7 +140,7 @@
 </template>
 <script>
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
-import { getSnapDetail } from "@/views/index/api/api.judge.js";
+import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
   data() {
     return {
@@ -198,19 +198,44 @@ export default {
   mounted() {
     // this.tcDiscuss();
     this.getSnapDetail()
+    this.getArchives()
   },
   methods: {
+    goToPage(v){
+      if(v=="vehicle_search_lxwfdetail"){
+        this.$router.push({name:v , query:{
+          datastart:this.$route.query.dateStart,
+          dataend:this.$route.query.dateEnd,
+          plateNo:this.$route.query.plateNo,
+        }});
+      }else{
+        this.$router.push({name:v });
+      }
+        
+    },
+    getArchives(){
+      let d={
+        plateNo:this.$route.query.plateNo || "湘AN8888"
+      }
+      getArchives(d).then(res=>{
+        if(res && res.data){
+          // console.log(res);
+          this.detailData=res.data
+        }
+      })
+    },
     //
     getSnapDetail(){
       let d={
-        dateStart:'2019-06-01',
-        dateEnd:'2019-07-02',
+        dateStart:this.$route.query.dateStart,
+        dateEnd:this.$route.query.dateEnd,
         devIds:'',
-        plateNo:'湘A77777',
+        plateNo:this.$route.query.plateNo,
+        hasPlate:this.$route.query.plateNo?'1':'0'
       }
       getSnapDetail(d).then(res=>{
         if(res){
-          this.detailData=res.data
+          //this.detailData=res.data
           if(res.data.snapDtoList && res.data.snapDtoList.length>0)
           this.strucInfoList = res.data.snapDtoList;
           this.snapObj=res.data.snapDtoList[0]
@@ -222,7 +247,7 @@ export default {
     imgListTap(data, index) {
       this.curImgIndex = index;
       console.log(index);
-      this.snapObj = this.detailData.snapDtoList[index]
+      this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);
     },

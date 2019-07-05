@@ -20,7 +20,8 @@
                 :file-list="fileList">
                 <i v-if="uploading" class="el-icon-loading"></i>
                 <img v-else-if="curImageUrl" :src="curImageUrl">
-                <i v-else class="vl_icon vl_icon_control_14"></i>
+                <i v-else class="vl_icon vl_icon_vehicle_01"></i>
+                <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
                 <p class="history" @click="showHistoryPic($event)" v-show="fileList.length < 3">从上传记录中选择</p>
               </el-upload>
             </div>
@@ -77,22 +78,23 @@
               </li>
             </ul>
           </div>
+          <el-pagination
+            class="cum_pagination"
+            @current-change="handleCurrentChange"
+            :current-page.sync="pagination.pageNum"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="pagination.pageSize"
+            layout="total, prev, pager, next, jumper"
+            :total="pagination.total">
+          </el-pagination>
         </template>
         <template v-else>
           <div class="not_content">
             <img src="../../../../../assets/img/not-content.png" alt="">
-            <p>暂无相关数据</p>
+            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
           </div>
         </template>
-        <el-pagination
-          class="cum_pagination"
-          @current-change="handleCurrentChange"
-          :current-page.sync="pagination.pageNum"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="pagination.pageSize"
-          layout="total, prev, pager, next, jumper"
-          :total="pagination.total">
-        </el-pagination>
+        
       </div>
       <!--历史记录弹窗-->
       <el-dialog
@@ -343,7 +345,7 @@ export default {
             }
           })
           if (_ids.length) {
-            params['where.appendixIds'] = _ids.join(':');
+            params['where.appendixIds'] = _ids.join(',');
           }
           getIdNoList(params).then(res => {
             if (res) {
@@ -378,8 +380,6 @@ export default {
       background-color: #ffffff;
       .upload_box {
         padding: 15px 20px;
-        // position: relative;
-        
          .img_list {
            display: flex;
            margin-top: 10px;
@@ -428,6 +428,11 @@ export default {
           width: 225px;
           height: 225px;
           position: relative;
+          .upload_text {
+            line-height: 0;
+            color: #999999;
+            margin-top: -60px;
+          }
           >img {
             width: 100%;
             height: 100%;
@@ -446,14 +451,18 @@ export default {
             display: none;
           }
           i {
-            margin-top: 20px;
+            margin-top: 40px;
+            margin-left: 15px;
             width: 120px;
             height: 120px;
           }
           &:hover {
             background: #2981F8;
-            i.vl_icon_control_14{
-              background-position: -228px -570px;
+            // i.vl_icon_control_14{
+            //   background-position: -228px -570px;
+            // }
+            .upload_text {
+              color: #ffffff;
             }
             .history {
               display: block;

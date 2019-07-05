@@ -2,68 +2,36 @@
   <div class="gcsj_container">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{name: 'vehicle'}">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{name: 'vehicle'}">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>过车数据统计</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="con_box">
       <div class="con_left">
-        <el-select
-          style="width: 100%;"
-          v-model="queryForm.devIdData"
-          multiple
-          popper-class="statistics_select_list"
-          @remove-tag="removeSeletedDev"
-          @click.native="showChange"
-          collapse-tags
-          placeholder="请选择设备">
-          <el-option :value="queryForm.devIdData[0]" :label="queryForm.devIdData[0] && queryForm.devIdData[0].label"></el-option>
-        </el-select>
-        <div class="search_item" :style="{'height': isShowSelectList ? '120px' : '0px'}">
-          <div class="tab_box">
-            <div @click="changeTab(1)" :class="{'active': tabIndex === 1}">摄像头</div>
-            <div @click="changeTab(2)" :class="{'active': tabIndex === 2}">卡口</div>
-          </div>
-          <vue-scroll style="height: 90px;">
-            <el-tree
-              v-show="tabIndex === 1"
-              :data="data1"
-              class="select_tree"
-              ref="selectTree1"
-              @check-change="changeSeletedStatus1"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-            <el-tree
-              v-show="tabIndex === 2" 
-              :data="data2"
-              class="select_tree"
-              ref="selectTree2"
-              @check-change="changeSeletedStatus2"
-              show-checkbox
-              node-key="label">
-            </el-tree>
-          </vue-scroll>
-        </div>
+        <div ref="devSelect" is="devSelect" @sendSelectData="getSelectData"></div>
         <div class="left_start">
           <span>开始</span>
           <el-date-picker
             v-model="queryForm.startTime"
-            type="datetime"
+            type="date"
+            value-format="yyyy-MM-dd"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
         <div class="left_end">
           <span>结束</span>
           <el-date-picker
+            :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
-            type="datetime"
+            type="date"
+            @focus="getEndTime"
+            value-format="yyyy-MM-dd"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getCarBeforeSta">查询</el-button>
+          <el-button class="select_btn" @click="getCarBeforeSta" :loading="loadingBtn">查询</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -74,7 +42,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_01"></i>
                 <span>设备数</span>
               </div>
-              <span>19个</span>
+              <span>{{gcsjDetail.deviceNums}}个</span>
             </div>
           </li>
           <li>
@@ -83,7 +51,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_02"></i>
                 <span>过车总数</span>
               </div>
-              <span>19万次</span>
+              <span>{{gcsjDetail.passingCarNums}}次</span>
             </div>
           </li>
           <li>
@@ -92,7 +60,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_03"></i>
                 <span>车辆总数</span>
               </div>
-              <span>19辆</span>
+              <span>{{gcsjDetail.carNums}}辆</span>
             </div>
           </li>
           <li>
@@ -101,7 +69,7 @@
                 <i class="vl_icon vl_icon_vehicle_gcsj_04"></i>
                 <span>外地车数</span>
               </div>
-              <span>19辆</span>
+              <span>{{gcsjDetail.fieldCarNums}}辆</span>
             </div>
           </li>
         </ul>
@@ -109,7 +77,7 @@
           <div>
             <div class="chart_item">
               <h1>设备过车数（Top5）</h1>
-              <p>数量（万次）</p>
+              <p>数量（次）</p>
               <div id="chartContainer1"></div>
             </div>
           </div>
@@ -141,77 +109,25 @@
 <script>
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
+import {apiPassingCarSta} from '@/views/index/api/api.vehicle.js';
+import devSelect from '@/components/common/devSelect.vue';
+import {formatDate} from '@/utils/util.js';
 export default {
+  components: {devSelect},
   data () {
     return {
       queryForm: {
-        startTime: null,
-        endTime: null,
-        devIdData: []
+        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
+        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        devIdData: {
+          selSelectedData1: [],
+          selSelectedData2: []
+        }
       },
-      currentNode: null,
-      isShowSelectList: false,
-      selSelectedData1: [],
-      selSelectedData2: [],
-      tabIndex: 1, // select 下拉 tab 切换下标
-      data1: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-            id: 4,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 2,
-        label: '一级 2',
-        children: [{
-            id: 5,
-            label: '二级 2-1'
-        }, {
-            id: 6,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 3,
-        label: '一级 3',
-        children: [{
-            id: 7,
-            label: '二级 3-1'
-        }, {
-            id: 8,
-            label: '二级 3-2'
-        }]
-      }],
-      data2: [{
-        id: 9,
-        label: '一级 3',
-        children: [{
-            id: 12,
-            label: '二级 1-1'
-        }]
-        }, {
-        id: 10,
-        label: '一级 4',
-        children: [{
-            id: 13,
-            label: '二级 2-1'
-        }, {
-            id: 14,
-            label: '二级 2-2'
-        }]
-        }, {
-        id: 11,
-        label: '一级 5',
-        children: [{
-            id: 15,
-            label: '二级 3-1'
-        }, {
-            id: 16,
-            label: '二级 3-2'
-        }]
-      }],
+      pickerOptions1: [],
       provinceList: [],
       loading: false,
+      loadingBtn: false,
       bkclccList: [{name: 'xxxxxxx'}],
       // 翻页数据
       currentPage: 1,
@@ -260,73 +176,39 @@ export default {
         chart2: null,
         chart3: null,
         chart4: null  
+      },
+      gcsjDetail: {
+        deviceNums: '',
+        passingCarNums: '',
+        carNums: '',
+        fieldCarNums: ''
       }
     }
   },
+  watch: {
+    'queryForm.startTime' () {
+      const threeDays = 2 * 3600 * 24 * 1000;
+      const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
+      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
+    }
+  },
   mounted () {
-    this.drawChart1();
-    this.drawChart2();
-    this.drawChart3();
-    this.drawChart4();
+    setTimeout(() => {
+      this.getCarBeforeSta();
+    }, 2000);
   },
   methods: {
-    // 是否显示下拉列表
-    showChange () {
-      this.isShowSelectList = !this.isShowSelectList;
-    },
-    // 下拉列表的tab切换
-    changeTab (tabIndex) {
-      this.tabIndex = tabIndex;
-    },
-    // 移除已选择的下拉列表项
-    removeSeletedDev (data) {
-      // 判断是否是删除的第一个数中的数据
-      if (this.selSelectedData1.some(s => s.id === data.id)) {
-        this.$refs.selectTree1.setChecked(data, false);
-      // 判断是否是删除的第二个树中的数据  
-      } else if (this.selSelectedData2.some(s => s.id === data.id)) {
-        this.$refs.selectTree2.setChecked(data, false);
+    getEndTime(time) {
+      let startTime = new Date(this.queryForm.startTime).getTime();
+      this.pickerOptions1 = {
+        disabledDate(time) {
+          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
+        },
       }
     },
-    // 数组去重
-    unique (array) {
-      let obj = {}, resultArray = [];
-      resultArray = array.reduce((item, next) => {
-        if (!obj[next.id]) {
-          obj[next.id] = true;
-          item.push(next);
-        }
-        return item;
-      }, []);
-      return resultArray;
-    },
-    // 切换下拉列表的选中状态并关联到select上
-    changeSeletedStatus1 () {
-      let data = [], obj = null;
-      this.$refs.selectTree1.getCheckedNodes().forEach(f => {
-        data.push(f);
-      })
-      data = this.unique(data);
-      data = data.filter(f => !f.children);
-      this.selSelectedData1 = data;
-      this.queryForm.devIdData = [...this.selSelectedData2, ...data];
-    },
-    // 切换下拉列表的选中状态并关联到select上
-    changeSeletedStatus2 () {
-      let data = [], obj = null;
-      this.$refs.selectTree2.getCheckedNodes().forEach(f => {
-        data.push(f);
-      })
-      data = this.unique(data);
-      data = data.filter(f => !f.children);
-      this.selSelectedData2 = data;
-      this.queryForm.devIdData = [...this.selSelectedData1, ...data];
-    },
-    indexMethod (index) {
-      return index + 1 + this.pageSize * (this.pageNum - 1);
-    },
-    handleCurrentChange (page) {
-      
+    // 获得选择设备组件传过来的数据
+    getSelectData (data) {
+      this.queryForm.devIdData = data;
     },
     // 画图表
     drawChart1 () {
@@ -339,7 +221,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer1',
           forceFit: true,
-          padding: [ 20, 0, 25, 25 ],
+          padding: [ 20, 20, 25, 25 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -352,8 +234,7 @@ export default {
         value: 'value', // value字段
         retains: ['devName']
       });
-
-      // impute 补全列/补全字段
+       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
         field: '过车数1',       // 待补全字段
@@ -371,10 +252,13 @@ export default {
       .size(34)
       .shape('cylinder');
     
-
       chart.source(dv);
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
       // 坐标轴刻度
-      chart.scale('过车数1', {
+      chart.scale('value', {
         max: 40,
         min: 0,
         tickCount: 6,
@@ -397,6 +281,7 @@ export default {
           lineWidth: 0
         }
       });
+      chart.axis('过车数1', false);
       chart.tooltip(false);
       chart.legend(false);
       chart.interval()
@@ -413,6 +298,8 @@ export default {
           shadowColor: 'rgba(0, 0, 0, .45)'
         },
       });
+
+     
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -508,7 +395,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer3',
           forceFit: true,
-          padding: [ 20, 24, 80, 60 ],
+          padding: [ 20, 20, 80, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -524,12 +411,15 @@ export default {
       chart.source(dv, {});
       // 坐标轴刻度
       chart.scale('value', {
-        max: 50000,
+        max: 100,
         min: 0,
         tickCount: 7,
         title: {
           offset: 50
         }
+      });
+      chart.axis('value', {
+        title: null
       });
       chart.axis('time', {
         label: {
@@ -549,12 +439,18 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          return `<div class="my_tooltip"><h1>${_this.transformTime(title)}-${title}</h1>
-            <span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          let str = `<div class="my_tooltip">`;
+          if (title === '0点') {
+            str += `<h1>${title}</h1>`;
+          } else {
+            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          }
+          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          return str;
         }
       });
       chart.legend(false);
-      chart.line().position('time*value').color('type', [ '#00C4FC']).size(4).shape('smooth');
+      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
       chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart3 = chart;
@@ -569,7 +465,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer4',
           forceFit: true,
-          padding: [ 0, 40, 20, 60 ],
+          padding: [ 20, 60, 60, 30 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -582,9 +478,7 @@ export default {
         value: 'value', // value字段
         retains: ['carType']
       });
-      chart.source(dv, {});
-
-      // impute 补全列/补全字段
+       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
         field: 'count1',       // 待补全字段
@@ -595,12 +489,31 @@ export default {
       let view2 = chart.view();
       view2.source(dv);
       view2.tooltip(false);
-      chart.interval().position('carType*count1').color('carType', '#F2F2F2').size(18);
-      
+      view2.axis(false);
+      chart.interval()
+      .position('carType*count1') 
+      .color('#F2F2F2')
+      .size(30);
+
+      chart.source(dv, {});
+      // 坐标轴刻度
+      chart.scale('value', {
+        max: 100,
+        min: 0,
+        tickCount: 6,
+        title: {
+          offset: 50
+        }
+      });
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
+      chart.axis('count1', false);
       chart.axis('carType', {
         label: {
           textStyle: {
-            fill: '#8d8d8d',
+            fill: '#999999',
             fontSize: 12
           }
         },
@@ -612,36 +525,72 @@ export default {
           lineWidth: 0
         }
       });
-      chart.axis('count1', false);
-      chart.axis('value', false);
-      chart.tooltip(false); 
-      chart.legend(false);
-      chart.coord().transpose();
-      chart.interval().position('carType*value').color('carType', ['#00F3DF','#00F3DF','#0FB1FF','#088BFD','#6262FF','#00C888']).size(18).label('value', {
-      textStyle: {
-          fill: '#333',
-          fontWeight: 'bold'
-        },
-        offset: 10
+      chart.tooltip({
+        useHtml: true,
+        htmlContent: function (title, items) {
+          return `<div class="my_tooltip">
+            <h1>${title}</h1>
+            <span><span>${items[1].value}辆</span></span></div>`;
+        }
       });
+      chart.legend(false);
+      chart.interval()
+      .position('carType*value')
+      .color('type', ['l(270) 0:#0C70F8 1:#0D9DF4'])
+      .size(30)
+
       chart.render();
       this.charts.chart4 = chart;
     },
     // 转换时间间隔
     transformTime (title) {
-      return title.length === 2 ? parseInt(title.slice(0, 1)) - 2 : parseInt(title.slice(0, 2)) - 2;
+      if (title === '0点') return 0;
+      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
     },
     // 重置表单
     resetQueryForm () {
+      this.$refs.devSelect.resetSelect();
       this.queryForm = {
-        startTime: null,
-        endTime: null,
-        devIdData: []
+        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
+        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        devIdData: {
+          selSelectedData1: [],
+          selSelectedData2: []
+        }
       };
     },
     // 获取过车数据统计
     getCarBeforeSta () {
-
+      const params = {  
+        deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
+        bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
+        startTime: this.queryForm.startTime + ' 00:00:00',
+        endTime: this.queryForm.endTime + ' 23:59:59'
+      }
+      this.loadingBtn = true;
+      apiPassingCarSta(params).then(res => {
+        if (res) {
+          this.gcsjDetail = res.data;
+          this.chartData1 = res.data.device.map(m => {
+            return {devName: m.name, '过车数': m.total, '过车数1': 1};
+          })
+          this.chartData2 = res.data.brandDto.map(m => {
+            return { item: m.name, count: m.total };
+          })
+          this.chartData3 = res.data.timeDto.map(m => {
+            return { time: m.name, count: m.total };
+          })
+          this.chartData4 = res.data.carTypeDto.map(m => {
+            return { carType: m.name, count: m.total, count1: 1 };
+          })
+          this.drawChart1();
+          this.drawChart2();
+          this.drawChart3();
+          this.drawChart4();
+        }
+      }).finally(() => {
+        this.loadingBtn = false;
+      })
     }
   }
 }
@@ -672,35 +621,6 @@ export default {
       }
       > .left_start{
         padding-top: 10px; 
-      }
-      .search_item {
-        width: 232px;
-        height: 0;
-        overflow: hidden;
-        transition: all .3s linear;
-        .tab_box{
-          width: 100%;
-          height: 30px;
-          display: flex;
-          > div{
-            width: 50%;
-            line-height: 30px;
-            text-align: center;
-            border:1px solid #D3D3D3;
-            border-radius:3px 0px 0px 3px;
-            cursor: pointer;
-            &:hover, &.active{
-              background:#E0F2FF;
-              color: #0C70F8;
-            }
-          }
-        }
-        .select_tree {
-          border: 1px solid #e4e7ed;
-          border-radius: 4px;
-          background-color: #fff;
-          box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-        }
       }
       .left_btn{
         padding-top: 10px;
@@ -816,9 +736,6 @@ export default {
 }
 </style>
 <style lang="scss">
-.statistics_select_list {
-  display: none!important;
-}
 // 车辆品牌排名样式
 .vi_stat11_leg{
   max-width: 3.34rem!important;

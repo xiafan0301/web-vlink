@@ -22,45 +22,42 @@
             <div class="card-row">
               <div class="card-item">
                 <label class="title">车牌号牌：</label>
-                <span>湘A51790</span>
+                <span>{{carInfo.plateno}}</span>
               </div>
               <div class="card-item">
                 <label class="title">归属地：</label>
-                <span>雪佛兰科鲁兹</span>
+                <span>{{carInfo.vehicleLocation}}</span>
               </div>
               <div class="card-item">
                 <label class="title">车身颜色：</label>
-                <span>红色</span>
+                <span>{{carInfo.color}}</span>
               </div>
               <div class="card-item">
                 <label class="title">中文品牌：</label>
-                <span>正常</span>
+                <span>{{carInfo.brand}}</span>
               </div>
               <div class="card-item">
                 <label class="title">所有人：</label>
-                <span>周全</span>
+                <span>{{carInfo.owner	}}</span>
               </div>
               <div class="card-item">
                 <label class="title">身份证号：</label>
-                <span>430111199071651322</span>
+                <span>{{carInfo.idCard}}</span>
               </div>
               <div class="card-item">
                 <label class="title">核定载客：</label>
-                <span>5人</span>
+                <span>{{carInfo.seatnumber}}</span>
               </div>
               <div class="card-item">
                 <label class="title">机动车状态：</label>
-                <span>正常</span>
+                <span>{{carInfo.status}}</span>
               </div>
               <div class="card-item vehicle-img">
                 <label class="title">车辆登记照片：</label>
                 <div class='upload_box'>
-                  <div class="img-box" v-for="(item, index) in historyPicList" :key="index">
-                    <img
-                      :src="item.path"
-                      @click="openBigImg(index, historyPicList)"
-                    />
-                  </div>
+                  <!-- <div class="img-box" v-for="(item, index) in historyPicList" :key="index"> -->
+                     <div class="img-box"><img :src="carInfo.vehicleImage"/></div>
+                  <!-- </div> @click="openBigImg(index, historyPicList)" -->
                 </div>
               </div>
             </div>
@@ -84,7 +81,7 @@
                 </el-table-column>
                 <el-table-column
                   label="违法时间"
-                  prop="date"
+                  prop="vioDate"
                   show-overflow-tooltip
                   >
                 </el-table-column>
@@ -96,19 +93,19 @@
                 </el-table-column>
                 <el-table-column
                   label="违法行为"
-                  prop="name"
+                  prop="vioName"
                   show-overflow-tooltip
                   >
                 </el-table-column>
                 <el-table-column
                   label="处理机关"
-                  prop="name"
+                  prop="vioCollectionOffice"
                   show-overflow-tooltip
                   >
                 </el-table-column>
               </el-table>
             </div>
-            <template v-if="pagination.total > 0">
+            <!-- <template v-if="pagination.total > 0">
               <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="onPageChange"
@@ -119,7 +116,7 @@
                 :total="pagination.total"
                 class="cum_pagination">
               </el-pagination>
-            </template>
+            </template> -->
           </div>
         </div>
       </div>
@@ -128,69 +125,27 @@
     </div>
     <div class="bottom">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>同行车分析</a>
+           <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_txcl')">同行车分析</a>
         </div>
       </div>
   </div>
 </template>
 <script>
-
+import {
+  getViolationInfo,
+  getArchives
+} from "../../../api/api.judge.js";
 export default {
  
   data() {
     return {
       historyPicList: [], // 上传历史记录
+      carInfo:{},
       searching:false,
-      regulationsList: [{
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1518 弄'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1517 弄'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1519 弄'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }
-          , {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1516 弄'
-          }],      //违章信息列表
+      regulationsList: [],      //违章信息列表
           pagination: { total: 20, pageSize: 10, pageNum: 1 },
     };
   },
@@ -198,9 +153,43 @@ export default {
   
   },
   mounted() {
-  
+    this.getArchives()
+    this.getViolationInfo()
   },
   methods: {
+    goToPage(v){
+        this.$router.push({name:v });
+    },
+    getViolationInfo(){
+      let today = new Date()
+      let y = today.getFullYear()
+      let m = today.getMonth()+1
+      let r = today.getDay()
+      let day= y +"-"+ m +"-" + r
+      let sdate = this.$route.query.datastart ? this.$route.query.datastart.substr(0,10) : ''
+      let edate = this.$route.query.dataend ? this.$route.query.dataend.substr(0,10) : ''
+      let d={
+        dateStart:(sdate || day) + " 00:00:00",
+        dateEnd:(edate || day) + " 23:59:59",
+        plateNo:this.$route.query.plateNo
+      }
+      getViolationInfo(d).then(res=>{
+        if(res.data && res.data.length>0){
+          this.regulationsList=res.data
+        }
+      })
+    },
+    getArchives(){
+      let d={
+        plateNo:this.$route.query.plateNo
+      }
+      getArchives(d).then(res=>{
+        if(res && res.data){
+          // console.log(res);
+          this.carInfo=res.data
+        }
+      })
+    },
    //分页
     handleSizeChange (val) {
       this.pagination.pageNum = 1;

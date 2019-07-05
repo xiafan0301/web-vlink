@@ -5,12 +5,12 @@
 const oDomains = {
     // 默认ajax地址
     base: {
-        dev: 'https://apidev.aorise.org/vlink-base',
-        // dev: 'http://10.116.64.23:8081',
-        // dev: 'http://10.116.64.142:8081',
-        // dev: 'http://10.116.66.29:8082',// 钟赞
-        test: 'https://apirel.aorise.org/vlink-base',
-        prod: 'https://apirel.aorise.org/vlink-base'
+      dev: 'https://apidev.aorise.org/vlink-base',
+      // dev: 'http://10.116.64.23:8081',
+      // dev: 'http://10.116.64.142:8081',
+      // dev: 'http://10.116.66.29:8082',// 钟赞
+      test: 'https://apirel.aorise.org/vlink-base',
+      prod: 'https://apirel.aorise.org/vlink-base'
     },
     // 视频服务地址
     video: {
@@ -170,3 +170,4 @@ export const mapXupuxian = {
     name: '溆浦县',
     center: [110.594280, 27.908490]
 };
+

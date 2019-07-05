@@ -78,16 +78,20 @@ export default {
     this.devices=this.allPoints
     this.allboy=this.allBayonets
    //console.log(this.devices);
+   this.addMarket()
     
   },
   methods: {
     confirmMap(){
       //console.log(this.pointData);
         this.amap.clearMap();
+        this.addMarket()
         this.$emit("selectMap",{
           dev:this.pointData,
           boy:this.boyData
         })
+        this.pointData=[]
+        this.boyData=[]
     },
     cancelMap(){
       this.amap.clearMap();
@@ -236,17 +240,6 @@ export default {
           _this.amap.setZoomAndCenter(16, new_center);
         }
 
-        // for(var i = 0; i < pois.length; i++){
-        //     var poi = pois[i];
-        //     var marker = [];
-        //     marker[i] = new AMap.Marker({
-        //         position: poi.location,   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-        //         title: poi.name
-        //     });
-        //     // 将创建的点标记添加到已有的地图实例：
-        //     _this.amap.add(marker[i]);
-        // }
-        // _this.amap.setFitView();
       });
     },
     mapZoomSet(val) {
@@ -312,10 +305,10 @@ export default {
               
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
+              //   var marker = new AMap.Marker({
+              //   position: [el.longitude,el.latitude],
+              //   map: _this.amap
+              // });
                 this.pointData.push(el)
               }
               
@@ -331,10 +324,6 @@ export default {
               
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
                 this.boyData.push(el)
               }
               
@@ -350,10 +339,6 @@ export default {
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
                 this.pointData.push(el)
               }
         })
@@ -366,15 +351,25 @@ export default {
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
-                var marker = new AMap.Marker({
-                position: [el.longitude,el.latitude],
-                map: _this.amap
-              });
                 this.boyData.push(el)
               }
         })
         
       }
+    },
+    addMarket(){
+        this.devices.forEach(el=>{
+          let marker = new AMap.Marker({
+            position: [el.longitude,el.latitude],
+            map: this.amap
+          });
+        })
+        this.allboy.forEach(el=>{
+           let marker = new AMap.Marker({
+              position: [el.longitude,el.latitude],
+              map: this.amap
+            });
+        })
     }
     // 关闭图片放大弹出框
     // closeImgDialog() {
