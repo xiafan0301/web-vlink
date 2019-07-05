@@ -53,7 +53,7 @@ export default {
   },
   mounted() {
     this.uid = this.$route.query.uid
-    for(let i=0; i<50; i++) {
+    /* for(let i=0; i<50; i++) {
       let personDetailList = []
       for(let k=0; k<4;k++) {
         personDetailList.push({
@@ -101,7 +101,7 @@ export default {
         "personDetailList": [...personDetailList]
       })
     }
-    this.list.sort(this.sortVal)
+    this.list.sort(this.sortVal) */
     this.getDetail();
   },
   methods: {
@@ -111,7 +111,15 @@ export default {
     //分析结果
     getDetail() {
       getTaskInfosDetail(this.uid).then(res => {
-        console.log("------getTaskInfosDetail-------",res)
+        console.log("------getTaskInfosDetail-------",res,JSON.parse(res.data.taskResult))
+        if(res && res.data) {
+          let taskResult = JSON.parse(res.data.taskResult)
+          this.list = taskResult.resultList
+          if(this.list && this.list.length > 0) {
+            this.list.sort(this.sortVal)
+            this.pagination.total = this.list.length
+          }
+        }
       }).catch(error => {
         console.log(error)
       })
@@ -126,12 +134,6 @@ export default {
       console.log("obj",obj)
       this.snapObj = obj;
       this.$refs["snapDialogComp"].toogleVisiable(true);
-    },
-    showLoading(data) {
-      console.log("---00000------",data)
-      if(data) {
-        this.getAlarm()
-      }
     },
   }
 };
