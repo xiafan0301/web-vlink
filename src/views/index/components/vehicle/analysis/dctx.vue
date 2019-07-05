@@ -106,7 +106,7 @@
             <div class="struc_c_d_info" style="padding-left: 14px;">
               <div class="th-dctx-tab">
                 <p class="line">
-                  <span>卡口名称：</span>
+                  <span>设备名称：</span>
                   <span>{{ sturcDetail.deviceName }}</span>
                 </p>
                 <p class="line">
