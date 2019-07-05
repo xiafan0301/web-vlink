@@ -3,7 +3,7 @@
     <!-- 面包屑通用样式 -->
     <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">区域人员分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -18,7 +18,7 @@
                 class="width232"
                 v-model="searchCamera"
                 suffix-icon="el-icon-search"
-                placeholder="请输入内容"
+                placeholder="搜索地点名称"
                 @focus="isSearchResult = true;"
                 id="map-sd-search-input"
               ></el-input>
@@ -27,33 +27,46 @@
             <div class="search_condition">
               <div class="condition_title">设定分析条件</div>
               <div class="condition">
-                <el-select class="width232" v-model="searchCamera" placeholder="选择分析人群">
+                <el-select
+                  class="width232"
+                  @change="peopleGroupChange"
+                  v-model="qyryfxFrom.personGroupId"
+                  placeholder="选择分析人群"
+                  multiple
+                  collapse-tags
+                >
                   <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                    v-for="item in peopleGroupOptions"
+                    :key="item.uid"
+                    :label="item.groupName"
+                    :value="item.uid"
                   ></el-option>
                 </el-select>
               </div>
               <div class="condition">
-                <el-select class="width232" v-model="searchCamera" placeholder="选择性别">
+                <el-select class="width232" v-model="qyryfxFrom.sex" placeholder="选择性别">
                   <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                    v-for="item in peopleSexOptions"
+                    :key="item.enumField"
+                    :label="item.enumValue"
+                    :value="item.enumField"
                   ></el-option>
                 </el-select>
               </div>
             </div>
             <div class="condition">
-              <el-select class="width232" v-model="searchCamera" placeholder="选择年龄段">
+              <el-select
+                class="width232"
+                v-model="qyryfxFrom.age"
+                placeholder="选择年龄段"
+                multiple
+                collapse-tags
+              >
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in peopleAgeOptions"
+                  :key="item.enumField"
+                  :label="item.enumValue"
+                  :value="item.enumField"
                 ></el-option>
               </el-select>
             </div>
@@ -128,7 +141,7 @@
                     type="datetime"
                     :clearable="false"
                     value-format="yyyy-MM-dd HH:mm:ss"
-                    :picker-options="startDateOpt"
+                    :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
                     class="width212px"
                   ></el-date-picker>
@@ -138,7 +151,7 @@
                   <el-date-picker
                     v-model="item.endTime"
                     :clearable="false"
-                    :picker-options="endDateOpt"
+                    :picker-options="endDateOptArr[index]"
                     value-format="yyyy-MM-dd HH:mm:ss"
                     type="datetime"
                     default-time="23:59:59"
@@ -202,17 +215,17 @@
                 <div class="change_img next_btn" @click="nextImg(index)"></div>
                 <!-- 第一张图 -->
                 <div class="img_warp">
-                  <img src alt />
+                  <img :src="item.currentPeople.upPhotoUrl" alt />
                 </div>
                 <!-- 相似度 -->
                 <div class="similarity">
-                  <p class="similarity_count">98.15</p>
-                  <p class="similarity_title">相似度 {{item.currentPeople.index}}</p>
+                  <p class="similarity_count">{{item.currentPeople.semblance}}</p>
+                  <p class="similarity_title">相似度 </p>
                   <!-- 选择摄像头的时间 -->
                   <div class="select_time">
                     <el-select v-model="searchCamera" placeholder="请选择">
                       <el-option
-                        v-for="item in options"
+                        v-for="item in item.detailList"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value"
@@ -222,14 +235,14 @@
                 </div>
                 <!-- 第二张图 -->
                 <div class="img_warp">
-                  <img src alt />
+                  <img :src="item.currentPeople.subStoragePath" alt />
                 </div>
                 <!-- 危险人物照片信息 -->
                 <div class="people_message">
-                  <h2 class="name">范冰冰</h2>
+                  <h2 class="name">{{item.name}}</h2>
                   <div class="tips_wrap">
-                    <p class="tip">男</p>
-                    <p class="tip">青年</p>
+                    <p class="tip">{{item.sex}}</p>
+                    <p class="tip">{{item.age}}</p>
                   </div>
                 </div>
               </div>
@@ -243,98 +256,137 @@
 </template>
 <script>
 import { mapXupuxian } from "@/config/config.js";
+import { formatDate } from "@/utils/util.js";
 import {
   getAllMonitorList,
   getAllBayonetList
 } from "@/views/index/api/api.base.js";
+import {
+  postShotNumArea,
+  getShotNumAreaDetail
+} from "@/views/index/api/api.analysis.js";
+import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
 export default {
   data() {
     return {
       /*左边搜索表单变量 */
       searchCamera: "",
+      qyryfxFrom: {
+        personGroupId: null,
+        sex: null,
+        age: null
+      },
       cameraPhotoList: [
-        {
-          currentPeople: {
-            index: 0
-          },
-          imgArr: [0, 1, 2, 3]
-        },
-        {
-          currentPeople: {
-            index: 0
-          },
-          imgArr: [0, 1, 2, 3]
-        },
-        {
-          currentPeople: {
-            index: 0
-          },
-          imgArr: [0, 1, 2, 3]
-        },
-        {
-          currentPeople: {
-            index: 0
-          },
-          imgArr: [0, 1, 2, 3]
-        }
+        
       ],
-      searchData: {
-        endTime: "",
-        startTime: ""
-      },
-      startDateOpt: {
-        disabledDate: time => {
-          if (this.searchData.endTime) {
-            return (
-              time.getTime() > new Date(this.searchData.endTime).getTime() ||
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-              time.getTime() > new Date().getTime()
-            );
+      startDateOptArr: [
+        {
+          disabledDate: time => {
+            if (this.drawTypesArr[0].endTime) {
+              return (
+                time.getTime() >
+                  new Date(this.drawTypesArr[0].endTime).getTime() ||
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+              );
+            } else {
+              return (
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                time.getTime() > new Date().getTime()
+              );
+            }
           }
         }
-      },
-      endDateOpt: {
-        disabledDate: time => {
-          if (this.searchData.startTime) {
-            return (
-              time.getTime() < new Date(this.searchData.startTime).getTime() ||
-              time.getTime() > new Date().getTime()
-            );
-          } else {
-            return (
-              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
-              time.getTime() > new Date().getTime()
-            );
+      ],
+      endDateOptArr: [
+        {
+          disabledDate: time => {
+            if (this.drawTypesArr[0].startTime) {
+              return (
+                time.getTime() <
+                  new Date(this.drawTypesArr[0].startTime).getTime() ||
+                time.getTime() > new Date().getTime()
+              );
+            } else {
+              return (
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                time.getTime() > new Date().getTime()
+              );
+            }
           }
         }
-      },
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕"
-        },
-        {
-          value: "选项2",
-          label: "双皮奶"
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎"
-        },
-        {
-          value: "选项4",
-          label: "龙须面"
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭"
-        }
       ],
+      // searchData: {
+      //   endTime: "",
+      //   startTime: ""
+      // },
+      // startDateOpt: {
+      //   disabledDate: time => {
+      //     if (this.searchData.endTime) {
+      //       return (
+      //         time.getTime() > new Date(this.searchData.endTime).getTime() ||
+      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+      //       );
+      //     } else {
+      //       return (
+      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+      //         time.getTime() > new Date().getTime()
+      //       );
+      //     }
+      //   }
+      // },
+      // endDateOpt: {
+      //   disabledDate: time => {
+      //     if (this.searchData.startTime) {
+      //       return (
+      //         time.getTime() < new Date(this.searchData.startTime).getTime() ||
+      //         time.getTime() > new Date().getTime()
+      //       );
+      //     } else {
+      //       return (
+      //         time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+      //         time.getTime() > new Date().getTime()
+      //       );
+      //     }
+      //   }
+      // },
+      peopleGroupOptions: [], // 分析人群下拉
+      peopleSexOptions: [
+        {
+          enumField: null,
+          enumValue: "全部"
+        },
+        {
+          enumField: "男",
+          enumValue: "男"
+        },
+        {
+          enumField: "女",
+          enumValue: "女"
+        }
+      ], // 性别下拉
+      peopleAgeOptions: [
+        {
+          enumField: "儿童",
+          enumValue: "儿童"
+        },
+        {
+          enumField: "少年",
+          enumValue: "少年"
+        },
+        {
+          enumField: "青年",
+          enumValue: "青年"
+        },
+        {
+          enumField: "中年",
+          enumValue: "中年"
+        },
+        {
+          enumField: "老年",
+          enumValue: "老年"
+        }
+      ], // 年龄段下拉
       isSearchResult: false, // 搜索框是否打开
       searchResultList: [1, 2, 3, 4, 5, 6, 7, 8], // 搜索结果的列表
       infoRightShow: false, // 右边菜单状态
@@ -348,8 +400,12 @@ export default {
           polyline: null, // 3
           polygon: null, // 4
           circle10km: null, // 5
-          startTime: "",
-          endTime: ""
+          startTime:
+            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
+            " 00:00:00",
+          endTime:
+            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
+            " 23:59:59"
         }
       ],
       drawTypes: {
@@ -376,6 +432,16 @@ export default {
     this.getTreeList();
     //加载地图
     this.initMap();
+    // 获取到监控人群分组
+    getGroupAllList()
+      .then(res => {
+        if (res) {
+          this.peopleGroupOptions = [
+            ...res.data.filter(item => item.uid !== null)
+          ];
+        }
+      })
+      .catch(() => {});
   },
   methods: {
     openMenu() {
@@ -384,12 +450,96 @@ export default {
     closeMenu() {
       this.videoMenuStatus = false;
     },
+    peopleGroupChange() {
+      // 分析人群多选
+      // if (val === null) {
+      //   this.qyryfxFrom.personGroupId = [null];
+      // }
+    },
     submitData() {
-      this.totalData = [];
+      this.totalData = []; // 先清空数据
       for (let i = 0; i < this.drawTypesArr.length; i++) {
         this.selSubmit(i);
       }
       console.log("total", this.totalData);
+      let deviceAndTimeList = [];
+      // 校验每一个时间区域中是否都有设备存在
+      for (let j = 0; j < this.totalData.length; j++) {
+        const area = this.totalData[j];
+        if (area.ab.length <= 0 && area.ad.length <= 0) {
+          this.$message.warning(
+            `您在第${j + 1}个选择区域未选中设备，请您重新选择`
+          );
+          return;
+        } else {
+          deviceAndTimeList = [
+            ...deviceAndTimeList,
+            {
+              deviceIds: area.ad.join(),
+              bayonetIds: area.ab.join(),
+              startTime: this.drawTypesArr[j].startTime,
+              endTime: this.drawTypesArr[j].endTime
+            }
+          ];
+        }
+      }
+      // 处理下拉框
+      if (this.qyryfxFrom.personGroupId) {
+        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
+      }
+      if (this.qyryfxFrom.age) {
+        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
+      }
+      const queryParams = {
+        ...this.qyryfxFrom,
+        deviceAndTimeList: deviceAndTimeList
+      };
+      postShotNumArea(queryParams)
+        .then(res => {
+          if (res) {
+            this.setMarks(res.data);
+          }
+        })
+        .catch(() => {});
+    },
+    clickGetCameraData(device) {
+      console.log('总的摄像头数据', this.totalData);
+      // 处理下拉框
+      if (this.qyryfxFrom.personGroupId) {
+        this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
+      }
+      if (this.qyryfxFrom.age) {
+        this.qyryfxFrom.age = this.qyryfxFrom.age.join();
+      }
+      // 点击设备获取到人员的信息
+      const queryParams = {
+        ...this.qyryfxFrom,
+        deviceCode: device.viewClassCode,
+        startTime: this.drawTypesArr[0].startTime,
+        endTime: this.drawTypesArr[0].endTime
+      };
+      getShotNumAreaDetail(queryParams)
+        .then(res => {
+          if (res && res.data) {
+            this.cameraPhotoList = res.data;
+            for (let i = 0; i< this.cameraPhotoList.length; i++) {
+              const item = this.cameraPhotoList[i];
+              if (item.detailList.length) {
+                item.currentPeople = item.detailList[0];
+              } else {
+                item.currentPeople = {
+                  semblance: "0",
+                  subStoragePath: "",
+                  upPhotoUrl: ""
+                };
+              }
+                item.currentPeople['index'] = i;
+            }
+          } else {
+            this.cameraPhotoList = [];
+          }
+        })
+        .catch(() => {});
     },
     /*处理删除或者添加一个时间区域*/
     addArea() {
@@ -397,6 +547,45 @@ export default {
         this.$message.warning("监控时间区域不能超过5个");
         return;
       }
+      const index = this.drawTypesArr.length - 1;
+      this.startDateOptArr = [
+        ...this.startDateOptArr,
+        {
+          disabledDate: time => {
+            if (this.drawTypesArr[index].endTime) {
+              return (
+                time.getTime() >
+                  new Date(this.drawTypesArr[index].endTime).getTime() ||
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+              );
+            } else {
+              return (
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                time.getTime() > new Date().getTime()
+              );
+            }
+          }
+        }
+      ];
+      this.endDateOptArr = [
+        ...this.endDateOptArr,
+        {
+          disabledDate: time => {
+            if (this.drawTypesArr[index].startTime) {
+              return (
+                time.getTime() <
+                  new Date(this.drawTypesArr[index].startTime).getTime() ||
+                time.getTime() > new Date().getTime()
+              );
+            } else {
+              return (
+                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                time.getTime() > new Date().getTime()
+              );
+            }
+          }
+        }
+      ];
       this.drawTypesArr = [
         ...this.drawTypesArr,
         {
@@ -405,8 +594,12 @@ export default {
           polyline: null, // 3
           polygon: null, // 4
           circle10km: null, // 5
-          startTime: "",
-          endTime: ""
+          startTime:
+            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
+            " 00:00:00",
+          endTime:
+            formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
+            " 23:59:59"
         }
       ];
     },
@@ -435,6 +628,8 @@ export default {
         }
       }
       this.drawTypesArr.splice(val, 1);
+      this.endDateOptArr.splice(val, 1);
+      this.startDateOptArr.splice(val, 1);
     },
     /* 切换危险人图片方法 */
     preImg(index) {
@@ -503,7 +698,7 @@ export default {
       window.AMap.event.addListener(auto, "select", _this.selectArea);
     },
     selectArea(e) {
-      console.log(e, '获取到地点');
+      console.log(e, "获取到地点");
       if (e.poi && e.poi.location) {
         this.amap.setZoom(15);
         this.amap.setCenter(e.poi.location);
@@ -883,8 +1078,6 @@ export default {
         ab: ab
       };
       this.totalData = [...this.totalData, device];
-      // console.log("设备 ad", ad, dObj, bObj);
-      // console.log("卡口 ab", ab);
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
@@ -899,7 +1092,7 @@ export default {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
-          this.setMarks();
+          // this.setMarks();
         }
       });
     },
@@ -907,29 +1100,36 @@ export default {
     getListBayonet() {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
-          console.log("111111111111", res);
           this.listBayonet = res.data;
-          this.setMarks();
+          // this.setMarks();
         }
       });
     },
     // D设备 B卡口
-    setMarks() {
-      if (this.showTypes.indexOf("D") >= 0) {
-        for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark(this.listDevice[i], "vl_icon vl_icon_sxt");
+    setMarks(deviceList) {
+      // 展示设备和卡口
+      for (let i = 0; i < this.listDevice.length; i++) {
+        const listItem = this.listDevice[i];
+        for (let j = 0; j < deviceList.length; j++) {
+          const deviceItem = deviceList[j];
+          if (deviceItem.shotPlaceLongitude === listItem.longitude) {
+            this.doMark(listItem, "vl_icon vl_icon_sxt");
+          }
         }
       }
-      if (this.showTypes.indexOf("B") >= 0) {
-        for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
+      for (let i = 0; i < this.listBayonet.length; i++) {
+        const listItem = this.listBayonet[i];
+        for (let j = 0; j < deviceList.length; j++) {
+          const deviceItem = deviceList[j];
+          if (deviceItem.shotPlaceLongitude === listItem.longitude) {
+            this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
+          }
         }
       }
       this.amap.setFitView();
     },
     // 地图标记
     doMark(obj, sClass) {
-      console.log("doMark", obj, sClass);
       let marker = new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
@@ -942,10 +1142,8 @@ export default {
       });
       let _this = this;
       marker.on("click", function() {
-        _this.infoRightShow = !_this.infoRightShow;
-        if (_this.infoRightShow) {
-          _this.selectedDevice = obj;
-        }
+        _this.selectedDevice = obj;
+        _this.clickGetCameraData(obj);
       });
     }
   },
@@ -1130,12 +1328,16 @@ export default {
             > i {
               display: block;
               width: 14px;
-              height: 14px;
+              height: 16px;
               position: absolute;
               right: 30px;
               top: 10px;
               cursor: pointer;
-              background: blue;
+              background: url("../../../../assets/img/icons.png") no-repeat;
+              background-position: -695px -376px;
+              &:hover {
+                background-position: -695px -349px;
+              }
             }
           }
           // 地图选择器
