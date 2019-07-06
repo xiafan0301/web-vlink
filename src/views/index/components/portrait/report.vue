@@ -21,37 +21,37 @@
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
         </div>
         <ul class="vc_rep_mu">
-          <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 2}" @click="changeShowType(2)">车辆入城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 3}" @click="changeShowType(3)">车辆出城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 4}" @click="changeShowType(4)">车辆行驶轨迹</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">人员档案信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 2}" @click="changeShowType(2)">人员入城信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 3}" @click="changeShowType(3)">人员出城信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 4}" @click="changeShowType(4)">人员行驶轨迹</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行人员分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li>
         </ul>
       </div>
       <div class="vc_rep_c">
         <div id="report_content">
           <div>
-            <!-- 车辆档案信息-车辆信息  showType 1 -->
+            <!-- 人员档案信息-人员信息  showType 1 -->
             <div class="vc_rep_cl" id="report_showtype_1">
               <div>
-                <h2>车辆档案信息-车辆信息</h2>
+                <h2>人员档案信息-人员信息</h2>
                 <div>
                   <ul class="rep_clxx" v-if="clInfo">
                     <li><span>车牌号码：</span><p>{{clInfo.plateno}}</p></li>
-                    <li><span>车辆所有人：</span><p>{{clInfo.owner}}</p></li>
+                    <li><span>人员所有人：</span><p>{{clInfo.owner}}</p></li>
                     <li><span>中文品牌：</span><p>{{clInfo.brand}}</p></li>
                     <li><span>车身颜色：</span><p>{{clInfo.color}}</p></li>
                     <li><span>车身形式：</span><p>{{clInfo.bodyform}}</p></li>
                     <li><span>车门数：</span><p>{{clInfo.doornumber}}</p></li>
                     <li><span>发动机号：</span><p>{{clInfo.engineno}}</p></li>
-                    <li><span>车辆类型：</span><p>{{clInfo.platetype}}</p></li>
+                    <li><span>人员类型：</span><p>{{clInfo.platetype}}</p></li>
                     <li><span>年款：</span><p>{{clInfo.model}}</p></li>
                     <li><span>座位数：</span><p>{{clInfo.seatnumber}}</p></li>
-                    <li><span>车辆状态：</span><p>{{clInfo.status}}</p></li>
+                    <li><span>人员状态：</span><p>{{clInfo.status}}</p></li>
                     <li><span>使用性质：</span><p>{{clInfo.usecharacter}}</p></li>
                     <li><span>车型：</span><p>{{clInfo.vehicletype}}</p></li>
                     <li><span>厂商名称：</span><p>{{clInfo.vendor}}</p></li>
@@ -61,10 +61,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆档案信息-违章信息 -->
+            <!-- 人员档案信息-违章信息 -->
             <div class="vc_rep_cl">
               <div>
-                <h2>车辆档案信息-违章信息</h2>
+                <h2>人员档案信息-违章信息</h2>
                 <div>
                   <el-table :data="wzList" max-height="300">
                     <el-table-column label="序号" type="index" width="80"></el-table-column>
@@ -80,10 +80,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆入城分析-入城记录 showType 2 -->
+            <!-- 人员入城分析-入城记录 showType 2 -->
             <div class="vc_rep_cl" id="report_showtype_2">
               <div>
-                <h2>车辆入城分析-入城记录</h2>
+                <h2>人员入城分析-入城记录</h2>
                 <div>
                   <el-table :data="rcList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -94,10 +94,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆出城分析-出城记录 showType 3 -->
+            <!-- 人员出城分析-出城记录 showType 3 -->
             <div class="vc_rep_cl" id="report_showtype_3">
               <div>
-                <h2>车辆出城分析-出城记录</h2>
+                <h2>人员出城分析-出城记录</h2>
                 <div>
                   <el-table :data="ccList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -108,10 +108,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆行驶轨迹-车辆轨迹 showType 4 -->
+            <!-- 人员行驶轨迹-人员轨迹 showType 4 -->
             <div class="vc_rep_cl" id="report_showtype_4">
               <div>
-                <h2>车辆行驶轨迹-车辆轨迹</h2>
+                <h2>人员行驶轨迹-人员轨迹</h2>
                 <div style="padding: 0;">
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_clgj"></div>
@@ -200,7 +200,7 @@
                   <el-table :data="pfcmList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
                     <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="车辆出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="人员出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
                     <el-table-column label="较多出没时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
@@ -233,10 +233,10 @@
                 </div>
               </div>
             </div>
-            <!-- 同行车辆分析 showType 8 -->
+            <!-- 同行人员分析 showType 8 -->
             <div class="vc_rep_cl" id="report_showtype_8">
               <div>
-                <h2>同行车辆分析</h2>
+                <h2>同行人员分析</h2>
                 <div>
                   <el-table :data="txclList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -303,7 +303,7 @@ export default {
 
       tpcList: [], // 套牌车
 
-      clgjList: [], // 车辆轨迹
+      clgjList: [], // 人员轨迹
 
       showType: 1,
 
@@ -342,7 +342,7 @@ export default {
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
-          this.setMapMarkerForClgj(); // 车辆轨迹
+          this.setMapMarkerForClgj(); // 人员轨迹
         }
         this.searchLoading = false;
       }).catch(error => {

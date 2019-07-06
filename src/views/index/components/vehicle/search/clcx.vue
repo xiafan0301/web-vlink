@@ -273,6 +273,10 @@ export default {
     //查询车辆
     getSnapList(){
       
+      if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
+        this.$message.error("请输入开始时间和结束时间!");
+        return
+      }
       if(this.input5==1){
         this.ruleForm.areaIds =this.value1.join(",")
       }else{
@@ -282,8 +286,8 @@ export default {
         this.ruleForm.bayonetIds = this.selectBayonet.join(",")
       }
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
-      this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
+      this.ruleForm.dateStart =this.ruleForm.dateStart?(this.ruleForm.dateStart +" 00:00:00"):""
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd?(this.ruleForm.dateEnd+" 23:59:59"):""
         //console.log(this.ruleForm);
       let d=this.ruleForm
       getSnapList(d).then(res=>{
