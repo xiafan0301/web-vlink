@@ -41,7 +41,7 @@
 <!--          </el-date-picker>-->
         </div>
         <div class="kaishi">
-          <el-button style="width: 110px">重置</el-button>
+          <el-button style="width: 110px" @click="rester">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="search">统计</el-button>
         </div>
       </div>
@@ -182,12 +182,12 @@
               <div class="struc_main">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="subStoragePath" alt="">
+                      <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -216,7 +216,7 @@
                 </div>
                 <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
@@ -229,9 +229,9 @@
               <div class="struc-list">
                 <swiper :options="swiperOption" ref="mySwiper">
                   <!-- slides -->
-                  <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
+                  <swiper-slide v-for="(item, index) in regulationsList" :key="index + 'isgm'">
                     <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                      <img style="display: block; width: 100%; height: .88rem;" :src="item.photoPath" alt="">
+                      <img style="display: block; width: 100%; height: .88rem;" :src="item.vehicleDto.subStoragePath" alt="">
                     </div>
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
@@ -255,9 +255,8 @@ export default {
   },
   data () {
     return {
-      subStoragePath: '',
       searchData: {                //搜索参数
-        time: null,
+        time: [new Date(new Date().getTime() - 24*60*60*1000), new Date(new Date().getTime() - 24*60*60*1000)],
         licensePlateNum: null, // 车牌号
       },
       vehicleArch: {},      //车辆档案
@@ -411,6 +410,9 @@ export default {
       this.pagination.pageNum = page;
       this.search()
     },
+    rester() {
+      console.log(this.searchData.time)
+    },
     /**
      * 打开抓拍弹框
      */
@@ -418,7 +420,6 @@ export default {
       this.$_showLoading({text: '加载中...'})
       console.log(obj)
       this.sturcDetail = obj
-      this.subStoragePath = obj.vehicleDto.subStoragePath
       console.log(this.sturcDetail.videoPath)
       this.videoUrl = this.sturcDetail.vehicleDto.videoPath
       this.playUrl = {
@@ -447,6 +448,7 @@ export default {
      */
     imgListTap (obj, i) {
       this.curImgIndex = i
+      this.sturcDetail = obj
     }
   }
 }
