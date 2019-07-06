@@ -314,7 +314,7 @@ export default {
   data () {
     return {
       searchForm: {
-        plateNo: '湘AN8888', // 沪D008CP 沪A009CP 湘AN8888
+        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()]
       },
       searchLoading: false,
