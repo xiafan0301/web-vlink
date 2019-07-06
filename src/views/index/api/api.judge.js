@@ -297,8 +297,8 @@ export function getAllDevice(params) {
 export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
-    method: 'get',
-    params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   });
 }
@@ -493,6 +493,21 @@ export function getNightVehicleRecordList(params) {
 export function getVehicleInvestigationReport(params) {
   return request({
     url: '/vehicle-investigation-report-service/report',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+
+/*--------------------------  导入导出  ---------------------------------*/
+/**
+ * 夜间行车分析导出接口
+ * @param {object} params
+ */
+export function exportNightVehicle(params) {
+  return request({
+    url: '/export',
     method: 'post',
     data: params,
     mode: 'judge'

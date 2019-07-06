@@ -146,7 +146,11 @@
           </div>
           <div class="struc_c_d_box">
             <span class="th-video-text">视频回放</span>
-            <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
+            <video id="capVideo" :src="sturcDetail.videoPath"></video>
+              <div class="play_btn" @click="videoTap" v-show="!playing">
+                <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
+                <i class="vl_icon vl_icon_control_09" v-else></i>
+              </div>
           </div>
           <a class="download_btn" target="_blank" download="视频" :href="sturcDetail.videoPath">下载视频</a>
         </div>
@@ -229,6 +233,7 @@ export default {
       },
       dataList: [], // 查询结果列表数据
       hasError: false, // 是否符合查询条件
+      playing: false, // 视频播放是否
     }
   },
   watch: {
@@ -240,6 +245,21 @@ export default {
     }
   },
   methods: {
+    // 播放视频
+      videoTap() {
+      // 播放视频
+      let vDom = document.getElementById("capVideo");
+      if (this.playing) {
+        vDom.pause();
+      } else {
+        vDom.play();
+      }
+      vDom.addEventListener("ended", e => {
+        e.target.currentTime = 0;
+        this.playing = false;
+      });
+      this.playing = !this.playing;
+    },
     /**
      * 弹框地图初始化
      */
@@ -635,6 +655,11 @@ html {font-size: 100px;}
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
+      &:hover {
+        background-color: #FFFFFF;
+        border-color: #0C70F8;
+        color: #0C70F8;
+      }
     }
     .struc_c_detail {
       width:  100%;
@@ -748,6 +773,42 @@ html {font-size: 100px;}
         border-radius: 1px;
         position: relative;
         overflow: hidden;
+        &:hover {
+          .play_btn {
+            display: block !important;
+          }
+        }
+        .play_btn {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+          background: rgba(0, 0, 0, 0.4);
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          line-height: 1rem;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+          border-radius: 50%;
+          cursor: pointer;
+          i {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            height: 22px !important;
+          }
+        }
+        > video {
+          width: 100%;
+          height: 100%;
+          background-color: #E9E7E8;
+        }
         &:before {
           display: block;
           content: '';
