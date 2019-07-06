@@ -272,7 +272,7 @@ export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
     method: 'post',
-    params:data,
+    data,
     mode: 'judge'
   });
 }
@@ -298,7 +298,7 @@ export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
     method: 'post',
-    data: params,
+    data:params,
     mode: 'judge'
   });
 }
@@ -345,8 +345,8 @@ export function getViolation(params) {
 export function getSnapList(params) {
   return request({
     url: '/vehicle/snap',
-    method: 'get',
-    params,
+    method: 'post',
+    data:params,
     mode: 'judge'
   });
 }

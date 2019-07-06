@@ -61,9 +61,10 @@
           </div>
            
           
-          <div v-if="input5 == 2" class="chbox" >
+          <div class="chbox" >
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
-                <el-form-item label="号牌类型" label-width="90px" prop>
+              <div style="padding-right: 20px;" v-if="input5 == 2">
+                <el-form-item label="号牌类型" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.licenseType" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in plateType"
@@ -73,7 +74,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="号牌颜色" label-width="90px" prop>
+                <el-form-item label="号牌颜色" label-width="70px" prop>
                   <el-select
                     v-model="tzscMenuForm.licenseColor"
                     class="width132"
@@ -87,7 +88,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆类型" label-width="90px" prop>
+                <el-form-item label="车辆类型" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.carType" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in vehicleType"
@@ -97,7 +98,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆颜色" label-width="90px" prop>
+                <el-form-item label="车辆颜色" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.carColor" class="width132" placeholder="选择选项">
                     <el-option
                       v-for="item in carColor"
@@ -107,17 +108,17 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="车辆型号" label-width="90px" prop>
+                <el-form-item label="车辆型号" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.carModel" class="width132" placeholder="选择选项">
                     <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
+                      v-for="item in carModel"
+                      :key="item.vehicleBrand"
+                      :label="item.vehicleBrand"
+                      :value="item.vehicleBrand"
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="遮阳板" label-width="90px" prop>
+                <el-form-item label="遮阳板" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
                     <el-option   key="收起" label="收起" value="收起"></el-option>
                     <el-option   key="放下" label="放下" value="放下"></el-option>
@@ -137,42 +138,44 @@
                     ></el-option>
                   </el-select>
                 </el-form-item> -->
+                </div>
+                 <!-- 时间 -->
+                 <el-form-item >
+                 <div class="time-search">
+                  <el-date-picker
+                    v-model="data1"
+                    type="daterange"
+                    class="full"
+                    :picker-options="pickerOptions"
+                    value-format="yyyy-MM-dd"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期">
+                  </el-date-picker>
+                </div>
+                </el-form-item>
+                 <el-form-item prop="input4">
+                   <div class="license-plate-search">
+                  <el-row :gutter="5">
+                    <el-col :span="22">
+                      <div>
+                        <el-input placeholder="多少" v-model="tzscMenuForm.input4" class="insetIput">
+                          <i slot="prefix" class="inset">违章次数大于</i>
+                        </el-input>
+                      </div>
+                    </el-col>
+                    <el-col :span="2">
+                      <div class="line40">次</div>
+                    </el-col>
+                  </el-row>
+                </div>
+                </el-form-item>
+                
+                
             </el-form>
               </div>
           
-           <!-- 时间 -->
-            <div class="time-search">
-              <el-date-picker
-                v-model="data1"
-                type="daterange"
-                class="full"
-                    value-format="yyyy-MM-dd"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
-              </el-date-picker>
-              <!-- <el-date-picker
-                v-model="data1"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="选择日期"
-                class="full"
-              ></el-date-picker> -->
-            </div>
-            <div class="license-plate-search">
-              <el-row :gutter="5">
-                <el-col :span="22">
-                  <div>
-                    <el-input placeholder="多少" v-model="input4" class="insetIput">
-                      <i slot="prefix" class="inset">违章次数大于</i>
-                    </el-input>
-                  </div>
-                </el-col>
-                <el-col :span="2">
-                  <div class="line40">次</div>
-                </el-col>
-              </el-row>
-            </div>
+          
           
           <div class="search-btn">
             <el-row :gutter="10">
@@ -273,11 +276,14 @@ import {
   JtcGETAppendixInfoList,
   JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
 } from "../../../api/api.judge.js";
+import { getCarmodelList } from "../../../api/api.base.js";
 import { setTimeout } from "timers";
 import { dataList } from '@/utils/data.js';
+import { callbackify, error } from 'util';
 export default {
   components: { BigImg },
   data() {
+    
     return {
       plateType:[],// 号牌类型
       plateColor:[],// 号牌颜色
@@ -293,9 +299,10 @@ export default {
       imgData: null,
       input5: "1",
       data1: "",
-      input4: null,
+      
        // 菜单表单变量
       tzscMenuForm: {
+        input4: 3,
         selectDate: "",
         selectDevice: "",
         licenseType: "",
@@ -322,10 +329,10 @@ export default {
           let d = date.getDate();
           let threeMonths = "";
           let start = "";
-          if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+          if (parseFloat(m) >= 2) {
+            start = y + "-" + (m - 1) + "-" + d;
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -335,7 +342,14 @@ export default {
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList: [],
-      rules: {},
+      rules: {
+        input4:  [{
+              //pattern: /^[0-9]?$/,
+              pattern: /^(0|([1-9]\d{0,2}))$/,
+              trigger: 'blur',
+							message: '请输入不大于999的整数值'
+						}]
+      },
       options: [
         {
           value: "1",
@@ -358,6 +372,7 @@ export default {
           label: "5"
         },
       ],
+      carModel:[],
       regulationsList: [
       ], //违章信息列表
       pagination: { total: 0, pageSize: 10, pageNum: 1 }
@@ -381,6 +396,13 @@ export default {
     this.setDTime();
   },
   methods: {
+    getCarmodelList(){
+      getCarmodelList().then(res=>{
+        if(res && res.data && res.data.length>0){
+          this.carModel=res.data
+        }
+      })
+    },
     //获取图片信息
     getPhotoAnalysis(){
       let d={
@@ -532,7 +554,19 @@ export default {
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
-      this.input4 = null,
+      //this.tzscMenuForm.input4 = 3,
+      this.tzscMenuForm= {
+        input4: 3,
+        selectDate: "",
+        selectDevice: "",
+        licenseType: "",
+        licenseColor: "",
+        carType: "",
+        carColor: "",
+        carModel: "",
+        sunVisor: "",
+        inspectionCount: ""
+      },
       this.setDTime();
     //this.getVehicleDetail();
     },
@@ -555,7 +589,7 @@ export default {
       let params = {
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
-        vilolationNum:this.input4,
+        vilolationNum:this.tzscMenuForm.input4,
         plateClass:this.tzscMenuForm.licenseType,
         plateColor:this.tzscMenuForm.licenseColor,
         vehicleClass:this.tzscMenuForm.carType,
@@ -851,6 +885,11 @@ html {
     font-size: 100px !important;
   }
 }
+.info-left{
+.el-date-editor .el-range-input{
+ font-size: 12px;
+}
+}
 .vehicle-info {
   .vl_judge_tc_c_item {
     .vl_jtc_upload {
@@ -874,7 +913,7 @@ html {
   }
   //时间搜索
   .time-search {
-    margin-bottom: 10px;
+    // margin-bottom: 10px;
     margin-right: 20px;
     .el-date-editor--daterange.el-input,
     .el-date-editor--daterange.el-input__inner,

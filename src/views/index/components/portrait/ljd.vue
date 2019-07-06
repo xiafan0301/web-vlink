@@ -16,27 +16,47 @@
           label-width="0px"
           class="demo-ruleForm"
         >
-          <el-form-item class="firstItem" prop="data1">
+          <el-form-item>
+            <div class="upload_warp" @drop="drop($event)" @dragover="allowDrop($event)">
+              <el-upload
+                @drop="drop($event)"
+                :class="{'vl_jtc_upload': true}"
+                :show-file-list="false"
+                accept="image/*"
+                :action="uploadAcion"
+                list-type="picture-card"
+                :before-upload="beforeAvatarUpload"
+                :on-success="uploadSucess"
+                :on-error="handleError"
+              >
+                <i v-if="uploading" class="el-icon-loading"></i>
+                <img v-else-if="curImageUrl" :src="curImageUrl">
+                <div v-else>
+                  <i
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                    class="vl_icon vl_icon_vehicle_01"
+                  ></i>
+                  <span>点击上传图片</span>
+                </div>
+              </el-upload>
+              <!-- <p @click="showHistoryPic">从上传记录中选择</p> -->
+              <div v-show="curImageUrl" class="del_icon">
+                <i class="el-icon-delete" @click="delPic"></i>
+              </div>
+            </div>
+          </el-form-item>
+          <el-form-item prop="data1">
             <el-date-picker
-          v-model="ruleForm.data1"
-          type="daterange"
-           class="full"
+              v-model="ruleForm.data1"
+              type="daterange"
+              class="full"
               value-format="yyyy-MM-dd"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期">
-        </el-date-picker>
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
           </el-form-item>
-
-          <el-form-item prop="input3">
-            <p class="carCold">车牌：</p>
-            <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="请选择">
-                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
-              </el-select>
-            </el-input>
-          </el-form-item>
-          <el-form-item prop="input4" >
+          <el-form-item prop="input4" class="firstItem">
             <el-row :gutter="5">
               <el-col :span="22">
                 <div>
@@ -50,10 +70,10 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item class="firstItem" label="区域：" label-width="60px" prop="input5">
             <!-- <el-radio-group v-model="input5" @change="changeTab"> -->
             <el-radio-group v-model="ruleForm.input5" @change="changeTab">
-               <el-row :gutter="10">
+              <el-row :gutter="10">
                 <el-col :span="12">
                   <el-radio label="1">列表选择</el-radio>
                 </el-col>
@@ -66,23 +86,29 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
-            <el-option-group
-              v-for="group in options"
-              :key="group.areaName"
-              :label="group.areaName">
-              <el-option
-                v-for="item in group.areaTreeList"
-                :key="item.areaId"
-                :label="item.areaName"
-                :value="item.areaId">
-              </el-option>
-            </el-option-group>
-          </el-select>
+            <el-select
+              v-model="ruleForm.value1"
+              multiple
+              collapse-tags
+              placeholder="请选择"
+              class="full"
+            >
+              <el-option-group
+                v-for="group in options"
+                :key="group.areaName"
+                :label="group.areaName"
+              >
+                <el-option
+                  v-for="item in group.areaTreeList"
+                  :key="item.areaId"
+                  :label="item.areaName"
+                  :value="item.areaId"
+                ></el-option>
+              </el-option-group>
+            </el-select>
           </el-form-item>
-          <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="selectValue" :disabled="true">
-            </el-input>
+          <el-form-item v-if="ruleForm.input5=='2'">
+            <el-input v-model="selectValue" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item>
             <el-row :gutter="10">
@@ -102,25 +128,84 @@
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
         <h3 class="title">分析结果</h3>
-        <el-table :data="evData" style="width: 100%">
-          <el-table-column  type="index" :show-overflow-tooltip="true" label="序号"></el-table-column>
-          <el-table-column  prop="address" :show-overflow-tooltip="true" label="地址"></el-table-column>
-          <el-table-column prop="shotNum" width="80px" sortable label="次数"></el-table-column>
-        </el-table>
+        <div class="limitBox">
+          <vue-scroll>
+          <el-collapse v-model="activeNames" @change="handleChange">
+            <el-collapse-item title="创谷广告园(2次)" name="1">
+              <div class="itembox">
+                <div class="imgInfo">
+                   <img src="../../../../assets/img/share/logo.png" class="img">
+                  <p class="timedata"><i class="el-icon-time"></i>2018-12-27  15:46:07</p>
+                  <span class="subdata">
+                    <i class="vl_icon vl_icon_retrieval_03"></i>
+                    <b>99.12</b>%
+                  </span>
+                </div>
+                <p class="fz12"><i class="el-icon-location-outline"></i>长沙市天心区雀园路与君逸路交汇口</p>
+              </div>
+              <div class="itembox">
+                <div class="imgInfo">
+                   <img src="../../../../assets/img/share/logo.png" class="img">
+                  <p class="timedata"><i class="el-icon-time"></i>2018-12-27  15:46:07</p>
+                  <span class="subdata">
+                    <i class="vl_icon vl_icon_retrieval_03"></i>
+                    <b>99.12</b>%
+                  </span>
+                </div>
+                <p class="fz12"><i class="el-icon-location-outline"></i>长沙市天心区雀园路与君逸路交汇口</p>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="反馈 Feedback" name="2">
+              <div class="itembox">
+                <div class="imgInfo">
+                   <img src="../../../../assets/img/share/logo.png" class="img">
+                  <p class="timedata"><i class="el-icon-time"></i>2018-12-27  15:46:07</p>
+                  <span class="subdata">
+                    <i class="vl_icon vl_icon_retrieval_03"></i>
+                    <b>99.12</b>%
+                  </span>
+                </div>
+                <p class="fz12"><i class="el-icon-location-outline"></i>长沙市天心区雀园路与君逸路交汇口</p>
+              </div>
+              <div class="itembox">
+                <div class="imgInfo">
+                   <img src="../../../../assets/img/share/logo.png" class="img">
+                  <p class="timedata"><i class="el-icon-time"></i>2018-12-27  15:46:07</p>
+                  <span class="subdata">
+                    <i class="vl_icon vl_icon_retrieval_03"></i>
+                    <b>99.12</b>%
+                  </span>
+                </div>
+                <p class="fz12"><i class="el-icon-location-outline"></i>长沙市天心区雀园路与君逸路交汇口</p>
+              </div>
+            </el-collapse-item>
+            
+          </el-collapse>
+          </vue-scroll>
+        </div>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
 
     <!-- 地图选择 -->
     <el-dialog :visible.sync="dialogVisible" width="80%">
-        <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
+      <mapselect
+        @selectMap="mapPoint"
+        @closeMap="hideMap"
+        :allPoints="allDevice"
+        :allBayonets="allBayonet"
+      ></mapselect>
     </el-dialog>
   </div>
 </template>
 <script>
-import { mapXupuxian } from "@/config/config.js";
+import { ajaxCtx, mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
-import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
+import {
+  getVehicleShot,
+  getAllDevice,
+  JtcPOSTAppendixInfo
+} from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import mapselect from "@/views/index/components/common/mapSelect";
@@ -130,25 +215,35 @@ export default {
   },
   data() {
     return {
+      /* 上传图片变量 */
+      uploadAcion: ajaxCtx.base + "/new", //上传路径
+      uploading: false, // 是否上传中
+      curImageUrl: "", // 当前上传的图片
+      historyPicList: [], // 上传历史记录
+      selectedHistoryPic: null, // 当前选中的历史图片
+      historyPicDialog: false,
+      loadingHis: false, // 加载效果
+      imgData: null,
       dialogVisible: false,
       amap: null,
-      allDevice:[],
-      allBayonet:[],
-      selectDevice:[],
-      selectBayonet:[],
-      selectValue:"已选设备0个",
+      allDevice: [],
+      allBayonet: [],
+      selectDevice: [],
+      selectBayonet: [],
+      selectValue: "已选设备0个",
       select: "",
-      reselt: false,
+      reselt: true,
       hideleft: false,
       ruleForm: {
-        data1:null,
+        data1: null,
         input3: null,
         input4: null,
         input5: "1",
-        value1: null,
+        value1: null
       },
-      pricecode:cityCode,
-     
+       activeNames: ['1','2'],
+      pricecode: cityCode,
+      
       options: [],
       evData: []
     };
@@ -161,11 +256,14 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
-    this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice() //查询所有的设备
-    this.getAllBayonetList() //查询所有的卡口
+    this.getMapGETmonitorList(); //查询行政区域
+    this.getAllDevice(); //查询所有的设备
+    this.getAllBayonetList(); //查询所有的卡口
   },
   methods: {
+    handleChange(val) {
+        console.log(val);
+      },
     hideResult() {
       this.reselt = false;
       this.hideLeft();
@@ -181,31 +279,33 @@ export default {
         this.dialogVisible = true;
       }
     },
-    hideMap(){
-      this.dialogVisible=false
+    hideMap() {
+      this.dialogVisible = false;
     },
-    mapPoint(data){
+    mapPoint(data) {
       let v = data.dev;
       let p = data.boy;
-      this.dialogVisible=false;
-      this.selectDevice=[]
-      this.selectBayonet=[]
+      this.dialogVisible = false;
+      this.selectDevice = [];
+      this.selectBayonet = [];
       //返回有效点集合
-      if(v && v.length>0){
+      if (v && v.length > 0) {
         v.forEach(element => {
-          this.selectDevice.push(element.uid)
+          this.selectDevice.push(element.uid);
         });
       }
-      if(p && p.length>0){
+      if (p && p.length > 0) {
         p.forEach(element => {
-          this.selectBayonet.push(element.uid)
+          this.selectBayonet.push(element.uid);
         });
       }
-      this.selectValue="已选设备"+(this.selectDevice.length+this.selectBayonet.length)+"个"
+      this.selectValue =
+        "已选设备" +
+        (this.selectDevice.length + this.selectBayonet.length) +
+        "个";
       //this.selectDevice=v
 
       // console.log(this.selectDevice);
-      
     },
     changeTab(v) {
       //console.log(v);
@@ -216,68 +316,71 @@ export default {
       }
     },
     submitForm(v) {
-      if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
-      let pg={
-        //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
-        startTime:this.ruleForm.data1[0]+" 00:00:00",
-        endTime:this.ruleForm.data1[1]+" 23:59:59",
-        //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
-        minSnapNum: this.ruleForm.input4 || 0,
-        plateNo:this.select+ this.ruleForm.input3 ,
-      }
-      if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-        pg.areaIds=this.ruleForm.value1.join(",")
-      }
-      if(this.ruleForm.input5==2){
-         pg.deviceIds=this.selectDevice.join(",")
-         pg.bayonetIds=this.selectBayonet.join(",")
-      }
-        
-      this.getVehicleShot(pg);
-      }else{
-         this.$message.info("请输入开始时间和车牌号码。");
+      if (
+        this.ruleForm &&
+        this.ruleForm.data1 &&
+        this.ruleForm.data1.length > 0 &&
+        this.ruleForm.input3 &&
+        this.select
+      ) {
+        let pg = {
+          //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
+          startTime: this.ruleForm.data1[0] + " 00:00:00",
+          endTime: this.ruleForm.data1[1] + " 23:59:59",
+          //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
+          minSnapNum: this.ruleForm.input4 || 0,
+          plateNo: this.select + this.ruleForm.input3
+        };
+        if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
+          pg.areaIds = this.ruleForm.value1.join(",");
+        }
+        if (this.ruleForm.input5 == 2) {
+          pg.deviceIds = this.selectDevice.join(",");
+          pg.bayonetIds = this.selectBayonet.join(",");
+        }
+
+        this.getVehicleShot(pg);
+      } else {
+        this.$message.info("请输入开始时间和车牌号码。");
       }
     },
-    resetForm(v){
-      this.select=""
-      this.ruleForm= {
-        data1:null,
-        input3: null,
+    resetForm(v) {
+      this.curImageUrl = "";
+      this.ruleForm = {
+        data1: null,
         input4: null,
         input5: "1",
-        value1: null,
-      }
+        value1: null
+      };
       //this.$refs[v].resetFields();
     },
     //查询行政区域
-    getMapGETmonitorList(){
-      let d={
-        areaUid:mapXupuxian.adcode
-      }
-      MapGETmonitorList(d).then(res=>{
-        if(res && res.data){
-          
-          
-          this.options.push(res.data)
+    getMapGETmonitorList() {
+      let d = {
+        areaUid: mapXupuxian.adcode
+      };
+      MapGETmonitorList(d).then(res => {
+        if (res && res.data) {
+          this.options.push(res.data);
         }
-      })
+      });
     },
-    compare  (prop) {
-        return function (obj1, obj2) {
+    compare(prop) {
+      return function(obj1, obj2) {
         var val1 = obj1[prop];
         var val2 = obj2[prop];
         if (!isNaN(Number(val1)) && !isNaN(Number(val2))) {
-            val1 = Number(val1);
-            val2 = Number(val2);
+          val1 = Number(val1);
+          val2 = Number(val2);
         }
         if (val1 < val2) {
-            return 1;
+          return 1;
         } else if (val1 > val2) {
-            return -1;
+          return -1;
         } else {
-            return 0;
-        }            
-      } 
+          return 0;
+        }
+      };
     },
     getVehicleShot(d) {
       getVehicleShot(d).then(res => {
@@ -294,50 +397,48 @@ export default {
             x.checked = false;
             return x;
           });
-        //  console.log(this.evData);
-          
+          //  console.log(this.evData);
+
           this.amap.clearMap();
-          this.evData.sort(this.compare("shotNum"))
+          this.evData.sort(this.compare("shotNum"));
           this.drawMarkers(this.evData);
           //this.showEventList();
         }
       });
     },
     //查询所有的设备
-    getAllDevice(){
-      getAllDevice().then(res=>{
-          // console.log(res);
-          if(res.data && res.data.length>0){
-            this.allDevice=res.data
-          }
-          
-      })
+    getAllDevice() {
+      getAllDevice().then(res => {
+        // console.log(res);
+        if (res.data && res.data.length > 0) {
+          this.allDevice = res.data;
+        }
+      });
     },
     //查询所有的卡口设备
-    getAllBayonetList(){
+    getAllBayonetList() {
       getAllBayonetList({
-        areaId:mapXupuxian.adcode
-      }).then(res=>{
-           console.log(res.data);
-          if(res.data && res.data.length>0){
-            this.allBayonet=res.data
-          }
-          
-      })
+        areaId: mapXupuxian.adcode
+      }).then(res => {
+        console.log(res.data);
+        if (res.data && res.data.length > 0) {
+          this.allBayonet = res.data;
+        }
+      });
     },
     drawMarkers(data) {
       //console.log(data);
-      let limit = 0
-      if(data.length > 3){
-         limit= data[2].shotNum
+      let limit = 0;
+      if (data.length > 3) {
+        limit = data[2].shotNum;
       }
-      
+
       for (let i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = "vlJfoImg" + i;
-        let isBig = obj.shotNum >= limit?true:false
+        let isBig = obj.shotNum >= limit ? true : false;
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          if( isBig){
+          if (isBig) {
             let _sContent = `<div id="${_idWin}" class="vl_jig_mk_p"><p>${
               obj.deviceName
             }</p><p class="big">${obj.shotNum}次</p></div>`;
@@ -409,11 +510,93 @@ export default {
           //   break;
         }
       });
+    },
+    /* 上传图片方法 */
+    beforeAvatarUpload(file) {
+      // 上传图片控制
+      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
+      const isLt = file.size / 1024 / 1024 < 100;
+      if (!isJPG) {
+        this.$message.error("只能上传 JPG / PNG 格式图片!");
+      }
+      if (!isLt) {
+        this.$message.error("上传图片大小不能超过 100MB!");
+      }
+      this.uploading = true;
+      return isJPG && isLt;
+    },
+    uploadSucess(response, file) {
+      //上传成功
+      this.uploading = false;
+      console.log(file);
+      if (response && response.data) {
+        let oRes = response.data;
+        if (oRes) {
+          let x = {
+            cname: oRes.fileName, // 附件名称 ,
+            contentUid: this.$store.state.loginUser.uid,
+            // desci: '', // 备注 ,
+            filePathName: oRes.fileName, // 附件保存名称 ,
+            fileType: 1, // 文件类型 ,
+            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+            // otherFlag: '', // 其他标识 ,
+            path: oRes.fileFullPath, // 附件路径 ,
+            // path: oRes.path,
+            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+            // uid: '' //  附件标识
+          };
+          JtcPOSTAppendixInfo(x).then(jRes => {
+            if (jRes) {
+              x["uid"] = jRes.data;
+              console.log(x);
+            }
+          });
+          this.imgData = x;
+          this.curImageUrl = x.path;
+        }
+      }
+    },
+    /* 拖拽图片上传的方法 */
+    drag(ev) {
+      ev.dataTransfer.setData("Text", ev.target.currentSrc);
+    },
+    drop(e) {
+      this.curImageUrl = e.dataTransfer.getData("Text");
+      let x = {
+        contentUid: this.$store.state.loginUser.uid,
+        cname: "拖拽图片" + Math.random(),
+        filePathName: "拖拽图片" + Math.random(),
+        path: e.dataTransfer.getData("Text")
+      };
+      JtcPOSTAppendixInfo(x).then(jRes => {
+        if (jRes) {
+          x["uid"] = jRes.data;
+          console.log(x);
+        }
+      });
+    },
+    allowDrop(e) {
+      e.preventDefault();
+    },
+    handleError() {
+      //上传失败
+      this.uploading = false;
+      this.$message.error("上传失败");
+    },
+    delPic() {
+      //删除图片
+      this.curImageUrl = "";
     }
   }
 };
 </script>
 <style lang="scss" scoped>
+.fz12{
+  font-size: 12px;
+}
 .point {
   width: 100%;
   height: 100%;
@@ -527,8 +710,153 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+// 上传
+.upload_warp {
+  position: relative;
+  height: 232px;
+  max-height: 232px;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  &:hover {
+    background: #2981f8;
+    > p {
+      display: block;
+    }
+    .del_icon {
+      display: block;
+    }
+  }
+  .vl_jtc_upload {
+    width: 100%;
+    height: 100%;
+    background: none;
+  }
+  > p {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+    color: #ffffff;
+    height: 40px;
+    line-height: 40px;
+    -webkit-border-radius: 0 0 10px 10px;
+    -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
+    background: #0c70f8;
+  }
+  .vl_jtc_ic_input {
+    position: absolute;
+    top: 0.2rem;
+    width: 3rem;
+    height: 0.26rem;
+    left: 0.2rem;
+    border: 1px solid #d3d3d3;
+    -webkit-border-radius: 0.13rem;
+    -moz-border-radius: 0.13rem;
+    border-radius: 0.13rem;
+    padding: 0 0.02rem;
+    background: #ffffff;
+    .el-form-item__content {
+      height: 0.23rem;
+      line-height: 0.23rem;
+    }
+    input {
+      border: none !important;
+      height: 0.23rem;
+      line-height: 0.23rem;
+    }
+  }
+  .del_icon {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.4);
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    color: #ffffff;
+  }
+}
+
+.limitBox{
+  height: 96%;
+  .el-collapse-item{
+    border: solid 1px rgba(211,211,211,1);
+    margin-top: 10px;
+  }
+  
+}
+.limitBox .itembox:last-child{
+  border: none;
+}
+.plane{
+  height: 100%;
+}
+.imgInfo{
+  .timedata{
+    padding: 2px 6px;
+    display: inline-block;
+    background:rgba(250,250,250,1);
+    border:1px solid rgba(242,242,242,1);
+    border-radius:2px;
+    i{
+      margin-right: 2px;
+      color: #999999;
+    }
+  }
+  .subdata{
+    color: #0c70f8;
+    b{
+      padding-left: 5px;
+      font-size: 28px;
+      
+    }
+  }
+    .img{
+      float: left;
+      width: 60px;
+      height: 60px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    &:after{
+      display: block;
+      content: "";
+      clear: both;
+    }
+  }
+  .itembox{
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    margin-top: 10px;
+    border-bottom: solid 1px #f2f2f2;
+  }
 </style>
 <style lang="scss">
+.limitBox{
+  height: 96%;
+
+  .el-collapse-item{
+    .el-collapse-item__header{
+      background: #F6F6F6;
+      padding-left: 10px;
+      height: 40px;
+      line-height: 40px;
+    }
+  }
+  .el-collapse-item__content{
+    padding: 10px;
+  }
+}
 .vl_jig_mk_p {
   width: 180px;
   height: auto;
@@ -576,6 +904,9 @@ export default {
   }
 }
 .ljd {
+  .insetIput.el-input--prefix .el-input__inner {
+    padding-left: 90px;
+  }
   .el-dialog__wrapper .el-dialog__body {
     padding: 0px;
   }
@@ -584,6 +915,25 @@ export default {
   }
   .el-dialog__headerbtn {
     z-index: 1;
+  }
+  // 上传
+  .upload_warp .vl_jtc_upload {
+    .el-upload {
+      width: 100%;
+      height: 100%;
+      background: #f2f2f2;
+      border: none;
+      span {
+        color: #999;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+      }
+    }
   }
 }
 </style>

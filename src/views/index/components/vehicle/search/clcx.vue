@@ -20,6 +20,7 @@
               v-model="ruleForm.dateStart"
               type="date"
               placeholder="开始时间"
+              :picker-options="pickerOptions"
               class="full"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
@@ -28,6 +29,7 @@
             <el-date-picker
               v-model="ruleForm.dateEnd"
               type="date"
+              :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full"
               value-format="yyyy-MM-dd"
@@ -128,7 +130,7 @@
         label="抓拍次数">
       </el-table-column>
       <el-table-column
-        prop="vehicleType"
+        prop="vehicleGroup"
         sortable
         label="车辆类别">
       </el-table-column>
@@ -179,6 +181,23 @@ export default {
   },
   data () {
     return {
+      pickerOptions: {
+          disabledDate (time) {
+            let date = new Date();
+            let y = date.getFullYear();
+            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+            let d = date.getDate();
+            let threeMonths = '';
+            let start = '';
+            if (parseFloat(m) >= 2) {
+              start = y + '-' + (m - 1) + '-' + d;
+            } else {
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
+            }
+            threeMonths = new Date(start).getTime();
+            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          }
+        },
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -221,7 +240,7 @@ export default {
     }
   },
   mounted() {
-   
+   this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
     this.getAllDevice()
     this.getGroups()
@@ -235,6 +254,23 @@ export default {
     
   },
   methods: {
+    //设置默认时间
+    setDTime() {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 30 * 24 * 3600 * 1000;
+      let _s =
+        new Date(curDate - curS).getFullYear() +
+        "-" +
+        (new Date(curDate - curS).getMonth() + 1) +
+        "-" +
+        new Date(curDate - curS).getDate();
+      let _e =
+        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      // this.data1 = [_e, _e];
+      this.ruleForm.dateStart=_e
+      this.ruleForm.dateEnd=_e
+    },
     //查询行政区域
     getMapGETmonitorList(){
       let d={
@@ -273,28 +309,35 @@ export default {
     //查询车辆
     getSnapList(){
       
+      if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
+        this.$message.error("请输入开始时间和结束时间!");
+        return
+      }
       if(this.input5==1){
-        this.ruleForm.areaIds =this.value1.join(",")
+        this.ruleForm.areaIds =this.value1?this.value1.join(","):''
       }else{
         /*   this.selectDevice=[]
       this.selectBayonet=[] */
-        this.ruleForm.deviceIds  = this.selectDevice.join(",")
-        this.ruleForm.bayonetIds = this.selectBayonet.join(",")
+        this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
+        this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       }
-      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
-      this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
+      this.ruleForm.dateStart =this.ruleForm.dateStart?(this.ruleForm.dateStart +" 00:00:00"):""
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd?(this.ruleForm.dateEnd+" 23:59:59"):""
         //console.log(this.ruleForm);
       let d=this.ruleForm
       getSnapList(d).then(res=>{
         if(res.data && res.data.length>0){
           // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
-          this.pagination.total=res.data.total
-          this.pagination.pageSize =res.data.pageNum
+          // this.pagination.total=res.data.total
+          // this.pagination.pageSize =res.data.pageNum
           this.tableData= res.data
           // console.log(this.tableData);
           
+        }else{
+          this.$message.info("没有相关数据。");
+          this.tableData=[]
         }
       })
     },
@@ -355,16 +398,21 @@ export default {
       this.value1=null
       this.selectValue="已选设备0个",
       this.select=""
-        this.ruleForm = {
-        dateStart:'',
-        dateEnd:'',
-        _vehicleGroup:'',
-        vehicleClass:'',
-        devIds:'',
-        include:1,
-        _include:0,
-        plateNo:'',
-      }
+      this.ruleForm._vehicleGroup="" 
+      this.ruleForm.vehicleClass="" 
+      this.ruleForm.devIds="" 
+      this.ruleForm.include="" 
+      this.ruleForm._include="" 
+      this.ruleForm.plateNo="" 
+      //   = {
+      //   _vehicleGroup:'',
+      //   vehicleClass:'',
+      //   devIds:'',
+      //   include:1,
+      //   _include:0,
+      //   plateNo:'',
+      // }
+      this.setDTime()
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1

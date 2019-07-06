@@ -259,6 +259,17 @@ export function getGroupListIsPortrait(params) {
   })
 }
 /**
+ * getGroupAllList 获取全部组      
+ * @param {object} params
+ */
+export function getGroupAllList() {
+  return request({
+    url: '/portrait-groups',
+    method: 'get',
+    mode: 'control'
+  })
+}
+/**
  * getGroupListIsVehicle 根据组名【未传查询所有】模糊查询车辆组【包含车辆数目】      
  * @param {object} params
  */
