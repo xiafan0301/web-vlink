@@ -398,37 +398,39 @@ export default {
         // console.log('oList', oList);
         for (let key in oList) {
           let _oo = oList[key];
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: _this.yjcmMap,
-            position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
-            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            // extData: obj,
-            // 自定义点标记覆盖物内容
-            content: '<div class="map_icons vl_icon vl_icon_cl"></div>'
-          });
-          marker.on('mouseover', function (mEvent) {
-            // let iW = Math.round($(window).width() * 0.15);
-            // let extD = mEvent.target.F.extData;
-            // console.log('mEvent', mEvent);
-            let sContent = '<div class="cl_report_hw"><div>' +
-              '<p>' + _oo.deviceName + '</p>' +
-              '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-              '<ul><li>出没时间:</li>';
-            for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
-              sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
-            }
-            sContent += '</ul></div></div>';
-            let aOffSet = [0, -50];
-            _this.yjcmHoverWindow = new AMap.InfoWindow({
-              isCustom: true,
-              closeWhenClickMap: true,
-              offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
-              content: sContent
+          if (_oo.longitude > 0 && _oo.latitude > 0) {
+            let marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.yjcmMap,
+              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
+              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              // extData: obj,
+              // 自定义点标记覆盖物内容
+              content: '<div class="map_icons vl_icon vl_icon_cl"></div>'
             });
-            let aCenter = mEvent.target.B.position;
-            _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
-          });
+            marker.on('mouseover', function (mEvent) {
+              // let iW = Math.round($(window).width() * 0.15);
+              // let extD = mEvent.target.F.extData;
+              // console.log('mEvent', mEvent);
+              let sContent = '<div class="cl_report_hw"><div>' +
+                '<p>' + _oo.deviceName + '</p>' +
+                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
+                '<ul><li>出没时间:</li>';
+              for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
+                sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
+              }
+              sContent += '</ul></div></div>';
+              let aOffSet = [0, -50];
+              _this.yjcmHoverWindow = new AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
+                content: sContent
+              });
+              let aCenter = mEvent.target.B.position;
+              _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
+            });
+          }
           /* marker.on('mouseout', function (mEvent) {
             // if (_this.yjcmHoverWindow) { _this.yjcmHoverWindow.close(); }
           }); */
@@ -441,22 +443,24 @@ export default {
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
-        let  sVideo = '';
-        if (obj.videoPath) {
-          sVideo = '<div><video src="' + obj.videoPath + '" controls></video></div>';
+        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          let  sVideo = '';
+          if (obj.videoPath) {
+            sVideo = '<div><video src="' + obj.videoPath + '" controls></video></div>';
+          }
+          let marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: this.clgjMap,
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            // extData: obj,
+            // 自定义点标记覆盖物内容
+            content: '<div class="map_icons vl_icon vl_icon_sxt cl_report_gj">' +
+              sVideo +
+              '</div>'
+          });
+          gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
         }
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.clgjMap,
-          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // extData: obj,
-          // 自定义点标记覆盖物内容
-          content: '<div class="map_icons vl_icon vl_icon_sxt cl_report_gj">' +
-            sVideo +
-            '</div>'
-        });
-        gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
       }
       // 绘制轨迹
       var polyline = new window.AMap.Polyline({
