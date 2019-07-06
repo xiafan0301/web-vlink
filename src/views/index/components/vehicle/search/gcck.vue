@@ -99,7 +99,7 @@
           <!-- <div class="vc_gcck_r">
             <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
           </div> -->
-          <div class="gcck_rh" v-if="zpDeviceIdsHis && picList.length > 0">
+          <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
                 <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="1" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
