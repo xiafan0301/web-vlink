@@ -116,9 +116,15 @@
     </div>
     <ul class="hd_menu">
       <li>
-        <router-link :to="{name: 'video'}">
-          <i class="vl_icon vl_icon_001"></i>
-          <span>视频查看</span>
+        <router-link :to="{name: 'vehicle'}">
+          <i class="vl_icon vl_icon_004"></i>
+          <span>车辆侦查</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'portrait'}">
+          <i class="vl_icon vl_icon_005"></i>
+          <span>人像侦查</span>
         </router-link>
       </li>
       <li>
@@ -128,9 +134,9 @@
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'event'}">
-          <i class="vl_icon vl_icon_003"></i>
-          <span>事件管理</span>
+        <router-link :to="{name: 'video'}">
+          <i class="vl_icon vl_icon_001"></i>
+          <span>视频监控</span>
         </router-link>
       </li>
       <li>
@@ -140,15 +146,9 @@
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'vehicle'}">
-          <i class="vl_icon vl_icon_004"></i>
-          <span>车辆侦查</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'portrait'}">
-          <i class="vl_icon vl_icon_005"></i>
-          <span>人像检索</span>
+        <router-link :to="{name: 'event'}">
+          <i class="vl_icon vl_icon_003"></i>
+          <span>事件管理</span>
         </router-link>
       </li>
       <li>

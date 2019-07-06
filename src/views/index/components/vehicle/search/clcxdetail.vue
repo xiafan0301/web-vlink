@@ -61,9 +61,8 @@
               class="spimg"
               v-if="showimg"
             >
-            <video
-              v-if="!showimg"
-              id="capVideo"
+            <div v-if="!showimg">
+            <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
               autoplay
@@ -72,6 +71,7 @@
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
+             </div>
           </div>
           <div class="flex1">
             <h3 class="titles">抓拍信息</h3>
@@ -99,7 +99,7 @@
             </div>
           </div>
         </div>
-        <div class="struc-list">
+        <div class="struc-list" v-if="strucInfoList && strucInfoList.length>1">
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
