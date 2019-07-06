@@ -12,7 +12,7 @@
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
-              value-format="timestamp"
+              value-format="yyyy-MM-dd HH:mm:ss"
               @change="hhh"
               style="width: 212px; vertical-align: top"
               type="datetime"
@@ -23,7 +23,7 @@
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
-              value-format="timestamp"
+              value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
@@ -130,6 +130,7 @@
           </div>
           <el-pagination
               class="cum_pagination"
+              v-if="false"
               @current-change="handleCurrentChange"
               :current-page.sync="pagination.pageNum"
               :page-sizes="[100, 200, 300, 400]"
@@ -199,6 +200,7 @@ export default {
           console.log('jjjjjjjjjjjjjjjjjjjj',this.bayonetTree)
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
+
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
           // this.$refs.videotree.setCheckedNodes(this.videoTree);
         }
@@ -378,10 +380,10 @@ export default {
     },
     JfoGETCity () {
       const params = {
-        'where.startTime': this.value1,
-        'where.endTime': this.value2,
-        'where.unvehicleFlag': this.unvehicleFlag,
-        'where.vehicleNumber': this.v + this.vehicleNumber,
+        startTime: this.value1,
+        endTime: this.value2,
+        unvehicleFlag: this.unvehicleFlag,
+        vehicleNumber: this.v + this.vehicleNumber,
         // 'where.eventType': eventType,
         // 'where.reporterUserRole': userName,
         // 'where.keyword': this.auditForm.phoneOrNumber,
@@ -395,11 +397,11 @@ export default {
         for (let i = 0; i< this.selectDeviceArr.length; i++) {
           str = this.selectDeviceArr[i].uid + ',' +  str
         }
-        params['where.bayonetUid'] = str.substr(0,str.length - 1)
+        params['bayonetUid'] = str.substr(0,str.length - 1)
       }
       JfoGETCity(params).then(res => {
         if (res) {
-          this.tableData = res.data.list;
+          this.tableData = res.data;
           this.pagination.total = res.data.total;
           console.log('llllllllllllllllllll', res)
         }
