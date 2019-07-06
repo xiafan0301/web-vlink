@@ -498,3 +498,18 @@ export function getVehicleInvestigationReport(params) {
     mode: 'judge'
   })
 }
+
+
+/*--------------------------  导入导出  ---------------------------------*/
+/**
+ * 夜间行车分析导出接口
+ * @param {object} params
+ */
+export function exportNightVehicle(params) {
+  return request({
+    url: '/export',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}

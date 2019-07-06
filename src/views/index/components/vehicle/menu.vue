@@ -121,7 +121,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_ycxc'}">
-              <i class="vl_icon2 vl_icon2_025"></i><span>夜车行车统计</span>
+              <i class="vl_icon2 vl_icon2_025"></i><span>夜间行车统计</span>
             </router-link>
           </li>
           <li>
