@@ -144,4 +144,26 @@ export const validateInteger = (rule, value, callback) => {
   }
   callback();
 };
+/**
+ * 支持3-200之间的正整数
+ */
+export const validateFrequency = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (!reg.test(value) || parseInt(value) < 3 || parseInt(value) > 200) {
+    callback(new Error('请正确输入3-200之间的整数'));
+  } else {
+    callback();
+  }
+};
+/**
+ * 支持0-100之间的数字
+ */
+export const validateSimilarity = (rule, value, callback) => {
+  let reg = /^100$|^(\d|[1-9]\d)(\.\d+)*$/;
+  if (!reg.test(value)) {
+    callback(new Error('请正确输入0-100之间的数字'));
+  } else {
+    callback();
+  }
+};
 

@@ -221,7 +221,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer1',
           forceFit: true,
-          padding: [ 20, 0, 25, 25 ],
+          padding: [ 20, 20, 25, 25 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -234,8 +234,7 @@ export default {
         value: 'value', // value字段
         retains: ['devName']
       });
-
-      // impute 补全列/补全字段
+       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
         field: '过车数1',       // 待补全字段
@@ -253,10 +252,13 @@ export default {
       .size(34)
       .shape('cylinder');
     
-
       chart.source(dv);
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
       // 坐标轴刻度
-      chart.scale('过车数1', {
+      chart.scale('value', {
         max: 40,
         min: 0,
         tickCount: 6,
@@ -279,6 +281,7 @@ export default {
           lineWidth: 0
         }
       });
+      chart.axis('过车数1', false);
       chart.tooltip(false);
       chart.legend(false);
       chart.interval()
@@ -295,6 +298,8 @@ export default {
           shadowColor: 'rgba(0, 0, 0, .45)'
         },
       });
+
+     
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -390,7 +395,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer3',
           forceFit: true,
-          padding: [ 20, 24, 80, 60 ],
+          padding: [ 20, 20, 80, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -412,6 +417,9 @@ export default {
         title: {
           offset: 50
         }
+      });
+      chart.axis('value', {
+        title: null
       });
       chart.axis('time', {
         label: {
@@ -457,7 +465,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer4',
           forceFit: true,
-          padding: [ 20, 0, 60, 30 ],
+          padding: [ 20, 60, 60, 30 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -470,14 +478,13 @@ export default {
         value: 'value', // value字段
         retains: ['carType']
       });
-
-      // impute 补全列/补全字段
+       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
         field: 'count1',       // 待补全字段
         // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
         method: 'value',  // 补全常量
-        value: 100     // 补全字段值时执行的规则
+        value: 1     // 补全字段值时执行的规则
       });
       let view2 = chart.view();
       view2.source(dv);
@@ -498,6 +505,11 @@ export default {
           offset: 50
         }
       });
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
+      chart.axis('count1', false);
       chart.axis('carType', {
         label: {
           textStyle: {
@@ -526,6 +538,7 @@ export default {
       .position('carType*value')
       .color('type', ['l(270) 0:#0C70F8 1:#0D9DF4'])
       .size(30)
+
       chart.render();
       this.charts.chart4 = chart;
     },

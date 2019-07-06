@@ -291,8 +291,8 @@ export default {
     getDeviceSnapSum (dId) {
       getDeviceSnapImagesSum({
         deviceIds: dId,
-        startTime: formatDate(new Date(), 'yyyy-MM-dd'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd'),
+        startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59'),
       }).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.zpTotal = res.data[0].snapImagesCount;
@@ -306,9 +306,11 @@ export default {
 
     getDeviceSnapPage (dId) {
       getDeviceSnapImagesPage({
-        'where.deviceIds': dId,
-        'where.startTime': formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        'where.endTime': formatDate(new Date(), 'yyyy-MM-dd'),
+        where: {
+          deviceIds: dId,
+          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
+        },
         pageNum: 1,
         pageSize: 8
       }).then(res => {
@@ -367,9 +369,11 @@ export default {
       if (!pageNum) { pageNum = 1; }
       // this.picTotal = 0;
       getDeviceSnapImagesPage({
-        'where.deviceIds': this.zpDeviceIdsHis,
-        'where.startTime': formatDate(this.searchTime2[0], 'yyyy-MM-dd'),
-        'where.endTime': formatDate(this.searchTime2[1], 'yyyy-MM-dd'),
+        where: {
+          deviceIds: this.zpDeviceIdsHis,
+          startTime: formatDate(this.searchTime2[0], 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(this.searchTime2[1], 'yyyy-MM-dd 23:59:59')
+        },
         pageNum: pageNum,
         pageSize: this.picPageSize
       }).then(res => {

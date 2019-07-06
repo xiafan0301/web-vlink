@@ -30,15 +30,15 @@
               </div>
               <div class="card-item">
                 <label class="title">车身颜色：</label>
-                <span>{{carInfo.vehicleColor}}</span>
+                <span>{{carInfo.color}}</span>
               </div>
               <div class="card-item">
                 <label class="title">中文品牌：</label>
-                <span>{{carInfo.vehicleBrand}}</span>
+                <span>{{carInfo.brand}}</span>
               </div>
               <div class="card-item">
                 <label class="title">所有人：</label>
-                <span>{{carInfo.vehicleOwner}}</span>
+                <span>{{carInfo.owner	}}</span>
               </div>
               <div class="card-item">
                 <label class="title">身份证号：</label>
@@ -46,7 +46,7 @@
               </div>
               <div class="card-item">
                 <label class="title">核定载客：</label>
-                <span>{{carInfo.approvedPassNum}}</span>
+                <span>{{carInfo.seatnumber}}</span>
               </div>
               <div class="card-item">
                 <label class="title">机动车状态：</label>
@@ -166,9 +166,11 @@ export default {
       let m = today.getMonth()+1
       let r = today.getDay()
       let day= y +"-"+ m +"-" + r
+      let sdate = this.$route.query.datastart ? this.$route.query.datastart.substr(0,10) : ''
+      let edate = this.$route.query.dataend ? this.$route.query.dataend.substr(0,10) : ''
       let d={
-        dateStart:(this.$route.query.datastart || day) + " 00:00:00",
-        dateEnd:(this.$route.query.dataend || day) + " 23:59:59",
+        dateStart:(sdate || day) + " 00:00:00",
+        dateEnd:(edate || day) + " 23:59:59",
         plateNo:this.$route.query.plateNo
       }
       getViolationInfo(d).then(res=>{

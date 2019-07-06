@@ -272,7 +272,7 @@ export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
     method: 'post',
-    params:data,
+    data,
     mode: 'judge'
   });
 }
@@ -297,8 +297,8 @@ export function getAllDevice(params) {
 export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
-    method: 'get',
-    params,
+    method: 'post',
+    data:params,
     mode: 'judge'
   });
 }
@@ -345,13 +345,14 @@ export function getViolation(params) {
 export function getSnapList(params) {
   return request({
     url: '/vehicle/snap',
-    method: 'get',
-    params,
+    method: 'post',
+    data:params,
     mode: 'judge'
   });
 }
+
 /**
- * 
+ *
 车辆图片分析接口
  * @param {object} params
  */
@@ -371,12 +372,12 @@ export function getPhotoAnalysis(params) {
  * 区域徘徊
  * @param {object} params
  */
-export function QyphGetAreaWander(params) {
+export function QyphGetAreaWander(data) {
   return request({
     url: '/vehicle-analysis/area-wander',
-    method: 'get',
-    params: params,
-    mode: 'noServe'
+    method: 'post',
+    data,
+    mode: 'judge'
   });
 }
 /*--------------------------  区域徘徊碰撞end  ---------------------------------*/
@@ -384,16 +385,27 @@ export function QyphGetAreaWander(params) {
  * 区域碰撞
  * @param {object} params
  */
-export function QypzGetAreaCross(params) {
+export function QypzGetAreaCross(data) {
   return request({
     url: '/vehicle-analysis/area-cross',
-    method: 'get',
-    params: params,
-    mode: 'noServe'
+    method: 'post',
+    data,
+    mode: 'judge'
   });
 }
-/*--------------------------  车辆轨迹start  ---------------------------------*/
-
+/*--------------------------  车辆侦查-车辆轨迹start  ---------------------------------*/
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function InvestigateGetTrace(data) {
+  return request({
+    url: '/vehicle-investigate/trace',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
 /*--------------------------  车辆轨迹end  ---------------------------------*/
 /**
  * 查询设备抓拍图片汇总信息
@@ -402,8 +414,8 @@ export function QypzGetAreaCross(params) {
 export function getDeviceSnapImagesSum(params) {
   return request({
     url: '/device-snap-service/device-snap-images-sum',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
@@ -427,8 +439,8 @@ export function getGroups(params) {
 export function getDeviceSnapImagesPage(params) {
   return request({
     url: '/device-snap-service/device-snap-images-page',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
@@ -473,3 +485,16 @@ export function getNightVehicleRecordList(params) {
   })
 }
 /*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/
+
+/**
+ * 车辆侦查报告查询接口
+ * @param {object} params
+ */
+export function getVehicleInvestigationReport(params) {
+  return request({
+    url: '/vehicle-investigation-report-service/report',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}

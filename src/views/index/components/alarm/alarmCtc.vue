@@ -443,12 +443,32 @@ export default {
     },
     // 跳至查看预案页面
     skipSelectPlanPage (obj) {
+      let status = '';
+      if (this.sturcDetail.dispatchStatus == 1) {
+        status = 'ctc_ing'
+      }else if (this.sturcDetail.dispatchStatus == 2) {
+        status = 'ctc_end'
+      }
+      this.$router.push({name: 'plan_detail', query: {alarmId: this.$route.query.eventId, eventId: this.$route.query.id, planId: obj.uid, type: 'alarm_ctc', status: status, objType: this.$route.query.objType}});
+    },
+    // 跳至启用预案页面
+    skipReplanPage (obj) {
+      let status = '';
+      if (this.sturcDetail.dispatchStatus == 1) {
+        status = 'ctc_ing'
+      }else if (this.sturcDetail.dispatchStatus == 2) {
+        status = 'ctc_end'
+      }
+      this.$router.push({name: 'enable_plan', query: {alarmId: this.$route.query.eventId, eventId: this.$route.query.id, planId: obj.uid, type: 'alarm_ctc', status: status, objType: this.$route.query.objType}});
+    },
+    /* // 跳至查看预案页面
+    skipSelectPlanPage (obj) {
       this.$router.push({name: 'plan_detail', query: {eventId: this.$route.query.id, planId: obj.uid}});
     },
     // 跳至启用预案页面
     skipReplanPage (obj) {
       this.$router.push({name: 'enable_plan', query: {eventId: this.$route.query.id, planId: obj.uid}});
-    },
+    }, */
     // 返回
     back () {
       this.$router.back(-1);

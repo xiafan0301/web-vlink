@@ -4,7 +4,7 @@
     <!-- 面包屑通用样式 -->
     <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>模糊搜车</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -28,6 +28,7 @@
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
                 <!-- 选择设备 -->
@@ -103,7 +104,7 @@
                 </div>
 
                 <el-form-item label prop="carType">
-                  <el-select v-model="mhscMenuForm.carType" class="width232" placeholder="选择车辆类型">
+                  <el-select v-model="mhscMenuForm.carType" multiple class="width232" clearable placeholder="选择车辆类别">
                     <el-option
                       v-for="item in vehicleClassOptions"
                       :key="item.enumField"
@@ -117,7 +118,7 @@
                   <el-checkbox v-model="mhscMenuForm.isNegate">非</el-checkbox>
                 </el-form-item>
 
-                <el-form-item label prop="carType">
+                <el-form-item label prop="carNumber">
                   <el-input
                     placeholder
                     v-model="mhscMenuForm.carNumber"
@@ -260,7 +261,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -404,7 +405,32 @@ export default {
           }
         ]
       },
-      vehicleClassOptions: [], // 车辆类型下拉
+      vehicleClassOptions: [
+        {
+          enumField: "无牌车",
+          enumValue: "无牌车"
+        },
+        {
+          enumField: "号牌遮挡",
+          enumValue: "号牌遮挡"
+        },
+        {
+          enumField: "红名单",
+          enumValue: "红名单"
+        },
+        {
+          enumField: "网约车",
+          enumValue: "网约车"
+        },
+        {
+          enumField: "布控库车辆",
+          enumValue: "布控库车辆"
+        },
+        {
+          enumField: "违法车辆",
+          enumValue: "违法车辆"
+        },
+      ], // 车辆类别下拉
       vehicleBelongOptions: [], // 车辆归属地下拉
       pickerOptions: {
         disabledDate(time) {
@@ -418,9 +444,9 @@ export default {
           let threeMonths = "";
           let start = "";
           if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+            start = y + "-" + (m - 1) + "-" + d;
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
           let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
@@ -498,7 +524,6 @@ export default {
   mounted() {
     this.getMonitorList();
     this.setDTime();
-    this.vehicleClassOptions = this.dicFormater(44)[0].dictList; // 获取到车辆类别下拉数组
     this.vehicleBelongOptions = this.dicFormater(48)[0].dictList; // 获取车辆归属地
     // 一进入页面就全选设备
     this.$nextTick(() => {
@@ -537,18 +562,16 @@ export default {
             this.$message.warning("请您填写完整的车牌号码");
           }
           const queryParams = {
-            "where.startTime":
-              this.mhscMenuForm.selectDate[0] + " 00:00:00" || null, // 开始时间
-            "where.endTime":
-              this.mhscMenuForm.selectDate[1] + " 23:59:59" || null, // 结束时间
-            "where.deviceUid": deviceUidArr.join(), // 摄像头标识
-            "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
-            "where.vehicleClass": this.mhscMenuForm.carType, // 车辆类型
-            "where.vehicleNumber":
+            "startTime":
+             formatDate(this.mhscMenuForm.selectDate[0], 'yyyy-MM-dd')  + " 00:00:00" || null, // 开始时间
+            "endTime":
+              formatDate(this.mhscMenuForm.selectDate[1], 'yyyy-MM-dd') + " 23:59:59" || null, // 结束时间
+            "deviceUid": deviceUidArr.join(), // 摄像头标识
+            "bayonetUid": bayonetUidArr.join(), // 卡口标识
+            "vehicleType": this.mhscMenuForm.carType.join(), // 车辆类型
+            "vehicleNumber":
               this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
-            "where.unvehicleFlag": this.mhscMenuForm.isNegate, // 非车辆标志
-            pageNum: this.pageNum,
-            pageSize: this.pageSize
+            "unvehicleFlag": this.mhscMenuForm.isNegate // 非车辆标志
           };
           // 处理排序字段
           if (this.sortType === 1) {
@@ -575,10 +598,16 @@ export default {
                   this.strucInfoList = res.data;
                   // this.pageNum = res.data.pageNum;
                   this.total = res.data.length;
+                } else {
+                    this.strucInfoList = []; // 清空搜索结果
                 }
+              } else {
+                    this.strucInfoList = []; // 清空搜索结果
               }
             })
-            .catch(err => {});
+            .catch(err => {
+                    this.strucInfoList = []; // 清空搜索结果
+            });
         } else {
           return false;
         }
@@ -595,6 +624,8 @@ export default {
     },
     /*重置菜单的数据 */
     resetMenu() {
+      // 置空数据数量
+      this.total = 0;
       this.selectDeviceArr = []; // 清空选中的设备列表
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
@@ -608,17 +639,7 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      // let _e = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      this.mhscMenuForm.selectDate = [_s, _s];
+      this.mhscMenuForm.selectDate = [formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"), formatDate(new Date(), "yyyy-MM-dd")];      
     },
     /*sort排序方法*/
     clickTime() {

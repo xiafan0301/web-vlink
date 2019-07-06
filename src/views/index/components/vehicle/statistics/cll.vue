@@ -12,16 +12,7 @@
           <el-radio :label="1">按卡口</el-radio>
           <!-- <el-radio :label="6">按单位</el-radio> -->
         </el-radio-group>
-        <el-select
-          @clear="listBayonet = []"
-          v-model="queryForm.bayonet"
-          filterable
-          remote
-          value-key="value"
-          clearable
-          placeholder="请输入关键字搜索选择卡口"
-          :remote-method="getListBayonet"
-          :loading="loading">
+        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
             :key="item.value"
@@ -30,11 +21,12 @@
           </el-option>
         </el-select>
         <el-select v-model="queryForm.carType" placeholder="选择车辆类型">
+          <el-option value="" label="全部类型"></el-option>
           <el-option
             v-for="item in carTypeList"
             :key="item.value"
             :label="item.label"
-            :value="item.label">
+            :value="item.value">
           </el-option>
         </el-select>
         <!-- <el-select v-model="queryForm.lane" placeholder="选择车道">
@@ -45,7 +37,7 @@
             :value="item.value">
           </el-option>
         </el-select> -->
-        <el-select v-model="queryForm.statementType" placeholder="选择报表类型" @change="clearDate">
+        <el-select v-model="queryForm.statementType" placeholder="选择报表类型">
           <el-option
             v-for="item in statementTypeList"
             :key="item.value"
@@ -59,8 +51,8 @@
           <span>开始</span>
           <el-date-picker
             v-model="queryForm.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
         </div>
@@ -69,9 +61,9 @@
           <el-date-picker
             :picker-options="pickerOptions1"
             v-model="queryForm.endTime"
-            type="date"
+            type="datetime"
             @focus="getEndTime"  
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
@@ -84,8 +76,8 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="tabIndex = 1" :class="{'active': tabIndex === 1}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="changeTwo" :class="{'active': tabIndex === 2}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}"></i>
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
@@ -116,34 +108,36 @@
   </div>
 </template>
 <script>
+let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate} from '@/utils/util.js';
+import {dataList} from '@/utils/data.js';
 export default {
   data () {
     return {
       queryForm: {
         radio: 1,
-        carType: '轿车',
+        carType: null,
         bayonet: {value: ''},
         // lane: null,
-        statementType: 5,
+        statementType: '',
         warningNum: null,
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        startTime: startTime,
+        endTime: endTime
       },
       pickerOptions1: [],
       listBayonet: [],
-      tabIndex: 1,
-      carTypeList: [
-        {label: '全部类型', value: null},
-        {label: '轿车', value: 1},
-        {label: '卡车', value: 2},
-        {label: 'SUV', value: 3},
-        {label: '摩托车', value: 4}
-      ],
+      tabIndex: 2,
+      carTypeList: this.dicFormater(dataList.vehicleType)[0].dictList.map(m => {
+        return {
+          value: parseInt(m.enumField),
+          label: m.enumValue
+        }
+      }),
       // laneList: [],
       statementTypeList: [
         {label: '日报表', value: 1},
@@ -190,29 +184,27 @@ export default {
     }
   },
   watch: {
-    'queryForm.startTime' () {
-      const threeDays = 2 * 3600 * 24 * 1000;
+   'queryForm.startTime' () {
+      const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
       const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
-      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd');
+      this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
     }
+  },
+  mounted () {
+    this.getListBayonet();
   },
   methods: {
     getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime()
+      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
       this.pickerOptions1 = {
         disabledDate(time) {
-          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 2 * 3600 * 24 * 1000) - 8.64e6);
+          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
         },
       }
     },
     // 模糊搜索卡口
-    getListBayonet (query) {
-      const _query = this.Trim(query, 'g');
-      if (!_query) return;
-      const params = {
-        name: query
-      }
-      getAllBayonetListByName(params).then(res => {
+    getListBayonet () {
+      getAllBayonetListByName().then(res => {
         if (res) {
           this.listBayonet = res.data.map(m => {
             return {
@@ -221,13 +213,8 @@ export default {
             }
           });
         }
-      });
-    },
-    // 清除已选择的自定义时间
-    clearDate () {
-      this.queryForm.startTime = null;
-      this.queryForm.endTime = null;
-    },
+      })
+    },  
     // 画图表
     drawChart1 () {
       let chart = null;
@@ -239,7 +226,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer1',
           forceFit: true,
-          padding: [ 20, 0, 60, 30 ],
+          padding: [ 20, 40, 60, 40 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -252,7 +239,6 @@ export default {
         value: 'value', // value字段
         retains: ['date']
       });
-
       // impute 补全列/补全字段
       dv.transform({
         type: 'impute',
@@ -263,24 +249,31 @@ export default {
       });
       console.log(dv.rows, 'dv.rows')
       let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
+      view2.source(dv, {
+        
+      });
       chart.interval()
       .position('date*车流量1') 
       .color('#F2F2F2')
       .size(30);
-
-      chart.source(dv, {});
+      chart.source(dv, {
+       
+      });
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      });
       // 坐标轴刻度
       chart.scale('value', {
         max: 120,
         min: 0,
+        alias: '车流量',
         tickCount: 7,
         title: {
           offset: 50
         }
       });
+      chart.axis('车流量1', false);
       chart.axis('date', {
         label: {
           textStyle: {
@@ -307,8 +300,10 @@ export default {
       chart.legend(false);
       chart.interval()
       .position('date*value')
-      .color('type', ['l(270) 0:#0C70F8 1:#0D9DF4'])
+      .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30)
+
+     
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -377,9 +372,9 @@ export default {
     },
     // tab切换
     changeTwo () {
-      this.tabIndex = 2;
+      this.tabIndex = 1;
       this.$nextTick(() => {
-        this.drawChart2();
+        this.drawChart1();
       })
     },
     // 重置查询表单
@@ -391,19 +386,22 @@ export default {
         // lane: null,
         statementType: 1,
         warningNum: null,
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        startTime: startTime,
+        endTime: endTime
       };
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
-        startTime: this.queryForm.startTime + ' 00:00:00',
-        endTime: this.queryForm.endTime + ' 23:59:59',
         carType: this.queryForm.carType
       }
-      this.queryForm.statementType !== 5 && (params.reportType = this.queryForm.statementType);
+      if (this.queryForm.statementType !== 5) {
+        params.reportType = this.queryForm.statementType
+      } else {
+        params.startTime = this.queryForm.startTime;
+        params.endTime = this.queryForm.endTime;
+      }
       this.loadingBtn = true;
       apiCarFlow(params).then(res => {
         if (res) {
@@ -417,16 +415,17 @@ export default {
             }
           });
           if (this.chartData.length > 0) {
+            this.tabIndex = 2;
             this.isShowChart = true;
             this.$nextTick(() => {
-              this.drawChart1();
+              this.drawChart2();
             })
           } else {
             this.charts = {
               chart1: null,
               chart2: null  
             };
-            this.tabIndex = 1;
+            this.tabIndex = 2;
             this.isShowChart = false;
             this.$message.warning('没有相关卡口的统计数据');
           } 

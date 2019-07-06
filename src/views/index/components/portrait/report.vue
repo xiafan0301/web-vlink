@@ -1,6 +1,6 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '车辆侦察报告'}]"></div>
+    <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '人员侦察报告'}]"></div>
     <div class="vc_rep">
       <div class="vc_rep_t">
         <div class="vc_rep_sc">
@@ -21,37 +21,37 @@
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
         </div>
         <ul class="vc_rep_mu">
-          <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 2}" @click="changeShowType(2)">车辆入城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 3}" @click="changeShowType(3)">车辆出城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 4}" @click="changeShowType(4)">车辆行驶轨迹</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">人员档案信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 2}" @click="changeShowType(2)">人员入城信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 3}" @click="changeShowType(3)">人员出城信息</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 4}" @click="changeShowType(4)">人员行驶轨迹</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行车辆分析</span></li>
+          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行人员分析</span></li>
           <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li>
         </ul>
       </div>
       <div class="vc_rep_c">
         <div id="report_content">
           <div>
-            <!-- 车辆档案信息-车辆信息  showType 1 -->
+            <!-- 人员档案信息-人员信息  showType 1 -->
             <div class="vc_rep_cl" id="report_showtype_1">
               <div>
-                <h2>车辆档案信息-车辆信息</h2>
+                <h2>人员档案信息-人员信息</h2>
                 <div>
                   <ul class="rep_clxx" v-if="clInfo">
                     <li><span>车牌号码：</span><p>{{clInfo.plateno}}</p></li>
-                    <li><span>车辆所有人：</span><p>{{clInfo.owner}}</p></li>
+                    <li><span>人员所有人：</span><p>{{clInfo.owner}}</p></li>
                     <li><span>中文品牌：</span><p>{{clInfo.brand}}</p></li>
                     <li><span>车身颜色：</span><p>{{clInfo.color}}</p></li>
                     <li><span>车身形式：</span><p>{{clInfo.bodyform}}</p></li>
                     <li><span>车门数：</span><p>{{clInfo.doornumber}}</p></li>
                     <li><span>发动机号：</span><p>{{clInfo.engineno}}</p></li>
-                    <li><span>车辆类型：</span><p>{{clInfo.platetype}}</p></li>
+                    <li><span>人员类型：</span><p>{{clInfo.platetype}}</p></li>
                     <li><span>年款：</span><p>{{clInfo.model}}</p></li>
                     <li><span>座位数：</span><p>{{clInfo.seatnumber}}</p></li>
-                    <li><span>车辆状态：</span><p>{{clInfo.status}}</p></li>
+                    <li><span>人员状态：</span><p>{{clInfo.status}}</p></li>
                     <li><span>使用性质：</span><p>{{clInfo.usecharacter}}</p></li>
                     <li><span>车型：</span><p>{{clInfo.vehicletype}}</p></li>
                     <li><span>厂商名称：</span><p>{{clInfo.vendor}}</p></li>
@@ -61,10 +61,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆档案信息-违章信息 -->
+            <!-- 人员档案信息-违章信息 -->
             <div class="vc_rep_cl">
               <div>
-                <h2>车辆档案信息-违章信息</h2>
+                <h2>人员档案信息-违章信息</h2>
                 <div>
                   <el-table :data="wzList" max-height="300">
                     <el-table-column label="序号" type="index" width="80"></el-table-column>
@@ -80,10 +80,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆入城分析-入城记录 showType 2 -->
+            <!-- 人员入城分析-入城记录 showType 2 -->
             <div class="vc_rep_cl" id="report_showtype_2">
               <div>
-                <h2>车辆入城分析-入城记录</h2>
+                <h2>人员入城分析-入城记录</h2>
                 <div>
                   <el-table :data="rcList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -94,10 +94,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆出城分析-出城记录 showType 3 -->
+            <!-- 人员出城分析-出城记录 showType 3 -->
             <div class="vc_rep_cl" id="report_showtype_3">
               <div>
-                <h2>车辆出城分析-出城记录</h2>
+                <h2>人员出城分析-出城记录</h2>
                 <div>
                   <el-table :data="ccList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
@@ -108,10 +108,10 @@
                 </div>
               </div>
             </div>
-            <!-- 车辆行驶轨迹-车辆轨迹 showType 4 -->
+            <!-- 人员行驶轨迹-人员轨迹 showType 4 -->
             <div class="vc_rep_cl" id="report_showtype_4">
               <div>
-                <h2>车辆行驶轨迹-车辆轨迹</h2>
+                <h2>人员行驶轨迹-人员轨迹</h2>
                 <div style="padding: 0;">
                   <div class="rep_map">
                     <div class="rep_map_c" id="map_report_clgj"></div>
@@ -132,11 +132,11 @@
               <div>
                 <h2>夜间活动规律-夜间出没记录</h2>
                 <div>
-                  <el-table :data="yjcmList.allRecords">
+                  <el-table :data="yjcmList">
                     <el-table-column label="设备名称" prop="deviceName"></el-table-column>
-                    <el-table-column label="过车时间" prop="shotTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="timeQuantum" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="timeSlot" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="过车时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="时间间隔" prop="nums" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="参考时间" prop="nums" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -164,23 +164,8 @@
                           <span>出没次数</span>
                         </div>
                         <ul>
-                          <li>
-                            <span>19:00-21:00</span><span>{{yjcmList.period19_21Records ? yjcmList.period19_21Records.length : 0}}次</span>
-                          </li>
-                          <li>
-                            <span>21:00-23:00</span><span>{{yjcmList.period21_23Records ? yjcmList.period21_23Records.length : 0}}次</span>
-                          </li>
-                          <li>
-                            <span>23:00-01:00</span><span>{{yjcmList.period23_1Records ? yjcmList.period23_1Records.length : 0}}次</span>
-                          </li>
-                          <li>
-                            <span>01:00-03:00</span><span>{{yjcmList.period1_3Records ? yjcmList.period1_3Records.length : 0}}次</span>
-                          </li>
-                          <li>
-                            <span>03:00-05:00</span><span>{{yjcmList.period3_5Records ? yjcmList.period3_5Records.length : 0}}次</span>
-                          </li>
-                          <li>
-                            <span>05:00-07:00</span><span>{{yjcmList.period5_7Records ? yjcmList.period5_7Records.length : 0}}次</span>
+                          <li v-for="item in 15" :key="item">
+                            <span>99:99-99:99</span><span>39次</span>
                           </li>
                         </ul>
                       </div>
@@ -197,21 +182,11 @@
                   <ul class="rep_yjcm">
                     <li>
                       <span>较常在出没时间段：</span>
-                      <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl1_' + index">{{item.timeSegment}}</span>
-                        </template>
-                      </div>
+                      <div><span>03:00-05:00</span>|<span>05:00-07:00</span></div>
                     </li>
                     <li>
                       <span>较常出没地点为：</span>
-                      <div>
-                        <template v-for="(item, index) in yjcmjlList">
-                          <template v-if="index != 0">|</template>
-                          <span :key="'yjcmjl2_' + index">{{item.address}}</span>
-                        </template>
-                      </div>
+                      <div><span>摄像头地点1摄像头地点</span>|<span>摄像头地点1摄像头地点2</span></div>
                     </li>
                   </ul>
                 </div>
@@ -225,7 +200,7 @@
                   <el-table :data="pfcmList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
                     <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="车辆出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="人员出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
                     <el-table-column label="较多出没时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
                   </el-table>
                 </div>
@@ -258,19 +233,18 @@
                 </div>
               </div>
             </div>
-            <!-- 同行车辆分析 showType 8 -->
+            <!-- 同行人员分析 showType 8 -->
             <div class="vc_rep_cl" id="report_showtype_8">
               <div>
-                <h2>同行车辆分析</h2>
+                <h2>同行人员分析</h2>
                 <div>
                   <el-table :data="txclList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
                     <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
                     <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="车辆颜色" prop="vehicleColor" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="车辆型号" prop="vehicleStyles" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="同行次数" prop="" show-overflow-tooltip></el-table-column>
-                   <!--  <el-table-column
+                    <el-table-column label="登记信息" prop="address" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="同行次数" prop="name" show-overflow-tooltip></el-table-column>
+                    <el-table-column
                       label="操作"
                       width="120">
                       <template slot-scope="scope">
@@ -280,7 +254,7 @@
                           查看同行记录
                         </el-button>
                       </template>
-                    </el-table-column> -->
+                    </el-table-column>
                   </el-table>
                 </div>
               </div>
@@ -305,7 +279,7 @@
   </div>
 </template>
 <script>
-import vehicleBreadcrumb from '../breadcrumb.vue';
+import vehicleBreadcrumb from './breadcrumb.vue';
 import {formatDate} from '@/utils/util.js';
 import {mapXupuxian} from '@/config/config.js';
 import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
@@ -314,7 +288,7 @@ export default {
   data () {
     return {
       searchForm: {
-        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
+        plateNo: '湘AN8888',
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()]
       },
       searchLoading: false,
@@ -323,15 +297,13 @@ export default {
       wzList: [], // 违章信息
       rcList: [], // 入城记录
       ccList: [], // 出城记录
-      yjcmList: {}, // 夜间出没记录
-      yjcmjlList: [],  // 夜间出没结论
-      yjcmHoverWindow: null,
+      yjcmList: [], // 夜间出没记录
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
 
       tpcList: [], // 套牌车
 
-      clgjList: [], // 车辆轨迹
+      clgjList: [], // 人员轨迹
 
       showType: 1,
 
@@ -365,14 +337,12 @@ export default {
           this.wzList = data.violationDtoList;
           this.rcList = data.inCityDtoList;
           this.ccList = data.outCityDtoList;
-          this.yjcmList = data.analysisResultDto;
-          this.yjcmjlList = data.nightHauntConclusionList;
+          this.yjcmList = data.nightHauntConclusionList;
           this.pfcmList = data.oftenCarAnalysisDtoList;
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
-          this.setMapMarkerForYjcm(); // 夜间出没
-          this.setMapMarkerForClgj(); // 车辆轨迹
+          this.setMapMarkerForClgj(); // 人员轨迹
         }
         this.searchLoading = false;
       }).catch(error => {
@@ -381,107 +351,45 @@ export default {
       });
     },
 
-    setMapMarkerForYjcm () {
-      if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
-        let _this = this;
-        let oList = {};
-        for (let i = 0; i < this.yjcmList.allRecords.length; i++) {
-          let _o = this.yjcmList.allRecords[i];
-          if (!oList[_o.deviceId]) {
-            oList[_o.deviceId] = Object.assign({}, _o, {
-              CM_shotTimes: [_o.shotTime]
-            });
-          } else {
-            oList[_o.deviceId].CM_shotTimes.push(_o.shotTime);
-          }
-        }
-        // console.log('oList', oList);
-        for (let key in oList) {
-          let _oo = oList[key];
-          if (_oo.longitude > 0 && _oo.latitude > 0) {
-            let marker = new window.AMap.Marker({ // 添加自定义点标记
-              map: _this.yjcmMap,
-              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
-              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-              draggable: false, // 是否可拖动
-              // extData: obj,
-              // 自定义点标记覆盖物内容
-              content: '<div class="map_icons vl_icon vl_icon_cl"></div>'
-            });
-            marker.on('mouseover', function (mEvent) {
-              // let iW = Math.round($(window).width() * 0.15);
-              // let extD = mEvent.target.F.extData;
-              // console.log('mEvent', mEvent);
-              let sContent = '<div class="cl_report_hw"><div>' +
-                '<p>' + _oo.deviceName + '</p>' +
-                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
-                '<ul><li>出没时间:</li>';
-              for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
-                sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
-              }
-              sContent += '</ul></div></div>';
-              let aOffSet = [0, -50];
-              _this.yjcmHoverWindow = new AMap.InfoWindow({
-                isCustom: true,
-                closeWhenClickMap: true,
-                offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
-                content: sContent
-              });
-              let aCenter = mEvent.target.B.position;
-              _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
-            });
-          }
-          /* marker.on('mouseout', function (mEvent) {
-            // if (_this.yjcmHoverWindow) { _this.yjcmHoverWindow.close(); }
-          }); */
-        }
-        this.yjcmMap.setFitView();
-      }
-    },
     setMapMarkerForClgj () {
       let gjPath = [];
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
-        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
-          let  sVideo = '';
-          if (obj.videoPath) {
-            sVideo = '<div><video src="' + obj.videoPath + '" controls></video></div>';
-          }
-          let marker = new window.AMap.Marker({ // 添加自定义点标记
-            map: this.clgjMap,
-            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            // extData: obj,
-            // 自定义点标记覆盖物内容
-            content: '<div class="map_icons vl_icon vl_icon_sxt cl_report_gj">' +
-              sVideo +
-              '</div>'
-          });
-          gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
-        }
+        let marker = new window.AMap.Marker({ // 添加自定义点标记
+          map: this.clgjMap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // extData: obj,
+          // 自定义点标记覆盖物内容
+          content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
+        });
+        gjPath.push([obj.longitude, obj.latitude]);
       }
       // 绘制轨迹
       var polyline = new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
-          strokeColor: "#61c772",  //线颜色
+          strokeColor: "#00A",  //线颜色
           strokeOpacity: 1,     //线透明度
-          strokeWeight: 2,      //线宽
+          strokeWeight: 3,      //线宽
           strokeStyle: "solid"  //线样式
       });
       this.clgjMap.setFitView();
+
     },
 
     changeShowType (val) {
-      this.showType = val;
-      let $tar = $('#report_showtype_' + val);
-      if ($tar && $tar.length > 0) {
-        let osTop = $tar.offset().top -250;
-        let sTop = $('#report_content').scrollTop();
-        // $('#report_content').scrollTop(osTop + sTop);
-        $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
+      if (val != this.showType) {
+        this.showType = val;
+        let $tar = $('#report_showtype_' + val);
+        if ($tar && $tar.length > 0) {
+          let osTop = $tar.offset().top -250;
+          let sTop = $('#report_content').scrollTop();
+          // $('#report_content').scrollTop(osTop + sTop);
+          $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
+        }
       }
     },
     initClgjMap () {
@@ -514,8 +422,7 @@ export default {
       let _map = this.yjcmMap;
       if (type === 'clgj') { _map = this.clgjMap; }
       if (state === 1) {
-        _map.setFitView();
-        // _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
+        _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
       } else if (state === 2) {
         _map.setZoom(_map.getZoom() + 1);
       } else if (state === 3) {
@@ -737,68 +644,6 @@ export default {
           }
         }
       }
-    }
-  }
-}
-</style>
-<style lang="scss">
-.cl_report_hw {
-  background-color: #fff;
-  background:rgba(255,255,255,1);
-  box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
-  padding: 10px 20px;
-  border-radius: 4px;
-  > div {
-    position: relative;
-    width: 180px;
-    > p {
-      color: #666;
-      padding-bottom: 5px;
-      text-align: center;
-    }
-    > h3 {
-      color: #333; font-weight: bold; font-size: 20px;
-      text-align: center;
-    }
-    > ul {
-      display: none;
-      position: absolute; top: -10px; left: 180px;
-      background-color: #fff;
-      padding: 5px 0;;
-      > li {
-        padding: 5px 10px 5px 15px;
-        color: #666;
-        word-break:keep-all; white-space:nowrap;
-        &:first-child { color: #999; padding-left: 10px; }
-      }
-    }
-    &:hover {
-      > ul { display: block; }
-    }
-    &::after {
-      border-bottom-color: rgba(0, 0, 0, 0.2);
-      content: "";
-      display: inline-block;
-      position: absolute;
-    }
-    &::after {
-      left: 70px; bottom: -20px;
-      border-top: 20px solid #fff;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-    }
-  }
-}
-.cl_report_gj {
-  position: relative;
-  > div {
-    position: absolute; top: -40px; left: 105%; z-index: 1;
-    width: 218px; height: 122px;
-    background-color: #fff;
-    border-radius: 3px;
-    &:hover { z-index: 2; }
-    > video {
-      width: 100%; height: 100%;
     }
   }
 }
