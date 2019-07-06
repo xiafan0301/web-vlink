@@ -335,7 +335,7 @@ export default {
          // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
          // console.log(closestPositionOnLine);
 
-          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
+          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.getPath()));
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
@@ -347,7 +347,7 @@ export default {
          // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
          // console.log(closestPositionOnLine);
 
-          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
+          let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.getPath()));
           // console.log(distance);
               let id = this.pointData.findIndex(item=>item.uid==el.uid)
               if(id==-1 && distance <=1000){
@@ -361,13 +361,23 @@ export default {
         this.devices.forEach(el=>{
           let marker = new AMap.Marker({
             position: [el.longitude,el.latitude],
-            map: this.amap
+            map: this.amap,
+            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            // extData: obj,
+            // 自定义点标记覆盖物内容 vl_icon vl_icon_sxt
+            content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
           });
         })
         this.allboy.forEach(el=>{
            let marker = new AMap.Marker({
               position: [el.longitude,el.latitude],
-              map: this.amap
+              map: this.amap,
+              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              // extData: obj,
+              // 自定义点标记覆盖物内容 vl_icon vl_icon_sxt
+              content: '<div class="map_icons vl_icon vl_icon_kk"></div>'
             });
         })
     }
