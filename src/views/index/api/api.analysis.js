@@ -96,7 +96,7 @@ export function getPhotoSearch(data) {
 export function getVagueSearch(data) {
   return request({
     url: '/vehicle-investigate/vague-search',
-    method: 'get',
+    method: 'post',
     mode: 'judge',
     data
   })
