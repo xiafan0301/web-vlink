@@ -15,23 +15,23 @@
       <div class="header member_header">
         <span>基本信息</span>
         <p>
-          创建于2018-12-12 12:12:12；
-          最近更新于2018-12-12 12:12:12
+          创建于2019-06-12 09:34:12；
+          最近更新于2019-07-01 17:12:56
         </p>
       </div>
       <div class="divide"></div>
       <ul class="detail_info">
         <li>
           <span>摄像头编码:</span>
-          <span>2018121212121</span>
+          <span>201812209001</span>
         </li>
         <li>
           <span>所属单位:</span>
-          <span>见风使舵看风景</span>
+          <span>溆浦县公安局</span>
         </li>
         <li>
           <span>摄像头编号:</span>
-          <span>123</span>
+          <span>3</span>
         </li>
         <li>
           <span>摄像头类型:</span>
@@ -39,7 +39,7 @@
         </li>
         <li>
           <span>厂商:</span>
-          <span>XXXXXXXXXXXX单位</span>
+          <span>大华</span>
         </li>
         <li>
           <span>摄像头序列号:</span>
@@ -51,7 +51,7 @@
         </li>
         <li>
           <span>智能特性:</span>
-          <span>人脸识别；红外感光；人脸识别；红外感光；人脸识别；红外感光</span>
+          <span>人脸识别、红外感应</span>
         </li>
         <li>
           <span>IP:</span>

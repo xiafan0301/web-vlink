@@ -27,7 +27,7 @@
     <div class="vehicle_right">
       <div class="search_right_box">
         <el-form :inline="true" :model="searchForm" class="search_form clearfix" ref="searchForm">
-          <el-form-item prop="idType">
+          <el-form-item prop="dateTime">
             <el-date-picker
               style="width: 250px;"
               v-model="searchForm.dateTime"

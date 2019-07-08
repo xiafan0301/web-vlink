@@ -51,49 +51,51 @@
         </vue-scroll>
       </div>
       <div class="right">
-        <template v-if="dataList && dataList.length > 0">
-          <div class="content_top">
-            <p>
-              <span>检索结果</span>
-              <span>({{dataList.length}})</span>
-              <span style="color: #999999;font-size: 12px; margin-left: 10px;">tip：可拖动下方图片上传至左侧检索区进行检索</span>
-            </p>
-          </div>
-          <div class="result_detail">
-            <ul class="clearfix">
-              <li v-for="(item, index) in dataList" :key="index" @click="showStrucInfo(item, index)">
-                <div class="de_left">
-                  <img :src="item.photoUrl" draggable="true" @dragstart="dragImg($event)" title="可以试着把我拖拽到左侧上传图片处">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="user_name">
-                    <span>{{item.name}}</span>
-                  </p>
-                  <p class="similarity">
-                    <i class="vl_icon_retrieval_03 vl_icon"></i>
-                    <span>{{item.semblance}}<span class="percent">%</span></span>
-                  </p>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <el-pagination
-            class="cum_pagination"
-            @current-change="handleCurrentChange"
-            :current-page.sync="pagination.pageNum"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="pagination.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="pagination.total">
-          </el-pagination>
-        </template>
-        <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
-        </template>
+        <vue-scroll>
+          <template v-if="dataList && dataList.length > 0">
+            <div class="content_top">
+              <p>
+                <span>检索结果</span>
+                <span>({{dataList.length}})</span>
+                <span style="color: #999999;font-size: 12px; margin-left: 10px;">tip：可拖动下方图片上传至左侧检索区进行检索</span>
+              </p>
+            </div>
+            <div class="result_detail">
+              <ul class="clearfix">
+                <li v-for="(item, index) in dataList" :key="index" @click="showStrucInfo(item, index)">
+                  <div class="de_left">
+                    <img :src="item.photoUrl" draggable="true" @dragstart="dragImg($event)" title="可以试着把我拖拽到左侧上传图片处">
+                  </div>
+                  <div class="de_right">
+                    <span class="title">检索资料</span>
+                    <p class="user_name">
+                      <span>{{item.name}}</span>
+                    </p>
+                    <p class="similarity">
+                      <i class="vl_icon_retrieval_03 vl_icon"></i>
+                      <span>{{item.semblance}}<span class="percent">%</span></span>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <el-pagination
+              class="cum_pagination"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total">
+            </el-pagination>
+          </template>
+          <template v-else>
+            <div class="not_content">
+              <img src="../../../../../assets/img/not-content.png" alt="">
+              <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+            </div>
+          </template>
+        </vue-scroll>
       </div>
     </div>
     <!--历史记录弹窗-->
@@ -470,6 +472,7 @@ export default {
           const params = {
             'where.idNo': this.searchForm.idNo,
             'where.minSemblance': this.searchForm.similarity,
+            'where.uploadImgUrls': this.queryImgPath,
             pageNum: this.pagination.pageNum,
             pageSize: this.pagination.pageSize
           };
