@@ -1,7 +1,9 @@
 <template>
   <header class="vl_header clearfix">
-    <div class="hd_log vl_icon vl_icon_logo" @click="goBack">
+    <div class="hd_log" @click="goBack">
     </div>
+    <!-- <div class="hd_log vl_icon vl_icon_logo" @click="goBack">
+    </div> -->
     <!-- <div class="hd_log vl_ymx_logo" @click="goBack">
     </div> -->
   </header>
@@ -34,6 +36,7 @@ export default {
     width: 170px; height:  48px;
     margin: 26px 20px 0 20px;
     cursor: pointer;
+    background: url(../assets/img/logo_ysd.png) center center no-repeat;
   }
 }
 .vl_ymx_logo {
