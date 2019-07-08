@@ -1,11 +1,12 @@
 <template>
   <div class="vl_header">
-    <div class="hd_log vl_icon vl_icon_logo">
+    <!-- <div class="hd_log vl_icon vl_icon_logo"> -->
+    <div class="hd_log">
     </div>
     <!-- <div class="hd_log vl_ymx_logo">
     </div> -->
     <div class="hd_user">
-      <img src="../assets/img/temp/vl_photo.png" alt="">
+      <!-- <img src="../assets/img/temp/vl_photo.png" alt=""> -->
       <el-popover
         popper-class="person_info"
         placement="bottom"
@@ -498,6 +499,7 @@ export default {
     float: left;
     width: 170px; height:  48px;
     margin: 26px 20px 0 20px;
+    background: url(../assets/img/logo_ysd.png) center center no-repeat;
   }
   > .hd_menu {
     overflow: hidden;
