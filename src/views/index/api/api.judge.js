@@ -499,6 +499,20 @@ export function getVehicleInvestigationReport(params) {
   })
 }
 
+/*--------------------------  人像接口--重点关注  ---------------------------------*/
+/**
+ * 重点关注次数统计接口
+ * @param {object} params
+ */
+export function getFocusList(params) {
+  return request({
+    url: '/portrait/shot-num/focus',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
 
 /*--------------------------  导入导出  ---------------------------------*/
 /**
@@ -508,6 +522,18 @@ export function getVehicleInvestigationReport(params) {
 export function exportNightVehicle(params) {
   return request({
     url: '/export',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人像落脚点查询接口接口
+ * @param {object} params
+ */
+export function getFoothold(params) {
+  return request({
+    url: '/foothold',
     method: 'post',
     data: params,
     mode: 'judge'
