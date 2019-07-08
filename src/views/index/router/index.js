@@ -33,17 +33,13 @@ const router = new VueRouter({
   base: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : '',
   routes: [{
       path: '*',
-      redirect: {
-        name: 'index'
-      }
+      redirect: { name: 'index' }
     }, // 404
     {
       path: '/',
       name: 'index',
       component: () => import('@/views/index/components/default.vue'),
-      redirect: {
-        name: 'video'
-      },
+      redirect: { name: 'vehicle' },
       children: [
         routerVideo,
         routerMap,
@@ -81,28 +77,15 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/pc',
-      name: 'pc',
-      component: () => import('@/views/index/components/webrtcTest.vue')
-    }, {
       path: '/share',
       name: 'share',
       meta: { unrequireLogin: true },
       component: () => import('@/views/index/components/appshare/share.vue')
     }, {
-      path: '/v',
-      name: 'v',
+      path: '/vehicle-report-save',
+      name: 'vehicle_report_save',
       meta: { unrequireLogin: true },
-      component: () => import('@/views/index/components/vehicle/vehicle.vue'),
-      redirect: { name: 'v_menu' },
-      children: [
-        {
-          path: 'menu',
-          name: 'v_menu',
-          meta: { unrequireLogin: true },
-          component: () => import('@/views/index/components/vehicle/menu.vue')
-        }
-      ]
+      component: () => import('@/views/index/components/vehicle/analysis/reportSave.vue')
     }
   ]
 })

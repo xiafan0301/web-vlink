@@ -19,6 +19,12 @@
             end-placeholder="结束日期">
           </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
+          <router-link v-if="clInfo && !searchLoading" target="_blank" class="vc_rep_cs_dc" :to="{name: 'vehicle_report_save', query: {
+            pn: clInfo.plateno,
+            st: timeStr[0],
+            et: timeStr[1]
+            }}">导出</router-link>
+          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出</a>
         </div>
         <ul class="vc_rep_mu">
           <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
@@ -318,6 +324,7 @@ export default {
         time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
         // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
+      timeStr: ['', ''],
       searchLoading: false,
 
       clInfo: null,
@@ -355,10 +362,12 @@ export default {
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
+      this.timeStr = [formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
+        formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')];
       getVehicleInvestigationReport({
         plateNo: this.searchForm.plateNo,
-        startTime: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-        endTime: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
+        startTime: this.timeStr[0],
+        endTime: this.timeStr[1]
       }).then(res => {
         if (res && res.data && res.data.vehicleArchivesDto) {
           let data = res.data;
@@ -374,6 +383,21 @@ export default {
           this.clgjList = data.struVehicleDtoList;
           this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
+         
+        } else {
+          this.clInfo = null;
+          this.wzList = [];
+          this.rcList = [];
+          this.ccList = [];
+          this.yjcmList = {};
+          this.yjcmjlList = [];
+          this.pfcmList = [];
+          this.tpcList = [];
+          this.txclList =  []; // 同行车
+          this.clgjList = [];
+          this.setMapMarkerForYjcm(); // 夜间出没
+          this.setMapMarkerForClgj(); // 车辆轨迹
+          // #/vehicle-report-save
         }
         this.searchLoading = false;
       }).catch(error => {
@@ -383,6 +407,7 @@ export default {
     },
 
     setMapMarkerForYjcm () {
+      this.yjcmMap.remove();
       if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
         let _this = this;
         let oList = {};
@@ -400,7 +425,7 @@ export default {
         for (let key in oList) {
           let _oo = oList[key];
           if (_oo.longitude > 0 && _oo.latitude > 0) {
-            console.log('_oo', _oo);
+            // console.log('_oo', _oo);
             let marker = new window.AMap.Marker({ // 添加自定义点标记
               map: _this.yjcmMap,
               position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
@@ -445,14 +470,15 @@ export default {
       }
     },
     setMapMarkerForClgj () {
+      this.clgjMap.remove();
       let gjPath = [];
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
         if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
           let  sVideo = '';
-          if (obj.videoPath) {
-            sVideo = '<div><video src="' + obj.videoPath + '" controls></video></div>';
+          if (obj.storagePath) {
+            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
           }
           let marker = new window.AMap.Marker({ // 添加自定义点标记
             map: this.clgjMap,
@@ -461,7 +487,7 @@ export default {
             draggable: false, // 是否可拖动
             // extData: obj,
             // 自定义点标记覆盖物内容
-            content: '<div class="map_icons vl_icon vl_icon_sxt cl_report_gj">' +
+            content: '<div title="' + obj.deviceName + '" class="cl_report_gj">' +
               sVideo +
               '</div>'
           });
@@ -564,7 +590,8 @@ export default {
   }
 }
 .vc_rep_sc {
-  padding: 20px 0 5px 20px;
+  overflow: hidden;
+  padding: 20px 20px 5px 20px;
 }
 .vc_rep_mu {
   overflow: hidden;
@@ -748,17 +775,38 @@ export default {
     }
   }
 }
+.vc_rep_cs_dc {
+  float: right;
+  position: relative; top: 1px;
+  padding: 9px 15px; 
+  font-size: 12px; color: #FFF !important;
+  border-radius: 3px;
+  background-color: #409EFF;
+  border: 1px solid #409EFF;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none !important;
+  &.vc_rep_cs_dc_dis { 
+    cursor: not-allowed;
+    background-color: #a0cfff;
+    border-color: #a0cfff;
+  }
+}
 </style>
 <style lang="scss">
 .cl_report_gj {
   position: relative;
+  display: inline-block;
+  width: 42px; height: 49px;
+  background: url(../../../../../assets/img/icons/icons_sxt.png) center center no-repeat;
   > div {
-    position: absolute; top: -40px; left: -90px; z-index: 1;
-    width: 218px; height: 122px;
+    position: absolute; bottom: -20px; left: 95%; z-index: 1;
+    width: 160px; height: 120px;
     background-color: #fff;
     border-radius: 3px;
     &:hover { z-index: 2; }
-    > video {
+    > img {
       width: 100%; height: 100%;
     }
   }
