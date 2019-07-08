@@ -84,7 +84,7 @@ export default {
   methods: {
     confirmMap(){
       //console.log(this.pointData);
-        this.amap.clearMap();
+        //this.amap.clearMap();
         this.addMarket()
         this.$emit("selectMap",{
           dev:this.pointData,
@@ -94,7 +94,8 @@ export default {
         this.boyData=[]
     },
     cancelMap(){
-      this.amap.clearMap();
+     // this.amap.clearMap();
+       //this.addMarket()
       this.$emit("closeMap")
     },
     querySearch(queryString, cb) {

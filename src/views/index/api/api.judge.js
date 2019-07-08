@@ -473,3 +473,30 @@ export function getNightVehicleRecordList(params) {
   })
 }
 /*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/
+
+
+/*--------------------------  人像接口--重点关注  ---------------------------------*/
+/**
+ * 重点关注次数统计接口
+ * @param {object} params
+ */
+export function getFocusList(params) {
+  return request({
+    url: '/portrait/shot-num/focus',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人像落脚点查询接口接口
+ * @param {object} params
+ */
+export function getFoothold(params) {
+  return request({
+    url: '/foothold',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
