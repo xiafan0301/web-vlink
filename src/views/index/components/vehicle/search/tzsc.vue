@@ -652,9 +652,21 @@ export default {
       return this.historyPicList.filter(x => x.checked);
     },
     characteristicAble() {
-      return (this.characteristicList.filter(item => {
+      if (this.selectType === 1) {
+        return (this.characteristicList.filter(item => {
         return item.checked;
-      }).length <= 0);
+        }).length <= 0);
+      } else { // 自定义
+        const form = objDeepCopy(this.tzscMenuForm);
+        delete form.selectDate;
+        delete form.selectDevice;
+        for (let key in form) {
+          if (form[key]) {
+            return false;
+          }
+        }
+        return true;
+      }
     }
   },
   mounted() {
