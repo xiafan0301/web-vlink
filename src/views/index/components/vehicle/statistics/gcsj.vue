@@ -118,7 +118,7 @@ export default {
     return {
       queryForm: {
         startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
@@ -552,7 +552,7 @@ export default {
       this.$refs.devSelect.resetSelect();
       this.queryForm = {
         startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
