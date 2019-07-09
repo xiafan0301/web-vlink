@@ -36,7 +36,7 @@
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="全部车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -46,7 +46,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="车辆类型">
+            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
               <el-option
                 v-for="item in vehicleOptions"
                 :key="item.enumValue"
@@ -77,7 +77,7 @@
             </el-input>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="value1" multiple collapse-tags placeholder="全部地区" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
