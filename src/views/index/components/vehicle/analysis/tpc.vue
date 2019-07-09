@@ -160,7 +160,8 @@
                 <div class="list-item" v-for="item in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(item)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
-                  <p class="address"><i></i>{{item.vehicleDto.address}}</p>
+                  <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
+                  <p class="address" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -193,7 +194,7 @@
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
+                      <img :src="sturcDetail.vehicleDto.storagePath" alt="">
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -213,7 +214,9 @@
                       <div class="struc_cdi_line">
                         <span>{{sturcDetail.vehicleDto.vehicleColor + sturcDetail.vehicleDto.vehicleClass + sturcDetail.vehicleDto.vehicleStyles}}<b>特征</b></span>
                       </div>
-                      <div class="struc_cdi_line"></div>
+                      <div class="struc_cdi_line">
+                        <span>{{sturcDetail.fakeReason}}<b>套牌依据</b></span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -383,12 +386,14 @@ export default {
       })
     },
     getViolationList(params) {
+      this.$_showLoading({text: '加载中...'})
       delete(params.plateNo)
       JtcPOSTAppendtpInfo(params).then(res => {
         console.log("----getViolation----", params)
         if(res && res.data) {
           this.regulationsList = res.data.list
-          this. pagination.total = res.data.total
+          this.pagination.total = res.data.total
+          this.$_hideLoading()
           console.log(this.regulationsList)
         }
       }).catch( error => {
@@ -458,6 +463,8 @@ export default {
     rester() {
       this.setDTime();
       this.searchData.licensePlateNum = null
+      this.regulationsList = []
+      this.getSearchData();
     },
     /**
      * 打开抓拍弹框
