@@ -52,10 +52,15 @@
             </div>
             <div class="license-plate-search">
               <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
-              <div class="chara">
-                <span>湘H3A546</span>
-                <span>红色</span>
-                <span>大众-捷达-2009</span>
+              <div class="chara" v-if="photoAnalysis">
+                <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
+                <span>{{photoAnalysis.vehicleColor}}</span>
+                <span>{{photoAnalysis.vehicleStyles}}</span>
+                <span>{{photoAnalysis.vehicleRoof}}</span>
+                <span>{{photoAnalysis.vehicleClass}}</span>
+                <span>遮阳板{{photoAnalysis.sunvisor}}</span>
+                <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
+                <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
               </div>
             </div>
           </div>
@@ -285,6 +290,7 @@ export default {
   data() {
     
     return {
+      photoAnalysis:null,//图片分析特征
       plateType:[],// 号牌类型
       plateColor:[],// 号牌颜色
       vehicleType:[],// 车辆类型
@@ -393,6 +399,8 @@ export default {
     this.plateColor= [...dic2[0].dictList]// 号牌颜色
     this.vehicleType= [...dic[0].dictList]// 车辆类型
     this.carColor= [...dic3[0].dictList]// 车辆颜色
+   // console.log(this.plateType[1]);
+    
     this.setDTime();
   },
   methods: {
@@ -513,8 +521,9 @@ export default {
       getPhotoAnalysis({
         uploadImgUrls :this.curImageUrl
       }).then(res=>{
-        if(res){
+        if(res.data && res.data.length>0){
           console.log(res);
+          this.photoAnalysis=res.data[0]
           
         }
       })
@@ -586,7 +595,32 @@ export default {
         sunVisor: "",
         inspectionCount: ""
       }, */
-      let params = {
+      
+      
+    //  <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
+    //             <span>{{photoAnalysis.vehicleColor}}</span>
+    //             <span>{{photoAnalysis.vehicleStyles}}</span>
+    //             <span>{{photoAnalysis.vehicleRoof}}</span>
+    //             <span>{{photoAnalysis.vehicleClass}}</span>
+    //             <span>遮阳板{{photoAnalysis.sunvisor}}</span>
+    //             <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
+    //             <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
+      
+      if(this.input5==1){
+        let datas={
+        dateStart:this.data1[0] + " 00:00:00",
+        dateEnd:this.data1[1] + " 23:59:59" ,
+        vilolationNum:this.tzscMenuForm.input4,
+        plateClass:plateType[this.photoAnalysis.plateClass*1-1].enumValue,
+        plateColor:this.photoAnalysis.plateColor,
+        vehicleClass:this.photoAnalysis.vehicleClass,
+        vehicleColor:this.photoAnalysis.vehicleColor,
+        vehicleModel:this.photoAnalysis.vehicleModel,
+        sunvisor:this.photoAnalysis.sunVisor
+      }
+        this.getViolation(datas)
+      }else{
+        let params = {
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
         vilolationNum:this.tzscMenuForm.input4,
@@ -599,11 +633,10 @@ export default {
         // plateClass:this.input4,
 
       };
-
-      this.getViolation(params)
-      // setTimeout(() => {
-      //   this.searching = false;
-      // }, 3000);
+        this.getViolation(params)
+      }
+      
+    
     },
     //按条件查询违章
     getViolation(d){
