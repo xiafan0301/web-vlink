@@ -1,6 +1,6 @@
 <template>
   <div class="portrait_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '人脸查询'}]"></div>
+    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '特征搜人'}]"></div>
     <div class="rlcx_main clearfix">
       <div class="rlcx_l">
         <el-form ref="form" class="pt_rlcx_fm" :model="searchForm" size="small">
@@ -10,6 +10,7 @@
               v-model="searchForm.time"
               type="daterange"
               :editable="false" :clearable="false"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
@@ -112,13 +113,15 @@
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
+import {getFaceRetrieval} from '../../api/api.judge.js';
+import {formatDate} from '@/utils/util.js';
 export default {
   components: {vehicleBreadcrumb, mapSelector},
   data () {
     return {
       searchForm: {
-        time: [new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000), new Date()],
-        type: '列表选择',
+        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
+        type: '列表选择', // 列表选择 地图选择
         area: '',
         sex: '',
         age: '',
@@ -134,8 +137,17 @@ export default {
         total: 2312
       },
 
-      openMap: false
+      openMap: false,
+
+      pickerOptions: {
+        disabledDate (d) {
+          return d > new Date() || d < new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
+        }
+      }
     }
+  },
+  mounted () {
+    this.searchSubmit();
   },
   methods: {
     mapSelectorEmit (result) {
@@ -149,10 +161,33 @@ export default {
       }
     },
     searchSubmit () {
+      getFaceRetrieval({
+        /* where: {
+          startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
+          endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
+          deviceIds: '',
+          areaUid: '',
+          sex: this.searchForm.sex,
+          age: this.searchForm.age,
+          hat: this.searchForm.hat
+        }, */
+          'where.startDate': formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
+          'where.endDate': formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
+          'where.deviceIds': '',
+          'where.areaUid': '',
+          'where.sex': this.searchForm.sex,
+          'where.age': this.searchForm.age,
+          'where.hat': this.searchForm.hat,
+        orderBy: this.searchForm.orderType === 1 ? 'shotTime' : '',
+        order: this.searchForm.order === 1 ? 'desc' : 'asc',
+        pageNum: 1,
+        pageSize: 16
+      }).then(res => {
+      });
     },
     searchReset () {
       this.searchForm = {
-        time: '',
+        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
         type: '列表选择',
         area: '',
         sex: '',

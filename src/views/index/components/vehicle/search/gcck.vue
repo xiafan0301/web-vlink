@@ -148,7 +148,7 @@
 import vehicleBreadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
-import {getDeviceByBayonetUid} from '../../../api/api.base.js';
+import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
 import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate} from '@/utils/util.js';
@@ -178,6 +178,7 @@ export default {
       picList: [],
       picListAll: [],
       zpDeviceIdsHis: '',
+      zpBId: '',
 
       picTotal: 0,
       picIndex: 1,
@@ -185,6 +186,7 @@ export default {
       picPageSize: 100,
       picPageNum: 1,
       picPages: 0,
+      
       picAutoPlayActive: false,
       picAntoPlayInval: null,
       picCKEmpty: false,
@@ -197,6 +199,28 @@ export default {
     }
   },
   mounted () {
+    let did = this.$route.query.deviceIds;
+    let bid = this.$route.query.bId;
+    if (bid) {
+      this.selectItem(2, {
+        uid: bid
+      });
+    } else if (did) {
+      getDeviceDetailById({
+        id: did
+      }).then(res => {
+        if (res && res.data) {
+          this.selectItem(1, {
+            type: 1,
+            title: res.data.deviceName,
+            record: false,
+            video: {
+              uid: res.data.uid
+            }
+          });
+        }
+      });
+    }
   },
   methods: {
 
@@ -207,14 +231,13 @@ export default {
     },
 
     goToZP () {
-      this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds }});
+      this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds, bId: this.zpBId }});
     },
     changeShowType (type) {
       if (type !== this.showType) {
         this.showType = type;
       }
     },
-
     selectItem (type, item) {
       console.log(type, item);
       let ids = '';
@@ -232,6 +255,7 @@ export default {
         this.getDeviceSnapSum(ids);
         this.getDeviceSnapPage(ids);
         this.zpDeviceIds = ids;
+        this.zpBId = '';
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -286,6 +310,7 @@ export default {
               this.getDeviceSnapSum(ids);
               this.getDeviceSnapPage(ids);
               this.zpDeviceIds = ids;
+              this.zpBId = item.uid;
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
