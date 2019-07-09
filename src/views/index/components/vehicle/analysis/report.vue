@@ -19,6 +19,8 @@
             end-placeholder="结束日期">
           </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
+          <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
+          
           <router-link v-if="clInfo && !searchLoading" target="_blank" class="vc_rep_cs_dc" :to="{name: 'vehicle_report_save', query: {
             pn: clInfo.plateno,
             st: timeStr[0],
@@ -561,7 +563,30 @@ export default {
         this.searchForm.time[1] = new Date(this.searchForm.time[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过3天.');
       }
-    }
+    },
+
+    /* vehicleExport () {
+      // report_content
+      let _this = this;
+      this.$confirm('确定导出吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        let pdf = new jsPDF('p','pt','a3');
+        // 设置打印比例 越大打印越小
+        pdf.internal.scaleFactor = 2;
+        let options = {
+          pagesplit: true, //设置是否自动分页
+          "background": '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
+        };
+        pdf.addHTML($('#report_content')[0], 15, 15, options, function () {
+          pdf.save('车辆侦察报告_' + _this.clInfo.plateno + '_' +
+            formatDate(_this.searchForm.time[0], 'yyyyMMdd') + '-'  + formatDate(_this.searchForm.time[1], 'yyyyMMdd') + '.pdf');
+        });
+      }).catch(() => {
+      });
+    } */
   }
 }
 </script>
