@@ -125,7 +125,7 @@
     </div>
     <div class="bottom">
         <div class="tablink">
-           <a @click="goToPage('control_map')">车辆布控</a>
+           <a @click="goToPage('control_create')">车辆布控</a>
           <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
           <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
           <a @click="goToPage('vehicle_search_txcl')">同行车分析</a>
@@ -158,7 +158,10 @@ export default {
   },
   methods: {
     goToPage(v){
-        this.$router.push({name:v });
+        this.$router.push({name:v,query:{
+            plateNo:this.$route.query.plateNo,
+           imgurl:this.$route.query.imgurl || ''
+        } });
     },
     getViolationInfo(){
       let today = new Date()
@@ -221,6 +224,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover{
+   background-color: #0466de;
 }
 .vehicle-info-content{
   height: calc(100% - 60px);
