@@ -68,7 +68,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -207,8 +207,14 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 1 * 24 * 3600 * 1000;
-      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-      let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+      
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.ruleForm.data1 = [_s, _e]
     },
     hideResult() {
@@ -285,14 +291,14 @@ export default {
     },
     resetForm(v){
       this.select="湘"
-      this.ruleForm= {
-        data1:null,
-        input3: null,
-        input4: null,
-        input5: "1",
-        value1: null,
-      }
-      //this.$refs[v].resetFields();
+      this.setDTime() 
+      this.ruleForm.input3=null
+      this.ruleForm.input4=3
+      this.ruleForm.input5="1"
+      this.ruleForm.value1=null
+      this.selectDevice=[]
+      this.selectBayonet=[]
+      this.selectValue="已选设备0个"
     },
     //查询行政区域
     getMapGETmonitorList(){

@@ -12,6 +12,7 @@
           <span>开始</span>
           <el-date-picker
             v-model="queryForm.startTime"
+            :picker-options="pickerOptions"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
@@ -28,7 +29,7 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </div>
-        <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
+        <el-select v-model="queryForm.bayonet" filterable multiple collapse-tags placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
             :key="item.value"
@@ -57,7 +58,7 @@
         <div class="right_box table_box">
           <el-table
             v-loading="loading"
-            :data="bkclccList && bkclccList.list"
+            :data="bkclccList"
             >
             <el-table-column
               type="index"
@@ -109,7 +110,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <el-pagination
+         <!--  <el-pagination
             class="cum_pagination"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
@@ -117,7 +118,7 @@
             :page-size="pageSize"
             layout="total, prev, pager, next, jumper"
             :total="bkclccList.total">
-          </el-pagination>
+          </el-pagination> -->
         </div>
       </div>
     </div>
@@ -125,8 +126,8 @@
 </template>
 <script>
 let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
-import {getAllBayonetListByName, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+import {getOutCityBayonet, apiOutCityStatistics} from '@/views/index/api/api.vehicle.js';
 import {dataList} from '@/utils/data.js';
 import {formatDate} from '@/utils/util.js';
 export default {
@@ -135,7 +136,7 @@ export default {
       queryForm: {
         startTime: startTime,
         endTime: endTime,
-        bayonet: {value: ''},
+        bayonet: '',
         province: {label: '湘', value: 9},
         provinceName: '',
         radio: false
@@ -154,15 +155,45 @@ export default {
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
-      pageNum: 1
+      pageNum: 1,
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.queryForm.endTime) {
+            return (
+              time.getTime() > new Date(this.queryForm.endTime).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.queryForm.startTime) {
+            return (
+              time.getTime() < new Date(this.queryForm.startTime).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
     }
   },
   watch: {
-    'queryForm.startTime' () {
+    /* 'queryForm.startTime' () {
       const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
       const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
       this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
-    }
+    } */
   },
   mounted () {
     this.getListBayonet();
@@ -170,12 +201,17 @@ export default {
   },
   methods: { 
     getEndTime(time) {
-      let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
-      this.pickerOptions1 = {
+      /* let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000; */
+      let startTime = new Date(this.queryForm.startTime).getTime();
+      /* this.pickerOptions1 = {
         disabledDate(time) {
-          return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
+          if (this.queryForm.startTime) {
+            return time.getTime() < (startTime - 8.64e7) || time.getTime() > startTime;
+          } else {
+            return time.getTime() < (startTime - 8.64e7) || time.getTime() > new Date().getTime()
+          }
         },
-      }
+      } */
     },
     skip (plateNo) {
       console.log(plateNo)
@@ -183,14 +219,21 @@ export default {
     },
     // 模糊搜索卡口
     getListBayonet () {
-      getAllBayonetListByName().then(res => {
+      getOutCityBayonet().then(res => {
         if (res) {
-          this.listBayonet = res.data.map(m => {
-            return {
-              value: m.uid,
-              label: m.bayonetName
+          let data = res.data;
+          let bayonetList = [];
+          if(data && data.length > 0) {
+            for(let item of data) {
+              bayonetList.push(...item.bayonetList)
             }
-          });
+            this.listBayonet = bayonetList.map(m => {
+              return {
+                value: m.uid,
+                label: m.bayonetName
+              }
+            });
+          }
         }
       })
     },  
@@ -209,8 +252,8 @@ export default {
       this.queryForm = {
         startTime: startTime,
         endTime: endTime,
-        bayonet: {value: ''},
-        province: {label: ''},
+        bayonet: '',
+        province: {label: '湘', value: 9},
         provinceName: '',
         radio: false
       };
@@ -220,15 +263,14 @@ export default {
     getControlCarSta () {
       console.log(this.queryForm.bayonet, 'this.queryForm.bayonet')
       const params = {
-        'where.startTime': this.queryForm.startTime,
-        'where.endTime': this.queryForm.endTime,
-        'where.bayonetUid': this.queryForm.bayonet.value,
-        'where.vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
-        'where.unvehicleFlag': this.queryForm.radio,
-        pageNum: this.pageNum,
-        pageSize: this.pageSize,
-        orderBy: 'shotTime',
-        order: 'desc',
+        'startTime': this.queryForm.startTime,
+        'endTime': this.queryForm.endTime,
+        'vehicleNumber': this.queryForm.province.label + this.queryForm.provinceName,
+        'unvehicleFlag': this.queryForm.radio,
+      }
+      if(this.queryForm.bayonet && this.queryForm.bayonet.length > 0) {
+        let bayonet = this.queryForm.bayonet.map(r => r.value)
+        params['bayonetUid'] = bayonet.join(',')
       }
       this.loadingBtn = true;
       apiOutCityStatistics(params).then(res => {

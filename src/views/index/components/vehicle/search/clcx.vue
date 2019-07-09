@@ -259,14 +259,14 @@ export default {
       let date = new Date();
       let curDate = date.getTime();
       let curS = 30 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+      
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       // this.data1 = [_e, _e];
       this.ruleForm.dateStart=_e
       this.ruleForm.dateEnd=_e
@@ -322,9 +322,8 @@ export default {
         this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       }
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
-      this.ruleForm.dateStart =this.ruleForm.dateStart?(this.ruleForm.dateStart +" 00:00:00"):""
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd?(this.ruleForm.dateEnd+" 23:59:59"):""
-        //console.log(this.ruleForm);
+      this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       let d=this.ruleForm
       getSnapList(d).then(res=>{
         if(res.data && res.data.length>0){
