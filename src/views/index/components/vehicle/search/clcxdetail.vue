@@ -128,7 +128,7 @@
       </div>
       <div class="ment">
         <div class="tablink">
-          <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('control_create')">车辆布控</a>
           <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
           <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
           <a @click="goToPage('vehicle_search_ws')">尾随分析</a>
@@ -207,9 +207,13 @@ export default {
           datastart:this.$route.query.dateStart,
           dataend:this.$route.query.dateEnd,
           plateNo:this.$route.query.plateNo,
+           
         }});
       }else{
-        this.$router.push({name:v });
+        this.$router.push({name:v ,query:{
+           plateNo:this.detailData.plateno,
+           imgurl:this.snapObj.storagePath
+        }});
       }
         
     },

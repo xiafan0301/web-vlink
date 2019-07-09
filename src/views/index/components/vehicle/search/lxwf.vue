@@ -39,7 +39,7 @@
                 <img v-else-if="curImageUrl" :src="curImageUrl">
                 <div v-else>
                   <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#fefefe; font-size: 100px;"
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#dddddd; font-size: 100px;"
                     class="vl_icon el-icon-camera-solid"
                   ></i>
                   <span>点击上传图片</span>
@@ -427,6 +427,9 @@ export default {
       console.log(v);
       v.datastart=this.data1[0]
       v.dataend=this.data1[1]
+      if(this.curImageUrl){
+        v.imgurl=this.curImageUrl
+      }
       this.$router.push({name: 'vehicle_search_lxwfdetail', query: v});
     },
     // 上传图片
@@ -582,29 +585,8 @@ export default {
     //查询
     getVehicleDetail() {
       this.searching = true;
-      console.log("======getVehicleDetail=====", this.searchData, this.imgData);
-/* 
- tzscMenuForm: {
-        selectDate: "",
-        selectDevice: "",
-        licenseType: "",
-        licenseColor: "",
-        carType: "",
-        carColor: "",
-        carModel: "",
-        sunVisor: "",
-        inspectionCount: ""
-      }, */
-      
-      
-    //  <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
-    //             <span>{{photoAnalysis.vehicleColor}}</span>
-    //             <span>{{photoAnalysis.vehicleStyles}}</span>
-    //             <span>{{photoAnalysis.vehicleRoof}}</span>
-    //             <span>{{photoAnalysis.vehicleClass}}</span>
-    //             <span>遮阳板{{photoAnalysis.sunvisor}}</span>
-    //             <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
-    //             <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
+     // console.log("======getVehicleDetail=====", this.searchData, this.imgData);
+
       
       if(this.input5==1){
         let datas={
@@ -933,17 +915,20 @@ html {
       .el-upload {
         width: 100%;
         height: 100%;
-        background: #2981f8;
-        border: none;
-        span {
-          color: #ffffff;
-        }
+       
         img {
           width: 100%;
           height: 100%;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
           border-radius: 10px;
+        }
+      }
+      .el-upload:hover{
+         background: #2981f8;
+        border: none;
+        span {
+          color: #ffffff;
         }
       }
     }
