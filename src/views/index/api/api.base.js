@@ -86,3 +86,16 @@ export function getCarmodelList(params) {
   })
 }
 
+/**
+ * 通过设备id监控设备详情查询   
+ * @param {object} params
+ */
+export function getDeviceDetailById(params) {
+  return request({
+    url: '/device-service/device-details',
+    method: 'get',
+    params: params,
+    mode: baseModeName
+  })
+}
+
