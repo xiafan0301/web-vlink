@@ -7,7 +7,7 @@
     :show-close="false"
     width="1180px"
     class="map_selector_dialog">
-    <div class="map_sd_content" :id="sid">
+    <div class="map_sd_content">
       <div class="sd_search">
         <input type="text" placeholder="请输入关键字" class="sd_search_input" id="map_sd_search_input">
         <span><i class="el-icon-search"></i></span>
@@ -16,19 +16,19 @@
         <h4>请选择框选图形</h4>
         <ul>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
+            <div :class="{'sd_opts_sed': drawTypes.rectangle != null }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
+            <div :class="{'sd_opts_sed': drawTypes.circle != null }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
+            <div :class="{'sd_opts_sed': drawTypes.polyline != null }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
+            <div :class="{'sd_opts_sed': drawTypes.polygon != null }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
+            <div style="cursor: not-allowed;" :class="{'sd_opts_sed': drawTypes.circle10km != null }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
           </li>
         </ul>
       </div>
@@ -36,7 +36,7 @@
         <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
         <li @click="setMapStatus(2)"><i class="el-icon-minus"></i></li>
       </ul>
-      <div style="width: 100%; height: 100%;" :id="sid + '_container'"></div>
+      <div style="width: 100%; height: 100%;" id="mapSelector_container"></div>
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false" size="small">取 消</el-button>
@@ -47,7 +47,6 @@
 <script>
 import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
   /* 
@@ -58,7 +57,6 @@ export default {
   props: ['open', 'showTypes', 'oConfig'],
   data () {
     return {
-      sid: 'map_selector_' + random14(),
       treeList: [],
       // selectorId: 'db_tree_' + random14(),
       amap: null,
@@ -73,7 +71,6 @@ export default {
       listDevice: [], // 设备
       listBayonet: [], // 卡口
 
-      mouseTool: null,
       drawType: 0,
       drawTypes: {
         rectangle: null, // 1
@@ -83,21 +80,9 @@ export default {
         circle10km: null, // 5
       },
 
-      drawActiveType: null, // 
       drawObj: {
-        rectangle: {
-          /* 'id': {
-            marker: null, // 标记对象 (编辑、完成、删除等)
-            obj: null // 矩形图层对象
-            edtor: null // 编辑对象
-          } */
-        },
-        circle: {},
-        polyline: {},
-        polygon: {},
-        circle10km: {}
+        rectangle: {}
       },
-      zIndex: 50,
 
       dialogVisible: false,
       submitLoading: false
@@ -122,7 +107,6 @@ export default {
   },
   mounted () {
     this.getTreeList();
-    this.mapEvents();
   },
   methods: {
     initMap () {
@@ -133,7 +117,7 @@ export default {
       _config = Object.assign({}, _config, _this.config);
       // console.log('_config', _config)
       // 初始化地图
-      let map = new window.AMap.Map(this.sid + '_container', Object.assign({}, _config));
+      let map = new window.AMap.Map('mapSelector_container', Object.assign({}, _config));
       map.setMapStyle('amap://styles/light');
       // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
       // console.log('_config', _config)
@@ -147,74 +131,14 @@ export default {
       });
       window.AMap.event.addListener(auto, 'select', _this.selectArea);
 
-      // 在地图中添加MouseTool插件
-      this.mouseTool = new window.AMap.MouseTool(map);
-      this.mouseTool.on("draw", (event) => {
-        // event.obj 为绘制出来的覆盖物对象
-        console.log('draw event', event);
-        let _sid = random14();
-        //  return
-        if (this.drawActiveType === 1) {
-          this.drawObj.rectangle[_sid] = {};
-          this.drawObj.rectangle[_sid].obj = event.obj;
-          this.drawRectangleMark(_sid, event.obj);
-        } else if (this.drawActiveType === 2) {
-          this.drawObj.circle[_sid] = {};
-          this.drawObj.circle[_sid].obj = event.obj;
-          this.drawCircleMark(_sid, event.obj);
-        } else if (this.drawActiveType === 3) {
-          this.drawObj.polyline[_sid] = {};
-          this.drawObj.polyline[_sid].obj = event.obj;
-          this.drawPolylineMark(_sid, event.obj);
-        } else if (this.drawActiveType === 4) {
-          this.drawObj.polygon[_sid] = {};
-          this.drawObj.polygon[_sid].obj = event.obj;
-          this.drawPolygonMark(_sid, event.obj);
-        } else if (this.drawActiveType === 5) {
-          this.drawObj.circle10km[_sid] = {};
-          this.drawObj.circle10km[_sid].obj = event.obj;
-        }
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
-        this.drawActiveType = 0;
-        console.log("覆盖物对象绘制完成");
-        // log.info('覆盖物对象绘制完成')
-      });
-
       _this.setMarks();
-    },
-    mapEvents () {
-      let _this = this, nContent = $('body');
-      nContent.on('click', '.el-icon-close', function () {
-        let nOpt = $(this).closest('.ms_marker_opt');
-        let _sid = nOpt.attr('_sid'), _type = Number(nOpt.attr('_type'));
-        // console.log('mapEvents', _sid);
-        // console.log(_this.drawObj);
-        _this.removeMarkers(_type, _sid);
-        // if (_this.drawObj.rectangle[_sid]) {
-        //   _this.removeMarkers(_this.drawObj.rectangle[_sid]);
-        //   delete _this.drawObj.rectangle[_sid];
-        // }
-      });
-    },
-    removeMarkers (drawType, sid) {
-      let obj = null;
-      if (drawType === 1) { // 矩形
-        obj =  this.drawObj.rectangle[sid];
-      } else if (drawType === 2) { // 圆形
-        obj =  this.drawObj.circle[sid];
-      } else if (drawType === 3) { // 折线
-        obj =  this.drawObj.polyline[sid];
-      } else if (drawType === 4) { // 多边形
-        obj =  this.drawObj.polygon[sid];
-      } else if (drawType === 5) {
-        obj =  this.drawObj.circle10km[sid];
-      }
-      if (obj) {
-        if (obj.obj) { this.amap.remove(obj.obj); }
-        if (obj.marker) { this.amap.remove(obj.marker); }
-        if (obj.editor) { this.amap.remove(obj.editor); }
-      }
+      //输入提示
+      // window.AMap.plugin('AMap.Autocomplete', function () {
+      //   var auto = new AMap.Autocomplete({
+      //     input: "map_sd_search_input"
+      //   });
+      //   // AMap.event.addListener(auto, 'select', _this.selectArea);
+      // });
     },
     selectArea (e) {
       console.log(e);
@@ -223,245 +147,176 @@ export default {
         this.amap.setCenter(e.poi.location);
       }
     },
+
     selDrawType (drawType) {
       this.drawType = drawType;
-      this.drawActiveType = drawType;
       if (drawType === 1) { // 矩形
         this.drawRectangle();
       } else if (drawType === 2) { // 圆形
         this.drawCircle();
       } else if (drawType === 3) { // 折线
         this.drawPolyline(); 
-      } else if (drawType === 4) { // 多边形
+      }else if (drawType === 4) { // 多边形
         this.drawPolygon(); 
-      } else if (drawType === 5) { // 多边形
-        this.drawCircle10km(); 
       }
     },
     // 圆形
     drawCircle () {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.circle({
-        borderWeight: 3,
-        strokeColor: "#FA453A", 
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        // strokeOpacity: 0.2,
-        fillOpacity: 0.2,
-        // strokeStyle: 'dashed',
-        // strokeDasharray: [10, 10], 
-        // 线样式还支持 'dashed'
-        fillColor: '#FA453A',
-        zIndex: this.zIndex
-      });
-    },
-    drawCircleMark (sid, obj) {
-      // console.log('circle', obj);
-      // console.log('circle getRadius', obj.getBounds());
-      // console.log('circle getRadius', obj.getBounds().getNorthEast());
-      // console.log('circle center', obj.getCenter());
-      let ne = obj.getBounds().getNorthEast();
-      let c = obj.getCenter()
-      let _q = c.Q + (ne.Q - c.Q) * 0.66667;
-      let _p = c.P + (ne.P - c.P) * 0.7444444;
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        position: [_q, _p], // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="2" class="ms_marker_opt ms_marker_circle"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.circle[sid]) {
-        this.drawObj.circle[sid].marker = marker;
+      if (this.drawTypes.circle !== null) {
+        this.closeDraw(2);
+      } else {
+        let circle = new AMap.Circle({
+          center: this.amap.getCenter(),
+          radius: 1000, //半径
+          borderWeight: 3,
+          strokeColor: "#FA453A", 
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10], 
+          // 线样式还支持 'dashed'
+          fillColor: '#FA453A',
+          zIndex: 50,
+        });
+        circle.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([ circle ]);
+        let circleEditor = new window.AMap.CircleEditor(this.amap, circle);
+        circleEditor.on('end', function(event) {
+          console.log('触发事件： end')
+          // event.target 即为编辑后的圆形对象
+        });
+        circleEditor.open();
+        this.drawTypes.circle = {
+          obj: circle,
+          editor: circleEditor
+        };
       }
     },
     // 矩形
     drawRectangle () {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.rectangle({
-        strokeColor: "#FA453A", 
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillOpacity: 0.2,
-        fillColor: '#FA453A',
-        cursor:'pointer',
-        strokeStyle: "solid",
-        zIndex: this.zIndex
-      });
-    },
-    drawRectangleEditor (sid) {
-      if (this.drawObj.rectangle[sid] && this.drawObj.rectangle[sid].obj) {
-        let rectangleEditor = new window.AMap.RectangleEditor(this.amap, this.drawObj.rectangle[sid].obj);
+      if (this.drawTypes.rectangle !== null) {
+        this.closeDraw(1);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var southWest = new AMap.LngLat(oCneter.lng - 0.008, oCneter.lat - 0.005)
+        var northEast = new AMap.LngLat(oCneter.lng + 0.008, oCneter.lat + 0.005)
+        var bounds = new window.AMap.Bounds(southWest, northEast)
+        var rectangle = new window.AMap.Rectangle({
+          bounds: bounds,
+          strokeColor: "#FA453A", 
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10], 
+          // 线样式还支持 'dashed'
+          fillColor: '#FA453A',
+          cursor:'pointer',
+          zIndex:50,
+        });
+        rectangle.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([ rectangle ]);
+        var rectangleEditor = new window.AMap.RectangleEditor(this.amap, rectangle);
         rectangleEditor.on('end', function(event) {
           // log.info('触发事件： end')
           // event.target 即为编辑后的矩形对象
         });
         rectangleEditor.open();
-        this.drawObj.rectangle[sid].editor = rectangleEditor;
-      }
-    },
-    drawRectangleMark (sid, obj) {
-      // console.log('drawRectangleMark getRadius', obj.getBounds());
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: obj.getBounds().northeast, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="1" class="ms_marker_opt ms_marker_rectang"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.rectangle[sid]) {
-        this.drawObj.rectangle[sid].marker = marker;
+        this.drawTypes.rectangle = {
+          obj: rectangle,
+          editor: rectangleEditor
+        };
       }
     },
     // 折线
     drawPolyline () {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.polyline({
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        strokeWeight: 2,
-        // 线样式还支持 'dashed'
-        strokeStyle: "solid",
-        zIndex: this.zIndex
-        // strokeStyle是dashed时有效
-        // strokeDasharray: [10, 5],
-      });
-    },
-    drawPolylineMark (sid, obj) {
-      // console.log('drawRectangleMark getRadius', obj.getBounds());
-      let p = obj.getPath()[obj.getPath().length - 1];
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: p, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="3" class="ms_marker_opt ms_marker_polyline"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.polyline[sid]) {
-        this.drawObj.polyline[sid].marker = marker;
+      if (this.drawTypes.polyline !== null) {
+        this.closeDraw(3);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var path = [
+          [oCneter.lng - 0.008, oCneter.lat],
+          [oCneter.lng + 0.008, oCneter.lat]
+        ];
+        var polyline = new window.AMap.Polyline({
+          path: path,
+          isOutline: true,
+          outlineColor: '#ffeeff',
+          borderWeight: 3,
+          strokeColor: "#3366FF", 
+          strokeOpacity: 1,
+          strokeWeight: 3,
+          // 折线样式还支持 'dashed'
+          strokeStyle: "solid",
+          // strokeStyle是dashed时有效
+          strokeDasharray: [10, 5],
+          lineJoin: 'round',
+          lineCap: 'round',
+          zIndex: 50,
+        });
+        polyline.setMap(this.amap);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([ polyline ]);
+        var polyEditor = new window.AMap.PolyEditor(this.amap, polyline);
+        polyEditor.on('end', function(event) {
+          // log.info('触发事件： end')
+          // event.target 即为编辑后的折线对象
+        });
+        polyEditor.open();
+        this.drawTypes.polyline = {
+          obj: polyline,
+          editor: polyEditor
+        };
       }
     },
     // 多边形
     drawPolygon () {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.polygon({
-        strokeColor: "#FA453A",
-        strokeOpacity: 1,
-        bubble: true,
-        strokeWeight: 1,
-        fillColor: "#FA453A",
-        fillOpacity: 0.2,
-        isRing: false,
-        zIndex: this.zIndex,
-      });
-    },
-    drawPolygonMark (sid, obj) {
-      console.log('drawPolygonMark getPath', obj.getPath());
-      let p = obj.getPath()[obj.getPath().length - 1];
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: p, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="4" class="ms_marker_opt ms_marker_polygon"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.polygon[sid]) {
-        this.drawObj.polygon[sid].marker = marker;
+      if (this.drawTypes.polygon !== null) {
+        this.closeDraw(4);
+      } else {
+        let oCneter = this.amap.getCenter();
+        var path = [
+          [oCneter.lng - 0.005, oCneter.lat - 0.005],
+          [oCneter.lng + 0.005, oCneter.lat - 0.005],
+          [oCneter.lng + 0.005, oCneter.lat + 0.005],
+          [oCneter.lng - 0.005, oCneter.lat + 0.005]
+        ];
+        let polygon = new window.AMap.Polygon({
+          path: path,
+          strokeColor: "#FA453A", 
+          strokeOpacity: 1,
+          strokeWeight: 1,
+          // strokeOpacity: 0.2,
+          fillOpacity: 0.2,
+          // strokeStyle: 'dashed',
+          // strokeDasharray: [10, 10], 
+          // 线样式还支持 'dashed'
+          fillColor: '#FA453A',
+          zIndex: 50,
+        });
+        this.amap.add(polygon);
+        // 缩放地图到合适的视野级别
+        this.amap.setFitView([ polygon ]);
+
+        var polyEditor = new window.AMap.PolyEditor(this.amap, polygon);
+        polyEditor.on('end', function(event) {
+          // log.info('触发事件： end')
+          // event.target 即为编辑后的多边形对象
+        });
+        polyEditor.open();
+        this.drawTypes.polygon = {
+          obj: polygon,
+          editor: polyEditor
+        };
+
+        console.log('polygon', polygon);
       }
     },
-
-    drawCircle10km () {
-      this.amap.setDefaultCursor("crosshair");
-      this.amap.on('click', this.drawCircle10kmClick);
-    },
-    drawCircle10kmClick (e) {
-      console.log('drawCircle10kmClick', e);
-      // e.lnglat.getLng()+','+e.lnglat.getLat()
-      let circle = new AMap.Circle({
-        center: e.lnglat,
-        radius: 1000 * 10, //半径
-        borderWeight: 3,
-        strokeColor: "#FA453A", 
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        // strokeOpacity: 0.2,
-        fillOpacity: 0.2,
-        // strokeStyle: 'dashed',
-        // strokeDasharray: [10, 10], 
-        // 线样式还支持 'dashed'
-        fillColor: '#FA453A',
-        zIndex: 50,
-      });
-      circle.setMap(this.amap);
-      // 缩放地图到合适的视野级别
-      this.amap.setFitView([ circle ]);
-      let _sid = random14();
-      this.drawObj.circle10km[_sid] = {};
-      this.drawObj.circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
-      this.drawActiveType = 0;
-      this.amap.off('click', this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
-    },
-    drawCircle10kmMark (sid, obj) {
-      // console.log('circle', obj);
-      // console.log('circle getRadius', obj.getBounds());
-      // console.log('circle getRadius', obj.getBounds().getNorthEast());
-      // console.log('circle center', obj.getCenter());
-      let ne = obj.getBounds().getNorthEast();
-      let c = obj.getCenter()
-      let _q = c.Q + (ne.Q - c.Q) * 0.66667;
-      let _p = c.P + (ne.P - c.P) * 0.7444444;
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        position: [_q, _p], // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="5" class="ms_marker_opt ms_marker_circle"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.circle10km[sid]) {
-        this.drawObj.circle10km[sid].marker = marker;
-      }
-    },
-
     closeDraw (drawType) {
       if (drawType === 1 && this.drawTypes.rectangle !== null) {
         if (this.drawTypes.rectangle.editor) { this.drawTypes.rectangle.editor.close(); }
@@ -695,36 +550,6 @@ export default {
     background-image: url(../../assets/img/vehicle/cut5.png);
     &:hover { background-image: url(../../assets/img/vehicle/cut5m.png); }
   }
-}
-.ms_marker_opt {
-  position: relative; width: 0; height: 0;
-  > div {
-    position: absolute;
-    padding: 0;
-    word-break:keep-all; white-space:nowrap;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    > span { display: inline-block; }
-    > i {
-      display: inline-block;
-      padding: 0 2px;
-      font-size: 16px;
-    }
-    > .el-icon-check {
-      color: #67C23A;
-    }
-    > .el-icon-close {
-      color: #FA453A;
-    }
-    > .el-icon-edit {
-      color: #E6A23C; font-size: 19px;
-    }
-  }
-  &.ms_marker_rectang { right: 10px; top: -10px; }
-  &.ms_marker_circle { left: 0; top: -10px; }
-  &.ms_marker_polyline { left: -10px; top: -10px; }
-  &.ms_marker_polygon { left: -10px; top: -10px; }
 }
 </style>
 <style lang="scss">

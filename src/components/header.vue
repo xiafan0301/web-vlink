@@ -1,11 +1,12 @@
 <template>
   <div class="vl_header">
-    <div class="hd_log vl_icon vl_icon_logo">
+    <!-- <div class="hd_log vl_icon vl_icon_logo"> -->
+    <div class="hd_log">
     </div>
     <!-- <div class="hd_log vl_ymx_logo">
     </div> -->
     <div class="hd_user">
-      <img src="../assets/img/temp/vl_photo.png" alt="">
+      <!-- <img src="../assets/img/temp/vl_photo.png" alt=""> -->
       <el-popover
         popper-class="person_info"
         placement="bottom"
@@ -116,9 +117,15 @@
     </div>
     <ul class="hd_menu">
       <li>
-        <router-link :to="{name: 'video'}">
-          <i class="vl_icon vl_icon_001"></i>
-          <span>视频查看</span>
+        <router-link :to="{name: 'vehicle'}">
+          <i class="vl_icon vl_icon_004"></i>
+          <span>车辆侦查</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'portrait'}">
+          <i class="vl_icon vl_icon_005"></i>
+          <span>人像侦查</span>
         </router-link>
       </li>
       <li>
@@ -128,9 +135,9 @@
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'event'}">
-          <i class="vl_icon vl_icon_003"></i>
-          <span>事件管理</span>
+        <router-link :to="{name: 'video'}">
+          <i class="vl_icon vl_icon_001"></i>
+          <span>视频监控</span>
         </router-link>
       </li>
       <li>
@@ -140,15 +147,9 @@
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'vehicle'}">
-          <i class="vl_icon vl_icon_004"></i>
-          <span>车辆侦查</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'portrait'}">
-          <i class="vl_icon vl_icon_005"></i>
-          <span>人像检索</span>
+        <router-link :to="{name: 'event'}">
+          <i class="vl_icon vl_icon_003"></i>
+          <span>事件管理</span>
         </router-link>
       </li>
       <li>
@@ -498,6 +499,7 @@ export default {
     float: left;
     width: 170px; height:  48px;
     margin: 26px 20px 0 20px;
+    background: url(../assets/img/logo_ysd.png) center center no-repeat;
   }
   > .hd_menu {
     overflow: hidden;

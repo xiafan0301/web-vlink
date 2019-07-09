@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆查询</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/clcx' }">车辆查询</el-breadcrumb-item>
         <el-breadcrumb-item>过车详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>

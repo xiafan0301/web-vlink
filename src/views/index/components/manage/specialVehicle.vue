@@ -27,7 +27,7 @@
     <div class="vehicle_right">
       <div class="search_right_box">
         <el-form :inline="true" :model="searchForm" class="search_form clearfix" ref="searchForm">
-          <el-form-item prop="idType">
+          <el-form-item prop="dateTime">
             <el-date-picker
               style="width: 250px;"
               v-model="searchForm.dateTime"
@@ -1073,7 +1073,7 @@ export default {
             }
             let a = document.createElement('a');
             a.setAttribute('href', res.data.fileUrl);
-            a.setAttribute('target', '_blank');
+            a.setAttribute('target', '_self');
             a.setAttribute('id', 'export_id');
 
             document.body.appendChild(a);
