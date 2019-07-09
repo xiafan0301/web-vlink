@@ -282,7 +282,7 @@ export default {
           }
         },
         tickLine: {
-          alignWithLabel: false,
+          alignWithLabel: true,
           length: 0
         },
         line: {
@@ -348,7 +348,7 @@ export default {
           }
         },
         tickLine: {
-          alignWithLabel: false,
+          alignWithLabel: true,
           length: 0
         },
         line: {
@@ -420,7 +420,7 @@ export default {
           });
           if(this.queryForm.statementType === 3) {
             for(let item of this.chartData) {
-              item['date'] = formatDate(item.data,'MM-dd')
+              item['date'] = formatDate(item.date,'yy-MM-dd')
             }
           }
           if (this.chartData.length > 0) {
