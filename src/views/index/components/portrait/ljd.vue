@@ -716,7 +716,7 @@ export default {
     getAllDevice() {
       getAllDevice().then(res => {
         // console.log(res);
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allDevice = res.data;
         }
       });
@@ -726,7 +726,7 @@ export default {
       getAllBayonetList({
         areaId: mapXupuxian.adcode
       }).then(res => {
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allBayonet = res.data;
         }
       });
