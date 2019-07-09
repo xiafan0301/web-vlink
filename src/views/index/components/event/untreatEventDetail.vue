@@ -3,7 +3,7 @@
     <div class="untreat-detail">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件处理</el-breadcrumb-item>
           <el-breadcrumb-item>事件详情</el-breadcrumb-item>
         </el-breadcrumb>
       </div>

@@ -67,6 +67,16 @@
               ></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="运营公司:" prop="brandNo">
+            <el-select style="width: 40%;" v-model="addCar.brandNo" placeholder="请选择运营公司">
+              <el-option
+                v-for="(item, index) in operateCompanyList"
+                :key="index"
+                :label="item.enumValue"
+                :value="item.enumField"
+              ></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="设备账号:" prop="deviceAccount">
             <el-input style="width: 40%;" placeholder="请输入设备账号" v-model="addCar.deviceAccount"></el-input>
           </el-form-item>
@@ -104,21 +114,15 @@ export default {
         numberType: null, // 号牌种类
         numberColor: null, // 号牌颜色
         organId: null, // 所属单位
+        brandNo: null, // 运营公司
         deviceAccount: null, // 设备账号
         devicePassword: null // 访问密码
       },
       rules: {
         vehicleNumber: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' },
-          // { max: 10, message: '最多输入10个字', trigger: 'blur' },
           { validator: checkPlateNumber, trigger: 'blur' }
         ],
-        // transportNo: [
-        //   { max: 50, message: '最多输入50个字', trigger: 'blur'}
-        // ],
-        // identityNo: [
-        //   { max: 17, message: '最多输入17个字', trigger: 'blur'}
-        // ],
         vehicleType: [
           { required: true, message: '该项内容不能为空', trigger: 'blur' }
         ],
@@ -148,6 +152,7 @@ export default {
       userInfo: {}, // 用户信息
       numberTypeList: [], // 号牌种类
       departmentList: [], // 部门列表
+      operateCompanyList: [], // 运营公司列表
     }
   },
   mounted () {
@@ -156,9 +161,20 @@ export default {
     this.getVehicleTypeList();
     this.getVehicleColor();
     this.getNumberTypeList();
+    this.getOperateCompanyList();
     this.getDepartList();
   },
   methods: {
+    // 获取运营公司列表
+    getOperateCompanyList () {
+      const operate = dataList.operateCompany;
+      getDiciData(operate)
+        .then(res => {
+          if (res) {
+            this.operateCompanyList = res.data;
+          }
+        })
+    },
     // 获取号牌种类列表
     getNumberTypeList () {
       const type = dataList.numberType;
@@ -194,15 +210,20 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
+            });
+            this.departmentList.map(val => {
+              if (val.uid == this.$route.query.organObj.uid) {
+                this.addCar.organId = val.uid;
+              } 
             });
           }
         })
@@ -249,6 +270,7 @@ export default {
 
 <style lang="scss" scoped>
 .add_car {
+  margin-bottom: 100px;
   .add_box {
     margin: 0 10px 20px;
     // padding: 10px;

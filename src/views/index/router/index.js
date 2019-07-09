@@ -22,6 +22,10 @@ import routerAlarm from './router.alarm.js'
 import routerManage from './router.manage.js'
 // 任务板块 router
 import routerTask from './router.task.js'
+// 车辆侦察 router
+import routerVehicle from './router.vehicle.js'
+// 车辆侦察 router
+import routerPortrait from './router.portrait.js'
 
 Vue.use(VueRouter)
 const router = new VueRouter({
@@ -29,17 +33,13 @@ const router = new VueRouter({
   base: process.env.NODE_ENV === 'production' ? ('/' + process.env.VUE_APP_PROJECTNAME) : '',
   routes: [{
       path: '*',
-      redirect: {
-        name: 'index'
-      }
+      redirect: { name: 'index' }
     }, // 404
     {
       path: '/',
       name: 'index',
       component: () => import('@/views/index/components/default.vue'),
-      redirect: {
-        name: 'video'
-      },
+      redirect: { name: 'vehicle' },
       children: [
         routerVideo,
         routerMap,
@@ -50,7 +50,9 @@ const router = new VueRouter({
         routerMessage,
         routerAlarm,
         routerManage,
-        routerTask
+        routerTask,
+        routerVehicle,
+        routerPortrait
       ]
     }, {
       path: '/login',
@@ -75,28 +77,34 @@ const router = new VueRouter({
         unrequireLogin: true
       }
     }, {
-      path: '/pc',
-      name: 'pc',
-      component: () => import('@/views/index/components/webrtcTest.vue')
+      path: '/share',
+      name: 'share',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/appshare/share.vue')
+    }, {
+      path: '/vehicle-report-save',
+      name: 'vehicle_report_save',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/vehicle/analysis/reportSave.vue')
     }
   ]
 })
-router.beforeEach((to, from, next) => {
-  // 判断该路由是否不需要登录权限
-  if (to.meta && to.meta.unrequireLogin) {
-    // 不需要登陆，直接走
-    next()
-  } else {
-    // 需要登陆
-    // 通过vuex state获取当前的token是否存在
-    if (store.state.loginToken) {
-      next()
-    } else {
-      next({
-        name: 'login',
-        // query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
-      })
-    } 
-  }
-})
+// router.beforeEach((to, from, next) => {
+//   // 判断该路由是否不需要登录权限
+//   if (to.meta && to.meta.unrequireLogin) {
+//     // 不需要登陆，直接走
+//     next()
+//   } else {
+//     // 需要登陆
+//     // 通过vuex state获取当前的token是否存在
+//     if (store.state.loginToken) {
+//       next()
+//     } else {
+//       next({
+//         name: 'login',
+//         // query: {redirect: to.fullPath}  // 将跳转的路由path作为参数，登录成功后跳转到该路由
+//       })
+//     } 
+//   }
+// })
 export default router

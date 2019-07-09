@@ -1,29 +1,35 @@
 const dataList = {
-  eventType: 20, // 事件类型
+  imgId: 1, // 图片id
+  videoId: 2, // 视频id
   eventLevel: 2, // 事件等级
+  fileId: 3, // 文件id
   handleUnit: 3, // 处理单位
   identity: 4, // 上报者身份
   eventSource: 5, // 事件来源  中心端--1 app端--2
+  sourceType: 5, //资源来源
   participateType: 6, // 参与类型
-  vehicleColor: 17, // 车身颜色
-  vehicleType: 31, // 车辆类型
-  numberType: 32, // 号牌种类
-  memberJob: 42, // 成员职位
   eventStatus: 7, // 事件状态
   auditStatus: 8, // 审核状态
   autoCheck: 10, // 自动审核政务人员
-  ctcStatus: 26, // 调度事件状态
+  alarmLevel: 11, //告警级别
   planType: 12, // 预案类型
   rejectReason: 13, // 驳回原因
-  imgId: 1, // 图片id
-  videoId: 2, // 视频id
-  fileId: 3, // 文件id
+  eventType: 20, // 事件类型
   distanceId: 23, // 推送距离
-  taskType: 25, // 任务类型
   taskStatus: 24, // 任务状态,
-  alarmLevel: 11, //告警级别
-  sourceType: 5, //资源来源
-  intelCharac: 38 // 智能特性
+  taskType: 25, // 任务类型
+  ctcStatus: 26, // 调度事件状态
+  intelCharac: 38, // 智能特性
+  memberJob: 42, // 成员职位
+  operateCompany: 43, // 运营公司
+  ownership: 48, //号牌归属
+  vehicleType: 44, // 车辆类型
+  numberType: 45, // 号牌种类
+  licensePlateColor: 46, //车牌颜色
+  vehicleColor: 47, // 车身颜色
+  plateColor: 46,     //号牌颜色
+  plateType: 45, // 号牌类型
+  carColor: 47, // 车辆颜色
 }
 // 处理方式
 const handeMethods = {
@@ -48,5 +54,9 @@ const proccessEventType = {
   acceptId: 4, // 受理
   feedbackId: 5 // 反馈
 }
+const cityCode = [
+  '京','津','沪','冀','晋','蒙','辽','吉','黑','苏','浙','皖','闽','赣','鲁','豫','鄂','湘','粤','桂','琼','川','贵','云','渝','藏','陕','甘','青','宁','新','港','澳','台'
+]
 
-export { dataList, handeMethods, operationType, proccessEventType };
+
+export { dataList, handeMethods, operationType, proccessEventType,cityCode };

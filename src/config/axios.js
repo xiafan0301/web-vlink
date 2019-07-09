@@ -44,6 +44,7 @@ service.interceptors.request.use((config) => {
 service.interceptors.response.use(function (response) {
   // console.log('response', response)
   if (response && response.data) {
+    const contenType = response.headers['content-type'];
     let _data = response.data;
     if (_data.code === '00000000') {
       return _data;
@@ -51,8 +52,11 @@ service.interceptors.response.use(function (response) {
       store.commit('setLoginToken', {
         loginToken: false
       });
+      return null;
       // 未登录
       // ElementUI.Message({ message: _data.viewMsg, type: 'error', customClass: 'request_tip' });
+    } else if ( contenType === 'application/msexcel') {
+      return _data;
     } else {
       let msg = '系统繁忙，请稍后再试！';
       if (_data.viewMsg) {
@@ -65,15 +69,8 @@ service.interceptors.response.use(function (response) {
     return null;
   }
 }, function (error) {
-  let errorMsg = '<span style="font-weight: bold; font-size: 13px; display: inline-block; padding-bottom: 5px;">请求失败</span><br/>' +
-    '<span>请刷新页面重新操作，如果问题依旧存在，请联系管理员</span>';
-  // 提示
-  ElementUI.Message({
-    message: errorMsg,
-    dangerouslyUseHTMLString: true,
-    type: 'error',
-    customClass: 'request_tip'
-  });
+  let msg = '系统繁忙，请稍后再试！';
+  ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
   return Promise.reject(error);
 });
 Vue.prototype.axios = service;

@@ -1,9 +1,9 @@
 <template>
-<vue-scroll>
+<!-- <vue-scroll> -->
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件处理</el-breadcrumb-item>
         <el-breadcrumb-item>事件详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -280,7 +280,7 @@
     </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
-</vue-scroll>
+<!-- </vue-scroll> -->
 </template>
 <script>
 import EventBasic from './components/eventBasic';
@@ -505,7 +505,8 @@ export default {
 <style lang="scss" scoped>
 .treating-detail {
   width: 100%;
-  // margin-bottom: 20px;
+  height: 100%;
+  overflow-y: scroll;
   .content-box {
     width: 100%;
     padding: 0 20px;

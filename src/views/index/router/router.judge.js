@@ -3,9 +3,7 @@ export default {
   path: '/judge',
   name: 'judge',
   component: () => import('@/views/index/components/judge/judge.vue'),
-  redirect: {
-    name: 'trajectory_collide'
-  },
+  redirect: { name: 'trajectory_collide' },
   children: [{
       path: 'trajectoryCollide',
       name: 'trajectory_collide',

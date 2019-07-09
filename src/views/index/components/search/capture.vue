@@ -608,6 +608,7 @@
           if (res) {
             console.log(res);
             this.strucInfoList = res.data.list;
+            console.log(JSON.stringify(this.strucInfoList), 'this.strucInfoList')
             this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = res.data.total;
             this.searching = false;
@@ -630,6 +631,7 @@
         this.curImgIndex = index;
         this.strucDetailDialog = true;
         this.sturcDetail = data;
+        console.log(JSON.stringify(data) , 'data')
         this.drawPoint(data);
       },
       imgListTap (data, index) {

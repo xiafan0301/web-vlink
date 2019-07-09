@@ -5,7 +5,7 @@
         <router-link :to="{name: 'event_audit'}">受理核实</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'event_manage'}">事件管理</router-link>
+        <router-link :to="{name: 'event_manage'}">事件处理</router-link>
       </li>
       <li>
         <router-link :to="{name: 'event_ctc'}">调度指挥</router-link>
@@ -18,7 +18,9 @@
       </li>
     </ul>
     <div class="eve_content">
-      <router-view></router-view>
+      <!-- <vue-scroll> -->
+        <router-view></router-view>
+      <!-- </vue-scroll> -->
     </div>
   </div>
 </template>
@@ -39,6 +41,7 @@ export default {
   > .eve_content {
     height: 100%;
     padding-left: 200px;
+    // overflow: scroll;
   }
 }
 </style>

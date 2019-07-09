@@ -73,7 +73,17 @@
                   >
                   </el-option>
               </el-select>
-              <el-input type="text" style="width: 80%;margin-top:20px;" id="inputAddress" placeholder="请输入详细地址" v-model="editRoom.address" @input="changeAddress"></el-input>
+              <el-input 
+                type="text" 
+                style="width: 80%;margin-top:20px;"
+                :class="[isShowAddressTip ? 'input_address' : '']"  
+                id="inputAddress" 
+                placeholder="请输入详细地址" 
+                v-model="editRoom.address" 
+                @blur="handleBlurAddress"
+                @input="changeAddress">
+              </el-input>
+              <span class="address_tip" v-show="isShowAddressTip">请输入正确的地址</span>
               <div class="map_select" @click="initMap">
                 <i class="vl_icon vl_icon_archives_4"></i>
                 <span>地图选择</span>
@@ -111,6 +121,7 @@ import { updateRoom, getRoomDetail } from '@/views/index/api/api.archives.js';
 export default {
   data () {
     return {
+      isShowAddressTip: false, // 是否显示地址错误提示
       isShowClose: false, // 是否显示关闭地图按钮
       isEditLoading: false, // 添加加载中
       editRoom: {
@@ -176,6 +187,29 @@ export default {
     this.getDetail();
   },
   methods: {
+    // 事件地址失焦
+    handleBlurAddress () {
+      let _this = this;
+      if (!_this.editRoom.address) {
+        this.isShowAddressTip = false;
+      } else {
+        let placeSearch = new window.AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          // city: '010'
+        });
+        placeSearch.search(_this.editRoom.address, function (status, result) {
+          // 查询成功时，result即对应匹配的POI信息
+          if (status === 'complete' && result.info === 'OK') {
+            _this.isShowAddressTip = false;
+  
+            _this.editRoom.longitude = result.poiList.pois[0].location.lng;
+            _this.editRoom.latitude = result.poiList.pois[0].location.lat;
+          } else {
+            _this.isShowAddressTip = true;
+          }
+        })
+      }
+    },
     // 获取点室详情
     getDetail () {
       const roomId = this.$route.query.id;
@@ -183,6 +217,11 @@ export default {
         getRoomDetail(roomId)
           .then(res => {
             if (res) {
+              let province = res.data.province;
+              let city = res.data.city;
+              let region = res.data.region;
+              let street = res.data.street;
+
               this.editRoom.uid = res.data.uid;
               this.editRoom.desci = res.data.desci;
               this.editRoom.latitude = res.data.latitude;
@@ -196,13 +235,16 @@ export default {
               this.editRoom.roomName = res.data.roomName;
 
               this.editRoom.address = res.data.address;
-              this.editRoom.province = res.data.province;
-              this.editRoom.city = res.data.city;
-              this.editRoom.region = res.data.region;
-              this.editRoom.street = res.data.street;
 
+              this.editRoom.province = province.toString();
+              this.editRoom.city = city.toString();
+              this.editRoom.region = region.toString();
+              if (street) {
+                this.editRoom.street = street.toString();
+              }
               this.getCountryList();
               this.getCityList();
+              this.getStreetList();
             }
           })
       }
@@ -287,6 +329,10 @@ export default {
     // 事件地址change
     changeAddress () {
       let _this = this;
+      _this.autoInput = new window.AMap.Autocomplete({
+        input: 'inputAddress'
+      });
+      
       window.AMap.event.addListener(_this.autoInput, 'select', function (e) {
         _this.editRoom.eventAddress = e.poi.name;
         window.AMap.service('AMap.Geocoder', () => {
@@ -356,6 +402,18 @@ export default {
           }
         })
     },
+    // 获取街道数据
+    getStreetList () {
+      const params = {
+        parentUid: this.editRoom.region
+      }
+      apiAreaList(params)
+        .then(res => {
+          if (res) {
+            this.streetList = res.data;
+          }
+        })
+    },
     // 省 change
     handleProvinceData (id) {
       this.areaName = '市';
@@ -390,13 +448,13 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
             });
@@ -466,6 +524,20 @@ export default {
           width: 100%;
           .address_select {
             position: relative;
+            .input_address {
+              border-color: #F56C6C;
+            }
+            .address_tip {
+              position: absolute;
+              display: block;
+              color: #F56C6C;
+              font-size: 12px;
+              line-height: 1;
+              padding-top: 4px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
             .map_select {
               // width: calc(100% - 85%);
               position: absolute;

@@ -8,7 +8,10 @@
         <router-link :to="{name: 'basic_info'}">基础信息库</router-link>
       </li>
       <li>
-        <router-link :to="{name: 'manage_department'}">部门架构</router-link>
+        <router-link :to="{name: 'special_ehicle'}">特殊车辆管理</router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'archives_manage'}">档案管理</router-link>
       </li>
       <li>
         <router-link :to="{name: 'user'}">用户管理</router-link>
@@ -24,9 +27,6 @@
       </li>
       <li>
         <router-link :to="{name: 'version_manage'}">APP版本管理</router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'archives_manage'}">档案管理</router-link>
       </li>
     </ul>
     <div class="manage_content">

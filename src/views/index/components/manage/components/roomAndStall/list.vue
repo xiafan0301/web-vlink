@@ -2,16 +2,6 @@
   <div class="room_stall">
     <div class="search_box">
       <el-form :inline="true" :model="searchForm" class="search_form" ref="searchForm">
-        <el-form-item prop="organId">
-          <el-select  style="width: 240px;" v-model="searchForm.organId" placeholder="所属单位">
-            <el-option
-              v-for="(item, index) in departmentList"
-              :key="index"
-              :label="item.organName"
-              :value="item.uid"
-            ></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item prop="isEnable">
           <el-select style="width: 240px;" v-model="searchForm.isEnable" placeholder="使用状况">
             <el-option label="启用" :value='1'></el-option>
@@ -47,35 +37,53 @@
           prop="roomNumber"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.roomNumber && scope.row.roomNumber ? scope.row.roomNumber : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="名称"
           prop="roomName"
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.roomName && scope.row.roomName ? scope.row.roomName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="地址"
           prop="address"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.address && scope.row.address ? scope.row.address : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="所属单位"
           prop="organName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.organName && scope.row.organName ? scope.row.organName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="责任人"
           prop="dutyUserName"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.dutyUserName && scope.row.dutyUserName ? scope.row.dutyUserName : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="电话"
           prop="userMobile"
           show-overflow-tooltip
           >
+          <template slot-scope="scope">
+            <span>{{scope.row.userMobile && scope.row.userMobile ? scope.row.userMobile : '-'}}</span>
+          </template>
         </el-table-column>
         <el-table-column
           label="使用状况"
@@ -125,62 +133,50 @@
 </template>
 <script>
 import { getRoomData, delRoom } from '@/views/index/api/api.archives.js';
-import { getDepartmentList } from '@/views/index/api/api.manage.js';
 export default {
   data () {
-    // const oragnId = this.userInfo.organList[0].uid;
     return {
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       deleteDialog: false, // 删除弹出框
       isDeleteLoading: false, // 删除加载中
       searchForm: {
-        organId: null,
+        // organId: null,
         isEnable: null,
       },
       dataList: [], // 列表数据
       userInfo: {}, // 用户信息
-      departmentList: [], // 部门列表
       deleteId: null, // 要删除的点室id
     }
   },
   watch: {
-    currentOrganId () {
-      this.getList();
+    currentOrganObj () {
+      if (this.$store.state.currentOrganObj) {
+        this.getList();
+      }
     }
   },
   computed: {
-    currentOrganId () {
-      return this.$store.state.currentOrganId;
+    currentOrganObj () {
+      return this.$store.state.currentOrganObj;
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
-    this.getDepartList();
+    // this.getDepartList();
     this.getList();
   },
   methods: {
-    // 获取当前部门及子级部门
-    getDepartList () {
-      const params = {
-        'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
-        pageSize: 0
-      };
-      getDepartmentList(params)
-        .then(res => {
-          if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
-            res.data.list.map(item => {
-              this.departmentList.push(item);
-            });
-          }
-        })
-    },
     // 获取列表数据
     getList () {
+      let organId = null;
+      if (this.$store.state.currentOrganObj) {
+        organId = this.$store.state.currentOrganObj.uid;
+      } else {
+        organId = this.userInfo.organList[0].uid;
+      }
       const params = {
-        'where.organId': this.$store.state.currentOrganId,
+        'where.organId': organId,
         'where.isEnable': this.searchForm.isEnable,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -206,15 +202,33 @@ export default {
     },
     // 跳至详情页
     skipSelectDetail (obj) {
-      this.$router.push({name: 'room_detail', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'room_detail', query: { id: obj.uid, organObj: organObj }});
     },
     // 跳至新增点室页面
     skipAddPage () {
-      this.$router.push({name: 'room_add'});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'room_add', query: { organObj: organObj }});
     },
     // 跳至编辑页面
     skipEditPage (obj) {
-      this.$router.push({name: 'room_edit', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'room_edit', query: { id: obj.uid, organObj: organObj }});
     },
     // 显示删除弹出框
     showDeleteDialog (obj) {

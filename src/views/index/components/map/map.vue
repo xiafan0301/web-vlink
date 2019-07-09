@@ -172,8 +172,6 @@
     </el-dialog>
     <!--全屏视频监控-->
     <div v-if="showBigVideo" is="flvplayer" class="vl_map_full_video"  @playerClose="playerClose" :index="0" :oData="oData" :showFullScreen="true" :bResize="bResize" :oConfig="{sign: true}"></div>
-    <!--语音视频通话-->
-    <div is="webrtc" @wrStateEmit="wrStateEmit" @wrClose="wrClose" @wrSwitchCall="wrSwitchCall" @exceptCalling="exceptCalling" :oAdd="oAdd" :oDel="oDel"></div>
     <!--通话时长-->
     <p :class="'vl_map_time_' + item._id" v-for="item in isCalling"  :key="item.id">
       {{item.minute &lt; 10 ? '0' + item.minute : item.minute}}:{{item.second &lt; 10 ? '0' + item.second : item.second}}
@@ -182,13 +180,12 @@
 </template>
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
-import webrtc from '@/components/common/webrtc.vue';
 import {formatDate, h2canvas, objDeepCopy, random14} from '../../../../utils/util.js';
 import {MapGETmonitorList, MapGETsignList, MapDELETEmapSign, MapDELETEmapSigns, MapUPDATEEmapSign, MapPOSTmapSign, MapGetBayonetInfo} from '../../api/api.map.js';
 import {apiVideoPlay} from "@/views/index/api/api.video.js";
 import {getAlarmListByDev} from '@/views/index/api/api.control.js';
 export default {
-  components: {flvplayer, webrtc},
+  components: {flvplayer},
   data () {
     return {
       defaultExpand: [],
@@ -280,14 +277,29 @@ export default {
 //      isPc: false,
 //      telNo: null,
 //      curCall: {}
-      oAdd: {},
-      oDel: {},
-      callingList: [] // 通话状态下的人员列表，{}包含
+//      oAdd: {},
+//      oDel: {},
+//      callingList: [] // 通话状态下的人员列表，{}包含
     }
   },
   computed: {
     isCalling () {
-      return this.callingList.filter(x => x.isTime)
+      return this.$store.state.callingList.filter(x => x.isTime)
+    },
+    oAdd () {
+      return this.$store.state.oAdd;
+    },
+    oDel () {
+      return this.$store.state.oDel;
+    },
+    callingList () {
+      return this.$store.state.callingList;
+    },
+    stateHandler () {
+      return this.$store.state.stateHandler;
+    },
+    switchCall () {
+      return this.$store.state.switchCall;
     }
   },
   created () {
@@ -310,7 +322,7 @@ export default {
           }, 0)
         })
         this.mapTypeList.forEach(u => {
-          this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+          this.operClassToEL(this.marks[u], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
         })
         this.$refs.mapLeftTree.filter(val);
       }
@@ -350,7 +362,7 @@ export default {
       arr.forEach(u => {
         this.updateNumberss(true, u, bool);
         setTimeout(() => {
-          this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+          this.operClassToEL(this.marks[u], this.hideClass, bool, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
         }, 0)
       })
       // 更新子菜单勾选状态
@@ -363,6 +375,29 @@ export default {
           this.constObj[x].supTypeList = [];
         }
       })
+    },
+    // 视频通话相关
+    stateHandler (oData) {
+      console.log('----------------------------->', oData)
+      if (oData.state > 20) {
+        if (oData.mark) {
+          this.map.remove(oData.mark);
+        }
+        $('#' + oData._mid).removeClass('vl_icon_map_mark_calling');
+      } else if (oData.state === 20) {
+        let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
+        setTimeout(() => {
+          $('#' + oData._id).append(domT[0])
+        }, 1000)
+      }
+    },
+    switchCall (data) {
+      let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
+       $('#' + data._id + ' div').removeClass(_sclass);
+       $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
+    },
+    oAdd () {
+      this.watchCalling();
     }
   },
   mounted () {
@@ -379,14 +414,15 @@ export default {
     _this.mouseTool = mouseTool;
     // 添加事件
     window.AMap.event.addListener(mouseTool, 'draw', function (e) {
-      if(!e.obj.C.isRing) {
+      console.log(e)
+      if(!e.obj.B.isRing) {
         if (_this.selAreaPolygon) {_this.map.remove(_this.selAreaPolygon);}
         if (_this.delSelAreaIcon) {_this.map.remove(_this.delSelAreaIcon);}
         _this.selAreaPolygon = e.obj;
         // delete icon
         _this.delSelAreaIcon = new window.AMap.Marker({
           map: _this.map,
-          position: e.obj.C.path[e.obj.C.path.length - 1],
+          position: e.obj.getPath()[e.obj.getPath().length - 1],
           offset: new window.AMap.Pixel(-15, -16),
           draggable: false, // 是否可拖动
           content: '<div  class="vl_map_hover"><span class="del_area_icon el-icon-circle-close"></span></div>'
@@ -400,7 +436,7 @@ export default {
                 position: [y.longitude, y.latitude]
               })
               let point = m.getPosition();
-              if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path) && y.isShow) {
+              if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath()) && y.isShow) {
                 y['isInArea'] = true;
               } else {
                 y['isInArea'] = false;
@@ -416,7 +452,7 @@ export default {
                   position: [y.longitude, y.latitude]
                 })
                 let point = m.getPosition();
-                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.C.path)) {
+                if (window.AMap.GeometryUtil.isPointInRing(point, _this.selAreaPolygon.getPath())) {
                   y['isInArea'] = true;
                 } else {
                   y['isInArea'] = false;
@@ -434,7 +470,7 @@ export default {
         }, 30)
         // 给范围内的marker加class
         _this.mapTypeList.forEach(u => {
-          _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+          _this.operClassToEL(_this.marks[u], _this.hideClass, false, true, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
         })
         _this.activeType = 0;
         _this.resetTools(1)
@@ -446,7 +482,9 @@ export default {
     _this.mapMarkerEvents();
     setTimeout(() => {
       this.getAlarmListByDev();
-    }, 12000)
+    }, 12000);
+
+
   },
   methods: {
     filterMapTree () {
@@ -473,7 +511,7 @@ export default {
         this.updateNumberss();
         this.marks.forEach((x, _index) => {
           if (_index < 4) {
-            this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+            this.operClassToEL(x, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
           }
         })
         console.log(this.mapTreeData[0].infoList[9])
@@ -620,7 +658,7 @@ export default {
             if (this.hoverWindow ){this.hoverWindow.close()}
             this.markList = this.markList.filter(x => x.uid !== this.curSignObj.uid);
             this.marks[4].forEach(x => {
-              if (x.Le.extData.uid === this.curSignObj.uid) {
+              if (x.getExtData().uid === this.curSignObj.uid) {
                 this.map.remove(x)
               }
             })
@@ -786,19 +824,22 @@ export default {
               this.defaultExpand.push(res.data.areaName);
               res.data.areaTreeList.push(__obj);
               this.mapTreeData = this.switchData(res.data);
+              console.log('树的数据', this.mapTreeData);
               this.$_hideLoading();
               this.mapMark(this.mapTreeData[0].infoList);
               // this.moveDom();
               this.updateDom();
               // 定时查询车辆数据
               this.carLoop();
+
+              this.watchCalling();
+
             })
           }
         })
     },
     carLoop () {
       this.vehicleTimer = setTimeout(() => {
-        console.log('1')
         this.getVehicel().then(_supData => {
           let _carL = this.mapTreeData[0].infoList.find(x => x.infoName === '车辆');
           _supData = this.objSetItem(_supData, {infoName: 'vehicleNumber', areaType: '5', dataType: 2, isShow: true, longitude: 'gpsLongitude', latitude: 'gpsLatitude', isDrawLine: false});
@@ -851,12 +892,12 @@ export default {
                 });
                 this.carMarks.passedLine.push(passedLine);
               }
+              _carL.carList.splice(oldDIndex, 1);
             } else {
               x['lineArr'] = [[x.gpsLongitude, x.gpsLatitude]];
               // 把新增的车放入地图
               this.mapMark([{infoList:[x]}], true)
             }
-            _carL.carList.splice(oldDIndex, 1);
           })
           // _carL.carList里剩下的是，消失的车子,移除掉
           if (_carL.carList.length) {
@@ -870,8 +911,8 @@ export default {
               }
             })
           }
-          _carL.carList = objDeepCopy(_supData);
-          console.log(this.mapTreeData[0].infoList[9])
+          // _carL.carList = objDeepCopy(_supData);
+          _carL.carList = _supData;
           // 判断顶部车辆有没有勾选
           if (this.mapTypeList.includes(2)) {
             _carL.infoList = [];
@@ -891,6 +932,7 @@ export default {
         this.carLoop();
       }, 5000)
     },
+
     // 路线纠偏
     drivingPath (path) {
       let newPath = [];
@@ -963,7 +1005,7 @@ export default {
         }
         // 都加上markSid , 方便处理移动端发起的通话
         if (!z['markSid']) {
-          z['markSid'] = 'mapMark' + random14();
+          z['markSid'] = 'mapMark' + z['dataType'] + z['uid'];
         }
         return z;
       })
@@ -1015,120 +1057,8 @@ export default {
         })
       })
     },
-    moveDom () {
-      this.$nextTick(() => {
-        let tabDom = document.getElementsByClassName('map_tree_tab');
-        tabDom = Array.from(tabDom);
-        tabDom.forEach(dom => {
-          let parent = dom.parentNode.parentNode.parentNode.parentNode;
-          parent.insertBefore(dom, parent.childNodes[0])
-        })
-      })
-    },
-    switchTab (node, dataType, event) {
-      // 判断 当前dataType是否在mapTypeLit里，
-      if (!this.mapTypeList.includes(dataType)) {
-        return false;
-      }
-      if (event.target.classList.contains('active')) {
-       event.target.classList.remove('active')
-      } else {
-        event.target.classList.add('active')
-      }
-      // 判断dataType 是否在tabActiveList,决定是个node的parent的data的infoList里移除还是添加
-      let key = this.key2Type[dataType];
-      // 找到父级的数据;
-      let curData = {};
-      curData = this.findParentData(node)
-      if (curData.tabActiveList.includes(dataType)) {
-        // 'delete'
-        curData.tabActiveList.splice(curData.tabActiveList.indexOf(dataType), 1);
-        if (curData.tabActiveList.length) {
-          curData.infoList = curData.infoList.filter(u => u.dataType !== dataType);
-          if (curData.infoList.length === 0) {
-            curData.infoList.push({infoName: '无相关数据'})
-          }
-        } else {
-          // '重置'
-          let oldArr = []
-          console.log(this.mapTypeList)
-          this.mapTypeList.forEach(x => {
-            oldArr.push(...curData[this.key2Type[x]])
-          })
-          console.log(oldArr)
-          // let oldArr = [...curData['deviceBasicList'], ...curData['carList'], ...curData['bayonetList'], ...curData['sysUserExtendList']];
-          let ss;
-          if (this.selAreaPolygon) {
-            ss = objDeepCopy(oldArr.filter(y => y.isInArea && y.isShow))
-          } else {
-            ss = objDeepCopy(oldArr.filter(y => y.isShow))
-          }
-          if (ss.length === 0) ss.push({infoName: '无相关数据'})
-          curData.infoList = ss;
-        }
-      } else {
-        // 'add'
-        curData.tabActiveList.push(dataType);
-        if (curData.tabActiveList.length === 1) {
-          // '第一次'
-          let _ar = [];
-          if (curData[key].length && curData[key].find(x => x.isShow)) {
-            if (this.selAreaPolygon) {
-              _ar = objDeepCopy(curData[key].filter(y => y.isInArea))
-            } else {
-              _ar = objDeepCopy(curData[key].filter(y => y.isShow))
-            }
-            _ar.forEach(k => {
-              k.infoName += ' ';
-            })
-            if (_ar.length === 0) _ar.push({infoName: '无相关数据'})
-          } else {
-            _ar.push({infoName: '无相关数据'})
-          }
-          curData.infoList = [..._ar]
-        } else {
-          // '已经有了再添加'
-          let _arr3 = [];
-          // 判断目前显示的是不是 无相关数据
-          if (this.selAreaPolygon) {
-            _arr3 = objDeepCopy(curData[key].filter(y => y.isInArea))
-          } else {
-            _arr3 = objDeepCopy(curData[key].filter(y => y.isShow))
-          }
-          if (curData.infoList[0].infoName === '无相关数据') {
-            if (curData[key].length && curData[key].find(x => x.isShow)) {
-              curData.infoList = [];
-              // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
-              _arr3.forEach(m => {
-                curData.infoList.unshift(m)
-              })
-              // _arr3 = _arr3.filter(x => x.isShow)
-            }
-          } else {
-            // _arr3 = objDeepCopy(curData[key].filter(y => y.isShow));
-            _arr3.forEach(m => {
-              curData.infoList.unshift(m)
-            })
-            // _arr3 = _arr3.filter(x => x.isShow)
-          }
-          if (curData.infoList.length === 0) curData.infoList.push({infoName: '无相关数据'})
-        }
-      }
-      this.updateDom();
-    },
-    findParentData (node) {
-      let obj;
-      this.mapTreeData.forEach(item => {
-        item.infoList.forEach(x => {
-          if (x.areaId === node.areaUid) {
-            obj = x;
-          }
-        })
-      })
-      return obj;
-    },
     // 地图标记
-    mapMark (data, isSetView) {
+    mapMark (data) {
       if (data && data.length > 0) {
         let _this = this;
         for (let i = 0; i < data.length; i++) {
@@ -1332,11 +1262,7 @@ export default {
             }
           })
         }
-        if (!isSetView) {
-//          setTimeout(() => {
-//            _this.map.setFitView()
-//          }, 100)
-        }
+        this.map.setFitView();
       }
     },
     // 清除车辆路线和图标
@@ -1532,7 +1458,7 @@ export default {
           _this.selAreaPolygon = null;
           _this.updateNumberss(false, '', false, true);
           _this.mapTypeList.forEach(x => {
-            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.C.path : null)
+            _this.operClassToEL(_this.marks[x], _this.hideClass, true, false, _this.selAreaPolygon ? _this.selAreaPolygon.getPath() : null)
           })
         }
         // close small video
@@ -1554,17 +1480,7 @@ export default {
     setElementText (el, content) {
       el.text(content)
     },
-    addCalling (_obj) {
-      if (this.hoverWindow ){this.hoverWindow.close()}
-      let _m = this.markCalling(_obj);
-      _obj.mark = _m;
-      this.oAdd = _obj;
-      this.callingList.push(_obj)
-      $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
-      // 模拟通话成功，开始计时
-      _obj.countTime = this.countTime;
-      _obj.clearTime = this.clearTime;
-    },
+
     markCalling (obj) {
       let _this = this, marker;
       if (obj.longitude > 0 && obj.latitude > 0) {
@@ -1583,22 +1499,6 @@ export default {
         });
       }
       return marker;
-    },
-    countTime (data) {
-      data.timer = setInterval(() => {
-        if (data.second < 59) {
-          data.second += 1;
-        } else {
-          data.second = 0;
-          data.minute += 1;
-        }
-      }, 1000)
-    },
-    clearTime (data) {
-      if (data.timer) {
-        clearInterval(data.timer)
-        data.timer = null;
-      }
     },
     // 清除地图标注
     clearSign (isAll, dataType, _index) {
@@ -1628,7 +1528,7 @@ export default {
           this.mouseTool.close(true);
           this.updateNumberss(false, '', false, true);
           this.mapTypeList.forEach(x => {
-            this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.C.path : null)
+            this.operClassToEL(this.marks[x], this.hideClass, true, false, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null)
           })
           break;
         case 1: // clear all tap event but selArea
@@ -1654,18 +1554,21 @@ export default {
     // boolean 为 true时 显示, false 隐藏.  operLeft 存在的话，说明是操作了左侧地图信息树，
     operClassToEL (elList, className, boolean, isSetAera, path) {
       elList.forEach(y => {
-        let _curObj = y.Le.contentDom.classList, point = y.getPosition();
-        let b = this.updateMarkVisible(y.Le.extData)
+        let _curObj = document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList, point = y.getPosition();
+        let b = this.updateMarkVisible(y.getExtData());
+//        let b = true;
         if (b){
           if (boolean) {
+            console.log('--1')
             if (_curObj.contains(className)) {
+              console.log('--2')
               if (path) {
                 if (window.AMap.GeometryUtil.isPointInRing(point, path)) {
                   _curObj.remove(className);
                 }
               } else {
                 // 判断小菜单有没有勾选
-                let __obj = y.Le.extData;
+                let __obj = y.getExtData();
                 if (__obj.dataType === 1) {
                   _curObj.remove(className);
                 } else {
@@ -1677,7 +1580,7 @@ export default {
             }
           } else {
             //没有className并且dataType 不等于4的元素
-            if (!_curObj.contains(className) && y.Le.extData.dataType !== 4) {
+            if (!_curObj.contains(className) && y.getExtData().dataType !== 4) {
               if (path && isSetAera) {
                 let point = y.getPosition();
                 if (!window.AMap.GeometryUtil.isPointInRing(point, path)) {
@@ -2096,10 +1999,10 @@ export default {
         })
       })
       console.log(this.mapTreeData[0])
-      this.operClassToEL(this.marks[index], this.hideClass, false, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null);
-      let addMark = this.marks[index].filter(x => item.supTypeList.includes(parseFloat(x.Le.extData[this.findType[index]]) - 1))
+      this.operClassToEL(this.marks[index], this.hideClass, false, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
+      let addMark = this.marks[index].filter(x => item.supTypeList.includes(parseFloat(x.getExtData()[this.findType[index]]) - 1))
       console.log(addMark, this.marks[index])
-      this.operClassToEL(addMark, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.C.path : null);
+      this.operClassToEL(addMark, this.hideClass, true, null, this.selAreaPolygon ? this.selAreaPolygon.getPath() : null);
     },
 
     // 视频播放
@@ -2166,16 +2069,16 @@ export default {
             });
             _this.snapMarks.push(marker);
             _this.marks[0].forEach(y => {
-              if (y.C.extData.uid === x.deviceId) {
-                y.Le.contentDom.childNodes[0].classList.add('vl_icon_map_sxt_error')
+              if (y.getExtData().uid === x.deviceId) {
+                document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.add('vl_icon_map_sxt_error')
               }
             })
           })
           _this.timer = setTimeout(() => {
             _this.map.remove(_this.snapMarks);
             _this.marks[0].forEach(y => {
-              if (y.Le.contentDom.childNodes[0].classList.contains('vl_icon_map_sxt_error')) {
-                y.Le.contentDom.childNodes[0].classList.remove('vl_icon_map_sxt_error')
+              if (document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.contains('vl_icon_map_sxt_error')) {
+                document.getElementById('mapMark' + y.getExtData().dataType + y.getExtData().uid).classList.remove('vl_icon_map_sxt_error')
               }
             })
             _this.snapMarks = [];
@@ -2188,87 +2091,31 @@ export default {
         }
       })
     },
-    // 语音视频通话
-    wrStateEmit (oData) {
-      console.log('状态EMIT oData: ', oData);
-      if (oData.state > 20) {
-        this.wrClose(oData);
-      } else if (oData.state === 20) {
-        this.$nextTick(() => {
-          this.$set(oData, 'isTime', true)
-        })
-        console.log(this.callingList)
-        // oData.isTime = true;
-        oData.countTime(oData);
-        let domT = document.getElementsByClassName('vl_map_time_' + oData._id)
-        setTimeout(() => {
-          $('#' + oData._id).append(domT[0])
-        }, 1000)
-      }
-    },
-    wrClose (data) {
-      $('#' + data._mid).removeClass('vl_icon_map_mark_calling');
-      let o = this.callingList.find(x => x.uid === data.uid);
-      if (o) {
-        this.map.remove(o.mark);
-         o.clearTime(o);
-      }
-      let _index = this.callingList.findIndex(x => x.uid === data.uid);
-      if (_index !== -1) {
-        this.callingList.splice(_index, 1);
-      }
-      console.log(this.callingList)
-    },
-    wrSwitchCall (data) {
-      let _sclass = data.type === '0' ? 'vl_icon_map_calling1' : 'vl_icon_map_calling0'
-      $('#' + data._id + ' div').removeClass(_sclass);
-      $('#' + data._id + ' div').addClass('vl_icon_map_calling' + data.type);
-    },
-        // 收到手机端发送的视频请求
-    exceptCalling (data) {
-      let _obj, infoList = this.mapTreeData[0].infoList;
-      for (let i = 0; i < infoList.length; i++) {
-        if (parseFloat(infoList[i].uid) === parseFloat(data.remoteId) && infoList[i].dataType === 3) {
-          _obj = infoList[i];
-          break;
-        } else {
-          for (let j = 0; j < infoList[i].infoList.length; j++) {
-            if (parseFloat(infoList[i].infoList[j].uid) === parseFloat(data.remoteId) && infoList[i].infoList[j].dataType === 3) {
-              _obj = infoList[i].infoList[j];
-              break;
-            }
-          }
-          if (_obj) {
-            break;
-          }
-        }
-      }
-      if (!_obj) {
-        this.$message.error('来自非地图上人物的来电')
-      } else {
-        // 增加通话对象到webrtc
-        let cObj = {
-          uid: _obj.uid + '',
-          longitude: _obj.longitude,
-          latitude: _obj.latitude,
-          remoteId: _obj.uid + '',
-          remoteName: _obj.infoName,
-          type: data.type,
-          _id: 'mapCall' + random14(),
-          _mid: _obj.markSid,
-          isTime: false,
-          minute: 0,
-          second: 0,
-          timer: null,
-          mark: null,
-          mute: false,
-          oMsData: data.oMsData,
-          isAddOffered: data.isAddOffered
-        }
-        this.addCalling(cObj)
-      }
-    },
 
+
+    // 语音视频通话
+    addCalling (_obj) {
+      if (this.hoverWindow ){this.hoverWindow.close()}
+      // let _m = this.markCalling(_obj);
+      // _obj.mark = _m;
+      this.$store.commit('ADD_WEBRTC', {oAdd: _obj})
+      /// $('#' + _obj._mid).addClass('vl_icon_map_mark_calling')
+    },
+    // 检测到视频通话
+    watchCalling () {
+      // 视频通话相关,初次进入地图，判断是否有在通话中的人员
+      this.callingList.forEach(x => {
+        let _m = this.markCalling(x);
+        x.mark = _m;
+        console.log($('#' + x._mid))
+        this.map.setZoomAndCenter(16, [x.longitude, x.latitude])
+        setTimeout(() => {
+          $('#' + x._mid).addClass('vl_icon_map_mark_calling');
+          let domT = document.getElementsByClassName('vl_map_time_' + x._id)
+          $('#' + x._id).append(domT[0])
+        }, 30)
+      })
+    },
 
     // 模拟假车辆数据
     getVehicel () {
@@ -2318,7 +2165,6 @@ export default {
       x.detachMediaElement();
       x.destroy();
     })
-    console.log('----------->', this.vehicleTimer)
   }
 }
 </script>

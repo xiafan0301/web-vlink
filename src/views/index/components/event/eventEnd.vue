@@ -3,7 +3,7 @@
     <div class="event-end">
       <div class="breadcrumb_heaer">
         <el-breadcrumb separator=">">
-          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/event/manage' }">事件处理</el-breadcrumb-item>
           <template v-if="$route.query.status === 'handling'">
             <el-breadcrumb-item :to="{ path: '/event/treatingEventDetail', query: { eventId: $route.query.id, status: $route.query.status } }">事件详情</el-breadcrumb-item>
           </template>
