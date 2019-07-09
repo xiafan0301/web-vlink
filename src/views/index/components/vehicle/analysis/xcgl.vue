@@ -892,7 +892,7 @@ export default {
         center: _this.mapCenter // 中心点坐标
       });
 
-      map.setMapStyle("amap://styles/whitesmoke");
+      map.setMapStyle("amap://styles/light");
       console.log("===========", map);
       this.map = map;
     },
@@ -1590,6 +1590,13 @@ html {
         height: 100%;
         background: #f2f2f2;
         border: none;
+        &:hover {
+          background: #2981f8;
+          border: none;
+        }
+        &:hover span {
+          color: #fff;
+        }
         span {
           color: #999;
         }
