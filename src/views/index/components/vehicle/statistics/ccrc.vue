@@ -216,11 +216,10 @@ export default {
   },
   created () {
     this.setDTime();
-    this.JfoGETCity()
     this.cityCode = cityCode
-    this.getMonitorList()
   },
   mounted() {
+    this.getMonitorList()
     this.setDTime();
   },
   methods: {
@@ -252,10 +251,13 @@ export default {
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.kakou = this.getTreeList1(bayonet)
-          console.log('lopjhkjjk', this.kakou)
+          this.lll = this.kakou.map((item)=> {
+            return item.uid
+          })
           this.videoTree = this.getTreeList(camera);
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          this.JfoGETCity()
 
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
           // this.$refs.videotree.setCheckedNodes(this.videoTree);
@@ -427,7 +429,6 @@ export default {
       this.lll = []
       this.selectDeviceArr = []
       this.checkAllTreeBayonet = false
-      this.$refs.bayonetTree.setCheckedKeys([]);
       this.JfoGETCity()
     },
     see () {
@@ -452,7 +453,7 @@ export default {
         endTime: this.value2,
         unvehicleFlag: this.unvehicleFlag
       }
-      if (this.lll) {
+      if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
       }
       if (this.vehicleNumber) {
