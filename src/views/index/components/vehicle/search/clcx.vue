@@ -246,7 +246,7 @@ export default {
   mounted() {
    this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice()
+    //this.getAllDevice()
     this.getGroups()
     //this.getAllDevice()
     //let dic= JSON.parse(localStorage.getItem("dic"));

@@ -418,7 +418,7 @@ export default {
       selectDevice: [],
       selectBayonet: [],
       selectValue: "已选设备0个",
-      select: "",
+      // select: "",
       reselt: true,
       hideleft: false,
       ruleForm: {
@@ -446,8 +446,8 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList(); //查询行政区域
-    this.getAllDevice(); //查询所有的设备
-    this.getAllBayonetList(); //查询所有的卡口
+    // this.getAllDevice(); //查询所有的设备
+    // this.getAllBayonetList(); //查询所有的卡口
   },
   methods: {
 
@@ -604,8 +604,7 @@ export default {
         this.ruleForm &&
         this.ruleForm.data1 &&
         this.ruleForm.data1.length > 0 &&
-        this.ruleForm.input3 &&
-        this.select
+        this.curImageUrl
       ) {
         let pg = {
           //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
@@ -613,7 +612,6 @@ export default {
           endDate: this.ruleForm.data1[1] + " 23:59:59",
           //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
-          plateNo: this.select + this.ruleForm.input3
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
           pg.areaIds = this.ruleForm.value1.join(",");
@@ -625,7 +623,7 @@ export default {
         pg.personPicUrl = this.curImageUrl
         this.getFoothold(pg);
       } else {
-        this.$message.info("请输入开始时间和车牌号码。");
+        this.$message.info("请上传图片。");
       }
     },
     resetForm(v) {
@@ -704,7 +702,6 @@ export default {
       getAllBayonetList({
         areaId: mapXupuxian.adcode
       }).then(res => {
-        console.log(res.data);
         if (res.data && res.data.length > 0) {
           this.allBayonet = res.data;
         }

@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
                 <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
                 <span>{{photoAnalysis.vehicleColor}}</span>
@@ -345,6 +345,7 @@ export default {
         }
       },
       searching: false,
+      searchings: false,
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList: [],
@@ -520,14 +521,18 @@ export default {
     },
     //获取特征
     getItem(){
+      this.searchings=true
       //this.curImageUrl =
       getPhotoAnalysis({
         uploadImgUrls :this.curImageUrl
       }).then(res=>{
         if(res.data && res.data.length>0){
-          console.log(res);
+          // console.log(res);
+          this.searchings=!this.searchings
           this.photoAnalysis=res.data[0]
           
+        }else{
+           this.searchings=!this.searchings
         }
       })
     },
@@ -593,7 +598,7 @@ export default {
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
         vilolationNum:this.tzscMenuForm.input4,
-        plateClass:plateType[this.photoAnalysis.plateClass*1-1].enumValue,
+        plateClass:this.plateType[this.photoAnalysis.plateClass*1-1].enumValue,
         plateColor:this.photoAnalysis.plateColor,
         vehicleClass:this.photoAnalysis.vehicleClass,
         vehicleColor:this.photoAnalysis.vehicleColor,

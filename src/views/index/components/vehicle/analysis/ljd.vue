@@ -200,8 +200,8 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice() //查询所有的设备
-    this.getAllBayonetList() //查询所有的卡口
+    // this.getAllDevice() //查询所有的设备
+    // this.getAllBayonetList() //查询所有的卡口
     
   },
   methods: {
