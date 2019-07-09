@@ -1019,7 +1019,7 @@
 
 /* th css style create by th */
 .th-breadcrumb {
-  width: 100%; height: 60px;
+  width: 100%; height: 50px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

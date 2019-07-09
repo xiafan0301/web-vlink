@@ -3,7 +3,7 @@
     <div class="frequent-appearances">
       <div class="th-breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
           <el-breadcrumb-item>同行分析</el-breadcrumb-item>
         </el-breadcrumb>
         <el-button :loading="addLoadingbtn" @click="skipAddTaskPage" class="th-button-export-color">新建任务</el-button>
@@ -49,31 +49,41 @@
           <div class="table_box">
             <el-table :data="list">
               <el-table-column label="序号" type="index" width="100"></el-table-column>
-              <el-table-column label="任务名称" prop="name" show-overflow-tooltip></el-table-column>
-              <el-table-column label="创建时间" prop="date" show-overflow-tooltip></el-table-column>
-              <el-table-column label="相似度" prop="name" show-overflow-tooltip></el-table-column>
-              <el-table-column label="频次阈值" prop="name" show-overflow-tooltip></el-table-column>
+              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="分析时间范围" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="同行次数" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="操作" fixed="right">
                 <template slot-scope="scope">
                   <span
                     class="operation_btn"
-                    @click="skipDetailPage(scope.row)"
-                    v-if="selectIndex === 0"
+                    @click="skipResultPage(scope.row)"
+                    v-if="selectIndex === 1"
                   >查看</span>
                   <span
                     class="operation_btn"
-                    @click="interruptDialog = true"
-                    v-if="selectIndex === 1 && scope.row.status"
+                    @click="showInterruptDialog(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 1"
                   >中断任务</span>
                   <span
                     class="operation_btn"
-                    @click="skipDetailPage(scope.row)"
-                    v-if="selectIndex === 1 && !scope.row.status"
+                    @click="recoveryTask(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
                   >恢复任务</span>
                   <span
                     class="operation_btn"
-                    @click="deleteDialog = true"
-                    v-if="selectIndex === 1 && !scope.row.status"
+                    @click="showAddTaskDialog('edit', scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
+                  >重启任务</span>
+                  <span
+                    class="operation_btn"
+                    @click="showDeleteDialog(scope.row)"
+                    v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus !== 4"
                   >删除任务</span>
                 </template>
               </el-table-column>
@@ -95,7 +105,7 @@
 
       <!--中断任务弹出框-->
       <el-dialog
-        title="中断任务确认?"
+        title="中断任务确认"
         :visible.sync="interruptDialog"
         width="482px"
         :close-on-click-modal="false"
@@ -118,104 +128,251 @@
         :close-on-press-escape="false"
         class="dialog_comp"
       >
-        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，人物不在可以恢复</span>
+        <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="deleteDialog = false">确认</el-button>
         </div>
       </el-dialog>
+      <!--新建任务弹出框-->
+      <!-- <el-dialog
+        :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
+        :visible.sync="addTaskDialog"
+        width="720px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        class="dialog_comp dialog_comp_add"
+        >
+        <div class="content_body">
+          <div class="left">
+            <div :class="['upload_box', {'hidden': dialogImageUrl}]">
+              <el-upload
+                ref="uploadPic"
+                accept="image/*"
+                :limit="1"
+                :action="uploadUrl"
+                list-type="picture-card"
+                :on-success="uploadPicSuccess"
+                :on-remove="handleRemove"
+                :before-upload="beforeAvatarUpload"
+                :file-list="fileList">
+                <i class="vl_icon vl_icon_vehicle_01"></i>
+                <p class="upload_text" v-show="!dialogImageUrl">点击上传图片</p>
+              </el-upload>
+            </div>
+          </div>
+          <div class="right">
+            <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
+              <el-form-item prop="taskName">
+                <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
+              </el-form-item>
+              <el-form-item  prop="dateTime">
+                <el-date-picker
+                  v-model="addForm.dateTime"
+                  style="width: 100%"
+                  :clearable="false"
+                  @change="handleDateTime"
+                  :picker-options="pickerDateTime"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  range-separator="至"
+                  type="datetimerange"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  >
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item prop="deviceCode">
+                <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
+                  <el-option
+                    v-for="(item, index) in deviceList"
+                    :key="index"
+                    :label="item.deviceName"
+                    :value="item.deviceID"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item prop="interval">
+                <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
+                  <el-option
+                    v-for="(item, index) in intervalList"
+                    :key="index"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="resetData('addForm')">取消</el-button>
+          <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="searchData('addForm')">确认</el-button>
+        </div>
+      </el-dialog> -->
     </div>
   </vue-scroll>
 </template>
 <script>
-// eslint-disable-next-line no-unused-vars
-import { formatDate } from "@/utils/util.js";
-// eslint-disable-next-line no-unused-vars
-import { dataList } from "@/utils/data.js";
-// eslint-disable-next-line no-unused-vars
-import { getEventList } from "@/views/index/api/api.event.js";
-// eslint-disable-next-line no-unused-vars
-import { getDepartmentList } from "@/views/index/api/api.manage.js";
-// eslint-disable-next-line no-unused-vars
-import { getDiciData } from "@/views/index/api/api.js";
+import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 export default {
   data() {
     return {
       tabList: [
         {
           label: "已完成任务",
-          value: 0
+          value: 1
         },
         {
-          label: "进行中任务",
-          value: 1
+          label: "未完成任务",
+          value: 0
         }
       ],
-      selectIndex: 0,
-      pagination: { total: 20, pageSize: 10, pageNum: 1 },
+      selectIndex: 1, // 默认已完成的任务
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
       taskForm: {
-        reportTime: "", // 日期
-        taskName: "" // 任务名称
+        reportTime: [], // 日期
+        taskName: null // 任务名称
       },
-      list: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-          status: true
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄",
-          status: false
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄",
-          status: false
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄",
-          status: true
-        }
-      ], //已完成列表
-      userInfo: {}, // 存储的用户信息
+      list: [], //已完成列表
+      taskId: null, // 任务id
       deleteDialog: false,
       interruptDialog: false, //中断任务
       addLoadingbtn: false
     };
   },
-  created() {
-    this.userInfo = this.$store.state.loginUser;
+  mounted() {
+    this.getDataList();
   },
-  mounted() {},
   methods: {
+    // 获取离线任务
+    getDataList () {
+      const params = {
+        'where.taskName': this.taskForm.taskName,
+        'where.taskType': 2, // 2：人员同行分析
+        'where.dateStart': this.taskForm.reportTime[0],
+        'where.dateEnd': this.taskForm.reportTime[1],
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        order: 'desc',
+        orderBy: 'create_time'
+      };
+      getTaskInfosPage(params)
+        .then(res => {
+          if (res) {
+            this.list = res.data.list;
+            this.pagination.total = res.data.total;
+          }
+        })
+        .catch(() => {})
+    },
     //tab切换
-    selectTab(val) {
+    selectTab (val) {
       this.selectIndex = val;
-    },
-    handleCurrentChange(page) {
-      this.pagination.pageNum = page;
-    },
-    // 根据搜索条件查询
-    selectDataList() {},
-    // 重置查询条件
-    resetForm(form) {
-      this.$refs[form].resetFields();
+      this.getDataList();
     },
     skipAddTaskPage() {
       // 跳到新增任务页面
       this.addLoadingbtn = true
-      // this.$router.push({ name: "portrait_xjpfcm" });
     },
     // 跳至详情页面
-    // eslint-disable-next-line no-unused-vars
     skipDetailPage(obj) {
-      this.$router.push({ name: "peer_analysis" });
+      this.$router.push({ name: "peer_analysis_result" });
+    },
+    // 显示中断任务弹出框
+    showInterruptDialog (obj) {
+      this.interruptDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 显示删除任务弹出框
+    showDeleteDialog (obj) {
+      this.deleteDialog = true;
+      this.taskId = obj.uid;
+    },
+    // 确认中断任务
+    sureInterruptTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          taskStatus: 4 // 1：处理中 2：处理成功 3：处理失败 4：处理中断
+        };
+        this.isInterruptLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '中断任务成功',
+                customClass: 'request_tip'
+              });
+              this.interruptDialog = false;
+              this.isInterruptLoading = false;
+              this.getDataList();
+            } else {
+              this.isInterruptLoading = false;
+            }
+          })
+          .catch(() => {this.isInterruptLoading = false;})
+      }
+    },
+    // 确认删除任务
+    sureDeleteTask () {
+      if (this.taskId) {
+        const params = {
+          uid: this.taskId,
+          taskType: 2, // 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+          delFlag: true
+        };
+        this.isDeleteLoading = true;
+        putAnalysisTask(params)
+          .then(res => {
+            if (res) {
+              this.$message({
+                type: 'success',
+                message: '删除任务成功',
+                customClass: 'request_tip'
+              });
+              this.deleteDialog = false;
+              this.isDeleteLoading = false;
+              this.getDataList();
+            } else {
+              this.isDeleteLoading = false;
+            }
+          })
+          .catch(() => {this.isDeleteLoading = false;})
+      }
+    },
+    // 恢复任务
+    recoveryTask (obj) {
+      if (obj.uid) {
+        const params = {
+          uid: obj.uid
+          // taskType: 3
+        };
+        putTaskInfosResume(params)
+          .then(res => {
+            if (res) {
+              this.getDataList();
+            }
+          })
+      }
+    },
+    // 查询任务列表数据
+    selectDataList () {
+      this.getDataList();
+    },
+    // 重置查询条件
+    resetForm (form) {
+      this.$refs[form].resetFields();
+      this.getDataList();
+    },
+    // 分页
+    handleCurrentChange (page) {
+      this.pagination.pageNum = page;
+      this.getDataList();
     }
   }
 };
@@ -250,7 +407,7 @@ export default {
       }
       .is-active {
         color: #0c70f8;
-        border-bottom: 1px solid #0c70f8;
+        border-bottom: 2px solid #0c70f8;
       }
     }
     .search_box {
