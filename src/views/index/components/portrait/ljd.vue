@@ -78,7 +78,7 @@
                   <el-radio label="1">列表选择</el-radio>
                 </el-col>
                 <el-col :span="12">
-                  <div @click="clickTab">
+                  <div @click.stop="clickTab">
                     <el-radio label="2">地图选择</el-radio>
                   </div>
                 </el-col>
@@ -188,14 +188,16 @@
     </div>
 
     <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
       <mapselect
         @selectMap="mapPoint"
         @closeMap="hideMap"
         :allPoints="allDevice"
         :allBayonets="allBayonet"
       ></mapselect>
-    </el-dialog>
+    </el-dialog> -->
     <!-- 人工筛选 -->
     <el-dialog
       title="人工筛选"
@@ -367,10 +369,12 @@ import {
 } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import mapselect from "@/views/index/components/common/mapSelect";
+// import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
+import { log } from 'util';
 export default {
   components: {
-    mapselect,
+    mapSelector,
     flvplayer
   },
   data() {
@@ -414,7 +418,7 @@ export default {
       selectDevice: [],
       selectBayonet: [],
       selectValue: "已选设备0个",
-      select: "",
+      // select: "",
       reselt: true,
       hideleft: false,
       ruleForm: {
@@ -442,8 +446,8 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList(); //查询行政区域
-    this.getAllDevice(); //查询所有的设备
-    this.getAllBayonetList(); //查询所有的卡口
+    // this.getAllDevice(); //查询所有的设备
+    // this.getAllBayonetList(); //查询所有的卡口
   },
   methods: {
 
@@ -551,17 +555,20 @@ export default {
       }
     },
     clickTab() {
-      if (!this.dialogVisible) {
-        this.dialogVisible = true;
-      }
+      //  console.log(12,this.dialogVisibles);
+      this.dialogVisible = !this.dialogVisible;
+      // if (!this.dialogVisible) {
+      //   this.dialogVisible = true;
+      //   this.dialogVisibles = !this.dialogVisibles;
+      // }
     },
-    hideMap() {
-      this.dialogVisible = false;
-    },
+    // hideMap() {
+    //   this.dialogVisibles = false;
+    // },
     mapPoint(data) {
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible = false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
+      //this.dialogVisible = false;
       this.selectDevice = [];
       this.selectBayonet = [];
       //返回有效点集合
@@ -586,9 +593,10 @@ export default {
     changeTab(v) {
       //console.log(v);
       if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
+        //this.dialogVisibles = !this.dialogVisibles;
+        //this.dialogVisibles = true;
+      } else{
+        //this.dialogVisible=false
       }
     },
     submitForm(v) {
@@ -596,8 +604,7 @@ export default {
         this.ruleForm &&
         this.ruleForm.data1 &&
         this.ruleForm.data1.length > 0 &&
-        this.ruleForm.input3 &&
-        this.select
+        this.curImageUrl
       ) {
         let pg = {
           //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
@@ -605,7 +612,6 @@ export default {
           endDate: this.ruleForm.data1[1] + " 23:59:59",
           //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
-          plateNo: this.select + this.ruleForm.input3
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
           pg.areaIds = this.ruleForm.value1.join(",");
@@ -617,7 +623,7 @@ export default {
         pg.personPicUrl = this.curImageUrl
         this.getFoothold(pg);
       } else {
-        this.$message.info("请输入开始时间和车牌号码。");
+        this.$message.info("请上传图片。");
       }
     },
     resetForm(v) {
@@ -696,7 +702,6 @@ export default {
       getAllBayonetList({
         areaId: mapXupuxian.adcode
       }).then(res => {
-        console.log(res.data);
         if (res.data && res.data.length > 0) {
           this.allBayonet = res.data;
         }

@@ -24,42 +24,75 @@
                 <label class="title">车牌号牌：</label>
                 <span>{{carInfo.plateno}}</span>
               </div>
-              <div class="card-item">
+              <!-- <div class="card-item">
                 <label class="title">归属地：</label>
                 <span>{{carInfo.vehicleLocation}}</span>
+              </div> -->
+              <div class="card-item">
+                <label class="title">所有人：</label>
+                <span>{{carInfo.owner	}}</span>
+              </div>
+              
+              <div class="card-item">
+                <label class="title">中文品牌：</label>
+                <span>{{carInfo.brand}}</span>
               </div>
               <div class="card-item">
                 <label class="title">车身颜色：</label>
                 <span>{{carInfo.color}}</span>
               </div>
               <div class="card-item">
-                <label class="title">中文品牌：</label>
-                <span>{{carInfo.brand}}</span>
+                <label class="title">车身形式：</label>
+                <span>{{carInfo.bodyform}}</span>
               </div>
               <div class="card-item">
-                <label class="title">所有人：</label>
-                <span>{{carInfo.owner	}}</span>
+                <label class="title">车门数：</label>
+                <span>{{carInfo.doornumber}}</span>
               </div>
               <div class="card-item">
-                <label class="title">身份证号：</label>
-                <span>{{carInfo.idCard}}</span>
+                <label class="title">发动机号：</label>
+                <span>{{carInfo.engineno}}</span>
               </div>
               <div class="card-item">
-                <label class="title">核定载客：</label>
+                <label class="title">车辆类型：</label>
+                <span>{{carInfo.platetype}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">年款：</label>
+                <span>{{carInfo.model}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">座位数：</label>
                 <span>{{carInfo.seatnumber}}</span>
               </div>
               <div class="card-item">
-                <label class="title">机动车状态：</label>
+                <label class="title">车辆状态：</label>
                 <span>{{carInfo.status}}</span>
               </div>
-              <div class="card-item vehicle-img">
+              <div class="card-item">
+                <label class="title">使用性质：</label>
+                <span>{{carInfo.usecharacter}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车型：</label>
+                <span>{{carInfo.vehicletype}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">厂商名称：</label>
+                <span>{{carInfo.vendor}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">有效期止：</label>
+                <span>{{carInfo.validuntil}}</span>
+              </div>
+              <!-- <div class="card-item vehicle-img">
                 <label class="title">车辆登记照片：</label>
                 <div class='upload_box'>
-                  <!-- <div class="img-box" v-for="(item, index) in historyPicList" :key="index"> -->
+                  <div class="img-box" v-for="(item, index) in historyPicList" :key="index">
                      <div class="img-box"><img :src="carInfo.vehicleImage"/></div>
-                  <!-- </div> @click="openBigImg(index, historyPicList)" -->
+                  </div> @click="openBigImg(index, historyPicList)"
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
       </div>
@@ -160,7 +193,7 @@ export default {
     goToPage(v){
         this.$router.push({name:v,query:{
             plateNo:this.$route.query.plateNo,
-           imgurl:this.$route.query.imgurl || ''
+            imgurl:this.$route.query.imgurl || ''
         } });
     },
     getViolationInfo(){

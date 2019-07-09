@@ -37,8 +37,9 @@
             </el-form-item>
             <el-form-item>
               <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
-                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
+                <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
+                  <el-option :label="'不选'" :value="''"></el-option>
                 </el-select>
               </el-input>
             </el-form-item>
@@ -114,7 +115,7 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '',
+        cpp: '湘',
         cp: ''
       },
       searchLoading: false,
@@ -183,7 +184,6 @@ export default {
       getDiciData(48).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.cppList = res.data;
-          this.formInline.cpp = res.data[0].enumValue;
         }
       });
     },

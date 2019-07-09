@@ -163,9 +163,12 @@
     </el-pagination> -->
     </div>
      <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
+    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
-    </el-dialog>
+    </el-dialog> -->
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    
   </div>
 </template>
 <script>
@@ -173,11 +176,12 @@ import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import mapselect from "@/views/index/components/common/mapSelect";
+// import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 import { dataList } from '@/utils/data.js';
 export default {
   components: {
-    mapselect
+    mapSelector
   },
   data () {
     return {
@@ -242,7 +246,7 @@ export default {
   mounted() {
    this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice()
+    //this.getAllDevice()
     this.getGroups()
     //this.getAllDevice()
     //let dic= JSON.parse(localStorage.getItem("dic"));
@@ -340,13 +344,13 @@ export default {
         }
       })
     },
-    hideMap(){
-      this.dialogVisible=false
-    },
+    // hideMap(){
+    //   this.dialogVisible=false
+    // },
     mapPoint(data){
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible=false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
+      // this.dialogVisible=false;
       this.selectDevice=[]
       this.selectBayonet=[]
       //返回有效点集合
@@ -366,18 +370,9 @@ export default {
       // console.log(this.selectDevice);
       
     },
-    changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
-    },
+  
     clickTab(){
-      if(!this.dialogVisible){
-        this.dialogVisible=true
-      }
+      this.dialogVisible = !this.dialogVisible;
     },
     handleClick(v){
       // console.log(v);
@@ -387,11 +382,11 @@ export default {
     },
     changeTab(v) {
       //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+      // if (v == "2") {
+      //   this.dialogVisible = true;
+      // } else {
+      //   this.dialogVisible = false;
+      // }
     },
     resetForm (){
       this.value1=null
