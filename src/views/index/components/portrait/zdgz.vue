@@ -321,7 +321,7 @@ export default {
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
     this.getAllAreas();
-    this.getAllDevice()
+    // this.getAllDevice()
     // 获取人员组，跟车辆组列表
     getGroupListIsPortrait().then(res => {
       if (res) {
