@@ -205,9 +205,8 @@
   </div>
 
   <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
-        <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
-    </el-dialog>
+   <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -215,10 +214,10 @@ let AMap = window.AMap;
 import {getFocusList, JigGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
-import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
    components: {
-    mapselect
+    mapSelector
   },
   data() {
     return {
@@ -337,25 +336,14 @@ export default {
   },
   methods: {
     changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+     
     },
     clickTab() {
-      if (!this.dialogVisible) {
-        this.dialogVisible = true;
-      }
-    },
-    hideMap(){
-      this.dialogVisible=false
+        this.dialogVisible = !this.dialogVisible;
     },
     mapPoint(data){
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible = false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
       this.selectDevice = [];
       this.selectBayonet = [];
       //返回有效点集合
