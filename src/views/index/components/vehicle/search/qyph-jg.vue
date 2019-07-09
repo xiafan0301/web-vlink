@@ -39,7 +39,7 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
@@ -64,8 +64,8 @@
                 <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
               </div>
               <div class="struc_cdi_line">
-                <!--<p v-if="strucInfoList[curShowIndex] && strucInfoList[curShowIndex].isInSur">该车牌信息已存在布控库中</p>-->
-                <!--<el-button :disabled="strucInfoList[curShowIndex].isInSur" type="primary" size="mini">加入布控库</el-button>-->
+                <p v-if="curInSur">该车牌信息已存在布控库中</p>
+                <el-button :disabled="curInSur" type="primary" size="mini">加入布控库</el-button>
               </div>
             </div>
           </div>
@@ -111,6 +111,7 @@
     components: {vehicleBreadcrumb, flvplayer},
     data () {
       return {
+        curInSur: null,
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 10,
@@ -190,6 +191,7 @@
         this.getTheList();
       },
       showStrucInfo (data, index) {
+        this.curInSur = data.isInSur;
         this.curImgIndex = 0;
         this.strucCurTab = 1;
         this.curShowIndex = index;
@@ -417,8 +419,8 @@
             top: -.5rem;
             left: -.5rem;
             transform: rotate(-45deg);
-            border: .5rem solid #0c70f8;
-            border-color: transparent transparent #0C70F8;
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
             z-index: 9;
           }
           span {
@@ -497,26 +499,6 @@
                 color: #999999;
               }
             }
-          }
-          &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.7rem;
-            right: -.7rem;
-            transform: rotate(-46deg);
-            border: .7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0C70F8;
-          }
-          &:after {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.4rem;
-            right: -.4rem;
-            transform: rotate(-45deg);
-            border: .4rem solid #FFFFFF;
-            border-color: transparent transparent transparent #FFFFFF;
           }
           >span {
             display: block;

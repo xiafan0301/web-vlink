@@ -50,14 +50,14 @@
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
             <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
               <el-option-group
-                      v-for="group in options"
-                      :key="group.areaName"
-                      :label="group.areaName">
+                v-for="group in options"
+                :key="group.areaName"
+                :label="group.areaName">
                 <el-option
-                        v-for="item in group.areaTreeList"
-                        :key="item.areaId"
-                        :label="item.areaName"
-                        :value="item.areaId">
+                  v-for="item in group.areaTreeList"
+                  :key="item.areaId"
+                  :label="item.areaName"
+                  :value="item.areaId">
                 </el-option>
               </el-option-group>
             </el-select>
@@ -100,7 +100,7 @@
                   </div>
                 </div>
                 <el-pagination
-                  v-show="pagination.total > 5"
+                  v-show="pagination.total > 10"
                   class="cum_pagination th-center-pagination"
                   @current-change="onPageChange"
                   :current-page.sync="pagination.pageNum"
@@ -130,7 +130,7 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
@@ -259,7 +259,7 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 5, pageNum: 1 },
+        pagination: { total: 0, pageSize: 10, pageNum: 1 },
         dialogVisible: false,
         amap: null,
         map: null,
@@ -270,7 +270,7 @@
         timeOrder: false,
         ruleForm: {
           data1:null,
-          input3: '湘AN8888',
+          input3: '',
           input5: "1",
           value1: null,
         },
@@ -286,9 +286,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -319,10 +319,10 @@
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 3 * 24 * 3600 * 1000;
+        let curS = 1 * 24 * 3600 * 1000;
         let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.ruleForm.data1 = [_s, _e];
+//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
+        this.ruleForm.data1 = [_s, _s];
       },
       onPageChange (page) {
         this.pagination.pageNum = page;
@@ -414,20 +414,20 @@
         this.dialogVisible=false
       },
       submitForm(v) {
-        this.reselt = true;
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
           let pg = {
+            pageSize: 9999,
             where: {}
           }
           pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-          pg.where['endTime'] = this.ruleForm.data1[1]+" 00:00:00";
+          pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
           pg.where['vehicleNumber'] = this.ruleForm.input3;
           if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-            pg['where.areaUid']=this.ruleForm.value1.join(",")
+            pg.where['areaUid']=this.ruleForm.value1.join(",")
           }
           if(this.ruleForm.input5==2){
             pg.where['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-            pg.where['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+            pg.where['deviceUid'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
           }
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
@@ -484,6 +484,9 @@
       cancelMap(){
         this.dialogVisible = false;
         this.pointData = [];
+        if (this.drawArea) {
+          this.contentMap.remove(this.drawArea)
+        }
       },
       //查询行政区域
       getMapGETmonitorList(){
@@ -492,7 +495,9 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-
+            res.data.areaTreeList.forEach(x => {
+              this.ruleForm.value1.push(x.areaId)
+            })
             this.options.push(res.data)
           }
         })
@@ -581,7 +586,7 @@
           if(_this.hover=='cut5'){
             _this.mouseTool.close(true);
             if (_this.drawArea) {
-              _this.map.remove(_this.drawArea)
+              _this.contentMap.remove(_this.drawArea)
             }
             _this.circle = new AMap.Circle({
               center:e.lnglat,
@@ -667,7 +672,7 @@
         }
       },
       getVehicleShot(d) {
-        this.$_showLoading('.reselt');
+        this.$_showLoading('.right');
         InvestigateGetTrace(d).then(res => {
           if (res) {
             // console.log(res);
@@ -678,6 +683,7 @@
               //this.searching = false;
               return false;
             }
+            this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
             this.pagination.total = res.data.total;
@@ -721,9 +727,9 @@
           }).then(resBon => {
             console.log(resBon.data);
             if(resBon.data && resBon.data.length>0){
-              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 0});
+              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 1});
             }
-            this.mapTreeData = Object.assign([], res.data, resBon.data)
+            this.mapTreeData = res.data.concat(resBon.data)
             console.log(this.mapTreeData)
             this.mapMark(this.mapTreeData)
           })
@@ -758,7 +764,7 @@
           str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
           str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
           str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
+//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
           str += '</ul></div>'
         }
         return str;
@@ -814,6 +820,7 @@
         }
       },
       drawMapMarker (data) {
+        console.log(data)
         let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -1087,6 +1094,9 @@
         cursor: pointer;
         text-indent: 6px;
         border-bottom: 1px solid #F2F2F2;
+        i{
+          color: #999999;
+        }
       }
       .p_main_item {
         width: 100%;
@@ -1403,16 +1413,6 @@
                 color: #999999;
               }
             }
-          }
-          &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.7rem;
-            right: -.7rem;
-            transform: rotate(-46deg);
-            border: .7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0C70F8;
           }
           &:after {
             display: block;

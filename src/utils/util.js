@@ -355,6 +355,3 @@ export const translateDataToTree = (data) => {
 //   return sFormat;
 // };
 
-// html2canvas
-import html2canvas from 'html2canvas';
-export const h2canvas = html2canvas;

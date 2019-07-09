@@ -63,3 +63,19 @@ export const getPersonFollowing = (params) => {
   });
 }
 /*================人脸检索 --- 跟踪尾随 end=================== */
+
+/*================人脸检索 --- 轨迹分析 start=================== */
+
+/**
+ * 轨迹分析
+ * @data {object} data
+ */
+export function PortraitPostPersonTrace(data) {
+  return request({
+    url: '/person-trace/analysis',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/*================人脸检索 --- 轨迹分析 end=================== */

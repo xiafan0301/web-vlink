@@ -66,7 +66,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_qy'}">
-              <i class="vl_icon2 vl_icon2_013"></i><span>区域分析</span>
+              <i class="vl_icon2 vl_icon2_013"></i><span>区域碰撞</span>
             </router-link>
           </li>
           <li>
