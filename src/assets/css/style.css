@@ -281,79 +281,79 @@
   width: 102px; height: 108px;
   background-repeat: no-repeat;
   background-image: url(../img/icons2.png);
-  transition: .4s ease-out;
+  /* transition: .4s ease-out; */
 }
 /**车辆侦察**/
 .vl_icon2_001 { background-position: -36px -38px; }
-.vl_icon2_001:hover { background-position: -36px -148px; }
+.vl_icon2_001:hover { background-position: -35px -148px; }
 .vl_icon2_002 { background-position: -172px -38px; }
-.vl_icon2_002:hover { background-position: -172px -148px; }
+.vl_icon2_002:hover { background-position: -171px -148px; }
 .vl_icon2_003 { background-position: -308px -38px; }
-.vl_icon2_003:hover { background-position: -308px -148px; }
+.vl_icon2_003:hover { background-position: -307px -148px; }
 .vl_icon2_004 { background-position: -444px -38px; }
-.vl_icon2_004:hover { background-position: -444px -148px; }
+.vl_icon2_004:hover { background-position: -443px -148px; }
 .vl_icon2_005 { background-position: -582px -38px; }
-.vl_icon2_005:hover { background-position: -582px -148px; }
+.vl_icon2_005:hover { background-position: -581px -148px; }
 .vl_icon2_006 { background-position: -718px -38px; }
-.vl_icon2_006:hover { background-position: -718px -148px; }
+.vl_icon2_006:hover { background-position: -717px -148px; }
 .vl_icon2_007 { background-position: -854px -38px; }
-.vl_icon2_007:hover { background-position: -854px -148px; }
+.vl_icon2_007:hover { background-position: -853px -148px; }
 .vl_icon2_011 { background-position: -36px -293px; }
-.vl_icon2_011:hover { background-position: -36px -418px; }
+.vl_icon2_011:hover { background-position: -35px -417px; }
 .vl_icon2_012 { background-position: -172px -293px; }
-.vl_icon2_012:hover { background-position: -172px -418px; }
+.vl_icon2_012:hover { background-position: -171px -417px; }
 .vl_icon2_013 { background-position: -308px -293px; }
-.vl_icon2_013:hover { background-position: -308px -418px; }
+.vl_icon2_013:hover { background-position: -307px -417px; }
 .vl_icon2_014 { background-position: -444px -293px; }
-.vl_icon2_014:hover { background-position: -444px -418px; }
+.vl_icon2_014:hover { background-position: -443px -417px; }
 .vl_icon2_015 { background-position: -582px -293px; }
-.vl_icon2_015:hover { background-position: -582px -418px; }
+.vl_icon2_015:hover { background-position: -581px -417px; }
 .vl_icon2_016 { background-position: -718px -293px; }
-.vl_icon2_016:hover { background-position: -718px -418px; }
+.vl_icon2_016:hover { background-position: -717px -417px; }
 .vl_icon2_017 { background-position: -854px -293px; }
-.vl_icon2_017:hover { background-position: -854px -418px; }
+.vl_icon2_017:hover { background-position: -853px -417px; }
 .vl_icon2_018 { background-position: -990px -293px; }
-.vl_icon2_018:hover { background-position: -990px -418px; }
+.vl_icon2_018:hover { background-position: -989px -417px; }
 .vl_icon2_021 { background-position: -990px -38px; }
-.vl_icon2_021:hover { background-position: -990px -148px; }
+.vl_icon2_021:hover { background-position: -989px -148px; }
 .vl_icon2_022 { background-position: -1126px -38px; }
-.vl_icon2_022:hover { background-position: -1126px -148px; }
+.vl_icon2_022:hover { background-position: -1125px -148px; }
 .vl_icon2_023 { background-position: -1262px -38px; }
-.vl_icon2_023:hover { background-position: -1262px -148px; }
+.vl_icon2_023:hover { background-position: -1261px -148px; }
 .vl_icon2_024 { background-position: -1398px -38px; }
-.vl_icon2_024:hover { background-position: -1398px -148px; }
+.vl_icon2_024:hover { background-position: -1397px -148px; }
 .vl_icon2_025 { background-position: -1126px -293px; }
-.vl_icon2_025:hover { background-position: -1126px -418px; }
+.vl_icon2_025:hover { background-position: -1125px -417px; }
 
 .vl_icon2_027 { background-position: -1398px -293px; }
-.vl_icon2_027:hover { background-position: -1398px -418px; }
+.vl_icon2_027:hover { background-position: -1397px -417px; }
 /**人像检索**/
 .vl_icon2_101 { background-position: -23px -566px; }
-.vl_icon2_101:hover { background-position: -23px -684px; }
+.vl_icon2_101:hover { background-position: -22px -683px; }
 .vl_icon2_102 { background-position: -159px -566px; }
-.vl_icon2_102:hover { background-position: -159px -684px; }
+.vl_icon2_102:hover { background-position: -158px -683px; }
 .vl_icon2_103 { background-position: -295px -566px; }
-.vl_icon2_103:hover { background-position: -295px -684px; }
+.vl_icon2_103:hover { background-position: -294px -683px; }
 .vl_icon2_104 { background-position: -431px -566px; }
-.vl_icon2_104:hover { background-position: -431px -684px; }
+.vl_icon2_104:hover { background-position: -430px -683px; }
 .vl_icon2_105 { background-position: -567px -566px; }
-.vl_icon2_105:hover { background-position: -567px -684px; }
+.vl_icon2_105:hover { background-position: -566px -683px; }
 .vl_icon2_106 { background-position: -703px -566px; }
-.vl_icon2_106:hover { background-position: -703px -684px; }
+.vl_icon2_106:hover { background-position: -702px -683px; }
 .vl_icon2_107 { background-position: -839px -566px; }
-.vl_icon2_107:hover { background-position: -839px -684px; }
+.vl_icon2_107:hover { background-position: -838px -683px; }
 .vl_icon2_108 { background-position: -975px -566px; }
-.vl_icon2_108:hover { background-position: -975px -684px; }
+.vl_icon2_108:hover { background-position: -974px -683px; }
 .vl_icon2_109 { background-position: -1111px -566px; }
-.vl_icon2_109:hover { background-position: -1111px -684px; }
+.vl_icon2_109:hover { background-position: -1110px -683px; }
 .vl_icon2_110 { background-position: -1247px -566px; }
-.vl_icon2_110:hover { background-position: -1247px -684px; }
+.vl_icon2_110:hover { background-position: -1246px -683px; }
 .vl_icon2_111 { background-position: -1375px -566px; }
-.vl_icon2_111:hover { background-position: -1375px -684px; }
+.vl_icon2_111:hover { background-position: -1374px -683px; }
 .vl_icon2_112 { background-position: -23px -815px; }
-.vl_icon2_112:hover { background-position: -23px -933px; }
+.vl_icon2_112:hover { background-position: -22px -932px; }
 .vl_icon2_113 { background-position: -159px -815px; }
-.vl_icon2_113:hover { background-position: -159px -933px; }
+.vl_icon2_113:hover { background-position: -157px -933px; }
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}

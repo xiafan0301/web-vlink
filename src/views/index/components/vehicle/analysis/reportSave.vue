@@ -1,6 +1,8 @@
 <template>
-  <div>
+  <div id="vehicle_report_save_c">
     <div>
+      <div class="vc_rep_c_tt">车辆侦察报告 <span v-if="clInfo">- {{clInfo.plateno}}</span></div>
+      <div class="vc_rep_c_ti"><span>{{time[0] | fmTimestamp('yyyy年MM月dd日')}}&nbsp;-&nbsp;{{time[1] | fmTimestamp('yyyy年MM月dd日')}}</span></div>
       <!-- 车辆档案信息-车辆信息  showType 1 -->
       <div class="vc_rep_cl" id="report_showtype_1">
         <div>
@@ -252,7 +254,7 @@
         </div>
       </div>
       <!-- 区域碰撞 showType 9 -->
-      <div class="vc_rep_cl" id="report_showtype_9">
+      <!-- <div class="vc_rep_cl" id="report_showtype_9">
         <div>
           <h2>区域碰撞</h2>
           <div>
@@ -263,7 +265,7 @@
             进行操作查看
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -277,6 +279,8 @@ export default {
   data () {
     return {
       searchLoading: true,
+
+      time: ['', ''],
 
       clInfo: null,
       wzList: [], // 违章信息
@@ -302,10 +306,17 @@ export default {
   },
   mounted () {
     // $('html, body').css({ 'height': 'auto', width: '210mm' });
-    $('html, body').css({ 'height': 'auto' });
+    // min-width: 1200px; max-width: 1800px;
+    $('html, body').css({
+      'margin': '0 auto',
+      'height': 'auto',
+      'min-width': '1200px',
+      'max-width': '1800px'
+    });
     $('#app').css({ 'height': 'auto' });
     $('#app').css({ 'height': 'auto' });
     $('title').text('车辆侦察报告');
+    this.time = [this.$route.query.st, this.$route.query.et];
     this.initClgjMap();
     this.initYjcmMap();
     this.searchSubmit();
@@ -314,18 +325,10 @@ export default {
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
-      /* let params = {
-        plateNo: '湘AN8888',
-        startTime: formatDate(new Date(new Date().getTime() - 7 * 24 * 3600 * 1000), 'yyyy-MM-dd 00:00:00'),
-        endTime: formatDate(new Date(new Date().getTime() - 5 * 24 * 3600 * 1000), 'yyyy-MM-dd 23:59:59')
-      }
-      console.log('pn', this.$route.query.pn);
-      console.log('st', this.$route.query.st);
-      console.log('et', this.$route.query.et); */
       let params = {
         plateNo: this.$route.query.pn,
-        startTime: this.$route.query.st,
-        endTime: this.$route.query.et
+        startTime: this.time[0],
+        endTime: this.time[1]
       }
       getVehicleInvestigationReport(params).then(res => {
         if (res && res.data && res.data.vehicleArchivesDto) {
@@ -344,11 +347,40 @@ export default {
           this.setMapMarkerForClgj(); // 车辆轨迹
           $('title').text('车辆侦察报告 - ' + this.clInfo.plateno);
           this.$nextTick(() => {
-            // window.print();
-            window.setTimeout(() => {
-              window.print();
-              this.searchLoading = false;
-            }, 1000);
+            this.$msgbox({
+              title: '确认',
+              message: '确认导出吗？',
+              showCancelButton: true,
+              confirmButtonText: ' 确定 ',
+              cancelButtonText: ' 取消 ',
+              beforeClose: (action, instance, done) => {
+                if (action === 'confirm') {
+                  instance.confirmButtonLoading = true;
+                  instance.confirmButtonText = '正在生成文件...';
+                  let _this = this;
+                  let pdf = new jsPDF('p','pt','a3');
+                  // 设置打印比例 越大打印越小
+                  pdf.internal.scaleFactor = 2;
+                  let options = {
+                    pagesplit: true, //设置是否自动分页
+                    background: '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
+                  };
+                  pdf.addHTML($('#vehicle_report_save_c')[0], 0, 0, options, function () {
+                      pdf.save('车辆侦察报告_' + _this.clInfo.plateno + '_' +
+                        formatDate(params.startTime, 'yyyyMMdd') + '-'  + formatDate(params.endTime, 'yyyyMMdd') + '.pdf');
+                  });
+                  setTimeout(() => {
+                    done();
+                    setTimeout(() => {
+                      instance.confirmButtonLoading = false;
+                    }, 300);
+                  }, 1000);
+                } else {
+                  done();
+                }
+              }
+            }).then(() => {
+            });
           });
         }
       }).catch(error => {
@@ -473,6 +505,20 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+#vehicle_report_save_c {
+  margin: 0 auto;
+}
+.vc_rep_c_tt {
+  text-align: center;
+  font-size: 20px; font-weight: bold;
+  padding-top: 20px;
+}
+.vc_rep_c_ti {
+  padding-top: 10px;
+  overflow: hidden;
+  text-align: center;
+  > span {color: #666; }
+}
 .vc_rep {
   position: relative;
   height: 100%;
