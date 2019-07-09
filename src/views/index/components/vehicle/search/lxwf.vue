@@ -55,7 +55,7 @@
               <div class="chara" v-if="photoAnalysis">
                 <span v-if="photoAnalysis.plateNo">车牌：{{photoAnalysis.plateNo}}</span>
                 <span v-if="photoAnalysis.vehicleColor">车身颜色：{{photoAnalysis.vehicleColor}}</span>
-                <span v-if="photoAnalysis.vehicleStyles">车辆年款:{{photoAnalysis.vehicleStyles}}</span>
+                <span v-if="photoAnalysis.vehicleBrand">车辆品牌:{{photoAnalysis.vehicleBrand}}</span>
                 <span v-if="photoAnalysis.vehicleRoof">车顶{{photoAnalysis.vehicleRoof}}</span>
                 <span v-if="photoAnalysis.vehicleClass">{{photoAnalysis.vehicleClass}}</span>
                 <span v-if="photoAnalysis.sunvisor">遮阳板{{photoAnalysis.sunvisor}}</span>
