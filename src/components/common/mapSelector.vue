@@ -219,9 +219,19 @@ export default {
         obj =  this.drawObj.circle10km[sid];
       }
       if (obj) {
-        if (obj.obj) { this.amap.remove(obj.obj); }
-        if (obj.marker) { this.amap.remove(obj.marker); }
-        if (obj.editor) { obj.editor.close(); this.amap.remove(obj.editor); }
+        if (obj.obj) {
+          this.amap.remove(obj.obj);
+          obj.obj = null;
+        }
+        if (obj.marker) {
+          this.amap.remove(obj.marker);
+          obj.marker = null;
+        }
+        if (obj.editor) {
+          obj.editor.close();
+          this.amap.remove(obj.editor);
+          obj.editor = null;
+        }
         obj = null;
       }
     },
