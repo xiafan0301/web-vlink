@@ -676,7 +676,7 @@ export default {
     this.getMonitorList();
     // 从字典中取出自定义的特征数组
     this.getSelectOption();
-    console.log("字典数据", this.dicObj);
+    // console.log("字典数据", this.dicObj);
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
@@ -1062,13 +1062,14 @@ export default {
     },
     showStrucInfo(data, index) {
       // 打开抓拍详情
+       this.$nextTick(() => {
+        console.log('swiper', this.$refs.mySwiper);
+      });
       this.sturcDetail = null;
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
       this.drawPoint(data);
-    console.log('this.$refs.mySwiper', this.$refs.mySwiper);
-      
     },
     imgListTap(data, index) {
       // 点击swiper图片

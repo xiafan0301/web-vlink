@@ -68,6 +68,17 @@
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
 .vl_icon_cl { width: 41px; height: 48px; background-position: -217px -188px; }
 .vl_icon_sxt { width: 41px; height: 48px; background-position: -280px -188px; }
+.qyryfx_vl_icon_wrap { width: 125px; height: 50px; }
+.qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 3px 0 0 3px; }
+.qyryfx_vl_icon_wrap .vl_icon { float: left; }
+
+.qyryfx_vl_icon_wrap .level1 { background: #fa453a; }
+.qyryfx_vl_icon_wrap .level2 { background: #f4ba18; }
+.qyryfx_vl_icon_wrap .level3 { background: #8949f3; }
+.qyryfx_vl_icon_wrap .level4 { background: #6262FF; }
+.qyryfx_vl_icon_wrap .level5 { background: #0C70F8; }
+.qyryfx_vl_icon_wrap .level6 { background: #0D9DF4; }
+
 
 .vl_icon_sxt_not_choose { width: 41px; height: 48px; background-position: -344px -188px; }
 .vl_icon_zzd { width: 41px; height: 48px; background-position: -700px -188px; }
@@ -1008,7 +1019,7 @@
 
 /* th css style create by th */
 .th-breadcrumb {
-  width: 100%; height: 60px;
+  width: 100%; height: 50px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

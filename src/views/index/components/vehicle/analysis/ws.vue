@@ -5,7 +5,7 @@
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
           <el-form-item prop="plateNo">
-            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo"></el-input>
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
           </el-form-item>
           <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
             <el-date-picker
@@ -176,7 +176,10 @@ export default {
     const plateNo = this.$route.query.plateNo;
     const dateStart = this.$route.query.dateStart;
     const dateEnd = this.$route.query.dateEnd;
-    if (plateNo && dateStart && dateEnd) {
+    if (plateNo) { // 从其他模块跳转过来的
+      this.searchForm.plateNo = plateNo;
+    }
+    if (plateNo && dateStart && dateEnd) { // 从分析结果页面跳过来的
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
@@ -201,10 +204,14 @@ export default {
         })
     },
     // 车牌号码change
-    handlePlateNo () {
-      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
-        this.getDeviceList();
-      }
+    handlePlateNo (form) {
+      this.$refs[form].validateField('plateNo', (error) => {
+        if (!error) {
+          if (this.searchForm.shotTime && this.searchForm.dateEnd) {
+            this.getDeviceList();
+          }
+        }
+      })
     },
     // 开始时间blur
     blurStartTime (form) {

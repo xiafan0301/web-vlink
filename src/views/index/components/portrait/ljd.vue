@@ -51,6 +51,7 @@
               type="daterange"
               class="full"
               value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -400,6 +401,29 @@ export default {
           prevEl: '.swiper-button-prev',
         },
       },
+      pickerOptions: {
+        disabledDate (time) {
+          let date = new Date();
+          let y = date.getFullYear();
+          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+          let d = date.getDate();
+          let threeMonths = '';
+          let start = '';
+          if (parseFloat(d) >= 3) {
+            start = y + '-' + m + '-' + (d - 2);
+          } else {
+            let o =30
+            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
+              o=31
+            }else if(m == 2){
+              o=28
+            }
+            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
+          }
+          threeMonths = new Date(start).getTime();
+          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+        }
+      },
       videoUrl: null, // 下载地址
       map: null,
       /* 上传图片变量 */
@@ -692,7 +716,7 @@ export default {
     getAllDevice() {
       getAllDevice().then(res => {
         // console.log(res);
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allDevice = res.data;
         }
       });
@@ -702,7 +726,7 @@ export default {
       getAllBayonetList({
         areaId: mapXupuxian.adcode
       }).then(res => {
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allBayonet = res.data;
         }
       });
@@ -1572,6 +1596,12 @@ html {font-size: 100px;}
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         border-radius: 10px;
+      }
+    }
+    .el-upload:hover{
+      background: #0c70f8;
+      span{
+        color: #ffffff;
       }
     }
   }

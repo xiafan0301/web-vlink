@@ -1,6 +1,9 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '过车查看', routerName: 'vehicle_search_gcck'}, {name: '全部抓拍'}]"></div>
+    <div class="vc_gcck_bd" is="vehicleBreadcrumb"
+      :oData="[{name: '过车查看', 
+        routerName: 'vehicle_search_gcck',
+        query: {'deviceIds': $route.query.deviceIds, bId: $route.query.bId}}, {name: '全部抓拍'}]"></div>
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="gcck_s">
@@ -33,7 +36,7 @@
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">
-              <el-checkbox class="gcck_ck_f" v-model="formInline.no">非</el-checkbox>
+              <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
             <el-form-item>
               <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
@@ -144,6 +147,9 @@ export default {
       }
       return val;
     }
+  },
+  created () {
+    // this.queryData = {this.$route.query.deviceIds{};
   },
   mounted () {
     this.searchSubmit();

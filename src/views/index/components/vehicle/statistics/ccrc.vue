@@ -14,7 +14,6 @@
               v-model="value1"
               value-format="yyyy-MM-dd HH:mm:ss"
               :picker-options="pickerOptions"
-              @change="changval1"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
@@ -25,7 +24,7 @@
           <el-date-picker
               v-model="value2"
               format="yyyy-MM-dd HH:mm:ss"
-              :picker-options="pickerOptions"
+              :picker-options="pickerOptions1"
               value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 212px; vertical-align: top"
               type="datetime"
@@ -33,37 +32,37 @@
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px"  popper-class="statistics_select_list" @click.native="showChange" multiple collapse-tags>
+          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags>
               <el-option
-                  v-for="item in selectDeviceArr"
+                  v-for="item in kakou"
                   :key="item.uid"
-                  :label="item.bayonetName"
+                  :label="item.label"
                   :value="item.uid">
               </el-option>
           </el-select>
-          <div class="search_item" v-show="isShowSelectList">
-            <vue-scroll>
-              <el-checkbox
-                  :indeterminate="isIndeterminateBayonet"
-                  v-model="checkAllTreeBayonet"
-                  @change="handleCheckedAllBayonet"
-              >全选</el-checkbox>
-              <el-tree
-                  @check="listenCheckedBayonet"
-                  :data="bayonetTree"
-                  show-checkbox
-                  default-expand-all
-                  node-key="id"
-                  ref="bayonetTree"
-                  highlight-current
-                  :props="defaultProps">
-              </el-tree>
-            </vue-scroll>
-          </div>
+<!--          <div class="search_item" v-show="isShowSelectList">-->
+<!--            <vue-scroll>-->
+<!--              <el-checkbox-->
+<!--                  :indeterminate="isIndeterminateBayonet"-->
+<!--                  v-model="checkAllTreeBayonet"-->
+<!--                  @change="handleCheckedAllBayonet"-->
+<!--              >全选</el-checkbox>-->
+<!--              <el-tree-->
+<!--                  @check="listenCheckedBayonet"-->
+<!--                  :data="bayonetTree"-->
+<!--                  show-checkbox-->
+<!--                  default-expand-all-->
+<!--                  node-key="id"-->
+<!--                  ref="bayonetTree"-->
+<!--                  highlight-current-->
+<!--                  :props="defaultProps">-->
+<!--              </el-tree>-->
+<!--            </vue-scroll>-->
+<!--          </div>-->
         </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
-          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">非</span></el-checkbox>
+          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-input placeholder="请输入内容" v-model="vehicleNumber" class="input-with-select">
@@ -160,10 +159,37 @@ export default {
   data () {
     return {
       pickerOptions: {
-        disabledDate(time) {
-          return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
+        disabledDate: time => {
+          if (this.value2) {
+            return (
+              time.getTime() > new Date(this.value2).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+          // return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.value1) {
+            return (
+              time.getTime() < new Date(this.value1).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
         }
       },
+      kakou: [],
       v: '湘',
       lll: [],
       value1: '',
@@ -225,9 +251,9 @@ export default {
           console.log('原始数据', res.data)
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
-          console.log('lopjhkjjk', bayonet)
+          this.kakou = this.getTreeList1(bayonet)
+          console.log('lopjhkjjk', this.kakou)
           this.videoTree = this.getTreeList(camera);
-          this.bayonetTree = this.getBayTreeList(bayonet);
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
 
@@ -254,6 +280,17 @@ export default {
         }
       }
       return data;
+    },
+    getTreeList1(data) {
+      let arr = []
+      for(let item of data) {
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          for(let key of item['bayonetList']) {
+            arr.push({label: key.bayonetName, uid: key.uid})
+          }
+        }
+      }
+      return arr;
     },
     /**
      * 获取卡口数据
@@ -374,8 +411,6 @@ export default {
     // 选中的设备数量处理
     handleData() {
       this.selectDeviceArr = [...this.selectVedioArr, ...this.selectBayonetArr].filter(key => key.treeType);
-      this.lll = this.selectDeviceArr
-      // console.log('选中的数据', this.selectDeviceArr);
     },
     oo () {
       console.log(this.selectDeviceArr)
@@ -393,6 +428,7 @@ export default {
       this.selectDeviceArr = []
       this.checkAllTreeBayonet = false
       this.$refs.bayonetTree.setCheckedKeys([]);
+      this.JfoGETCity()
     },
     see () {
       this.$router.push({name: 'clxx'});
@@ -416,12 +452,8 @@ export default {
         endTime: this.value2,
         unvehicleFlag: this.unvehicleFlag
       }
-      let str = '';
-      if (this.selectDeviceArr.length > 0) {
-        for (let i = 0; i< this.selectDeviceArr.length; i++) {
-          str = this.selectDeviceArr[i].uid + ',' +  str
-        }
-        params['bayonetUid'] = str.substr(0,str.length - 1)
+      if (this.lll) {
+        params['bayonetUid'] = this.lll.join(',')
       }
       if (this.vehicleNumber) {
         params['vehicleNumber'] = this.v + this.vehicleNumber
@@ -429,8 +461,6 @@ export default {
       JfoGETCity(params).then(res => {
         if (res) {
           this.tableData = res.data;
-          this.pagination.total = res.data.total;
-          console.log('llllllllllllllllllll', res)
         }
       })
     }
@@ -515,7 +545,4 @@ export default {
   }
 </style>
 <style lang="scss">
-.statistics_select_list {
-  display: none!important;
-}
 </style>
