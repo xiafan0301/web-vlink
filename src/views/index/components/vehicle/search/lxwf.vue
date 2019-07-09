@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
               <div class="chara">
                 <span>湘H3A546</span>
                 <span>红色</span>
@@ -829,6 +829,10 @@ export default {
 }
 .select_btn {
   background-color: #0c70f8;
+  color: #ffffff;
+}
+.select_btn.el-button--primary.is-disabled{
+background-color: #a0cfff;
   color: #ffffff;
 }
 .inset {
