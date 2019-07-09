@@ -39,7 +39,7 @@
                 <img v-else-if="curImageUrl" :src="curImageUrl">
                 <div v-else>
                   <i
-                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#fefefe; font-size: 100px;"
+                    style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto; color:#dddddd; font-size: 100px;"
                     class="vl_icon el-icon-camera-solid"
                   ></i>
                   <span>点击上传图片</span>
@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searching" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
                 <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
                 <span>{{photoAnalysis.vehicleColor}}</span>
@@ -345,6 +345,7 @@ export default {
         }
       },
       searching: false,
+      searchings: false,
       imgIndex: 0, // 点击的图片索引
       isShowImg: false, // 是否放大图片
       imgList: [],
@@ -427,6 +428,9 @@ export default {
       console.log(v);
       v.datastart=this.data1[0]
       v.dataend=this.data1[1]
+      if(this.curImageUrl){
+        v.imgurl=this.curImageUrl
+      }
       this.$router.push({name: 'vehicle_search_lxwfdetail', query: v});
     },
     // 上传图片
@@ -517,14 +521,18 @@ export default {
     },
     //获取特征
     getItem(){
+      this.searchings=true
       //this.curImageUrl =
       getPhotoAnalysis({
         uploadImgUrls :this.curImageUrl
       }).then(res=>{
         if(res.data && res.data.length>0){
-          console.log(res);
+          // console.log(res);
+          this.searchings=!this.searchings
           this.photoAnalysis=res.data[0]
           
+        }else{
+           this.searchings=!this.searchings
         }
       })
     },
@@ -582,36 +590,15 @@ export default {
     //查询
     getVehicleDetail() {
       this.searching = true;
-      console.log("======getVehicleDetail=====", this.searchData, this.imgData);
-/* 
- tzscMenuForm: {
-        selectDate: "",
-        selectDevice: "",
-        licenseType: "",
-        licenseColor: "",
-        carType: "",
-        carColor: "",
-        carModel: "",
-        sunVisor: "",
-        inspectionCount: ""
-      }, */
-      
-      
-    //  <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
-    //             <span>{{photoAnalysis.vehicleColor}}</span>
-    //             <span>{{photoAnalysis.vehicleStyles}}</span>
-    //             <span>{{photoAnalysis.vehicleRoof}}</span>
-    //             <span>{{photoAnalysis.vehicleClass}}</span>
-    //             <span>遮阳板{{photoAnalysis.sunvisor}}</span>
-    //             <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
-    //             <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
+     // console.log("======getVehicleDetail=====", this.searchData, this.imgData);
+
       
       if(this.input5==1){
         let datas={
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
         vilolationNum:this.tzscMenuForm.input4,
-        plateClass:plateType[this.photoAnalysis.plateClass*1-1].enumValue,
+        plateClass:this.plateType[this.photoAnalysis.plateClass*1-1].enumValue,
         plateColor:this.photoAnalysis.plateColor,
         vehicleClass:this.photoAnalysis.vehicleClass,
         vehicleColor:this.photoAnalysis.vehicleColor,
@@ -864,6 +851,9 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+.select_btn:hover{
+   background-color: #0466de;
+}
 .select_btn.el-button--primary.is-disabled{
 background-color: #a0cfff;
   color: #ffffff;
@@ -933,17 +923,20 @@ html {
       .el-upload {
         width: 100%;
         height: 100%;
-        background: #2981f8;
-        border: none;
-        span {
-          color: #ffffff;
-        }
+       
         img {
           width: 100%;
           height: 100%;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
           border-radius: 10px;
+        }
+      }
+      .el-upload:hover{
+         background: #2981f8;
+        border: none;
+        span {
+          color: #ffffff;
         }
       }
     }

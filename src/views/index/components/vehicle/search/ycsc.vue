@@ -338,7 +338,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list"  v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -509,6 +509,10 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    // 处理其他页面跳转的参数
+    if (this.$route.query.imgurl) {
+      this.curImageUrl = this.$route.query.imgurl;
+    }
   },
   computed: {
     choosedHisPic() {

@@ -114,9 +114,11 @@
     </div>
 
     <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
+    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
-    </el-dialog>
+    </el-dialog> -->
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -125,10 +127,11 @@ import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import mapselect from "@/views/index/components/common/mapSelect";
+// import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
   components: {
-    mapselect
+    mapSelector
   },
   data() {
     return {
@@ -197,8 +200,8 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice() //查询所有的设备
-    this.getAllBayonetList() //查询所有的卡口
+    // this.getAllDevice() //查询所有的设备
+    // this.getAllBayonetList() //查询所有的卡口
     
   },
   methods: {
@@ -228,17 +231,14 @@ export default {
       }
     },
     clickTab() {
-      if (!this.dialogVisible) {
-        this.dialogVisible = true;
-      }
+       this.dialogVisible = !this.dialogVisible;
     },
-    hideMap(){
-      this.dialogVisible=false
-    },
+    // hideMap(){
+    //   this.dialogVisible=false
+    // },
     mapPoint(data){
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible=false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
       this.selectDevice=[]
       this.selectBayonet=[]
       //返回有效点集合
@@ -260,11 +260,11 @@ export default {
     },
     changeTab(v) {
       //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+      // if (v == "2") {
+      //   this.dialogVisible = true;
+      // } else {
+      //   this.dialogVisible = false;
+      // }
     },
     submitForm(v) {
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){

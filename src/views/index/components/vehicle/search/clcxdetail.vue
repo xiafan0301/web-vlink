@@ -25,29 +25,33 @@
             <label>机动车状态</label>
           </div>
           <div class="div">
-            <span>{{detailData.vehicleLocation}}</span>
-            <label>归属地</label>
+            <span>{{detailData.platetype}}</span>
+            <label>车辆类型</label>
           </div>
           <div class="div">
             <span>{{detailData.owner}}</span>
             <label>车辆所有人</label>
           </div>
           <div class="div">
-            <span>{{detailData.idCard}}</span>
-            <label>身份证</label>
+            <span>{{detailData.model}}</span>
+            <label>年 款</label>
           </div>
           <div class="div">
             <span>{{detailData.seatnumber}}人</span>
             <label>核定载客</label>
           </div>
           <div class="div">
+            <span>{{detailData.usecharacter}}人</span>
+            <label>使用性质</label>
+          </div>
+          <div class="div">
             <span>{{detailData.validuntil}}</span>
             <label>有效期</label>
           </div>
-          <div class="div">
+          <!-- <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
-          </div>
+          </div> -->
           <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
         </div>
       </div>
@@ -128,7 +132,7 @@
       </div>
       <div class="ment">
         <div class="tablink">
-          <a @click="goToPage('control_map')">车辆布控</a>
+          <a @click="goToPage('control_create')">车辆布控</a>
           <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
           <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
           <a @click="goToPage('vehicle_search_ws')">尾随分析</a>
@@ -207,9 +211,13 @@ export default {
           datastart:this.$route.query.dateStart,
           dataend:this.$route.query.dateEnd,
           plateNo:this.$route.query.plateNo,
+           
         }});
       }else{
-        this.$router.push({name:v });
+        this.$router.push({name:v ,query:{
+           plateNo:this.detailData.plateno,
+           imgurl:this.snapObj.storagePath
+        }});
       }
         
     },
@@ -414,6 +422,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover{
+   background-color: #0466de;
 }
 .infobox {
   margin: 35px auto;

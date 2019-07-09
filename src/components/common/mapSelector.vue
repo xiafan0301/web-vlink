@@ -219,9 +219,19 @@ export default {
         obj =  this.drawObj.circle10km[sid];
       }
       if (obj) {
-        if (obj.obj) { this.amap.remove(obj.obj); }
-        if (obj.marker) { this.amap.remove(obj.marker); }
-        if (obj.editor) { obj.editor.close(); this.amap.remove(obj.editor); }
+        if (obj.obj) {
+          this.amap.remove(obj.obj);
+          obj.obj = null;
+        }
+        if (obj.marker) {
+          this.amap.remove(obj.marker);
+          obj.marker = null;
+        }
+        if (obj.editor) {
+          obj.editor.close();
+          this.amap.remove(obj.editor);
+          obj.editor = null;
+        }
         obj = null;
       }
     },
@@ -805,6 +815,7 @@ export default {
         deviceList: ad,
         bayonetList: ab
       });
+      this.submitLoading = false;
       this.dialogVisible = false;
     },
 
@@ -836,26 +847,28 @@ export default {
     setMarks () {
       if (this.showTypes.indexOf('D') >= 0) {
         for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark(this.listDevice[i], 'vl_icon vl_icon_sxt');
+          this.doMark([this.listDevice[i].longitude, this.listDevice[i].latitude],
+            this.listDevice[i].deviceName, 'vl_icon vl_icon_sxt');
         }
       }
       if (this.showTypes.indexOf('B') >= 0) {
         for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark(this.listBayonet[i], 'vl_icon vl_icon_kk');
+          this.doMark([this.listBayonet[i].longitude, this.listBayonet[i].latitude],
+            this.listBayonet[i].bayonetName, 'vl_icon vl_icon_kk');
         }
       }
     },
     // 
-    doMark (obj, sClass) {
+    doMark (lnglat, title, sClass) {
       // console.log('doMark', obj);
       let marker = new window.AMap.Marker({ // 添加自定义点标记
         map: this.amap,
-        position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+        position: lnglat, // 基点位置 [116.397428, 39.90923]
         offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // extData: obj,
         // 自定义点标记覆盖物内容
-        content: '<div class="map_icons ' + sClass + '"></div>'
+        content: '<div title="' + title + '" class="map_icons ' + sClass + '"></div>'
       });
     },
     setMapStatus (status) {

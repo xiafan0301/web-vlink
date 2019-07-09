@@ -39,11 +39,11 @@
               <i class="vl_icon2 vl_icon2_006"></i><span>连续违法</span>
             </router-link>
           </li>
-          <li>
+          <!-- <li>
             <router-link :to="{name: 'vehicle_search_pfgc'}">
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
             </router-link>
-          </li>
+          </li> -->
           <li>
             <router-link :to="{name: 'vehicle_search_qyph'}">
               <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
