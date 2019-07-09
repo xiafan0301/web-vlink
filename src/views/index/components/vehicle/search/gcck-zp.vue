@@ -33,7 +33,7 @@
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">
-              <el-checkbox class="gcck_ck_f" v-model="formInline.no">非</el-checkbox>
+              <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
             <el-form-item>
               <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
