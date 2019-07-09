@@ -26,7 +26,7 @@
             v-for="item in carTypeList"
             :key="item.value"
             :label="item.label"
-            :value="item.value">
+            :value="item.label">
           </el-option>
         </el-select>
         <!-- <el-select v-model="queryForm.lane" placeholder="选择车道">
@@ -76,9 +76,9 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}" ></i>
+              <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
             <div></div>
@@ -392,9 +392,13 @@ export default {
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
+      this.chartData = []
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
-        carType: this.queryForm.carType
+        /* carType: this.queryForm.carType */
+      }
+      if(this.queryForm.carType) {
+        params['carType'] = this.queryForm.carType
       }
       if (this.queryForm.statementType !== 5) {
         params.reportType = this.queryForm.statementType
@@ -414,6 +418,11 @@ export default {
               date: m.name, '车流量': m.total, '车流量1': 1
             }
           });
+          if(this.queryForm.statementType === 3) {
+            for(let item of this.chartData) {
+              item['date'] = formatDate(item.data,'MM-dd')
+            }
+          }
           if (this.chartData.length > 0) {
             this.tabIndex = 2;
             this.isShowChart = true;
