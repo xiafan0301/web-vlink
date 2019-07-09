@@ -737,27 +737,27 @@ export default {
           // 点标记点击事件
           marker.on('click', function(e) {
             // 点击切换告警闪烁图标
-            if (_this.markerAlarmList.some(s => s.deviceId === e.target.C.extData.uid)) {
-              if (!$('#' + e.target.C.extData.uid).hasClass('vl_icon_control_02')) {
+            if (_this.markerAlarmList.some(s => s.deviceId === marker.getExtData().uid)) {
+              if (!$('#' + marker.getExtData().uid).hasClass('vl_icon_control_02')) {
                 // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
                 $('#mapBox .vl_icon_control_03').removeClass(" vl_icon_control_03");
-                $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
               } else {
-                $('#' + e.target.C.extData.uid).removeClass("vl_icon_alarm");
-                $('#' + e.target.C.extData.uid + '> .vl_icon_warning').remove();
-                $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_02");
-                $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+                $('#' + marker.getExtData().uid).removeClass("vl_icon_alarm");
+                $('#' + marker.getExtData().uid + '> .vl_icon_warning').remove();
+                $('#' + marker.getExtData().uid).removeClass("vl_icon_control_02");
+                $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
                 // $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).addClass("vl_icon_control_01");
-                $(`#mapBox .vl_icon_control_03:not(#${e.target.C.extData.uid})`).removeClass("vl_icon_control_03");
+                $(`#mapBox .vl_icon_control_03:not(#${marker.getExtData().uid})`).removeClass("vl_icon_control_03");
               }
             } else {
               // 点击切换普通点标记图标
               // $('#mapBox .vl_icon_control_03').addClass("vl_icon_control_01");
               $('#mapBox .vl_icon_control_03').removeClass("vl_icon_control_03");
-              $('#' + e.target.C.extData.uid).addClass("vl_icon_control_03");
+              $('#' + marker.getExtData().uid).addClass("vl_icon_control_03");
               // $('#' + e.target.C.extData.uid).removeClass("vl_icon_control_01");
             }
-            _this.getControlMapByDevice(e.target.C.extData);
+            _this.getControlMapByDevice(marker.getExtData());
           })
           _this.markerList.push(marker);
         }
