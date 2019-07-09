@@ -33,6 +33,7 @@
       </div>
     </div>
     <div class="shrink">
+      <span class="el-icon-aim mbt" @click="resemt"></span>
       <span class="el-icon-plus" @click="mapZoomSet(1)"></span>
       <span class="el-icon-minus" @click="mapZoomSet(-1)"></span>
     </div>
@@ -82,9 +83,15 @@ export default {
     
   },
   methods: {
+    resemt(){
+      this.amap.clearMap();
+      this.hover=null;
+      this.mouseTool.close(false);
+      this.addMarket()
+    },
     confirmMap(){
       //console.log(this.pointData);
-        this.amap.clearMap();
+        //this.amap.clearMap();
         this.addMarket()
         this.$emit("selectMap",{
           dev:this.pointData,
@@ -94,7 +101,8 @@ export default {
         this.boyData=[]
     },
     cancelMap(){
-      this.amap.clearMap();
+     // this.amap.clearMap();
+       //this.addMarket()
       this.$emit("closeMap")
     },
     querySearch(queryString, cb) {
@@ -393,23 +401,29 @@ export default {
   width: 100%;
   height: 500px;
   .shrink {
-    background: #ffffff;
+    
     padding: 1px;
     position: absolute;
     right: 20px;
     bottom: 90px;
     box-shadow: 3px 4px 5px -5px #666666;
     span {
+      background: #ffffff;
       display: block;
-      width: 60px;
-      height: 60px;
+      width: 45px;
+      height: 45px;
       text-align: center;
-      line-height: 60px;
+      line-height: 45px;
       font-size: 28px;
       font-weight: normal;
       cursor: pointer;
       &:first-child {
-        border-bottom: solid 1px #dddddd;
+        margin-bottom: 5px;
+        
+      }
+      &:last-child {
+        
+        border-top: solid 1px #dddddd;
       }
     }
     span:hover {
@@ -502,7 +516,9 @@ export default {
       }
     }
   }
+  
 }
+
 </style>
 <style lang="scss">
 </style>

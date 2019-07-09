@@ -220,15 +220,15 @@
                 <!-- 相似度 -->
                 <div class="similarity">
                   <p class="similarity_count">{{item.currentPeople.semblance}}</p>
-                  <p class="similarity_title">相似度 </p>
+                  <p class="similarity_title">相似度</p>
                   <!-- 选择摄像头的时间 -->
                   <div class="select_time">
                     <el-select v-model="searchCamera" placeholder="请选择">
                       <el-option
-                        v-for="item in item.detailList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
+                        v-for="(item,index) in item.detailList"
+                        :key="index"
+                        :label="index + 1"
+                        :value="index"
                       ></el-option>
                     </el-select>
                   </div>
@@ -267,6 +267,7 @@ import {
 } from "@/views/index/api/api.analysis.js";
 import { getGroupAllList } from "@/views/index/api/api.control.js";
 import { validatePersonNum, validateInteger } from "@/utils/validator.js";
+import { objDeepCopy } from "../../../../utils/util";
 export default {
   data() {
     return {
@@ -277,9 +278,7 @@ export default {
         sex: null,
         age: null
       },
-      cameraPhotoList: [
-        
-      ],
+      cameraPhotoList: [],
       startDateOptArr: [
         {
           disabledDate: time => {
@@ -503,7 +502,7 @@ export default {
         .catch(() => {});
     },
     clickGetCameraData(device) {
-      console.log('总的摄像头数据', this.totalData);
+      console.log("总的摄像头数据", this.totalData);
       // 处理下拉框
       if (this.qyryfxFrom.personGroupId) {
         this.qyryfxFrom.personGroupId = this.qyryfxFrom.personGroupId.join();
@@ -521,19 +520,17 @@ export default {
       getShotNumAreaDetail(queryParams)
         .then(res => {
           if (res && res.data) {
+            this.infoRightShow = true;
             this.cameraPhotoList = res.data;
-            for (let i = 0; i< this.cameraPhotoList.length; i++) {
+            for (let i = 0; i < this.cameraPhotoList.length; i++) {
               const item = this.cameraPhotoList[i];
               if (item.detailList.length) {
-                item.currentPeople = item.detailList[0];
-              } else {
-                item.currentPeople = {
-                  semblance: "0",
-                  subStoragePath: "",
-                  upPhotoUrl: ""
-                };
+                for (let j = 0; j < item.detailList.length; j++) {
+                  item.detailList[j]["index"] = j;
+                }
+                item.currentPeople = objDeepCopy(item.detailList[0]);
+                // item.currentIndex = 0;
               }
-                item.currentPeople['index'] = i;
             }
           } else {
             this.cameraPhotoList = [];
@@ -635,34 +632,38 @@ export default {
     preImg(index) {
       // 上一张
       const cameraObj = this.cameraPhotoList[index];
-      const len = this.cameraPhotoList[index].imgArr.length - 1;
+      const len = cameraObj.detailList.length - 1;
       if (len <= 0) {
         return;
       }
+      console.log('cameraObj.currentPeople', cameraObj.currentPeople)
       if (cameraObj.currentPeople.index === 0) {
-        this.$set(this.cameraPhotoList[index].currentPeople, "index", len);
+        this.$set(cameraObj.currentPeople, "index", len);
+        this.$set(cameraObj.currentPeople, "semblance", '88');
+        // this.$set(cameraObj.currentPeople, "index", len);
+        // this.$set(cameraObj.currentPeople, "index", len);
+      console.log('cameraObj.currentPeople', cameraObj.currentPeople)
+
       } else {
-        this.$set(
-          this.cameraPhotoList[index].currentPeople,
-          "index",
-          cameraObj.currentPeople.index - 1
-        );
+        // this.$set(this.cameraPhotoList[index], "currentIndex", cameraObj.currentIndex - 1);        
       }
+      // console.log(cameraObj.currentPeople, "当前的人");
     },
     nextImg(index) {
       // 下一张
       const cameraObj = this.cameraPhotoList[index];
-      const len = this.cameraPhotoList[index].imgArr.length - 1;
+      const len = cameraObj.detailList.length - 1;
+      
       if (len <= 0) {
         return;
       }
       if (cameraObj.currentPeople.index === len) {
-        this.$set(this.cameraPhotoList[index].currentPeople, "index", 0);
+        this.$set(cameraObj, "currentPeople", cameraObj["detailList"][0]);
       } else {
         this.$set(
-          this.cameraPhotoList[index].currentPeople,
-          "index",
-          cameraObj.currentPeople.index + 1
+          cameraObj,
+          "currentPeople",
+          cameraObj["detailList"][cameraObj.currentPeople.index + 1]
         );
       }
     },

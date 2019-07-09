@@ -26,9 +26,7 @@
               <!-- <i>全景图</i> -->
             </div>
             <div class="struc_c_d_info">
-              <h2>
-                对比信息
-              </h2>
+              <h2>对比信息</h2>
               <div class="struc_cdi_line simple_line">
                 <span :title="sturcDetail.feature">{{sturcDetail.age}}</span>
               </div>
@@ -75,7 +73,7 @@
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
           </div>
-          <div class="download_btn" >
+          <div class="download_btn">
             <a download="视频" :href="videoUrl"></a>下载视频
           </div>
         </div>
@@ -97,7 +95,7 @@
                 ></i>
                 {{item.semblance ? item.semblance : 92}}
                 <span style="font-size: 12px;">%</span>
-              </div> -->
+              </div>-->
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -175,6 +173,7 @@ export default {
       if (this.snapObj.personDetailList && this.snapObj.personDetailList.length > 0) {
         console.log("99999999", this.snapObj);
         this.curImgIndex = 0;
+        this.strucCurTab = 1;
         this.sturcDetail = this.snapObj.personDetailList[0];
         this.strucInfoList = this.snapObj.personDetailList;
         this.drawPoint(this.sturcDetail);
@@ -183,7 +182,6 @@ export default {
     imgListTap(item, index) {
       this.curImgIndex = index;
       console.log("--------------", this.curImgIndex, item);
-      /* this.toAlarmDetail(item) */
       this.sturcDetail = item;
       this.drawPoint(item);
     },
@@ -195,7 +193,8 @@ export default {
         this.amap.remove(this.markerPoint);
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
-      this.markerPoint = new AMap.Marker({
+      if(data.shotPlaceLongitude && data.shotPlaceLatitude) {
+        this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -214,6 +213,8 @@ export default {
         offset: new AMap.Pixel(0, -70),
         content: sConent
       });
+      }
+      
     },
     videoTap() {
       let vDom = document.getElementById("capVideo");

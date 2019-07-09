@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       uid: '',
-      pagination: { total: 50, pageSize: 24, pageNum: 1 },
+      pagination: { total: 0, pageSize: 24, pageNum: 1 },
       list: [],
       snapObj: {},
     };

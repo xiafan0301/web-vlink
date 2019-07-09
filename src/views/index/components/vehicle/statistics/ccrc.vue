@@ -2,7 +2,7 @@
   <div class="ccrc">
     <div class="ccrc_breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item>车辆侦查</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }"><span style="color: #999999">车辆侦查</span></el-breadcrumb-item>
           <el-breadcrumb-item>初次入城</el-breadcrumb-item>
         </el-breadcrumb>
     </div>
@@ -13,7 +13,8 @@
           <el-date-picker
               v-model="value1"
               value-format="yyyy-MM-dd HH:mm:ss"
-              @change="hhh"
+              :picker-options="pickerOptions"
+              @change="changval1"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
@@ -23,6 +24,8 @@
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
+              format="yyyy-MM-dd HH:mm:ss"
+              :picker-options="pickerOptions"
               value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 212px; vertical-align: top"
               type="datetime"
@@ -30,7 +33,7 @@
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择" style="width: 230px"  popper-class="statistics_select_list" @click.native="showChange" multiple collapse-tags>
+          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px"  popper-class="statistics_select_list" @click.native="showChange" multiple collapse-tags>
               <el-option
                   v-for="item in selectDeviceArr"
                   :key="item.uid"
@@ -111,9 +114,13 @@
                   show-overflow-tooltip>
               </el-table-column>
               <el-table-column
-                  prop="address"
+                  prop="isSurveillance"
                   label="布控库"
                   show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSurveillance">是</span>
+                  <span v-else>否</span>
+                </template>
               </el-table-column>
               <el-table-column
                   prop="vehicleClass"
@@ -123,7 +130,7 @@
               <el-table-column
                   label="操作">
                 <template slot-scope="scope">
-                  <span class="operation_btn">查看</span>
+                  <span class="operation_btn" @click="see">查看</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -152,7 +159,12 @@ import { cityCode } from "@/utils/data.js";
 export default {
   data () {
     return {
-      v: '',
+      pickerOptions: {
+        disabledDate(time) {
+          return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
+        }
+      },
+      v: '湘',
       lll: [],
       value1: '',
       value2: '',
@@ -177,11 +189,30 @@ export default {
     }
   },
   created () {
+    this.setDTime();
     this.JfoGETCity()
     this.cityCode = cityCode
     this.getMonitorList()
   },
+  mounted() {
+    this.setDTime();
+  },
   methods: {
+    changval1 (val) {
+      let time = val.replace(/-/g, '/');
+      let time1 = new Date(time)
+      let time2 = time1.getTime()
+      this.value2 = formatDate(time2 + 24*60*60*1000)
+    },
+    setDTime () {
+      let _s = formatDate(new Date(new Date().getTime() - 86400000));
+      let _e = formatDate(Date.now())
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 00:00:00";
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 23:59:59";
+      // this.ruleForm.data1 = [_s, _e];
+      this.value1 = _s
+      this.value2 = _e
+    },
     /**
      * 获取摄像头卡口信息列表
      */
@@ -197,7 +228,6 @@ export default {
           console.log('lopjhkjjk', bayonet)
           this.videoTree = this.getTreeList(camera);
           this.bayonetTree = this.getBayTreeList(bayonet);
-          console.log('jjjjjjjjjjjjjjjjjjjj',this.bayonetTree)
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
 
@@ -355,15 +385,17 @@ export default {
       console.log(1)
     },
     reset () {
-      this.value1 = '';
-      this.value2 = '';
+      this.setDTime();
       this.unvehicleFlag = false
-      this.v = ''
+      this.v = '湘'
       this.vehicleNumber = ''
       this.lll = []
       this.selectDeviceArr = []
       this.checkAllTreeBayonet = false
       this.$refs.bayonetTree.setCheckedKeys([]);
+    },
+    see () {
+      this.$router.push({name: 'clxx'});
     },
     hhh (val) {
       console.log(val)
@@ -382,15 +414,7 @@ export default {
       const params = {
         startTime: this.value1,
         endTime: this.value2,
-        unvehicleFlag: this.unvehicleFlag,
-        vehicleNumber: this.v + this.vehicleNumber,
-        // 'where.eventType': eventType,
-        // 'where.reporterUserRole': userName,
-        // 'where.keyword': this.auditForm.phoneOrNumber,
-        // 'where.eventSource': this.auditForm.eventSource,
-        pageNum: this.pagination.pageNum,
-        // orderBy: 'report_time',
-        // order: 'asc'
+        unvehicleFlag: this.unvehicleFlag
       }
       let str = '';
       if (this.selectDeviceArr.length > 0) {
@@ -398,6 +422,9 @@ export default {
           str = this.selectDeviceArr[i].uid + ',' +  str
         }
         params['bayonetUid'] = str.substr(0,str.length - 1)
+      }
+      if (this.vehicleNumber) {
+        params['vehicleNumber'] = this.v + this.vehicleNumber
       }
       JfoGETCity(params).then(res => {
         if (res) {
@@ -481,6 +508,9 @@ export default {
     }
     .statistics_select_list{
       display: none !important;
+    }
+    /deep/ .el-checkbox__inner{
+      border-radius: 50%;
     }
   }
 </style>
