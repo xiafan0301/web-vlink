@@ -151,7 +151,7 @@ export default {
       this.mouseTool = new window.AMap.MouseTool(map);
       this.mouseTool.on("draw", (event) => {
         // event.obj 为绘制出来的覆盖物对象
-        console.log('draw event', event);
+        // console.log('draw event', event);
         let _sid = random14();
         //  return
         if (this.drawActiveType === 1) {
@@ -177,24 +177,32 @@ export default {
         this.mouseTool.close(false);
         this.amap.setDefaultCursor();
         this.drawActiveType = 0;
-        console.log("覆盖物对象绘制完成");
-        // log.info('覆盖物对象绘制完成')
       });
 
       _this.setMarks();
     },
     mapEvents () {
       let _this = this, nContent = $('body');
+      // el-icon-edit el-icon-close el-icon-check
       nContent.on('click', '.el-icon-close', function () {
+        // 删除
         let nOpt = $(this).closest('.ms_marker_opt');
         let _sid = nOpt.attr('_sid'), _type = Number(nOpt.attr('_type'));
-        // console.log('mapEvents', _sid);
-        // console.log(_this.drawObj);
         _this.removeMarkers(_type, _sid);
-        // if (_this.drawObj.rectangle[_sid]) {
-        //   _this.removeMarkers(_this.drawObj.rectangle[_sid]);
-        //   delete _this.drawObj.rectangle[_sid];
-        // }
+      }).on('click', '.el-icon-edit', function () {
+        // 编辑
+        let nOpt = $(this).closest('.ms_marker_opt');
+        let _sid = nOpt.attr('_sid'), _type = Number(nOpt.attr('_type'));
+        nOpt.find('.el-icon-edit').hide();
+        nOpt.find('.el-icon-check').show();
+        _this.editMarkers(_type, _sid);
+      }).on('click', '.el-icon-check', function () {
+        // 完成
+        let nOpt = $(this).closest('.ms_marker_opt');
+        let _sid = nOpt.attr('_sid'), _type = Number(nOpt.attr('_type'));
+        nOpt.find('.el-icon-check').hide();
+        nOpt.find('.el-icon-edit').show();
+        _this.checkMarkers(_type, _sid);
       });
     },
     removeMarkers (drawType, sid) {
@@ -213,7 +221,44 @@ export default {
       if (obj) {
         if (obj.obj) { this.amap.remove(obj.obj); }
         if (obj.marker) { this.amap.remove(obj.marker); }
-        if (obj.editor) { this.amap.remove(obj.editor); }
+        if (obj.editor) { obj.editor.close(); this.amap.remove(obj.editor); }
+        obj = null;
+      }
+    },
+    editMarkers (drawType, sid) {
+      if (drawType === 1) { // 矩形
+        this.drawRectangleEditor(sid);
+      } else if (drawType === 2) {
+        this.drawCircleEditor(sid);
+      } else if (drawType === 3) {
+        this.drawPolylineEditor(sid);
+      } else if (drawType === 4) {
+        this.drawPolygonEditor(sid);
+      } else if (drawType === 5) {
+        this.drawCircle10kmEditor(sid);
+      }
+    },
+    checkMarkers (drawType, sid) {
+      if (drawType === 1) { // 矩形
+        if (this.drawObj.rectangle[sid] && this.drawObj.rectangle[sid].editor) {
+          this.drawObj.rectangle[sid].editor.close();
+        }
+      } else if (drawType === 2) { // 圆形
+        if (this.drawObj.circle[sid] && this.drawObj.circle[sid].editor) {
+          this.drawObj.circle[sid].editor.close();
+        }
+      } else if (drawType === 3) { // 折线
+        if (this.drawObj.polyline[sid] && this.drawObj.polyline[sid].editor) {
+          this.drawObj.polyline[sid].editor.close();
+        }
+      } else if (drawType === 4) {
+        if (this.drawObj.polygon[sid] && this.drawObj.polygon[sid].editor) {
+          this.drawObj.polygon[sid].editor.close();
+        }
+      } else if (drawType === 5) {
+        if (this.drawObj.circle10km[sid] && this.drawObj.circle10km[sid].editor) {
+          this.drawObj.circle10km[sid].editor.close();
+        }
       }
     },
     selectArea (e) {
@@ -238,6 +283,87 @@ export default {
         this.drawCircle10km(); 
       }
     },
+    // 矩形
+    drawRectangle () {
+      this.amap.setDefaultCursor("crosshair");
+      this.mouseTool.rectangle({
+        strokeColor: "#FA453A", 
+        strokeOpacity: 1,
+        strokeWeight: 1,
+        fillOpacity: 0.2,
+        fillColor: '#FA453A',
+        cursor:'pointer',
+        strokeStyle: "solid",
+        zIndex: this.zIndex
+      });
+      this.zIndex += 1;
+    },
+    drawRectangleEditor (sid) {
+      if (this.drawObj.rectangle[sid]) {
+        let _this = this, obj = this.drawObj.rectangle[sid];
+        if (obj.editor) {
+          obj.editor.open();
+        } else {
+          let ps = obj.obj.getPath();
+          let southWest = ps[3];
+          let northEast = ps[1];
+          let bounds = new window.AMap.Bounds(southWest, northEast);
+          // 删除原来的矩形
+          this.amap.remove(obj.obj);
+          // 新建可编辑的矩形
+          let rectangle = new window.AMap.Rectangle({
+            bounds: bounds,
+            strokeColor: "#FA453A", 
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillOpacity: 0.2,
+            fillColor: '#FA453A',
+            cursor:'pointer',
+            zIndex: this.zIndex
+          });
+          this.zIndex += 1;
+          rectangle.setMap(this.amap);
+          obj.obj = rectangle;
+          let rectangleEditor = new window.AMap.RectangleEditor(this.amap, rectangle);
+          /* rectangleEditor.on('end', function(event) {
+            // event.target 即为编辑后的矩形对象
+          }); */
+          rectangleEditor.on('adjust', function(event) {
+            // event.target 即为编辑后的矩形对象
+            // console.log('event.target.getPath()', event.target.getPath());
+            // 需要重新定位marker
+            if (obj.marker) {
+              obj.marker.setPosition(event.target.getPath()[3]);
+            }
+          });
+          obj.editor = rectangleEditor;
+          rectangleEditor.open();
+        }
+      }
+    },
+    drawRectangleMark (sid, obj) {
+      // console.log('drawRectangleMark getRadius', obj.getBounds());
+      let ap = [obj.getBounds().southwest.Q, obj.getBounds().northeast.P];
+      let marker = new window.AMap.Marker({ // 添加自定义点标记
+        map: this.amap,
+        // position: obj.B.path[0], // 基点位置 矩形的右上点
+        position: ap, // 基点位置 矩形的右上点
+        offset: new window.AMap.Pixel(-1, -23), // 相对于基点的偏移位置
+        draggable: false, // 是否可拖动
+        zIndex: this.zIndex,
+        // extData: obj,
+        // 自定义点标记覆盖物内容
+        content: '<div _sid="' + sid + '" _type="1" class="ms_marker_opt ms_marker_rectang"><div>' +
+          '<i class="el-icon-close" title="删除"></i>' +
+          '<i class="el-icon-edit" title="编辑"></i>' +
+          '<i class="el-icon-check" title="完成"></i>' +
+          '</div></div>'
+      });
+      this.zIndex += 1;
+      if (this.drawObj.rectangle[sid]) {
+        this.drawObj.rectangle[sid].marker = marker;
+      }
+    },
     // 圆形
     drawCircle () {
       this.amap.setDefaultCursor("crosshair");
@@ -254,16 +380,70 @@ export default {
         fillColor: '#FA453A',
         zIndex: this.zIndex
       });
+      this.zIndex += 1;
+    },
+    drawCircleEditor (sid) {
+      if (this.drawObj.circle[sid]) {
+        let _this = this, obj = this.drawObj.circle[sid];
+        if (obj.editor) {
+          obj.editor.open();
+        } else {
+          // 新建可编辑的矩形
+          let circle = new AMap.Circle({
+            center: obj.obj.getCenter(),
+            radius: obj.obj.getRadius(), //半径
+            borderWeight: 3,
+            strokeColor: "#FA453A", 
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            // strokeOpacity: 0.2,
+            fillOpacity: 0.2,
+            // strokeStyle: 'dashed',
+            // strokeDasharray: [10, 10], 
+            // 线样式还支持 'dashed'
+            fillColor: '#FA453A',
+            zIndex: this.zIndex
+          });
+          this.zIndex += 1;
+          // 删除原来的矩形
+          this.amap.remove(obj.obj);
+          circle.setMap(this.amap);
+          obj.obj = circle;
+          let circleEditor = new window.AMap.CircleEditor(_this.amap, circle);
+          circleEditor.on('adjust', function(event) {
+            // event.target 即为编辑后的矩形对象
+            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
+            // 需要重新定位marker
+            if (obj.marker) {
+              let ne = event.target.getBounds().getSouthWest();
+              let c = event.target.getCenter();
+              let _q = c.Q + (ne.Q - c.Q) * 0.705;
+              let _p = c.P + (ne.P - c.P) * 0.705;
+              obj.marker.setPosition([_q, _p]);
+            }
+          });
+          circleEditor.on('move', function(event) { // 拖拽圆心调整圆形位置时触发此事件
+            // event.target 即为编辑后的矩形对象
+            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
+            // 需要重新定位marker
+            if (obj.marker) {
+              let ne = event.target.getBounds().getSouthWest();
+              let c = event.target.getCenter();
+              let _q = c.Q + (ne.Q - c.Q) * 0.705;
+              let _p = c.P + (ne.P - c.P) * 0.705;
+              obj.marker.setPosition([_q, _p]);
+            }
+          });
+          obj.editor = circleEditor;
+          circleEditor.open();
+        }
+      }
     },
     drawCircleMark (sid, obj) {
-      // console.log('circle', obj);
-      // console.log('circle getRadius', obj.getBounds());
-      // console.log('circle getRadius', obj.getBounds().getNorthEast());
-      // console.log('circle center', obj.getCenter());
-      let ne = obj.getBounds().getNorthEast();
+      let ne = obj.getBounds().getSouthWest();
       let c = obj.getCenter()
-      let _q = c.Q + (ne.Q - c.Q) * 0.66667;
-      let _p = c.P + (ne.P - c.P) * 0.7444444;
+      let _q = c.Q + (ne.Q - c.Q) * 0.705;
+      let _p = c.P + (ne.P - c.P) * 0.705;
       let marker = new window.AMap.Marker({ // 添加自定义点标记
         map: this.amap,
         position: [_q, _p], // 基点位置 矩形的右上点
@@ -274,58 +454,13 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div _sid="' + sid + '" _type="2" class="ms_marker_opt ms_marker_circle"><div>' +
           '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
+          '<i class="el-icon-edit" title="编辑"></i>' +
+          '<i class="el-icon-check" title="完成"></i>' +
           '</div></div>'
       });
+      this.zIndex += 1;
       if (this.drawObj.circle[sid]) {
         this.drawObj.circle[sid].marker = marker;
-      }
-    },
-    // 矩形
-    drawRectangle () {
-      this.amap.setDefaultCursor("crosshair");
-      this.mouseTool.rectangle({
-        strokeColor: "#FA453A", 
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillOpacity: 0.2,
-        fillColor: '#FA453A',
-        cursor:'pointer',
-        strokeStyle: "solid",
-        zIndex: this.zIndex
-      });
-    },
-    drawRectangleEditor (sid) {
-      if (this.drawObj.rectangle[sid] && this.drawObj.rectangle[sid].obj) {
-        let rectangleEditor = new window.AMap.RectangleEditor(this.amap, this.drawObj.rectangle[sid].obj);
-        rectangleEditor.on('end', function(event) {
-          // log.info('触发事件： end')
-          // event.target 即为编辑后的矩形对象
-        });
-        rectangleEditor.open();
-        this.drawObj.rectangle[sid].editor = rectangleEditor;
-      }
-    },
-    drawRectangleMark (sid, obj) {
-      // console.log('drawRectangleMark getRadius', obj.getBounds());
-      let marker = new window.AMap.Marker({ // 添加自定义点标记
-        map: this.amap,
-        // position: obj.B.path[0], // 基点位置 矩形的右上点
-        position: obj.getBounds().northeast, // 基点位置 矩形的右上点
-        offset: new window.AMap.Pixel(0, 0), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        zIndex: this.zIndex,
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: '<div _sid="' + sid + '" _type="1" class="ms_marker_opt ms_marker_rectang"><div>' +
-          '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
-          '</div></div>'
-      });
-      if (this.drawObj.rectangle[sid]) {
-        this.drawObj.rectangle[sid].marker = marker;
       }
     },
     // 折线
@@ -341,6 +476,26 @@ export default {
         // strokeStyle是dashed时有效
         // strokeDasharray: [10, 5],
       });
+      this.zIndex += 1;
+    },
+    drawPolylineEditor (sid) {
+      if (this.drawObj.polyline[sid]) {
+        let _this = this, obj = this.drawObj.polyline[sid];
+        if (obj.editor) {
+          obj.editor.open();
+        } else {
+          let polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
+          polyEditor.on('adjust', function(event) {
+            // event.target 即为编辑后的对象
+            // 需要重新定位marker
+            if (obj.marker) {
+              obj.marker.setPosition(event.target.getPath()[event.target.getPath().length - 1]);
+            }
+          });
+          obj.editor = polyEditor;
+          polyEditor.open();
+        }
+      }
     },
     drawPolylineMark (sid, obj) {
       // console.log('drawRectangleMark getRadius', obj.getBounds());
@@ -356,10 +511,11 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div _sid="' + sid + '" _type="3" class="ms_marker_opt ms_marker_polyline"><div>' +
           '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
+          '<i class="el-icon-edit" title="编辑"></i>' +
+          '<i class="el-icon-check" title="完成"></i>' +
           '</div></div>'
       });
+      this.zIndex += 1;
       if (this.drawObj.polyline[sid]) {
         this.drawObj.polyline[sid].marker = marker;
       }
@@ -377,9 +533,28 @@ export default {
         isRing: false,
         zIndex: this.zIndex,
       });
+      this.zIndex += 1;
+    },
+    drawPolygonEditor (sid) {
+      if (this.drawObj.polygon[sid]) {
+        let _this = this, obj = this.drawObj.polygon[sid];
+        if (obj.editor) {
+          obj.editor.open();
+        } else {
+          var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
+          polyEditor.on('adjust', function(event) {
+            // event.target 即为编辑后的对象
+            // 需要重新定位marker
+            if (obj.marker) {
+              obj.marker.setPosition(event.target.getPath()[event.target.getPath().length - 1]);
+            }
+          });
+          obj.editor = polyEditor;
+          polyEditor.open();
+        }
+      }
     },
     drawPolygonMark (sid, obj) {
-      console.log('drawPolygonMark getPath', obj.getPath());
       let p = obj.getPath()[obj.getPath().length - 1];
       let marker = new window.AMap.Marker({ // 添加自定义点标记
         map: this.amap,
@@ -392,21 +567,20 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div _sid="' + sid + '" _type="4" class="ms_marker_opt ms_marker_polygon"><div>' +
           '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
+          '<i class="el-icon-edit" title="编辑"></i>' +
+          '<i class="el-icon-check" title="完成"></i>' +
           '</div></div>'
       });
+      this.zIndex += 1;
       if (this.drawObj.polygon[sid]) {
         this.drawObj.polygon[sid].marker = marker;
       }
     },
-
     drawCircle10km () {
       this.amap.setDefaultCursor("crosshair");
       this.amap.on('click', this.drawCircle10kmClick);
     },
     drawCircle10kmClick (e) {
-      console.log('drawCircle10kmClick', e);
       // e.lnglat.getLng()+','+e.lnglat.getLat()
       let circle = new AMap.Circle({
         center: e.lnglat,
@@ -417,12 +591,10 @@ export default {
         strokeWeight: 1,
         // strokeOpacity: 0.2,
         fillOpacity: 0.2,
-        // strokeStyle: 'dashed',
-        // strokeDasharray: [10, 10], 
-        // 线样式还支持 'dashed'
         fillColor: '#FA453A',
-        zIndex: 50,
+        zIndex: this.zIndex
       });
+      this.zIndex += 1;
       circle.setMap(this.amap);
       // 缩放地图到合适的视野级别
       this.amap.setFitView([ circle ]);
@@ -434,15 +606,47 @@ export default {
       this.amap.off('click', this.drawCircle10kmClick);
       this.drawCircle10kmMark(_sid, circle);
     },
+    drawCircle10kmEditor (sid) {
+      if (this.drawObj.circle10km[sid]) {
+        let _this = this, obj = this.drawObj.circle10km[sid];
+        if (obj.editor) {
+          obj.editor.open();
+        } else {
+          let circleEditor = new window.AMap.CircleEditor(this.amap, obj.obj);
+          circleEditor.on('adjust', function(event) {
+            // event.target 即为编辑后的矩形对象
+            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
+            // 需要重新定位marker
+            if (obj.marker) {
+              let ne = event.target.getBounds().getSouthWest();
+              let c = event.target.getCenter();
+              let _q = c.Q + (ne.Q - c.Q) * 0.705;
+              let _p = c.P + (ne.P - c.P) * 0.705;
+              obj.marker.setPosition([_q, _p]);
+            }
+          });
+          circleEditor.on('move', function(event) { // 拖拽圆心调整圆形位置时触发此事件
+            // event.target 即为编辑后的矩形对象
+            // console.log('event.target.getPath()', event.target.getBounds().getSouthWest());
+            // 需要重新定位marker
+            if (obj.marker) {
+              let ne = event.target.getBounds().getSouthWest();
+              let c = event.target.getCenter();
+              let _q = c.Q + (ne.Q - c.Q) * 0.705;
+              let _p = c.P + (ne.P - c.P) * 0.705;
+              obj.marker.setPosition([_q, _p]);
+            }
+          });
+          obj.editor = circleEditor;
+          circleEditor.open();
+        }
+      }
+    },
     drawCircle10kmMark (sid, obj) {
-      // console.log('circle', obj);
-      // console.log('circle getRadius', obj.getBounds());
-      // console.log('circle getRadius', obj.getBounds().getNorthEast());
-      // console.log('circle center', obj.getCenter());
-      let ne = obj.getBounds().getNorthEast();
-      let c = obj.getCenter()
-      let _q = c.Q + (ne.Q - c.Q) * 0.66667;
-      let _p = c.P + (ne.P - c.P) * 0.7444444;
+      let ne = obj.getBounds().getSouthWest();
+      let c = obj.getCenter();
+      let _q = c.Q + (ne.Q - c.Q) * 0.705;
+      let _p = c.P + (ne.P - c.P) * 0.705;
       let marker = new window.AMap.Marker({ // 添加自定义点标记
         map: this.amap,
         position: [_q, _p], // 基点位置 矩形的右上点
@@ -453,10 +657,11 @@ export default {
         // 自定义点标记覆盖物内容
         content: '<div _sid="' + sid + '" _type="5" class="ms_marker_opt ms_marker_circle"><div>' +
           '<i class="el-icon-close" title="删除"></i>' +
-          // '<i class="el-icon-edit ms_marker_rectang" title="编辑"></i>' +
-          // '<i class="el-icon-check ms_marker_rectang" title="完成"></i>' +
+          '<i class="el-icon-edit" title="编辑"></i>' +
+          '<i class="el-icon-check" title="完成"></i>' +
           '</div></div>'
       });
+      this.zIndex += 1;
       if (this.drawObj.circle10km[sid]) {
         this.drawObj.circle10km[sid].marker = marker;
       }
@@ -487,38 +692,56 @@ export default {
     },
 
     selSubmit () {
+      // this.drawObj.circle10km 
+      // rectangle circle polyline polygon circle10km
       this.submitLoading = true;
       let dObj = {}, bObj = {};
       if (this.listDevice && this.listDevice.length > 0) {
         for (let i = 0; i < this.listDevice.length; i++) {
           let o = this.listDevice[i];
-          if (this.drawTypes.rectangle && this.drawTypes.rectangle.obj) {
-            if (this.drawTypes.rectangle.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              dObj[o.uid] = o;
+          // 矩形
+          if (this.drawObj.rectangle) {
+            for (let k in this.drawObj.rectangle) {
+              let so = this.drawObj.rectangle[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                dObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.circle && this.drawTypes.circle.obj) {
-            if (this.drawTypes.circle.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              dObj[o.uid] = o;
+          // 圆形
+          if (this.drawObj.circle) {
+            for (let k in this.drawObj.circle) {
+              let so = this.drawObj.circle[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                dObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.polyline && this.drawTypes.polyline.obj) {
-            // distanceToLine closestOnLine
-            var closestPositionOnLine  = window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
-              this.drawTypes.polyline.obj.getPath());
-            console.log(closestPositionOnLine);
-            if (closestPositionOnLine < 200) {
-              dObj[o.uid] = o;
+          // 线
+          if (this.drawObj.polyline) {
+            for (let k in this.drawObj.polyline) {
+              let so = this.drawObj.polyline[k];
+              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+                so.obj.getPath()) < 200) {
+                dObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.polygon && this.drawTypes.polygon.obj) {
-            if (this.drawTypes.polygon.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              dObj[o.uid] = o;
+          // 多边形
+          if (this.drawObj.polygon) {
+            for (let k in this.drawObj.polygon) {
+              let so = this.drawObj.polygon[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                dObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.circle10km && this.drawTypes.circle10km.obj) {
-            if (this.drawTypes.circle10km.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              dObj[o.uid] = o;
+          if (this.drawObj.circle10km) {
+            for (let k in this.drawObj.circle10km) {
+              let so = this.drawObj.circle10km[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                dObj[o.uid] = o;
+              }
             }
           }
         }
@@ -526,31 +749,49 @@ export default {
       if (this.listBayonet && this.listBayonet.length > 0) {
         for (let i = 0; i < this.listBayonet.length; i++) {
           let o = this.listBayonet[i];
-          if (this.drawTypes.rectangle && this.drawTypes.rectangle.obj) {
-            if (this.drawTypes.rectangle.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              bObj[o.uid] = o;
+          // 矩形
+          if (this.drawObj.rectangle) {
+            for (let k in this.drawObj.rectangle) {
+              let so = this.drawObj.rectangle[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                bObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.circle && this.drawTypes.circle.obj) {
-            if (this.drawTypes.circle.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              bObj[o.uid] = o;
+          // 圆形
+          if (this.drawObj.circle) {
+            for (let k in this.drawObj.circle) {
+              let so = this.drawObj.circle[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                bObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.polyline && this.drawTypes.polyline.obj) {
-            var closestPositionOnLine  = window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
-              this.drawTypes.polyline.obj.getPath());
-            if (closestPositionOnLine < 200) {
-              bObj[o.uid] = o;
+          // 线
+          if (this.drawObj.polyline) {
+            for (let k in this.drawObj.polyline) {
+              let so = this.drawObj.polyline[k];
+              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+                so.obj.getPath()) < 200) {
+                bObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.polygon && this.drawTypes.polygon.obj) {
-            if (this.drawTypes.polygon.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              bObj[o.uid] = o;
+          // 多边形
+          if (this.drawObj.polygon) {
+            for (let k in this.drawObj.polygon) {
+              let so = this.drawObj.polygon[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                bObj[o.uid] = o;
+              }
             }
           }
-          if (this.drawTypes.circle10km && this.drawTypes.circle10km.obj) {
-            if (this.drawTypes.circle10km.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
-              bObj[o.uid] = o;
+          if (this.drawObj.circle10km) {
+            for (let k in this.drawObj.circle10km) {
+              let so = this.drawObj.circle10km[k];
+              if (so.obj && so.obj.contains(new window.AMap.LngLat(o.longitude, o.latitude))) {
+                bObj[o.uid] = o;
+              }
             }
           }
         }
@@ -561,18 +802,11 @@ export default {
       console.log('设备 ad', ad);
       console.log('卡口 ab', ab);
       this.$emit('mapSelectorEmit', {
-        deviceList: dObj,
-        bayonetList: bObj
+        deviceList: ad,
+        bayonetList: ab
       });
+      this.submitLoading = false;
       this.dialogVisible = false;
-      window.setTimeout(() => {
-        this.submitLoading = false;
-        this.closeDraw(1);
-        this.closeDraw(2);
-        this.closeDraw(3);
-        this.closeDraw(4);
-        this.closeDraw(5);
-      }, 200);
     },
 
     getTreeList () {
@@ -603,29 +837,30 @@ export default {
     setMarks () {
       if (this.showTypes.indexOf('D') >= 0) {
         for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark(this.listDevice[i], 'vl_icon vl_icon_sxt');
+          this.doMark([this.listDevice[i].longitude, this.listDevice[i].latitude],
+            this.listDevice[i].deviceName, 'vl_icon vl_icon_sxt');
         }
       }
       if (this.showTypes.indexOf('B') >= 0) {
         for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark(this.listBayonet[i], 'vl_icon vl_icon_kk');
+          this.doMark([this.listBayonet[i].longitude, this.listBayonet[i].latitude],
+            this.listBayonet[i].bayonetName, 'vl_icon vl_icon_kk');
         }
       }
     },
     // 
-    doMark (obj, sClass) {
+    doMark (lnglat, title, sClass) {
       // console.log('doMark', obj);
       let marker = new window.AMap.Marker({ // 添加自定义点标记
         map: this.amap,
-        position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+        position: lnglat, // 基点位置 [116.397428, 39.90923]
         offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
         draggable: false, // 是否可拖动
         // extData: obj,
         // 自定义点标记覆盖物内容
-        content: '<div class="map_icons ' + sClass + '"></div>'
+        content: '<div title="' + title + '" class="map_icons ' + sClass + '"></div>'
       });
     },
-
     setMapStatus (status) {
       if (this.amap) {
         if (status === 1) {
@@ -697,31 +932,29 @@ export default {
   }
 }
 .ms_marker_opt {
-  position: relative; width: 0; height: 0;
   > div {
-    position: absolute;
-    padding: 0;
     word-break:keep-all; white-space:nowrap;
     background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 50%;
+    padding: 0 2px;
     > span { display: inline-block; }
     > i {
       display: inline-block;
       padding: 0 2px;
-      font-size: 16px;
+      font-size: 18px;
     }
     > .el-icon-check {
+      display: none;
       color: #67C23A;
     }
     > .el-icon-close {
       color: #FA453A;
     }
     > .el-icon-edit {
-      color: #E6A23C; font-size: 19px;
+      color: #E6A23C; font-size: 18px;
     }
   }
-  &.ms_marker_rectang { right: 10px; top: -10px; }
+  &.ms_marker_rectang { left: 0px; bottom: 0px; }
   &.ms_marker_circle { left: 0; top: -10px; }
   &.ms_marker_polyline { left: -10px; top: -10px; }
   &.ms_marker_polygon { left: -10px; top: -10px; }
@@ -735,7 +968,7 @@ export default {
       position: relative;
       width: 100%; height: 600px;
       > .sd_search {
-        position: absolute; top: 20px; left: 20px; z-index: 1000;
+        position: absolute; top: 10px; left: 10px; z-index: 1000;
         background-color: #fff;
         overflow: hidden;
         > .sd_search_input {
@@ -759,7 +992,7 @@ export default {
         }
       }
       > .sd_opts {
-        position: absolute; top: 70px; left: 20px; z-index: 1000;
+        position: absolute; top: 55px; left: 10px; z-index: 1000;
         background-color: #fff;
       }
       > .sd_fs {

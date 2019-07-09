@@ -104,7 +104,14 @@
                 </div>
 
                 <el-form-item label prop="carType">
-                  <el-select v-model="mhscMenuForm.carType" multiple class="width232" clearable placeholder="选择车辆类别">
+                  <el-select
+                    v-model="mhscMenuForm.carType"
+                    multiple
+                    collapse-tags
+                    class="width232"
+                    clearable
+                    placeholder="选择车辆类别"
+                  >
                     <el-option
                       v-for="item in vehicleClassOptions"
                       :key="item.enumField"
@@ -210,7 +217,7 @@
                 :total="total"
                 class="cum_pagination"
               ></el-pagination>
-            </template> -->
+            </template>-->
           </vue-scroll>
         </div>
       </div>
@@ -344,7 +351,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list" v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -429,7 +436,7 @@ export default {
         {
           enumField: "违法车辆",
           enumValue: "违法车辆"
-        },
+        }
       ], // 车辆类别下拉
       vehicleBelongOptions: [], // 车辆归属地下拉
       pickerOptions: {
@@ -537,6 +544,18 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    // 获取到车辆类别
+    // getGroupsByType({ groupType: 9 })
+    //         .then(res => {
+    //           if (res.data) {
+    //             this.vehicleClassOptions = res.data.map(item => {
+    //               return {
+    //                  enumField: item.groupName,
+    //                  enumValue: item.groupName // uid
+    //               }
+    //             })
+    //           }
+    //         })
   },
   methods: {
     getStrucInfo() {
@@ -562,16 +581,18 @@ export default {
             this.$message.warning("请您填写完整的车牌号码");
           }
           const queryParams = {
-            "startTime":
-             formatDate(this.mhscMenuForm.selectDate[0], 'yyyy-MM-dd')  + " 00:00:00" || null, // 开始时间
-            "endTime":
-              formatDate(this.mhscMenuForm.selectDate[1], 'yyyy-MM-dd') + " 23:59:59" || null, // 结束时间
-            "deviceUid": deviceUidArr.join(), // 摄像头标识
-            "bayonetUid": bayonetUidArr.join(), // 卡口标识
-            "vehicleType": this.mhscMenuForm.carType.join(), // 车辆类型
-            "vehicleNumber":
+            startTime:
+              formatDate(this.mhscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                " 00:00:00" || null, // 开始时间
+            endTime:
+              formatDate(this.mhscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                " 23:59:59" || null, // 结束时间
+            deviceUid: deviceUidArr.join(), // 摄像头标识
+            bayonetUid: bayonetUidArr.join(), // 卡口标识
+            vehicleType: this.mhscMenuForm.carType.join(), // 车辆类型
+            vehicleNumber:
               this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
-            "unvehicleFlag": this.mhscMenuForm.isNegate // 非车辆标志
+            unvehicleFlag: this.mhscMenuForm.isNegate // 非车辆标志
           };
           // 处理排序字段
           if (this.sortType === 1) {
@@ -599,14 +620,14 @@ export default {
                   // this.pageNum = res.data.pageNum;
                   this.total = res.data.length;
                 } else {
-                    this.strucInfoList = []; // 清空搜索结果
+                  this.strucInfoList = []; // 清空搜索结果
                 }
               } else {
-                    this.strucInfoList = []; // 清空搜索结果
+                this.strucInfoList = []; // 清空搜索结果
               }
             })
             .catch(err => {
-                    this.strucInfoList = []; // 清空搜索结果
+              this.strucInfoList = []; // 清空搜索结果
             });
         } else {
           return false;
@@ -639,7 +660,10 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      this.mhscMenuForm.selectDate = [formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"), formatDate(new Date(), "yyyy-MM-dd")];      
+      this.mhscMenuForm.selectDate = [
+        formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"),
+        formatDate(new Date(), "yyyy-MM-dd")
+      ];
     },
     /*sort排序方法*/
     clickTime() {

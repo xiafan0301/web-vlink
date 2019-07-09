@@ -168,7 +168,7 @@
                       v-for="item in plateClassOptions"
                       :key="'licenseType' + item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -183,7 +183,7 @@
                       v-for="item in plateColorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -193,7 +193,7 @@
                       v-for="item in vehicleClassOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -203,7 +203,7 @@
                       v-for="item in vehicleColorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -213,7 +213,7 @@
                       v-for="item in carModelOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -223,7 +223,7 @@
                       v-for="item in sunvisorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -238,7 +238,7 @@
                       v-for="item in descOfRearItemOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -452,7 +452,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list" v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -676,7 +676,7 @@ export default {
     this.getMonitorList();
     // 从字典中取出自定义的特征数组
     this.getSelectOption();
-    // console.log("字典数据", this.dicObj);
+    console.log("字典数据", this.dicObj);
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
@@ -1067,7 +1067,8 @@ export default {
       this.strucDetailDialog = true;
       this.sturcDetail = data;
       this.drawPoint(data);
-      console.log(this.sturcDetail);
+    console.log('this.$refs.mySwiper', this.$refs.mySwiper);
+      
     },
     imgListTap(data, index) {
       // 点击swiper图片
