@@ -122,7 +122,7 @@
                 </el-form-item>
 
                 <el-form-item label="车牌：" style="margin: 0;" label-width="55px" prop="isNegate">
-                  <el-checkbox v-model="mhscMenuForm.isNegate">非</el-checkbox>
+                  <el-checkbox v-model="mhscMenuForm.isNegate">排除</el-checkbox>
                 </el-form-item>
 
                 <el-form-item label prop="carNumber">
@@ -400,7 +400,7 @@ export default {
         selectDate: "", // 选择日期
         carType: "", // 车辆类型
         isNegate: false, // 是否取反
-        provice: "", // 省简称
+        provice: "湘", // 省简称
         carNumber: ""
       },
       rules: {
