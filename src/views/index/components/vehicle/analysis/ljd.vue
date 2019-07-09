@@ -13,6 +13,7 @@
           :model="ruleForm"
           status-icon
           ref="ruleForm"
+          :rules="rules"
           label-width="0px"
           class="demo-ruleForm"
         >
@@ -22,6 +23,7 @@
           type="daterange"
            class="full"
               value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -66,7 +68,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
-            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="全部区域" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -112,9 +114,11 @@
     </div>
 
     <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
+    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice" :allBayonets="allBayonet"></mapselect>
-    </el-dialog>
+    </el-dialog> -->
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
@@ -123,10 +127,11 @@ import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice } from "@/views/index/api/api.judge.js";
 import { getAllBayonetList } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import mapselect from "@/views/index/components/common/mapSelect";
+// import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
   components: {
-    mapselect
+    mapSelector
   },
   data() {
     return {
@@ -137,26 +142,56 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
-      select: "",
+      select: "湘",
       reselt: false,
       hideleft: false,
       ruleForm: {
         data1:null,
         input3: null,
-        input4: null,
+        input4: 3,
         input5: "1",
         value1: null,
       },
+      rules: {input4: [ {
+              pattern:  /^[1-9]\d*$/,
+              trigger: 'blur',
+							message: '请输入正确的数值'
+						}
+          ],
+          input3:{
+            pattern:/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
+            message: '常规格式：湘A12345',
+            trigger: 'blur'
+            }
+       },
       pricecode:cityCode,
      
       options: [],
-      evData: []
+      evData: [],
+      pickerOptions: {
+          disabledDate (time) {
+            let date = new Date();
+            let y = date.getFullYear();
+            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+            let d = date.getDate();
+            let threeMonths = '';
+            let start = '';
+            if (parseFloat(m) >= 2) {
+              start = y + '-' + (m - 1) + '-' + d;
+            } else {
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
+            }
+            threeMonths = new Date(start).getTime();
+            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          }
+        },
     };
   },
   mounted() {
     //this.getControlMap(1);
+    this.setDTime();
     let pNo=this.$route.query.plateNo
-    this.select = pNo?pNo.substring(0,1):"";
+    this.select = pNo?pNo.substring(0,1):"湘";
     this.ruleForm.input3 = pNo?pNo.substr(1,6):"";
     let map = new window.AMap.Map("mapBox", {
       zoom: 10,
@@ -165,10 +200,26 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice() //查询所有的设备
-    this.getAllBayonetList() //查询所有的卡口
+    // this.getAllDevice() //查询所有的设备
+    // this.getAllBayonetList() //查询所有的卡口
+    
   },
   methods: {
+    setDTime () {
+      
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 1 * 24 * 3600 * 1000;
+       let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+      
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+      this.ruleForm.data1 = [_s, _e]
+    },
     hideResult() {
       this.reselt = false;
       this.hideLeft();
@@ -180,17 +231,14 @@ export default {
       }
     },
     clickTab() {
-      if (!this.dialogVisible) {
-        this.dialogVisible = true;
-      }
+       this.dialogVisible = !this.dialogVisible;
     },
-    hideMap(){
-      this.dialogVisible=false
-    },
+    // hideMap(){
+    //   this.dialogVisible=false
+    // },
     mapPoint(data){
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible=false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
       this.selectDevice=[]
       this.selectBayonet=[]
       //返回有效点集合
@@ -212,11 +260,11 @@ export default {
     },
     changeTab(v) {
       //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+      // if (v == "2") {
+      //   this.dialogVisible = true;
+      // } else {
+      //   this.dialogVisible = false;
+      // }
     },
     submitForm(v) {
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
@@ -242,15 +290,15 @@ export default {
       }
     },
     resetForm(v){
-      this.select=""
-      this.ruleForm= {
-        data1:null,
-        input3: null,
-        input4: null,
-        input5: "1",
-        value1: null,
-      }
-      //this.$refs[v].resetFields();
+      this.select="湘"
+      this.setDTime() 
+      this.ruleForm.input3=null
+      this.ruleForm.input4=3
+      this.ruleForm.input5="1"
+      this.ruleForm.value1=null
+      this.selectDevice=[]
+      this.selectBayonet=[]
+      this.selectValue="已选设备0个"
     },
     //查询行政区域
     getMapGETmonitorList(){
@@ -289,6 +337,7 @@ export default {
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
             this.$message.info("抱歉，没有找到匹配结果");
+            this.evData=[]
             this.amap.clearMap();
             //this.searching = false;
             return false;
@@ -355,28 +404,29 @@ export default {
               // 自定义点标记覆盖物内容
               content: _sContent
             });
-          }
+          // }
           // 摄像头
-          let _id = "vlJfoSxt" + i;
-          let _content =
-            "<div id=" +
-            _id +
-            ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
-          new AMap.Marker({
-            // 添加自定义点标记
-            map: this.amap,
-            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-            offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
-            draggable: false, // 是否可拖动
-            extData: obj,
-            // 自定义点标记覆盖物内容
-            content: _content
-          });
-          setTimeout(() => {
-            this.addListen($("#" + _id), "mouseover", i);
-            this.addListen($("#" + _id), "mouseout", i, obj);
-            this.addListen($("#" + _id), "click", i, obj);
-          }, 300);
+            let _id = "vlJfoSxt" + i;
+            let _content =
+              "<div id=" +
+              _id +
+              ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>';
+            new AMap.Marker({
+              // 添加自定义点标记
+              map: this.amap,
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+              offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: obj,
+              // 自定义点标记覆盖物内容
+              content: _content
+            });
+            setTimeout(() => {
+              this.addListen($("#" + _id), "mouseover", i);
+              this.addListen($("#" + _id), "mouseout", i, obj);
+              this.addListen($("#" + _id), "click", i, obj);
+            }, 300);
+          }
         }
       }
       this.amap.setFitView();

@@ -2,7 +2,7 @@
   <div class="tpc">
     <div class="ccrc_breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item>车辆侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }"><span style="color: #999999">车辆侦查</span></el-breadcrumb-item>
         <el-breadcrumb-item>套牌车分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -12,40 +12,46 @@
           <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
         </div>
         <div class="kaishi">
+<!--          <el-date-picker-->
+<!--              v-model="searchData.time"-->
+<!--              type="daterange"-->
+<!--              style="width: 232px"-->
+<!--              range-separator="-"-->
+<!--              value-format="yyyy-MM-dd HH:mm:ss"-->
+<!--              format="yy/MM/dd"-->
+<!--              start-placeholder="开始日期"-->
+<!--              end-placeholder="结束日期"-->
+<!--              :default-time="['00:00:00', '23:59:59']">-->
+<!--          </el-date-picker>-->
+          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
-              v-model="searchData.time"
-              type="daterange"
-              style="width: 232px"
-              range-separator="-"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              format="yy/MM/dd"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="['00:00:00', '23:59:59']">
+              v-model="value1"
+              value-format="timestamp"
+              format="yyyy-MM-dd HH:mm:ss"
+              @change="changval1"
+              style="width: 212px; vertical-align: top"
+              type="datetime"
+              placeholder="选择日期时间">
           </el-date-picker>
-<!--          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>-->
-<!--          <el-date-picker-->
-<!--              v-model="value2"-->
-<!--              style="width: 212px; vertical-align: top"-->
-<!--              type="datetime"-->
-<!--              placeholder="选择日期时间">-->
-<!--          </el-date-picker>-->
-<!--        </div>-->
-<!--        <div class="jiesu">-->
-<!--          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>-->
-<!--          <el-date-picker-->
-<!--              v-model="value2"-->
-<!--              style="width: 212px; vertical-align: top"-->
-<!--              type="datetime"-->
-<!--              placeholder="选择日期时间">-->
-<!--          </el-date-picker>-->
+        </div>
+        <div class="jiesu">
+          <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
+          <el-date-picker
+              v-model="value2"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd HH:mm:ss"
+              style="width: 212px; vertical-align: top"
+              type="datetime"
+              :picker-options="pickerOptions"
+              placeholder="选择日期时间">
+          </el-date-picker>
         </div>
         <div class="kaishi">
-          <el-button style="width: 110px">重置</el-button>
+          <el-button style="width: 110px" @click="rester">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="search">统计</el-button>
         </div>
       </div>
-      <div class="ccrc_content_right">
+      <div class="ccrc_content_right" v-if="regulationsList.length > 0">
         <div class="clearfix">
           <div style="padding: 10px 0; float: right">
             <el-button type="primary" style="width: 110px">导出</el-button>
@@ -154,7 +160,8 @@
                 <div class="list-item" v-for="item in regulationsList" :key="item.vehicleDto.uid" @click="onOpenDetail(item)">
                   <img :src="item.vehicleDto.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.vehicleDto.shotTime}}</p>
-                  <p class="address"><i></i>{{item.vehicleDto.address}}</p>
+                  <p class="address"><i></i>{{item.vehicleDto.deviceName}}</p>
+                  <p class="address" style="color: red; padding-top: 5px"><i></i>{{item.fakeReason}}</p>
                 </div>
                 <el-pagination
                     class="cum_pagination th-center-pagination"
@@ -182,12 +189,12 @@
               <div class="struc_main">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="subStoragePath" alt="">
+                      <img :src="sturcDetail.vehicleDto.storagePath" alt="">
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -207,7 +214,9 @@
                       <div class="struc_cdi_line">
                         <span>{{sturcDetail.vehicleDto.vehicleColor + sturcDetail.vehicleDto.vehicleClass + sturcDetail.vehicleDto.vehicleStyles}}<b>特征</b></span>
                       </div>
-                      <div class="struc_cdi_line"></div>
+                      <div class="struc_cdi_line">
+                        <span>{{sturcDetail.fakeReason}}<b>套牌依据</b></span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -216,7 +225,7 @@
                 </div>
                 <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="subStoragePath" alt="">
+                    <img :src="sturcDetail.vehicleDto.subStoragePath" alt="">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
@@ -229,9 +238,9 @@
               <div class="struc-list">
                 <swiper :options="swiperOption" ref="mySwiper">
                   <!-- slides -->
-                  <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
+                  <swiper-slide v-for="(item, index) in regulationsList" :key="index + 'isgm'">
                     <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                      <img style="display: block; width: 100%; height: .88rem;" :src="item.photoPath" alt="">
+                      <img style="display: block; width: 100%; height: .88rem;" :src="item.vehicleDto.subStoragePath" alt="">
                     </div>
                   </swiper-slide>
                   <div class="swiper-button-prev" slot="button-prev"></div>
@@ -242,10 +251,15 @@
           </div>
         </div>
       </div>
+      <div class="not_content" v-else>
+        <img src="../../../../../assets/img/not-content.png" alt="">
+        <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+      </div>
     </div>
   </div>
 </template>
 <script>
+import { formatDate } from "@/utils/util.js";
 import flvplayer from '@/components/common/flvplayer.vue';
 import {getArchives} from '../../../api/api.analysis.js';
 import {JtcPOSTAppendtpInfo} from '../../../api/api.judge.js';
@@ -255,9 +269,11 @@ export default {
   },
   data () {
     return {
-      subStoragePath: '',
-      searchData: {                //搜索参数
-        time: null,
+      value1: '',
+      pickerOptions: {
+      },
+      searchData: {               //搜索参数
+        time: [new Date(new Date().getTime() - 24*60*60*1000), new Date(new Date().getTime() - 24*60*60*1000)],
         licensePlateNum: null, // 车牌号
       },
       vehicleArch: {},      //车辆档案
@@ -296,7 +312,37 @@ export default {
       },
     }
   },
+  created () {
+    this.setDTime();
+    this.pickerOptions.disabledDate = this.disabledDate;
+  },
+  mounted() {
+    this.setDTime();
+    this.pickerOptions.disabledDate = this.disabledDate;
+  },
+  watch:{
+    value1 (val) {
+      if (val !== new Date().getTime() - 86400000) {
+        this.pickerOptions.disabledDate = this.disabledDate;
+      }
+    }
+  },
   methods: {
+    changval1 (val) {
+      this.value2 = formatDate(val + 3*24*60*60*1000)
+    },
+    disabledDate(time) {
+      return  time.getTime() > this.value1 + 3*24*60*60*1000 || time.getTime() < this.value1 - 24*60*60*1000
+    },
+    setDTime () {
+      let _s = new Date().getTime() - 86400000;
+      let _e = formatDate(Date.now())
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 00:00:00";
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 23:59:59";
+      // this.ruleForm.data1 = [_s, _e];
+      this.value1 = _s
+      this.value2 = _e
+    },
     //查询
     search() {
       if(this.searchData.licensePlateNum) {
@@ -308,9 +354,9 @@ export default {
     },
     getSearchData() {
       let params = {};
-      if(this.searchData.time && this.searchData.time.length > 0) {
-        params['startDate'] = this.searchData.time[0];
-        params['endDate'] = this.searchData.time[1];
+      if(this.value1 && this.value2) {
+        params['startDate'] = formatDate(this.value1);
+        params['endDate'] = this.value2;
         params['pageNum'] = this.pagination.pageNum;
         params['pageSize'] =this.pagination.pageSize;
       }
@@ -340,11 +386,14 @@ export default {
       })
     },
     getViolationList(params) {
+      this.$_showLoading({text: '加载中...'})
+      delete(params.plateNo)
       JtcPOSTAppendtpInfo(params).then(res => {
         console.log("----getViolation----", params)
         if(res && res.data) {
           this.regulationsList = res.data.list
-          this. pagination.total = res.data.total
+          this.pagination.total = res.data.total
+          this.$_hideLoading()
           console.log(this.regulationsList)
         }
       }).catch( error => {
@@ -411,6 +460,12 @@ export default {
       this.pagination.pageNum = page;
       this.search()
     },
+    rester() {
+      this.setDTime();
+      this.searchData.licensePlateNum = null
+      this.regulationsList = []
+      this.getSearchData();
+    },
     /**
      * 打开抓拍弹框
      */
@@ -418,7 +473,6 @@ export default {
       this.$_showLoading({text: '加载中...'})
       console.log(obj)
       this.sturcDetail = obj
-      this.subStoragePath = obj.vehicleDto.subStoragePath
       console.log(this.sturcDetail.videoPath)
       this.videoUrl = this.sturcDetail.vehicleDto.videoPath
       this.playUrl = {
@@ -447,6 +501,7 @@ export default {
      */
     imgListTap (obj, i) {
       this.curImgIndex = i
+      this.sturcDetail = obj
     }
   }
 }
@@ -520,6 +575,9 @@ export default {
           }
         }
       }
+    }
+    .not_content{
+      width: calc(100% - 282px)!important;
     }
   }
   .th-ycxc-record {

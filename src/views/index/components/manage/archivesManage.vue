@@ -416,8 +416,8 @@ export default {
     handleDepartData (parentArr, childArr) {
       childArr.forEach(a => {
         parentArr.forEach(b => {
-          if (a.organPid === b.uid) {
-            if (!b.children.find(c => {return a.uid === c.uid})) 
+          if (a.organPid == b.uid) {
+            if (!b.children.find(c => {return a.uid == c.uid})) 
               b.children.push(a);
               if (b.children && b.children.length > 0) {
                 this.handleDepartData(b.children, childArr);
@@ -447,7 +447,7 @@ export default {
         .then(res => {
           if (res) {
             const params = {
-              uid: this.userInfo.organList[0].uid,
+              uid: parseInt(this.userInfo.organList[0].uid),
               organName: this.userInfo.organList[0].organName,
               isShow: true,
               children: []
@@ -469,7 +469,6 @@ export default {
               this.handleDepartData(departmentList, this.departmentList);
             } else {
               this.defaultExpandKey.push(this.allDepartmentList[0].uid);
-
               this.handleDepartData(this.allDepartmentList, this.departmentList);
             }
           }

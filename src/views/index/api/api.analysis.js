@@ -48,14 +48,14 @@ export function getDrivingAnalysis(data) {
 /**
  * getFeatureSearch
  * 查询特征搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getFeatureSearch(params) {
+export function getFeatureSearch(data) {
   return request({
     url: '/vehicle-investigate/feature-search',
-    method: 'get',
+    method: 'post',
     mode: 'judge',
-    params: params
+    data
   })
 }
 
@@ -76,14 +76,14 @@ export function getPhotoAnalysis(url) {
 /**
  * getPhotoSearch
  * 查询以图搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getPhotoSearch(params) {
+export function getPhotoSearch(data) {
   return request({
     url: '/vehicle-investigate/photo-search',
-    method: 'get',
+    method: 'post',
     mode: 'judge',
-    params: params
+    data
   })
 }
 
@@ -91,14 +91,14 @@ export function getPhotoSearch(params) {
 /**
  * getVagueSearch
  * 查询模糊搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getVagueSearch(params) {
+export function getVagueSearch(data) {
   return request({
     url: '/vehicle-investigate/vague-search',
-    method: 'get',
+    method: 'post',
     mode: 'judge',
-    params: params
+    data
   })
 }
 
@@ -161,6 +161,35 @@ export function putTaskInfosResume(uid) {
 export function postTaskAnalysis(data) {
   return request({
     url: '/face-retrieval/add-frequently-haunt-job',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/*-------------------------- 区域人员分析start -------------------------------*/
+/**
+ * postShotNumArea
+ * 区域人员抓拍统计接口
+ * @param {object} data
+ */
+export function postShotNumArea(data) {
+  return request({
+    url: '/portrait/shot-num/area',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/**
+ * postShotNumAreaDetail
+ * 区域人员抓拍详情接口
+ * @param {object} data
+ */
+export function getShotNumAreaDetail(data) {
+  return request({
+    url: '/portrait/shot-num/area/detail',
     method: 'post',
     mode: 'judge',
     data

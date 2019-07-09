@@ -73,3 +73,16 @@ export function getDeviceByBayonetUid(params) {
   })
 }
 
+/**
+ * 查询全国车辆型号列表信息   
+ * @param {object} params
+ */
+export function getCarmodelList(params) {
+  return request({
+    url: '/vehicle-brands',
+    method: 'get',
+    params,
+    mode: baseModeName
+  })
+}
+

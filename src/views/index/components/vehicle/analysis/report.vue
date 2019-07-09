@@ -19,6 +19,14 @@
             end-placeholder="结束日期">
           </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
           <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
+          <!-- <el-button style="float: right;" size="small" :disabled="!clInfo || searchLoading" type="primary" @click="vehicleExport">导出为PDF</el-button> -->
+          
+          <router-link v-if="clInfo && !searchLoading" target="_blank" class="vc_rep_cs_dc" :to="{name: 'vehicle_report_save', query: {
+            pn: clInfo.plateno,
+            st: timeStr[0],
+            et: timeStr[1]
+            }}">导出</router-link>
+          <a v-else class="vc_rep_cs_dc vc_rep_cs_dc_dis">导出</a>
         </div>
         <ul class="vc_rep_mu">
           <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">车辆档案信息</span></li>
@@ -196,7 +204,7 @@
                 <div>
                   <ul class="rep_yjcm">
                     <li>
-                      <span>较常在出没时间段：</span>
+                      <span>较常出没时间段：</span>
                       <div>
                         <template v-for="(item, index) in yjcmjlList">
                           <template v-if="index != 0">|</template>
@@ -266,10 +274,11 @@
                   <el-table :data="txclList">
                     <el-table-column label="序号" type="index" width="100"></el-table-column>
                     <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="登记信息" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="同行次数" prop="name" show-overflow-tooltip></el-table-column>
-                    <el-table-column
+                    <!-- <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column> -->
+                    <el-table-column label="车辆颜色" prop="vehicleColor" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="车辆类型" prop="vehicleClass" show-overflow-tooltip></el-table-column>
+                    <el-table-column label="同行次数" prop="shotNum" show-overflow-tooltip></el-table-column>
+                   <!--  <el-table-column
                       label="操作"
                       width="120">
                       <template slot-scope="scope">
@@ -279,7 +288,7 @@
                           查看同行记录
                         </el-button>
                       </template>
-                    </el-table-column>
+                    </el-table-column> -->
                   </el-table>
                 </div>
               </div>
@@ -313,9 +322,11 @@ export default {
   data () {
     return {
       searchForm: {
-        plateNo: '湘AN8888',
-        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()]
+        plateNo: '', // 沪D008CP 沪A009CP 湘AN8888
+        time: [new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000)]
+        // time: [new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000), new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000)]
       },
+      timeStr: ['', ''],
       searchLoading: false,
 
       clInfo: null,
@@ -324,6 +335,7 @@ export default {
       ccList: [], // 出城记录
       yjcmList: {}, // 夜间出没记录
       yjcmjlList: [],  // 夜间出没结论
+      yjcmHoverWindow: null,
       pfcmList: [], // 频繁出没分析
       txclList: [], // 同行车分析
 
@@ -339,7 +351,7 @@ export default {
 
       pickerOptions: {
         disabledDate (d) {
-          return d > new Date();
+          return d > new Date() || (d.getTime() < new Date().getTime() - 30 * 24 * 60 * 60 * 1000);
         }
       }
     }
@@ -352,10 +364,12 @@ export default {
     // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
     searchSubmit () {
       this.searchLoading = true;
+      this.timeStr = [formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
+        formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')];
       getVehicleInvestigationReport({
         plateNo: this.searchForm.plateNo,
-        startTime: formatDate(this.searchForm.time[0]),
-        endTime: formatDate(this.searchForm.time[1])
+        startTime: this.timeStr[0],
+        endTime: this.timeStr[1]
       }).then(res => {
         if (res && res.data && res.data.vehicleArchivesDto) {
           let data = res.data;
@@ -369,7 +383,23 @@ export default {
           this.tpcList = data.fakePlateResultDtoList;
           this.txclList =  data.tailBehindListForReportList; // 同行车
           this.clgjList = data.struVehicleDtoList;
+          this.setMapMarkerForYjcm(); // 夜间出没
           this.setMapMarkerForClgj(); // 车辆轨迹
+         
+        } else {
+          this.clInfo = null;
+          this.wzList = [];
+          this.rcList = [];
+          this.ccList = [];
+          this.yjcmList = {};
+          this.yjcmjlList = [];
+          this.pfcmList = [];
+          this.tpcList = [];
+          this.txclList =  []; // 同行车
+          this.clgjList = [];
+          this.setMapMarkerForYjcm(); // 夜间出没
+          this.setMapMarkerForClgj(); // 车辆轨迹
+          // #/vehicle-report-save
         }
         this.searchLoading = false;
       }).catch(error => {
@@ -378,21 +408,93 @@ export default {
       });
     },
 
+    setMapMarkerForYjcm () {
+      this.yjcmMap.remove();
+      if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
+        let _this = this;
+        let oList = {};
+        for (let i = 0; i < this.yjcmList.allRecords.length; i++) {
+          let _o = this.yjcmList.allRecords[i];
+          if (!oList[_o.deviceId]) {
+            oList[_o.deviceId] = Object.assign({}, _o, {
+              CM_shotTimes: [_o.shotTime]
+            });
+          } else {
+            oList[_o.deviceId].CM_shotTimes.push(_o.shotTime);
+          }
+        }
+        // console.log('oList', oList);
+        for (let key in oList) {
+          let _oo = oList[key];
+          if (_oo.longitude > 0 && _oo.latitude > 0) {
+            // console.log('_oo', _oo);
+            let marker = new window.AMap.Marker({ // 添加自定义点标记
+              map: _this.yjcmMap,
+              position: [_oo.longitude, _oo.latitude], // 基点位置 [116.397428, 39.90923]
+              offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              // extData: obj,
+              // 自定义点标记覆盖物内容
+              content: '<div class="map_icons vl_icon vl_icon_cl cl_report_cm">' +
+                '<div class="cl_report_hw"><div>' +
+                '<p>' + _oo.deviceName + '</p>' +
+                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
+                '</div></div></div>'
+            });
+            /* marker.on('mouseover', function (mEvent) {
+              // let iW = Math.round($(window).width() * 0.15);
+              // let extD = mEvent.target.F.extData;
+              // console.log('mEvent', mEvent);
+              let sContent = '<div class="cl_report_hw"><div>' +
+                '<p>' + _oo.deviceName + '</p>' +
+                '<h3>' + _oo.CM_shotTimes.length + '次</h3>' +
+                '<ul><li>出没时间:</li>';
+              for (let j = 0; j < _oo.CM_shotTimes.length; j++) {
+                sContent += '<li>' + _oo.CM_shotTimes[j] + '</li>';
+              }
+              sContent += '</ul></div></div>';
+              let aOffSet = [0, -50];
+              _this.yjcmHoverWindow = new AMap.InfoWindow({
+                isCustom: true,
+                closeWhenClickMap: true,
+                offset: new AMap.Pixel(aOffSet[0], aOffSet[1]), // 相对于基点的偏移位置
+                content: sContent
+              });
+              let aCenter = mEvent.target.B.position;
+              _this.yjcmHoverWindow.open(_this.yjcmMap, aCenter);
+            }); */
+          }
+          /* marker.on('mouseout', function (mEvent) {
+            // if (_this.yjcmHoverWindow) { _this.yjcmHoverWindow.close(); }
+          }); */
+        }
+        this.yjcmMap.setFitView();
+      }
+    },
     setMapMarkerForClgj () {
+      this.clgjMap.remove();
       let gjPath = [];
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
         let obj = this.clgjList[i];
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.clgjMap,
-          position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // extData: obj,
-          // 自定义点标记覆盖物内容
-          content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
-        });
-        gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          let  sVideo = '';
+          if (obj.storagePath) {
+            sVideo = '<div><img src="' + obj.storagePath + '" controls></img></div>';
+          }
+          let marker = new window.AMap.Marker({ // 添加自定义点标记
+            map: this.clgjMap,
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
+            offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+            draggable: false, // 是否可拖动
+            // extData: obj,
+            // 自定义点标记覆盖物内容
+            content: '<div title="' + obj.deviceName + '" class="cl_report_gj">' +
+              sVideo +
+              '</div>'
+          });
+          gjPath.push([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+        }
       }
       // 绘制轨迹
       var polyline = new window.AMap.Polyline({
@@ -401,10 +503,9 @@ export default {
           strokeColor: "#61c772",  //线颜色
           strokeOpacity: 1,     //线透明度
           strokeWeight: 2,      //线宽
-          strokeStyle: "dashed"  //线样式
+          strokeStyle: "solid"  //线样式
       });
       this.clgjMap.setFitView();
-
     },
 
     changeShowType (val) {
@@ -422,7 +523,8 @@ export default {
       let map = new window.AMap.Map('map_report_clgj', {
         zoom: this.zoom,
         center: mapXupuxian.center,
-        zooms: [2, 18]
+        zooms: [2, 18],
+        scrollWheel: false
       });
       map.setMapStyle('amap://styles/light');
       // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
@@ -434,7 +536,8 @@ export default {
       let map = new window.AMap.Map('map_report_yjcm', {
         zoom: 11,
         center: mapXupuxian.center,
-        zooms: [2, 18]
+        zooms: [2, 18],
+        scrollWheel: false
       });
       map.setMapStyle('amap://styles/light');
       // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
@@ -447,7 +550,8 @@ export default {
       let _map = this.yjcmMap;
       if (type === 'clgj') { _map = this.clgjMap; }
       if (state === 1) {
-        _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
+        _map.setFitView();
+        // _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
       } else if (state === 2) {
         _map.setZoom(_map.getZoom() + 1);
       } else if (state === 3) {
@@ -459,7 +563,30 @@ export default {
         this.searchForm.time[1] = new Date(this.searchForm.time[0].getTime() + 2 * 24 * 60 * 60 * 1000);
         this.$message('最多不能超过3天.');
       }
-    }
+    },
+
+    /* vehicleExport () {
+      // report_content
+      let _this = this;
+      this.$confirm('确定导出吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        let pdf = new jsPDF('p','pt','a3');
+        // 设置打印比例 越大打印越小
+        pdf.internal.scaleFactor = 2;
+        let options = {
+          pagesplit: true, //设置是否自动分页
+          "background": '#FFFFFF'   //如果导出的pdf为黑色背景，需要将导出的html模块内容背景 设置成白色。
+        };
+        pdf.addHTML($('#report_content')[0], 15, 15, options, function () {
+          pdf.save('车辆侦察报告_' + _this.clInfo.plateno + '_' +
+            formatDate(_this.searchForm.time[0], 'yyyyMMdd') + '-'  + formatDate(_this.searchForm.time[1], 'yyyyMMdd') + '.pdf');
+        });
+      }).catch(() => {
+      });
+    } */
   }
 }
 </script>
@@ -488,7 +615,8 @@ export default {
   }
 }
 .vc_rep_sc {
-  padding: 20px 0 5px 20px;
+  overflow: hidden;
+  padding: 20px 20px 5px 20px;
 }
 .vc_rep_mu {
   overflow: hidden;
@@ -519,7 +647,7 @@ export default {
     border-radius:4px;
     > h2 {
       height: 48px; line-height: 48px;
-      color: #333; font-size: 16px;
+      color: #333; font-size: 16px; font-weight: bold;
       padding-left: 20px;
       border-bottom: 1px solid #eee;
     }
@@ -668,6 +796,93 @@ export default {
             }
           }
         }
+      }
+    }
+  }
+}
+.vc_rep_cs_dc {
+  float: right;
+  position: relative; top: 1px;
+  padding: 9px 15px; 
+  font-size: 12px; color: #FFF !important;
+  border-radius: 3px;
+  background-color: #409EFF;
+  border: 1px solid #409EFF;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none !important;
+  &.vc_rep_cs_dc_dis { 
+    cursor: not-allowed;
+    background-color: #a0cfff;
+    border-color: #a0cfff;
+  }
+}
+</style>
+<style lang="scss">
+.cl_report_gj {
+  position: relative;
+  display: inline-block;
+  width: 42px; height: 49px;
+  background: url(../../../../../assets/img/icons/icons_sxt.png) center center no-repeat;
+  > div {
+    position: absolute; bottom: -20px; left: 95%; z-index: 1;
+    width: 160px; height: 120px;
+    background-color: #fff;
+    border-radius: 3px;
+    &:hover { z-index: 2; }
+    > img {
+      width: 100%; height: 100%;
+    }
+  }
+}
+.cl_report_cm {
+  position: relative;
+  > .cl_report_hw {
+    position: absolute; bottom: 125%; left: -90px; z-index: 1;
+    background-color: #fff;
+    background:rgba(255,255,255,1);
+    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+    padding: 10px 20px;
+    border-radius: 4px;
+    > div {
+      position: relative;
+      width: 180px;
+      > p {
+        color: #666;
+        padding-bottom: 5px;
+        text-align: center;
+      }
+      > h3 {
+        color: #333; font-weight: bold; font-size: 20px;
+        text-align: center;
+      }
+      > ul {
+        display: none;
+        position: absolute; top: -10px; left: 180px;
+        background-color: #fff;
+        padding: 5px 0;;
+        > li {
+          padding: 5px 10px 5px 15px;
+          color: #666;
+          word-break:keep-all; white-space:nowrap;
+          &:first-child { color: #999; padding-left: 10px; }
+        }
+      }
+      &:hover {
+        > ul { display: block; }
+      }
+      &::after {
+        border-bottom-color: rgba(0, 0, 0, 0.2);
+        content: "";
+        display: inline-block;
+        position: absolute;
+      }
+      &::after {
+        left: 70px; bottom: -20px;
+        border-top: 20px solid #fff;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
       }
     }
   }

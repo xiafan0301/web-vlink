@@ -14,13 +14,13 @@ export const apiFaceTotal = (params) => {
 }
 /**
  * 人脸抓拍统计接口
- * @param {*} params 
+ * @param {*} data 
  */
-export const apiFaceSnap = (params) => {
+export const apiFaceSnap = (data) => {
   return request({
     url: '/analysis/face-snap',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'judge'
   });
 }

@@ -51,72 +51,131 @@
         </vue-scroll>
       </div>
       <div class="right">
-        <template v-if="dataList && dataList.length > 0">
-          <div class="content_top">
-            <p>
-              <span>检索结果</span>
-              <span>({{dataList.length}})</span>
-              <span style="color: #999999;font-size: 12px; margin-left: 10px;">tip：可拖动下方图片上传至左侧检索区进行检索</span>
-            </p>
-          </div>
-          <div class="result_detail">
-            <ul class="clearfix">
-              <li v-for="(item, index) in dataList" :key="index">
-                <div class="de_left">
-                  <img :src="item.photoUrl" draggable="true" @dragstart="dragImg($event)" title="可以试着把我拖拽到左侧上传图片处">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="user_name">
-                    <span>{{item.name}}</span>
-                  </p>
-                  <p class="similarity">
-                    <i class="vl_icon_retrieval_03 vl_icon"></i>
-                    <span>{{item.semblance}}<span class="percent">%</span></span>
-                  </p>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <el-pagination
-            class="cum_pagination"
-            @current-change="handleCurrentChange"
-            :current-page.sync="pagination.pageNum"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="pagination.pageSize"
-            layout="total, prev, pager, next, jumper"
-            :total="pagination.total">
-          </el-pagination>
-        </template>
-        <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
-        </template>
-        
-      </div>
-      <!--历史记录弹窗-->
-      <el-dialog
-        :visible.sync="historyPicDialog"
-        class="history-pic-dialog dialog_comp"
-        width="1000px"
-        :close-on-click-modal="false"
-        title="最近上传的图片">
-        <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
-        <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
-          <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
-            <img :src="item.path" alt="">
-          </div>
-          <div style="clear: both;"></div>
+        <vue-scroll>
+          <template v-if="dataList && dataList.length > 0">
+            <div class="content_top">
+              <p>
+                <span>检索结果</span>
+                <span>({{dataList.length}})</span>
+                <span style="color: #999999;font-size: 12px; margin-left: 10px;">tip：可拖动下方图片上传至左侧检索区进行检索</span>
+              </p>
+            </div>
+            <div class="result_detail">
+              <ul class="clearfix">
+                <li v-for="(item, index) in dataList" :key="index" @click="showStrucInfo(item, index)">
+                  <div class="de_left">
+                    <img :src="item.photoUrl" draggable="true" @dragstart="dragImg($event)" title="可以试着把我拖拽到左侧上传图片处">
+                  </div>
+                  <div class="de_right">
+                    <span class="title">检索资料</span>
+                    <p class="user_name">
+                      <span>{{item.name}}</span>
+                    </p>
+                    <p class="similarity">
+                      <i class="vl_icon_retrieval_03 vl_icon"></i>
+                      <span>{{item.semblance}}<span class="percent">%</span></span>
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <el-pagination
+              class="cum_pagination"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total">
+            </el-pagination>
+          </template>
+          <template v-else>
+            <div class="not_content">
+              <img src="../../../../../assets/img/not-content.png" alt="">
+              <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+            </div>
+          </template>
         </vue-scroll>
-        <p v-else>暂无历史记录</p>
-        <div slot="footer" v-show="historyPicList.length">
-          <el-button @click="historyPicDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
-        </div>
-      </el-dialog>
+      </div>
     </div>
+    <!--历史记录弹窗-->
+    <el-dialog
+      :visible.sync="historyPicDialog"
+      class="history-pic-dialog dialog_comp"
+      width="1000px"
+      :close-on-click-modal="false"
+      title="最近上传的图片">
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
+      <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
+        <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
+          <img :src="item.path" alt="">
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer" v-show="historyPicList.length">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <el-button class="operation_btn function_btn" @click="addHisToImg" :disabled="choosedHisPic.length === 0">确认</el-button>
+      </div>
+    </el-dialog>
+    <!--身份核实详情弹窗-->
+    <el-dialog
+      :visible.sync="identyDetailDialog"
+      class="struc_detail_dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
+      <div class="struc_tab">
+        <span>检索详情</span>
+        <i class="el-icon-close" @click="identyDetailDialog = false"></i>
+      </div>
+      <div class="struc_main">
+        <div class="struc_c_detail">
+          <div class="struc_c_d_qj struc_c_d_img">
+            <!-- <img :src="sturcDetail.upPhotoUrl" alt=""> -->
+            <img src="../../../../../assets/img/666.jpg" alt="">
+            <span>上传图</span>
+          </div>
+          <div class="struc_c_d_box">
+            <div class="struc_c_d_img">
+              <!-- <img :src="sturcDetail.photoUrl" alt=""> -->
+              <img src="../../../../../assets/img/temp/video_pic.png" alt="">
+            </div>
+            <div class="struc_c_d_info">
+              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
+              <div class="struc_cdi_line">
+                <span>{{sturcDetail.label}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span>{{sturcDetail.birthDate}}</span>
+              </div>
+              <div class="struc_cdi_line">
+                <span>{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_08"></i></span>
+              </div>
+              <div class="struc_cdi_line">
+                <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
+              </div>
+              <div class="struc_cdi_line"></div>
+            </div>
+            <span>来源库信息</span>
+          </div>
+        </div>
+      </div>
+      <div class="struc-list">
+        <swiper :options="swiperOption" ref="mySwiper">
+          <!-- slides -->
+          <swiper-slide v-for="(item, index) in dataList" :key="item.id">
+            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
+              <img style="height: .88rem;width: 50%;padding-right: .02rem;" :src="item.upPhotoUrl" alt="">
+              <img style="height: .88rem;width: 50%;padding-left: .02rem;" :src="item.photoUrl" alt="">
+              <div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05"  :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
+            </div>
+          </swiper-slide>
+          <div class="swiper-button-prev" slot="button-prev"></div>
+          <div class="swiper-button-next" slot="button-next"></div>
+        </swiper>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -140,6 +199,7 @@ export default {
       }
     }
     return {
+      identyDetailDialog: false, // 身份核实详情弹出框
       loadingHis: false, // 获取历史图片加载中
       historyPicDialog: false, // 历史图片弹出框
       uploading: false, // 是否正在上传
@@ -160,15 +220,93 @@ export default {
           { validator: validateSimilar, trigger: 'blur' }
         ]
       },
-      dataList: [],
+      // dataList: [],
       historyPicList: [], // 历史图片列表
       // choosedHisPic: [], // 选择了的图片
       curImgNum: 0, // 图片数量
+      swiperOption: {
+        slidesPerView: 5,
+        spaceBetween: 10,
+        slidesPerGroup: 5,
+        loop: false,
+        slideToClickedSlide: true,
+        loopFillGroupWithBlank: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      },
+      curImgIndex: 0,
+      sturcDetail: {
+        name: '张三',
+        semblance: 76,
+        label: '汉族',
+        birthDate: '1980-12-12',
+        idNo: '430321199500199932',
+        remarks: '奥克兰大家拉克斯基的卢卡斯就的离开洒家大斯卡拉大家啊斯卡拉大家爱上了大家撒开了多久拉萨看得见拉萨空间的拉萨空间的撒开了多久爱上了卡觉得啊斯卡拉大家拉萨空间大撒赖扩大就'
+      }, // 身份核实详情
+      dataList: [
+        {
+          id: 1,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 2,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 3,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 4,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 5,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 6,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        },
+        {
+          id: 7,
+          semblance: 89,
+          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
+          photoUrl: require('../../../../../assets/img/666.jpg')
+        }
+      ],
+      queryImgPath: null, // 从其他模块传过来的图片
     }
   },
   computed: {
     choosedHisPic () {
       return this.historyPicList.filter(x => x.checked)
+    }
+  },
+  created () {
+    const imgPath = this.$route.query.path;
+    const similarity = this.$route.query.semblance;
+    if (imgPath) {
+      this.queryImgPath = imgPath;
+      this.fileList.push({path: imgPath});
+      this.curImageUrl = imgPath;
+    }
+    if (similarity) {
+      this.searchForm.similarity = similarity;
     }
   },
   methods: {
@@ -187,7 +325,7 @@ export default {
       if (this.curImgNum >= 3) {
          this.$message({
             type: 'warning',
-            message: '最多上传3张，请先删掉再上传',
+            message: '最多可同时对比三张图片',
             customClass: 'left_error_tip'
           });
         return;
@@ -261,7 +399,7 @@ export default {
     },
     // 上传图片
     uploadPicExceed () {
-      this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
+      this.$message.warning('最多可同时对比三张图片');
     },
     uploadPicSuccess (res) {
       this.uploading = true;
@@ -269,7 +407,7 @@ export default {
         let oRes = res.data;
 
         if (this.curImgNum >= 3) {
-          this.$message.error('最多上传3张，请先删掉再上传');
+          this.$message.error('最多可同时对比三张图片');
           return;
         }
         this.curImgNum ++;
@@ -334,6 +472,7 @@ export default {
           const params = {
             'where.idNo': this.searchForm.idNo,
             'where.minSemblance': this.searchForm.similarity,
+            'where.uploadImgUrls': this.queryImgPath,
             pageNum: this.pagination.pageNum,
             pageSize: this.pagination.pageSize
           };
@@ -362,12 +501,25 @@ export default {
     // 分页
     handleCurrentChange (page) {
       this.pagination.pageNum = page;
-    }
+    },
+    imgListTap (data, index) {
+      this.curImgIndex = index;
+      this.sturcDetail = data;
+    },
+    // 显示身份核实详情
+    showStrucInfo (data, index) {
+      this.curImgIndex = index;
+      this.identyDetailDialog = true;
+      this.sturcDetail = data;
+    },
   }
 }
 </script>
 
 <style lang="scss" scoped>
+// html {
+//   font-size: 100px;
+// }
 .identy_container {
   height: 100%;
   .content_box {
@@ -515,6 +667,7 @@ export default {
             height: 180px;
             width: 375px;
             max-width: 32%;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             padding: 20px;
@@ -609,6 +762,277 @@ export default {
     }
     .active {
       border-color: #0C70F8;
+    }
+  }
+}
+.struc_detail_dialog {
+  // width: 1000px;
+  /deep/ .el-dialog {
+    max-width: 13.06rem;
+    width: 100%;
+  }
+  .el-dialog__header {
+    display: none;
+  }
+  .struc_tab {
+    height: 1.16rem;
+    // padding: .3rem 0;
+    position: relative;
+    color: #999999;
+    span {
+      display: inline-block;
+      margin-right: .55rem;
+      padding-bottom: .1rem;
+      cursor: pointer;
+    }
+    .active {
+      color: #0C70F8;
+      border-bottom: 2px solid #0C70F8;
+    }
+    i {
+      display: block;
+      position: absolute;
+      top: 0;
+      right: 0px;
+      cursor: pointer;
+    }
+  }
+  .struc_main {
+    width: 11.46rem;
+    height: 4.4rem;
+    margin: 0 auto;
+    border-bottom: 1px solid #F2F2F2;
+    .struc_c_detail {
+      width:  100%;
+      height: 3.6rem;
+      >div {
+        float: left;
+      }
+      .struc_c_d_img {
+        width: 3.6rem;
+        height: 3.6rem;
+        background: #EAEAEA;
+        position: relative;
+        img {
+          width: 100%;
+          height: auto;
+          max-height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+        }
+        i {
+          display: block;
+          position: absolute;
+          top: .1rem;
+          right: .1rem;
+          line-height: .26rem;
+          height: .26rem;
+          background: rgba(255, 255, 255, .8);
+          border-radius: .13rem;
+          font-style: normal;
+          color: #0C70F8;
+          font-size: 12px;
+          padding: 0 .1rem;
+        }
+      }
+      .struc_c_d_qj {
+        margin-right: .3rem;
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.5rem;
+          left: -.5rem;
+          transform: rotate(-45deg);
+          border: .5rem solid #0c70f8;
+          border-color: transparent transparent #0C70F8;
+          z-index: 9;
+        }
+        span {
+          display: block;
+          position: absolute;
+          top: .1rem;
+          left: .1rem;
+          width: .6rem;
+          height: .6rem;
+          text-align: center;
+          color: #FFFFFF;
+          font-size: .12rem;
+          -webkit-transform: rotate(-45deg);
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+          z-index: 99;
+        }
+      }
+      .struc_c_d_box {
+        width: calc(100% - 3.9rem);
+        box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+        border-radius:1px;
+        position: relative;
+        overflow: hidden;
+        >div {
+          float: left;
+        }
+        .struc_c_d_info {
+          width: calc(100% - 3.6rem);
+          padding-left: .24rem;
+          color: #333333;
+          h2 {
+            font-weight: bold;
+            line-height: .74rem;
+            padding-right: 1rem;
+            .vl_jfo_sim {
+              color: #0C70F8;
+              font-weight: bold;
+              font-size: .24rem;
+              float: right;
+              i {
+                vertical-align: text-bottom;
+                margin-right: .1rem;
+              }
+              span {
+                font-weight: normal;
+              }
+            }
+          }
+          .struc_cdi_line {
+            span {
+              /*position: relative;*/
+              max-width: 100%;
+              display: inline-block;
+              height: .3rem;
+              line-height: .3rem;
+              margin-bottom: .08rem;
+              border: 1px solid #F2F2F2;
+              background: #FAFAFA;
+              color: #333333;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              border-radius:3px;
+              font-size: 12px;
+              overflow: hidden;
+              padding: 0 .1rem;
+              margin-right: .08rem;
+              > i {
+                vertical-align: middle;
+                margin-left: .1rem;
+              }
+            }
+          }
+        }
+        &:before {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.7rem;
+          right: -.7rem;
+          transform: rotate(-46deg);
+          border: .7rem solid #0c70f8;
+          border-color: transparent transparent transparent #0C70F8;
+        }
+        &:after {
+          display: block;
+          content: '';
+          position: absolute;
+          top: -.4rem;
+          right: -.4rem;
+          transform: rotate(-45deg);
+          border: .4rem solid #FFFFFF;
+          border-color: transparent transparent transparent #FFFFFF;
+        }
+        >span {
+          display: block;
+          position: absolute;
+          top: .19rem;
+          right: .19rem;
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          color: #FFFFFF;
+          font-size: .12rem;
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+          z-index: 99;
+        }
+      }
+    }
+    .struc_c_address {
+      height: 100%;
+      #capMap {
+        width:  100%;
+        height: 100%;
+      }
+    }
+  }
+  .struc-list {
+    width: 12.46rem;
+    margin: 0 auto;
+    padding: .44rem 0 .34rem 0;
+    .swiper-container {
+      padding: .02rem .5rem;
+      &:before {
+        display: block;
+        content: '';
+        width: .5rem;
+        height: 110%;
+        background: #FFFFFF;
+        position: absolute;
+        left: 0;
+        z-index: 9;
+        border: 1px solid #FFFFFF;
+      }
+      &:after {
+        display: block;
+        content: '';
+        width: .5rem;
+        height: 110%;
+        background: #FFFFFF;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 9;
+        border: 1px solid #FFFFFF;
+      }
+      .swiper-button-next {
+        right:  0;
+      }
+      .swiper-button-prev {
+        left: 0;
+      }
+      .swiper-slide {
+        .swiper_img_item {
+          cursor: pointer;
+          border: 1px solid #FFFFFF;
+          padding: 2px;
+          .vl_jfo_sim {
+            font-size: .14rem;
+            height: .3rem;
+            margin-top: 0;
+            /*display: inline-block;*/
+            white-space: nowrap;
+            text-align: center;
+            color: #999999;
+            i {
+              margin-right: 0;
+            }
+          }
+        }
+        .active {
+          border-color: #0C70F8;
+          .vl_jfo_sim {
+            color: #0C70F8;
+          }
+        }
+      }
     }
   }
 }

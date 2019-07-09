@@ -4,7 +4,7 @@
     <!-- 面包屑通用样式 -->
     <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>特征搜车</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -84,7 +84,6 @@
                 </div>-->
               </div>
             </div>
-
             <!-- 表单 -->
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
               <div class="selectDate">
@@ -99,10 +98,10 @@
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
               </div>
-
               <!-- 选择搜车的类型 -->
               <div class="select_type">
                 <el-radio-group v-model="selectType">
@@ -163,12 +162,13 @@
                     v-model="tzscMenuForm.licenseType"
                     class="width232"
                     placeholder="选择号牌类型"
+                    clearable
                   >
                     <el-option
                       v-for="item in plateClassOptions"
                       :key="'licenseType' + item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -177,52 +177,53 @@
                     v-model="tzscMenuForm.licenseColor"
                     class="width232"
                     placeholder="选择号牌颜色"
+                    clearable
                   >
                     <el-option
                       v-for="item in plateColorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carType">
-                  <el-select v-model="tzscMenuForm.carType" class="width232" placeholder="选择车辆类型">
+                  <el-select v-model="tzscMenuForm.carType" class="width232" clearable placeholder="选择车辆类型">
                     <el-option
                       v-for="item in vehicleClassOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carColor">
-                  <el-select v-model="tzscMenuForm.carColor" class="width232" placeholder="选择车辆颜色">
+                  <el-select v-model="tzscMenuForm.carColor" clearable class="width232" placeholder="选择车辆颜色">
                     <el-option
                       v-for="item in vehicleColorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="carModel">
-                  <el-select v-model="tzscMenuForm.carModel" class="width232" placeholder="选择车辆型号">
+                  <el-select v-model="tzscMenuForm.carModel" clearable class="width232" placeholder="选择车辆型号">
                     <el-option
                       v-for="item in carModelOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item prop="sunVisor">
-                  <el-select v-model="tzscMenuForm.sunVisor" class="width232" placeholder="选择遮阳板">
+                  <el-select v-model="tzscMenuForm.sunVisor" clearable class="width232" placeholder="选择遮阳板">
                     <el-option
                       v-for="item in sunvisorOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -231,12 +232,13 @@
                     v-model="tzscMenuForm.inspectionCount"
                     class="width232"
                     placeholder="选择年检标数量"
+                    clearable
                   >
                     <el-option
                       v-for="item in descOfRearItemOptions"
                       :key="item.enumField"
                       :label="item.enumValue"
-                      :value="item.enumField"
+                      :value="item.enumValue"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -245,7 +247,7 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" @click="getStrucInfo">确定</el-button>
+              <el-button class="select_btn" :disabled="characteristicAble" @click="getStrucInfo">确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -367,7 +369,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -450,7 +452,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list" v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -482,7 +484,7 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入溆浦县地图
-import {formatDate} from '@/utils/util.js';
+import { formatDate } from "@/utils/util.js";
 
 import {
   JtcPOSTAppendixInfo,
@@ -505,7 +507,11 @@ export default {
       sortType: 1, // 1为时间排序， 2为监控排序
       timeSortType: true, // true为时间降序， false为时间升序
       cameraSortType: true, // true为监控降序， false为监控升序
-      characteristicList: [], // 车辆特征数组
+      characteristicList: [
+        // {
+        //   checked: false
+        // }
+      ], // 车辆特征数组
       // 菜单表单变量
       tzscMenuForm: {
         selectDate: "",
@@ -536,15 +542,15 @@ export default {
               ? "0" + (date.getMonth() + 1)
               : date.getMonth() + 1;
           let d = date.getDate();
-          let threeMonths = "";
+          let oneMonths = "";
           let start = "";
           if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+            start = y + "-" + (m - 1) + "-" + d;
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
-          threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          oneMonths = new Date(start).getTime();
+          return time.getTime() > Date.now() || time.getTime() < oneMonths;
         }
       },
       /* 自定义特征下拉框数组 */
@@ -644,6 +650,23 @@ export default {
   computed: {
     choosedHisPic() {
       return this.historyPicList.filter(x => x.checked);
+    },
+    characteristicAble() {
+      if (this.selectType === 1) {
+        return (this.characteristicList.filter(item => {
+        return item.checked;
+        }).length <= 0);
+      } else { // 自定义
+        const form = objDeepCopy(this.tzscMenuForm);
+        delete form.selectDate;
+        delete form.selectDevice;
+        for (let key in form) {
+          if (form[key]) {
+            return false;
+          }
+        }
+        return true;
+      }
     }
   },
   mounted() {
@@ -653,7 +676,7 @@ export default {
     this.getMonitorList();
     // 从字典中取出自定义的特征数组
     this.getSelectOption();
-    console.log("字典数据", this.dicObj);
+    // console.log("字典数据", this.dicObj);
     // 一进入页面就全选设备
     this.$nextTick(() => {
       this.checkAllTree = true;
@@ -699,8 +722,8 @@ export default {
             return item.id;
           });
           let queryParams = {
-            "where.startTime": this.tzscMenuForm.selectDate[0] + ' 00:00:00', // 开始时间
-            "where.endTime": this.tzscMenuForm.selectDate[1] + ' 23:59:59', // 结束时间
+            "where.startTime": formatDate(this.tzscMenuForm.selectDate[0], 'yyyy-MM-dd') + ' 00:00:00', // 开始时间
+            "where.endTime": formatDate(this.tzscMenuForm.selectDate[1], 'yyyy-MM-dd') + ' 23:59:59', // 结束时间
             "where.deviceUid":
               deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
             "where.bayonetUid":
@@ -738,12 +761,18 @@ export default {
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
-                  this.pageNum = res.data.pageNum;
+                  // this.pageNum = res.data.pageNum;
                   this.total = res.data.total;
+                } else {
+                    this.strucInfoList = []; // 清空搜索结果
                 }
+              } else {
+                    this.strucInfoList = []; // 清空搜索结果
               }
             })
-            .catch(err => {});
+            .catch(err => {
+                    this.strucInfoList = []; // 清空搜索结果
+            });
         } else {
           return false;
         }
@@ -775,6 +804,9 @@ export default {
     },
     /*重置菜单的数据 */
     resetMenu() {
+      // 置空数据数量
+      this.total = 0;
+      this.pageNum = 1;
       this.selectDeviceArr = []; // 清空选中的设备列表
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
@@ -815,18 +847,7 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      this.tzscMenuForm.selectDate = [_s, _s];
+      this.tzscMenuForm.selectDate = [formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"), formatDate(new Date(), "yyyy-MM-dd")];
     },
     /*选择设备的方法*/
     initCheckTree() {
@@ -1041,12 +1062,14 @@ export default {
     },
     showStrucInfo(data, index) {
       // 打开抓拍详情
+       this.$nextTick(() => {
+        console.log('swiper', this.$refs.mySwiper);
+      });
       this.sturcDetail = null;
       this.curImgIndex = index;
       this.strucDetailDialog = true;
       this.sturcDetail = data;
       this.drawPoint(data);
-      console.log(this.sturcDetail);
     },
     imgListTap(data, index) {
       // 点击swiper图片
@@ -1107,12 +1130,11 @@ export default {
       this.uploading = false;
       this.$message.error("上传失败");
     },
-
     /**从历史记录中上传图片 */
     showHistoryPic() {
       //获取上传记录
       this.loadingHis = true;
-      this.historyPicDialog = true;
+      this.historyPicDialog = true; // 打开加载效果
       let params = {
         userId: this.$store.state.loginUser.uid,
         fileType: 1
@@ -1120,13 +1142,13 @@ export default {
       JtcGETAppendixInfoList(params)
         .then(res => {
           if (res) {
-            this.loadingHis = false;
+            this.loadingHis = false; // 关闭加载效果
             res.data.forEach(x => (x.checked = false));
             this.historyPicList = res.data;
           }
         })
         .catch(() => {
-          this.historyPicDialog = false;
+          this.historyPicDialog = false; // 关闭加载效果
         });
     },
     delPic() {

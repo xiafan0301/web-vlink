@@ -12,7 +12,7 @@
           <div v-show="showType === 1">
             <div class="gcck_ll_s">
               <el-input
-                placeholder="搜索"
+                placeholder="搜索设备"
                 size="small"
                 @keyup.enter.native="getTreeList1()"
                 v-model="searchVal1">
@@ -42,7 +42,7 @@
               </el-date-picker>
               <el-input
                 style="margin-top: 10px"
-                placeholder="搜索"
+                placeholder="搜索设备"
                 size="small"
                 @keyup.enter.native="getTreeList2()"
                 v-model="searchVal2">
@@ -79,7 +79,7 @@
               </li>
               <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                 <div class="vc_gcck_rbl">
-                  <p>
+                  <p @click="goToDetail(item.plateNo)">
                     <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
                   </p>
                   <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
@@ -99,7 +99,7 @@
           <!-- <div class="vc_gcck_r">
             <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
           </div> -->
-          <div class="gcck_rh" v-if="zpDeviceIdsHis && picList.length > 0">
+          <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
                 <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="1" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
@@ -199,6 +199,13 @@ export default {
   mounted () {
   },
   methods: {
+
+    goToDetail (plateNo) {
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        plateNo: plateNo
+      }});
+    },
+
     goToZP () {
       this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds }});
     },

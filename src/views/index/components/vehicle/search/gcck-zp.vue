@@ -24,6 +24,7 @@
                 <el-option :label="'布控车辆'" :value="1"></el-option>
                 <el-option :label="'无牌车'" :value="2"></el-option>
                 <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
+                <el-option v-for="(item, index) in lbtsList" :label="item.name" :key="'dept-list-ts-' + index" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -32,12 +33,13 @@
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">
-              <el-checkbox class="gcck_ck_f" v-model="formInline.no">非</el-checkbox>
+              <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
             <el-form-item>
-              <el-input placeholder="请输入车牌" style="width: 200px;" v-model="formInline.cp">
-                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
+              <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
+                <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
+                  <el-option :label="'不选'" :value="''"></el-option>
                 </el-select>
               </el-input>
             </el-form-item>
@@ -57,7 +59,7 @@
                   <div class="vc_gcck_rbl">
                     <div class="gcck_rbl_i">
                       <div>
-                        <div>
+                        <div @click="goToDetail(sitem.plateNo)">
                           <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.imagePath">
                         </div>
                       </div>
@@ -101,6 +103,8 @@ import flvplayer from '@/components/common/flvplayer.vue';
 import {formatDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
+import {getSpecialGroup} from '../../../api/api.manage.js';
+import { constants } from 'crypto';
 export default {
   components: {vehicleBreadcrumb, flvplayer},
   data () {
@@ -111,11 +115,12 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '',
+        cpp: '湘',
         cp: ''
       },
       searchLoading: false,
       lbList: [],
+      lbtsList: [],
       lxList: [],
       cppList: [],
       aDay: [],
@@ -143,14 +148,28 @@ export default {
   mounted () {
     this.searchSubmit();
     this.getLxList();
-    this.getLbList();
+    // this.getLbList();
+    this.getLbtsList();
     this.getCppList();
   },
   methods: {
+    goToDetail (plateNo) {
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        plateNo: plateNo
+      }});
+    },
     getLxList () {
       getDiciData(44).then(res => {
         if (res && res.data) {
           this.lxList = res.data;
+        }
+      });
+    },
+    getLbtsList () {
+      console.log('getLbtsList');
+      getSpecialGroup().then(res => {
+        if (res && res.data) {
+          this.lbtsList = res.data;
         }
       });
     },
@@ -165,7 +184,6 @@ export default {
       getDiciData(48).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.cppList = res.data;
-          // this.formInline.cpp = res.data[0].enumValue;
         }
       });
     },

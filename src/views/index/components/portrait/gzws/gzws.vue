@@ -141,59 +141,37 @@
       >
       <div class="content_body">
         <div class="left">
-          <div class="upload_box">
+          <div :class="['upload_box', {'hidden': dialogImageUrl}]">
             <el-upload
-              :disabled="isAddImgDisabled"
               ref="uploadPic"
               accept="image/*"
+              :limit="1"
               :action="uploadUrl"
-              :show-file-list="false"
-              :limit="3"
               list-type="picture-card"
               :on-success="uploadPicSuccess"
-              :on-exceed="uploadPicExceed"
+              :on-remove="handleRemove"
               :before-upload="beforeAvatarUpload"
-              >
-              <i v-if="uploading" class="el-icon-loading"></i>
-              <img v-else-if="curImageUrl" :src="curImageUrl">
-              <i v-else class="vl_icon vl_icon_vehicle_01"></i>
-              <p class="upload_text" v-show="!curImageUrl">点击上传图片</p>
+              :file-list="fileList">
+              <i class="vl_icon vl_icon_vehicle_01"></i>
+              <p class="upload_text" v-show="!dialogImageUrl">点击上传图片</p>
             </el-upload>
-            <div class="img_list">
-              <div class="img_box" v-for="(item, index) in fileList" :key="index">
-                <img :src="item.path ? item.path : ''" alt="">
-                <div class="delete_box" v-show="item.path">
-                  <i class="vl_icon vl_icon_manage_8" @click="deleteImg(index)"></i>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
         <div class="right">
           <el-form class="left_form" :model="addForm" ref="addForm" :rules="rules">
-            <el-form-item>
-              <el-input placeholder="请输入任务名称，最多20字" maxlength="20"></el-input>
+            <el-form-item prop="taskName">
+              <el-input placeholder="请输入任务名称，最多20字" maxlength="20" v-model="addForm.taskName"></el-input>
             </el-form-item>
-            <!-- <el-form-item  prop="shotTime">
-              <el-date-picker
-                v-model="addForm.shotTime"
-                type="datetime"
-                :clearable="false"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                style="width: 100%"
-                @blur="handleStartTime"
-                :picker-options="pickerStart"
-                placeholder="开始时间">
-              </el-date-picker>
-            </el-form-item> -->
             <el-form-item  prop="dateTime">
               <el-date-picker
                 v-model="addForm.dateTime"
                 style="width: 100%"
                 :clearable="false"
-                @blur="handleDateTime"
-                :picker-options="pickerEnd"
+                @change="handleDateTime"
+                :picker-options="pickerDateTime"
                 value-format="yyyy-MM-dd HH:mm:ss"
+                format="yyyy-MM-dd HH:mm:ss"
+                range-separator="至"
                 type="datetimerange"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -237,9 +215,7 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-import { dataList } from '@/utils/data.js';
-import { getDiciData } from '@/views/index/api/api.js';
-import { formatESDate } from '@/utils/util.js';
+import { formatDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
   data () {
@@ -264,8 +240,8 @@ export default {
       isAddLoading: false, // 新建-恢复任务加载中
       isDeleteLoading: false, // 删除任务弹出框
       isInterruptLoading: false, // 中断任务弹出框
-      fileList: [],
-      isAddImgDisabled: false, // 图片上传禁用
+      fileList: [], // 图片上传列表
+      dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       deviceStartTime: null, // 起点设备抓拍时间
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
@@ -274,12 +250,12 @@ export default {
         taskName: null // 任务名称
       },
       addForm: {
-        plateNo: null, // 车牌号码
+        taskName: null, // 任务名称
         deviceCode: null, // 起点设备编号
-        dateTime: [],
+        dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         // shotTime: new Date(startTime), // 开始时间
         // dateEnd: new Date(), // 结束时间
-        vehicleClass: [], // 车辆类型
+        // vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔
       },
       intervalList: [
@@ -294,15 +270,10 @@ export default {
           { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
-      pickerStart: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
-      },
-      pickerEnd: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
+      pickerDateTime: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
       },
       list: [], // 离线任务列表
       deviceList: [], // 抓拍设备列表
@@ -314,13 +285,22 @@ export default {
     }
   },
   created () {
-    this.getVehicleTypeList();
+    // this.getVehicleTypeList();
     this.getDataList();
   },
   methods: {
-    // 时间选择失焦
-    handleDateTime () {
-      
+    // 时间选择change
+    handleDateTime (val) {
+      if (val) {
+        if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+          this.$message.warning('最多选择3天');
+          this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
+        } else {
+          if (this.dialogImageUrl) {
+            this.getDeviceList();
+          }
+        }
+      }
     },
     // 获取离线任务
     getDataList () {
@@ -350,53 +330,16 @@ export default {
       this.getDataList();
     },
     // 删除图片
-    deleteImg (index) {
-      this.curImgNum --;
-      this.fileList.splice(index, 1);
-      this.curImageUrl = null;
+    handleRemove (file, fileList) {
+      this.dialogImageUrl = null;
     },
-     // 上传图片
-    uploadPicExceed () {
-      this.$message.warning('当前限制选择 3 个文件，请删除后再上传！');
-    },
+    // 上传成功
     uploadPicSuccess (res) {
-      this.uploading = true;
       if (res && res.data) {
-        let oRes = res.data;
-
-        if (this.curImgNum >= 3) {
-          this.$message.error('最多上传3张，请先删掉再上传');
-          return;
+        this.dialogImageUrl = res.data.fileFullPath;
+        if (this.addForm.dateTime && this.addForm.dateTime.length !== 0) {
+          this.getDeviceList();
         }
-        this.curImgNum ++;
-
-        this.uploading = false;
-
-        this.curImageUrl = oRes.fileFullPath;
-
-        // if (oRes) {
-        let x = {
-          cname: oRes.fileName, // 附件名称 ,
-          contentUid: this.$store.state.loginUser.uid,
-          // desci: '', // 备注 ,
-          filePathName: oRes.fileName, // 附件保存名称 ,
-          fileType: 1, // 文件类型 ,
-          imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
-          imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
-          imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
-          // otherFlag: '', // 其他标识 ,
-          path: oRes.fileFullPath, // 附件路径 ,
-          // path: oRes.path,
-          thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
-          thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
-          // uid: '' //  附件标识
-        };
-        // JtcPOSTAppendixInfo(x).then(jRes => {
-        //   if (jRes) {
-        //     x['uid'] = jRes.data;
-        //   }
-        // })
-        this.fileList.push(x);
       }
     },
     beforeAvatarUpload (file) {
@@ -411,54 +354,16 @@ export default {
       }
       return isJPG && isLt4M;
     },
-    // 获取车辆类型列表
-    getVehicleTypeList () {
-      const type = dataList.vehicleType;
-      getDiciData(type)
-        .then(res => {
-          if (res) {
-            this.vehicleTypeList = res.data;
-          }
-        })
-    },
-    // 车牌号码change
-    handlePlateNo () {
-      if (this.addForm.plateNo && this.addForm.shotTime && this.addForm.dateEnd) {
-        this.getDeviceList();
-      }
-    },
-    // 开始时间change
-    handleStartTime () {
-      if (this.addForm.shotTime) {
-        // this.pickerEnd.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime() + 3 * 24 * 3600 * 1000;
-        // }
-        if (this.addForm.plateNo && this.addForm.dateEnd) {
-          this.getDeviceList();
-        }
-      }
-    },
-    // 结束时间change
-    handleEndTime () {
-      if (this.addForm.dateEnd) {
-        // this.pickerStart.disabledDate = function (time) {
-        //   return time.getTime() > new Date(val).getTime();
-        // }
-        if (this.addForm.shotTime && this.addForm.plateNo) {
-          this.getDeviceList();
-        }
-      }
-    },
     // 获取抓拍设备列表
     getDeviceList () {
       this.deviceList = [];
-      const shotTime = formatESDate(this.addForm.shotTime) + '-' + formatESDate(this.addForm.dateEnd);
       const params = {
-        plateNo: this.addForm.plateNo,
-        shotTime: shotTime
+        targetPicUrl : this.dialogImageUrl,
+        startTime : formatDate(this.addForm.dateTime[0]),
+        endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
-      getShotDevice(params)
+      getPersonShotDev(params)
         .then(res => {
           if (res) {
             this.deviceList = res.data;
@@ -467,13 +372,13 @@ export default {
     },
     // 起点设备change
     handleChangeDeviceCode (obj) {
-      if (obj) {
-        this.deviceList.map(item => {
-          if (item.deviceID === obj) {
-            this.deviceStartTime = item.shotTime;
-          }
-        })
-      }
+      // if (obj) {
+      //   this.deviceList.map(item => {
+      //     if (item.deviceID === obj) {
+      //       // this.deviceStartTime = item.shotTime;
+      //     }
+      //   })
+      // }
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
@@ -489,35 +394,56 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();
+      this.addTaskDialog = false;
+      this.dialogImageUrl = null;
     },
     // 搜索数据
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          if (!this.addForm.deviceCode) {
+          if (!this.dialogImageUrl) {
+             this.$message({
+              type: 'warning',
+              message: '请先上传目标人员全身照',
+              customClass: 'request_tip'
+            });
+            return;
+          }
+          if (this.dialogImageUrl && !this.addForm.deviceCode) {
             this.$message({
               type: 'warning',
-              message: '请先选择起点设备',
+              message: '请设置分析起点',
               customClass: 'request_tip'
             });
             return;
           };
-          const vehicleType = this.addForm.vehicleClass.join(':');
+          // const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            deviceCode: this.addForm.deviceCode,
-            dateStart: formatESDate(this.addForm.shotTime),
-            shotTime: formatESDate(this.deviceStartTime),
-            plateNo: this.addForm.plateNo,
-            dateEnd: formatESDate(this.addForm.dateEnd),
-            vehicleClass: vehicleType,
+            targetPicUrl: this.dialogImageUrl,
+            deviceId: this.addForm.deviceCode,
+            startTime: formatDate(this.addForm.dateTime[0]),
+            endTime: formatDate(this.addForm.dateTime[1]),
+            taskName: this.addForm.plateNo,
             interval: this.addForm.interval
           };
-          getTailBehindList(params)
+          this.isAddLoading = true;
+          getPersonFollowing(params)
             .then(res => {
               if (res && res.data) {
-                this.dataList = res.data;
+                this.$message({
+                  type: 'success',
+                  message: '新建成功',
+                  customClass: 'request_tip'
+                });
+                // this.dataList = res.data;
+                this.isAddLoading = false;
+                this.addTaskDialog = false;
+                this.getDataList();
+              } else {
+                this.isAddLoading = false;
               }
             })
+            .catch(() => {this.isAddLoading = false;})
         }
       });
     },
@@ -602,8 +528,8 @@ export default {
     recoveryTask (obj) {
       if (obj.uid) {
         const params = {
-          uid: obj.uid,
-          taskType: 3
+          uid: obj.uid
+          // taskType: 3
         };
         putTaskInfosResume(params)
           .then(res => {
@@ -716,69 +642,33 @@ export default {
     display: flex;
     .left {
       border-right: 1px dashed #F2F2F2;
+      width: 400px;
       .upload_box {
-        padding: 15px 20px;
-         .img_list {
-           display: flex;
-           margin-top: 10px;
-           .img_box {
-            width: 70px;
-            height: 70px;
-            background:rgba(255,255,255,1);
-            border:1px dashed rgba(211,211,211,1);
-            border-radius:1px;
-            position: relative;
-            &:hover {
-              .delete_box {
-                display: block;
-              }
-            }
-            .delete_box {
-              display: none;
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              height: 100%;
-              background-color: #000;
-              opacity: 0.7;
-              text-align: center;
-              i {
-                margin-top: 35%;
-                cursor: pointer; 
-              }
-            }
-            &:not(:last-child) {
-              margin-right: 5px;
-            }
-            img {
-              width: 100%;
-              height: 100%;
-            }
-           }
-         }
-         /deep/ .el-upload {
+        text-align: center;
+        margin-left: 10px;
+        width: 225px;
+        height: 225px;
+        overflow: hidden;
+        margin-top: 30px;
+        // margin-bottom: 25px;
+        /deep/ .el-upload {
           width: 225px;
           height: 225px;
-          position: relative;
+          
+          i {
+            width: 120px;
+            height: 110px;
+            margin-top: 40px;
+            margin-left: 15px;
+          }
           .upload_text {
             line-height: 0;
             color: #999999;
-            margin-top: -60px;
+            margin-top: -50px;
           }
-          >img {
-            width: 100%;
-            height: 100%;
-          }
-          i {
-            margin-top: 40px;
-            margin-left: 15px;
-            width: 120px;
-            height: 120px;
-          }
-          &:hover {
-            background: #2981F8;
-            // i.vl_icon_control_14{
+          &:hover{
+            background: #0C70F8;
+            // i.vl_icon_control_14 {
             //   background-position: -228px -570px;
             // }
             .upload_text {
@@ -786,10 +676,92 @@ export default {
             }
           }
         }
-        &.hidden /deep/ .el-upload--picture-card {
+        &.hidden /deep/ .el-upload--picture-card{
           display: none!important;
         }
+        /deep/ .el-upload-list__item {
+          width: 225px;
+          height: 225px;
+        }
       }
+      // .upload_box {
+      //   padding: 15px 20px;
+      //   //  .img_list {
+      //   //    display: flex;
+      //   //    margin-top: 10px;
+      //   //    .img_box {
+      //   //     width: 70px;
+      //   //     height: 70px;
+      //   //     background:rgba(255,255,255,1);
+      //   //     border:1px dashed rgba(211,211,211,1);
+      //   //     border-radius:1px;
+      //   //     position: relative;
+      //   //     &:hover {
+      //   //       .delete_box {
+      //   //         display: block;
+      //   //       }
+      //   //     }
+      //   //     .delete_box {
+      //   //       display: none;
+      //   //       position: absolute;
+      //   //       left: 0;
+      //   //       top: 0;
+      //   //       width: 100%;
+      //   //       height: 100%;
+      //   //       background-color: #000;
+      //   //       opacity: 0.7;
+      //   //       text-align: center;
+      //   //       i {
+      //   //         margin-top: 35%;
+      //   //         cursor: pointer; 
+      //   //       }
+      //   //     }
+      //   //     &:not(:last-child) {
+      //   //       margin-right: 5px;
+      //   //     }
+      //   //     img {
+      //   //       width: 100%;
+      //   //       height: 100%;
+      //   //     }
+      //   //    }
+      //   //  }
+      //    /deep/ .el-upload {
+      //     width: 225px;
+      //     height: 225px;
+      //     position: relative;
+      //     .upload_text {
+      //       line-height: 0;
+      //       color: #999999;
+      //       margin-top: -60px;
+      //     }
+      //     // >img {
+      //     //   width: 100%;
+      //     //   height: 100%;
+      //     // }
+      //     i {
+      //       margin-top: 40px;
+      //       margin-left: 15px;
+      //       width: 120px;
+      //       height: 120px;
+      //     }
+      //     &:hover {
+      //       background: #2981F8;
+      //       // i.vl_icon_control_14{
+      //       //   background-position: -228px -570px;
+      //       // }
+      //       .upload_text {
+      //         color: #ffffff;
+      //       }
+      //     }
+      //   }
+      //   &.hidden /deep/ .el-upload--picture-card {
+      //     display: none!important;
+      //   }
+      //   /deep/ .el-upload-list__item {
+      //     width: 225px;
+      //     height: 225px;
+      //   }
+      // }
     }
     .right {
       width: 100%;

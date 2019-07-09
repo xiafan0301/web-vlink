@@ -224,6 +224,7 @@ export default {
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
+        // console.log(this.userList)
         setTimeout(() => {
           this.loading = false;
           this.reportUserList = this.userList.filter(item => {

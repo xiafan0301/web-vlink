@@ -2,7 +2,7 @@
   <div class="ccrc">
     <div class="ccrc_breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
-          <el-breadcrumb-item>车辆侦查</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/vehicle/menu' }"><span style="color: #999999">车辆侦查</span></el-breadcrumb-item>
           <el-breadcrumb-item>初次入城</el-breadcrumb-item>
         </el-breadcrumb>
     </div>
@@ -12,8 +12,8 @@
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">开 始</span>
           <el-date-picker
               v-model="value1"
-              value-format="timestamp"
-              @change="hhh"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              :picker-options="pickerOptions"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
@@ -23,44 +23,46 @@
           <span style="display: inline-block; width: 14px; margin-right: 4px; color: #999999">结 束</span>
           <el-date-picker
               v-model="value2"
-              value-format="timestamp"
+              format="yyyy-MM-dd HH:mm:ss"
+              :picker-options="pickerOptions1"
+              value-format="yyyy-MM-dd HH:mm:ss"
               style="width: 212px; vertical-align: top"
               type="datetime"
               placeholder="选择日期时间">
           </el-date-picker>
         </div>
         <div class="kakou">
-          <el-select v-model="lll" placeholder="请选择" style="width: 230px"  popper-class="statistics_select_list" @click.native="showChange" multiple collapse-tags>
+          <el-select v-model="lll" placeholder="请选择卡口" style="width: 230px" multiple collapse-tags>
               <el-option
-                  v-for="item in selectDeviceArr"
+                  v-for="item in kakou"
                   :key="item.uid"
-                  :label="item.bayonetName"
+                  :label="item.label"
                   :value="item.uid">
               </el-option>
           </el-select>
-          <div class="search_item" v-show="isShowSelectList">
-            <vue-scroll>
-              <el-checkbox
-                  :indeterminate="isIndeterminateBayonet"
-                  v-model="checkAllTreeBayonet"
-                  @change="handleCheckedAllBayonet"
-              >全选</el-checkbox>
-              <el-tree
-                  @check="listenCheckedBayonet"
-                  :data="bayonetTree"
-                  show-checkbox
-                  default-expand-all
-                  node-key="id"
-                  ref="bayonetTree"
-                  highlight-current
-                  :props="defaultProps">
-              </el-tree>
-            </vue-scroll>
-          </div>
+<!--          <div class="search_item" v-show="isShowSelectList">-->
+<!--            <vue-scroll>-->
+<!--              <el-checkbox-->
+<!--                  :indeterminate="isIndeterminateBayonet"-->
+<!--                  v-model="checkAllTreeBayonet"-->
+<!--                  @change="handleCheckedAllBayonet"-->
+<!--              >全选</el-checkbox>-->
+<!--              <el-tree-->
+<!--                  @check="listenCheckedBayonet"-->
+<!--                  :data="bayonetTree"-->
+<!--                  show-checkbox-->
+<!--                  default-expand-all-->
+<!--                  node-key="id"-->
+<!--                  ref="bayonetTree"-->
+<!--                  highlight-current-->
+<!--                  :props="defaultProps">-->
+<!--              </el-tree>-->
+<!--            </vue-scroll>-->
+<!--          </div>-->
         </div>
         <div class="cpai">
           <span style="display: inline-block; width: 42px;color: #999999">车牌：</span>
-          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">非</span></el-checkbox>
+          <el-checkbox v-model="unvehicleFlag"><span style="color: #999999">排除</span></el-checkbox>
         </div>
         <div class="kakou">
           <el-input placeholder="请输入内容" v-model="vehicleNumber" class="input-with-select">
@@ -111,9 +113,13 @@
                   show-overflow-tooltip>
               </el-table-column>
               <el-table-column
-                  prop="address"
+                  prop="isSurveillance"
                   label="布控库"
                   show-overflow-tooltip>
+                <template slot-scope="scope">
+                  <span v-if="scope.row.isSurveillance">是</span>
+                  <span v-else>否</span>
+                </template>
               </el-table-column>
               <el-table-column
                   prop="vehicleClass"
@@ -123,13 +129,14 @@
               <el-table-column
                   label="操作">
                 <template slot-scope="scope">
-                  <span class="operation_btn">查看</span>
+                  <span class="operation_btn" @click="see">查看</span>
                 </template>
               </el-table-column>
             </el-table>
           </div>
           <el-pagination
               class="cum_pagination"
+              v-if="false"
               @current-change="handleCurrentChange"
               :current-page.sync="pagination.pageNum"
               :page-sizes="[100, 200, 300, 400]"
@@ -151,7 +158,39 @@ import { cityCode } from "@/utils/data.js";
 export default {
   data () {
     return {
-      v: '',
+      pickerOptions: {
+        disabledDate: time => {
+          if (this.value2) {
+            return (
+              time.getTime() > new Date(this.value2).getTime() ||
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 90 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+          // return  time.getTime() < new Date(new Date().getTime() - 90*86400000) || time.getTime() > new Date(new Date().getTime())
+      },
+      pickerOptions1: {
+        disabledDate: time => {
+          if (this.value1) {
+            return (
+              time.getTime() < new Date(this.value1).getTime() ||
+              time.getTime() > new Date().getTime()
+            );
+          } else {
+            return (
+              time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 30 ||
+              time.getTime() > new Date().getTime()
+            );
+          }
+        }
+      },
+      kakou: [],
+      v: '湘',
       lll: [],
       value1: '',
       value2: '',
@@ -176,11 +215,30 @@ export default {
     }
   },
   created () {
+    this.setDTime();
     this.JfoGETCity()
     this.cityCode = cityCode
     this.getMonitorList()
   },
+  mounted() {
+    this.setDTime();
+  },
   methods: {
+    changval1 (val) {
+      let time = val.replace(/-/g, '/');
+      let time1 = new Date(time)
+      let time2 = time1.getTime()
+      this.value2 = formatDate(time2 + 24*60*60*1000)
+    },
+    setDTime () {
+      let _s = formatDate(new Date(new Date().getTime() - 86400000));
+      let _e = formatDate(Date.now())
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 00:00:00";
+      // let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + " 23:59:59";
+      // this.ruleForm.data1 = [_s, _e];
+      this.value1 = _s
+      this.value2 = _e
+    },
     /**
      * 获取摄像头卡口信息列表
      */
@@ -193,12 +251,12 @@ export default {
           console.log('原始数据', res.data)
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
-          console.log('lopjhkjjk', bayonet)
+          this.kakou = this.getTreeList1(bayonet)
+          console.log('lopjhkjjk', this.kakou)
           this.videoTree = this.getTreeList(camera);
-          this.bayonetTree = this.getBayTreeList(bayonet);
-          console.log('jjjjjjjjjjjjjjjjjjjj',this.bayonetTree)
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
+
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
           // this.$refs.videotree.setCheckedNodes(this.videoTree);
         }
@@ -222,6 +280,17 @@ export default {
         }
       }
       return data;
+    },
+    getTreeList1(data) {
+      let arr = []
+      for(let item of data) {
+        if(item.bayonetList && item.bayonetList.length > 0) {
+          for(let key of item['bayonetList']) {
+            arr.push({label: key.bayonetName, uid: key.uid})
+          }
+        }
+      }
+      return arr;
     },
     /**
      * 获取卡口数据
@@ -342,8 +411,6 @@ export default {
     // 选中的设备数量处理
     handleData() {
       this.selectDeviceArr = [...this.selectVedioArr, ...this.selectBayonetArr].filter(key => key.treeType);
-      this.lll = this.selectDeviceArr
-      // console.log('选中的数据', this.selectDeviceArr);
     },
     oo () {
       console.log(this.selectDeviceArr)
@@ -353,15 +420,18 @@ export default {
       console.log(1)
     },
     reset () {
-      this.value1 = '';
-      this.value2 = '';
+      this.setDTime();
       this.unvehicleFlag = false
-      this.v = ''
+      this.v = '湘'
       this.vehicleNumber = ''
       this.lll = []
       this.selectDeviceArr = []
       this.checkAllTreeBayonet = false
       this.$refs.bayonetTree.setCheckedKeys([]);
+      this.JfoGETCity()
+    },
+    see () {
+      this.$router.push({name: 'clxx'});
     },
     hhh (val) {
       console.log(val)
@@ -378,30 +448,19 @@ export default {
     },
     JfoGETCity () {
       const params = {
-        'where.startTime': this.value1,
-        'where.endTime': this.value2,
-        'where.unvehicleFlag': this.unvehicleFlag,
-        'where.vehicleNumber': this.v + this.vehicleNumber,
-        // 'where.eventType': eventType,
-        // 'where.reporterUserRole': userName,
-        // 'where.keyword': this.auditForm.phoneOrNumber,
-        // 'where.eventSource': this.auditForm.eventSource,
-        pageNum: this.pagination.pageNum,
-        // orderBy: 'report_time',
-        // order: 'asc'
+        startTime: this.value1,
+        endTime: this.value2,
+        unvehicleFlag: this.unvehicleFlag
       }
-      let str = '';
-      if (this.selectDeviceArr.length > 0) {
-        for (let i = 0; i< this.selectDeviceArr.length; i++) {
-          str = this.selectDeviceArr[i].uid + ',' +  str
-        }
-        params['where.bayonetUid'] = str.substr(0,str.length - 1)
+      if (this.lll) {
+        params['bayonetUid'] = this.lll.join(',')
+      }
+      if (this.vehicleNumber) {
+        params['vehicleNumber'] = this.v + this.vehicleNumber
       }
       JfoGETCity(params).then(res => {
         if (res) {
-          this.tableData = res.data.list;
-          this.pagination.total = res.data.total;
-          console.log('llllllllllllllllllll', res)
+          this.tableData = res.data;
         }
       })
     }
@@ -480,10 +539,10 @@ export default {
     .statistics_select_list{
       display: none !important;
     }
+    /deep/ .el-checkbox__inner{
+      border-radius: 50%;
+    }
   }
 </style>
 <style lang="scss">
-.statistics_select_list {
-  display: none!important;
-}
 </style>

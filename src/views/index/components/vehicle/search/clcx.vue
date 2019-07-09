@@ -20,6 +20,7 @@
               v-model="ruleForm.dateStart"
               type="date"
               placeholder="开始时间"
+              :picker-options="pickerOptions"
               class="full"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
@@ -28,13 +29,14 @@
             <el-date-picker
               v-model="ruleForm.dateEnd"
               type="date"
+              :picker-options="pickerOptions"
               placeholder="结束时间"
               class="full"
               value-format="yyyy-MM-dd"
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="全部车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -44,7 +46,7 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="车辆类型">
+            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
               <el-option
                 v-for="item in vehicleOptions"
                 :key="item.enumValue"
@@ -75,7 +77,7 @@
             </el-input>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="value1" multiple collapse-tags placeholder="全部地区" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -128,7 +130,7 @@
         label="抓拍次数">
       </el-table-column>
       <el-table-column
-        prop="vehicleType"
+        prop="vehicleGroup"
         sortable
         label="车辆类别">
       </el-table-column>
@@ -161,9 +163,12 @@
     </el-pagination> -->
     </div>
      <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
+    <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
         <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
-    </el-dialog>
+    </el-dialog> -->
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    
   </div>
 </template>
 <script>
@@ -171,14 +176,32 @@ import { mapXupuxian } from "@/config/config.js";
 import { cityCode } from "@/utils/data.js";
 import { getVehicleShot,getAllDevice,getGroups,getSnapList} from "@/views/index/api/api.judge.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
-import mapselect from "@/views/index/components/common/mapSelect";
+// import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 import { dataList } from '@/utils/data.js';
 export default {
   components: {
-    mapselect
+    mapSelector
   },
   data () {
     return {
+      pickerOptions: {
+          disabledDate (time) {
+            let date = new Date();
+            let y = date.getFullYear();
+            let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+            let d = date.getDate();
+            let threeMonths = '';
+            let start = '';
+            if (parseFloat(m) >= 2) {
+              start = y + '-' + (m - 1) + '-' + d;
+            } else {
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
+            }
+            threeMonths = new Date(start).getTime();
+            return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          }
+        },
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -221,9 +244,9 @@ export default {
     }
   },
   mounted() {
-   
+   this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
-    this.getAllDevice()
+    //this.getAllDevice()
     this.getGroups()
     //this.getAllDevice()
     //let dic= JSON.parse(localStorage.getItem("dic"));
@@ -235,6 +258,23 @@ export default {
     
   },
   methods: {
+    //设置默认时间
+    setDTime() {
+      let date = new Date();
+      let curDate = date.getTime();
+      let curS = 30 * 24 * 3600 * 1000;
+      let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+      
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
+      // this.data1 = [_e, _e];
+      this.ruleForm.dateStart=_e
+      this.ruleForm.dateEnd=_e
+    },
     //查询行政区域
     getMapGETmonitorList(){
       let d={
@@ -273,38 +313,44 @@ export default {
     //查询车辆
     getSnapList(){
       
+      if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
+        this.$message.error("请输入开始时间和结束时间!");
+        return
+      }
       if(this.input5==1){
-        this.ruleForm.areaIds =this.value1.join(",")
+        this.ruleForm.areaIds =this.value1?this.value1.join(","):''
       }else{
         /*   this.selectDevice=[]
       this.selectBayonet=[] */
-        this.ruleForm.deviceIds  = this.selectDevice.join(",")
-        this.ruleForm.bayonetIds = this.selectBayonet.join(",")
+        this.ruleForm.deviceIds  = this.selectDevice?this.selectDevice.join(","):''
+        this.ruleForm.bayonetIds = this.selectBayonet?this.selectBayonet.join(","):''
       }
-      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup.join(",")
-      this.ruleForm.dateStart =this.ruleForm.dateStart +" 00:00:00"
-      this.ruleForm.dateEnd = this.ruleForm.dateEnd+" 23:59:59"
-        //console.log(this.ruleForm);
+      this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
+      this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
+      this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       let d=this.ruleForm
       getSnapList(d).then(res=>{
         if(res.data && res.data.length>0){
           // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
-          this.pagination.total=res.data.total
-          this.pagination.pageSize =res.data.pageNum
+          // this.pagination.total=res.data.total
+          // this.pagination.pageSize =res.data.pageNum
           this.tableData= res.data
           // console.log(this.tableData);
           
+        }else{
+          this.$message.info("没有相关数据。");
+          this.tableData=[]
         }
       })
     },
-    hideMap(){
-      this.dialogVisible=false
-    },
+    // hideMap(){
+    //   this.dialogVisible=false
+    // },
     mapPoint(data){
-      let v = data.dev;
-      let p = data.boy;
-      this.dialogVisible=false;
+      let v = data.deviceList;
+      let p = data.bayonetList;
+      // this.dialogVisible=false;
       this.selectDevice=[]
       this.selectBayonet=[]
       //返回有效点集合
@@ -324,18 +370,9 @@ export default {
       // console.log(this.selectDevice);
       
     },
-    changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
-    },
+  
     clickTab(){
-      if(!this.dialogVisible){
-        this.dialogVisible=true
-      }
+      this.dialogVisible = !this.dialogVisible;
     },
     handleClick(v){
       // console.log(v);
@@ -345,26 +382,31 @@ export default {
     },
     changeTab(v) {
       //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+      // if (v == "2") {
+      //   this.dialogVisible = true;
+      // } else {
+      //   this.dialogVisible = false;
+      // }
     },
     resetForm (){
       this.value1=null
       this.selectValue="已选设备0个",
       this.select=""
-        this.ruleForm = {
-        dateStart:'',
-        dateEnd:'',
-        _vehicleGroup:'',
-        vehicleClass:'',
-        devIds:'',
-        include:1,
-        _include:0,
-        plateNo:'',
-      }
+      this.ruleForm._vehicleGroup="" 
+      this.ruleForm.vehicleClass="" 
+      this.ruleForm.devIds="" 
+      this.ruleForm.include="" 
+      this.ruleForm._include="" 
+      this.ruleForm.plateNo="" 
+      //   = {
+      //   _vehicleGroup:'',
+      //   vehicleClass:'',
+      //   devIds:'',
+      //   include:1,
+      //   _include:0,
+      //   plateNo:'',
+      // }
+      this.setDTime()
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
@@ -448,6 +490,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover{
+   background-color: #0466de;
 }
 </style>
 <style lang="scss">

@@ -26,6 +26,19 @@ export function JtcPOSTAppendtpInfo(data) {
   })
 }
 /**
+ * JfoGETGroup 分组列表查询接口
+ * @param {object} params
+ */
+export function JfoGETCity(data) {
+  return request({
+    url: '/vehicle-investigate/first-enter-city',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+/**
  * JtcGETAppendixInfoList 历史上传图片
  * @param {object} params
  */
@@ -120,19 +133,6 @@ export function JfoGETGroup(params) {
     mode: 'base'
   })
 }
-/**
- * JfoGETGroup 分组列表查询接口
- * @param {object} params
- */
-export function JfoGETCity(params) {
-  return request({
-    url: '/vehicle-investigate/first-enter-city',
-    method: 'get',
-    params: params,
-    mode: 'judge'
-  })
-}
-/**
 /**
  * JfoGETSurveillanceObject 布控范围内监控设备列表查询接口
  * @param {object} params
@@ -272,7 +272,7 @@ export function getVehicleShot(data) {
   return request({
     url: '/vehicle/shot-num',
     method: 'post',
-    params:data,
+    data,
     mode: 'judge'
   });
 }
@@ -297,8 +297,8 @@ export function getAllDevice(params) {
 export function getSnapDetail(params) {
   return request({
     url: '/vehicle/snap-detail',
-    method: 'get',
-    params,
+    method: 'post',
+    data:params,
     mode: 'judge'
   });
 }
@@ -345,8 +345,8 @@ export function getViolation(params) {
 export function getSnapList(params) {
   return request({
     url: '/vehicle/snap',
-    method: 'get',
-    params,
+    method: 'post',
+    data:params,
     mode: 'judge'
   });
 }
@@ -493,6 +493,47 @@ export function getNightVehicleRecordList(params) {
 export function getVehicleInvestigationReport(params) {
   return request({
     url: '/vehicle-investigation-report-service/report',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+/*--------------------------  人像接口--重点关注  ---------------------------------*/
+/**
+ * 重点关注次数统计接口
+ * @param {object} params
+ */
+export function getFocusList(params) {
+  return request({
+    url: '/portrait/shot-num/focus',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+
+/*--------------------------  导入导出  ---------------------------------*/
+/**
+ * 夜间行车分析导出接口
+ * @param {object} params
+ */
+export function exportNightVehicle(params) {
+  return request({
+    url: '/export',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人像落脚点查询接口接口
+ * @param {object} params
+ */
+export function getFoothold(params) {
+  return request({
+    url: '/foothold',
     method: 'post',
     data: params,
     mode: 'judge'

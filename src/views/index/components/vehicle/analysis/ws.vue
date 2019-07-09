@@ -5,7 +5,7 @@
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
           <el-form-item prop="plateNo">
-            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo"></el-input>
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
           </el-form-item>
           <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
             <el-date-picker
@@ -15,7 +15,7 @@
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
               style="width: 100%"
-              @blur="handleStartTime"
+              @blur="blurStartTime"
               :picker-options="pickerStart"
               placeholder="开始时间">
             </el-date-picker>
@@ -25,7 +25,8 @@
               v-model="searchForm.dateEnd"
               style="width: 100%"
               :clearable="false"
-              @blur="handleEndTime"
+              @blur="blurEndTime"
+              @focus="handleEndTime"
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
@@ -152,13 +153,21 @@ export default {
         }
       },
       pickerEnd: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
+        // disabledDate (time) {
+        //   return time.getTime() > (new Date().getTime());
+        // }
       },
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
+    }
+  },
+  watch: {
+    'searchForm.shotTime' () {
+      let _this = this;
+      const threeDays = 2 * 3600 * 24 * 1000;
+      const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
+      _this.searchForm.dateEnd = formatDate(endTime);
     }
   },
   created () {
@@ -167,7 +176,10 @@ export default {
     const plateNo = this.$route.query.plateNo;
     const dateStart = this.$route.query.dateStart;
     const dateEnd = this.$route.query.dateEnd;
-    if (plateNo && dateStart && dateEnd) {
+    if (plateNo) { // 从其他模块跳转过来的
+      this.searchForm.plateNo = plateNo;
+    }
+    if (plateNo && dateStart && dateEnd) { // 从分析结果页面跳过来的
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
@@ -192,32 +204,41 @@ export default {
         })
     },
     // 车牌号码change
-    handlePlateNo () {
-      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
-        this.getDeviceList();
-      }
-    },
-    // 开始时间change
-    handleStartTime () {
-      let _this = this;
-      if (_this.searchForm.shotTime) {
-        _this.pickerEnd.disabledDate = function (time) {
-          return time.getTime() > new Date(_this.searchForm.shotTime).getTime() + 3 * 24 * 3600 * 1000;
+    handlePlateNo (form) {
+      this.$refs[form].validateField('plateNo', (error) => {
+        if (!error) {
+          if (this.searchForm.shotTime && this.searchForm.dateEnd) {
+            this.getDeviceList();
+          }
         }
+      })
+    },
+    // 开始时间blur
+    blurStartTime (form) {
+      let _this = this;
+    
+      if (_this.searchForm.shotTime) {
         if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
           _this.getDeviceList();
         }
       }
     },
-    // 结束时间change
-    handleEndTime () {
+    // 结束时间blur
+    blurEndTime () {
       let _this = this;
       if (_this.searchForm.dateEnd) {
-        _this.pickerStart.disabledDate = function (time) {
-          return time.getTime() > new Date(_this.searchForm.dateEnd).getTime();
-        }
         if (_this.searchForm.shotTime && _this.searchForm.plateNo) {
           _this.getDeviceList();
+        }
+      }
+    },
+    // 结束时间focus
+    handleEndTime () {
+      let _this = this;
+      const startDate = new Date(_this.searchForm.shotTime).getTime();
+      _this.pickerEnd = {
+        disabledDate (time) {
+         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
         }
       }
     },
@@ -236,7 +257,6 @@ export default {
             if (this.$route.query.deviceCode) {
               this.deviceList.map(item => {
                 if (item.deviceID === this.$route.query.deviceCode) {
-                  console.log('asdasdasd')
                   this.deviceStartTime = item.shotTime;
                 }
               })

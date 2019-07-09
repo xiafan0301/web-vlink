@@ -6,21 +6,21 @@
           <div>
             <span>时间排序</span>
             <span class="sort_icon">
-              <i class="el-icon-caret-top" :class="{'sortActive': sortTimeType === 1}" @click="onSortByTime(1)"></i>
-              <i class="el-icon-caret-bottom" :class="{'sortActive': sortTimeType === 2}" @click="onSortByTime(2)"></i>
+              <i class="el-icon-caret-top" :class="{'sortActive': sortTimeType === 'asc'}" @click="onSortByTime('asc')"></i>
+              <i class="el-icon-caret-bottom" :class="{'sortActive': sortTimeType === 'desc'}" @click="onSortByTime('desc')"></i>
             </span>
           </div>
           <div>
             <span>监控排序</span>
             <span class="sort_icon">
-              <i class="el-icon-caret-top" :class="{'sortActive': sortMonitoryType === 1}" @click="onSortByMonitory(1)"></i>
-              <i class="el-icon-caret-bottom" :class="{'sortActive': sortMonitoryType === 2}" @click="onSortByMonitory(2)"></i>
+              <i class="el-icon-caret-top" :class="{'sortActive': sortMonitoryType === 'asc'}" @click="onSortByMonitory('asc')"></i>
+              <i class="el-icon-caret-bottom" :class="{'sortActive': sortMonitoryType === 'desc'}" @click="onSortByMonitory('desc')"></i>
             </span>
           </div>
         </div>
         <div class="list-box">
             <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-              <img :src="item.subStoragePath" alt="">
+              <img :src="item.storagePath" alt="">
               <p class="time"><i></i>{{item.shotTime}}</p>
               <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
             </div>
@@ -59,16 +59,16 @@
               </div>
               <div class="struc_c_d_info">
                 <h2>抓拍信息</h2>
-                 <div class="struc_cdi_line">
+                 <div class="struc_cdi_line" v-show="sturcDetail.snapTime">
                   <span>{{sturcDetail.snapTime}}<b>抓拍时间</b></span>
                 </div>
-                <div class="struc_cdi_line">
+                <div class="struc_cdi_line" v-show="sturcDetail.snapDevice">
                   <span>{{sturcDetail.snapDevice}}<b>抓拍设备</b></span>
                 </div>
-                <div class="struc_cdi_line">
+                <div class="struc_cdi_line" v-show="sturcDetail.snapAddress">
                   <span>{{sturcDetail.snapAddress}}<b>抓拍地址</b></span>
                 </div>
-                <div class="struc_cdi_line">
+                <div class="struc_cdi_line" v-show="sturcDetail.plateNo">
                   <span>{{sturcDetail.plateNo}}<b>车牌号</b></span>
                 </div>
                 <div class="struc_cdi_line">
@@ -94,7 +94,11 @@
             </div>
             <div class="struc_c_d_box">
               <span class="th-video-text">视频回放</span>
-              <div is="flvplayer" :index="1" :oData="sturcDetail.videoPath" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
+              <video id="capVideo" :src="sturcDetail.videoPath"></video>
+              <div class="play_btn" @click="videoTap" v-show="!playing">
+                <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
+                <i class="vl_icon vl_icon_control_09" v-else></i>
+              </div>
             </div>
             <a class="download_btn" target="_blank" download="视频" :href="sturcDetail.videoPath">下载视频</a>
           </div>
@@ -102,9 +106,9 @@
         <div class="struc-list">
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
-            <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
+            <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
               <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-                <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
+                <img style="display: block; width: 100%; height: .88rem;" :src="item.storagePath" alt="">
               </div>
             </swiper-slide>
             <div class="swiper-button-prev" slot="button-prev"></div>
@@ -127,11 +131,13 @@
       return {
         pagination: {
           pageNum: 1,
-          pageSize: 15,
-          total: 0
+          pageSize: 10,
+          total: 0,
+          order: 'asc',
+          orderBy: 'shotTime' // 默认抓拍时间升序
         },
         currentPage: 1,
-        sortTimeType: null, // 时间排序active
+        sortTimeType: 'asc', // 时间排序active  默认升序
         sortMonitoryType: null, // 监控排序active
         /* 抓拍记录页面参数 */
         strucDetailDialog: false, // 抓拍记录弹窗
@@ -141,6 +147,7 @@
         sturcDetail: {},
         bResize: {},
         markerPoint: null, // 地图icon
+        newMarker: null,
         playUrl: {},
         videoUrl: null, // 下载地址
         map: null,
@@ -157,16 +164,36 @@
           },
         },
         dataList: [],
+        playing: false, // 视频播放是否
       }
     },
     mounted () {
       this.getList();
     },
     methods: {
+      // 播放视频
+      videoTap() {
+        // 播放视频
+        let vDom = document.getElementById("capVideo");
+        if (this.playing) {
+          vDom.pause();
+        } else {
+          vDom.play();
+        }
+        vDom.addEventListener("ended", e => {
+          e.target.currentTime = 0;
+          this.playing = false;
+        });
+        this.playing = !this.playing;
+      },
       // 获取抓拍记录
       getList () {
         const params = JSON.parse(this.$route.query.obj);
         params['vehicleNumber'] = this.$route.query.number;
+        params['pageSize'] = this.pagination.pageSize;
+        params['pageNum'] = this.pagination.pageNum;
+        params['order'] = this.pagination.order;
+        params['orderBy'] = this.pagination.orderBy;
         getNightVehicleRecordList(params)
           .then(res => {
             if (res && res.data) {
@@ -179,15 +206,15 @@
       /**
        * 弹框地图初始化
        */
-      initMap () {
+      initMap (obj) {
         // this.map.setZoomAndCenter(iZoom, aCenter);
         let map = new window.AMap.Map('container', {
           zoom: 14, // 级别
-          center: [this.sturcDetail.shotPlaceLongitude, this.sturcDetail.shotPlaceLatitude], // 中心点坐标
+          center: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 中心点坐标
         });
         map.setMapStyle('amap://styles/whitesmoke');
         this.map = map;
-        this.drawPoint(this.sturcDetail)
+        this.drawPoint(obj)
       },
       /**
        * 地图描点
@@ -196,6 +223,10 @@
         console.log(data)
         if (this.markerPoint) {
           this.map.remove(this.markerPoint)
+        }
+        if (this.newMarker) {
+          this.map.remove(this.newMarker);
+          this.newMarker = null;
         }
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
         this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
@@ -207,8 +238,8 @@
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.shotPlaceFullAdress}</p></div>`
-        this.infoWindow = new window.AMap.InfoWindow({
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        this.newMarker = new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
@@ -221,13 +252,32 @@
        * 按照时间排序
        */
       onSortByTime (type) {
-        this.sortTimeType = type
+
+        this.sortTimeType = type;
+
+        this.sortMonitoryType = null;
+
+        this.pagination.order = type;
+        this.pagination.orderBy = 'shotTime';
+
+        this.$nextTick(() => {
+          this.getList();
+        })
       },
       /**
        * 按照监控排序
        */
       onSortByMonitory (type) {
-        this.sortMonitoryType = type
+        this.sortMonitoryType = type;
+
+        this.sortTimeType = null;
+
+        this.pagination.order = type;
+        this.pagination.orderBy = 'deviceName';
+
+        this.$nextTick(() => {
+          this.getList();
+        })
       },
       /**
        * 分页赋值
@@ -240,40 +290,39 @@
        * 打开抓拍弹框
        */
       onOpenDetail (obj) {
-        this.$_showLoading({text: '加载中...'});
 
+        this.sturcDetail = obj;
         this.strucDetailDialog = true;
         this.$nextTick(() => {
-          this.getVehicleDetail(obj);
+          this.initMap(obj);
         })
-        this.$_hideLoading();
       },
       // 获取车辆抓拍详情
-      getVehicleDetail (obj) {
-        const data = JSON.parse(this.$route.query.obj);
-        const params = {
-          dateStart: data.startDate,
-          dateEnd: data.endDate,
-          devIds: obj.deviceID,
-          hasPlate: 1, // 1--有牌车 0 --无牌车
-          plateNo: obj.plateNo
-        }
-          // const params = {
-          //   dateStart: '2019-01-01 00:00:00',
-          //   dateEnd: '2019-09-01 23:59:59',
-          //   hasPlate: 1, // 1--有牌车 0 --无牌车
-          //   // devIds: obj.deviceID,
-          //   plateNo: '湘A77777'
-          // }
-        getSnapDetail(params)
-          .then(res => {
-            if (res && res.data) {
-              this.strucInfoList = res.data.snapDtoList;
-              this.sturcDetail = res.data.snapDtoList[0];
-              this.initMap();
-            }
-          })
-      },
+      // getVehicleDetail (obj) {
+      //   const data = JSON.parse(this.$route.query.obj);
+      //   const params = {
+      //     dateStart: data.startDate,
+      //     dateEnd: data.endDate,
+      //     devIds: obj.deviceID,
+      //     hasPlate: obj.plateNo ? 1 : 0, // 1--有牌车 0 --无牌车
+      //     plateNo: obj.plateNo
+      //   }
+      //     // const params = {
+      //     //   dateStart: '2019-01-01 00:00:00',
+      //     //   dateEnd: '2019-09-01 23:59:59',
+      //     //   hasPlate: 1, // 1--有牌车 0 --无牌车
+      //     //   // devIds: obj.deviceID,
+      //     //   plateNo: '湘A77777'
+      //     // }
+      //   getSnapDetail(params)
+      //     .then(res => {
+      //       if (res && res.data) {
+      //         this.strucInfoList = res.data.snapDtoList;
+      //         this.sturcDetail = res.data.snapDtoList[0];
+      //         this.initMap();
+      //       }
+      //     })
+      // },
       /**
        * 关闭抓拍弹框
        */
@@ -288,6 +337,9 @@
         this.sturcDetail = {};
         this.curImgIndex = i;
         this.sturcDetail = obj;
+        this.$nextTick(() => {
+          this.initMap(obj);
+        })
       }
     },
   }
@@ -341,6 +393,7 @@
         height: 320px;
         padding: 15px;
         margin-bottom: 15px;
+        cursor: pointer;
         background: #fff;
         margin-left: 1.25%;
         &:nth-child(5n - 4) {
@@ -452,6 +505,11 @@ html {font-size: 100px;}
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
+      &:hover {
+        background-color: #FFFFFF;
+        border-color: #0C70F8;
+        color: #0C70F8;
+      }
     }
     .struc_c_detail {
       width:  100%;
@@ -560,6 +618,42 @@ html {font-size: 100px;}
         border-radius: 1px;
         position: relative;
         overflow: hidden;
+        &:hover {
+          .play_btn {
+            display: block !important;
+          }
+        }
+        .play_btn {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+          background: rgba(0, 0, 0, 0.4);
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          line-height: 1rem;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+          border-radius: 50%;
+          cursor: pointer;
+          i {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            height: 22px !important;
+          }
+        }
+        > video {
+          width: 100%;
+          height: 100%;
+          background-color: #E9E7E8;
+        }
         &:before {
           display: block;
           content: '';
@@ -707,6 +801,7 @@ html {font-size: 100px;}
   padding: .18rem;
   font-size: .14rem;
   color: #666666;
+  margin-bottom: -15px;
   position: relative;
   &:after {
     display: block;

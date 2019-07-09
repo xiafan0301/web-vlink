@@ -26,7 +26,7 @@
             v-for="item in carTypeList"
             :key="item.value"
             :label="item.label"
-            :value="item.value">
+            :value="item.label">
           </el-option>
         </el-select>
         <!-- <el-select v-model="queryForm.lane" placeholder="选择车道">
@@ -76,9 +76,9 @@
         <div class="right_box" v-if="isShowChart">
           <div class="tab_box">
             <div>
-              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}"></i>
-              <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_01" @click="changeTwo" :class="{'active': tabIndex === 1}" v-show="queryForm.statementType !== 5"></i>
+              <i class="vl_icon vl_icon_vehicle_cll_02" @click="tabIndex = 2" :class="{'active': tabIndex === 2}" ></i>
+              <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
             <div></div>
@@ -109,7 +109,7 @@
 </template>
 <script>
 let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss'); //默认开始时间为当前时间前一天
-let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
+let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
 import {apiCarFlow} from '@/views/index/api/api.vehicle.js';
@@ -121,10 +121,10 @@ export default {
     return {
       queryForm: {
         radio: 1,
-        carType: null,
+        carType: "",
         bayonet: {value: ''},
         // lane: null,
-        statementType: '',
+        statementType: 1,
         warningNum: null,
         startTime: startTime,
         endTime: endTime
@@ -184,11 +184,11 @@ export default {
     }
   },
   watch: {
-   'queryForm.startTime' () {
+   /* 'queryForm.startTime' () {
       const threeDays = 2 * 3600 * 24 * 1000 + (24 * 60 * 60 * 1000 - 1);
       const endTime = new Date(this.queryForm.startTime).getTime() + threeDays;
       this.queryForm.endTime = formatDate(endTime, 'yyyy-MM-dd HH:mm:ss');
-    }
+    } */
   },
   mounted () {
     this.getListBayonet();
@@ -196,11 +196,11 @@ export default {
   methods: {
     getEndTime(time) {
       let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
-      this.pickerOptions1 = {
+      /* this.pickerOptions1 = {
         disabledDate(time) {
           return time.getTime() < (startTime - 8.64e7) || time.getTime() > ((startTime + 1 * 3600 * 24 * 1000) + (24 * 60 * 60 * 1000 - 1) - 8.64e6);
         },
-      }
+      } */
     },
     // 模糊搜索卡口
     getListBayonet () {
@@ -282,7 +282,7 @@ export default {
           }
         },
         tickLine: {
-          alignWithLabel: false,
+          alignWithLabel: true,
           length: 0
         },
         line: {
@@ -348,7 +348,7 @@ export default {
           }
         },
         tickLine: {
-          alignWithLabel: false,
+          alignWithLabel: true,
           length: 0
         },
         line: {
@@ -392,9 +392,13 @@ export default {
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
+      this.chartData = []
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
-        carType: this.queryForm.carType
+        /* carType: this.queryForm.carType */
+      }
+      if(this.queryForm.carType) {
+        params['carType'] = this.queryForm.carType
       }
       if (this.queryForm.statementType !== 5) {
         params.reportType = this.queryForm.statementType
@@ -414,6 +418,11 @@ export default {
               date: m.name, '车流量': m.total, '车流量1': 1
             }
           });
+          if(this.queryForm.statementType === 3) {
+            for(let item of this.chartData) {
+              item['date'] = formatDate(item.date,'yy-MM-dd')
+            }
+          }
           if (this.chartData.length > 0) {
             this.tabIndex = 2;
             this.isShowChart = true;
