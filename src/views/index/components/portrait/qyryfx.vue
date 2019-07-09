@@ -236,8 +236,46 @@
                 v-for="(item, index) in cameraPhotoList"
                 :key="'people_item' + index"
               >
-                <swiper :options="swiperOption" :ref="'mySwiper' + index">
-                  <!-- slides -->
+              <div  v-for="(sItem, sIndex) in wocao(item, index)"
+                    :key="'my_swiper' + sIndex">
+
+                <div class="swiper_contents">
+                  <div class="img_warp">
+                    <img :src="sItem.upPhotoUrl" alt />
+                  </div>
+                  <div class="similarity">
+                    <p class="similarity_count">{{sItem.semblance}}</p>
+                    <p class="similarity_title">相似度</p>
+                    <div class="select_time">
+                      <el-select
+                        v-model="searchCamera"
+                        @change="slideToIndex(index, searchCamera)"
+                        placeholder="请选择"
+                      >
+                        <el-option
+                          v-for="(gItem, gIndex) in item.detailList"
+                          :key="gIndex"
+                          :label="gIndex + 1"
+                          :value="gIndex"
+                        ></el-option>
+                      </el-select>
+                    </div>
+                  </div>
+                  <div class="img_warp">
+                    <img :src="sItem.subStoragePath" alt />
+                  </div>
+                  <div class="people_message">
+                    <h2 class="name">{{item.name}}</h2>
+                    <div class="tips_wrap">
+                      <p class="tip">{{item.sex}}</p>
+                      <p class="tip">{{item.age}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                  <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                  <div @click="next(index)" class="swiper-button-next change_img"></div>
+                <!-- <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
                   <swiper-slide
                     v-for="(sItem, sIndex) in item.detailList"
                     :key="index + 'my_swiper' + sIndex"
@@ -278,7 +316,7 @@
                   </swiper-slide>
                   <div class="swiper-button-prev change_img" slot="button-prev"></div>
                   <div class="swiper-button-next change_img" slot="button-next"></div>
-                </swiper>
+                </swiper>-->
               </div>
             </div>
           </vue-scroll>
@@ -289,6 +327,7 @@
   </div>
 </template>
 <script>
+import swiper from "vue-awesome-swiper";
 import { mapXupuxian } from "@/config/config.js";
 import { formatDate } from "@/utils/util.js";
 import {
@@ -464,7 +503,8 @@ export default {
       listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       totalData: [],
-      selectedDevice: {}
+      selectedDevice: {}, // 当前选中的设备信息
+      swiper: null
     };
   },
   mounted() {
@@ -473,21 +513,28 @@ export default {
     //加载地图
     this.initMap();
     // 获取到监控人群分组
-    getGroupAllList()
-      .then(res => {
-        if (res) {
-          this.peopleGroupOptions = [
-            ...res.data.filter(item => item.uid !== null)
-          ];
-        }
-      })
-      .catch(() => {});
+    getGroupAllList().then(res => {
+      if (res) {
+        this.peopleGroupOptions = [
+          ...res.data.filter(item => item.uid !== null)
+        ];
+      }
+    });
   },
   methods: {
+    prev(val) {
+      const ind = this.cameraPhotoList[val].detailList.length - 1
+      if (this.cameraPhotoList[val].currentIndex === 0) {
+        this.$set(this.cameraPhotoList[val], 'currentIndex', ind);
+      } else {
+        this.$set(this.cameraPhotoList[val], 'currentIndex', this.cameraPhotoList[val].currentIndex - 1);
+      }
+      console.log('为什么不变呢', this.cameraPhotoList);
+    },
     slideToIndex(index, val) {
-      this.$nextTick(() => {
-        // this.$refs.mySwiper.swiper.slideTo(val-1, 1000, false);
-      });
+      // this.$nextTick(() => {
+      //   console.log('swiper', this.$refs.mySwiper1);
+      // });
       // this.$refs['mySwiper' + val].swiper.slideTo(index, 1000, false);
     },
     /**重置左边菜单的方法 */
@@ -504,7 +551,7 @@ export default {
         this.delArea(i, true);
       }
       // 初始化时间区域数组
-      this.drawTypesArr =  [
+      this.drawTypesArr = [
         {
           rectangle: null, // 1
           circle: null, // 2
@@ -557,15 +604,16 @@ export default {
       ];
       this.totalData = [];
       this.infoRightShow = false; // 关闭右边的菜单数据
-    }, 
-    /** 操作左边菜单方法 */ 
+    },
+    /** 操作左边菜单方法 */
     openMenu() {
       this.videoMenuStatus = true;
     },
     closeMenu() {
       this.videoMenuStatus = false;
     },
-    /** 提交搜索摄像头抓拍记录 */ 
+    /** 提交搜索摄像头抓拍记录 */
+
     submitData() {
       this.totalData = []; // 先清空数据
       for (let i = 0; i < this.drawTypesArr.length; i++) {
@@ -608,11 +656,13 @@ export default {
         .then(res => {
           if (res) {
             this.setMarks(res.data);
+            console.log("对比", res.data);
+            console.log("dui", this.listDevice);
           }
         })
         .catch(() => {});
     },
-    /** 点击摄像头查看此摄像头抓拍详情信息 */ 
+    /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
       // console.log("总的摄像头数据", this.totalData);
       // console.log("设备详情", device);
@@ -646,14 +696,14 @@ export default {
           if (res && res.data) {
             this.infoRightShow = true;
             this.cameraPhotoList = res.data;
-            // for (let i = 0; i < this.cameraPhotoList.length; i++) {
-            //   const item = this.cameraPhotoList[i];
-            //   if (item.detailList.length) {
-            //     for (let j = 0; j < item.detailList.length; j++) {
-            //       item.detailList[j]["index"] = j;
-            //     }
-            //   }
-            // }
+            for (let i = 0; i < this.cameraPhotoList.length; i++) {
+              const item = this.cameraPhotoList[i];
+              if (item.detailList.length) {
+                item.currentIndex = item.detailList.length - 1;
+              } else {
+                item.currentIndex = 0;
+              }
+            }
           } else {
             this.cameraPhotoList = [];
           }
@@ -748,7 +798,8 @@ export default {
           }
         }
       }
-      if (!clearAll) { // 是否全部清除地图标记
+      if (!clearAll) {
+        // 是否全部清除地图标记
         this.drawTypesArr.splice(val, 1);
         this.endDateOptArr.splice(val, 1);
         this.startDateOptArr.splice(val, 1);
@@ -1173,21 +1224,19 @@ export default {
         this.getListBayonet();
       }
     },
-    // 设备
+    // 获取到设备数据
     getListDevice() {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
-          // this.setMarks();
         }
       });
     },
-    // 卡口
+    // 获取到卡口数据
     getListBayonet() {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listBayonet = res.data;
-          // this.setMarks();
         }
       });
     },
@@ -1198,12 +1247,12 @@ export default {
         const listItem = this.listDevice[i];
         for (let j = 0; j < deviceList.length; j++) {
           const deviceItem = deviceList[j];
-          if (
-            deviceItem.shotPlaceLongitude === listItem.longitude &&
-            deviceItem.shotPlaceLatitude === listItem.latitude
-          ) {
-            this.doMark(listItem, "vl_icon vl_icon_sxt");
-          }
+          // if (
+          //   deviceItem.shotPlaceLongitude === listItem.longitude &&
+          //   deviceItem.shotPlaceLatitude === listItem.latitude
+          // ) {
+          this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt");
+          // }
         }
       }
       for (let i = 0; i < this.listBayonet.length; i++) {
@@ -1221,7 +1270,22 @@ export default {
       this.amap.setFitView();
     },
     // 地图标记
-    doMark(obj, sClass) {
+    doMark(obj, device, sClass) {
+      let level;
+      if (device.shotNum < 20) {
+        level = "level6";
+      } else if (device.shotNum <= 50 && device.shotNum >= 20) {
+        level = "level5";
+      } else if (device.shotNum <= 100 && device.shotNum >= 51) {
+        level = "level4";
+      } else if (device.shotNum <= 200 && device.shotNum >= 101) {
+        level = "level3";
+      } else if (device.shotNum <= 500 && device.shotNum >= 201) {
+        level = "level2";
+      } else if (device.shotNum > 500) {
+        level = "level1";
+      }
+
       let marker = new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
@@ -1230,8 +1294,9 @@ export default {
         draggable: false, // 是否可拖动
         // extData: obj,
         // 自定义点标记覆盖物内容
-        content: '<div class="map_icons ' + sClass + '"></div>'
+        content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
       });
+      console.log("数量", device.shotNum);
       let _this = this;
       marker.on("click", function() {
         _this.selectedDevice = obj;
@@ -1243,7 +1308,15 @@ export default {
     if (this.amap) {
       this.amap.destroy();
     }
-  }
+  },
+  computed: {
+    wocao() {
+      return function (val) {
+        console.log('返回的数据是啥咯', val.detailList[val.currentIndex]);
+         return [val.detailList[val.currentIndex]]
+      }
+    }
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -1587,13 +1660,13 @@ export default {
               background: #8949f3;
             }
             .colors:nth-of-type(4) > div {
-              background: #6262FF;
+              background: #6262ff;
             }
             .colors:nth-of-type(5) > div {
-              background: #0C70F8;
+              background: #0c70f8;
             }
             .colors:nth-of-type(6) > div {
-              background: #0D9DF4;
+              background: #0d9df4;
             }
           }
           // 地图控制按钮
@@ -1682,7 +1755,7 @@ export default {
             }
             // 点击变成上一张
             .swiper-button-prev {
-              left: 24px;
+              left: 22px;
               background-position: -990px -133px;
               &:hover {
                 background-position: -972px -133px;
