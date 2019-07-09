@@ -846,6 +846,9 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+.select_btn:hover{
+   background-color: #0466de;
+}
 .select_btn.el-button--primary.is-disabled{
 background-color: #a0cfff;
   color: #ffffff;

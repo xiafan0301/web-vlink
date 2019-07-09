@@ -496,6 +496,9 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+.select_btn:hover{
+   background-color: #0466de;
+}
 </style>
 <style lang="scss">
 .clcx{

@@ -419,6 +419,9 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+.select_btn:hover{
+   background-color: #0466de;
+}
 .infobox {
   margin: 35px auto;
   width: 90%;
