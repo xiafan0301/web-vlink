@@ -1,9 +1,13 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb"
-      :oData="[{name: '过车查看', 
-        routerName: 'vehicle_search_gcck',
-        query: {'deviceIds': $route.query.deviceIds, bId: $route.query.bId}}, {name: '全部抓拍'}]"></div>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': $route.query.deviceIds, bId: $route.query.bId}},
+          {name: '全部抓拍'}]">
+      </div>
+    </div>
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="gcck_s">
@@ -101,15 +105,15 @@
   </div>
 </template>
 <script>
-import vehicleBreadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, getDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
 import {getSpecialGroup} from '../../../api/api.manage.js';
 import { constants } from 'crypto';
 export default {
-  components: {vehicleBreadcrumb, flvplayer},
+  components: {vlBreadcrumb, flvplayer},
   data () {
     let nDate = new Date();
     return {
@@ -150,6 +154,14 @@ export default {
   },
   created () {
     // this.queryData = {this.$route.query.deviceIds{};
+    if (this.$route.query.st && this.$route.query.et) {
+      this.formInline.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)]
+    }
+    if (this.$route.query.lb) { this.formInline.lb = this.$route.query.lb; }
+    if (this.$route.query.lx) { this.formInline.lb = this.$route.query.lx; }
+    if (this.$route.query.no) { this.formInline.no = this.$route.query.no == 1 ? true : false; }
+    if (this.$route.query.cpp) { this.formInline.cpp = this.$route.query.cpp; }
+    if (this.$route.query.cp) { this.formInline.cp = this.$route.query.cp; }
   },
   mounted () {
     this.searchSubmit();
@@ -160,7 +172,28 @@ export default {
   },
   methods: {
     goToDetail (plateNo) {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.$route.query.deviceIds, bId: this.$route.query.bId}},
+          { name: '全部抓拍', routerName: 'vehicle_search_gcck_zp', 
+            query: {
+              deviceIds: this.$route.query.deviceIds,
+              bId: this.$route.query.bId,
+              st: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
+              et: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+              lb: this.formInline.lb,
+              lx: this.formInline.lx,
+              no: this.formInline.no ? 1 : 2,
+              cpp: this.formInline.cpp,
+              cp: this.formInline.cp
+            }
+          },
+          {name: '车辆详情'}
+        ]
+      });
       this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        breadcrumb: 2,
         plateNo: plateNo
       }});
     },
@@ -308,6 +341,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .vc_gcck {
   height: 100%;
   padding-top: 50px;

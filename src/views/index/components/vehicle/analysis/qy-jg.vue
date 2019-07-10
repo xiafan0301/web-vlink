@@ -17,7 +17,7 @@
         <div class="vl_jig_right">
           <div class="vl_jig_right_title">
             <div class="vl_jr_t_item">
-              <span><span style="color: #333333">共有过车数据</span> ({{strucInfoList.length}}) 条 </span>
+              <span><span style="color: #333333">共有过车数据</span> ({{pagination.total}}) 条 </span>
               <div :class="{'active-item': stucOrder < 3}" @click="timeOrderS">时间排序 <span><i :class="{'active': stucOrder === 2}" class="el-icon-caret-top"></i><i :class="{'active': stucOrder === 1}" class="el-icon-caret-bottom"></i></span></div>
             </div>
             <div class="vl_jr_t_item">
@@ -27,7 +27,7 @@
           <div class="vl_jfo_event">
             <vue-scroll>
               <div class="vl_jfo_event_box clearfix">
-                <div class="vl_jfo_box_item" :class="{'vl_jfo_box_item_su': index === 4 || index === 9}" v-for="(item, index) in curStrucList" :key="item.id" @click="showStrucInfo(item, index)">
+                <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
                   <img :src="item.subStoragePath" alt="">
                   <p class="time"><i></i>{{item.shotTime}}</p>
                   <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
@@ -49,11 +49,11 @@
       </div>
     </div>
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -111,7 +111,7 @@
       <div class="struc-list">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in curStrucList" :key="item.id">
+          <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
               <!--<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>-->
@@ -133,6 +133,7 @@
     components: {vehicleBreadcrumb, flvplayer},
     data () {
       return {
+        firstIn: true,
         stucOrder: 2, // 1升序，2降序，3监控，4相似度
         swiperOption: {
           slidesPerView: 10,
@@ -151,6 +152,7 @@
         markerPoint: null, // 地图点集合
         InfoWindow: null,
         curVideoUrl: '',
+        leftList: [],
         playing: false, // 视频播放是否
         strucInfoList: [], // 检索抓拍信息
         strucCurTab: 1,
@@ -162,22 +164,6 @@
       }
     },
     computed: {
-      leftList () {
-        let _arr = [];
-        this.strucInfoList.forEach(x => {
-          if (!_arr.includes(x.plateNo)) {
-            _arr.push(x.plateNo)
-          }
-        })
-        return _arr;
-      },
-      curStrucList () {
-        if (this.leftActive === -1) {
-          return this.strucInfoList
-        } else {
-          return this.strucInfoList.filter(x => x.plateNo === this.leftList[this.leftActive])
-        }
-      }
     },
     mounted () {
       let map = new AMap.Map('capMap', {
@@ -196,18 +182,24 @@
         params.pageSize = this.pagination.pageSize;
         params.order = this.stucOrder === 2 ? "desc" : "asc";
         params.orderBy= "shotTime";
+        if (this.leftActive !== -1) {
+          params.where['vehicleNumber'] =  this.leftList[this.leftActive];
+        } else {
+          params.where['vehicleNumber'] =  '';
+        }
         QypzGetAreaCross(params).then(res => {
           if (res) {
-            console.log(res)
-            if(res.data.list.length === 0) {
+            if(res.data.total === 0 && this.firstIn) {
               this.$message.info('抱歉，没有找到匹配结果');
               this.$router.push({name: "vehicle_search_qy"})
             }
-            this.strucInfoList = res.data.list;
+            this.firstIn = false;
+            this.strucInfoList = res.data.list[0].struVehicleDtoList;
+            this.leftList = res.data.list[0].vehicleNumberList;
             this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = res.data.total;
           } else {
-            if(res.data.list.length === 0) {
+            if(res.data.total === 0) {
               this.$message.info('抱歉，没有找到匹配结果');
               this.$router.push({name: "vehicle_search_qy"})
             }
@@ -299,10 +291,9 @@
           this.videoUrl = document.getElementById('capVideo').src;
         }
       },
-      leftActive (e) {
-        if (e === -1) {
-
-        }
+      leftActive () {
+        this.pagination.pageNum = 1;
+        this.getTheList();
       }
     }
   }
@@ -410,7 +401,7 @@
               width: 292px;
               height: 346px;
               padding: 14px;
-              margin-right: 40px;
+              margin-left: 24px;
               margin-bottom: 26px;
               background: rgba(255, 255, 255, 1);
               box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
@@ -452,9 +443,6 @@
                   background-size: 15px 15px;
                 }
               }
-            }
-            .vl_jfo_box_item_su {
-              margin-right: 0px;
             }
           }
         }
@@ -670,7 +658,7 @@
               }
             }
             .struc_cdi_line {
-              span {
+              >span {
                 /*position: relative;*/
                 max-width: 100%;
                 display: inline-block;
@@ -693,26 +681,6 @@
                 }
               }
             }
-          }
-          &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.7rem;
-            right: -.7rem;
-            transform: rotate(-46deg);
-            border: .7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0C70F8;
-          }
-          &:after {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.4rem;
-            right: -.4rem;
-            transform: rotate(-45deg);
-            border: .4rem solid #FFFFFF;
-            border-color: transparent transparent transparent #FFFFFF;
           }
           >span {
             display: block;
