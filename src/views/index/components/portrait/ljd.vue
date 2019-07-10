@@ -117,7 +117,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -380,6 +380,7 @@ export default {
   },
   data() {
     return {
+      isload:false,
       dialogChoose:false,
       strucDetailDialog:false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -688,8 +689,10 @@ export default {
       };
     },
     getFoothold(d) {
+      this.isload=true
       getFoothold(d).then(res => {
         if (res) {
+          this.isload=false
           this.dialogChoose=true
           // console.log(res);
           this.reselt = true;
@@ -708,7 +711,7 @@ export default {
           this.drawMarkers(this.evData);
           //this.showEventList();
         }else{
-
+          this.isload=false
         }
       });
     },
@@ -977,7 +980,7 @@ export default {
     margin-bottom: 5px;
   }
 }
-.insetLeft {
+.insetLeft ,.insetLeft2{
   position: absolute;
   right: -28px;
   width: 25px;
@@ -991,7 +994,7 @@ export default {
   background-position: -380px -1269px;
   cursor: pointer;
 }
-.insetLeft:hover{
+.insetLeft:hover,.insetLeft2:hover{
   position: absolute;
   right: -28px;
   width: 28px;
@@ -1010,34 +1013,10 @@ export default {
     transform: rotate(180deg);
     background-position: -504px -1269px;
   }
-}
-.insetLeft2:hover {
-  position: absolute;
-  right: -28px;
-  width: 25px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -380px -1269px;
-  cursor: pointer;
-}
-.insetLeft2:hover {
-  position: absolute;
-  right: -28px;
-  width: 28px;
-  height: 178px;
-  top: 50%;
-  margin-top: -89px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  transform: rotate(180deg);
-  background-image: url(../../../../assets/img/icons.png);
-  background-position: -318px -1269px;
-  cursor: pointer;
+  .insetLeft:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
 }
 .select_btn {
   background-color: #0c70f8;

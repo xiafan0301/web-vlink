@@ -1,7 +1,7 @@
 <template>
 <div class="judge_content">
   <div class="vl_judge_tc">
-    <div class="vl_j_left">
+    <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
@@ -80,8 +80,9 @@
             </el-row>
         </div>
       </div>
+      <span class="insetLeft2" @click="hideResult"></span>
     </div>
-    <div class="vl_j_right">
+    <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
@@ -310,6 +311,7 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
+      hideleft:false,
     }
   },
   mounted () {
@@ -335,6 +337,9 @@ export default {
     })
   },
   methods: {
+    hideResult(){
+      this.hideleft = !this.hideleft;
+    },
     changeTab(v) {
      
     },
@@ -884,7 +889,12 @@ export default {
         }
       }
     }
+    .hideleft.vl_j_left{
+      margin-left: -3rem;
+    }
     .vl_j_left {
+      position: relative;
+      z-index: 11;
       float: left;
       width: 3rem;
       padding-top: 24px;
@@ -1035,6 +1045,9 @@ export default {
           margin-bottom: .2rem;
         }
       }
+    }
+    .vl_j_right.hideleft{
+      width: 100%;
     }
     .vl_j_right {
       display: inline-block;
@@ -1279,12 +1292,53 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.hideleft {
+  .insetLeft2 {
+    transform: rotate(180deg);
+    background-position: -504px -1269px;
+  }
+  .insetLeft2:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
+}
+.insetLeft2{
+  position: absolute;
+  right: -28px;
+  width: 25px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -380px -1269px;
+  cursor: pointer;
+}
+.insetLeft2:hover{
+  position: absolute;
+  right: -28px;
+  width: 28px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -318px -1269px;
+  cursor: pointer;
+}
 .full {
   width: 100%;
 }
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover {
+   background-color: #0466de;
 }
 .judge_content {
       height: 100%;

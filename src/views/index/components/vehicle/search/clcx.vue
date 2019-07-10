@@ -106,7 +106,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">确定</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">确定</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -205,6 +205,7 @@ export default {
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
+      isload: false,
       value1: null,
       select: "",
       selectValue:"已选设备0个",
@@ -312,7 +313,7 @@ export default {
     },
     //查询车辆
     getSnapList(){
-      
+      this.isload=true
       if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
         this.$message.error("请输入开始时间和结束时间!");
         return
@@ -330,7 +331,8 @@ export default {
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       let d=this.ruleForm
       getSnapList(d).then(res=>{
-        if(res.data && res.data.length>0){
+        if(res && res.data && res.data.length>0){
+          this.isload=false
           // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
           // this.pagination.total=res.data.total
@@ -339,6 +341,7 @@ export default {
           // console.log(this.tableData);
           
         }else{
+           this.isload=false
           this.$message.info("没有相关数据。");
           this.tableData=[]
         }

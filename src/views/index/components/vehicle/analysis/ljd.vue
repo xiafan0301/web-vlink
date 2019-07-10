@@ -92,7 +92,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -136,6 +136,7 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      isload: false,
       amap: null,
       allDevice:[],
       allBayonet:[],
@@ -338,8 +339,10 @@ export default {
       } 
     },
     getVehicleShot(d) {
+      this.isload=true
       getVehicleShot(d).then(res => {
         if (res) {
+          this.isload=false
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
@@ -359,6 +362,8 @@ export default {
           this.evData.sort(this.compare("shotNum"))
           this.drawMarkers(this.evData);
           //this.showEventList();
+        }else{
+          this.isload=false
         }
       });
     },
@@ -568,6 +573,11 @@ export default {
     transform: rotate(180deg);
     background-position: -504px -1269px;
   }
+  .insetLeft:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
+  
 }
 .insetLeft2:hover,.insetLeft:hover {
   position: absolute;
@@ -586,6 +596,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover {
+   background-color: #0466de;
 }
 </style>
 <style lang="scss">
