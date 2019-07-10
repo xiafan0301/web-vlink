@@ -110,7 +110,7 @@
                     collapse-tags
                     class="width232"
                     clearable
-                    placeholder="选择车辆类别"
+                    placeholder="全部车辆类型"
                   >
                     <el-option
                       v-for="item in vehicleClassOptions"
@@ -289,19 +289,18 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{sturcDetail.plateNo}}</div>
-                <div
+                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
+                <!-- <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>
-
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</div>
+                >{{sturcDetail.plateReliability}}</div> -->
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
+                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</div>
-                <!-- <div class="item" v-if="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</div> -->
+                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
               <div class="struc_cdi_line">
@@ -385,6 +384,7 @@
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
 import { formatDate } from "@/utils/util.js";
 
+import { getGroupsByType } from '@/views/index/api/api.js'
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
@@ -398,9 +398,9 @@ export default {
       // 菜单表单变量
       mhscMenuForm: {
         selectDate: "", // 选择日期
-        carType: "", // 车辆类型
+        carType: "", // 车辆类别
         isNegate: false, // 是否取反
-        provice: "湘", // 省简称
+        provice: "", // 省简称
         carNumber: ""
       },
       rules: {
@@ -418,24 +418,8 @@ export default {
           enumValue: "无牌车"
         },
         {
-          enumField: "号牌遮挡",
-          enumValue: "号牌遮挡"
-        },
-        {
-          enumField: "红名单",
-          enumValue: "红名单"
-        },
-        {
-          enumField: "网约车",
-          enumValue: "网约车"
-        },
-        {
           enumField: "布控库车辆",
           enumValue: "布控库车辆"
-        },
-        {
-          enumField: "违法车辆",
-          enumValue: "违法车辆"
         }
       ], // 车辆类别下拉
       vehicleBelongOptions: [], // 车辆归属地下拉
@@ -545,17 +529,19 @@ export default {
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
     // 获取到车辆类别
-    // getGroupsByType({ groupType: 9 })
-    //         .then(res => {
-    //           if (res.data) {
-    //             this.vehicleClassOptions = res.data.map(item => {
-    //               return {
-    //                  enumField: item.groupName,
-    //                  enumValue: item.groupName // uid
-    //               }
-    //             })
-    //           }
-    //         })
+    getGroupsByType({ groupType: 9 }).then(res => {
+      if (res.data) {
+        this.vehicleClassOptions = [
+          ...this.vehicleClassOptions,
+          ...res.data.map(item => {
+            return {
+              enumField: item.groupName,
+              enumValue: item.groupName // uid
+            };
+          })
+        ];
+      }
+    });
   },
   methods: {
     getStrucInfo() {
@@ -589,9 +575,8 @@ export default {
                 " 23:59:59" || null, // 结束时间
             deviceUid: deviceUidArr.join(), // 摄像头标识
             bayonetUid: bayonetUidArr.join(), // 卡口标识
-            vehicleType: this.mhscMenuForm.carType.join(), // 车辆类型
-            vehicleNumber:
-              this.mhscMenuForm.provice + this.mhscMenuForm.carNumber, // 车牌号码
+            vehicleType: this.mhscMenuForm.carType.join() || null, // 车辆类型
+            vehicleNumber: (this.mhscMenuForm.provice + this.mhscMenuForm.carNumber) || null, // 车牌号码
             unvehicleFlag: this.mhscMenuForm.isNegate // 非车辆标志
           };
           // 处理排序字段
@@ -605,7 +590,7 @@ export default {
             }
           } else if (this.sortType === 2) {
             // 监控排序
-            queryParams.orderBy = "shotTime";
+            queryParams.orderBy = "deviceNamePinyin";
             if (this.cameraSortType) {
               queryParams.order = "desc";
             } else {
@@ -617,7 +602,6 @@ export default {
               if (res.data) {
                 if (res.data.length > 0) {
                   this.strucInfoList = res.data;
-                  // this.pageNum = res.data.pageNum;
                   this.total = res.data.length;
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
