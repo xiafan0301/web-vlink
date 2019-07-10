@@ -282,9 +282,9 @@ import {
   JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
 } from "../../../api/api.judge.js";
 import { getCarmodelList } from "../../../api/api.base.js";
-import { setTimeout } from "timers";
+// import { setTimeout } from "timers";
 import { dataList } from '@/utils/data.js';
-import { callbackify, error } from 'util';
+// import { callbackify, error } from 'util';
 export default {
   components: { BigImg },
   data() {
@@ -559,15 +559,14 @@ export default {
     //设置默认时间
     setDTime() {
       let date = new Date();
-      let curDate = date.getTime();
-      let curS = 30 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      //let curDate = date.getTime(); 
+      //let curS = 30 * 24 * 3600 * 1000;
+      //let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      //let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
       let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
       
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
+      //let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.data1 = [_e, _e];
     },
@@ -670,7 +669,7 @@ export default {
       this.pagination.pageNum = page;
     },
 
-    changeTab(v) {
+    changeTab() {
       //console.log(v);
       // if (v == "2") {
       //   this.dialogVisible = true;
