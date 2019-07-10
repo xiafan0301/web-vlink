@@ -47,6 +47,7 @@
           </el-form-item>
           <el-form-item prop="vehicleClass">
             <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
+              <el-option label="全部车辆类型" value=""></el-option>
               <el-option
                 v-for="item in vehicleOptions"
                 :key="item.enumValue"
