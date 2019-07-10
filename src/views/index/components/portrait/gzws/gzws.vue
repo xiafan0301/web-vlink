@@ -179,7 +179,7 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item prop="deviceCode">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
+              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode">
                 <el-option
                   v-for="(item, index) in deviceList"
                   :key="index"
