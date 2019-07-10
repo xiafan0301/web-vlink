@@ -51,14 +51,14 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" :disabled="curImageUrl=='' || disab" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
-                <span v-if="photoAnalysis.plateNo">{{photoAnalysis.plateNo}}</span>
-                <span>{{photoAnalysis.vehicleColor}}</span>
-                <span>{{photoAnalysis.vehicleStyles}}</span>
-                <span>{{photoAnalysis.vehicleRoof}}</span>
-                <span>{{photoAnalysis.vehicleClass}}</span>
-                <span>遮阳板{{photoAnalysis.sunvisor}}</span>
+                <span v-if="photoAnalysis.plateNo">车牌：{{photoAnalysis.plateNo}}</span>
+                <span v-if="photoAnalysis.vehicleColor">车身颜色：{{photoAnalysis.vehicleColor}}</span>
+                <span v-if="photoAnalysis.vehicleBrand">车辆品牌:{{photoAnalysis.vehicleBrand}}</span>
+                <span v-if="photoAnalysis.vehicleRoof">车顶{{photoAnalysis.vehicleRoof}}</span>
+                <span v-if="photoAnalysis.vehicleClass">{{photoAnalysis.vehicleClass}}</span>
+                <span v-if="photoAnalysis.sunvisor">遮阳板{{photoAnalysis.sunvisor}}</span>
                 <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
                 <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
               </div>
@@ -290,6 +290,7 @@ export default {
   data() {
     
     return {
+      disab:false,
       photoAnalysis:null,//图片分析特征
       plateType:[],// 号牌类型
       plateColor:[],// 号牌颜色
@@ -413,16 +414,16 @@ export default {
       })
     },
     //获取图片信息
-    getPhotoAnalysis(){
-      let d={
-        uploadImgUrls:""
-      }
-      getPhotoAnalysis(d).then(res=>{
-        if(res){
+    // getPhotoAnalysis(){
+    //   let d={
+    //     uploadImgUrls:""
+    //   }
+    //   getPhotoAnalysis(d).then(res=>{
+    //     if(res){
 
-        }
-      })
-    },
+    //     }
+    //   })
+    // },
     //查看详情
     handleClick(v){
       console.log(v);
@@ -478,6 +479,7 @@ export default {
           });
           this.imgData = x;
           this.curImageUrl = x.path;
+          this.disab=false
         }
       }
       this.uploadFileList = fileList;
@@ -511,6 +513,7 @@ export default {
     delPic() {
       this.uploadFileList.splice(0, 1);
       this.curImageUrl = "";
+      this.photoAnalysis=null
     },
     //选择最近上传的图片
     chooseHisPic(item) {
@@ -526,13 +529,13 @@ export default {
       getPhotoAnalysis({
         uploadImgUrls :this.curImageUrl
       }).then(res=>{
-        if(res.data && res.data.length>0){
+        if(res && res.data && res.data.length>0){
           // console.log(res);
-          this.searchings=!this.searchings
+          this.searchings=false
           this.photoAnalysis=res.data[0]
-          
+          this.disab=true
         }else{
-           this.searchings=!this.searchings
+           this.searchings=false
         }
       })
     },
@@ -543,6 +546,7 @@ export default {
       this.choosedHisPic.forEach(x => {
         _ids.push(x.uid);
         this.curImageUrl = x.path;
+        this.disab=false
         this.imgData = x;
       });
       let _obj = {
@@ -628,10 +632,7 @@ export default {
     //按条件查询违章
     getViolation(d){
       getViolation(d).then(res=>{
-       // console.log(res.data);
-        
-        if(res.data){
-
+        if(res && res.data){
            this.searching = false;
           // pagination: { total: 20, pageSize: 10, pageNum: 1 }
           this.pagination.total=res.data.total

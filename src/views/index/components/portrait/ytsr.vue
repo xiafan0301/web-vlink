@@ -582,16 +582,35 @@
         let params = {
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize,
-          'where.sortType': this.stucOrder,
-          'where.startTime': this.searchData.time[0],
-          'where.endTime': this.searchData.time[1],
-          'where.targetType': this.targetType * 1
+          where: {}
         }
+        if (this.stucOrder === 1) {
+          params.where['order'] = 'acs';
+        } else {
+          params.where['order'] = 'desc';
+        }
+        switch (this.stucOrder) {
+          case 1:
+            params.where['orderBy'] = 'shotTime';
+            break;
+          case 2:
+            params.where['orderBy'] = 'shotTime';
+            break;
+          case 3:
+            params.where['orderBy'] = 'deviceNamePinyin';
+            break;
+          case 4:
+            params.where['orderBy'] = 'semblance';
+            break;
+        }
+        params.where.startTime = this.searchData.time[0];
+        params.where.endTime = this.searchData.time[1];
+        params.where.targetType = this.targetType * 1;
         if (this.searchData.minSemblance) {
-          params['where.minSemblance'] = this.searchData.minSemblance;
+          params.where['minSemblance'] = this.searchData.minSemblance;
         }
         if (devIds.length) {
-          params['where.devIds'] = devIds.join(',');
+          params.where['deviceIds'] = devIds.join(',');
         }
         this.imgList.forEach(x => {
           if (x) {
@@ -599,7 +618,7 @@
           }
         })
         if (_ids.length && this.showSim) {
-          params['where.appendixIds'] = _ids.join(',');
+          params.where['appendixIds'] = _ids.join(',');
         }
         ScpGETstrucInfoList(params).then(res => {
           this.$_hideLoading();

@@ -24,8 +24,8 @@ Vue.use(vuescroll, {
     // 滚动条
     bar: {
       background: '#CCC',
-      onlyShowBarOnScroll: false
-      // keepShow: true
+      onlyShowBarOnScroll: false,
+      keepShow: true
     }
   }
 });

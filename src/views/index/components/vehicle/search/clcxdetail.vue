@@ -1,11 +1,16 @@
 <template>
-  <div class="point">
+  <div class="point detail">
     <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '过车详情'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/vehicle/clcx' }">车辆查询</el-breadcrumb-item>
         <el-breadcrumb-item>过车详情</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
 
     <div class="left">
@@ -143,9 +148,11 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       curImgIndex: 0,
@@ -281,11 +288,11 @@ export default {
   width: 100%;
   height: 100%;
 }
-.breadcrumb_heaer {
-  height: 54px;
-  line-height: 54px;
-  background: #ffffff;
-}
+// .breadcrumb_heaer {
+//   height: 54px;
+//   line-height: 54px;
+//   background: #ffffff;
+// }
 .full {
   width: 100%;
 }
@@ -578,4 +585,10 @@ export default {
 }
 </style>
 <style lang="scss">
+.detail{
+  .breadcrumb_heaer {
+    padding: 0px;
+  }
+}
+
 </style>

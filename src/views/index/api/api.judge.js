@@ -539,3 +539,17 @@ export function getFoothold(params) {
     mode: 'judge'
   })
 }
+
+/**
+ * 人脸查询接口
+ * @param {object} params
+ */
+export function getFaceRetrieval(params) {
+  return request({
+    url: '/face-retrieval/query',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
