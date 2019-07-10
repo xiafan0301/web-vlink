@@ -24,11 +24,8 @@ export default {
     }
   },
   created () {
-   /*  this.$store.commit('setCity', {
-              city: res.data
-            }); */
     /* 存在参数breadcrumb的时候，状态管理的权重大于父组件传值 */
-    if (this.$route.query.breadcrumb) {
+    if (this.$route.query.breadcrumb && this.$store.state.breadcrumbData) {
       // 存在参数breadcrumb，则从vuex中拿面包屑数据
       this.bdData = this.$store.state.breadcrumbData;
       console.log('store.state.breadcrumbData', this.bdData);

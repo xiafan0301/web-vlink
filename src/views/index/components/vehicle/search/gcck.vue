@@ -229,12 +229,11 @@ export default {
     }
   },
   methods: {
-
     goToDetail (plateNo) {
       this.$store.commit('setBreadcrumbData', {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
-          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIdsHis, bId: this.zpBId}},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
           {name: '全部抓拍'}
         ]
       });
