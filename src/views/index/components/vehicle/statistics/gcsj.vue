@@ -77,8 +77,17 @@
           <div>
             <div class="chart_item">
               <h1>设备过车数（Top5）</h1>
-              <p>数量（次）</p>
-              <div id="chartContainer1"></div>
+              <!-- <p>数量（次）</p> -->
+              <div id="chartContainer1">
+                <vue-scroll>
+                  <div class="chart_table">
+                <el-table :data="chartData1">
+                  <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
+                </el-table>
+                </div>
+                </vue-scroll>
+              </div>
             </div>
           </div>
           <div>
@@ -571,9 +580,10 @@ export default {
       apiPassingCarSta(params).then(res => {
         if (res) {
           this.gcsjDetail = res.data;
-          this.chartData1 = res.data.device.map(m => {
+          this.chartData1 = res.data.device;
+          /* this.chartData1 = res.data.device.map(m => {
             return {devName: m.name, '过车数': m.total, '过车数1': 1};
-          })
+          }) */
           this.chartData2 = res.data.brandDto.map(m => {
             return { item: m.name, count: m.total };
           })
@@ -583,7 +593,7 @@ export default {
           this.chartData4 = res.data.carTypeDto.map(m => {
             return { carType: m.name, count: m.total, count1: 1 };
           })
-          this.drawChart1();
+          /* this.drawChart1(); */
           this.drawChart2();
           this.drawChart3();
           this.drawChart4();
@@ -728,6 +738,9 @@ export default {
             #chartContainer2{
               width: 50%;
             }
+            .chart_table {
+              padding: 8px 38px 0 38px;
+            }
           }
         }
       }
@@ -794,6 +807,17 @@ export default {
       font-size: 22px;
     }
   }
+}
+.chart_table {
+  .el-table th {
+    background-color: #0567E2;
+    color: #fff;
+  }
+}
+.chart_item {
+  .__view {
+        width: 100% !important;
+      }
 }
 html {
   font-size: 100px;
