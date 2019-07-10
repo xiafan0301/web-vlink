@@ -107,7 +107,7 @@
       </div>
     </div>
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="openMap" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
+    <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
 </template>
 <script>
@@ -138,6 +138,7 @@ export default {
       },
 
       openMap: false,
+      msClear: {},
 
       pickerOptions: {
         disabledDate (d) {
@@ -158,6 +159,8 @@ export default {
       console.log(val);
       if (val === '地图选择') {
         this.openMap = !this.openMap;
+      } else {
+        this.msClear = {};
       }
     },
     searchSubmit () {
