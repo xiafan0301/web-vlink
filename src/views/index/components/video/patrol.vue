@@ -1,7 +1,6 @@
 <template>
   <div class="vl_vid" id="videoPatrol">
     <div class="vid_show_menu" :class="{'vid_show_menu_active': showMenuActive}">
-      <div class="show_menu_t" @click="showMenuActive = !showMenuActive">{{ showMenuActive ? '收起监控列表' : '展开监控列表' }}<i class="el-icon-caret-bottom"></i></div>
       <div class="show_menu_b">
         <div>
           <ul class="show_title">
@@ -155,22 +154,23 @@
           </div>
         </div>
       </div>
+      <span @click="showMenuActive = !showMenuActive; bResize = {};" class="vl_icon vid_icon_ssz" :class="{'vid_icon_sss': showMenuActive}"></span>
     </div>
-    <div class="vid_title">
-      <ul class="vid_show_type" :class="{'vid_show_type_dis': patrolActive === 1}">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="changeShowType(1)"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="changeShowType(4)"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="changeShowType(5)"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="changeShowType(9)"></li>
-       <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
-      </ul>
-    </div>
-    <div class="vid_opes">
-      <el-button v-if="patrolActive === 1" @click="patrolParse" type="primary">暂停轮巡</el-button>
-      <el-button v-else-if="patrolActive === 2" @click="patrolContinue" type="primary">继续轮巡</el-button>
-      <el-button v-if="patrolActive === 1 || patrolActive === 2" @click="patrolCloseDialogVisible = true">关闭轮巡</el-button>
-    </div>
-    <div class="vid_content">
+    <div class="vid_content" :class="{'vid_content2': showMenuActive}">
+      <div class="vid_title">
+        <ul class="vid_show_type" :class="{'vid_show_type_dis': patrolActive === 1}">
+          <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="changeShowType(1)"></li>
+          <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="changeShowType(4)"></li>
+          <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="changeShowType(5)"></li>
+          <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="changeShowType(9)"></li>
+        <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
+        </ul>
+      </div>
+      <div class="vid_opes">
+        <el-button v-if="patrolActive === 1" @click="patrolParse" type="primary">暂停轮巡</el-button>
+        <el-button v-else-if="patrolActive === 2" @click="patrolContinue" type="primary">继续轮巡</el-button>
+        <el-button v-if="patrolActive === 1 || patrolActive === 2" @click="patrolCloseDialogVisible = true">关闭轮巡</el-button>
+      </div>
       <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
@@ -885,22 +885,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 .vl_vid {
-  height: 100%;
-  position: relative;
-  > .vid_title {
-    position: absolute; top: 0; left: 270px;
-    height: 60px;
-    padding: 16px 0 0 0;
-  }
-  > .vid_opes {
+  .vid_opes {
     position: absolute; top: 2px; right: 10px;
     height: 60px;
     padding: 15px 0 0 0;
-  }
-  > .vid_content {
-    height: 100%;
-    padding-top: 60px;
-    overflow: hidden;
   }
 }
 </style>

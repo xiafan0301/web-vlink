@@ -19,15 +19,18 @@
             <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
+            <span>已选设备：</span>
+            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+          </li>
+          <li>
             <span>分析时间：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+            <span>
+              <p>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</p>
+              <p>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</p>
+            </span>
           </li>
           <li>
-            <span>起点设备：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
-          </li>
-          <li>
-            <span>尾随间隔：</span>
+            <span>同行次数：</span>
             <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
           </li>
           <li>
@@ -39,19 +42,32 @@
       <div class="the-right-result">
         <div class="the-result-box-peer">
           <vue-scroll>
+            <div class="the-result-number">检查结果<span>（166）</span></div>
             <div class="list-box">
-              <div class="list-item" v-for="item in '123123123123123'" :key="item.id">
-                <img src="../../../../assets/img/666.jpg" alt="">
-                <p class="time"><i></i>2018.-11-12  13:14:15</p>
-                <p class="address"><i></i>抓拍设备:抓拍名称京广高速</p>
-              </div>
+              <ul class="rlcx_r_list clearfix">
+                <li v-for="item in 12" :key="item">
+                  <div style="">
+                    <img src="../../../../assets/img/666.jpg" alt="">
+                    <div>
+                      <h4>检索资料</h4>
+                      <div><i class="vl_icon rlcx_sj"></i>18-12-24 14:12:17</div>
+                      <p>
+                        <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">男性</span>
+                        <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">青年</span>
+                      </p>
+                      <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">04</b><span style="color: #0C70F8;"> 同行次</span></p>
+                      <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord">查看同行记录</div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
               <el-pagination
                 class="cum_pagination th-center-pagination"
                 @current-change="onPageChange"
-                :current-page.sync="pagination.pageNum"
+                :current-page.sync="pagination.currentPage"
                 :page-size="pagination.pageSize"
                 layout="prev, pager, next"
-                :total="pagination.total">
+                :total="32">
               </el-pagination>
             </div>
           </vue-scroll>
@@ -71,8 +87,8 @@ export default {
     return {
       pagination: {
         pageNum: 1,
-        pageSize: 8,
-        totol: 0
+        pageSize: 9,
+        currentPage: 1
       },
       taskDetail: {}
     }
@@ -94,6 +110,9 @@ export default {
           })
       }
     },
+    goRecord () {
+      this.$router.push({name: 'peer_analysis_record'})
+    },
     onPageChange (page) {
       this.pagination.pageNum = page;
     },
@@ -113,123 +132,29 @@ export default {
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
-      padding: 20px 0 20px 15px;
+      padding: 20px 15px;
       position: relative;
-      .input-box {
-        width: 100%;
-        height: calc(100% - 50px);
-        overflow: hidden;
-        // 选择设备下拉
-        .selected_device {
-          margin-bottom: 10px;
-          position: relative;
-          width: 240px;
-          height: 40px;
-          border: 1px solid #dcdfe6;
-          border-radius: 4px;
-          padding-left: 15px;
-          > i {
-            position: absolute;
-            right: 12px;
-            top: 13px;
-          }
-          &:hover,
-          &:focus {
-            // border-color: #0c70f8;
-            cursor: pointer;
-          }
-          .device_list {
-            line-height: 40px;
-            font-size: 14px;
-            color: #333;
-            .device_count {
-              color: #0c70f8;
-              margin-left: 20px;
-            }
-          }
-          .no_device {
-            line-height: 40px;
-            color: #999999;
-          }
-          // 树tab
-          .device_tree_tab {
-            position: absolute;
-            top: 50px;
-            left: -1px;
-            z-index: 100;
-            background: #fff;
-            width: 240px;
-            height: 350px;
-            border-radius: 4px;
-            border: 1px solid #d3d3d3;
-            .tab_title {
-              width: 50%;
-              float: left;
-              background: #f2f2f2;
-              text-align: center;
-              color: #666666;
-              line-height: 30px;
-              font-size: 12px;
-            }
-            .current_title {
-              background: #fff;
-            }
-            // 树
-            .tree_content {
-              height: 310px;
-              padding-top: 10px;
-              .checked_all {
-                padding: 0 0 8px 23px;
-              }
-            }
+      > ul {
+        width: 100%;height: 100%;
+        li:nth-child(1) {
+          img {
+            display: inline-block;
+            width: 232px;height: 232px;
+            border-radius: 10px;
           }
         }
-        // 关闭设备tab
-        .selected_device_comp {
-          position: fixed;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          overflow: auto;
-          margin: 0;
-          opacity: 0;
-          z-index: 10;
-        }
-        .input-box-line {
-          display: flex;
-          padding-bottom: 12px;
-          padding-right: 15px;
-          .title {
-            display: flex;
-            flex-direction: column;
-            color: #909399;
-            width: 20px;
-          }
-        }
-        .left_num{
-          display: flex;
+        li {
           padding-bottom: 10px;
-          .el-input{
-            width: 175px;
-          }
-          > span{
-            margin-left: 4px;
-            line-height: 40px;
+          span:nth-child(1) {
             color: #999;
-            font-size: 12px;
+            display: inline-block;
+            width: 75px;
+            vertical-align: top;
           }
-        }
-        .add-vehicle-number {
-          width: 100%;
-          height: 40px;
-          line-height: 40px;
-          text-align: center;
-          color: #909399;
-          cursor: pointer;
-          i {
-            font-size: 20px;
-            vertical-align: text-top;
+          span:nth-child(2) {
+            display: inline-block;
+            width: calc(100% - 75px);
+            color: #555;
           }
         }
       }
@@ -243,58 +168,57 @@ export default {
       .the-result-box-peer {
         width: 100%; height: 100%;
         background: #F6F8F9;
+        .the-result-number {
+          color: #333;
+          padding: 0 0 8px 12px;
+          span {
+            color: #666;
+          }
+        }
         .list-box {
           display: flex;
           flex-wrap: wrap;
           // justify-content: space-between;
           flex-flow: row wrap;
           // height: calc(100% - 45px);
-          .list-item {
-            width: 24%;
-            height: 344px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #fff;
-            margin-left: 1.3%;
-            &:nth-child(4n - 3) {
-              margin-left: 0;
-            }
-            img {
-              display: inline-block;
-              width: 100%;
-              height: calc(100% - 70px);
-            }
-            p {
-              font-size: 14px;
-              font-family: 'MicrosoftYaHei';
-              font-weight: 500;
-              color: #333;
-              i {
-                color: #999;
-                margin-right: 3px;
-                display: block;
-                width: 15px;
-                height: 15px;
-              }
-            }
-            .time {
-              display: flex;
-              align-items: center;
-              padding: 10px 0 5px 0;
-              i {
-                background: url("../../../../assets/img/the-time.png") no-repeat;
-                background-size: 15px 15px;
-              }
-            }
-            .address {
-              display: flex;
-              align-items: center;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              i {
-                background: url("../../../../assets/img/the-daynoint.png") no-repeat;
-                background-size: 15px 15px;
+          > .rlcx_r_list {
+            padding: 5px;
+            > li {
+              padding: 5px;
+              float: left;
+              > div {
+                position: relative;
+                width: 380px; height: 210px;
+                padding: 10px;
+                background-color: #fff;
+                box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+                > img {
+                  position: absolute; top: 10px; left: 10px;
+                  width: 190px; height: 190px;
+                }
+                > div {
+                  height: 100%;
+                  margin-left: 210px; padding-right: 10px;
+                  > h4 {
+                    color: #999;
+                    margin-bottom: 10px;
+                  }
+                  > div {
+                    position: relative;
+                    height: 30px; line-height: 30px;
+                    margin-bottom: 10px; padding-left: 30px;
+                    font-size: 12px;
+                    background:rgba(250,250,250,1);
+                    border:1px solid rgba(242,242,242,1);
+                    border-radius:3px;
+                    > i {
+                      position: absolute; top: 7px; left: 10px;
+                      width: 12px; height: 15px;
+                      &.rlcx_sxt { background-position: -325px -377px; }
+                      &.rlcx_sj { background-position: -787px -376px; }
+                    }
+                  }
+                }
               }
             }
           }
@@ -302,7 +226,7 @@ export default {
         .th-center-pagination {
           width: 100%;
           text-align: center;
-          padding: 0 0 20px 0;
+          padding: 20px 0;
         }
       }
     }
@@ -311,76 +235,4 @@ export default {
 </style>
 
 <style lang="scss">
-.input-box-line {
-  .el-input__inner::placeholder {
-    color: #999999;
-  }
-  .el-input__inner:hover,
-  .el-input__inner:focus {
-    border-color: #DCDFE6;
-  }
-  .el-input-group__prepend {
-    background: #fff;
-    padding: 0 5px;
-  }
-  .el-date-editor {
-    .el-input__inner {
-      padding-left: 15px;
-    }
-    .el-input__prefix {right: 5px;left: auto;}
-  }
-}
-.left_num {
-  .el-input__inner:hover,
-  .el-input__inner:focus {
-    border-color: #DCDFE6 !important;
-  } 
-  .left-none-border {
-    .el-input__inner {
-      border-left: none;
-    }
-    .el-input-group__prepend {
-      background-color: #fff;
-      color: #999;
-      padding: 0 5px 0 10px;
-    }
-  }
-}
-.the-left-search {
-  .left_btn{
-    padding-top: 10px;
-    padding-left: 10px;
-    .select_btn, .reset_btn {
-      width: 110px;
-    }
-    .select_btn {
-      background-color: #0C70F8;
-      color: #ffffff;
-    }
-    .reset_btn {
-      background-color: #ffffff;
-      color: #666666;
-      border-color: #DDDDDD;
-    }
-  }
-}
-.th-upload-box {
-  width: 242px;
-  height: 242px;
-  margin-bottom: 15px;
-  .vl_jtc_upload {
-    width: 100%;
-    height: 100%;
-    background: none;
-    .el-upload {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .el-upload--picture-card:hover,
-  .el-upload:focus {
-    border-color: transparent;
-    color: #999;
-  }
-}
 </style>

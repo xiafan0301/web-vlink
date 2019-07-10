@@ -134,7 +134,11 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" @click="getStrucInfo">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -276,17 +280,26 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateColor"
+                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
                 <!-- <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div> -->
+                >{{sturcDetail.plateReliability}}</div>-->
                 <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleColor"
+                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleRoof"
+                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
                 <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
@@ -337,7 +350,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list"  v-show="strucInfoList.length > 1">
+      <div class="struc-list" v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -399,6 +412,8 @@ export default {
           }
         ]
       },
+      getStrucInfoLoading: false, // 查询按钮加载
+
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -532,16 +547,20 @@ export default {
       this.curImageUrl = ""; // 清空上传的图片
       this.initCheckTree(); // 初始化全选树节点
     },
-    getStrucInfo() {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       if (this.curImageUrl) {
         this.$refs.ytscMenuForm.validate(valid => {
+          if (isClick) {
+            this.getStrucInfoLoading = true; // 打开加载效果
+          }
           if (valid) {
             if (
               this.selectCameraArr.length <= 0 &&
               this.selectBayonetArr <= 0
             ) {
               this.$message.warning("请选择至少一个卡口与摄像头");
+              this.getStrucInfoLoading = false; // 关闭加载效果
               return;
             }
             // 处理设备UID
@@ -584,6 +603,7 @@ export default {
             }
             getPhotoSearch(queryParams)
               .then(res => {
+                this.getStrucInfoLoading = false; // 关闭加载效果
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
@@ -597,6 +617,7 @@ export default {
                 }
               })
               .catch(err => {
+                this.getStrucInfoLoading = false; // 关闭加载效果
                 this.strucInfoList = []; // 清空搜索结果
               });
           } else {

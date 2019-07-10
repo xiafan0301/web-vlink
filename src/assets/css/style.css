@@ -368,6 +368,7 @@
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}
+.vl_icon_th_01 {width: 100px; height: 85px; background-position: -88px -587px;}
 .vl_icon_vehicle_02 {width: 30px; height: 162px; background-position: -976px -1280px;}  
 .vl_icon_vehicle_02:hover {width: 30px; height: 162px; background-position: -1036px -1280px;}     
 .vl_icon_vehicle_03 {width: 30px; height: 162px; background-position: -1096px -1280px;}
@@ -437,11 +438,11 @@
 /* 左侧二级菜单样式 */
 .vl_smenu {
   background-color: #ffffff;
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; left: 0; z-index: 19;
   width: 200px; height: 100%;
   box-shadow:4px 0px 10px 0px #838383;
   box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
-  animation: fadeInLeft .4s ease-out .3s both;
+  /* animation: fadeInLeft .4s ease-out .3s both; */
 }
 .vl_smenu > li {
   height: 60px; line-height: 60px;

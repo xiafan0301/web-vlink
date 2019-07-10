@@ -277,7 +277,7 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" :disabled="characteristicAble" @click="getStrucInfo">确定</el-button>
+              <el-button class="select_btn" :loading="getStrucInfoLoading" :disabled="characteristicAble" @click="getStrucInfo(true)">确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -563,6 +563,8 @@ export default {
           }
         ]
       },
+      getStrucInfoLoading: false, // 查询按钮加载
+
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -795,12 +797,16 @@ export default {
       this.vehicleClassOptions = this.dicFormater(44)[0].dictList;
       this.vehicleColorOptions = this.dicFormater(17)[0].dictList;
     },
-    getStrucInfo() {
+    getStrucInfo(isClick=false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.tzscMenuForm.validate(valid => {
         if (valid) {
+          if (isClick) {
+          this.getStrucInfoLoading = true; // 打开加载效果
+          }
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
+            this.getStrucInfoLoading = false; // 关闭加载效果
             return;
           }
           // 处理设备UID
@@ -853,8 +859,7 @@ export default {
             const selectedArr = this.characteristicList.filter(item => {
               return item.checked;
             });
-            console.log('选择的数据', this.characteristicList);
-            console.log('选择的数据1', selectedArr);
+            
             for (let i = 0; i < selectedArr.length; i++) {
               if (selectedArr[i].plateClass) { // 号牌类型
                 queryParams['where.plateClass'] = selectedArr[i].plateClass;
@@ -905,6 +910,7 @@ export default {
           }
           getFeatureSearch(queryParams)
             .then(res => {
+              this.getStrucInfoLoading = false; // 关闭加载效果
               if (res.data && res.data.list) {
                 if (res.data.list.length > 0) {
                   this.strucInfoList = res.data.list;
@@ -917,6 +923,7 @@ export default {
               }
             })
             .catch(err => {
+              this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
             });
         } else {

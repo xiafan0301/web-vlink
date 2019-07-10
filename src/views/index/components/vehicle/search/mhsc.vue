@@ -102,7 +102,6 @@
                     </div>-->
                   </div>
                 </div>
-
                 <el-form-item label prop="carType">
                   <el-select
                     v-model="mhscMenuForm.carType"
@@ -110,7 +109,7 @@
                     collapse-tags
                     class="width232"
                     clearable
-                    placeholder="全部车辆类型"
+                    placeholder="全部车辆类别"
                   >
                     <el-option
                       v-for="item in vehicleClassOptions"
@@ -152,7 +151,7 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" @click="getStrucInfo">确定</el-button>
+              <el-button class="select_btn" :loading="getStrucInfoLoading" @click="getStrucInfo(true)">确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -289,17 +288,26 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.plateColor"
+                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
                 <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
                 <!-- <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div> -->
+                >{{sturcDetail.plateReliability}}</div>-->
                 <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
                 <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleColor"
+                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleRoof"
+                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
                 <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
@@ -384,7 +392,7 @@
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
 import { formatDate } from "@/utils/util.js";
 
-import { getGroupsByType } from '@/views/index/api/api.js'
+import { getGroupsByType } from "@/views/index/api/api.js";
 import { getVagueSearch } from "../../../api/api.analysis.js"; // 根据图检索接口
 import { MapGETmonitorList } from "../../../api/api.map.js"; // 获取到设备树的接口
 import { objDeepCopy } from "../../../../../utils/util.js"; // 深拷贝方法
@@ -412,7 +420,9 @@ export default {
           }
         ]
       },
+      getStrucInfoLoading: false, // 查询按钮加载
       vehicleClassOptions: [
+        // 车辆类别下拉
         {
           enumField: "无牌车",
           enumValue: "无牌车"
@@ -421,7 +431,7 @@ export default {
           enumField: "布控库车辆",
           enumValue: "布控库车辆"
         }
-      ], // 车辆类别下拉
+      ],
       vehicleBelongOptions: [], // 车辆归属地下拉
       pickerOptions: {
         disabledDate(time) {
@@ -544,12 +554,16 @@ export default {
     });
   },
   methods: {
-    getStrucInfo() {
+    getStrucInfo(isClick=false) {
       // 根据特征数组来获取到检索的结果
       this.$refs.mhscMenuForm.validate(valid => {
+        if (isClick) {
+          this.getStrucInfoLoading = true; // 打开加载效果
+        }
         if (valid) {
           if (this.selectCameraArr.length <= 0 && this.selectBayonetArr <= 0) {
             this.$message.warning("请选择至少一个卡口与摄像头");
+            this.getStrucInfoLoading = false; // 关闭加载效果
             return;
           }
           // 处理设备UID
@@ -559,13 +573,12 @@ export default {
           let bayonetUidArr = this.selectBayonetArr.map(item => {
             return item.id;
           });
-          // console.log('车牌号码', this.mhscMenuForm);
-          if (
-            (!this.mhscMenuForm.provice && this.mhscMenuForm.carNumber) ||
-            (this.mhscMenuForm.provice && !this.mhscMenuForm.carNumber)
-          ) {
-            this.$message.warning("请您填写完整的车牌号码");
-          }
+          // if (
+          //   (!this.mhscMenuForm.provice && this.mhscMenuForm.carNumber) ||
+          //   (this.mhscMenuForm.provice && !this.mhscMenuForm.carNumber)
+          // ) {
+          //   this.$message.warning("请您填写完整的车牌号码");
+          // }
           const queryParams = {
             startTime:
               formatDate(this.mhscMenuForm.selectDate[0], "yyyy-MM-dd") +
@@ -576,7 +589,8 @@ export default {
             deviceUid: deviceUidArr.join(), // 摄像头标识
             bayonetUid: bayonetUidArr.join(), // 卡口标识
             vehicleType: this.mhscMenuForm.carType.join() || null, // 车辆类型
-            vehicleNumber: (this.mhscMenuForm.provice + this.mhscMenuForm.carNumber) || null, // 车牌号码
+            vehicleNumber:
+              this.mhscMenuForm.provice + this.mhscMenuForm.carNumber || null, // 车牌号码
             unvehicleFlag: this.mhscMenuForm.isNegate // 非车辆标志
           };
           // 处理排序字段
@@ -599,6 +613,7 @@ export default {
           }
           getVagueSearch(queryParams)
             .then(res => {
+              this.getStrucInfoLoading = false; // 关闭加载效果
               if (res.data) {
                 if (res.data.length > 0) {
                   this.strucInfoList = res.data;
@@ -611,6 +626,8 @@ export default {
               }
             })
             .catch(err => {
+              this.getStrucInfoLoading = false; // 关闭加载效果
+
               this.strucInfoList = []; // 清空搜索结果
             });
         } else {

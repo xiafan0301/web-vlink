@@ -18,61 +18,75 @@
           </el-form-item>
           <el-form-item label="区域：" label-width="55px">
             <el-radio-group v-model="searchForm.type" @change="areaTypeChanged">
-              <el-radio :value="1" label="列表选择"></el-radio>
-              <el-radio :value="2" label="地图选择"></el-radio>
+              <el-radio :label="1">列表选择</el-radio>
+              <el-radio :label="2" @click="alert(1)">地图选择</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item>
-            <el-select style="width: 100%;" v-model="searchForm.area" placeholder="选择区域">
-              <el-option :label="'所有区域'" :value="0"></el-option>
-              <el-option :label="'行政区域1'" :value="1"></el-option>
-              <el-option :label="'行政区域2'" :value="2"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-select style="width: 100%;" v-model="searchForm.sex" placeholder="选择性别">
-              <el-option :label="'不限'" :value="0"></el-option>
-              <el-option :label="'男'" :value="1"></el-option>
-              <el-option :label="'女'" :value="2"></el-option>
-              <el-option :label="'未知'" :value="3"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-select style="width: 100%;" v-model="searchForm.age" placeholder="选择年龄段">
-              <el-option :label="'不限'" :value="0"></el-option>
-              <el-option :label="'儿童'" :value="1"></el-option>
-              <el-option :label="'少年'" :value="2"></el-option>
-              <el-option :label="'青年'" :value="3"></el-option>
-              <el-option :label="'中年'" :value="4"></el-option>
-              <el-option :label="'老年'" :value="5"></el-option>
-              <el-option :label="'未知'" :value="6"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
-              <el-option :label="'不限'" :value="0"></el-option>
-              <el-option :label="'戴眼镜'" :value="1"></el-option>
-              <el-option :label="'不戴眼镜'" :value="2"></el-option>
-              <el-option :label="'未知'" :value="6"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-select style="width: 100%;" v-model="searchForm.hat" placeholder="选择帽子">
-              <el-option :label="'不限'" :value="0"></el-option>
-              <el-option :label="'戴帽子'" :value="1"></el-option>
-              <el-option :label="'不戴帽子'" :value="2"></el-option>
-              <el-option :label="'未知'" :value="6"></el-option>
-            </el-select>
-          </el-form-item>
+            <el-form-item v-show="searchForm.type === 1">
+              <el-select style="width: 100%;" v-model="searchForm.area" multiple collapse-tags placeholder="请选择区域" class="full">
+                <el-option-group
+                  v-for="group in areaList"
+                  :key="group.areaName"
+                  :label="group.areaName">
+                  <el-option
+                    v-for="item in group.areaTreeList"
+                    :key="item.areaId"
+                    :label="item.areaName"
+                    :value="item.areaId">
+                  </el-option>
+                </el-option-group>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type === 1">
+              <el-select style="width: 100%;" v-model="searchForm.sex" placeholder="选择性别">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'男'" :value="'男'"></el-option>
+                <el-option :label="'女'" :value="'女'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type === 1">
+              <el-select style="width: 100%;" v-model="searchForm.age" placeholder="选择年龄段">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'儿童'" :value="'儿童'"></el-option>
+                <el-option :label="'少年'" :value="'少年'"></el-option>
+                <el-option :label="'青年'" :value="'青年'"></el-option>
+                <el-option :label="'中年'" :value="'中年'"></el-option>
+                <el-option :label="'老年'" :value="'老年'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <!-- <el-form-item v-show="searchForm.type === 1">
+              <el-select style="width: 100%;" v-model="searchForm.eyeglass" placeholder="选择眼镜">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'戴眼镜'" :value="'戴眼镜'"></el-option>
+                <el-option :label="'不戴眼镜'" :value="'不戴眼镜'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item> -->
+            <el-form-item v-show="searchForm.type === 1">
+              <el-select style="width: 100%;" v-model="searchForm.hat" placeholder="选择帽子">
+                <el-option :label="'不限'" :value="'不限'"></el-option>
+                <el-option :label="'戴帽子'" :value="'戴帽子'"></el-option>
+                <el-option :label="'不戴帽子'" :value="'不戴帽子'"></el-option>
+                <el-option :label="'未知'" :value="'未知'"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-show="searchForm.type === 2">
+              <div class="rlcx_dtxz_rst">
+                已选<span>{{dSum}}</span>个设备<a href="javascript: void(0);" @click="openMap={}">重选</a>
+              </div>
+            </el-form-item>
           <el-form-item>
             <div style="text-align: center; padding-top: 10px;">
               <el-button @click="searchReset">&nbsp;&nbsp;重&nbsp;&nbsp;置&nbsp;&nbsp;</el-button>
-              <el-button type="primary" @click="searchSubmit">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</el-button>
+              <el-button type="primary" @click="searchSubmit" :loading="searchLoading"
+                :disabled="(searchForm.type === 2 && dSum <= 0) || (!searchForm.area || searchForm.area.length <= 0)">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</el-button>
             </div>
           </el-form-item>
         </el-form>
       </div>
-      <div class="rlcx_r">
+      <div class="rlcx_r" :class="{'rlcx_r_list_empty': pagination.total <= 0}">
         <span class="rlcx_r_msg">检索结果<span>（{{pagination.total}}）</span></span>
         <div class="rlcx_r_order">
           <ul>
@@ -81,19 +95,24 @@
             <span :class="{'rlcx_r_order_line2': orderType === 2}"></span>
           </ul>
         </div>
-        <ul class="rlcx_r_list clearfix">
-          <li v-for="item in 12" :key="item">
+        <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
+          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index">
             <div>
-              <img src="../../../../assets/img/666.jpg" alt="">
+              <img :src="item.subStoragePath" :alt="item.deviceName">
               <div>
                 <h4>检索资料</h4>
-                <div><i class="vl_icon rlcx_sj"></i>18-12-24 14:12:17</div>
-                <div><i class="vl_icon rlcx_sxt"></i>环保路摄像头002</div>
+                <div><i class="vl_icon rlcx_sj"></i>{{item.shotTime}}</div>
+                <div class="com_ellipsis"><i class="vl_icon rlcx_sxt"></i>{{item.deviceName}}</div>
               </div>
             </div>
           </li>
         </ul>
-        <div v-if="pagination.total > pagination.pageSize" style="text-align: center; padding: 10px 0 20px 0;">
+        <ul class="rlcx_r_list clearfix" v-else>
+          <li style="padding: 30px 0 0 0; width: auto; float: none; text-align: center; color: #999;">
+            暂无数据
+          </li>
+        </ul>
+        <div v-show="pagination.total > 0" style="text-align: center; padding: 10px 0 20px 0;">
           <el-pagination
             class="dl_hi_pa"
             background
@@ -111,9 +130,12 @@
   </div>
 </template>
 <script>
+import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
 import {getFaceRetrieval} from '../../api/api.judge.js';
+import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
+import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
 export default {
   components: {vehicleBreadcrumb, mapSelector},
@@ -121,21 +143,27 @@ export default {
     return {
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
-        type: '列表选择', // 列表选择 地图选择
-        area: '',
+        type: 1, // 列表选择 地图选择
+        area: [],
         sex: '',
         age: '',
         eyeglass: '',
         hat: '',
       },
+      areaList: [],
+      areaSData: [],
+      searchLoading: false,
       dataList: [],
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
         currentPage: 1,
         pageSize: 12,
-        total: 2312
+        total: 0
       },
+
+      dSum: 0, // 设备总数
+      dIds: [], // 设备IDS
 
       openMap: false,
       msClear: {},
@@ -147,57 +175,114 @@ export default {
       }
     }
   },
-  mounted () {
-    this.searchSubmit();
+  created () {
+    this.getMapGETmonitorList();
   },
   methods: {
+    //查询行政区域
+    getMapGETmonitorList(){
+      let d={
+        areaUid: mapXupuxian.adcode
+      }
+      MapGETmonitorList(d).then(res=>{
+        if(res && res.data){
+          res.data.areaTreeList.forEach(x => {
+            this.areaSData.push(x.areaId);
+          })
+          this.searchForm.area = this.areaSData;
+          this.areaList.push(res.data);
+          this.$nextTick(() => {
+            this.searchSubmit();
+          });
+        }
+      })
+    },
     mapSelectorEmit (result) {
-      console.log('mapSelectorEmit', result);
+      // console.log('mapSelectorEmit', result);
+      if (result) {
+        // bayonetList deviceList
+        this.dSum = 0;
+        this.dIds = [];
+        if (result.deviceList) {
+          this.dSum = result.deviceList.length;
+          for (let i = 0; i < result.deviceList.length; i++) {
+            this.dIds.push(result.deviceList[i].uid);
+          }
+        }
+        if (result.bayonetList && result.bayonetList.length > 0) {
+          this.dSum += result.bayonetList.length;
+          // getDeviceByBayonetUids
+          let ab = [];
+          for (let i = 0; i < result.bayonetList.length; i++) {
+            ab.push(result.bayonetList[i].uid);
+          }
+          getDeviceByBayonetUids(ab).then(res => {
+            if (res && res.data) {
+              for (let i = 0; i < res.data.length; i++) {
+                this.dIds.push(res.data[i].uid);
+              }
+            }
+          }).catch(() => {
+          });
+        }
+      }
     },
 
     areaTypeChanged (val) {
-      console.log(val);
-      if (val === '地图选择') {
+      if (val === 2) {
         this.openMap = !this.openMap;
-      } else {
-        this.msClear = {};
       }
     },
     searchSubmit () {
-      getFaceRetrieval({
+      this.searchLoading = true;
+      let params = {
         where: {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-          endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
-          deviceIds: '',
-          areaUid: '',
+          endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
+        },
+        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceName',
+        order: this.order === 1 ? 'desc' : 'asc',
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize
+      }
+      if (this.searchForm.type === 1) {
+        params.where = Object.assign(params.where, {
+          areaUid: this.searchForm.area.join(','),
           sex: this.searchForm.sex,
           age: this.searchForm.age,
           hat: this.searchForm.hat
-        },
-          /* 'where.startDate': formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
-          'where.endDate': formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
-          'where.deviceIds': '',
-          'where.areaUid': '',
-          'where.sex': this.searchForm.sex,
-          'where.age': this.searchForm.age,
-          'where.hat': this.searchForm.hat, */
-        orderBy: this.searchForm.orderType === 1 ? 'shotTime' : '',
-        order: this.searchForm.order === 1 ? 'desc' : 'asc',
-        pageNum: 1,
-        pageSize: 16
-      }).then(res => {
+        });
+      } else if (this.searchForm.type === 2) {
+        params.where = Object.assign(params.where, {
+          deviceIds: this.dIds.join(',')
+        });
+      }
+      getFaceRetrieval(params).then(res => {
+        if (res && res.data) {
+          this.dataList = res.data.list;
+          this.pagination.total = res.data.total;
+        }
+        this.searchLoading = false;
+      }).catch(() => {
+        this.searchLoading = false;
       });
     },
     searchReset () {
-      this.searchForm = {
-        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
-        type: '列表选择',
-        area: '',
-        sex: '',
-        age: '',
-        eyeglass: '',
-        hat: '',
-      };
+      if (this.searchForm.type === 1) {
+        this.searchForm  = Object.assign(this.searchForm, {
+          time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
+          area: this.areaSData,
+          sex: '',
+          age: '',
+          eyeglass: '',
+          hat: '',
+        });
+      } else {
+        this.msClear = {};
+        this.dSum = 0;
+        this.dIds = [];
+      }
+      
     },
     orderHandler (type) {
       if (type === this.orderType) {
@@ -209,13 +294,40 @@ export default {
       } else {
         this.orderType = type;
       }
+      this.searchSubmit();
     },
-    handleCurrentChange () {
+    handleCurrentChange (val) {
+      this.pagination.pageNum = val;
+      this.searchSubmit();
     }
   }
 }
 </script>
 <style lang="scss" scoped>
+.rlcx_dtxz_rst {
+  width: 100%;
+  padding: 2px 15px; margin-top: 5px;
+  background-color: #F5F7FA;
+  color: #C0C4CC;
+  border: 1px solid #DCDFE6;
+  border-radius: 4px;
+  > span {
+    display: inline-block;
+    padding: 0 3px;
+    color: #333;
+  }
+  > a {
+    display: inline-block;
+    padding-left: 5px;
+    color: #2580FC !important;
+    text-decoration: none !important;
+    font-style: italic;
+    cursor: pointer;
+  }
+}
+.rlcx_r_list_empty {
+  background: url(../../../../assets/img/not-content.png) center center no-repeat;
+}
 .rlcx_main {
   height: 100%;
   padding-top: 50px;
@@ -237,22 +349,23 @@ export default {
   overflow-y: auto;
   > .rlcx_r_list {
     padding: 5px;
+    margin: 0 auto;
     > li {
-      padding: 5px;
+      padding: 5px; 
       float: left;
       > div {
         position: relative;
-        width: 380px; height: 180px;
+        width: 336px; height: 166px;
         padding: 10px;
         background-color: #fff;
         box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
         > img {
           position: absolute; top: 10px; left: 10px;
-          width: 160px; height: 160px;
+          width: 146px; height: 146px;
         }
         > div {
           height: 100%;
-          margin-left: 180px; padding-right: 10px;
+          margin-left: 156px;
           > h4 {
             color: #999;
             margin-bottom: 10px;
@@ -261,6 +374,7 @@ export default {
             position: relative;
             height: 30px; line-height: 30px;
             margin-bottom: 10px; padding-left: 30px;
+            overflow: hidden;
             font-size: 12px;
             background:rgba(250,250,250,1);
             border:1px solid rgba(242,242,242,1);
@@ -324,6 +438,9 @@ export default {
     }
   }
 }
+@media screen and (max-width: 1000px ){ .rlcx_r_list { width: 700px; } }
+@media screen and (min-width: 1001px) and (max-width: 1800px){.rlcx_r_list { width: 1050px; }}
+@media screen and (min-width: 1801px) {.rlcx_r_list { width: 1400px; }}
 </style>
 <style lang="scss">
 .pt_rlcx_fm {
