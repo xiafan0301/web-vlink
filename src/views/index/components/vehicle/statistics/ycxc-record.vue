@@ -2,7 +2,26 @@
     <div class="th-ycxc-record">
       <Breadcrumb :oData="[{name: '夜间行车分析', routerName: 'vehicle_search_ycxc'}, {name: '抓拍记录'}]"></Breadcrumb>
       <div class="th-ycxc-record-list">
-        <div class="list-sort">
+        <div class="result_sort">
+          <!-- <h3 class="result">检索结果（{{ total }}）</h3> -->
+          <div class="sort">
+            <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
+              时间排序
+              <i
+                :class="{'el-icon-arrow-down': timeSortType, 'el-icon-arrow-up': !timeSortType }"
+                v-show="sortType === 1"
+              ></i>
+            </div>
+            <div class="sort_item" :class="{ 'active_sort': sortType === 2 }" @click="clickCamera">
+              监控排序
+              <i
+                :class="{'el-icon-arrow-down': cameraSortType, 'el-icon-arrow-up': !cameraSortType }"
+                v-show="sortType === 2"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="list-sort">
           <div>
             <span>时间排序</span>
             <span class="sort_icon">
@@ -17,7 +36,7 @@
               <i class="el-icon-caret-bottom" :class="{'sortActive': sortMonitoryType === 'desc'}" @click="onSortByMonitory('desc')"></i>
             </span>
           </div>
-        </div>
+        </div> -->
         <div class="list-box">
             <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
               <img :src="item.storagePath" alt="">
@@ -129,6 +148,9 @@
     },
     data () {
       return {
+        sortType: 1, // 1为时间排序， 2为监控排序
+        timeSortType: true, // true为时间降序， false为时间升序
+        cameraSortType: true, // true为监控降序， false为监控升序
         pagination: {
           pageNum: 1,
           pageSize: 10,
@@ -248,37 +270,76 @@
           content: sConent
         })
       },
-      /**
-       * 按照时间排序
-       */
-      onSortByTime (type) {
-
-        this.sortTimeType = type;
-
-        this.sortMonitoryType = null;
-
-        this.pagination.order = type;
+      /*sort排序方法*/
+      clickTime() {
+        if (this.sortType === 1) {
+          this.timeSortType = !this.timeSortType;
+          if (this.timeSortType) {
+            this.pagination.order = 'desc';
+          } else {
+            this.pagination.order = 'asc';
+          }
+        } else if (this.sortType === 2) {
+          this.sortType = 1;
+        }
+        // this.pagination.order = type;
         this.pagination.orderBy = 'shotTime';
 
         this.$nextTick(() => {
           this.getList();
         })
       },
-      /**
-       * 按照监控排序
-       */
-      onSortByMonitory (type) {
-        this.sortMonitoryType = type;
+      // 点击监控排序
+      clickCamera() {
+        if (this.sortType === 2) {
+          this.cameraSortType = !this.cameraSortType;
+          if (this.cameraSortType) {
+            this.pagination.order = 'desc';
+          } else {
+            this.pagination.order = 'asc';
+          }
+        } else if (this.sortType === 1) {
+          this.sortType = 2;
+        }
 
-        this.sortTimeType = null;
-
-        this.pagination.order = type;
+        // this.pagination.order = type;
         this.pagination.orderBy = 'deviceName';
 
         this.$nextTick(() => {
           this.getList();
         })
       },
+      /**
+       * 按照时间排序
+       */
+      // onSortByTime (type) {
+
+      //   this.sortTimeType = type;
+
+      //   this.sortMonitoryType = null;
+
+      //   this.pagination.order = type;
+      //   this.pagination.orderBy = 'shotTime';
+
+      //   this.$nextTick(() => {
+      //     this.getList();
+      //   })
+      // },
+      // /**
+      //  * 按照监控排序
+      //  */
+      // onSortByMonitory (type) {
+      //   this.sortMonitoryType = type;
+
+      //   this.sortTimeType = null;
+
+      //   this.pagination.order = type;
+      //   this.pagination.orderBy = 'deviceName';
+
+      //   this.$nextTick(() => {
+      //     this.getList();
+      //   })
+      // },
       /**
        * 分页赋值
        */
@@ -354,30 +415,32 @@
     // height: calc(100% - 55px);
     padding: 0 20px;
     background: #f7f9f9;
-    .list-sort {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%; height: 45px;
-      line-height: 45px;
-      div {
-        width: 120px;height: 100%;
-        display: flex;
-        justify-content: flex-end;
-        span {
-          color: #999999;
+    // 检索结果与排序
+    .result_sort {
+      overflow: hidden;
+      height: 40px;
+      line-height: 40px;
+      .result {
+        font-size: 14px;
+        color: #666;
+        float: left;
+      }
+      .sort {
+        font-size: 14px;
+        width: 220px;
+        height: 14px;
+        margin: 0 auto;
+        .sort_item {
+          text-align: center;
+          width: 110px;
+          float: left;
+          color: #999;
+          cursor: pointer;
         }
-        .sort_icon {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          padding: 13px 0;
+        .active_sort {
+          color: #2580fc;
           i {
-            height: 6px;
-            cursor: pointer;
-            color: #999999;
-          }
-          .sortActive {
-            color: #0466DF;
+            color: #2580fc;
           }
         }
       }

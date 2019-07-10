@@ -107,7 +107,7 @@
 <script>
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, getDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
 import {getSpecialGroup} from '../../../api/api.manage.js';
@@ -154,6 +154,14 @@ export default {
   },
   created () {
     // this.queryData = {this.$route.query.deviceIds{};
+    if (this.$route.query.st && this.$route.query.et) {
+      this.formInline.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)]
+    }
+    if (this.$route.query.lb) { this.formInline.lb = this.$route.query.lb; }
+    if (this.$route.query.lx) { this.formInline.lb = this.$route.query.lx; }
+    if (this.$route.query.no) { this.formInline.no = this.$route.query.no == 1 ? true : false; }
+    if (this.$route.query.cpp) { this.formInline.cpp = this.$route.query.cpp; }
+    if (this.$route.query.cp) { this.formInline.cp = this.$route.query.cp; }
   },
   mounted () {
     this.searchSubmit();
@@ -168,7 +176,19 @@ export default {
         breadcrumbData: [
           {name: '车辆侦查', routerName: 'vehicle'},
           {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.$route.query.deviceIds, bId: this.$route.query.bId}},
-          {name: '全部抓拍', routerName: 'vehicle_search_gcck_zp', query: {'deviceIds': this.$route.query.deviceIds, bId: this.$route.query.bId}},
+          { name: '全部抓拍', routerName: 'vehicle_search_gcck_zp', 
+            query: {
+              deviceIds: this.$route.query.deviceIds,
+              bId: this.$route.query.bId,
+              st: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
+              et: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+              lb: this.formInline.lb,
+              lx: this.formInline.lx,
+              no: this.formInline.no ? 1 : 2,
+              cpp: this.formInline.cpp,
+              cp: this.formInline.cp
+            }
+          },
           {name: '车辆详情'}
         ]
       });
@@ -406,6 +426,7 @@ export default {
               width: 100%; height: 100%;
               display: flex; justify-content: center; align-items: center;
               position: relative;
+              cursor: pointer;
               > img {
                 visibility: visible;
                 width: 100%; height: 100%;

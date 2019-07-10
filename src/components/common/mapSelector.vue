@@ -691,7 +691,7 @@ export default {
           if (this.drawObj.polyline) {
             for (let k in this.drawObj.polyline) {
               let so = this.drawObj.polyline[k];
-              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+              if (so && so.obj && window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
                 so.obj.getPath()) < 200) {
                 dObj[o.uid] = o;
               }
@@ -741,7 +741,7 @@ export default {
           if (this.drawObj.polyline) {
             for (let k in this.drawObj.polyline) {
               let so = this.drawObj.polyline[k];
-              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+              if (so && so.obj && window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
                 so.obj.getPath()) < 200) {
                 bObj[o.uid] = o;
               }

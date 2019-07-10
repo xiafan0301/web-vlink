@@ -220,14 +220,22 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="carForm.region" placeholder="请选择品牌" style="width: 37%;" :disabled="isAddDisabled">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item prop="vehicelBrand">
+                <el-select v-model="carForm.vehicelBrand" placeholder="请选择品牌" style="width: 37%;" :disabled="isAddDisabled" @change="handleChangeVehicleBrand">
+                  <el-option
+                    v-for="(item, index) in vehicleBrandsList"
+                    :key="index"
+                    :label="item"
+                    :value="item"
+                  ></el-option>
                 </el-select>
                 <el-select v-model="carForm.vehicleModel" placeholder="请选择型号" style="width: 45%; margin-left: 3%" :disabled="isAddDisabled">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+                  <el-option
+                    v-for="(item, index) in vehicleModelList"
+                    :key="index"
+                    :label="item"
+                    :value="item"
+                  ></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberType">
@@ -418,7 +426,8 @@ import { dataList } from '@/utils/data.js';
 import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
@@ -490,6 +499,7 @@ export default {
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
+        vehicelBrand: null, // 车辆品牌
         desci: null, // 描述
       },
       carRules: {
@@ -501,6 +511,8 @@ export default {
           { validator: checkIdCard, trigger: 'blur'}
         ]
       },
+      vehicleBrandsList: [], // 车辆品牌列表
+      vehicleModelList: [], // 车辆型号列表
       numColorList: [],//号牌颜色列表
       vehicleTypeList: [], // 车辆类型列表
       vehicleColorList: [], // 车身颜色列表
@@ -531,10 +543,32 @@ export default {
     this.getVehicleColor();
     this.getNumberTypeList();
     this.getNumberColorList();
+    this.getVehicleBrandsList();
     this.getGroupList();
     
   },
   methods: {
+    // 车辆品牌change
+    handleChangeVehicleBrand (val) {
+      this.carForm.vehicleModel = null;
+      if (val) {
+        getVehicleModel(val)
+          .then(res => {
+            if (res) {
+              this.vehicleModelList = res.data;
+            }
+          })
+      }
+    },
+    // 获取车辆品牌
+    getVehicleBrandsList () {
+      getVehicleBrand()
+        .then(res => {
+          if (res) {
+            this.vehicleBrandsList = res.data;
+          }
+        })
+    },
     // 获取车辆类型列表
     getVehicleTypeList () {
       const type = dataList.vehicleType;
@@ -626,7 +660,14 @@ export default {
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
+              let vehicleModel;
+              if (item.vehicleModel) {
+                vehicleModel = item.vehicleModel.split(';');
+                item.vehicleModel = vehicleModel.join(' ');
+              }
+
               item.isDelete = false;
+
               this.vehicleTypeList.map(val => {
                 if (val.enumField === item.vehicleType) {
                   item.vehicleType = val.enumValue;
@@ -648,6 +689,7 @@ export default {
                 }
               });
             });
+            console.log(this.vehicleList)
           }
         })
     },
@@ -823,6 +865,9 @@ export default {
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
+          if (this.carForm.vehicelBrand || this.carForm.vehicleModel) {
+            this.carForm['vehicleModel'] = this.carForm.vehicelBrand + ';' + this.carForm.vehicleModel;
+          }
           this.isVehicleLoading = true;
           addSpecialVehicle(this.carForm)
             .then(res => {
@@ -867,6 +912,11 @@ export default {
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
+
+          if (this.carForm.vehicelBrand || this.carForm.vehicleModel) {
+            this.carForm['vehicleModel'] = this.carForm.vehicelBrand + ';' + this.carForm.vehicleModel;
+          }
+
           this.isVehicleLoading = true;
           editSpecialVehicle(this.carForm)
             .then(res => {
@@ -984,6 +1034,7 @@ export default {
       if (this.$refs[form]) {
         this.$refs[form].resetFields();
       }
+      this.carForm.vehicleModel = null;
       this.carForm.uid = null;
       this.carForm.groupList = [];
       this.isAddDisabled = false;
@@ -1022,7 +1073,12 @@ export default {
               this.carForm.ownerName = res.data.ownerName;
               this.carForm.ownerIdCard = res.data.ownerIdCard;
               this.carForm.ownerIdType = res.data.ownerIdType;
-      
+
+              if (res.data.vehicleModel) {
+                this.carForm.vehicelBrand = res.data.vehicleModel.split(';')[0];
+                this.carForm.vehicleModel = res.data.vehicleModel.split(';')[1];
+              }
+
               if (res.data.groupList.length > 0) {
                 res.data.groupList.map(item => {
                   this.carForm.groupList.push(item.uid);
@@ -1092,24 +1148,13 @@ export default {
         .then(res => {
           if (res && res.data) {
             autoDownloadUrl(res.data.fileUrl);
-            // const eleA = document.getElementById('export_id');
-            // if (eleA) {
-            //   document.body.removeChild(eleA);
-            // }
-            // let a = document.createElement('a');
-            // a.setAttribute('href', res.data.fileUrl);
-            // a.setAttribute('target', '_self');
-            // a.setAttribute('id', 'export_id');
-
-            // document.body.appendChild(a);
-            // a.click();
-          
           }
         })
     },
     // 显示导入车辆弹出框
     importVehicle () {
       this.importDialog = true;
+      this.fileList = [];
     },
     // 导入
     sureImportFile () {
@@ -1131,7 +1176,6 @@ export default {
     // 上传成功
     handleSuccess (res) {
       this.isImportLoading = false;
-      console.log(res);
       if (res && res.data.code === 0) {
         this.importDialog = false;
         this.successNumber = res.data.result.successSize;

@@ -1,10 +1,14 @@
 <template>
   <div class="vehicle-info">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆档案'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
@@ -130,7 +134,9 @@
 <script>
 import { getArchives, getViolation } from "../../../api/api.analysis.js";
 import { formatDate} from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       searchData: {
@@ -275,7 +281,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .vehicle-info {
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
   }

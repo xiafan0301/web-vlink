@@ -30,7 +30,7 @@ export default {
       this.bdData = this.$store.state.breadcrumbData;
       console.log('store.state.breadcrumbData', this.bdData);
     } else {
-      // 不存在参数breadcrumb，则从父组件传递的oData中拿面包屑数据
+      // 不存在参数breadcrumb，则从父组件传递的breadcrumbData中拿面包屑数据
       this.bdData = this.breadcrumbData;
     }
   }

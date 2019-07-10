@@ -35,7 +35,7 @@
               >
             </el-date-picker>
           </el-form-item>
-          <el-form-item prop="deviceCode">
+          <el-form-item prop="deviceCode" class="device_code">
             <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode" @change="handleChangeDeviceCode">
               <el-option
                 v-for="(item, index) in deviceList"
@@ -44,6 +44,7 @@
                 :value="item.deviceID"
               ></el-option>
             </el-select>
+            <span class="span_tips" v-show="isShowDeviceTip">该车辆在该时间内无抓拍设备</span>
           </el-form-item>
           <el-form-item prop="vehicleClass">
             <el-select placeholder="请选择尾随车辆类型" style="width: 100%" v-model="searchForm.vehicleClass" multiple clearable>
@@ -126,6 +127,7 @@ export default {
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      isShowDeviceTip: false, // 显示设备列表无数据提示
       deviceStartTime: null, // 起点设备抓拍时间
       searchForm: {
         plateNo: null, // 车牌号码
@@ -144,6 +146,7 @@ export default {
       ],
       rules: {
         plateNo: [
+          { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
           { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
@@ -152,11 +155,7 @@ export default {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {
-        // disabledDate (time) {
-        //   return time.getTime() > (new Date().getTime());
-        // }
-      },
+      pickerEnd: {},
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
@@ -252,14 +251,22 @@ export default {
       };
       getShotDevice(params)
         .then(res => {
-          if (res) {
-            this.deviceList = res.data;
-            if (this.$route.query.deviceCode) {
+          if (res && res.code === '00000000') {
+            if (res.data) {
+              this.deviceList = res.data;
+              this.searchForm.deviceCode = this.deviceList[0].deviceID;
+              this.isShowDeviceTip = false;
+
+              if (this.$route.query.deviceCode) {
               this.deviceList.map(item => {
                 if (item.deviceID === this.$route.query.deviceCode) {
                   this.deviceStartTime = item.shotTime;
                 }
               })
+            }
+
+            } else {
+              this.isShowDeviceTip = true;
             }
           }
         })
@@ -352,6 +359,19 @@ export default {
         width: 100%;
         padding: 15px 20px;
         font-size: 12px !important;
+        .device_code {
+          .el-form-item__content {
+            .span_tips {
+              color: #F56C6C;
+              font-size: 12px;
+              line-height: 1;
+              padding-top: 4px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
+          }
+        }
         /deep/ .el-form-item {
           margin-bottom: 20px;
         }

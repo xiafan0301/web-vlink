@@ -178,6 +178,15 @@ export default {
           }
         }
       }
+    },
+    searchDeviceName (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        if (this.closeShow) {
+          this.$emit('emitSearchData', val);
+        }
+      }
     }
   },
   methods: {
@@ -189,7 +198,9 @@ export default {
     },
     // 搜索设备
     searchData () {
-      this.closeShow = true;
+      if (this.searchDeviceName) {
+        this.closeShow = true;
+      }
       this.$emit('emitSearchData', this.searchDeviceName);
     },
     // 全选

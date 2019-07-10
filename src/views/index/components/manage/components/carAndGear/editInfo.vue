@@ -140,18 +140,18 @@ export default {
         ]
       },
       numColorList: [
-        {label: '黄底黑字', value: 1},
-        {label: '蓝底白字', value: 2},
-        {label: '蓝底白字', value: 8},
-        {label: '黄底黑字黑框线', value: 15},
-        {label: '白底黑字、红“警”字', value: 23},
-        {label: '白底黑字、红“警”字', value: 24},
-        {label: '渐变绿底黑字', value: 25},
-        {label: '黄绿双拼底黑字', value: 26},
-        // {label: '蓝底白字', value: 27},
-        // {label: '黄底黑字', value: 28},
-        // {label: '黄底黑字', value: 29},
-        {label: '其他', value: 99}
+        // {label: '黄底黑字', value: 1},
+        // {label: '蓝底白字', value: 2},
+        // {label: '蓝底白字', value: 8},
+        // {label: '黄底黑字黑框线', value: 15},
+        // {label: '白底黑字、红“警”字', value: 23},
+        // {label: '白底黑字、红“警”字', value: 24},
+        // {label: '渐变绿底黑字', value: 25},
+        // {label: '黄绿双拼底黑字', value: 26},
+        // // {label: '蓝底白字', value: 27},
+        // // {label: '黄底黑字', value: 28},
+        // // {label: '黄底黑字', value: 29},
+        // {label: '其他', value: 99}
       ],//号牌颜色列表
       userInfo: {}, // 用户信息
       vehicleTypeList: [], // 车辆类型
@@ -169,11 +169,22 @@ export default {
     this.getVehicleColor();
     this.getNumberTypeList();
     this.getVehicleTypeList();
+    this.getNumberColorList();
     this.getDepartList();
     this.getOperateCompanyList();
     this.getDetail();
   },
   methods: {
+    // 获取号牌颜色列表
+    getNumberColorList () {
+      const type = dataList.licensePlateColor;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numColorList = res.data;
+          }
+        })
+    },
     // 获取运营公司列表
     getOperateCompanyList () {
       const operate = dataList.operateCompany;
@@ -218,8 +229,8 @@ export default {
     // 号牌种类change
     handleNumberType (val) {
       this.numColorList.map(item => {
-        if (item.value == val) {
-          this.editCar.numberColor = item.label;
+        if (item.enumField == val) {
+          this.editCar.numberColor = item.enumValue;
         }
       })
     },
@@ -243,6 +254,11 @@ export default {
               this.editCar.devicePassword = res.data.devicePassword;
               this.editCar.numberColor = res.data.numberColor;
 
+              this.numColorList.map(item => {
+                if (item.enumField == numberType) {
+                  this.editCar.numberColor = item.enumValue;
+                }
+              })
               this.editCar.vehicleType = vehicleType && vehicleType.toString();
               this.editCar.vehicleColor = vehicleColor && vehicleColor.toString();
               this.editCar.numberType = numberType && numberType.toString();

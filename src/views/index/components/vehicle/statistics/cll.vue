@@ -175,11 +175,12 @@ export default {
       } else if (type === 4) {
         return '年报表';
       } else if (type === 5) {
-        const startTime = new Date(this.queryForm.startTime).getTime();
+        /* const startTime = new Date(this.queryForm.startTime).getTime();
         const endTime = new Date(this.queryForm.endTime).getTime();
         const threeDays = 3 * 3600 * 24 * 1000;
         if (endTime - startTime >= threeDays) return '周报表';
-        return '日报表';
+        return '日报表'; */
+        return '自定义时间段'
       }
     }
   },
@@ -237,7 +238,6 @@ export default {
         fields: ['车流量'], // 展开字段集
         key: 'type', // key字段
         value: 'value', // value字段
-        retains: ['date']
       });
       // impute 补全列/补全字段
       dv.transform({
@@ -247,18 +247,16 @@ export default {
         method: 'value',  // 补全常量
         value: 120     // 补全字段值时执行的规则
       });
+
       console.log(dv.rows, 'dv.rows')
       let view2 = chart.view();
-      view2.source(dv, {
-        
-      });
+      view2.source(dv, {});
+      
       chart.interval()
       .position('date*车流量1') 
       .color('#F2F2F2')
       .size(30);
-      chart.source(dv, {
-       
-      });
+      chart.source(dv, {});
       chart.axis('value', {
         title: null,
         position: 'left'
@@ -273,6 +271,7 @@ export default {
           offset: 50
         }
       });
+
       chart.axis('车流量1', false);
       chart.axis('date', {
         label: {
@@ -301,9 +300,21 @@ export default {
       chart.interval()
       .position('date*value')
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
-      .size(30)
+      .size(30);
 
-     
+console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
+      chart.guide().line({
+        top: true,
+        start: [dv.rows[0].date, this.queryForm.warningNum],
+        end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
+        lineStyle: {
+          stroke: '#ef5555',
+          lineWidth: 1,
+          lineDash: [3, 3]
+        },
+      });
+
+      /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart1 = chart;
     },
@@ -328,9 +339,9 @@ export default {
         fields: ['车流量'], // 展开字段集
         key: 'type', // key字段
         value: 'value', // value字段
-        retains: ['date']
       });
       chart.source(dv, {});
+       
       // 坐标轴刻度
       chart.scale('value', {
         max: 120,
@@ -367,6 +378,17 @@ export default {
       chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
       chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
       chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
+      chart.guide().line({
+        top: true,
+        start: [dv.rows[0].date, this.queryForm.warningNum],
+        end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
+        lineStyle: {
+          stroke: '#ef5555',
+          lineWidth: 2,
+          lineDash: [3, 3]
+        },
+      });
+      /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart2 = chart;
     },
@@ -381,7 +403,7 @@ export default {
     resetQueryForm () {
       this.queryForm = {
         radio: 1,
-        carType: null,
+        carType: '',
         bayonet: {value: ''},
         // lane: null,
         statementType: 1,
@@ -389,10 +411,13 @@ export default {
         startTime: startTime,
         endTime: endTime
       };
+      this.isShowChart = false;
     },
     // 获取车流量统计数据
     getCarTrafficSta () {
-      this.chartData = []
+      this.chartData = [];
+      this.headerList = [];
+      this.bodyList = [];
       let params = {
         bayonetIds: this.queryForm.bayonet.value,
         /* carType: this.queryForm.carType */
@@ -418,7 +443,12 @@ export default {
               date: m.name, '车流量': m.total, '车流量1': 1
             }
           });
-          if(this.queryForm.statementType === 3) {
+          if(this.queryForm.warningNum) {
+            for(let key of this.chartData) {
+              key['warnNum'] = this.queryForm.warningNum
+            }
+          }
+          if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || this.queryForm.statementType === 5) {
             for(let item of this.chartData) {
               item['date'] = formatDate(item.date,'yy-MM-dd')
             }
@@ -443,7 +473,7 @@ export default {
       }).finally(() => {
         this.loadingBtn = false;
       })
-    }
+    },
   }
 }
 </script>

@@ -1,7 +1,6 @@
 <template>
   <div class="vl_vid" id="videoPatrol">
     <div class="vid_show_menu" :class="{'vid_show_menu_active': showMenuActive}">
-      <div class="show_menu_t" @click="showMenuActive = !showMenuActive">{{ showMenuActive ? '收起监控列表' : '展开监控列表' }}<i class="el-icon-caret-bottom"></i></div>
       <div class="show_menu_b">
         <div>
           <ul class="show_title show_title_2">
@@ -71,15 +70,6 @@
           </div>
           <div class="show_content" v-show="showConTitle === 2">
             <div class="show_search">
-              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
-                <el-input
-                  placeholder="请输入设备或区域名称"
-                  size="small"
-                  @keyup.enter.native="getDeviceList(2)"
-                  v-model="searchVal2">
-                  <i slot="suffix" @click="getDeviceList(2)" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
-                </el-input>
-              </div>
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
@@ -110,8 +100,17 @@
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
+              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
+                <el-input
+                  placeholder="请输入设备或区域名称"
+                  size="small"
+                  @keyup.enter.native="getDeviceList(2)"
+                  v-model="searchVal2">
+                  <i slot="suffix" @click="getDeviceList(2)" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
+                </el-input>
+              </div>
             </div>
-            <div class="show_list" style="padding-top: 152px;">
+            <div class="show_list" style="padding-top: 142px;">
               <!-- 回放列表 -->
               <ul class="show_list_c show_tree" id="videoListTree2">
                 <template v-if="deviceList2 && deviceList2.areaTreeList && deviceList2.areaTreeList.length > 0">  
@@ -152,22 +151,23 @@
           </div>
         </div>
       </div>
+      <span @click="showMenuActive = !showMenuActive; bResize = {};" class="vl_icon vid_icon_ssz" :class="{'vid_icon_sss': showMenuActive}"></span>
     </div>
-    <div class="vid_title">
-      <ul class="vid_show_type">
-        <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="showVideoTotal = 1"></li>
-        <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="showVideoTotal = 4"></li>
-        <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="showVideoTotal = 5"></li>
-        <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="showVideoTotal = 9"></li>
-       <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
-      </ul>
-    </div>
-    <div class="vid_content">
+    <div class="vid_content" :class="{'vid_content2': showMenuActive}">
+      <div class="vid_title">
+        <ul class="vid_show_type">
+          <li class="vl_icon vl_icon_061" :class="{'vl_icon_sed': showVideoTotal === 1}" @click="showVideoTotal = 1"></li>
+          <li class="vl_icon vl_icon_062" :class="{'vl_icon_sed': showVideoTotal === 4}" @click="showVideoTotal = 4"></li>
+          <li class="vl_icon vl_icon_063" :class="{'vl_icon_sed': showVideoTotal === 5}" @click="showVideoTotal = 5"></li>
+          <li class="vl_icon vl_icon_064" :class="{'vl_icon_sed': showVideoTotal === 9}" @click="showVideoTotal = 9"></li>
+        <!--  <li class="vl_icon vl_icon_065" :class="{'vl_icon_sed': showType === 5}" @click="showType = 5"></li> -->
+        </ul>
+      </div>
       <ul class="vid_show_list" :class="'vid_list_st' + showVideoTotal">
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
-            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true"></div>
+            <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true" :bResize="bResize"></div>
           </div>
           <div class="vid_show_empty" v-else>
             <div is="videoEmpty" @btnEvent="showListEvent" :btn="true" :btnText="'视频直播'" :btn2="true" :btnText2="'视频回放'"></div>
@@ -231,6 +231,7 @@ export default {
   watch: {
     showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
+      this.bResize = {};
     }
   },
   created () {
@@ -419,23 +420,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.vl_vid {
-  height: 100%;
-  position: relative;
-  > .vid_title {
-    position: absolute; top: 0; left: 270px;
-    height: 60px;
-    padding: 16px 0 0 0;
-  }
-  > .vid_opes {
-    position: absolute; top: 2px; right: 10px;
-    height: 60px;
-    padding: 16px 0 0 0;
-  }
-  > .vid_content {
-    height: 100%;
-    padding-top: 60px;
-    overflow: hidden;
-  }
-}
 </style>
