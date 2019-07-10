@@ -165,7 +165,7 @@ export default {
     },
     searchSubmit () {
       getFaceRetrieval({
-        /* where: {
+        where: {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
           deviceIds: '',
@@ -173,14 +173,14 @@ export default {
           sex: this.searchForm.sex,
           age: this.searchForm.age,
           hat: this.searchForm.hat
-        }, */
-          'where.startDate': formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
+        },
+          /* 'where.startDate': formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           'where.endDate': formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59'),
           'where.deviceIds': '',
           'where.areaUid': '',
           'where.sex': this.searchForm.sex,
           'where.age': this.searchForm.age,
-          'where.hat': this.searchForm.hat,
+          'where.hat': this.searchForm.hat, */
         orderBy: this.searchForm.orderType === 1 ? 'shotTime' : '',
         order: this.searchForm.order === 1 ? 'desc' : 'asc',
         pageNum: 1,

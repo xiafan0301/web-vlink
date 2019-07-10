@@ -547,8 +547,8 @@ export function getFoothold(params) {
 export function getFaceRetrieval(params) {
   return request({
     url: '/face-retrieval/query',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data: params,
     mode: 'judge'
   })
 }
