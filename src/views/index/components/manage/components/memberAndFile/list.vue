@@ -120,17 +120,27 @@ export default {
     }
   },
   watch: {
-    currentOrganId () {
-      this.getList();
+    currentOrganObj () {
+      if (this.$store.state.currentOrganObj) {
+        this.getList();
+      }
     }
   },
   computed: {
-    currentOrganId () {
-      return this.$store.state.currentOrganId;
+    currentOrganObj () {
+      return this.$store.state.currentOrganObj;
     }
   },
+  created () {
+    
+    },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
+
+    this.$store.commit('setCurrentOrgan', {
+      currentOrganObj: this.userInfo.organList[0]
+    });
+
     this.getMemberJobList();
     setTimeout(() => {
       this.getList();
@@ -150,9 +160,15 @@ export default {
     },
     // 获取列表数据
     getList () {
+      let organId = null;
+      if (this.$store.state.currentOrganObj) {
+        organId = this.$store.state.currentOrganObj.uid;
+      } else {
+        organId = this.userInfo.organList[0].uid;
+      }
       const params = {
         'where.userName': this.searchUserName,
-        'where.organId': this.$store.state.currentOrganId,
+        'where.organId': organId,
         pageNum: this.pagination.pageNum,
       }
       getUserList(params)
@@ -186,15 +202,33 @@ export default {
     },
     // 跳至查看档案页面
     skipSelectDetail (obj) {
-      this.$router.push({name: 'member_detail', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'member_detail', query: { id: obj.uid, organObj: organObj }});
     },
     // 跳至新增成员页面
     skipAddPage () {
-      this.$router.push({name: 'member_add'});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'member_add', query: { organObj: organObj }});
     },
     // 跳至编辑页面
     showEditDialog (obj) {
-      this.$router.push({name: 'member_edit', query: { id: obj.uid }});
+      let organObj = {};
+      if (this.$store.state.currentOrganObj) {
+        organObj = this.$store.state.currentOrganObj;
+      } else {
+        organObj = this.userInfo.organList[0];
+      }
+      this.$router.push({name: 'member_edit', query: { id: obj.uid, organObj: organObj }});
     },
     handleCurrentChange (page) {
       this.pagination.pageNum = page;

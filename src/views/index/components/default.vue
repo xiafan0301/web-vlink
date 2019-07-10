@@ -17,12 +17,15 @@
         <el-button style="width: 80%;" type="primary" @click="reLogin">重&nbsp;新&nbsp;登&nbsp;录</el-button>
       </div>
     </el-dialog> -->
+    <!--视频通话-->
+    <div is="webrtc"></div>
   </div>
 </template>
 <script>
+import webrtc from '@/components/common/webrtc.vue';
 import vlinkHeader from '../../../components/header.vue';
 export default {
-  components: {vlinkHeader},
+  components: {vlinkHeader, webrtc},
   data () {
     return {
       /* loginDialogVisible: false,
@@ -52,6 +55,8 @@ export default {
       }, 1000); */
     }
   },
+  mounted () {
+  },
   methods: {
     reLogin () {
       if (this.intval) {
@@ -66,6 +71,8 @@ export default {
 <style lang="scss" scoped>
 .vl_main {
   height: 100%;
+  min-width: 1200px;
+  min-height: 625px;
   > .vl_content {
     padding-top: 100px;
     height: 100%;

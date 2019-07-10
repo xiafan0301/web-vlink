@@ -14,6 +14,31 @@ export function JtcPOSTAppendixInfo(data) {
   })
 }
 /**
+ * JtcPOSTAppendixInfo 套牌车查询接（分页）
+ * @param {object} params
+ */
+export function JtcPOSTAppendtpInfo(data) {
+  return request({
+    url: '/fake-plate-vehicle',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+ * JfoGETGroup 分组列表查询接口
+ * @param {object} params
+ */
+export function JfoGETCity(data) {
+  return request({
+    url: '/vehicle-investigate/first-enter-city',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+/**
  * JtcGETAppendixInfoList 历史上传图片
  * @param {object} params
  */
@@ -169,3 +194,362 @@ export function MapGetPortraitsByName(params) {
   })
 }
 /*--------------------------  研判end  ---------------------------------*/
+
+/*--------------------------  车辆侦查--尾随分析start  ---------------------------------*/
+/**
+ * 查询车辆抓拍设备接口
+ * @param {object} params
+ */
+export function getShotDevice(params) {
+  return request({
+    url: '/vehicle/shot-dev',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询尾随记录列表接口
+ * @param {object} params
+ */
+export function getTailBehindList(params) {
+  return request({
+    url: '/vehicle/tail-behind/list',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询尾随记录详情接口
+ * @param {object} params
+ */
+export function getTailBehindDetail(params) {
+  return request({
+    url: '/vehicle/tail-behind/detail',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 根据车牌号码查询车辆详情接口
+ * @param {object} params
+ */
+export function getVehicleArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+/*--------------------------  人脸检索--身份核实start  ---------------------------------*/
+/**
+ * 查询身份核实列表接口
+ * @param {object} params
+ */
+export function getIdNoList(params) {
+  return request({
+    url: '/portrait/identify',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  车辆侦查--车辆落脚点start  ---------------------------------*/
+/**
+ * 查询车辆落脚点
+ * @param {object} data
+ */
+
+export function getVehicleShot(data) {
+  return request({
+    url: '/vehicle/shot-num',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询所有的设备
+ * @param {object} params
+ */
+export function getAllDevice(params) {
+  return request({
+    url: '/device-service/all-deviceInfo',
+    method: 'get',
+    params,
+    mode: 'base'
+  });
+}
+/*--------------------------  车辆侦查--车辆落脚点end  ---------------------------------*/
+
+/**
+ * 查询车辆详情
+ * @param {object} params
+ */
+export function getSnapDetail(params) {
+  return request({
+    url: '/vehicle/snap-detail',
+    method: 'post',
+    data:params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登记信息
+ * @param {object} params
+ */
+export function getArchives(params) {
+  return request({
+    url: '/vehicle/archives',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆登违章信息
+ * @param {object} params
+ */
+export function getViolationInfo(params) {
+  return request({
+    url: '/vehicle/violation',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询连续违章
+ * @param {object} params
+ */
+export function getViolation(params) {
+  return request({
+    url: '/vehicle/continuous-violation',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/**
+ * 查询车辆
+ * @param {object} params
+ */
+export function getSnapList(params) {
+  return request({
+    url: '/vehicle/snap',
+    method: 'post',
+    data:params,
+    mode: 'judge'
+  });
+}
+
+/**
+ *
+车辆图片分析接口
+ * @param {object} params
+ */
+export function getPhotoAnalysis(params) {
+  return request({
+    url: '/vehicle-investigate/photo-analysis',
+    method: 'get',
+    params,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查--尾随分析end  ---------------------------------*/
+
+
+/*--------------------------  vehicle区域徘徊碰撞start  ---------------------------------*/
+/**
+ * 区域徘徊
+ * @param {object} params
+ */
+export function QyphGetAreaWander(data) {
+  return request({
+    url: '/vehicle-analysis/area-wander',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
+/*--------------------------  区域徘徊碰撞end  ---------------------------------*/
+/**
+ * 区域碰撞
+ * @param {object} params
+ */
+export function QypzGetAreaCross(data) {
+  return request({
+    url: '/vehicle-analysis/area-cross',
+    method: 'post',
+    data,
+    mode: 'judge'
+  });
+}
+/*--------------------------  车辆侦查-车辆轨迹start  ---------------------------------*/
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function InvestigateGetTrace(data) {
+  return request({
+    url: '/vehicle-investigate/trace',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆轨迹end  ---------------------------------*/
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesSum(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-sum',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 查询特殊组
+ * @param {object} params
+ */
+export function getGroups(params) {
+  return request({
+    url: '/groups',
+    method: 'get',
+    params: params,
+    mode: 'base'
+  })
+}
+
+/**
+ * 查询设备抓拍图片汇总信息
+ * @param {object} params
+ */
+export function getDeviceSnapImagesPage(params) {
+  return request({
+    url: '/device-snap-service/device-snap-images-page',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆侦查--多车同行分析start  ---------------------------------*/
+/**
+ * 多车同行查询接口
+ * @param {object} params
+ */
+export function getMultiVehicleList(params) {
+  return request({
+    url: '/multi-vehicle-peer',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆侦查--多车同行分析end  ---------------------------------*/
+
+/*--------------------------  车辆侦查--夜间行车分析start  ---------------------------------*/
+/**
+ * 夜间行车查询接口
+ * @param {object} params
+ */
+export function getNightVehicleList(params) {
+  return request({
+    url: '/night-driving-vehicle',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 夜间行车抓拍记录查询接口
+ * @param {object} params
+ */
+export function getNightVehicleRecordList(params) {
+  return request({
+    url: '/night-driving-vehicle/records',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/*--------------------------  车辆侦查--夜间行车分析end  ---------------------------------*/
+
+/**
+ * 车辆侦查报告查询接口
+ * @param {object} params
+ */
+export function getVehicleInvestigationReport(params) {
+  return request({
+    url: '/vehicle-investigation-report-service/report',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+/*--------------------------  人像接口--重点关注  ---------------------------------*/
+/**
+ * 重点关注次数统计接口
+ * @param {object} params
+ */
+export function getFocusList(params) {
+  return request({
+    url: '/portrait/shot-num/focus',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+
+/*--------------------------  导入导出  ---------------------------------*/
+/**
+ * 夜间行车分析导出接口
+ * @param {object} params
+ */
+export function exportNightVehicle(params) {
+  return request({
+    url: '/export',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人像落脚点查询接口接口
+ * @param {object} params
+ */
+export function getFoothold(params) {
+  return request({
+    url: '/foothold',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+
+/**
+ * 人脸查询接口
+ * @param {object} params
+ */
+export function getFaceRetrieval(params) {
+  return request({
+    url: '/face-retrieval/query',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+

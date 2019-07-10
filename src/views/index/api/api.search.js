@@ -17,11 +17,11 @@ export function ScpGETPortraitInfo(params) {
  * ScpGETstrucInfoList 抓拍检索列表接口
  * @param {object} params
  */
-export function ScpGETstrucInfoList(params) {
+export function ScpGETstrucInfoList(data) {
   return request({
     url: '/structures/page',
-    method: 'get',
-    params: params,
+    method: 'post',
+    data,
     mode: 'judge'
   })
 }

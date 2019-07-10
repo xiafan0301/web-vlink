@@ -23,12 +23,13 @@
               :multiple-limit="50"
               placeholder="请选择或输入成员账户"
               :remote-method="remoteMethod"
+              @change="handleUserChange"
               :loading="loading">
               <el-option
                 v-for="item in reportUserList"
                 :key="item.uid"
-                :label="item.userRealName"
-                :value="item.uid">
+                :label="item.userMobile"
+                :value="item.userMobile">
               </el-option>
             </el-select>
           </el-form-item>
@@ -81,6 +82,7 @@
 <script>
 import { validatePhone } from '@/utils/validator.js';
 import { createUser, getDepartmentList } from '@/views/index/api/api.manage.js';
+import { getUserList, getUserDetail } from '@/views/index/api/api.user.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import {dataList } from '@/utils/data.js';
 export default {
@@ -114,18 +116,31 @@ export default {
         ]
       },
       reportUserList: [],
-      userList: [],
+      userList: [], // 已有用户
       memberJobList: [], // 成员职位
       departmentList: [], // 部门列表
     }
   },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
-
     this.getMemberJobList();
     this.getDepartList();
+    this.getList();
   },
   methods: {
+    // 获取已有用户,未关联单位的
+    getList () {
+      const params = {
+        'where.flag': 2, // 1正常查询（默认）、2只查没有所属单位的
+        pageSize: 0
+      };
+      getUserList(params)
+        .then(res => {
+          if (res) {
+            this.userList = res.data.list;
+          }
+        })
+    },
     // 获取成员职位数据
     getMemberJobList () {
       const memberJob = dataList.memberJob;
@@ -141,18 +156,24 @@ export default {
     getDepartList () {
       const params = {
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.$store.state.currentOrganId,
+        'where.organPid': this.$route.query.organObj.uid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.departmentList.push(this.userInfo.organList[0]);
+            this.departmentList.push(this.$route.query.organObj);
             res.data.list.map(item => {
               this.departmentList.push(item);
             });
+            this.departmentList.map(val => {
+              if (val.uid == this.$route.query.organObj.uid) {
+                this.addUser.organId = val.uid;
+                this.addUser.organName = val.organName;
+              } 
+            });
           }
-        })
+        });
     },
     // 所属单位change
     handleDepartment (val) {
@@ -162,13 +183,52 @@ export default {
         }
       })
     },
+    // 成员账户change
+    handleUserChange (val) {
+      let userId = null;
+      if (val) {
+        this.userList.map(item => {
+          if (item.userMobile === val) {
+            userId = item.uid;
+          }
+        });
+        if (userId) {
+          getUserDetail(userId)
+            .then(res => {
+              if (res) {
+                console.log(res)
+                if (res) {
+                  this.addUser.userName = res.data.userName;
+                  this.addUser.userSex = parseInt(res.data.userSex);
+                  this.addUser.userEmail = res.data.userEmail;
+                  this.addUser.memberNo = res.data.memberNo;
+                  this.addUser.position = res.data.position;
+                }
+              }
+            })
+        } else {
+          this.addUser.userName = '';
+          this.addUser.userSex = 1;
+          this.addUser.userEmail = '';
+          this.addUser.memberNo = '';
+          this.addUser.position = '';
+        }
+      } else {
+        this.addUser.userName = '';
+        this.addUser.userSex = 1;
+        this.addUser.userEmail = '';
+        this.addUser.memberNo = '';
+        this.addUser.position = '';
+      }
+    },
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true;
+        // console.log(this.userList)
         setTimeout(() => {
           this.loading = false;
           this.reportUserList = this.userList.filter(item => {
-            return item.userRealName.toLowerCase()
+            return item.userMobile.toLowerCase()
               .indexOf(query.toLowerCase()) > -1;
           });
         }, 200);

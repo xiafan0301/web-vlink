@@ -2,8 +2,8 @@
   <div class="unaudit">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/audit' }">事件管理</el-breadcrumb-item>
-        <el-breadcrumb-item>受理核实</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/audit' }">受理核实</el-breadcrumb-item>
+        <el-breadcrumb-item>详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="content-box">
@@ -69,8 +69,9 @@
                         <i class="vl_icon vl_icon_event_24"></i>
                       </div>
                       <div class="play_icon">
-                        <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
-                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i>
+                        <i v-show="!isSmallPlaying" class="play_btn vl_icon vl_icon_control_09" @click="openVideo(item)"></i>
+                        <!-- <i v-show="isPlaying" class="pause_btn vl_icon vl_icon_judge_01" @click="playVideo(false)"></i>
+                        <i v-show="!isPlaying" class="play_btn vl_icon vl_icon_control_09" @click="playVideo(true)"></i> -->
                       </div>
                     </div>
                   </template>
@@ -209,6 +210,20 @@
         <el-button class="operation_btn function_btn" @click="sureBack">确认</el-button>
       </div>
     </el-dialog>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="vlJtcLargeV" :src="videoDetail.path"></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.cname}}</div>
+        <div>
+          <span @click="pauseLargeVideo" class="vl_icon vl_icon_judge_01" v-if="isPlaying"></span>
+          <span @click="playLargeVideo" class="vl_icon vl_icon_control_09" v-else></span>
+          <!-- <span @click="cutScreen" class="vl_icon vl_icon_control_07"></span> -->
+          <span><a download="视频" :href="videoDetail.path" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
     <BigImg :imgList="imgList1" :imgIndex='imgIndex' :isShow="isShowImg" @emitCloseImgDialog="emitCloseImgDialog"></BigImg>
   </div>
 </template>
@@ -282,7 +297,10 @@ export default {
       uplaodVideoList: [], // 要上传的视频列表
       isRejectLoading: false, // 驳回加载中
       isPassLoading: false, // 通过加载中
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
       isPlaying: false, // 是否播放视频
+      isSmallPlaying: false, // 小屏显示
       isShowErrorTip: false, // 是否显示图片上传错误提示
       errorText: null, // 图片上传错误提示
       autoInput: null, // 自动输入对象
@@ -768,21 +786,45 @@ export default {
         }
       })
     },
-    // 播放视频
-    playVideo (val) {
-      if (val) {
-        this.isPlaying = true;
-        document.getElementById('add_video').play();
-        this.handleVideoEnd();
-      } else {
-        this.isPlaying = false;
-        document.getElementById('add_video').pause();
-      }
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+      // this.isPlaying = true;
+      document.getElementById('vlJtcLargeV').play();
     },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      this.isPlaying = false;
+      document.getElementById('vlJtcLargeV').pause();
+    },
+    // 暂停视频
+    pauseLargeVideo () {
+      document.getElementById('vlJtcLargeV').pause();
+      this.isPlaying = false;
+    },
+    // 播放视频
+    playLargeVideo () {
+      document.getElementById('vlJtcLargeV').play();
+      this.isPlaying = true;
+      this.handleVideoEnd();
+    },
+    // // 播放视频
+    // playVideo (val) {
+    //   if (val) {
+    //     this.isPlaying = true;
+    //     document.getElementById('add_video').play();
+    //     this.handleVideoEnd();
+    //   } else {
+    //     this.isPlaying = false;
+    //     document.getElementById('add_video').pause();
+    //   }
+    // },
     // 监听视频是否已经播放结束
     handleVideoEnd () {
       let _this = this;
-      const obj = document.getElementById('add_video');
+      const obj = document.getElementById('vlJtcLargeV');
       if (obj) {
         obj.addEventListener('ended', () => { // 当视频播放结束后触发
           _this.isPlaying = false;
@@ -924,7 +966,7 @@ export default {
                 margin-top: 22%;
               }
               .play_btn {
-                margin-left: 37%;
+                margin-left: 28%;
                 margin-top: 22%;
               }
             }
@@ -1035,6 +1077,66 @@ export default {
       }
     }
   }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 9999;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
 }
 </style>
 

@@ -3,7 +3,7 @@
     <div class="flvplayer_player" :id="flvplayerId + '_container'">
       <!-- poster="videojs/eguidlogo.png" -->
       <div class="flvplayer_player_c" :id="flvplayerId + '_c'">
-        <video :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
+        <video crossOrigin="anonymous" :id="flvplayerId" style="width: 100%; height: 100%; object-fit: fill;" autoplay="autoplay" muted>
         </video>
       </div>
     </div>
@@ -70,6 +70,7 @@
             <template v-if="fullScreen || showFullScreen">
               <span v-if="!enlarge" class="flvplayer_opt vl_icon vl_icon_v29" @click="playerEnlarge(true)" title="局部放大"></span>
               <span v-else class="flvplayer_opt vl_icon vl_icon_v292" @click="playerEnlarge(false)" title="取消局部放大"></span>
+              <span v-if="config.ptz && oData.type === 1" class="flvplayer_opt vl_icon vl_icons_ptz" @click="ptzHandler(true)" :title="ptzObj.active ? '关闭云台控制' : '云台控制'"></span>
               <!-- 退出全屏 -->
               <span v-if="fullScreen && !showFullScreen" class="flvplayer_opt vl_icon vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
             </template>
@@ -79,6 +80,20 @@
         </span>
       </div>
     </div>
+    <!-- 云台控制 -->
+    <template v-if="config.ptz && oData.type === 1">
+      <div class="flvplayer_ptz" v-show="ptzObj.active && (fullScreen || showFullScreen)">
+        <ul>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lit" @mousedown="ptzMousedownEvent(1)" @mouseup="ptzMouseupEvent(1)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lir" @mousedown="ptzMousedownEvent(4)" @mouseup="ptzMouseupEvent(4)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lib" @mousedown="ptzMousedownEvent(2)" @mouseup="ptzMouseupEvent(2)"></li>
+          <li class="flvplayer_ptz_li flvplayer_ptz_lil" @mousedown="ptzMousedownEvent(3)" @mouseup="ptzMouseupEvent(3)"></li>
+        </ul>
+        <div>
+          <el-slider :format-tooltip="ptzSliderFm" :min="0" :max="255" v-model="ptzObj.para"></el-slider>
+        </div>
+      </div>
+    </template>
     <!-- 添加标记 dialog -->
     <el-dialog v-if="config.sign" title="添加标记" :visible.sync="signDialogVisible" :center="false" :append-to-body="true" width="500px">
       <div style="padding: 30px 0 20px 30px; text-align: left; color: #666; font-size: 15px;">当前监控：{{oData.title}}</div>
@@ -197,7 +212,7 @@
 import {random14, formatDate, getDate} from '@/utils/util.js';
 import { apiSignContentList, apiVideoSignContent, apiVideoSign, apiVideoRecord,
   apiVideoPlay, apiVideoPlayBack, getVideoPlayRecordStart, getVideoPlayRecordEnd,
-  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload } from "@/views/index/api/api.video.js";
+  getVideoFileDownProgressBatch, videoFileDownStartTime, addVideoDownload, ptzControl } from "@/views/index/api/api.video.js";
 // import { getTestLive } from "@/views/index/api/api.js";
 export default {
   /** 
@@ -220,6 +235,7 @@ export default {
    *    cut: 是否可截屏，默认为true,
    *    tape: 是否可录像，默认为true
    *    download: 是否可下载(回放)，默认为true
+   *    ptz: 是否开启云台控制（直播、全屏），默认为true
    * },
    * optDis: 是否隐藏所有的操作按钮
    * bResize: 播放容器尺寸变化
@@ -251,7 +267,8 @@ export default {
         fullscreen2: false,
         cut: true, // 是否可截屏
         tape: true, // 是否可录像
-        download: true // 是否可下载(回放)
+        download: true, // 是否可下载(回放)
+        ptz: true
       },
 
       startPlayTime: null,
@@ -321,6 +338,15 @@ export default {
         nextStepLaoding: false,
         progressFailed: false,
         downlaodInval: null // 下载进度定时器
+      },
+      // 云台控制对象
+      ptzObj: {
+        active: false,
+        handling: false, // 处理中
+        handleTime: null,
+        minCtrTime: 2000, // 最小控制时间
+        para: 100,
+        position: null // { cmd: , action: 1 } 正在调节的方向
       }
     }
   },
@@ -544,7 +570,7 @@ export default {
       }
     },
     // 普通播放（录像）
-    initPlayerDoForNormal (surl) {
+    initPlayerDoForNormal () {
       this.videoLoading = true;
       var videoElement = document.getElementById(this.flvplayerId);
       videoElement.src = this.oData.video.downUrl;
@@ -605,6 +631,81 @@ export default {
       this.initPlayer();
     },
     /***** 视频事件 *****/
+    /* 云台控制 */
+    // 开启云台控制
+    ptzHandler (flag) {
+      if (flag) {
+        if (this.ptzObj.active) {
+          this.ptzClose();
+        } else {
+          this.ptzObj.active = true;
+        }
+      } else {
+        this.ptzClose();
+      }
+    },
+    // 方向控制 cmd 1-上 2-下 3-左 4-右
+    ptzMousedownEvent (cmd) {
+      // if (this.ptzObj.handling) { return; }
+      // console.log('ptzMousedownEvent');
+      this.ptzObj.handling = true;
+      this.ptzObj.handleTime = new Date().getTime();
+      this.ptzPositionDo(cmd, 1); // action 0-停止 1-开始 
+      /* window.setTimeout(() => {
+        this.ptzObj.handling = false;
+      }, 3000); */
+    },
+    ptzMouseupEvent (cmd) {
+      // console.log('ptzMouseupEvent');
+      if (this.ptzObj.handleTime) {
+        let ind = new Date().getTime();
+        // console.log(ind - this.ptzObj.handleTime);
+        if (ind - this.ptzObj.handleTime < this.ptzObj.minCtrTime) {
+          window.setTimeout(() => {
+            this.ptzPositionDo(cmd, 0); // action 0-停止 1-开始 
+          }, this.ptzObj.minCtrTime - (ind - this.ptzObj.handleTime));
+        } else {
+          this.ptzPositionDo(cmd, 0); // action 0-停止 1-开始 
+        }
+        this.ptzObj.handleTime = null;
+      }
+    },
+    // 方向控制 cmd 1-上 2-下 3-左 4-右
+    // 控制动作 action 0-停止 1-开始 
+    ptzPositionDo (cmd,  action, callback) {
+      ptzControl({
+        deviceId: this.oData.video.uid,
+        cmd: cmd,
+        action: action,
+        para: this.ptzObj.para // 控制参数 取值范围0-255，方向控制为速度值
+      }).then(res => {
+        if (res) {
+          if (action === 0) {
+            this.ptzObj.position = null;
+          } else if (action === 1) {
+            // 只有调用成功了，才会有正在调接的方向
+            this.ptzObj.position = {
+              cmd: cmd,
+              action: action
+            }
+          }
+          if (callback) { callback.call(); }
+        }
+      }).catch(error => {
+        console.log("ptzControl error：", error);
+      });
+    },
+    // 取消云台控制
+    ptzClose () {
+      this.ptzObj.active = false;
+      if (this.ptzObj.position) {
+        this.ptzPositionDo(this.ptzObj.position.cmd,  0);
+        this.ptzObj.position = null;
+      }
+    },
+    ptzSliderFm (val) {
+      return '速度值：' + val;
+    },
     /* 录像函数 */
     tapeStart () {
       if (this.tape.active) { return; }
@@ -612,17 +713,19 @@ export default {
       this.tape.loading  = true;
       this.$message('开始录像。');
       this.tape.tapeTime = 0;
-      this.tape.tapeTimeInval = window.setInterval(() => {
-        this.tape.tapeTime += 1;
-      }, 1000);
       getVideoPlayRecordStart({
         deviceId: this.oData.video.uid
       }).then(res => {
         if (res && res.data) {
+          this.tape.tapeTimeInval = window.setInterval(() => {
+            this.tape.tapeTime += 1;
+          }, 1000);
           // console.log(res.data);
           this.tape.recordId = res.data.recordId;
           this.tape.loading  = false; // 此时才可以触发结束事件
         } else {
+          this.tape.active = false;
+          this.tape.loading  = false;
           if (this.tape.tapeTimeInval) {
             window.clearInterval(this.tape.tapeTimeInval);
           }
@@ -723,7 +826,8 @@ export default {
         endTime: formatDate(this.download.startTime.getTime() + this.download.currentM * 60 * 1000)
       }).then(res => {
         if (res && res.data) {
-          let params = [], rData = {}, rDataSize = 0;
+          // let params = [], rData = {}, rDataSize = 0;
+          let rData = {};
           this.download.recordDataSize = res.data.length;
           for (let i = 0; i < res.data.length; i++) {
             let _obj = res.data[i];
@@ -966,6 +1070,7 @@ export default {
       } else {
         this.fullScreen = flag;
         this.playerEnlarge(false);
+        this.ptzHandler(false);
       }
     },
     playerFullScreenTwo () {
@@ -1048,7 +1153,7 @@ export default {
         console.log("apiSignContentList error：", error);
       });
     },
-    signSubmit (formName) {
+    signSubmit () {
       // this.$refs[formName].validateField("content", (errorMessage) => {
       //   // errorMessage 为空就是验证成功了
       //   if (!errorMessage) {
@@ -1159,6 +1264,47 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.flvplayer_ptz {
+  width: 174px;
+  position: absolute; bottom: 50px; left: 50%; z-index: 200;
+  margin-left: -87px;
+  > ul {
+    position: relative;
+    width: 174px; height: 174px;
+    background: url(../../assets/img/video/vi_ptz_01.png) center center no-repeat;
+    > .flvplayer_ptz_li {
+      position: absolute;
+      width: 92px; height: 43px;
+      background-image: url(../../assets/img/video/vi_ptz_02.png);
+      background-position: center center;
+      background-repeat: no-repeat;
+      &.flvplayer_ptz_lit {
+        top: 17px; left: 42px;
+      }
+      &.flvplayer_ptz_lir {
+        top: 61px; right: -1px;
+        transform: rotate(90deg);
+      }
+      &.flvplayer_ptz_lib {
+        bottom: 28px; right: 42px;
+        transform: rotate(180deg);
+      }
+      &.flvplayer_ptz_lil {
+        top: 59px; left: -2px;
+        transform: rotate(270deg);
+      }
+      &:hover { background-image: url(../../assets/img/video/vi_ptz_03.png); }
+      &.flvplayer_ptz_li_sed { background-image: url(../../assets/img/video/vi_ptz_03.png); }
+    }
+  }
+  > div {
+    position: relative; top: -5px;
+    padding: 0 20px;
+    background-color: #000;
+    background-color: rgba(0, 0, 0, .6);
+    border-radius: 4px;
+  }
+}
 .vl_flvplayer {
   position: relative;
   width: 100%; height: 100%;
@@ -1260,7 +1406,7 @@ export default {
 }
 .flvplayer_bot_om.flvplayer_bot_om_h .flvplayer_bot_omh {
   display: none;
-  position: absolute; left: -10px; bottom: 100%;
+  position: absolute; left: -20px; bottom: 100%;
   background-color: #000;
   background-color: rgba(0, 0, 0, .7);
   padding: 10px 10px;

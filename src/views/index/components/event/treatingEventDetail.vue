@@ -3,7 +3,7 @@
   <div class="treating-detail">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/event/manage'}">事件处理</el-breadcrumb-item>
         <el-breadcrumb-item>事件详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -505,6 +505,8 @@ export default {
 <style lang="scss" scoped>
 .treating-detail {
   width: 100%;
+  height: 100%;
+  overflow-y: scroll;
   .content-box {
     width: 100%;
     padding: 0 20px;

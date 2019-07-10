@@ -446,6 +446,8 @@ export default {
         })
     },
     drawMarkers (data) {
+      console.log(data);
+      
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = 'vlJfoImg' + i;

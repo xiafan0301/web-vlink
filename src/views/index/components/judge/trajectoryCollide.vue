@@ -104,7 +104,7 @@
       </div>
     </el-dialog>
     <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
-      <video id="vlJtcLargeV" :src="curVideoUrl"></video>
+      <video  crossorigin="anonymous" id="vlJtcLargeV" :src="curVideoUrl"></video>
       <div @click="closeVideo" class="close_btn el-icon-error"></div>
       <div class="control_bottom">
         <div>{{mapData[curVideo.indexNum] ? mapData[curVideo.indexNum].deviceName : ''}}</div>
@@ -454,7 +454,7 @@ export default {
           let _idPoint = 'vlJtcPoint' + obj._key;
           let _sContent = `
             <div class="vl_jtc_mk" >
-              <video preload="auto" id="${_id}" src="${obj.videoPath}"></video>
+              <video crossorigin="anonymous" preload="auto" id="${_id}" src="${obj.videoPath}"></video>
               <p>${obj.shotTime}<i id="${_idBtn}" class="vl_icon vl_icon_control_09"></i></p>
               <div class="vl_jtc_mk_check">
                 <input id="${_idCheck}" checked type="checkbox">

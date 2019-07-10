@@ -15,11 +15,12 @@
       <vue-scroll>
         <div class="content">
           <el-tree
+            ref="departTree"
             class="depart_tree_list"
-            :data="departmentList.A"
+            :data="allDepartmentList"
             node-key="uid"
             highlight-current
-            :current-node-key="activeSelect"
+            current-node-key
             :default-expanded-keys="defaultExpandKey"
             icon-class="el-icon-arrow-right"
             @node-click="handleNodeClick"
@@ -222,11 +223,12 @@
   </div>
 </template>
 <script>
-import { getDepartmentList, delDepart, addDepart, updateDepart } from '@/views/index/api/api.manage.js';
+import { getDepartmentList, delDepart, addDepart, updateDepart, getUserList, getDepartDetail } from '@/views/index/api/api.manage.js';
 import { apiAreaList } from '@/views/index/api/api.base.js';
 export default {
   data () {
     return {
+      isSearch: false, // 是否搜索部门
       keyWord: null, // 根据部门名称搜索部门
       closeShow: false, // 显示清除输入框图标
       state: 1,
@@ -248,6 +250,7 @@ export default {
       defaultExpandKey: [], // 默认展开的key
       addUnit: {
         proKey: null,
+        chargeUserName: null, // 组织机构负责人
         organName: null, // 单位名称
         organPid: null, // 上级单位
         province: null, // 省
@@ -258,6 +261,7 @@ export default {
       editUnit: {
         uid: null,
         proKey: null,
+        chargeUserName: null, // 组织机构负责人
         organName: null, // 单位名称
         organPid: null, // 上级单位
         province: null, // 省
@@ -279,7 +283,8 @@ export default {
       },
       departmentFormList: [], // 新增和修改的单位
       allDepartmentList: [],  // 当前用户所属单位及下级单位
-      departmentList: { A: [], B: [], C: [], D: [], E: [] }, // 部门树
+      departmentList: [], // 下级单位
+      // departmentList: { A: [], B: [], C: [], D: [], E: [] }, // 部门树
       userInfo: {}, // 用户信息
       areaId: 1, // 行政区域id 1--省
       areaName: null, // 行政区域change
@@ -287,19 +292,43 @@ export default {
       cityList: [], // 市数据
       countyList: [], // 县数据
       streetList: [], // 街道数据
+      // userList: [], // 用户数据
+      finalData: []
     }
   },
+  // created () {
+  //   this.$nextTick(() => {
+  //     this.$refs.departTree.setCurrentKey(this.userInfo.organList[0].uid);
+  //   });
+  // },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
     this.addUnit.proKey = this.userInfo.proKey;
     this.editUnit.proKey = this.userInfo.proKey;
+    
+    // if (localStorage.getItem('organId')) {
+    //   console.log('3333')
+    //   console.log(localStorage.getItem('organId'))
+    //   // this.activeSelect = localStorage.getItem('organId');
+    //   // this.$nextTick(() => {
+    //   //   console.log('asdasd')
+    //   setTimeout(() => {
+    //     this.$nextTick(() => {
 
+    //       this.$refs.departTree.setCurrentKey(100);
+    //       console.log(this.$refs.departTree.getCurrentKey);
+    //     })
+
+    //   }, 1000)
+    //   // });
+    // }
+    // console.log(this.activeSelect)
     this.getDepartList();
     this.getAreaList();
+    this.getUsersData();
   },
   methods: {
-    handleAreaData () {},
     // 获取行政区划数据
     getAreaList () {
       const params = {
@@ -368,162 +397,80 @@ export default {
 
       this.getAreaList();
     },
+    // 获取用户数据
+    getUsersData () {
+      const params = {
+        'where.proKey': this.userInfo.proKey,
+        pageSize: 0,
+      };
+      getUserList(params)
+        .then(res => {
+          if (res && res.data.list) {
+            // 默认一个机构负责人
+            this.addUnit.chargeUserName = res.data.list[0].uid;
+            this.editUnit.chargeUserName = res.data.list[0].uid;
+          }
+        })
+        .catch(() => {})
+    },
+    handleDepartData (parentArr, childArr) {
+      childArr.forEach(a => {
+        parentArr.forEach(b => {
+          if (a.organPid == b.uid) {
+            if (!b.children.find(c => {return a.uid == c.uid})) 
+              b.children.push(a);
+              if (b.children && b.children.length > 0) {
+                this.handleDepartData(b.children, childArr);
+              }
+          }
+        });
+      });
+      this.allDepartmentList = parentArr;
+    },
     // 获取当前部门及子级部门
     getDepartList () {
-      this.departmentList.A = [];
-      this.departmentList.B = [];
-      this.departmentList.C = [];
-      this.departmentList.D = [];
-      this.departmentList.E = [];
-      this.allDepartmentList = [];
+       this.allDepartmentList = [];
+       this.departmentList = [];
+       let organPid = null;
+       if (this.isSearch) {
+         organPid = null;
+       } else {
+         organPid = this.userInfo.organList[0].uid;
+       }
       const params = {
         'where.organName': this.keyWord,
         'where.proKey': this.userInfo.proKey,
-        'where.organPid': this.userInfo.organList[0].uid,
+        'where.organPid': organPid,
         pageSize: 0
       };
       getDepartmentList(params)
         .then(res => {
           if (res) {
-            this.allDepartmentList.push(this.userInfo.organList[0]);
+            const params = {
+              uid: parseInt(this.userInfo.organList[0].uid),
+              organName: this.userInfo.organList[0].organName,
+              isShow: true,
+              children: []
+            };
+
+            this.allDepartmentList.push(params);
+
             res.data.list.map(item => {
-              this.allDepartmentList.push(item);
+              item.children = [];
+              this.departmentList.push(item);
             });
-            this.allDepartmentList.map((item, index) => {
-              if (item.organLayer === 1) {
-                this.departmentList.A.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-             if (item.organLayer === 2) {
-                this.departmentList.B.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 3) {
-                this.departmentList.C.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 4) {
-                this.departmentList.D.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isShow: false,
-                  isChecked: false,
-                  children: []
-                })
-              }
-              if (item.organLayer === 5) {
-                this.departmentList.E.push({
-                  uid: item.uid,
-                  organPid: item.organPid,
-                  organRight: item.organRight,
-                  organLeft: item.organLeft,
-                  organLayer: item.organLayer,
-                  organName: item.organName,
-                  parentOrganName: item.parentOrganName,
-                  isChecked: false,
-                })
-              }
-            });
-            // 2
-            this.departmentList.A.forEach(a => {
-              if (a.uid === this.userInfo.organList[0].uid) {
-                a.isShow = true;
-                this.activeSelect = a.uid;
-                this.defaultExpandKey.push(a.uid);
-                this.$store.commit('setCurrentOrgan', {
-                  currentOrganId: a.uid
-                });
-              }
-              this.departmentList.B.forEach(b => {
-                if (a.uid === b.organPid) {
-                  a.children.push(b);
-                }
-              })
-            })
-            // 3
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  this.departmentList.C.forEach(c => {
-                    if (b.uid === c.organPid) {
-                      b.children.push(c);
-                    }
-                  })
-                })
-              }
-            })
-            // 4
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  if (b.children && b.children.length > 0) {
-                    b.children.forEach(c => {
-                      this.departmentList.D.forEach(d => {
-                        if (c.uid === d.organPid) {
-                          c.children.push(d);
-                        }
-                      })
-                    })
-                  }
-                })
-              }
-            })
-            // 5
-            this.departmentList.A.forEach(a => {
-              if (a.children && a.children.length > 0) {
-                a.children.forEach(b => {
-                  if (b.children && b.children.length > 0) {
-                    b.children.forEach(c => {
-                      if (c.children && c.children.length > 0) {
-                        c.children.forEach(d => {
-                          this.departmentList.E.forEach(e => {
-                            if (d.uid === e.organPid) {
-                              d.children.push(e);
-                            }
-                          })
-                        })
-                      }
-                    })
-                  }
-                })
-              }
-            })
-            console.log()
+
+            if (this.isSearch) {
+              let departmentList = [];
+              departmentList.push(this.departmentList[0]);
+
+              this.defaultExpandKey.push(this.departmentList[0].uid);
+              
+              this.handleDepartData(departmentList, this.departmentList);
+            } else {
+              this.defaultExpandKey.push(this.allDepartmentList[0].uid);
+              this.handleDepartData(this.allDepartmentList, this.departmentList);
+            }
           }
         })
     },
@@ -531,32 +478,23 @@ export default {
     handleNodeClick (obj) {
       this.activeSelect = obj.uid;
       this.$store.commit('setCurrentOrgan', {
-        currentOrganId: obj.uid
+        currentOrganObj: obj
       });
-      // this.addUnit.organPid = obj.uid;
-
-      // const params = {
-      //   'where.proKey': this.userInfo.proKey,
-      //   'where.organPid': obj.uid,
-      //   pageSize: 0
-      // };
-      // getDepartmentList(params)
-      //   .then(res => {
-      //     if (res) {
-      //       this.departmentFormList.push(obj);
-      //       res.data.list.map(item => {
-      //         this.departmentFormList.push(item);
-      //       });
-      //     }
-      //   })
+      // // this.$nextTick(() => {
+      //   this.$refs.departTree.setCurrentKey(obj.uid);
+      // // });
+      // console.log(this.$refs.departTree.getCurrentKey())
+      // localStorage.setItem('organId', obj.uid);
     },
     // 根据部门进行搜索
     searchData () {
+      this.isSearch = true;
       this.getDepartList();
       this.closeShow = true;
     },
     // 清空搜索框
     onClear () {
+      this.isSearch = false;
       this.closeShow = false;
       this.keyWord = null;
       this.getDepartList();
@@ -688,16 +626,12 @@ export default {
     },
     // 显示编辑部门弹出框
     onEditDepart (obj, e) {
+      console.log('obj', obj)
       e.stopPropagation();
 
       this.editDepartmentDialog = true;
 
-      this.editUnit.organName = obj.organName;
-      this.editUnit.organPid = obj.uid;
-      this.editUnit.province = obj.province;
-      this.editUnit.city = obj.city;
-      this.editUnit.region = obj.region;
-      this.editUnit.street = obj.street;
+      this.getDetail(obj.uid);
 
       const params = {
         'where.proKey': this.userInfo.proKey,
@@ -724,6 +658,25 @@ export default {
       } else {
         this.delDepartmentDialog = true;
       }
+    },
+    // 获取机构详情
+    getDetail (id) {
+      const params = {
+        uid: id,
+        proKey: this.userInfo.proKey
+      };
+      getDepartDetail(params)
+        .then(res => {
+          if (res) {
+            console.log('res', res)
+            // this.editUnit.organName = obj.organName;
+            // this.editUnit.organPid = obj.organPid;
+            // this.editUnit.province = obj.province;
+            // this.editUnit.city = obj.city;
+            // this.editUnit.region = obj.region;
+            // this.editUnit.street = obj.street;
+          }
+        })
     }
   }
 }

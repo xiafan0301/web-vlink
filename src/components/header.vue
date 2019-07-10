@@ -1,11 +1,12 @@
 <template>
   <div class="vl_header">
-    <div class="hd_log vl_icon vl_icon_logo">
+    <!-- <div class="hd_log vl_icon vl_icon_logo"> -->
+    <div class="hd_log">
     </div>
     <!-- <div class="hd_log vl_ymx_logo">
     </div> -->
     <div class="hd_user">
-      <img src="../assets/img/temp/vl_photo.png" alt="">
+      <!-- <img src="../assets/img/temp/vl_photo.png" alt=""> -->
       <el-popover
         popper-class="person_info"
         placement="bottom"
@@ -116,51 +117,51 @@
     </div>
     <ul class="hd_menu">
       <li>
-        <router-link :to="{name: 'video'}">
-          <i class="vl_icon vl_icon_001"></i>
-          <span>视频</span>
+        <router-link :to="{name: 'vehicle'}">
+          <i class="vl_icon vl_icon_004"></i>
+          <span>车辆侦查</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'portrait'}">
+          <i class="vl_icon vl_icon_005"></i>
+          <span>人像侦查</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'map'}">
           <i class="vl_icon vl_icon_002"></i>
-          <span>GIS</span>
+          <span>GIS应用</span>
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'event'}">
-          <i class="vl_icon vl_icon_003"></i>
-          <span>事件</span>
+        <router-link :to="{name: 'video'}">
+          <i class="vl_icon vl_icon_001"></i>
+          <span>视频监控</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'control'}">
           <i class="vl_icon vl_icon_006"></i>
-          <span>布控</span>
+          <span>智能布控</span>
         </router-link>
       </li>
       <li>
-        <router-link :to="{name: 'judge'}">
-          <i class="vl_icon vl_icon_004"></i>
-          <span>研判</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link :to="{name: 'search'}">
-          <i class="vl_icon vl_icon_005"></i>
-          <span>检索</span>
+        <router-link :to="{name: 'event'}">
+          <i class="vl_icon vl_icon_003"></i>
+          <span>事件管理</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'message'}">
           <i class="vl_icon vl_icon_007"></i>
-          <span>消息</span>
+          <span>消息公告</span>
         </router-link>
       </li>
       <li>
         <router-link :to="{name: 'manage'}">
           <i class="vl_icon vl_icon_008"></i>
-          <span>管理</span>
+          <span>系统管理</span>
         </router-link>
       </li>
     </ul>
@@ -498,6 +499,7 @@ export default {
     float: left;
     width: 170px; height:  48px;
     margin: 26px 20px 0 20px;
+    background: url(../assets/img/logo_ysd.png) center center no-repeat;
   }
   > .hd_menu {
     overflow: hidden;
@@ -511,7 +513,7 @@ export default {
       > a {
         display: block;
         width: 100%; height: 90px;
-        font-size: 16px; color: #fff;
+        font-size: 15px; color: #fff;
         border-radius: 8px 8px 0 0;
         text-decoration: none !important;
         text-align: center;

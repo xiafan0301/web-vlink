@@ -443,6 +443,16 @@ export function addGroup (data) {
   });
 }
 /**
+ * 删除分组
+ * @param {*} data
+ */
+export function delGroup (uid) {
+  return request({
+    url: '/groups/' + uid,
+    method: 'delete'
+  });
+}
+/**
  * 判断车辆新增分组组名是否重名
  * @param {*} data 
  */
@@ -750,5 +760,93 @@ export function getAreaList (pid) {
     url: 'area-service/area-list/'+ pid,
     mode: 'user',
     method: 'get'
+  });
+}
+
+/**********************特殊车辆管理*************************** */
+/**
+ * 获取特殊车辆分组
+ * @param {*} data
+ */
+export function getSpecialGroup () {
+  return request({
+    url: '/special-vehicle/groups',
+    method: 'get'
+  });
+}
+/**
+ * 新增特殊车辆
+ * @param {*} data
+ */
+export function addSpecialVehicle (data) {
+  return request({
+    url: '/special-vehicle',
+    data,
+    method: 'post'
+  });
+}
+/**
+ * 修改特殊车辆
+ * @param {*} data
+ */
+export function editSpecialVehicle (data) {
+  return request({
+    url: '/special-vehicle',
+    data,
+    method: 'put'
+  });
+}
+/**
+ * 获取特殊车辆详情
+ * @param {*} data
+ */
+export function getSpecialVehicleDetail (uid) {
+  return request({
+    url: '/special-vehicle/' + uid,
+    method: 'get'
+  });
+}
+/**
+ * 获取特殊车辆列表
+ * @param {*} data
+ */
+export function getSpecialVehicleList (params) {
+  return request({
+    url: '/special-vehicles',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 验证特殊组是否重名
+ * @param {*} data
+ */
+export function checkRename (params) {
+  return request({
+    url: '/vehicle-special-group/rename',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 特殊车辆导入
+ * @param {*} data
+ */
+export function vehicleImport (params) {
+  return request({
+    url: '/special-vehicle/import',
+    data: params,
+    method: 'post'
+  });
+}
+/**
+ * 特殊车辆导出
+ * @param {*} data
+ */
+export function vehicleExport (params) {
+  return request({
+    url: '/excel-service/export',
+    data: params,
+    method: 'post'
   });
 }

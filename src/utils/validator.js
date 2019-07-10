@@ -45,12 +45,14 @@ export const checkName = (rule, value, callback) => {
 }
 // 车牌验证
 export const checkPlateNumber = (rule, value, callback) => {
-  let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+  console.log('value', value)
+  let reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
   if (value && !reg.test(value)) {
     callback(new Error('请输入正确的车牌号码'));
   } else {
     callback();
   }
+  callback();
 }
 /**
  * 判断邮箱格式
@@ -125,9 +127,45 @@ export const validatePatrolTime = (rule, value, callback) => {
     const endTime = new Date(value[1]);
     const timeDiff = endTime.getTime() - startTime.getTime();
     if (timeDiff < 1800000 || timeDiff > (8*60*60*1000)) {
-      callback(new Error('请选择正确的时间'));
+      callback(new Error('轮巡时间段在0.5h和8小时之间'));
     }
   }
   callback();
+};
+/**
+ * 支持正整数
+ */
+export const validateInteger = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('请输入正整数'));
+    } else {
+      callback();
+    }
+  }
+  callback();
+};
+/**
+ * 支持3-200之间的正整数
+ */
+export const validateFrequency = (rule, value, callback) => {
+  let reg = /^[0-9]+$/;
+  if (!reg.test(value) || parseInt(value) < 3 || parseInt(value) > 200) {
+    callback(new Error('请正确输入3-200之间的整数'));
+  } else {
+    callback();
+  }
+};
+/**
+ * 支持0-100之间的数字
+ */
+export const validateSimilarity = (rule, value, callback) => {
+  let reg = /^100$|^(\d|[1-9]\d)(\.\d+)*$/;
+  if (!reg.test(value)) {
+    callback(new Error('请正确输入0-100之间的数字'));
+  } else {
+    callback();
+  }
 };
 

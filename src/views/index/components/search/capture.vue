@@ -203,7 +203,7 @@
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
               <img style="width: 100%; height: .88rem;" :src="item.photoPath" alt="">
               <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
-            </div>
+  </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
           <div class="swiper-button-next" slot="button-next"></div>
@@ -608,6 +608,7 @@
           if (res) {
             console.log(res);
             this.strucInfoList = res.data.list;
+            console.log(JSON.stringify(this.strucInfoList), 'this.strucInfoList')
             this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = res.data.total;
             this.searching = false;
@@ -630,6 +631,7 @@
         this.curImgIndex = index;
         this.strucDetailDialog = true;
         this.sturcDetail = data;
+        console.log(JSON.stringify(data) , 'data')
         this.drawPoint(data);
       },
       imgListTap (data, index) {

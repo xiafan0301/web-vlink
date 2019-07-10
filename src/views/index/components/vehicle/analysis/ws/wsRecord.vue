@@ -1,0 +1,574 @@
+<template>
+  <div class="ws_record">
+    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws', query: {
+      plateNo: $route.query.plateNo,
+      dateStart: $route.query.dateStart,
+      dateEnd: $route.query.dateEnd,
+      vehicleClass: $route.query.vehicleClass,
+      interval: $route.query.interval,
+      deviceCode: $route.query.deviceCode
+    }}, {name: '尾随记录'}]"></Breadcrumb>
+    <div class="content_box">
+      <div class="left">
+        <h2>{{vehicleDetail.plateno ? vehicleDetail.plateno : $route.query.plateNoTb}}</h2>
+        <ul>
+          <li>
+            <span>车辆所有人：</span>
+            <span>{{vehicleDetail.owner ? vehicleDetail.owner : '未知'}}</span>
+          </li>
+          <li>
+            <span>中文品牌：</span>
+            <span>{{vehicleDetail.brand ? vehicleDetail.brand : '未知'}}</span>
+          </li>
+          <li>
+            <span>车身颜色：</span>
+            <span>{{vehicleDetail.color ? vehicleDetail.color : '未知'}}</span>
+          </li>
+          <li>
+            <span>车身形式：</span>
+            <span>{{vehicleDetail.bodyform ? vehicleDetail.bodyform : '未知'}}</span>
+          </li>
+          <li>
+            <span>车门数：</span>
+            <span>{{vehicleDetail.doornumber ? vehicleDetail.doornumber : '未知'}}</span>
+          </li>
+          <li>
+            <span>发动机号：</span>
+            <span>{{vehicleDetail.engineno ? vehicleDetail.engineno : '未知'}}</span>
+          </li>
+          <li>
+            <span>使用性质：</span>
+            <span>{{vehicleDetail.usecharacter ? vehicleDetail.usecharacter : '未知'}}</span>
+          </li>
+          <li>
+            <span>车辆类型：</span>
+            <span>{{vehicleDetail.platetype ? vehicleDetail.platetype : '未知'}}</span>
+          </li>
+          <li>
+            <span>年款：</span>
+            <span>{{vehicleDetail.model ? vehicleDetail.model : '未知'}}</span>
+          </li>
+          <li>
+            <span>车型：</span>
+            <span>{{vehicleDetail.vehicletype ? vehicleDetail.vehicletype : '未知'}}</span>
+          </li>
+          <li>
+            <span>座位数：</span>
+            <span>{{vehicleDetail.seatnumber ? vehicleDetail.seatnumber : '未知'}}</span>
+          </li>
+          <li>
+            <span>车辆状态：</span>
+            <span>{{vehicleDetail.status ? vehicleDetail.status : '未知'}}</span>
+          </li>
+          <li>
+            <span>厂商名称：</span>
+            <span>{{vehicleDetail.vendor ? vehicleDetail.vendor : '未知'}}</span>
+          </li>
+          <li>
+            <span>有效期止：</span>
+            <span>{{vehicleDetail.validuntil ? vehicleDetail.validuntil : '未知'}}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="right">
+        <div class="operation_box">
+          <p @click="skipBreakRecordPage">查看违章记录</p>
+          <p @click="skipVehicleControlPage">车辆布控</p>
+          <p @click="skipTrajectoryPage">轨迹分析</p>
+          <p @click="skipFootholdPage">落脚点分析</p>
+          <!-- <p>以车搜车</p> -->
+        </div>
+        <div id="rightMap"></div>
+      </div>
+    </div>
+    <!-- 视频全屏放大 -->
+    <div style="width: 0; height: 0;" v-show="showLarge" :class="{vl_j_fullscreen: showLarge}">
+      <video id="controlVideo" :src="videoDetail.videoPath" ></video>
+      <div @click="closeVideo" class="vl_icon vl_icon_event_23 close_icon"></div>
+      <div class="control_bottom">
+        <div>{{videoDetail.deviceName}}</div>
+        <div>
+          <span @click="playLargeVideo(false)" class="vl_icon vl_icon_judge_01" v-show="isPlaying"></span>
+          <span @click="playLargeVideo(true)" class="vl_icon vl_icon_control_09" v-show="!isPlaying"></span>
+          <span @click="playerCut" class="vl_icon vl_icon_control_07"></span>
+          <span><a download="视频" :href="videoDetail.videoPath" target="_blank" class="vl_icon vl_icon_event_26"></a></span>
+        </div>
+      </div>
+    </div>
+    <!-- 截屏 dialog -->
+    <el-dialog title="截屏" :visible.sync="cutDialogVisible" :center="false" :append-to-body="true" width="1000px">
+      <div style="text-align: center; padding-top: 30px;">
+        <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
+      </div>
+      <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
+        <el-button @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button type="primary" @click="playerCutSave">保 存</el-button>
+        <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import Breadcrumb from '../../breadcrumb.vue';
+import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
+import { random14 } from '@/utils/util.js';
+export default {
+  components: { Breadcrumb },
+  data () {
+    return {
+      cutDialogVisible: false, // 截屏弹出框
+      showLarge: false, // 全屏显示
+      videoDetail: {}, // 播放视频的信息
+      isPlaying: false, // 是否播放视频
+      map: null,
+      resultList: [],
+      vehicleDetail: {}, // 尾随车辆详细信息
+      marker: {},
+      flvplayerId: 'flv_' + random14(),
+    }
+  },
+  mounted () {
+    this.initMap();
+    this.getVehicleDetail();
+    setTimeout(() => {
+      this.getDetail();
+    }, 500)
+  },
+  methods: {
+    // 跳至新建布控页面
+    skipVehicleControlPage () {
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至查看违章记录页面
+    skipBreakRecordPage () {
+      this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至轨迹分析页面
+    skipTrajectoryPage () {
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 跳至落脚点分析页面
+    skipFootholdPage () {
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+    },
+    // 获取车辆信息（车管所）
+    getVehicleDetail () {
+      const plateNo = this.$route.query.plateNoTb;
+      if (plateNo) {
+        getVehicleArchives({plateNo})
+          .then(res => {
+            if (res) {
+              this.vehicleDetail = res.data;
+            }
+          })
+      }
+    },
+    // 获取尾随车辆详情
+    getDetail () {
+      const plateNo = this.$route.query.plateNo;
+      const startTime = this.$route.query.dateStart;
+      const endTime = this.$route.query.dateEnd;
+      const plateNoTb = this.$route.query.plateNoTb;
+      const startTimeTb = this.$route.query.dateStartTb;
+      const params = {
+        plateNo,
+        startTime,
+        endTime,
+        plateNoTb,
+        startTimeTb
+      };
+      getTailBehindDetail(params)
+        .then(res => {
+          if (res && res.data) {
+            console.log('res', res)
+            this.resultList = res.data;
+
+            this.mapMark(this.resultList)
+          }
+        })
+    },
+    // 初始化地图
+    initMap () {
+      let _this = this;
+      let map = new window.AMap.Map('rightMap', {
+        zoom: 15, // 级别
+        center: [110.596015, 27.907662], // 中心点坐标[110.596015, 27.907662]
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+
+      _this.map = map;
+    },
+    mapMark (data) {
+      if (data && data.length > 0) {
+        let _this = this, hoverWindow = null, path= [];
+        for (let i = 0; i < data.length; i++) {
+          
+          let obj = data[i];
+          if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+            let offSet = [-20.5, -55];
+            
+            let _idBtn = 'vlJtcPlayBtn' + obj.deviceID;
+            let _id = 'vlJtcVideo' + obj.deviceID;
+
+            let marker = new window.AMap.Marker({
+              map: _this.map,
+              position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude],
+              offset: new window.AMap.Pixel(offSet[0], offSet[1]), // 相对于基点的偏移位置
+              draggable: false, // 是否可拖动
+              extData: '', // 用户自定义属性
+              // 自定义点标记覆盖物内容
+              content: '<div id="vehicle' + obj.deviceID + '"  title="'+ obj.deviceName +'" class="vl_icon vl_icon_sxt"></div>'
+            });
+  
+            path.push(new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+
+            marker.on('mouseover', function () {
+              $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
+
+              let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
+                    +"<img src="+ obj.subStoragePath +" /><div class='mongolia'>"
+                    +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.subStoragePathTb +" />"
+                    +"<div class='mongolia'><span>"+ obj.shotTimeTb +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
+                    +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
+
+                hoverWindow = new window.AMap.InfoWindow({
+                  isCustom: true,
+                  closeWhenClickMap: true,
+                  offset: new window.AMap.Pixel(180, 180), // 相对于基点的偏移位置
+                  content: sContent
+                });
+                hoverWindow.open(_this.map, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
+
+                setTimeout(() => {
+                  _this.addListen(_idBtn, obj);
+                  _this.addListen(_id, obj);
+                }, 500);
+            });
+            marker.on('mouseout', function () {
+              $('#vehicle' + obj.deviceID).removeClass('vl_icon_map_hover_mark0');
+            });
+            _this.map.setZoom(13)
+            // marker.setPosition([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+             _this.map.setCenter([obj.shotPlaceLongitude, obj.shotPlaceLatitude]);
+            // marker.setMap(_this.map);
+            //_this.map.setFitView();// 执行定位
+
+          }
+          // 绘制线条
+          let polyline = new window.AMap.Polyline({
+            path: path,
+            strokeWeight: 4,
+            strokeColor: '#61C772',
+            strokeStyle: 'dashed'
+          });
+
+          _this.map.add(polyline);
+        }
+      }
+    },
+    // 视频播放点击事件
+    addListen (id, obj) {
+      let _Dom = document.getElementById(id);
+      let self = this;
+      _Dom.addEventListener('click', function () {
+        self.openVideo(obj);
+      })
+    },
+    // 点击视频播放按钮全屏播放视频
+    openVideo (obj) {
+      this.videoDetail = obj;
+      this.showLarge = true;
+    },
+    // 关闭视频
+    closeVideo () {
+      this.showLarge = false;
+      document.getElementById('controlVideo').pause();
+    },
+    // 播放视频
+    playLargeVideo (val) {
+       if (val) {
+        this.isPlaying = true;
+        document.getElementById('controlVideo').play();
+        this.handleVideoEnd();
+      } else {
+        this.isPlaying = false;
+        document.getElementById('controlVideo').pause();
+      }
+    },
+    // 监听视频是否已经播放结束
+    handleVideoEnd () {
+      let _this = this;
+      const obj = document.getElementById('controlVideo');
+      if (obj) {
+        obj.addEventListener('ended', () => { // 当视频播放结束后触发
+          _this.isPlaying = false;
+        });
+      }
+    },
+    // 截屏
+    playerCut () {
+      this.cutDialogVisible = true;
+      this.$nextTick(() => {
+        let $video = $('#controlVideo');
+        let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+        // console.log($video.width(), $video.height());
+        if ($canvas && $canvas.length > 0) {
+          // let w = 920, h = 540;
+          let w = $video.width(), h = $video.height();
+          if (w > 920) {
+            h = Math.floor(920 / w * h);
+            w = 920;
+          }
+          $canvas.attr({
+            width: w,
+            height: h,
+          });
+          // $video[0].crossOrigin = 'anonymous';
+          // video canvas 必须为原生对象
+          let ctx = $canvas[0].getContext('2d');
+          this.cutTime = new Date().getTime();
+          ctx.drawImage($video[0], 0, 0, w, h);
+        }
+      });
+    },
+    // 截屏保存
+    playerCutSave () {
+      let $canvas = $('#' + this.flvplayerId + '_cut_canvas');
+      if ($canvas && $canvas.length > 0) {
+        console.log('$canvas[0]', $canvas[0])
+        let img = $canvas[0].toDataURL('image/png');
+        // img.crossOrigin  = '';
+        let filename = 'image_' + this.cutTime + '.png';
+        if('msSaveOrOpenBlob' in navigator){
+          // 兼容EDGE
+          let arr = img.split(',');
+          let mime = arr[0].match(/:(.*?);/)[1];
+          let bstr = atob(arr[1]);
+          let n = bstr.length;
+          let u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          let blob = new Blob([u8arr], {type:mime});
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+          return;
+        }
+        img.replace('image/png', 'image/octet-stream');
+        let saveLink = $('#' + this.flvplayerId + '_cut_a')[0];
+        saveLink.href = img;
+        saveLink.download = filename;
+        saveLink.click();
+        // console.log(base64);
+      }
+    }
+  }
+}
+</script>
+<style lang="scss">
+.tip_box {
+  width: 258px;
+  height: 361px;
+  padding: 20px;
+  background:rgba(255,255,255,1);
+  box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+  .select_target, .tail_vehicle {
+    width:218px;
+    height:122px;
+    margin-bottom: 15px;
+    position: relative;
+    >p {
+      left: 0;
+      top: 0;
+      position: absolute;
+      width:68px;
+      height:20px;
+      border-radius:0px 10px 10px 0px;
+      color: #ffffff;
+    }
+    .select_p {
+      background:rgba(12,112,248,1);
+    }
+    .tail_p {
+      background-color: #50CC62;
+    }
+    .mongolia {
+      width: 100%;
+      // height: 26px;
+      padding: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      position: absolute;
+      background:rgba(0,0,0,1);
+      opacity:0.7;
+      bottom: 0;
+      left: 0;
+      align-items: center;
+      font-size: 12px;
+      color: #fff;
+      >span {
+        margin-left: 5px;
+      }
+      > i {
+        margin-right: 5px;
+        cursor: pointer;
+      }
+    }
+    // .img_box {
+      >img {
+        width: 100%;
+        height: 100%;
+      }
+    // }
+  }
+  .divide {
+    height:1px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #F2F2F2;
+    box-shadow:0px 12px 14px 0px rgba(148,148,148,0.4);
+  }
+  .device_name {
+    color: #666666;
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+.ws_record {
+  height: 100%;
+  .content_box {
+    display: flex;
+    height: 100%;
+    padding-top: 50px;
+    .left {
+      width: 272px;
+      background-color: #ffffff;
+      box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
+      padding: 20px;
+      >h2 {
+        color: #222222;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      >ul {
+        margin-top: 15px;
+        >li {
+          line-height: 30px;
+          span:first-child {
+            color: #666666;
+          }
+          span:last-child {
+            color: #222222;
+            img {
+              width:60px;
+              height:60px;
+              border-radius:2px;
+              vertical-align: text-top;
+            }
+          }
+        }
+      }
+    }
+    .right {
+      width: calc(100% - 272px);
+      height: 100%;
+      position: relative;
+      .operation_box {
+        width: 100%;
+        top: 0;
+        left: 0;
+        position: absolute;
+        height: 60px;
+        box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
+        background-color: #ffffff;
+        display: flex;
+        align-items: center;
+        padding-left:15px;
+        z-index: 1111;
+        >p {
+          width:130px;
+          height:40px;
+          line-height: 40px;
+          margin-right: 15px;
+          cursor: pointer;
+          background:rgba(246,248,249,1);
+          border:1px solid rgba(211,211,211,1);
+          border-radius:4px;
+          color: #666666;
+          font-size: 16px;
+          text-align: center;
+          &:hover {
+            background:linear-gradient(90deg,rgba(8,106,234,1) 0%,rgba(4,102,222,1) 100%);
+            color: #ffffff;
+          }
+        }
+      }
+      #rightMap {
+        z-index: 1000;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
+.vl_j_fullscreen {
+  position: fixed;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #000000;
+  z-index: 1111;
+  -webkit-transition: all .4s;
+  -moz-transition: all .4s;
+  -ms-transition: all .4s;
+  -o-transition: all .4s;
+  transition: all .4s;
+  > video {
+    width: 100%;
+    height: 100%;
+  }
+  > .control_bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 48px;
+    background: rgba(0, 0, 0, .65);
+    > div {
+      float: left;
+      width: 50%;
+      height: 100%;
+      line-height: 48px;
+      text-align: right;
+      padding-right: 20px;
+      color: #FFFFFF;
+      &:first-child {
+        text-align: left;
+        padding-left: 20px;
+      }
+      > span {
+        display: inline-block;
+        height: 22px;
+        margin-left: 10px;
+        vertical-align: middle;
+        cursor: pointer;
+        a {
+          font-size: 25px;
+          text-decoration: none;
+          color: #ffffff;
+          vertical-align: top;
+        }
+      }
+    }
+  }
+}
+.close_icon {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 1000;
+  cursor: pointer;
+}
+</style>
