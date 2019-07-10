@@ -10,7 +10,7 @@
         </el-option>
       </el-select>
       <div class="search_box">
-        <el-input placeholder="搜索组" size="small" v-model="searchGroupName"
+        <el-input placeholder="搜索组" size="small" v-model="searchGroupName">
           <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
           <i
             v-show="!closeShow"
