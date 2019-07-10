@@ -267,6 +267,8 @@ export default {
       // }
     },
     submitForm(v) {
+      let isP=/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/
+      let  result = isP.test(this.ruleForm.input3);
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
       let pg={
         //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
@@ -283,7 +285,12 @@ export default {
          pg.deviceIds=this.selectDevice.join(",")
          pg.bayonetIds=this.selectBayonet.join(",")
       }
-        
+      
+      if(!result){
+         this.$message.info("请输入正确的车牌号码。");
+         return;
+      }
+
       this.getVehicleShot(pg);
       }else{
          this.$message.info("请输入开始时间和车牌号码。");

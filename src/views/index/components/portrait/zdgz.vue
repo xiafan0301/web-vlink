@@ -889,7 +889,7 @@ export default {
       width: 3rem;
       padding-top: 24px;
       height: 100%;
-      margin-left: 0.2rem;
+      // margin-left: 0.2rem;
       background: #ffffff;
       box-shadow:4px 0px 10px 0px #838383;
       box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
@@ -998,14 +998,14 @@ export default {
         height: auto;
         padding: 0 .2rem;
         padding-top: .4rem;
-        .el-input__inner {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
-        .el-input__icon {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
+        // .el-input__inner {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
+        // .el-input__icon {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
         .el-range-editor {
           width: 100%;
           padding: 0;
@@ -1023,22 +1023,22 @@ export default {
           }
         }
         button {
-          height: .4rem;
-          line-height: .4rem;
+          height: .5rem;
+          line-height: .5rem;
           padding: 0 .12rem;
           margin-top: .14rem;
         }
         .el-select {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
         > div {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
       }
     }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3.2rem);
+      width: calc(100% - 3rem);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {

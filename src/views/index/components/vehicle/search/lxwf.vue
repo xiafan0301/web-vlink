@@ -60,7 +60,7 @@
                 <span v-if="photoAnalysis.vehicleClass">{{photoAnalysis.vehicleClass}}</span>
                 <span v-if="photoAnalysis.sunvisor">遮阳板{{photoAnalysis.sunvisor}}</span>
                 <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
-                <span v-if="plateType[photoAnalysis.plateClass*1-1].enumValue">{{plateType[photoAnalysis.plateClass*1-1].enumValue}}</span>
+                <span v-if="photoAnalysis._plateClass">{{photoAnalysis._plateClass}}</span>
               </div>
             </div>
           </div>
@@ -533,6 +533,8 @@ export default {
           // console.log(res);
           this.searchings=false
           this.photoAnalysis=res.data[0]
+           let a=this.plateType.map(el=>el.enumField==this.photoAnalysis.plateClass)
+        this.photoAnalysis._plateClass=a.enumValue
           this.disab=true
         }else{
            this.searchings=false
@@ -598,11 +600,12 @@ export default {
 
       
       if(this.input5==1){
+        let a=this.plateType.map(el=>el.enumField==this.photoAnalysis.plateClass)
         let datas={
         dateStart:this.data1[0] + " 00:00:00",
         dateEnd:this.data1[1] + " 23:59:59" ,
         vilolationNum:this.tzscMenuForm.input4,
-        plateClass:this.plateType[this.photoAnalysis.plateClass*1-1].enumValue,
+        plateClass:a.enumValue,
         plateColor:this.photoAnalysis.plateColor,
         vehicleClass:this.photoAnalysis.vehicleClass,
         vehicleColor:this.photoAnalysis.vehicleColor,
@@ -624,6 +627,7 @@ export default {
         // plateClass:this.input4,
 
       };
+      
         this.getViolation(params)
       }
       
