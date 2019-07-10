@@ -31,7 +31,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getCarBeforeSta" :loading="loadingBtn">查询</el-button>
+          <el-button class="select_btn" @click="search" :loading="loadingBtn">查询</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -204,7 +204,7 @@ export default {
   mounted () {
     setTimeout(() => {
       this.getCarBeforeSta();
-    }, 2000);
+    }, 1000);
   },
   methods: {
     getEndTime(time) {
@@ -568,6 +568,11 @@ export default {
         }
       };
     },
+    //查询
+    search() {
+      this.loadingBtn = true;
+      this.getCarBeforeSta();
+    },
     // 获取过车数据统计
     getCarBeforeSta () {
       const params = {  
@@ -576,7 +581,6 @@ export default {
         startTime: this.queryForm.startTime + ' 00:00:00',
         endTime: this.queryForm.endTime + ' 23:59:59'
       }
-      this.loadingBtn = true;
       apiPassingCarSta(params).then(res => {
         if (res) {
           this.gcsjDetail = res.data;

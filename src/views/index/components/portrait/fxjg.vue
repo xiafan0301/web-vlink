@@ -1,11 +1,16 @@
 <template>
   <div class="analysis-results">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
+      <div is="vlBreadcrumb" 
+          :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '频繁出没', routerName: 'portrait_pfcm'},
+            {name: '分析结果'}]">
+        </div>
     </div>
     <vue-scroll>
       <div class="analysis-rc-info">
@@ -40,9 +45,10 @@
 
 <script>
 import { getTaskInfosDetail } from "../../api/api.analysis.js";
-import snapDialog from './components/snapDetail'
+import snapDialog from './components/snapDetail';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
-  components: { snapDialog },
+  components: { snapDialog , vlBreadcrumb},
   data() {
     return {
       uid: '',
@@ -142,7 +148,7 @@ export default {
 <style lang="scss" scoped>
 .analysis-results {
   width: 100%;
-  height: calc(100% - 55px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
     border-bottom: 1px solid #d3d3d3;
