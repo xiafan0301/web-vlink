@@ -22,14 +22,14 @@ const dataList = {
   intelCharac: 38, // 智能特性
   memberJob: 42, // 成员职位
   operateCompany: 43, // 运营公司
-  ownership: 48, //号牌归属
   vehicleType: 44, // 车辆类型
   numberType: 45, // 号牌种类
-  licensePlateColor: 46, //车牌颜色
-  vehicleColor: 47, // 车身颜色
-  plateColor: 46,     //号牌颜色
   plateType: 45, // 号牌类型
+  vehicleColor: 47, // 车身颜色
   carColor: 47, // 车辆颜色
+  ownership: 48, //号牌归属
+  plateColor: 50,     //号牌颜色
+  licensePlateColor: 50, //车牌颜色
 }
 // 处理方式
 const handeMethods = {

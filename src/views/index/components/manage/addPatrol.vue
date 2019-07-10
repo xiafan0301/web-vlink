@@ -596,7 +596,7 @@ export default {
             this.allDeviceList = res.data;
             this.selectDeviceList = res.data;
             //在可选设备中删除已有的设备
-            if (this.patrolId) {
+            // if (this.patrolId) {
               if (this.currentDeviceList.length > 0) {
                 this.currentDeviceList.map(item => {
                   this.selectDeviceList.map((val) => {
@@ -625,10 +625,10 @@ export default {
                   })
                 });
               }
-            } else { // 新增---点击重置的时候将已有设备清零
-              this.currentDeviceList = [];
-              this.leftDeviceNumber = 0;
-            }
+            // } else { // 新增---点击重置的时候将已有设备清零
+            //   this.currentDeviceList = [];
+            //   this.leftDeviceNumber = 0;
+            // }
             this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
               item.isChecked = false; // 父级是否选中
@@ -653,7 +653,6 @@ export default {
           if (this.patrolId) {
             this.editPatrolInfo();
           } else {
-            console.log('88888')
             this.addPatrolInfo();
           }
         }
@@ -661,7 +660,6 @@ export default {
     },
     // 新增轮巡
     addPatrolInfo () {
-      console.log('77777')
       if (this.currentDeviceList.length === 0) {
         this.$message({
           type: 'warning',
@@ -670,7 +668,6 @@ export default {
         });
         return;
       }
-      console.log('666666')
       let devList = [], bayList = [];
       this.currentDeviceList.map(item => {
         if (item.deviceList.length > 0) {
@@ -876,7 +873,6 @@ export default {
     },
     // 轮巡时间change
     handleChangeDate (val) {
-      console.log('uuuuuuuuuuuuuuuuuuuu')
       console.log(val)
     }
   }

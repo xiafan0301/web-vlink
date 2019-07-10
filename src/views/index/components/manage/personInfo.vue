@@ -11,7 +11,7 @@
           </el-option>
         </el-select>
         <div class="search_box">
-          <el-input placeholder="搜索组" size="small"  v-model="searchGroupName" @input="changeGroupName">
+          <el-input placeholder="搜索组" size="small"  v-model="searchGroupName">
             <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
             <i
               v-show="!closeShow"
@@ -467,6 +467,21 @@ export default {
       isAddCopyLoading: false, // 复制并加入组加载中
     }
   },
+  watch: {
+    searchGroupName (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        if (this.closeShow) {
+          if (this.selectMethod === 1) {
+            this.getGroupList();
+          } else {
+            this.getBottomBankList();
+          }
+        }
+      }
+    }
+  },
   mounted () {
     document.addEventListener('click', (e)=> {
       if ((e.target.className != 'add_event_btn') && (e.target.className != 'add_class')) {
@@ -566,17 +581,6 @@ export default {
       this.$refs[form].resetFields();
       this.getPersonList();
     },
-    // 搜索框组名change
-    changeGroupName (val) {
-      if (!val) {
-        this.closeShow = false;
-        if (this.selectMethod === 1) {
-          this.getGroupList();
-        } else {
-          this.getBottomBankList();
-        }
-      }
-    },
     // 清空搜索框
     onClear () {
       this.closeShow = false;
@@ -591,11 +595,11 @@ export default {
     searchData () {
       if (this.searchGroupName) {
         this.closeShow = true;
-        if (this.selectMethod === 1) {
-          this.getGroupList();
-        } else {
-          this.getBottomBankList();
-        }
+      }
+      if (this.selectMethod === 1) {
+        this.getGroupList();
+      } else {
+        this.getBottomBankList();
       }
     },
     cancelAddGroup (form) {

@@ -1,6 +1,9 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '过车查看'}]"></div>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '过车查看'}]">
+      </div>
+    </div>
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="vc_gcck_l">
@@ -77,15 +80,22 @@
                   <el-button size="small" @click="goToZP">查看更多</el-button>
                 </div>
               </li>
-              <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
-                <div class="vc_gcck_rbl">
-                  <p @click="goToDetail(item.plateNo)">
-                    <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
-                  </p>
-                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
-                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
-                </div>
-              </li>
+              <template v-if="zpList && zpList.length > 0">
+                <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
+                  <div class="vc_gcck_rbl">
+                    <p @click="goToDetail(item.plateNo)">
+                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
+                    </p>
+                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
+                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
+                  </div>
+                </li>
+              </template>
+              <template v-else>
+                <li class="vc_gcck_rb_empty">
+                  暂无数据
+                </li>
+              </template>
             </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="videoTotal === 0">
@@ -145,7 +155,7 @@
   </div>
 </template>
 <script>
-import vehicleBreadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
 import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
@@ -153,7 +163,7 @@ import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate} from '@/utils/util.js';
 export default {
-  components: {vehicleBreadcrumb, flvplayer, dbTree},
+  components: {vlBreadcrumb, flvplayer, dbTree},
   data () {
     let nDate = new Date();
     return {
@@ -211,21 +221,24 @@ export default {
       }).then(res => {
         if (res && res.data) {
           this.selectItem(1, {
-            type: 1,
-            title: res.data.deviceName,
-            record: false,
-            video: {
-              uid: res.data.uid
-            }
+            uid: res.data.uid,
+            deviceName: res.data.deviceName
           });
         }
       });
     }
   },
   methods: {
-
     goToDetail (plateNo) {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
+          {name: '全部抓拍'}
+        ]
+      });
       this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        breadcrumb: 2,
         plateNo: plateNo
       }});
     },
@@ -511,6 +524,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .vc_gcck {
   height: 100%;
   padding-top: 50px;
@@ -668,6 +685,13 @@ export default {
                   }
                 }
               }
+            }
+            &.vc_gcck_rb_empty {
+              float: none !important;
+              margin-left: 170px; padding-right: 50px !important; padding-top: 20px;
+              width: auto;
+              text-align: center;
+              color: #999;
             }
           }
         }

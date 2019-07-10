@@ -850,3 +850,24 @@ export function vehicleExport (params) {
     method: 'post'
   });
 }
+/**
+ * 车辆品牌数据获取
+ * @param {*} data
+ */
+export function getVehicleBrand (params) {
+  return request({
+    url: '/vehicle-dict/brands',
+    params,
+    method: 'get'
+  });
+}
+/**
+ * 车辆型号数据获取
+ * @param {*} data
+ */
+export function getVehicleModel (brands) {
+  return request({
+    url: '/vehicle-dict/' + brands + '/types',
+    method: 'get'
+  });
+}
