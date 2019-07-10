@@ -71,7 +71,7 @@
                     <p class="user_name">
                       <span>{{item.name}}</span>
                     </p>
-                    <p class="similarity">
+                    <p class="similarity" v-show="item.semblance">
                       <i class="vl_icon_retrieval_03 vl_icon"></i>
                       <span>{{item.semblance}}<span class="percent">%</span></span>
                     </p>
@@ -132,27 +132,33 @@
       <div class="struc_main">
         <div class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <!-- <img :src="sturcDetail.upPhotoUrl" alt=""> -->
-            <img src="../../../../../assets/img/666.jpg" alt="">
+            <img :src="sturcDetail.upPhotoUrl" alt="">
+            <!-- <img src="../../../../../assets/img/666.jpg" alt=""> -->
             <span>上传图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <!-- <img :src="sturcDetail.photoUrl" alt=""> -->
-              <img src="../../../../../assets/img/temp/video_pic.png" alt="">
+              <img :src="sturcDetail.photoUrl" alt="">
+              <!-- <img src="../../../../../assets/img/temp/video_pic.png" alt=""> -->
             </div>
             <div class="struc_c_d_info">
-              <h2>{{sturcDetail.name}}<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
-              <div class="struc_cdi_line">
+              <h2>{{sturcDetail.name}}
+                <div class="vl_jfo_sim" v-show="sturcDetail.semblance">
+                  <i class="vl_icon vl_icon_retrieval_03"></i>
+                  {{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}
+                  <span style="font-size: 12px;">%</span>
+                </div>
+              </h2>
+              <div class="struc_cdi_line" v-show="sturcDetail.label">
                 <span>{{sturcDetail.label}}</span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.birthDate">
                 <span>{{sturcDetail.birthDate}}</span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.idNo">
                 <span>{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_08"></i></span>
               </div>
-              <div class="struc_cdi_line">
+              <div class="struc_cdi_line" v-show="sturcDetail.remarks">
                 <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
               </div>
               <div class="struc_cdi_line"></div>
@@ -237,58 +243,8 @@ export default {
         },
       },
       curImgIndex: 0,
-      sturcDetail: {
-        name: '张三',
-        semblance: 76,
-        label: '汉族',
-        birthDate: '1980-12-12',
-        idNo: '430321199500199932',
-        remarks: '奥克兰大家拉克斯基的卢卡斯就的离开洒家大斯卡拉大家啊斯卡拉大家爱上了大家撒开了多久拉萨看得见拉萨空间的拉萨空间的撒开了多久爱上了卡觉得啊斯卡拉大家拉萨空间大撒赖扩大就'
-      }, // 身份核实详情
-      dataList: [
-        {
-          id: 1,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 2,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 3,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 4,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 5,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 6,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        },
-        {
-          id: 7,
-          semblance: 89,
-          upPhotoUrl: require('../../../../../assets/img/666.jpg'),
-          photoUrl: require('../../../../../assets/img/666.jpg')
-        }
-      ],
+      sturcDetail: {}, // 身份核实详情
+      dataList: [],
       queryImgPath: null, // 从其他模块传过来的图片
     }
   },
@@ -326,7 +282,7 @@ export default {
          this.$message({
             type: 'warning',
             message: '最多可同时对比三张图片',
-            customClass: 'left_error_tip'
+            customClass: 'request_tip'
           });
         return;
       }
@@ -456,16 +412,17 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();
+      this.searchData();
     },
     // 根据搜索条件进行查询
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
-          if (this.curImgNum === 0) {
+          if (this.curImgNum === 0 && !this.searchForm.idNo) {
             this.$message({
               type: 'warning',
-              message: '请先选择要上传的图片',
-              customClass: 'left_error_tip'
+              message: '请先选择要上传的图片或填写身份证信息',
+              customClass: 'request_tip'
             });
             return false;
           }
@@ -493,7 +450,6 @@ export default {
               this.pagination.pageNum = res.data.pageNum;
               this.pagination.total = res.data.total;
             }
-          }).catch(() => {
           })
         }
       })
