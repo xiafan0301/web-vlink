@@ -1,30 +1,32 @@
 <template>
   <div class="wrt_main">
-    <h1 style="text-align: center;font-size: 40px;color: #0C70F8;">我是web端</h1>
-    <ul style="padding: 100px 0 0 400px;">
-      <li>
-        <el-input style="width: 250px;" v-model="form.val1" placeholder="请输入对方ID"></el-input>
-        <el-button style="margin-left: 20px;" @click="add">请求</el-button>
-      </li>
-      <li style="margin-top: 20px;">
-        <el-input style="width: 250px;" v-model="form.val2" placeholder="请输入对方ID"></el-input>
-        <el-button style="margin-left: 20px;" @click="del">断开</el-button>
-      </li>
-      <li>
-        <div style="width: 400px; height: 300px;">
-          <video id="localVideo" style="width: 100%; height: 100%; object-fit: fill;" autoplay></video>
-        </div>
-      </li>
-    </ul>
-    <div is="webrtc" @wrStateEmit="wrStateEmit" :oAdd="oAdd" :oDel="oDel"></div>
+    <h1 style="text-align: center;font-size: 40px;color: #0C70F8;">冉毅测试下载PDF</h1>
+    <el-table
+            :data="testList"
+            style="width: 100%">
+      <el-table-column
+              prop="constructTime"
+              label="日期"
+              width="180">
+      </el-table-column>
+      <el-table-column
+              prop="deviceName"
+              label="姓名"
+              width="180">
+      </el-table-column>
+      <el-table-column
+              prop="address"
+              label="地址">
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 <script>
-import webrtc from '@/components/common/webrtc.vue';
+  import {getAllDevice} from '../api/api.judge'
 export default {
-  components: {webrtc},
   data () {
     return {
+      testList: [],
       oAdd: {},
       oDel: {},
       form: {
@@ -35,6 +37,11 @@ export default {
     }
   },
   mounted () {
+    getAllDevice().then(res => {
+      if (res) {
+        this.testList = res.data;
+      }
+    })
   },
   methods: {
     add () {

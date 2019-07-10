@@ -11,9 +11,18 @@
       <div class="mapbox" id="mapSelect"></div>
       <div class="setPost">
         <div>
-          <el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">
-            <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-          </el-input>
+          <el-autocomplete
+            class="inline-input"
+            v-model="input3"
+            :fetch-suggestions="querySearch"
+            placeholder="请输入地名，快速定位地址"
+            value-key="name"
+            :trigger-on-focus="false"
+            @select="handleSelect"
+          ></el-autocomplete>
+          <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
+          <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
+          <!--</el-input>-->
         </div>
         <div style="width: 272px;height: calc(100% - 40px)">
           <vue-scroll>
@@ -66,7 +75,7 @@
               </div>
               <!--按钮-->
               <div class="search_btn">
-                <el-button type="primary" @click="tcDiscuss">获取特征</el-button>
+                <el-button type="primary" @click="tcDiscuss">区域碰撞</el-button>
               </div>
             </div>
           </vue-scroll>
@@ -78,7 +87,7 @@
       title="清除确认"
       :visible.sync="delDialog"
       width="30%">
-      <span>是否要清除地图上{{clearAll ? '全部' : '该条'}}已选区域？</span>
+      <span>是否要清除地图上{{clearAll ? '全部时间和' : '该条'}}已选区域？</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="delDialog = false">取 消</el-button>
     <el-button type="primary" @click="confirmClear">确 定</el-button>
@@ -167,14 +176,72 @@
 
     mounted() {
       this.renderMap();
-      this.setDTime();
-      this.searchData.forEach(x => {
-        x.startTime = this.setDTime().startTime;
-        x.endTime = this.setDTime().endTime;
-      })
+      // this.setDTime();
+//      this.searchData.forEach(x => {
+//        x.startTime = this.setDTime().startTime;
+//        x.endTime = this.setDTime().endTime;
+//      })
       this.getAllDevice();
     },
     methods: {
+      querySearch(queryString, cb) {
+        //this.seacher(queryString)
+
+        this.$nextTick(() => {
+          this.seacher(queryString).then(v => {
+            //console.log(v);
+            var restaurants = v;
+            //  console.log(restaurants)
+            var results = queryString
+                ? restaurants.filter(this.createFilter(queryString))
+                : restaurants;
+            // console.log(results)
+            cb(results);
+            // 调用 callback 返回建议列表的数据
+            // clearTimeout(this.timeout);
+            //   this.timeout = setTimeout(() => {
+            //     cb(results);
+            //   }, 3000 * Math.random());
+            // cb(results);
+          });
+        });
+      },
+      handleSelect(item) {
+        // console.log(item);
+        let new_center = item.location;
+        this.map.setZoomAndCenter(16, new_center);
+      },
+      createFilter(queryString) {
+        return restaurant => {
+          // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));
+
+          return (
+              restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1
+          );
+        };
+      },
+      seacher(v) {
+        var placeSearch = new AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          city: "湖南"
+        });
+
+        if (!!v) {
+          let _this = this;
+          return new Promise((resolve, reject) => {
+            placeSearch.search(v, (status, result) => {
+              // 查询成功时，result即对应匹配的POI信息
+              let pois = result.poiList.pois;
+              _this.restaurants = pois;
+              resolve(pois);
+            });
+          });
+        }
+        //return pois
+      },
+      setFitV () {
+        this.map.setFitView([this.searchData.area]);
+      },
       setFitV (index) {
         this.map.setFitView([this.searchData[index].area]);
       },
@@ -190,9 +257,9 @@
           }).then(resBon => {
             console.log(resBon.data);
             if(resBon.data && resBon.data.length>0){
-              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 0});
+              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 1});
             }
-            this.mapTreeData = Object.assign([], res.data, resBon.data)
+            this.mapTreeData = res.data.concat(resBon.data)
             console.log(this.mapTreeData)
             this.mapMark(this.mapTreeData)
           })
@@ -408,7 +475,7 @@
           str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
           str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
           str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
+//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
           str += '</ul></div>'
         }
         return str;
@@ -417,8 +484,10 @@
       delAllArea() {
         this.searchData.forEach(x => {
           if (x.area) {
-            this.map.remove(x.area)
+            this.map.remove(x.area);
           }
+          x.startTime = '';
+          x.endTime = '';
         })
         this.pointData.splice(2);
         this.searchData.splice(2);
@@ -511,7 +580,7 @@
       confirmClear () {
         this.delDialog = false;
         if (this.clearAll) {
-          this.delAllArea()
+          this.delAllArea();
         } else {
           this.mouseTool.close(false);
           this.map.remove(this.searchData[this.curDrawIndex].area)
@@ -519,15 +588,20 @@
       },
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
-        supQuery.where['dtoList'] = this.searchData.map((x, index) => {
-          let obj = {}
-          obj['cameraIds'] = this.pointData[index].filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
-          obj['bayonetIds'] = this.pointData[index].filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-          obj['startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
-          obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
-          return obj;
-        })
-        this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+        if (this.searchData.find(x => !x.area || !x.startTime || !x.endTime)) {
+          this.$message.info('列表的每个区域跟起止时间都必须选择');
+          return false;
+        } else {
+          supQuery.where['dtoList'] = this.searchData.map((x, index) => {
+            let obj = {}
+            obj['cameraIds'] = this.pointData[index].filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
+            obj['bayonetIds'] = this.pointData[index].filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
+            obj['startTime'] =  formatDate(x.startTime, 'yyyy-MM-dd HH:mm:ss');
+            obj['endTime'] =  formatDate(x.endTime, 'yyyy-MM-dd HH:mm:ss');
+            return obj;
+          })
+          this.$router.push({name: 'vehicle_search_qy_jg', query: supQuery})
+        }
       }
     }
   };
@@ -556,6 +630,9 @@
       top: 0px;
       width: 328px;
       height: 100%;
+      .inline-input {
+        width: 272px;
+      }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
