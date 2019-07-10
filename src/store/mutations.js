@@ -5,6 +5,12 @@ export default {
   setLoginToken (state, options) {
     state.loginToken = options.loginToken;
   },
+
+  // 面包屑
+  setBreadcrumbData (state, options) {
+    state.breadcrumbData = options.breadcrumbData;
+  },
+
   setCurrentOrgan (state, options) {
     state.currentOrganObj = options.currentOrganObj;
   },

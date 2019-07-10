@@ -1,11 +1,16 @@
 <template>
   <div class="point">
     <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '过车详情'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/vehicle/clcx' }">车辆查询</el-breadcrumb-item>
         <el-breadcrumb-item>过车详情</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
 
     <div class="left">
@@ -143,9 +148,11 @@
   </div>
 </template>
 <script>
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       curImgIndex: 0,
