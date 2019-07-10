@@ -1,5 +1,5 @@
 <template>
-  <div class="point">
+  <div class="point detail">
     <div class="breadcrumb_heaer">
       <div is="vlBreadcrumb" 
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
@@ -288,11 +288,11 @@ export default {
   width: 100%;
   height: 100%;
 }
-.breadcrumb_heaer {
-  height: 54px;
-  line-height: 54px;
-  background: #ffffff;
-}
+// .breadcrumb_heaer {
+//   height: 54px;
+//   line-height: 54px;
+//   background: #ffffff;
+// }
 .full {
   width: 100%;
 }
@@ -585,4 +585,10 @@ export default {
 }
 </style>
 <style lang="scss">
+.detail{
+  .breadcrumb_heaer {
+    padding: 0px;
+  }
+}
+
 </style>
