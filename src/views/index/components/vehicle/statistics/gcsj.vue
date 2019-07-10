@@ -685,19 +685,19 @@ export default {
               font-weight:normal;
               color: #fff;
             }
-            &:nth-child(1){
+          }
+          &:nth-child(1) >div{
               background: #0C70F8;
             }
-            &:nth-child(2){
-              background: #00C4FC;
+            &:nth-child(2) >div{
+              background: #489CED;
             }
-            &:nth-child(3){
-              background: #8E62FF;
+            &:nth-child(3) >div{
+              background: #6166F6;
             }
-            &:nth-child(4){
-              background: #00C888;
+            &:nth-child(4) >div{
+              background: #7F51EA;
             }
-          }
         }
       }
       .chart_bottom{
