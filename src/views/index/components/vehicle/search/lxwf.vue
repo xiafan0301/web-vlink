@@ -51,7 +51,7 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :disabled="curImageUrl==''" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
+              <el-button type="primary" :disabled="curImageUrl=='' || disab" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
                 <span v-if="photoAnalysis.plateNo">车牌：{{photoAnalysis.plateNo}}</span>
                 <span v-if="photoAnalysis.vehicleColor">车身颜色：{{photoAnalysis.vehicleColor}}</span>
@@ -290,6 +290,7 @@ export default {
   data() {
     
     return {
+      disab:false,
       photoAnalysis:null,//图片分析特征
       plateType:[],// 号牌类型
       plateColor:[],// 号牌颜色
@@ -478,6 +479,7 @@ export default {
           });
           this.imgData = x;
           this.curImageUrl = x.path;
+          this.disab=false
         }
       }
       this.uploadFileList = fileList;
@@ -511,6 +513,7 @@ export default {
     delPic() {
       this.uploadFileList.splice(0, 1);
       this.curImageUrl = "";
+      this.photoAnalysis=null
     },
     //选择最近上传的图片
     chooseHisPic(item) {
@@ -530,7 +533,7 @@ export default {
           // console.log(res);
           this.searchings=false
           this.photoAnalysis=res.data[0]
-          
+          this.disab=true
         }else{
            this.searchings=false
         }
@@ -543,6 +546,7 @@ export default {
       this.choosedHisPic.forEach(x => {
         _ids.push(x.uid);
         this.curImageUrl = x.path;
+        this.disab=false
         this.imgData = x;
       });
       let _obj = {
