@@ -991,13 +991,41 @@ export default {
   background-position: -380px -1269px;
   cursor: pointer;
 }
+.insetLeft:hover{
+  position: absolute;
+  right: -28px;
+  width: 28px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -318px -1269px;
+  cursor: pointer;
+}
 .hide {
   .insetLeft {
     transform: rotate(180deg);
     background-position: -504px -1269px;
   }
 }
-.insetLeft2 {
+.insetLeft2:hover {
+  position: absolute;
+  right: -28px;
+  width: 25px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -380px -1269px;
+  cursor: pointer;
+}
+.insetLeft2:hover {
   position: absolute;
   right: -28px;
   width: 28px;

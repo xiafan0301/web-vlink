@@ -549,7 +549,7 @@ export default {
     margin-bottom: 5px;
   }
 }
-.insetLeft {
+.insetLeft,.insetLeft2 {
   position: absolute;
   right: -28px;
   width: 25px;
@@ -569,7 +569,7 @@ export default {
     background-position: -504px -1269px;
   }
 }
-.insetLeft2 {
+.insetLeft2:hover,.insetLeft:hover {
   position: absolute;
   right: -28px;
   width: 28px;
