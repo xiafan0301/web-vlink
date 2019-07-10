@@ -46,11 +46,11 @@
               <div class="search_line">
                 <span class="time">开始</span>
                 <el-date-picker
-                        v-model="searchData.startTime"
-                        style="width: 212px;"
-                        :picker-options="pickerOptions"
-                        type="datetime"
-                        placeholder="选择日期时间">
+                    v-model="searchData.startTime"
+                    style="width: 212px;"
+                    :picker-options="pickerOptions"
+                    type="datetime"
+                    placeholder="选择日期时间">
                 </el-date-picker>
               </div>
               <p class="red_star"></p>
@@ -445,10 +445,20 @@
         let date = new Date();
         let curDate = date.getTime();
         let curS = 1 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.searchData.startTime = _s;
-        this.searchData.endTime = _s;
+        let sM = '', sD = '';
+        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+        } else {
+          sM = (new Date(curDate - curS).getMonth() + 1)
+        }
+        if ( new Date(curDate - curS).getDate() < 10 ) {
+          sD = '0' +  new Date(curDate - curS).getDate();
+        } else {
+          sD =  new Date(curDate - curS).getDate()
+        }
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
+        this.searchData.startTime = _s + " 00:00:00";
+        this.searchData.endTime = _s + " 23:59:59";
       },
       // 选择区域
       selArea (v) {
@@ -520,6 +530,10 @@
           this.$message.info('请输入频次');
           return false;
         }
+        if (!this.searchData.area) {
+          this.$message.info('请先选择区域');
+          return false;
+        }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
         let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
         let query = {'where': {}};
@@ -566,7 +580,7 @@
       }
       .search_main {
         width: 272px;
-        height: 569px;
+        height: 334px;
         margin-top: 20px;
         background: #ffffff;
         .search_btn {
