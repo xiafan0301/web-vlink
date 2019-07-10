@@ -276,19 +276,18 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{sturcDetail.plateNo}}</div>
-                <div
+                <div class="item" v-if="sturcDetail.plateColor">{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
+                <!-- <div
                   class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>
-
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</div>
+                >{{sturcDetail.plateReliability}}</div> -->
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
+                <div class="item" v-if="sturcDetail.vehicleColor">{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</div>
-                <!-- <div class="item" v-if="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</div> -->
+                <div class="item" v-if="sturcDetail.vehicleRoof">{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
               <div class="struc_cdi_line">
@@ -576,7 +575,7 @@ export default {
               }
             } else if (this.sortType === 2) {
               // 监控排序
-              queryParams.orderBy = "shotTime";
+              queryParams.orderBy = "deviceNamePinyin";
               if (this.cameraSortType) {
                 queryParams.order = "desc";
               } else {
