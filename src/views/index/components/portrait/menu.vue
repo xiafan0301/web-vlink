@@ -25,7 +25,7 @@
       <router-link :to="{name: 'portrait_rxbd'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_104"></span>
-        <span class="ptt_li_text">人像对比</span>
+        <span class="ptt_li_text">人像比对</span>
       </router-link>
     </li>
     <li>

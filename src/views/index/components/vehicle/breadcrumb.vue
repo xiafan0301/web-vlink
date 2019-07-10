@@ -25,7 +25,7 @@ export default {
   height: 50px; width: 100%;
   padding-left: 20px; padding-top: 17px;
   border-bottom: 1px solid #D3D3D3;
-  box-shadow: 0 0 5px #ddd;
+  /*box-shadow: 0 0 5px #ddd;*/
   background-color: #fff;
 }
 </style>
