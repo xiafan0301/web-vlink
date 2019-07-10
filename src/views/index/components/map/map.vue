@@ -141,9 +141,9 @@
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
             <el-popover
-                    placement="left"
-                    trigger="hover"
-                    content="单击选择范围，双击完成">
+              placement="left"
+              trigger="hover"
+              content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>

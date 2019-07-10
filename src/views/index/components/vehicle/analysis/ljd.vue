@@ -21,9 +21,9 @@
             <el-date-picker
           v-model="ruleForm.data1"
           type="daterange"
-           class="full"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
+          class="full"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptions"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">

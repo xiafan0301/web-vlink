@@ -1054,6 +1054,13 @@
 .the-table .el-table__body .el-table__row:hover td {
   background: #E6F7FF;
 }
+
+/*elementui primary标注button颜色*/
+.el-button--primary {
+    background-color: #0C70F8;
+    border-color: #0C70F8;
+}
+
 /* th css style create by th */
 html {
     font-size: 100px;
