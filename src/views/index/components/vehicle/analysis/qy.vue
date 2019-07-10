@@ -630,6 +630,9 @@
       top: 0px;
       width: 328px;
       height: 100%;
+      .inline-input {
+        width: 272px;
+      }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;

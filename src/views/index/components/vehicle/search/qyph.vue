@@ -25,8 +25,7 @@
           <!--</el-input>-->
         </div>
         <div style="width: 272px;height: 100%;">
-          <vue-scroll>
-            <div class="search_main">
+          <div class="search_main">
               <!--区域选择-->
               <div class="search_line">
                 <span class="red_star">区域:</span>
@@ -74,8 +73,7 @@
                 <el-button @click="resetS">重置</el-button>
                 <el-button type="primary" @click="tcDiscuss">徘徊分析</el-button>
               </div>
-            </div>
-          </vue-scroll>
+          </div>
         </div>
       </div>
     </div>
@@ -559,6 +557,9 @@
       top: 0px;
       width: 328px;
       height: 100%;
+      .inline-input {
+        width: 272px;
+      }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
@@ -570,7 +571,7 @@
         background: #ffffff;
         .search_btn {
           text-align: center;
-          margin-top: 255px;
+          /*margin-top: 255px;*/
         }
         >p {
           padding-left: 10px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="ljd point">
+  <div class="point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
@@ -45,7 +45,7 @@
                     end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="区域：" label-width="60px" prop="input5">
+          <el-form-item label="区域：" class="quyu" label-width="42px"  prop="input5">
             <el-radio-group v-model="ruleForm.input5">
               <el-row :gutter="10">
                 <el-col :span="12">
@@ -104,22 +104,24 @@
           <vue-scroll>
             <div class="plane_main">
               <!--可以展开列表-->
-              <div class="p_main_list"  :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+              <div class="p_main_list" v-if="item.list.length" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
                 <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
                   <div class="info">
                     <div class="info_left">
                       <img :src="sItem.subStoragePath" alt="">
                     </div>
                     <div class="info_right">
-                      <p class="time">{{sItem.shotTime}}</p>
+                      <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
+                      <div><i class="vl_icon vl_icon_retrieval_03"></i>98.00%</div>
                     </div>
                   </div>
                   <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                  <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                 </div>
               </div>
               <el-pagination
-                v-show="pagination.total > 10"
+                v-show="pagination.total > 5"
                 class="cum_pagination th-center-pagination"
                 @current-change="onPageChange"
                 :current-page.sync="pagination.pageNum"
@@ -154,27 +156,31 @@
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
               <img :src="sturcDetail.storagePath" alt="">
-              <span>全景图</span>
+              <span>抓拍图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>抓拍信息</h2>
+              <h2>对比信息<div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.shotTime}} <font>抓拍时间</font></span>
+                <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
+                <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
+                <span v-show="sturcDetail.mask">{{sturcDetail.mask}}</span>
+                <span v-show="sturcDetail.hat">{{sturcDetail.hat}}</span>
+                <span v-show="sturcDetail.glasses">{{sturcDetail.glasses}}</span>
+                <span v-show="sturcDetail.hair">{{sturcDetail.hair}}</span>
+                <span v-show="sturcDetail.bottomType">{{sturcDetail.bottomColor}}{{sturcDetail.bottomType}}</span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.deviceName}} <font>抓拍设备</font></span>
+                <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.address}} <font>抓拍地址</font></span>
+                <span>{{sturcDetail.deviceName}}<i class="vl_icon vl_icon_retrieval_02"></i></span>
               </div>
               <div class="struc_cdi_line">
-                <span>{{sturcDetail.plateNo}} <font>车牌号</font></span>
-              </div>
-              <div class="struc_cdi_line">
-                <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
+                <span>{{sturcDetail.address}}<i class="vl_icon vl_icon_retrieval_04"></i></span>
               </div>
               <div class="struc_cdi_line"></div>
             </div>
+            <span>抓拍信息</span>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -208,7 +214,7 @@
       </div>
     </el-dialog>
     <!-- 地图选择 -->
-    <el-dialog class="map_select" :show-close="false" :visible.sync="dialogVisible" width="80%">
+    <el-dialog class="map_select" :close-on-click-modal="false" :show-close="false" :visible.sync="dialogVisible" width="1180px">
       <div class="mapbox">
         <div class="mapbox map_select_box"></div>
         <div class="bottomBox">
@@ -281,7 +287,7 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 10, pageNum: 1 },
+        pagination: { total: 0, pageSize: 5, pageNum: 1 },
         dialogVisible: false,
         amap: null,
         map: null,
@@ -899,7 +905,7 @@
               // 自定义点标记覆盖物内容
               content: _content
             });
-            this.markerPoint[i] = point;
+            this.markerPoint[i] = [point,winInfo];
           }
         }
         this.amap.setFitView()
@@ -915,6 +921,15 @@
         this.markerLine.push(polyline);
         this.amap.add([polyline]);
       }, // 画线
+      updateLine (obj, list, index) {
+        this.amap.clearMap();
+        let _i = this.evData.indexOf(obj);
+        // list.splice(index, 1)
+        this.evData.splice(_i, 1);
+        this.pagination.total = this.evData.length;
+        this.operData();
+        this.drawMapMarker(this.evData)
+      }, // 更新画线
       videoTap () {
         let vDom = document.getElementById('capVideo')
         if (this.playing) {
@@ -987,7 +1002,7 @@
     height: 100%;
   }
   .right.hide {
-    width: calc(100% - 272px);
+    width: calc(100% - 226px);
     height: calc(100% - 54px);
     float: right;
   }
@@ -1001,7 +1016,7 @@
     height: calc(100% - 54px);
     background-color: #ffffff;
     position: absolute;
-    left: 275px;
+    left: 226px;
     z-index: 2;
     box-shadow: 4px 0px 10px 0px #838383;
     box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
@@ -1041,7 +1056,7 @@
     }
   }
   .left.hide {
-    margin-left: -272px;
+    margin-left: -226px;
     transition: marginLeft 0.3s ease-in;
     position: relative;
     z-index: 2;
@@ -1049,7 +1064,7 @@
   }
   .left {
     position: relative;
-    width: 272px;
+    width: 226px;
     height: calc(100% - 54px);
     background-color: #ffffff;
     float: left;
@@ -1133,6 +1148,8 @@
       -ms-transition: all .3s;
       -o-transition: all .3s;
       transition: all .3s;
+      border: 1px solid #D3D3D3;
+      margin-bottom: 10px;
       .p_main_head {
         height: 40px;
         line-height: 40px;
@@ -1147,19 +1164,82 @@
       .p_main_item {
         width: 100%;
         cursor: pointer;
+        position: relative;
         &:hover{
           background: #E0F3FF;
-          color: #0C70F8;
+          .del_icon{
+            display: block;
+          }
+          .info {
+            .info_right{
+              .time {
+                background: #E0F3FF;
+              }
+            }
+          }
         }
-        >div {
+        .info {
+          width: 100%;
+          padding: 10px;
+          .info_left {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+          .info_right {
+            display: inline-block;
+            width: 130px;
+            height: 46px;
+            padding-left: 10px;
+            float: right;
+            >div {
+              font-size: 24px;
+              color: #0C70F8;
+              font-weight: bold;
+              margin-top: 10px;
+              i {
+                margin: 0 4px;
+                vertical-align: text-bottom;
+              }
+            }
+            .time {
+              color: #333333;
+              vertical-align: bottom;
+              background: #FAFAFA;
+              border: 1px solid #F2F2F2;
+              height: 24px;
+              line-height: 24px;
+              i{
+                color: #999999;
+                vertical-align: middle;
+                margin: 0 4px;
+              }
+            }
+          }
+        }
+        .address {
           line-height: 39px;
           color: #666666;
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-        }
-        .address {
           border-bottom: 1px solid #F2F2F2;
+          padding: 0 30px 0 10px;
+        }
+        .del_icon {
+          font-size: 20px;
+          position: absolute;
+          bottom: 10px;
+          right: 4px;
+          display: none;
+          color: #999999;
+          &:hover {
+            color: #0C70F8;
+          }
         }
       }
     }
@@ -1286,6 +1366,13 @@
   }
 </style>
 <style lang="scss">
+  .demo-ruleForm {
+    .quyu {
+      .el-form-item__label {
+        padding: 0;
+      }
+    }
+  }
   .vl_jtc_upload {
     text-align: center;
     .el-upload--picture-card {

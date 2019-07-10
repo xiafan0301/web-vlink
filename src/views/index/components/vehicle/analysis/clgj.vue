@@ -115,11 +115,11 @@
       </div>
     </div>
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+        :visible.sync="strucDetailDialog"
+        class="struc_detail_dialog"
+        :close-on-click-modal="false"
+        top="4vh"
+        :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -189,7 +189,7 @@
       </div>
     </el-dialog>
     <!-- 地图选择 -->
-    <el-dialog class="map_select" :show-close="false" :visible.sync="dialogVisible" width="80%">
+    <el-dialog class="map_select" :close-on-click-modal="false" :show-close="false" :visible.sync="dialogVisible" width="80%">
       <div class="mapbox">
         <div class="mapbox map_select_box"></div>
         <div class="bottomBox">
@@ -310,6 +310,9 @@
       };
     },
     mounted() {
+      if (this.$route.query.plateNo) {
+        this.ruleForm.input3 = this.$route.query.plateNo;
+      }
       this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.getAllDevice() //查询所有的设备
