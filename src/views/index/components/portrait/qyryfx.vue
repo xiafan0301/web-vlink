@@ -664,7 +664,7 @@ export default {
         ...this.qyryfxFrom,
         deviceAndTimeList: deviceAndTimeList
       };
-      // console.log("检索摄像头", queryParams);
+      console.log("检索摄像头", this.totalData);
       postShotNumArea(queryParams)
         .then(res => {
           if (res) {
@@ -796,27 +796,25 @@ export default {
     },
     delArea(val, clearAll) {
       for (let item in this.drawObj[val]) {
-        if (this.drawObj[val][item] !== null) {
           switch (item) {
             case "rectangle":
-              this.closeDraw(1, val);
+              this.removeMarkers(1, this.drawObj[val][item].sid);
               break;
             case "circle":
-              this.closeDraw(2, val);
+              this.removeMarkers(2, this.drawObj[val][item].sid);
               break;
             case "polyline":
-              this.closeDraw(3, val);
+              this.removeMarkers(3, this.drawObj[val][item].sid);
               break;
             case "polygon":
-              this.closeDraw(4, val);
+              this.removeMarkers(4, this.drawObj[val][item].sid);
               break;
             case "circle10km":
-              this.closeDraw(5, val);
+              this.removeMarkers(5, this.drawObj[val][item].sid);
               break;
             default:
               break;
           }
-        }
       }
       if (!clearAll) {
         // 是否全部清除地图标记
@@ -864,22 +862,27 @@ export default {
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
+          this.drawObj[this.currenDrawobj].rectangle['sid'] = _sid;
           this.drawRectangleMark(_sid, event.obj);
         } else if (drawActive === 2) {
           this.drawObj[this.currenDrawobj].circle[_sid] = {};
           this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
+          this.drawObj[this.currenDrawobj].circle['sid'] = _sid;
           this.drawCircleMark(_sid, event.obj);
         } else if (drawActive === 3) {
           this.drawObj[this.currenDrawobj].polyline[_sid] = {};
           this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
+          this.drawObj[this.currenDrawobj].polyline['sid'] = _sid;
           this.drawPolylineMark(_sid, event.obj);
         } else if (drawActive === 4) {
           this.drawObj[this.currenDrawobj].polygon[_sid] = {};
           this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
+          this.drawObj[this.currenDrawobj].polygon['sid'] = _sid;
           this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
           this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
           this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
+          this.drawObj[this.currenDrawobj].circle10km['sid'] = _sid;
         }
         this.mouseTool.close(false);
         this.amap.setDefaultCursor();
@@ -1657,13 +1660,10 @@ export default {
       for (let k in bObj) {
         ab.push(bObj[k]);
       }
-      this.totalData = [
-        {
+      this.totalData.push({
           ad: ad,
           ab: ab
-        },
-        ...this.totalData
-      ];
+      });
     },
     getTreeList() {
       if (this.showTypes.indexOf("D") >= 0) {
