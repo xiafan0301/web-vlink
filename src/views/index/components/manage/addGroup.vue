@@ -128,7 +128,7 @@ export default {
     return {
       backDialog: false, // 返回提示弹出框
       isSelected: 0, // 查询--重置
-      tabState: 1, // 地图选择
+      tabState: 2, // 地图选择
       isShowError: false,
       errorText: null,
       searchForm: {
@@ -411,6 +411,7 @@ export default {
       }
 
       this.selectDeviceNumber = 0;
+      // this.selectDeviceList = [];
 
       const params = {
         dutyOrganId,
@@ -423,7 +424,7 @@ export default {
             this.allDeviceList = res.data;
             this.selectDeviceList = res.data;
             //在可选设备中删除已有的设备
-            if (this.$route.query.groupId) {
+            // if (this.$route.query.groupId) {
               if (this.currentDeviceList.length > 0) {
                 this.currentDeviceList.map(item => {
                   this.selectDeviceList.map((val) => {
@@ -453,10 +454,10 @@ export default {
                   })
                 });
               }
-            } else { // 新增---点击重置的时候将已有设备清零
-              this.currentDeviceList = [];
-              this.leftDeviceNumber = 0;
-            }
+            // } else { // 新增---点击重置的时候将已有设备清零
+            //   this.currentDeviceList = [];
+            //   this.leftDeviceNumber = 0;
+            // }
             this.selectDeviceList.map(item => {
               item.isOpenArrow = false; // 设置是否展开
               item.isChecked = false; // 父级是否选中
@@ -467,9 +468,12 @@ export default {
               item.bayonetList.map(itm => {
                 itm.isChildChecked = false; // 子级是否选中
               });
+              // console.log('deviceList', item.deviceList)
               this.selectDeviceNumber += item.deviceList.length;
               this.selectDeviceNumber += item.bayonetList.length;
             });
+
+            // console.log('selectDeviceNumber', this.selectDeviceNumber)
           }
         })
         .catch(() => {})
