@@ -624,6 +624,7 @@ export default {
       }
     },
     submitForm(v) {
+
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
@@ -631,10 +632,8 @@ export default {
         this.curImageUrl
       ) {
         let pg = {
-          //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
           startDate: this.ruleForm.data1[0] + " 00:00:00",
           endDate: this.ruleForm.data1[1] + " 23:59:59",
-          //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
@@ -691,6 +690,7 @@ export default {
     getFoothold(d) {
       getFoothold(d).then(res => {
         if (res) {
+          this.dialogChoose=true
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
@@ -703,12 +703,12 @@ export default {
             x.checked = false;
             return x;
           });
-          //  console.log(this.evData);
-
           this.amap.clearMap();
           this.evData.sort(this.compare("shotNum"));
           this.drawMarkers(this.evData);
           //this.showEventList();
+        }else{
+
         }
       });
     },
