@@ -2,7 +2,7 @@
   <div class="vl_judge_tc">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>以图搜人</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
