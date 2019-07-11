@@ -367,14 +367,14 @@
         <p>请先下载模板文件并按要求填写相关信息，再上传进行批量新增</p>
           <ul class="upload_box">
             <li>
-              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <p class="header">1、请下载导入模板，填写车辆信息。</p>
               <div class="main_content download_box">
                 <i class="vl_icon_manage_17 vl_icon"></i>
                 <span>下载模板</span>
               </div>
             </li>
             <li>
-              <p class="header">2、上传已填写的用户信息表。</p>
+              <p class="header">2、上传已填写的车辆信息表。</p>
               <div class="main_content">
                 <el-upload
                   ref="vehicleImport"
@@ -657,6 +657,8 @@ export default {
       getSpecialVehicleList(params)
         .then(res => {
           if (res) {
+            
+
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
@@ -684,8 +686,11 @@ export default {
                 }
               });
               this.numColorList.map(val => {
+                console.log('val')
                 if (val.enumField === item.numberColor) {
+                  console.log(val.enumValue)
                   item.numberColor = val.enumValue;
+                  console.log(item.numberColor)
                 }
               });
             });
@@ -1405,26 +1410,11 @@ export default {
       }
     }
   }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
   .disabled_btn {
     background:rgba(242,242,242,1);
     border:1px solid rgba(211,211,211,1);
     border-radius:4px;
     color: #B2B2B2;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-
-    }
   }
 }
 .dialog_comp_vehicle {

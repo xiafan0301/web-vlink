@@ -862,6 +862,7 @@ export default {
           i {
             display: block;
             margin-left: 5px;
+            display: none;
             &:hover {
               background-position: -412px -350px;
             }

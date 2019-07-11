@@ -1054,6 +1054,24 @@
 .the-table .el-table__body .el-table__row:hover td {
   background: #E6F7FF;
 }
+
+/**  重置--查询按钮  **/
+.reset_btn {
+  background:rgba(246,248,249,1);
+  border:1px solid rgba(211,211,211,1);
+  border-radius:4px;
+  color: #666666;
+}
+.select_btn {
+  background:rgba(12,112,248,1);
+  border-radius:4px;
+  color: #ffffff;
+}
+.select_btn:hover {
+  background:#0466de;
+  color: #ffffff;
+}
+
 /* th css style create by th */
 html {
     font-size: 100px;

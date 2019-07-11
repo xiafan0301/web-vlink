@@ -36,7 +36,7 @@
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="全部车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup" class="full"  multiple collapse-tags placeholder="全部车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
