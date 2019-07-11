@@ -1,6 +1,9 @@
 <template>
   <div class="th-many-peers">
-    <Breadcrumb :oData="[{name: '多车同行'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '多车同行'}]"></div>
+    </div>
+    <!-- <Breadcrumb :oData="[{name: '多车同行'}]"></Breadcrumb> -->
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="input-box">
@@ -170,8 +173,8 @@
   </div>
 </template>
 <script>
-import Breadcrumb from '../breadcrumb.vue';
-import flvplayer from '@/components/common/flvplayer.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+// import flvplayer from '@/components/common/flvplayer.vue';
 import { formatDate } from "@/utils/util.js";
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
@@ -179,8 +182,8 @@ const overStartTime = new Date() - 24 * 60 * 60 *1000;
 const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
 export default {
   components: {
-    flvplayer,
-    Breadcrumb
+    // flvplayer,
+    vlBreadcrumb
   },
   data () {
     return {
@@ -449,6 +452,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .th-many-peers {
   width: 100%; height: 100%;
   padding-top: 50px;

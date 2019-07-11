@@ -427,8 +427,8 @@ import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
-  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
-import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
+// import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
@@ -686,15 +686,11 @@ export default {
                 }
               });
               this.numColorList.map(val => {
-                console.log('val')
                 if (val.enumField === item.numberColor) {
-                  console.log(val.enumValue)
                   item.numberColor = val.enumValue;
-                  console.log(item.numberColor)
                 }
               });
             });
-            console.log(this.vehicleList)
           }
         })
     },
@@ -727,12 +723,12 @@ export default {
        const params = {
         vehicleNumber: carIdNo
       };
-      getVehicleByVehicleNumber(params)
+      getReVehicleInfo(params)
         .then(res => {
-          if (res && res.data && res.data.length > 0) {
+          if (res && res.data) {
             this.isAddDisabled = true;
 
-            let carInfo = res.data[0];
+            let carInfo = res.data;
 
             let vehicleColor = carInfo.vehicleColor;
             let vehicleType = carInfo.vehicleType;

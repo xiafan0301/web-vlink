@@ -139,7 +139,7 @@ export default {
   data () {
     return {
       sortType: 1, // 1为时间排序， 2为监控排序
-      timeSortType: true, // true为时间降序， false为时间升序
+      timeSortType: false, // true为时间降序， false为时间升序
       cameraSortType: true, // true为监控降序， false为监控升序
       pagination: {
         pageNum: 1,
