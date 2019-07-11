@@ -660,6 +660,9 @@ export default {
             let data = res.data;
             this.list = data;
             this.doubleDeviceList = objDeepCopy(data);
+            if(!this.list.allRecords || this.list.allRecords.length <= 0) {
+              this.$message.warning('搜索无结果')
+            }
             //获取全部时刻
             this.getData();
           }
