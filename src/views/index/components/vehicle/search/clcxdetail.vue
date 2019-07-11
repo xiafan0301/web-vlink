@@ -285,7 +285,6 @@ export default {
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
-      console.log(index);
       this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);

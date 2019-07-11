@@ -240,18 +240,24 @@ export default {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
         },
-        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceName',
+        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
         order: this.order === 1 ? 'desc' : 'asc',
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
       }
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
-          areaUid: this.searchForm.area.join(','),
-          sex: this.searchForm.sex,
-          age: this.searchForm.age,
-          hat: this.searchForm.hat
+          areaUid: this.searchForm.area.join(',')
         });
+        if (this.searchForm.sex !== '不限') {
+          params.where.sex = this.searchForm.sex;
+        }
+        if (this.searchForm.age !== '不限') {
+          params.where.age = this.searchForm.age;
+        }
+        if (this.searchForm.hat !== '不限') {
+          params.where.hat = this.searchForm.hat;
+        }
       } else if (this.searchForm.type === 2) {
         params.where = Object.assign(params.where, {
           deviceIds: this.dIds.join(',')

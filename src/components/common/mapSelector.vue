@@ -16,21 +16,28 @@
         <h4>请选择框选图形</h4>
         <ul>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
+            <div title="选择矩形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 1 }" @click="selDrawType(1)"><span class="sd_opts_icon sd_opts_icon1"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
+            <div title="选择圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 2 }" @click="selDrawType(2)"><span class="sd_opts_icon sd_opts_icon2"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
+            <div title="选择折线100米范围内的设备" :class="{'sd_opts_sed': drawActiveType === 3 }" @click="selDrawType(3)"><span class="sd_opts_icon sd_opts_icon3"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
+            <div title="选择多边形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 4 }" @click="selDrawType(4)"><span class="sd_opts_icon sd_opts_icon4"></span></div>
           </li>
           <li>
-            <div :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
+            <div title="选择10公里圆形范围内的设备" :class="{'sd_opts_sed': drawActiveType === 5 }" @click="selDrawType(5)"><span class="sd_opts_icon sd_opts_icon5"></span></div>
           </li>
         </ul>
+        <p>
+          <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+          <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+          <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+          <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+          <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+        </p>
       </div>
       <ul class="sd_fs">
         <li @click="setMapStatus(1)"><i class="el-icon-plus"></i></li>
@@ -858,14 +865,20 @@ export default {
     setMarks () {
       if (this.showTypes.indexOf('D') >= 0) {
         for (let i = 0; i < this.listDevice.length; i++) {
-          this.doMark([this.listDevice[i].longitude, this.listDevice[i].latitude],
-            this.listDevice[i].deviceName, 'vl_icon vl_icon_sxt');
+          let _d = this.listDevice[i];
+          let sC = 'vl_icon_sxt';
+          if (_d.deviceStatus !== 1) { sC = 'vl_icon_sxt_dis'; }
+          this.doMark([_d.longitude, _d.latitude],
+            _d.deviceName, 'vl_icon ' + sC);
         }
       }
       if (this.showTypes.indexOf('B') >= 0) {
         for (let i = 0; i < this.listBayonet.length; i++) {
-          this.doMark([this.listBayonet[i].longitude, this.listBayonet[i].latitude],
-            this.listBayonet[i].bayonetName, 'vl_icon vl_icon_kk');
+          let _d = this.listBayonet[i];
+          let sC = 'vl_icon_kk';
+          if (!_d.isEnabled) { sC = 'vl_icon_kk_dis'; }
+          this.doMark([_d.longitude, _d.latitude],
+            _d.bayonetName, 'vl_icon ' + sC);
         }
       }
     },
@@ -906,7 +919,7 @@ export default {
     color: #333;
   }
   > ul {
-    padding: 0 5px 5px 5px;
+    padding: 0 5px 0 5px;
     overflow: hidden;
     > li {
       padding: 5px;
@@ -922,6 +935,14 @@ export default {
           > .sd_opts_icon5 { background-image: url(../../assets/img/vehicle/cut5m.png); }
         }
       }
+    }
+  }
+  > p {
+    max-width: 320px;
+    padding: 0 10px 10px 10px;
+    margin: 0 auto;
+    > span {
+      color: #999; font-size: 12px;
     }
   }
 }

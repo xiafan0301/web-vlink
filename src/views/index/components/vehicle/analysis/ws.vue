@@ -1,6 +1,8 @@
 <template>
   <div class="tail_analysis">
-    <Breadcrumb :oData="[{name: '尾随分析'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '尾随分析'}]"></div>
+    </div>
     <div class="content_box">
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
@@ -116,14 +118,14 @@
   </div>
 </template>
 <script>
-import Breadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js'
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { formatDate } from '@/utils/util.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
@@ -169,12 +171,11 @@ export default {
       _this.searchForm.dateEnd = formatDate(endTime);
     }
   },
-  created () {
+  mounted () {
     this.getVehicleTypeList();
-
-    const plateNo = this.$route.query.plateNo;
-    const dateStart = this.$route.query.dateStart;
-    const dateEnd = this.$route.query.dateEnd;
+    const plateNo = this.$route.params.plateNo;
+    const dateStart = this.$route.params.dateStart;
+    const dateEnd = this.$route.params.dateEnd;
     if (plateNo) { // 从其他模块跳转过来的
       this.searchForm.plateNo = plateNo;
     }
@@ -182,9 +183,11 @@ export default {
       this.searchForm.plateNo = plateNo;
       this.searchForm.shotTime = dateStart;
       this.searchForm.dateEnd = dateEnd;
-      this.searchForm.interval = this.$route.query.interval;
-      this.searchForm.deviceCode = this.$route.query.deviceCode;
-      this.searchForm.vehicleClass = this.$route.query.vehicleClass && this.$route.query.vehicleClass.join(',');
+      this.searchForm.interval = this.$route.params.interval;
+      this.searchForm.deviceCode = this.$route.params.deviceCode;
+      if (this.$route.params.vehicleClass) {
+        this.searchForm.vehicleClass = this.$route.params.vehicleClass.join(',');
+      }
       this.getDeviceList();
       setTimeout(() => {
         this.searchData('searchForm');
@@ -254,16 +257,19 @@ export default {
           if (res && res.code === '00000000') {
             if (res.data) {
               this.deviceList = res.data;
+
+              // 初始化页面时默认选中第一个设备
               this.searchForm.deviceCode = this.deviceList[0].deviceID;
+              this.deviceStartTime = this.deviceList[0].shotTime;
               this.isShowDeviceTip = false;
 
-              if (this.$route.query.deviceCode) {
-              this.deviceList.map(item => {
-                if (item.deviceID === this.$route.query.deviceCode) {
-                  this.deviceStartTime = item.shotTime;
-                }
-              })
-            }
+              if (this.$route.params.deviceCode) {
+                this.deviceList.map(item => {
+                  if (item.deviceID === this.$route.params.deviceCode) {
+                    this.deviceStartTime = item.shotTime;
+                  }
+                })
+              }
 
             } else {
               this.isShowDeviceTip = true;
@@ -283,7 +289,7 @@ export default {
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
-      this.$router.push({name: 'ws_record', query: { 
+      this.$router.push({name: 'ws_record', params: {
         plateNo: this.searchForm.plateNo,
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
@@ -297,6 +303,7 @@ export default {
     // 重置查询条件
     resetData (form) {
       this.$refs[form].resetFields();
+      this.dataList = [];
     },
     // 搜索数据
     searchData (form) {
@@ -342,6 +349,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .tail_analysis {
   height: 100%;
   .content_box {
@@ -468,20 +479,20 @@ export default {
   }
   .reset_btn {
     width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
+    // background-color: #D3D3D3;
+    // color: #666666;
+    // border-radius: 4px;
+    // &:hover {
+    //   background-color: #ffffff;
+    //   color: #0C70F8;
+    //   border-color: #0C70F8;
+    // }
   }
   .select_btn {
     width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
+    // background-color: #0C70F8;
+    // color: #ffffff;
+    // border-radius: 4px;
   }
 }
 </style>

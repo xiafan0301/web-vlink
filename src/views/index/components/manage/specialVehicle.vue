@@ -367,14 +367,14 @@
         <p>请先下载模板文件并按要求填写相关信息，再上传进行批量新增</p>
           <ul class="upload_box">
             <li>
-              <p class="header">1、请下载导入模板，填写用户信息。</p>
+              <p class="header">1、请下载导入模板，填写车辆信息。</p>
               <div class="main_content download_box">
                 <i class="vl_icon_manage_17 vl_icon"></i>
                 <span>下载模板</span>
               </div>
             </li>
             <li>
-              <p class="header">2、上传已填写的用户信息表。</p>
+              <p class="header">2、上传已填写的车辆信息表。</p>
               <div class="main_content">
                 <el-upload
                   ref="vehicleImport"
@@ -427,8 +427,8 @@ import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
-  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
-import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
+// import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
@@ -657,6 +657,8 @@ export default {
       getSpecialVehicleList(params)
         .then(res => {
           if (res) {
+            
+
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
@@ -689,7 +691,6 @@ export default {
                 }
               });
             });
-            console.log(this.vehicleList)
           }
         })
     },
@@ -722,12 +723,12 @@ export default {
        const params = {
         vehicleNumber: carIdNo
       };
-      getVehicleByVehicleNumber(params)
+      getReVehicleInfo(params)
         .then(res => {
-          if (res && res.data && res.data.length > 0) {
+          if (res && res.data) {
             this.isAddDisabled = true;
 
-            let carInfo = res.data[0];
+            let carInfo = res.data;
 
             let vehicleColor = carInfo.vehicleColor;
             let vehicleType = carInfo.vehicleType;
@@ -1405,26 +1406,11 @@ export default {
       }
     }
   }
-  .select_btn {
-    background-color: #0C70F8;
-    color: #ffffff;
-  }
   .disabled_btn {
     background:rgba(242,242,242,1);
     border:1px solid rgba(211,211,211,1);
     border-radius:4px;
     color: #B2B2B2;
-  }
-  .reset_btn {
-    background-color: #ffffff;
-    color: #666666;
-    border-color: #DDDDDD;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-
-    }
   }
 }
 .dialog_comp_vehicle {

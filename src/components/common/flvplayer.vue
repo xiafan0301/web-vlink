@@ -16,7 +16,7 @@
       <div v-else>视频加载中，请稍后...</div>
     </div>
     <!-- oData.type === 5 视频接力 -->
-    <div class="player_relay_i">
+    <div class="player_relay_i" v-if="oData.type === 5">
       <div class="player_relay_icp">
         <ul>
           <li>车牌号码</li>
@@ -24,7 +24,10 @@
         </ul>
       </div>
       <div class="player_relay_imp">
-        <span title="接力地图" class="vl_icon vl_icon_rpm"></span>
+        <router-link title="接力地图" target="_blank" class="vl_icon vl_icon_rpm" :to="{name: 'video_relay_map', query: {
+            tid: '001'
+            }}">
+        </router-link>
       </div>
     </div>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
@@ -1294,7 +1297,7 @@ export default {
   }
   > .player_relay_imp {
     padding-top: 10px;
-    > span { cursor: pointer; }
+    > a { cursor: pointer; }
   }
 }
 /* 视频接力 end */

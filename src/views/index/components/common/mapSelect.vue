@@ -374,7 +374,8 @@ export default {
             draggable: false, // 是否可拖动
             // extData: obj,
             // 自定义点标记覆盖物内容 vl_icon vl_icon_sxt
-            content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
+            content: '<div class="map_icons vl_icon vl_icon_sxt"></div>',
+            bubble: true
           });
         })
         this.allboy.forEach(el=>{
@@ -385,7 +386,8 @@ export default {
               draggable: false, // 是否可拖动
               // extData: obj,
               // 自定义点标记覆盖物内容 vl_icon vl_icon_sxt
-              content: '<div class="map_icons vl_icon vl_icon_kk"></div>'
+              content: '<div class="map_icons vl_icon vl_icon_kk"></div>',
+              bubble: true
             });
         })
     }

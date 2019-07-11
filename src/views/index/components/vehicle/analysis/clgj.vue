@@ -116,6 +116,12 @@
           <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
+    <!--地图操作按钮-->
+    <ul class="map_rrt_u2">
+      <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+      <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+      <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+    </ul>
     <el-dialog
         :visible.sync="strucDetailDialog"
         class="struc_detail_dialog"
@@ -294,6 +300,16 @@
       this.setDTime();
     },
     methods: {
+      mapZoomSet (val) {
+        if (this.amap) {
+          this.amap.setZoom(this.amap.getZoom() + val);
+        }
+      },
+      resetZoom () {
+        if (this.amap) {
+          this.amap.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      },
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
@@ -403,6 +419,13 @@
               let pg = {
                 pageSize: 9999,
                 where: {}
+              }
+              if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
+                this.$message.info('选择的区域没有设备，请重新选择区域');
+                return false;
+              } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
+                this.$message.info('您没有选择区域，请点击下拉框选择镇');
+                return false;
               }
               console.log(this.ruleForm.data1);
               pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
@@ -689,6 +712,29 @@
   };
 </script>
 <style lang="scss" scoped>
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
   .point {
     width: 100%;
     height: 100%;
@@ -706,17 +752,17 @@
   }
   .right.hide {
     width: calc(100% - 272px);
-    height: calc(100% - 54px);
+    height: calc(100% - 55px);
     float: right;
   }
   .right {
     width: 100%;
-    height: calc(100% - 54px);
+    height: calc(100% - 55px);
     float: right;
   }
   .reselt {
     width: 272px;
-    height: calc(100% - 54px);
+    height: calc(100% - 55px);
     background-color: #ffffff;
     position: absolute;
     left: 275px;
@@ -768,7 +814,7 @@
   .left {
     position: relative;
     width: 272px;
-    height: calc(100% - 54px);
+    height: calc(100% - 55px);
     background-color: #ffffff;
     float: left;
     z-index: 1;
