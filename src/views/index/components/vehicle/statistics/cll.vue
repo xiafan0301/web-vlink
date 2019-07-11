@@ -45,7 +45,7 @@
             :value="item.value">
           </el-option>
         </el-select>
-        <el-input v-model="queryForm.warningNum" placeholder="请输入大于0的警戒数值"></el-input>
+        <el-input v-model.number="queryForm.warningNum" placeholder="请输入大于0的警戒数值" @blur="validationWarningNum"></el-input>
         <!-- 自定义报表类型 -->
         <div class="left_start" v-show="queryForm.statementType === 5">
           <span>开始</span>
@@ -81,8 +81,7 @@
               <i class="vl_icon vl_icon_vehicle_cll_03" @click="tabIndex = 3" :class="{'active': tabIndex === 3}" v-show="queryForm.statementType !== 5"></i>
             </div>
             <h1>({{dateTitle}})车流量统计</h1>
-            <div></div>
-            <!-- <el-button class="select_btn btn_100">导出</el-button> -->
+            <el-button class="select_btn btn_100" @click="exportExcel" :loading="loadingBtnExport">导出</el-button>
           </div>
           <div class="main_box" v-show="tabIndex === 1">
             <p>车流量（辆）</p>
@@ -112,7 +111,7 @@ let startTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() -
 let endTime = formatDate(new Date(new Date().toLocaleDateString()).getTime() + (24 * 60 * 60 * 1000 - 1) - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd HH:mm:ss');//默认结束时间为开始时间后第三天
 import G2 from '@antv/g2';
 import { View } from '@antv/data-set';
-import {apiCarFlow} from '@/views/index/api/api.vehicle.js';
+import {apiCarFlow, exportExcel} from '@/views/index/api/api.vehicle.js';
 import {getAllBayonetListByName} from '@/views/index/api/api.vehicle.js';
 import {formatDate} from '@/utils/util.js';
 import {dataList} from '@/utils/data.js';
@@ -120,7 +119,7 @@ export default {
   data () {
     return {
       queryForm: {
-        radio: 1,
+        // radio: 1,
         carType: "",
         bayonet: {value: ''},
         // lane: null,
@@ -148,6 +147,7 @@ export default {
       ],
       loading: false,
       loadingBtn: false,
+      loadingBtnExport: false,
       // 翻页数据
       currentPage: 1,
       pageSize: 10,
@@ -195,6 +195,46 @@ export default {
     this.getListBayonet();
   },
   methods: {
+    // 验证输入的警戒值
+    validationWarningNum () {
+      if (this.queryForm.warningNum !== '' && this.queryForm.warningNum <= 0) {
+        this.$message.warning('输入的警戒数值必须大于0');
+        this.queryForm.warningNum = '';
+      }
+    },
+    // 导出
+    exportExcel () {
+      let data = {
+        carFlowQueryDto: {
+          bayonetIds: this.queryForm.bayonet.value,
+          carType: this.queryForm.carType
+        },
+        viewType: 6
+      }
+      if (this.queryForm.statementType !== 5) {
+        data.carFlowQueryDto['reportType'] = this.queryForm.statementType
+      } else {
+        data.carFlowQueryDto['startTime'] = this.queryForm.startTime;
+        data.carFlowQueryDto['endTime'] = this.queryForm.endTime;
+      }
+      this.loadingBtnExport = true;
+      exportExcel(data).then(res => {
+        if (res && res.data) {
+          const eleA = document.getElementById('export_id');
+          if (eleA) {
+            document.body.removeChild(eleA);
+          }
+          let a = document.createElement('a');
+          a.setAttribute('href', res.data.fileUrl);
+          a.setAttribute('target', '_self');
+          a.setAttribute('id', 'export_id');
+          document.body.appendChild(a);
+          a.click();
+        }
+      }).finally(() => {
+        this.loadingBtnExport = false;
+      })
+    },
     getEndTime(time) {
       let startTime = new Date(this.queryForm.startTime).getTime() + 1 * 3600 * 24 * 1000;
       /* this.pickerOptions1 = {
@@ -291,7 +331,7 @@ export default {
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
             <h1>${title}</h1>
-            <span><span>${items[1].name}：</span><span>${items[1].value}辆</span></span></div>`;
+            <span><span>${items[0].name}：</span><span>${items[0].value}辆</span></span></div>`;
         }
       });
       chart.legend(false);
@@ -398,7 +438,7 @@ export default {
     // 重置查询表单
     resetQueryForm () {
       this.queryForm = {
-        radio: 1,
+        // radio: 1,
         carType: '',
         bayonet: {value: ''},
         // lane: null,
@@ -406,6 +446,10 @@ export default {
         warningNum: null,
         startTime: startTime,
         endTime: endTime
+      };
+      this.charts = {
+        chart1: null,
+        chart2: null  
       };
       this.isShowChart = false;
     },

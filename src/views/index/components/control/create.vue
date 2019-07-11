@@ -20,17 +20,12 @@
               <el-input v-model="createForm.controlName" maxlength="20" @blur="getControlInfoByName"></el-input>
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
-              <el-select
-                :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
-                v-model="createForm.event"
-                filterable
-                remote
-                clearable
-                @clear="eventList = []"
-                value-key="value"
+              <el-select 
+                v-model="createForm.event" 
+                filterable 
                 placeholder="请输入关联事件编号"
-                :remote-method="getEventList"
-                :loading="loading">
+                :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
+                >
                 <el-option
                   v-for="item in eventList"
                   :key="item.value"
@@ -62,8 +57,10 @@
                 :default-time="['00:00:00', '23:59:59']">
               </el-date-picker>
             </el-form-item>
-            <div v-for="(item, index) in createForm.periodTime" :key="index" style="width: 25%;position: relative;" :class="['period_time', {'top': index === 4}, {'one': index === 0 && (createForm.controlType === 2 || createForm.controlType === null)}]">
-              <el-form-item style="width: 48%;margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
+          </el-form-item>
+          <el-form-item class="period_time_box">
+            <div v-for="(item, index) in createForm.periodTime" :key="index" style="position: relative;" class="period_time">
+              <el-form-item style="margin-bottom: 0;" :label="index === 0 ? '布控时间段（最多可设置5个时间段）' : ''" :prop="'periodTime.' + index + '.startTime'" :rules="{ required: true, message: '请选择起始时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="起始时间"
                   v-model="item.startTime"
@@ -75,7 +72,7 @@
                 </el-time-picker>
               </el-form-item>
               <span class="vl_f_666">-</span>
-              <el-form-item style="width: 48%;margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
+              <el-form-item style="margin-bottom: 0;" :prop="'periodTime.' + index + '.endTime'" :rules="{ required: true, message: '请选择结束时间', trigger: 'blur'}" >
                 <el-time-picker
                   placeholder="结束时间"
                   v-model="item.endTime"
@@ -88,7 +85,7 @@
                 </el-time-picker>
               </el-form-item>
             </div>
-            <el-form-item class="period_time_btn_box" :class="{'top': (createForm.periodTime.length === 4 || createForm.periodTime.length === 5)}">
+            <el-form-item class="period_time_btn_box">
               <div class="period_time_btn" @click="addPeriodTime()"><i class="vl_icon vl_icon_control_22"></i><span>添加布控时间段</span></div>
               <div v-if="createForm.periodTime.length > 1" class="period_time_btn" @click="removePeriodTime()"><i class="vl_icon vl_icon_control_28"></i><span>删除布控时间段</span></div>
             </el-form-item>
@@ -111,7 +108,7 @@
                   <el-checkbox label="人员追踪" @change="modelType = '1';modelDOne = modelDOne ? modelDOne : 1" :class="{'is_checked': modelType === '1'}"></el-checkbox>
                   <el-checkbox label="车辆追踪" @change="modelType = '2';modelDTwo = modelDTwo ? modelDTwo : 1" :class="{'is_checked': modelType === '2'}"></el-checkbox>
                   <el-checkbox label="越界分析" @change="modelType = '3';modelDThree = modelDThree ? modelDThree : 1" :class="{'is_checked': modelType === '3'}"></el-checkbox>
-                  <el-checkbox label="范围分析" @change="modelType = '4';modelDFour = modelDFour ? modelDFour : 1" :class="{'is_checked': modelType === '4'}"></el-checkbox>
+                  <el-checkbox label="区域布防" @change="modelType = '4';modelDFour = modelDFour ? modelDFour : 1" :class="{'is_checked': modelType === '4'}"></el-checkbox>
                 </el-checkbox-group>
               </div>
               <template v-if="allDevData && allDevData.length > 0">
@@ -119,7 +116,7 @@
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDOne)" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType"></div>
                 <!-- 车辆追踪 -->
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType"></div>
-                <!-- 范围分析 -->
+                <!-- 区域布防 -->
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDFour)" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
               </template>
               <!-- 越界分析 -->
@@ -182,7 +179,7 @@ export default {
       createForm: {
         controlName: null,
         event: null,
-        controlType: null,
+        controlType: 1,
         controlDate: [],
         controlAlarmId: null,
         periodTime: [
@@ -210,13 +207,13 @@ export default {
       modelDOne: null,//传给子组件的回填数据-人员追踪
       modelDTwo: null,//传给子组件的回填数据-车辆追踪
       modelDThree: null,//传给子组件的回填数据-越界分析
-      modelDFour: null,//传给子组件的回填数据-范围分析
+      modelDFour: null,//传给子组件的回填数据-区域布防
       // 事件模块新增布控参数
       eventDetail: null,
     }
   },
   created () {
-    // this.getDiciData();
+    this.getEventList();
     this.getAllMonitorList();
     // 编辑页-2
     if (this.createType) {
@@ -269,29 +266,25 @@ export default {
       this.createForm.controlDate = [formatDate(new Date(), 'yyyy-MM-dd'), date];
     },
     // 获取关联事件列表
-    getEventList (query) {
-      const _query = this.Trim(query, 'g');
-      if (_query) {
-        const params = {
-          'where.keyword': _query,
-          'where.isSurveillance': false,//没有关联布控的事件
-          pageSize: 1000000,
-          orderBy: 'report_time',
-          order: 'desc'
-        }
-        getEventList(params).then(res => {
-          if (res && res.data) {
-            // 过滤掉事件状态为已结束的关联事件
-            this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
-              return {
-                label: m.eventCode,
-                value: m.uid,
-                eventStatus: m.eventStatus
-              }
-            });
-          }
-        })
+    getEventList () {
+      const params = {
+        'where.isSurveillance': false,//没有关联布控的事件
+        pageSize: 1000000,
+        orderBy: 'report_time',
+        order: 'desc'
       }
+      getEventList(params).then(res => {
+        if (res && res.data) {
+          // 过滤掉事件状态为已结束的关联事件
+          this.eventList = res.data.list.filter(f => f.eventStatus !== 3).map(m => {
+            return {
+              label: m.eventCode,
+              value: m.uid,
+              eventStatus: m.eventStatus
+            }
+          });
+        }
+      })
     },
     // 获取所有监控设备列表
     getAllMonitorList () {
@@ -373,7 +366,7 @@ export default {
               } else if (f === '越界分析') {  
                 this.$refs.mapThree.validateModelThree();
                 modelList.push(this.modelDataThree);
-              } else if (f === '范围分析') {
+              } else if (f === '区域布防') {
                 this.$refs.mapFour.validateModelFour();
                 modelList.push(this.modelDataFour);
               }
@@ -384,7 +377,7 @@ export default {
               return false;
             } else if (this.checkList.some(s => s === '越界分析') && !this.modelDataThree) {
               return false;
-            } else if (this.checkList.some(s => s === '范围分析') && !this.modelDataFour) {
+            } else if (this.checkList.some(s => s === '区域布防') && !this.modelDataFour) {
               return false;
             }
             const time = this.createForm.periodTime.map(m => {
@@ -495,7 +488,7 @@ export default {
             } else if (f.modelType === 3) {
               this.checkList.push('越界分析');
             } else if (f.modelType === 4) {
-              this.checkList.push('范围分析');
+              this.checkList.push('区域布防');
             }
           })
           // 高亮第一个有数据的模型
@@ -506,7 +499,7 @@ export default {
               this.modelType = '2';
             } else if (this.checkList[0] === '越界分析') {
               this.modelType = '3';
-            } else if (this.checkList[0] === '范围分析') {
+            } else if (this.checkList[0] === '区域布防') {
               this.modelType = '4';
             }
           }
@@ -538,7 +531,7 @@ export default {
               } else if (f === '越界分析') {
                 this.$refs.mapThree.validateModelThree();
                 modelList.push(this.modelDataThree);
-              } else if (f === '范围分析') {
+              } else if (f === '区域布防') {
                 this.$refs.mapFour.validateModelFour();
                 modelList.push(this.modelDataFour);
               }
@@ -550,7 +543,7 @@ export default {
               return false;
             } else if (this.checkList.some(s => s === '越界分析') && !this.modelDataThree) {
               return false;
-            } else if (this.checkList.some(s => s === '范围分析') && !this.modelDataFour) {
+            } else if (this.checkList.some(s => s === '区域布防') && !this.modelDataFour) {
               return false;
             }
             const time = this.createForm.periodTime.map(m => {
@@ -681,33 +674,47 @@ export default {
             padding-right: 0;
           }
         }
-        .period_time{
-          display: flex;
-          margin-top: 20px;
-          padding-right: 10px;
-          > span{
-            margin: 0 9px;
-          }
-          > .el-form-item{
-            padding-right: 0!important;
-            & > .el-form-item__label:nth-child(1){
-              width: 330px;
-              position: absolute;
-              left: 0;
-              top: -40px;
-            }
-          }
-          .el-form-item__content{
-            .el-date-editor{
-              width: 100%!important;
-            }
+      }
+    }
+    .el-form-item{
+      padding-right: 20px;
+      .el-input__inner, .el-select{
+        width: 100%!important;
+      }
+      .el-form-item__label{
+        padding-bottom: 0!important;
+      }
+    }
+    .model_checkbox label.is_checked{
+      border-bottom: 2px solid #0C70F8;
+      .el-checkbox__label{
+        color: #409EFF;
+      }
+    }
+    .period_time_box .el-form-item__content{
+      display: flex;
+      flex-wrap: wrap;
+      .period_time{
+        width: 25%;
+        display: flex;
+        margin-top: 20px;
+        padding-right: 10px;
+        > span{
+          margin: 0 3px;
+        }
+        > .el-form-item{
+          padding-right: 0!important;
+          & > .el-form-item__label:nth-child(1){
+            width: 330px;
+            position: absolute;
+            left: 0;
+            top: -40px;
           }
         }
-        .period_time.top{
-          margin-top: 20px!important;
-        }
-        .period_time.one{
-          margin-top: 41px!important;
+        .el-form-item__content{
+          .el-date-editor{
+            width: 100%!important;
+          }
         }
       }
       .period_time_btn_box{ 
@@ -746,21 +753,6 @@ export default {
             }
           }
         }
-      }
-    }
-    .el-form-item{
-      padding-right: 20px;
-      .el-input__inner, .el-select{
-        width: 100%!important;
-      }
-      .el-form-item__label{
-        padding-bottom: 0!important;
-      }
-    }
-    .model_checkbox label.is_checked{
-      border-bottom: 2px solid #0C70F8;
-      .el-checkbox__label{
-        color: #409EFF;
       }
     }
   }

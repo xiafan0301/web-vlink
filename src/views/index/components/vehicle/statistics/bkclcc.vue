@@ -37,7 +37,7 @@
             :value="item">
           </el-option>
         </el-select>
-        <div class="left_radio"><span>车牌：</span><el-checkbox v-model="queryForm.radio" :label="true">非</el-checkbox></div>
+        <div class="left_radio"><span>车牌：</span><el-checkbox v-model="queryForm.radio" :label="true">排除</el-checkbox></div>
         <div class="left_province">
           <el-select v-model="queryForm.province">
             <el-option
@@ -86,12 +86,6 @@
             <el-table-column
               label="车牌颜色"
               prop="vehicleColor"
-              show-overflow-tooltip
-              >
-            </el-table-column>
-            <el-table-column
-              label="布控库"
-              prop=""
               show-overflow-tooltip
               >
             </el-table-column>
