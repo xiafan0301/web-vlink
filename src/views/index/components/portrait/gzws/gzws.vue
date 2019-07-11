@@ -5,7 +5,7 @@
         <el-breadcrumb-item :to="{ name: 'portrait' }">人像检索</el-breadcrumb-item>
         <el-breadcrumb-item>跟踪尾随</el-breadcrumb-item>
       </el-breadcrumb>
-      <el-button class="add_btn" @click="showAddTaskDialog('add')">新建任务</el-button>
+      <el-button class="add_btn select_btn" @click="showAddTaskDialog('add')">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -569,9 +569,9 @@ export default {
     box-shadow: 0 0 5px #ddd;
     background-color: #fff;
     .add_btn {
-      background-color: #0C70F8;
-      color: #ffffff;
-      border-radius: 4px;
+      // background-color: #0C70F8;
+      // color: #ffffff;
+      // border-radius: 4px;
       margin-right: 10px;
     }
   }
@@ -621,20 +621,20 @@ export default {
   }
   .reset_btn {
     // width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
+    // background-color: #D3D3D3;
+    // color: #666666;
+    // border-radius: 4px;
+    // &:hover {
+    //   background-color: #ffffff;
+    //   color: #0C70F8;
+    //   border-color: #0C70F8;
+    // }
   }
   .select_btn {
     // width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
+    // background-color: #0C70F8;
+    // color: #ffffff;
+    // border-radius: 4px;
   }
 }
 .dialog_comp_add {

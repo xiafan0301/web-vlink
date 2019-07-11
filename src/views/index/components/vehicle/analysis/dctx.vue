@@ -47,8 +47,8 @@
           </vue-scroll>
         </div>
         <div class="btn-box">
-          <el-button class="th-btn-no-color" @click="onReset" :loading="resetLoading">重置</el-button>
-          <el-button class="th-btn-color" @click="onSearch" :loading="searchLoading">查询</el-button>
+          <el-button class="reset_btn" @click="onReset" :loading="resetLoading">重置</el-button>
+          <el-button class="select_btn" @click="onSearch" :loading="searchLoading">查询</el-button>
         </div>
       </div>
       <div class="the-right-result">
@@ -212,9 +212,13 @@ export default {
         startDate: new Date(overStartTime),
         endDate: new Date(),
         vehicleNumberList: [
-          {vehicleNumber: '沪D008CP'},
-          {vehicleNumber: '沪A009CP'},
+          {vehicleNumber: ''},
+          {vehicleNumber: ''},
         ],
+        // vehicleNumberList: [
+        //   {vehicleNumber: '沪D008CP'},
+        //   {vehicleNumber: '沪A009CP'},
+        // ],
         vehicleNumbers: null
       },
       resetLoading: false,
