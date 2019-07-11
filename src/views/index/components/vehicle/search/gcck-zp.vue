@@ -67,12 +67,12 @@
                     <div class="gcck_rbl_i">
                       <div>
                         <div @click="goToDetail(sitem.plateNo)">
-                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.imagePath">
+                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
                         </div>
                       </div>
                     </div>
                     <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo}}</div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.snapTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
                   </div>
                 </li>
               </ul>
@@ -205,7 +205,6 @@ export default {
       });
     },
     getLbtsList () {
-      console.log('getLbtsList');
       getSpecialGroup().then(res => {
         if (res && res.data) {
           this.lbtsList = res.data;
@@ -260,6 +259,7 @@ export default {
       }
       this.aDay = aDay;
       this.daysList = oDayList;
+      console.log('this.daysList', this.daysList);
       this.$set(this.daysList);
       // console.log('aDay', aDay);
       this.$nextTick(() => {
@@ -313,9 +313,9 @@ export default {
         pageSize: 16
       }).then(res => {
         this.daysList[sDay].state = 2;
-        if (res && res.data) {
+        if (res && res.data && res.data.list && res.data.list.length > 0) {
           this.daysList[sDay].total = res.data.total;
-          this.daysList[sDay].pageNum = res.data.pageNum; // 当前页数
+          this.daysList[sDay].pageNum = pageNum; // 当前页数
           this.daysList[sDay].pages = res.data.pages; // 总页数
           if (!this.daysList[sDay].list) {
             this.daysList[sDay].list = [];
