@@ -205,7 +205,6 @@ export default {
       });
     },
     getLbtsList () {
-      console.log('getLbtsList');
       getSpecialGroup().then(res => {
         if (res && res.data) {
           this.lbtsList = res.data;
@@ -260,6 +259,7 @@ export default {
       }
       this.aDay = aDay;
       this.daysList = oDayList;
+      console.log('this.daysList', this.daysList);
       this.$set(this.daysList);
       // console.log('aDay', aDay);
       this.$nextTick(() => {
@@ -313,7 +313,7 @@ export default {
         pageSize: 16
       }).then(res => {
         this.daysList[sDay].state = 2;
-        if (res && res.data) {
+        if (res && res.data && res.data.list && res.data.list.length > 0) {
           this.daysList[sDay].total = res.data.total;
           this.daysList[sDay].pageNum = res.data.pageNum; // 当前页数
           this.daysList[sDay].pages = res.data.pages; // 总页数
