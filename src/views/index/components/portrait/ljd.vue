@@ -51,6 +51,7 @@
               type="daterange"
               class="full"
               value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
@@ -116,7 +117,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -379,6 +380,7 @@ export default {
   },
   data() {
     return {
+      isload:false,
       dialogChoose:false,
       strucDetailDialog:false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -399,6 +401,29 @@ export default {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev',
         },
+      },
+      pickerOptions: {
+        disabledDate (time) {
+          let date = new Date();
+          let y = date.getFullYear();
+          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
+          let d = date.getDate();
+          let threeMonths = '';
+          let start = '';
+          if (parseFloat(d) >= 3) {
+            start = y + '-' + m + '-' + (d - 2);
+          } else {
+            let o =30
+            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
+              o=31
+            }else if(m == 2){
+              o=28
+            }
+            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
+          }
+          threeMonths = new Date(start).getTime();
+          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+        }
       },
       videoUrl: null, // 下载地址
       map: null,
@@ -600,6 +625,7 @@ export default {
       }
     },
     submitForm(v) {
+
       if (
         this.ruleForm &&
         this.ruleForm.data1 &&
@@ -607,10 +633,8 @@ export default {
         this.curImageUrl
       ) {
         let pg = {
-          //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
           startDate: this.ruleForm.data1[0] + " 00:00:00",
           endDate: this.ruleForm.data1[1] + " 23:59:59",
-          //shotTime:this.ruleForm.data1[0]+"_"+this.ruleForm.data1[1],
           minFootholdTimes: this.ruleForm.minFootholdTimes || 0,
         };
         if (this.ruleForm.input5 == 1 && this.ruleForm.value1.length != 0) {
@@ -665,8 +689,11 @@ export default {
       };
     },
     getFoothold(d) {
+      this.isload=true
       getFoothold(d).then(res => {
         if (res) {
+          this.isload=false
+          this.dialogChoose=true
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
@@ -679,12 +706,12 @@ export default {
             x.checked = false;
             return x;
           });
-          //  console.log(this.evData);
-
           this.amap.clearMap();
           this.evData.sort(this.compare("shotNum"));
           this.drawMarkers(this.evData);
           //this.showEventList();
+        }else{
+          this.isload=false
         }
       });
     },
@@ -692,7 +719,7 @@ export default {
     getAllDevice() {
       getAllDevice().then(res => {
         // console.log(res);
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allDevice = res.data;
         }
       });
@@ -702,7 +729,7 @@ export default {
       getAllBayonetList({
         areaId: mapXupuxian.adcode
       }).then(res => {
-        if (res.data && res.data.length > 0) {
+        if (res && res.data && res.data.length > 0) {
           this.allBayonet = res.data;
         }
       });
@@ -953,7 +980,7 @@ export default {
     margin-bottom: 5px;
   }
 }
-.insetLeft {
+.insetLeft ,.insetLeft2{
   position: absolute;
   right: -28px;
   width: 25px;
@@ -967,13 +994,7 @@ export default {
   background-position: -380px -1269px;
   cursor: pointer;
 }
-.hide {
-  .insetLeft {
-    transform: rotate(180deg);
-    background-position: -504px -1269px;
-  }
-}
-.insetLeft2 {
+.insetLeft:hover,.insetLeft2:hover{
   position: absolute;
   right: -28px;
   width: 28px;
@@ -986,6 +1007,16 @@ export default {
   background-image: url(../../../../assets/img/icons.png);
   background-position: -318px -1269px;
   cursor: pointer;
+}
+.hide {
+  .insetLeft {
+    transform: rotate(180deg);
+    background-position: -504px -1269px;
+  }
+  .insetLeft:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
 }
 .select_btn {
   background-color: #0c70f8;
@@ -1168,12 +1199,6 @@ export default {
   }
 </style>
 <style lang="scss">
-html {font-size: 100px;}
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
   .struc_detail_dialog {
     .el-dialog {
       max-width: 13.06rem;
@@ -1572,6 +1597,12 @@ html {font-size: 100px;}
         -webkit-border-radius: 10px;
         -moz-border-radius: 10px;
         border-radius: 10px;
+      }
+    }
+    .el-upload:hover{
+      background: #0c70f8;
+      span{
+        color: #ffffff;
       }
     }
   }

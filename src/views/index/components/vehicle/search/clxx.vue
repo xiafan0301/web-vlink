@@ -1,10 +1,14 @@
 <template>
   <div class="vehicle-info">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆档案'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
@@ -130,7 +134,9 @@
 <script>
 import { getArchives, getViolation } from "../../../api/api.analysis.js";
 import { formatDate} from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       searchData: {
@@ -275,7 +281,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .vehicle-info {
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
   }
@@ -387,34 +393,6 @@ export default {
 }
 </style>
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .vehicle-info {
   //时间搜索
   .time-search {

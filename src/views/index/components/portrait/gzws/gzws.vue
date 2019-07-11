@@ -171,6 +171,7 @@
                 :picker-options="pickerDateTime"
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
+                range-separator="至"
                 type="datetimerange"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -178,7 +179,7 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item prop="deviceCode">
-              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode" @change="handleChangeDeviceCode">
+              <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode">
                 <el-option
                   v-for="(item, index) in deviceList"
                   :key="index"
@@ -214,8 +215,6 @@ import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
 import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.portrait.js';
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
-// import { dataList } from '@/utils/data.js';
-// import { getDiciData } from '@/views/index/api/api.js';
 import { formatDate } from '@/utils/util.js';
 export default {
   components: { Breadcrumb },
@@ -529,8 +528,8 @@ export default {
     recoveryTask (obj) {
       if (obj.uid) {
         const params = {
-          uid: obj.uid,
-          taskType: 3
+          uid: obj.uid
+          // taskType: 3
         };
         putTaskInfosResume(params)
           .then(res => {

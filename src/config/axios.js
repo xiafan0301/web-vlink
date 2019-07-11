@@ -58,7 +58,7 @@ service.interceptors.response.use(function (response) {
     } else if ( contenType === 'application/msexcel') {
       return _data;
     } else {
-      let msg = '系统繁忙，请稍后再试！';
+      let msg = '网络繁忙，请稍后重试！';
       if (_data.viewMsg) {
         msg = _data.viewMsg;
       }
@@ -69,7 +69,7 @@ service.interceptors.response.use(function (response) {
     return null;
   }
 }, function (error) {
-  let msg = '系统繁忙，请稍后再试！';
+  let msg = '网络繁忙，请稍后重试！';
   ElementUI.Message({ message: msg, type: 'error', customClass: 'request_tip' });
   return Promise.reject(error);
 });

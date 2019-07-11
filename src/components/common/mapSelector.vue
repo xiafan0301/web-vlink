@@ -54,8 +54,9 @@ export default {
     open  改变open值则打开窗口
     showTypes  需要操作的东西 D设备 B卡口
     oConfig   初始化地图配置参数
+    clear  改变clear值则会清空已绘制的图形
   */
-  props: ['open', 'showTypes', 'oConfig'],
+  props: ['open', 'clear', 'showTypes', 'oConfig'],
   data () {
     return {
       sid: 'map_selector_' + random14(),
@@ -75,13 +76,6 @@ export default {
 
       mouseTool: null,
       drawType: 0,
-      drawTypes: {
-        rectangle: null, // 1
-        circle: null, // 2
-        polyline: null, // 3
-        polygon: null, // 4
-        circle10km: null, // 5
-      },
 
       drawActiveType: null, // 
       drawObj: {
@@ -112,6 +106,10 @@ export default {
           this.initMap();
         }, 200)
       }
+    },
+    clear () {
+      console.log('watch clear');
+      this.drawClear();
     },
     oConfig () {
       // console.log('oConfig', this.oConfig)
@@ -219,20 +217,7 @@ export default {
         obj =  this.drawObj.circle10km[sid];
       }
       if (obj) {
-        if (obj.obj) {
-          this.amap.remove(obj.obj);
-          obj.obj = null;
-        }
-        if (obj.marker) {
-          this.amap.remove(obj.marker);
-          obj.marker = null;
-        }
-        if (obj.editor) {
-          obj.editor.close();
-          this.amap.remove(obj.editor);
-          obj.editor = null;
-        }
-        obj = null;
+        this.drawClearDo(obj);
       }
     },
     editMarkers (drawType, sid) {
@@ -676,31 +661,6 @@ export default {
         this.drawObj.circle10km[sid].marker = marker;
       }
     },
-
-    closeDraw (drawType) {
-      if (drawType === 1 && this.drawTypes.rectangle !== null) {
-        if (this.drawTypes.rectangle.editor) { this.drawTypes.rectangle.editor.close(); }
-        this.amap.remove(this.drawTypes.rectangle.obj);
-        this.drawTypes.rectangle = null;
-      } else if (drawType === 2 && this.drawTypes.circle !== null) {
-        if (this.drawTypes.circle.editor) { this.drawTypes.circle.editor.close(); }
-        this.amap.remove(this.drawTypes.circle.obj);
-        this.drawTypes.circle = null;
-      } else if (drawType === 3 && this.drawTypes.polyline !== null) {
-        if (this.drawTypes.polyline.editor) { this.drawTypes.polyline.editor.close(); }
-        this.amap.remove(this.drawTypes.polyline.obj);
-        this.drawTypes.polyline = null;
-      } else if (drawType === 4 && this.drawTypes.polygon !== null) {
-        if (this.drawTypes.polygon.editor) { this.drawTypes.polygon.editor.close(); }
-        this.amap.remove(this.drawTypes.polygon.obj);
-        this.drawTypes.polygon = null;
-      } else if (drawType === 5 && this.drawTypes.pocircle10kmlygon !== null) {
-        if (this.drawTypes.pocircle10kmlygon.editor) { this.drawTypes.pocircle10kmlygon.editor.close(); }
-        this.amap.remove(this.drawTypes.circle10km.obj);
-        this.drawTypes.circle10km = null;
-      }
-    },
-
     selSubmit () {
       // this.drawObj.circle10km 
       // rectangle circle polyline polygon circle10km
@@ -731,7 +691,7 @@ export default {
           if (this.drawObj.polyline) {
             for (let k in this.drawObj.polyline) {
               let so = this.drawObj.polyline[k];
-              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+              if (so && so.obj && window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
                 so.obj.getPath()) < 200) {
                 dObj[o.uid] = o;
               }
@@ -781,7 +741,7 @@ export default {
           if (this.drawObj.polyline) {
             for (let k in this.drawObj.polyline) {
               let so = this.drawObj.polyline[k];
-              if (window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
+              if (so && so.obj && window.AMap.GeometryUtil.distanceToLine(new window.AMap.LngLat(o.longitude, o.latitude), 
                 so.obj.getPath()) < 200) {
                 bObj[o.uid] = o;
               }
@@ -818,7 +778,58 @@ export default {
       this.submitLoading = false;
       this.dialogVisible = false;
     },
-
+    drawClear () {
+      // 矩形
+      if (this.drawObj.rectangle) {
+        for (let k in this.drawObj.rectangle) {
+          this.drawClearDo(this.drawObj.rectangle[k]);
+        }
+        this.drawObj.rectangle = {};
+      }
+      // 圆形
+      if (this.drawObj.circle) {
+        for (let k in this.drawObj.circle) {
+          this.drawClearDo(this.drawObj.circle[k]);
+        }
+        this.drawObj.circle = {};
+      }
+      // 线
+      if (this.drawObj.polyline) {
+        for (let k in this.drawObj.polyline) {
+          this.drawClearDo(this.drawObj.polyline[k]);
+        }
+        this.drawObj.polyline = {};
+      }
+      // 多边形
+      if (this.drawObj.polygon) {
+        for (let k in this.drawObj.polygon) {
+          this.drawClearDo(this.drawObj.polygon[k]);
+        }
+        this.drawObj.polygon = {};
+      }
+      if (this.drawObj.circle10km) {
+        for (let k in this.drawObj.circle10km) {
+          this.drawClearDo(this.drawObj.circle10km[k]);
+        }
+        this.drawObj.circle10km = {};
+      }
+    },
+    drawClearDo (obj) {
+      if (obj.obj) {
+        this.amap.remove(obj.obj);
+        obj.obj = null;
+      }
+      if (obj.marker) {
+        this.amap.remove(obj.marker);
+        obj.marker = null;
+      }
+      if (obj.editor) {
+        obj.editor.close();
+        this.amap.remove(obj.editor);
+        obj.editor = null;
+      }
+      obj = null;
+    },
     getTreeList () {
       if (this.showTypes.indexOf('D') >= 0) {
         this.getListDevice();

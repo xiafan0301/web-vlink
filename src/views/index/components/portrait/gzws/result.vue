@@ -30,11 +30,11 @@
         </ul>
       </div>
       <div class="right">
-        <template v-if="dataList && dataList.length === 0">
+        <template v-if="taskDetail.taskResult && taskDetail.taskResult.length === 0">
           <div class="content_top">
             <p>
               <span>检索结果</span>
-              <span>（{{dataList.length}}）</span>
+              <span>（{{taskDetail.taskResult.length}}）</span>
             </p>
           </div>
           <div class="result_detail">
@@ -126,7 +126,7 @@
 </template>
 <script>
 import Breadcrumb from '../breadcrumb.vue';
-import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+// import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 export default {
   components: { Breadcrumb },

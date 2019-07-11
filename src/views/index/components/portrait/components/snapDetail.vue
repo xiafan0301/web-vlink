@@ -22,7 +22,7 @@
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.personStoragePath" alt />
+              <img :src="sturcDetail.storagePath" alt />
               <!-- <i>全景图</i> -->
             </div>
             <div class="struc_c_d_info">
@@ -148,24 +148,31 @@ export default {
       if (val.personDetailList && val.personDetailList.length > 0) {
         this.sturcDetail = val.personDetailList[0];
         this.strucInfoList = val.personDetailList;
-        this.drawPoint(this.sturcDetail);
+        if (this.amap) {
+          this.drawPoint(this.sturcDetail);
+        } else {
+          setTimeout(() => {
+            this.initMap();
+          }, 200)
+        }
       }
     },
     strucCurTab(e) {
       if (e === 2) {
-        this.drawPoint(this.sturcDetail);
+        if (this.amap) {
+          this.drawPoint(this.sturcDetail);
+        } else {
+          setTimeout(() => {
+            this.initMap();
+          }, 200)
+        }
       } else if (e === 3) {
         this.videoUrl = document.getElementById("capVideo").src;
       }
     }
   },
   mounted() {
-    let map = new AMap.Map('capMap', {
-        center: [112.974691, 28.093846],
-        zoom: 16
-      });
-      map.setMapStyle('amap://styles/whitesmoke');
-      this.amap = map;
+    
   },
   methods: {
     toogleVisiable(f) {
@@ -176,14 +183,37 @@ export default {
         this.strucCurTab = 1;
         this.sturcDetail = this.snapObj.personDetailList[0];
         this.strucInfoList = this.snapObj.personDetailList;
-        this.drawPoint(this.sturcDetail);
+        if (this.amap) {
+          this.drawPoint(this.sturcDetail);
+        } else {
+          setTimeout(() => {
+            this.initMap();
+          }, 200)
+        }
       }
     },
     imgListTap(item, index) {
       this.curImgIndex = index;
       console.log("--------------", this.curImgIndex, item);
       this.sturcDetail = item;
-      this.drawPoint(item);
+      if (this.amap) {
+        this.drawPoint(item);
+        } else {
+          setTimeout(() => {
+            this.initMap();
+          }, 200)
+        }
+    },
+    initMap() {
+      if (this.amap) { return; }
+      let _this = this;
+      let map = new AMap.Map('capMap', {
+        center: [112.974691, 28.093846],
+        zoom: 16
+      });
+      map.setMapStyle('amap://styles/whitesmoke');
+      this.amap = map;
+      this.drawPoint(this.sturcDetail);
     },
     drawPoint(data) {
       this.$nextTick(() => {
@@ -194,6 +224,7 @@ export default {
       }
       let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
       if(data.shotPlaceLongitude && data.shotPlaceLatitude) {
+        console.log("--------------------",data.shotPlaceLongitude , data.shotPlaceLatitude)
         this.markerPoint = new AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
@@ -261,31 +292,6 @@ export default {
 };
 </script>
 <style lang="scss">
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .snap_dialog {
   height: 100%;
   .struc_detail_dialog_comp {

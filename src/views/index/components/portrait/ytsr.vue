@@ -39,14 +39,14 @@
       </div>
       <div class="vl_jtc_search">
         <el-date-picker
-                v-model="searchData.time"
-                type="daterange"
-                range-separator="-"
-                value-format="yyyy-MM-dd"
-                format="yy/MM/dd"
-                :picker-options="pickerOptions"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
+          v-model="searchData.time"
+          type="daterange"
+          range-separator="-"
+          value-format="yyyy-MM-dd"
+          format="yy/MM/dd"
+          :picker-options="pickerOptions"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
         </el-date-picker>
         <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
         <el-select
@@ -525,10 +525,32 @@
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 15 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.searchData.time = [_s, _e]
+        let curS = 1 * 24 * 3600 * 1000;
+        let sM = '', sD = '';
+        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+        } else {
+          sM = (new Date(curDate - curS).getMonth() + 1)
+        }
+        if ( new Date(curDate - curS).getDate() < 10 ) {
+          sD = '0' +  new Date(curDate - curS).getDate();
+        } else {
+          sD =  new Date(curDate - curS).getDate()
+        }
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
+        let eM = '', eD = '';
+        if ((date.getMonth() + 1) < 10 ) {
+          eM = '0' + (date.getMonth() + 1);
+        } else {
+          eM = (date.getMonth() + 1)
+        }
+        if (date.getDate() < 10 ) {
+          eD = '0' + date.getDate();
+        } else {
+          eD = date.getDate()
+        }
+        let _e = date.getFullYear() + '-' + eM + '-' + eD;
+        this.searchData.time = [_s, _e];
       },
       vChange () {
         this.showCameraList = !this.showCameraList;
@@ -582,16 +604,37 @@
         let params = {
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize,
-          'where.sortType': this.stucOrder,
-          'where.startTime': this.searchData.time[0],
-          'where.endTime': this.searchData.time[1],
-          'where.targetType': this.targetType * 1
+          where: {}
         }
+        if (this.stucOrder === 1) {
+          params.where['order'] = 'acs';
+        } else {
+          params.where['order'] = 'desc';
+        }
+        switch (this.stucOrder) {
+          case 1:
+            params.where['orderBy'] = 'shotTime';
+            break;
+          case 2:
+            params.where['orderBy'] = 'shotTime';
+            break;
+          case 3:
+            params.where['orderBy'] = 'deviceNamePinyin';
+            break;
+          case 4:
+            params.where['orderBy'] = 'semblance';
+            break;
+        }
+        params.where.startTime = this.searchData.time[0] + ' 00:00:00';
+        params.where.endTime = this.searchData.time[1] + ' 23:59:59';
+        params.where.targetType = this.targetType * 1;
         if (this.searchData.minSemblance) {
-          params['where.minSemblance'] = this.searchData.minSemblance;
+          params.where['minSemblance'] = this.searchData.minSemblance;
+        } else {
+          params.where['minSemblance'] = 0;
         }
         if (devIds.length) {
-          params['where.devIds'] = devIds.join(',');
+          params.where['deviceIds'] = devIds.join(',');
         }
         this.imgList.forEach(x => {
           if (x) {
@@ -599,7 +642,7 @@
           }
         })
         if (_ids.length && this.showSim) {
-          params['where.appendixIds'] = _ids.join(',');
+          params.where['appendixIds'] = _ids.join(',');
         }
         ScpGETstrucInfoList(params).then(res => {
           this.$_hideLoading();

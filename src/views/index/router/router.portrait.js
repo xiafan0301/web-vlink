@@ -50,9 +50,14 @@ export default {
       component: () => import('@/views/index/components/portrait/peer-analysis-list.vue')
     },
     {
-      path: 'peer-analysis', // 同行分析
-      name: 'peer_analysis',
-      component: () => import('@/views/index/components/portrait/peer-analysis.vue')
+      path: 'peer-analysis-result', // 同行分析
+      name: 'peer_analysis_result',
+      component: () => import('@/views/index/components/portrait/peer-analysis-result.vue')
+    },
+    {
+      path: 'peer-analysis-record', // 同行分析记录
+      name: 'peer_analysis_record',
+      component: () => import('@/views/index/components/portrait/peer-analysis-record.vue')
     },
     {
       path: 'xjpfcm',     //新建分析任务

@@ -220,14 +220,22 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="">
-                <el-select v-model="carForm.region" placeholder="请选择品牌" style="width: 37%;" :disabled="isAddDisabled">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+              <el-form-item prop="vehicelBrand">
+                <el-select v-model="carForm.vehicelBrand" placeholder="请选择品牌" style="width: 37%;" :disabled="isAddDisabled" @change="handleChangeVehicleBrand">
+                  <el-option
+                    v-for="(item, index) in vehicleBrandsList"
+                    :key="index"
+                    :label="item"
+                    :value="item"
+                  ></el-option>
                 </el-select>
                 <el-select v-model="carForm.vehicleModel" placeholder="请选择型号" style="width: 45%; margin-left: 3%" :disabled="isAddDisabled">
-                  <el-option label="区域一" value="shanghai"></el-option>
-                  <el-option label="区域二" value="beijing"></el-option>
+                  <el-option
+                    v-for="(item, index) in vehicleModelList"
+                    :key="index"
+                    :label="item"
+                    :value="item"
+                  ></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item prop="numberType">
@@ -244,9 +252,9 @@
                 <el-select v-model="carForm.numberColor" placeholder="请选择号牌颜色" style="width: 85%;" disabled>
                   <el-option
                     v-for="item in numColorList"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                    :key="item.enumField"
+                    :label="item.enumValue"
+                    :value="item.enumField">
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -389,6 +397,22 @@
         <el-button class="operation_btn function_btn" :loading="isImportLoading" @click="sureImportFile">导入</el-button>
       </div>
     </el-dialog>
+    <!-- 导入完成弹框 -->
+    <el-dialog
+      class="dialog_comp dialog_comp_import"
+      title="导入完成"
+      width="392px"
+      :visible.sync="importFinishDialog"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false">
+      <div class="import-box">
+        <p>本次成功导入：<span style="color: #2888FF">{{successNumber}}</span>条数据</p>
+        <p>本次失败导入：<span style="color: #DC4C4F">{{failNumber}}</span>条数据</p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <div v-show="showFailFile" class="down-fail-btn" @click="downloadErrorFile">下载失败列表</div>
+      </span>
+    </el-dialog>
     <!--图片放大-->
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt="">
@@ -399,9 +423,11 @@
 import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber, checkIdCard } from '@/utils/validator.js';
 import { dataList } from '@/utils/data.js';
+import { autoDownloadUrl } from '@/utils/util.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
-  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
+  getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
+  getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport } from '@/views/index/api/api.manage.js';
 import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
@@ -436,6 +462,10 @@ export default {
       isImportLoading: false, // 导入加载中
       importDialog: false, // 导入弹出框
       delVehicleDialog: false, // 删除车辆弹出框
+      importFinishDialog: false, // 导入完成弹出框
+      successNumber: 0, // 成功导入多少条数据
+      failNumber: 0, // 导入失败多少条数据
+      showFailFile: false, // 是否显示错误文件
       fileList: [],
       dialogImageUrl: null,
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
@@ -469,6 +499,7 @@ export default {
         ownerIdCard: null, // 车主身份证号
         vehicleModel: null, // 车辆型号
         groupList: [], // 分组
+        vehicelBrand: null, // 车辆品牌
         desci: null, // 描述
       },
       carRules: {
@@ -480,17 +511,9 @@ export default {
           { validator: checkIdCard, trigger: 'blur'}
         ]
       },
-      numColorList: [
-        {label: '黄底黑字', value: '1'},
-        {label: '蓝底白字', value: '2'},
-        {label: '蓝底白字', value: '8'},
-        {label: '黄底黑字黑框线', value: '15'},
-        {label: '白底黑字、红“警”字', value: '23'},
-        {label: '白底黑字、红“警”字', value: '24'},
-        {label: '渐变绿底黑字', value: '25'},
-        {label: '黄绿双拼底黑字', value: '26'},
-        {label: '其他', value: '99'}
-      ],//号牌颜色列表
+      vehicleBrandsList: [], // 车辆品牌列表
+      vehicleModelList: [], // 车辆型号列表
+      numColorList: [],//号牌颜色列表
       vehicleTypeList: [], // 车辆类型列表
       vehicleColorList: [], // 车身颜色列表
       numberTypeList: [], // 号牌种类列表
@@ -519,10 +542,33 @@ export default {
     this.getVehicleTypeList();
     this.getVehicleColor();
     this.getNumberTypeList();
+    this.getNumberColorList();
+    this.getVehicleBrandsList();
     this.getGroupList();
     
   },
   methods: {
+    // 车辆品牌change
+    handleChangeVehicleBrand (val) {
+      this.carForm.vehicleModel = null;
+      if (val) {
+        getVehicleModel(val)
+          .then(res => {
+            if (res) {
+              this.vehicleModelList = res.data;
+            }
+          })
+      }
+    },
+    // 获取车辆品牌
+    getVehicleBrandsList () {
+      getVehicleBrand()
+        .then(res => {
+          if (res) {
+            this.vehicleBrandsList = res.data;
+          }
+        })
+    },
     // 获取车辆类型列表
     getVehicleTypeList () {
       const type = dataList.vehicleType;
@@ -530,6 +576,16 @@ export default {
         .then(res => {
           if (res) {
             this.vehicleTypeList = res.data;
+          }
+        })
+    },
+    // 获取号牌颜色列表
+    getNumberColorList () {
+      const type = dataList.licensePlateColor;
+      getDiciData(type)
+        .then(res => {
+          if (res) {
+            this.numColorList = res.data;
           }
         })
     },
@@ -560,7 +616,9 @@ export default {
         .then(res => {
           if (res) {
             this.groupList = res.data;
-            this.activeId = res.data[0].id;
+            if (!this.activeId) {
+              this.activeId = res.data[0].id;
+            }
             this.getVehicleList();
           }
         })
@@ -602,7 +660,14 @@ export default {
             this.vehicleList = res.data.list;
             this.pagination.total = res.data.total;
             this.vehicleList.map(item => {
+              let vehicleModel;
+              if (item.vehicleModel) {
+                vehicleModel = item.vehicleModel.split(';');
+                item.vehicleModel = vehicleModel.join(' ');
+              }
+
               item.isDelete = false;
+
               this.vehicleTypeList.map(val => {
                 if (val.enumField === item.vehicleType) {
                   item.vehicleType = val.enumValue;
@@ -619,11 +684,12 @@ export default {
                 }
               });
               this.numColorList.map(val => {
-                if (val.value === item.numberColor) {
-                  item.numberColor = val.label;
+                if (val.enumField === item.numberColor) {
+                  item.numberColor = val.enumValue;
                 }
               });
             });
+            console.log(this.vehicleList)
           }
         })
     },
@@ -799,6 +865,9 @@ export default {
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
+          if (this.carForm.vehicelBrand || this.carForm.vehicleModel) {
+            this.carForm['vehicleModel'] = this.carForm.vehicelBrand + ';' + this.carForm.vehicleModel;
+          }
           this.isVehicleLoading = true;
           addSpecialVehicle(this.carForm)
             .then(res => {
@@ -843,6 +912,11 @@ export default {
             return;
           }
           this.carForm.vehicleImagePath = this.dialogImageUrl;
+
+          if (this.carForm.vehicelBrand || this.carForm.vehicleModel) {
+            this.carForm['vehicleModel'] = this.carForm.vehicelBrand + ';' + this.carForm.vehicleModel;
+          }
+
           this.isVehicleLoading = true;
           editSpecialVehicle(this.carForm)
             .then(res => {
@@ -960,6 +1034,7 @@ export default {
       if (this.$refs[form]) {
         this.$refs[form].resetFields();
       }
+      this.carForm.vehicleModel = null;
       this.carForm.uid = null;
       this.carForm.groupList = [];
       this.isAddDisabled = false;
@@ -998,7 +1073,12 @@ export default {
               this.carForm.ownerName = res.data.ownerName;
               this.carForm.ownerIdCard = res.data.ownerIdCard;
               this.carForm.ownerIdType = res.data.ownerIdType;
-      
+
+              if (res.data.vehicleModel) {
+                this.carForm.vehicelBrand = res.data.vehicleModel.split(';')[0];
+                this.carForm.vehicleModel = res.data.vehicleModel.split(';')[1];
+              }
+
               if (res.data.groupList.length > 0) {
                 res.data.groupList.map(item => {
                   this.carForm.groupList.push(item.uid);
@@ -1067,29 +1147,20 @@ export default {
       vehicleExport(params)
         .then(res => {
           if (res && res.data) {
-            const eleA = document.getElementById('export_id');
-            if (eleA) {
-              document.body.removeChild(eleA);
-            }
-            let a = document.createElement('a');
-            a.setAttribute('href', res.data.fileUrl);
-            a.setAttribute('target', '_self');
-            a.setAttribute('id', 'export_id');
-
-            document.body.appendChild(a);
-            a.click();
-          
+            autoDownloadUrl(res.data.fileUrl);
           }
         })
     },
     // 显示导入车辆弹出框
     importVehicle () {
       this.importDialog = true;
+      this.fileList = [];
     },
     // 导入
     sureImportFile () {
       if (this.fileList.length > 0) {
         this.isImportLoading = true;
+        this.importUrl = ajaxCtx.base + '/special-vehicle/import?groupId=' +  this.activeId;
         this.$nextTick(() => {
           this.$refs.vehicleImport.submit();
         })
@@ -1105,9 +1176,33 @@ export default {
     // 上传成功
     handleSuccess (res) {
       this.isImportLoading = false;
-      console.log(res);
+      if (res && res.data.code === 0) {
+        this.importDialog = false;
+        this.successNumber = res.data.result.successSize;
+        this.failNumber = res.data.result.failSize;
+        this.showFailFile = false;
+        this.importFinishDialog = true;
+
+        this.getGroupList();
+      } else {
+
+      }
     },
-    
+    // 下载错误文件
+    downloadErrorFile () {
+      // if (this.errorFile) {
+      //   autoDownloadUrl(this.errorFile);
+      //   if (this.delErrorFile) {
+      //     // 下载成功后删除动态模板
+      //     // this.timerError = setTimeout(() => {
+      //     //   deleteDownLoadFile(this.delErrorFile)
+      //     //   .then(res => {
+      //     //     console.log('res', res)
+      //     //   });
+      //     // }, 30000)
+      //   }
+      // }
+    }
   }
 }
 </script>
@@ -1475,6 +1570,26 @@ export default {
           }
         }
       }
+  }
+  .import-box {
+    text-align: center;
+    // color: $dialog-color5;
+    p {
+      margin-bottom: 10px;
+    }
+  }
+  .down-fail-btn {
+    cursor: pointer;
+    margin: 0 auto;
+    background-color: #0C70F8;
+    color: #fff;
+    width: 110px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 5px;
+    a {
+      color: #fff;
+    }
   }
 }
 </style>

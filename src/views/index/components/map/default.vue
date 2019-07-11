@@ -16,14 +16,6 @@ export default {
 }
 </script>
 <style lang="scss">
-  html {
-    font-size: 100px;
-  }
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px;} }
 .vl_map_main { height: 100%; overflow: hidden; }
 .vl_map {
   position: relative;

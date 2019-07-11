@@ -36,7 +36,7 @@
             ></el-date-picker>
           </el-form-item>
           <el-form-item prop="_vehicleGroup" >
-            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="车辆类别">
+            <el-select v-model="ruleForm._vehicleGroup"class="full"  multiple collapse-tags placeholder="全部车辆类别">
               <el-option
                 v-for="item in grounpOptions"
                 :key="item.uid"
@@ -46,7 +46,8 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="vehicleClass">
-            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="车辆类型">
+            <el-select v-model="ruleForm.vehicleClass"  class="full" placeholder="全部车辆类型">
+              <el-option label="全部车辆类型" value=""></el-option>
               <el-option
                 v-for="item in vehicleOptions"
                 :key="item.enumValue"
@@ -77,7 +78,7 @@
             </el-input>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
+            <el-select v-model="value1" multiple collapse-tags placeholder="全部地区" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -106,7 +107,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">确定</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">确定</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -205,6 +206,7 @@ export default {
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
+      isload: false,
       value1: null,
       select: "",
       selectValue:"已选设备0个",
@@ -312,7 +314,7 @@ export default {
     },
     //查询车辆
     getSnapList(){
-      
+      this.isload=true
       if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
         this.$message.error("请输入开始时间和结束时间!");
         return
@@ -330,7 +332,8 @@ export default {
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       let d=this.ruleForm
       getSnapList(d).then(res=>{
-        if(res.data && res.data.length>0){
+        if(res && res.data && res.data.length>0){
+          this.isload=false
           // console.log(res.data);
           // pagination: { total: 4, pageSize: 10, pageNum: 1 },
           // this.pagination.total=res.data.total
@@ -339,6 +342,7 @@ export default {
           // console.log(this.tableData);
           
         }else{
+           this.isload=false
           this.$message.info("没有相关数据。");
           this.tableData=[]
         }

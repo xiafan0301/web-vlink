@@ -86,3 +86,32 @@ export function getCarmodelList(params) {
   })
 }
 
+/**
+ * 通过设备id监控设备详情查询   
+ * @param {object} params
+ */
+export function getDeviceDetailById(params) {
+  return request({
+    url: '/device-service/device-details',
+    method: 'get',
+    params: params,
+    mode: baseModeName
+  })
+}
+
+/**
+ * 根据卡口标识集合查询设备列表信息   
+ * @param {object} params
+ */
+export function getDeviceByBayonetUids(params) {
+  let str = '';
+  for (let i = 0; i < params.length; i++) {
+    str += (i === 0 ? '' : '&') + 'bayonetUids=' + params[i] + '&';
+  }
+  return request({
+    url: '/device-service/bayonetUids?' + str,
+    method: 'get',
+    // params: params,
+    mode: baseModeName
+  })
+}

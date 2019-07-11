@@ -1,5 +1,5 @@
 <template>
-  <div class="ljd point">
+  <div class="point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
@@ -10,22 +10,23 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-                :model="ruleForm"
-                status-icon
-                ref="ruleForm"
-                label-width="0px"
-                class="demo-ruleForm"
+          :model="ruleForm"
+          status-icon
+          ref="ruleForm"
+          :rules="rules"
+          label-width="0px"
+          class="demo-ruleForm"
         >
           <el-form-item class="firstItem" prop="data1">
             <el-date-picker
-                    v-model="ruleForm.data1"
-                    type="daterange"
-                    class="full data_range"
-                    value-format="yyyy-MM-dd"
-                    :picker-options="pickerOptions"
-                    range-separator="至"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期">
+              v-model="ruleForm.data1"
+              type="daterange"
+              class="full data_range"
+              value-format="yyyy-MM-dd"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
 
@@ -50,20 +51,20 @@
           <el-form-item v-if="ruleForm.input5=='1'" prop="value1">
             <el-select v-model="ruleForm.value1" multiple collapse-tags placeholder="请选择" class="full">
               <el-option-group
-                      v-for="group in options"
-                      :key="group.areaName"
-                      :label="group.areaName">
+                v-for="group in options"
+                :key="group.areaName"
+                :label="group.areaName">
                 <el-option
-                        v-for="item in group.areaTreeList"
-                        :key="item.areaId"
-                        :label="item.areaName"
-                        :value="item.areaId">
+                  v-for="item in group.areaTreeList"
+                  :key="item.areaId"
+                  :label="item.areaName"
+                  :value="item.areaId">
                 </el-option>
               </el-option-group>
             </el-select>
           </el-form-item>
           <el-form-item v-if="ruleForm.input5=='2'" >
-            <el-input  v-model="'已选设备'+ pointData.length + '个'" :disabled="true">
+            <el-input  v-model="curChooseNum" :disabled="true">
             </el-input>
           </el-form-item>
           <el-form-item>
@@ -72,7 +73,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="serarchLoading" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -99,8 +100,9 @@
                     <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
                   </div>
                 </div>
+                <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
                 <el-pagination
-                  v-show="pagination.total > 5"
+                  v-show="pagination.total > 10"
                   class="cum_pagination th-center-pagination"
                   @current-change="onPageChange"
                   :current-page.sync="pagination.pageNum"
@@ -115,11 +117,11 @@
       </div>
     </div>
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+        :visible.sync="strucDetailDialog"
+        class="struc_detail_dialog"
+        :close-on-click-modal="false"
+        top="4vh"
+        :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -130,7 +132,7 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
@@ -188,61 +190,33 @@
         </swiper>
       </div>
     </el-dialog>
-    <!-- 地图选择 -->
-    <el-dialog class="map_select" :show-close="false" :visible.sync="dialogVisible" width="80%">
-      <div class="mapbox">
-        <div class="mapbox map_select_box"></div>
-        <div class="bottomBox">
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="cancelMap">取 消</el-button>
-            <el-button class="select_btn" type="primary" @click="confirmMap">确 认</el-button>
-          </span>
-        </div>
-        <div class="setPost">
-          <div>
-            <el-autocomplete
-                class="inline-input"
-                v-model="input3"
-                :fetch-suggestions="querySearch"
-                placeholder="请输入内容"
-                value-key="name"
-                :trigger-on-focus="false"
-                @select="handleSelect"
-            ></el-autocomplete>
-            <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-            <!-- </el-input> -->
-          </div>
-          <div class="drawBox">
-            <p>请选择框选图形</p>
-            <div class="items">
-              <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
-              <span @click="clickTab('cut2')" :class="['cut2',{'hover':hover=='cut2'}]"></span>
-              <span @click="clickTab('cut3')" :class="['cut3',{'hover':hover=='cut3'}]"></span>
-              <span @click="clickTab('cut4')" :class="['cut4',{'hover':hover=='cut4'}]"></span>
-              <span @click="clickTab('cut5')" :class="['cut5',{'hover':hover=='cut5'}]"></span>
-            </div>
-          </div>
-        </div>
-        <div class="shrink">
-          <span class="el-icon-plus" @click="mapZoomSet(1)"></span>
-          <span class="el-icon-minus" @click="mapZoomSet(-1)"></span>
-        </div>
-      </div>
-    </el-dialog>
+    <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :clear="selectMapClear" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
     <div id="capMap"></div>
-    <div id="contentMap"></div>
   </div>
 </template>
 <script>
+  import mapSelector from '@/components/common/mapSelector.vue';
   import { mapXupuxian } from "@/config/config.js";
   import { objDeepCopy, random14 } from "@/utils/util.js";
   import { cityCode } from "@/utils/data.js";
-  import { getAllDevice,InvestigateGetTrace } from "@/views/index/api/api.judge.js";
+  import { InvestigateGetTrace } from "@/views/index/api/api.judge.js";
   import { MapGETmonitorList } from "@/views/index/api/api.map.js";
   import { getAllBayonetList } from "@/views/index/api/api.base.js";
   export default {
+    components: {mapSelector},
     data() {
       return {
+        serarchLoading: false,
+        rules: {
+          input3:{
+            pattern:/^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]([A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
+            message: '常规格式：湘A12345',
+            trigger: 'blur'
+          }
+        },
+        selectMapClear: '',
+        curChooseNum: '已选择0个设备',
         hover:null,
         input3: null,
         mouseTool: null,
@@ -259,18 +233,20 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 5, pageNum: 1 },
+        pagination: { total: 0, pageSize: 10, pageNum: 1 },
         dialogVisible: false,
         amap: null,
         map: null,
-        contentMap: null,
-        pointData: [],
+        pointData: {
+          deviceList: [],
+          bayonetList: []
+        },
         reselt: false,
         hideleft: false,
         timeOrder: false,
         ruleForm: {
           data1:null,
-          input3: '湘AN8888',
+          input3: '',
           input5: "1",
           value1: null,
         },
@@ -286,9 +262,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -310,19 +286,32 @@
       };
     },
     mounted() {
+      if (this.$route.query.plateNo) {
+        this.ruleForm.input3 = this.$route.query.plateNo;
+      }
       this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
-      this.getAllDevice() //查询所有的设备
       this.setDTime();
     },
     methods: {
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 3 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.ruleForm.data1 = [_s, _e];
+        let curS = 1 * 24 * 3600 * 1000;
+        let sM = '', sD = '';
+        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+        } else {
+          sM = (new Date(curDate - curS).getMonth() + 1)
+        }
+        if ( new Date(curDate - curS).getDate() < 10 ) {
+          sD = '0' +  new Date(curDate - curS).getDate();
+        } else {
+          sD =  new Date(curDate - curS).getDate()
+        }
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
+//        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
+        this.ruleForm.data1 = [_s, _s];
       },
       onPageChange (page) {
         this.pagination.pageNum = page;
@@ -339,13 +328,7 @@
         }
       },
       clickTabCh() {
-        if (!this.dialogVisible) {
-          this.dialogVisible = true;
-          this.$nextTick(() => {
-            $('.map_select_box').append($('#contentMap'))
-            this.contentMap.setFitView();
-          })
-        }
+        this.dialogVisible = !this.dialogVisible;
       },
       clickTab(val){
         this.hover = this.hover==val?'':val
@@ -414,76 +397,52 @@
         this.dialogVisible=false
       },
       submitForm(v) {
-        this.reselt = true;
-        if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
-          let pg = {
-            where: {}
+        this.$refs[v].validate((valid) => {
+          if (valid) {
+            if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
+              let pg = {
+                pageSize: 9999,
+                where: {}
+              }
+              console.log(this.ruleForm.data1);
+              pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
+              pg.where['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
+              pg.where['vehicleNumber'] = this.ruleForm.input3;
+              if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
+                pg.where['areaUid']=this.ruleForm.value1.join(",")
+              }
+              if(this.ruleForm.input5==2){
+                pg.where['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
+                pg.where['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
+              }
+              this.storeParam = objDeepCopy(pg);
+              this.getVehicleShot(pg);
+            }else{
+              this.$message.info("请输入开始时间和车牌号码。");
+            }
+          } else {
+            return false;
           }
-          pg.where['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
-          pg.where['endTime'] = this.ruleForm.data1[1]+" 00:00:00";
-          pg.where['vehicleNumber'] = this.ruleForm.input3;
-          if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-            pg['where.areaUid']=this.ruleForm.value1.join(",")
-          }
-          if(this.ruleForm.input5==2){
-            pg.where['bayonetIds'] = this.pointData.filter(x => x.dataType === 1).map(y => {return y.uid}).join(',');
-            pg.where['cameraIds'] = this.pointData.filter(x => x.dataType === 0).map(y => {return y.uid}).join(',');
-          }
-          this.storeParam = objDeepCopy(pg);
-          this.getVehicleShot(pg);
-        }else{
-          this.$message.info("请输入开始时间和车牌号码。");
-        }
+        });
       },
       resetForm(){
-        this.ruleForm= {
-          data1:null,
-          input3: null,
-          input5: "1",
-          value1: null,
+        this.ruleForm.input5 = '1';
+        this.ruleForm.input3 = '';
+        this.ruleForm.value1 = [];
+        this.options[0].areaTreeList.forEach(x => {
+          this.ruleForm.value1.push(x.areaId)
+        })
+        this.selectMapClear = random14();
+        this.pointData = {
+          deviceList: [],
+          bayonetList: []
         }
+        this.curChooseNum = '已选择0个设备';
+        this.setDTime ();
         //this.$refs[v].resetFields();
-      },
-      mapZoomSet(val) {
-        if (this.contentMap) {
-          this.contentMap.setZoom(this.contentMap.getZoom() + val);
-        }
-      },
-      setCenter() {
-        var _this = this;
-        // console.log(this.input3);
-        let placeSearch = new AMap.PlaceSearch({
-          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
-          city: "021"
-        });
-        placeSearch.search(this.input3, function(status, result) {
-          // 查询成功时，result即对应匹配的POI信息
-          //  console.log(result)
-          let pois = result.poiList.pois;
-          if (pois.length > 0) {
-            let new_center = pois[0].location;
-            _this.contentMap.setZoomAndCenter(16, new_center);
-          }
-
-          // for(var i = 0; i < pois.length; i++){
-          //     var poi = pois[i];
-          //     var marker = [];
-          //     marker[i] = new AMap.Marker({
-          //         position: poi.location,   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
-          //         title: poi.name
-          //     });
-          //     // 将创建的点标记添加到已有的地图实例：
-          //     _this.amap.add(marker[i]);
-          // }
-          // _this.amap.setFitView();
-        });
       },
       confirmMap(){
         this.dialogVisible = false;
-      },
-      cancelMap(){
-        this.dialogVisible = false;
-        this.pointData = [];
       },
       //查询行政区域
       getMapGETmonitorList(){
@@ -492,65 +451,12 @@
         }
         MapGETmonitorList(d).then(res=>{
           if(res && res.data){
-
+            res.data.areaTreeList.forEach(x => {
+              this.ruleForm.value1.push(x.areaId)
+            })
             this.options.push(res.data)
           }
         })
-      },
-      querySearch(queryString, cb) {
-        //this.seacher(queryString)
-
-        this.$nextTick(() => {
-          this.seacher(queryString).then(v => {
-            //console.log(v);
-            var restaurants = v;
-            //  console.log(restaurants)
-            var results = queryString
-                ? restaurants.filter(this.createFilter(queryString))
-                : restaurants;
-            // console.log(results)
-            cb(results);
-            // 调用 callback 返回建议列表的数据
-            // clearTimeout(this.timeout);
-            //   this.timeout = setTimeout(() => {
-            //     cb(results);
-            //   }, 3000 * Math.random());
-            // cb(results);
-          });
-        });
-      },
-      handleSelect(item) {
-        // console.log(item);
-        let new_center = item.location;
-        this.contentMap.setZoomAndCenter(16, new_center);
-      },
-      createFilter(queryString) {
-        return restaurant => {
-          // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));
-
-          return (
-              restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1
-          );
-        };
-      },
-      seacher(v) {
-        var placeSearch = new AMap.PlaceSearch({
-          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
-          city: "湖南"
-        });
-
-        if (!!v) {
-          let _this = this;
-          return new Promise((resolve, reject) => {
-            placeSearch.search(v, (status, result) => {
-              // 查询成功时，result即对应匹配的POI信息
-              let pois = result.poiList.pois;
-              _this.restaurants = pois;
-              resolve(pois);
-            });
-          });
-        }
-        //return pois
       },
       renderMap() {
         let map = new window.AMap.Map("rightMap", {
@@ -566,81 +472,13 @@
         });
         supMap.setMapStyle('amap://styles/whitesmoke');
         this.map = supMap;
-        // 弹窗地图
-        let supMap1 = new AMap.Map('contentMap', {
-          center: mapXupuxian.center,
-          zoom: 16
-        });
-        supMap1.setMapStyle('amap://styles/whitesmoke');
-        this.contentMap = supMap1;
-        // 在地图中添加MouseTool插件
-        this.mouseTool = new window.AMap.MouseTool(supMap1);
-        let _this=this
-        this.contentMap.on( 'click',   function (e) {
-          //lnglatInput.value = e.lnglat.toString();
-          if(_this.hover=='cut5'){
-            _this.mouseTool.close(true);
-            if (_this.drawArea) {
-              _this.map.remove(_this.drawArea)
-            }
-            _this.circle = new AMap.Circle({
-              center:e.lnglat,
-              radius: 5000, //半径
-              borderWeight: 3,
-              strokeColor: "#FF33FF",
-              strokeWeight: 1,
-              strokeOpacity: 0.2,
-              fillOpacity: 0.4,
-              strokeStyle: 'solid',
-              // strokeDasharray: [10, 10],
-              // 线样式还支持 'dashed'
-              fillColor: '#1791fc',
-              zIndex: 50,
-            })
-            _this.circle.setMap(_this.contentMap);
-            _this.drawArea = _this.circle;
-            _this.checkout(_this.circle,'AMap.circle')
-          }
-
-        });
-        window.AMap.event.addListener(this.mouseTool, 'draw', function (e) {
-          if (_this.drawArea) {_this.contentMap.remove(_this.drawArea);}
-          _this.drawArea = e.obj;
-          let a=e.obj
-          let t=e.obj.CLASS_NAME
-          _this.checkout(a,t)
-        });
       },
-      checkout(obj , type){
-        if(type!="AMap.Polyline"){
-          this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
-            //  var isPointInRing = window.AMap.GeometryUtil.isPointInRing(myLngLat,obj.C.path);
-            let isPointInRing = obj.contains(myLngLat);
-            // console.log(marker.getPosition());
-            if(isPointInRing){//如果点在圆内则输出
-              let id = this.pointData.findIndex(item=>item.uid==el.uid)
-              if(id == -1){
-                this.pointData.push(el)
-              }
-            }
-          })
-        }else{
-          this.mapTreeData.forEach(el=>{
-            let myLngLat=new AMap.LngLat(el.longitude,el.latitude);
-            // let  closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(myLngLat,obj.C.path);
-            // console.log(closestPositionOnLine);
-
-            let distance =  Math.round(window.AMap.GeometryUtil.distanceToLine(myLngLat,obj.B.path));
-            // console.log(distance);
-            let id = this.pointData.findIndex(item=>item.uid==el.uid)
-            if(id==-1 && distance <=1000){
-              this.pointData.push(el)
-            }
-          })
-        }
+      mapPoint (data) {
+        console.log(data);
+        let num = data.deviceList.length + data.bayonetList.length;
+        this.curChooseNum = '已选择' + num + '个设备';
+        this.pointData = data;
       },
-      
       compare  (prop, bool) {
         return function (obj1, obj2) {
           var val1 = obj1[prop];
@@ -667,17 +505,18 @@
         }
       },
       getVehicleShot(d) {
-        this.$_showLoading('.reselt');
+        this.serarchLoading = true;
         InvestigateGetTrace(d).then(res => {
+          this.serarchLoading = false;
           if (res) {
             // console.log(res);
-            this.$_hideLoading();
             if (!res.data || res.data.length === 0) {
               this.$message.info("抱歉，没有找到匹配结果");
               this.amap.clearMap();
               //this.searching = false;
               return false;
             }
+            this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
             this.pagination.total = res.data.total;
@@ -688,7 +527,7 @@
             //this.showEventList();
           }
         }).catch(() => {
-          this.$_hideLoading();
+          this.serarchLoading = false;
         });
       },
       operData () {
@@ -707,26 +546,6 @@
               this.leftEvData.find(y => y.label === key).list.push(x);
             }
           }
-        })
-      },
-      //查询所有的设备
-      getAllDevice(){
-        getAllDevice().then(res=>{
-          if(res.data && res.data.length>0){
-            console.log(res.data)
-            this.objSetItem(res.data, {infoName: 'deviceName', dataType: 0});
-          }
-          getAllBayonetList({
-            areaId: mapXupuxian.adcode
-          }).then(resBon => {
-            console.log(resBon.data);
-            if(resBon.data && resBon.data.length>0){
-              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 0});
-            }
-            this.mapTreeData = Object.assign([], res.data, resBon.data)
-            console.log(this.mapTreeData)
-            this.mapMark(this.mapTreeData)
-          })
         })
       },
       objSetItem (list, obj) {
@@ -758,62 +577,13 @@
           str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
           str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
           str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
+//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
           str += '</ul></div>'
         }
         return str;
       },
-      mapMark (data) {
-        if (data && data.length > 0) {
-          let _this = this;
-          data.forEach(obj => {
-            if (obj.longitude > 0 && obj.latitude > 0) {
-              let offSet = {0: [-15, -16],1: [-15, -16],2: [-15, -60],3: [-15, -16], 4: [-15, -16],5: [-15, -16]}, sDataType;
-              if (obj.dataType === 0 && obj.deviceStatus !== 1) {
-                sDataType = 6;
-              }else if (obj.dataType === 2) {
-                sDataType = '2' + obj.vehicleType
-              } else {
-                sDataType = obj.dataType;
-              }
-              let uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + '"></div>'
-              if (obj.dataType === 2 && !_this.constObj[obj.dataType].supTypeList.includes(obj.vehicleType - 1)) {
-                uContent = '<div id="' + obj.markSid + '" class="map_icons vl_icon vl_icon_map_mark' + sDataType + ' '+ _this.hideClass +'"></div>'
-              }
-              let marker = new window.AMap.Marker({ // 添加自定义点标记
-                map: _this.contentMap,
-                position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-                offset: new window.AMap.Pixel(offSet[obj.dataType][0], offSet[obj.dataType][1]), // 相对于基点的偏移位置
-                draggable: false, // 是否可拖动
-                extData: obj,
-                // 自定义点标记覆盖物内容
-                content: uContent,
-                bubble: true
-              });
-              _this.marks[obj.dataType].push(marker);
-              // hover
-              marker.on('mouseover', function () {
-//                  $('#' + obj.markSid).addClass('vl_icon_map_hover_mark' + obj.dataType)
-                let curP = marker.getPosition();
-                let sContent = '<div class="vl_map_hover" >' + _this.mapHoverInfo(obj) + '</div>';
-                _this.hoverWindow = new window.AMap.InfoWindow({
-                  isCustom: true,
-                  closeWhenClickMap: true,
-                  offset: new window.AMap.Pixel(9, 34), // 相对于基点的偏移位置
-                  content: sContent,
-                  bubble: true
-                });
-                _this.hoverWindow.open(_this.contentMap, new window.AMap.LngLat(curP.lng, curP.lat));
-
-              });
-              marker.on('mouseout', function () {
-//                  $('#' + obj.markSid).removeClass('vl_icon_map_hover_mark' + obj.dataType)
-              })
-            }
-          })
-        }
-      },
       drawMapMarker (data) {
+        console.log(data)
         let path = [];
         for (let  i = 0; i < data.length; i++) {
           let obj = data[i];
@@ -925,6 +695,7 @@
   }
   .breadcrumb_heaer {
     background: #ffffff;
+    border-bottom: 1px solid #D3D3D3;
   }
   .full {
     width: 100%;
@@ -950,8 +721,8 @@
     position: absolute;
     left: 275px;
     z-index: 2;
-    box-shadow: 4px 0px 10px 0px #838383;
-    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    /*box-shadow: 4px 0px 10px 0px #838383;*/
+    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
     animation: fadeInLeft 0.4s ease-out 0.3s both;
     .title {
       font-size: 16px;
@@ -1002,8 +773,8 @@
     float: left;
     z-index: 1;
     margin-left: 0px;
-    box-shadow: 4px 0px 10px 0px #838383;
-    box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+    /*box-shadow: 4px 0px 10px 0px #838383;*/
+    /*box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);*/
     animation: fadeInLeft 0.4s ease-out 0.3s both;
     transition: marginLeft 0.3s ease-in;
     .plane {
@@ -1065,12 +836,6 @@
     height: calc(100% - 100px);
     padding-top: 10px;
   }
-  .map_select_box {
-    #contentMap {
-      width: 100%;
-      height: 100%;
-    }
-  }
   .plane_main {
     .p_main_list {
       height: 40px;
@@ -1087,6 +852,9 @@
         cursor: pointer;
         text-indent: 6px;
         border-bottom: 1px solid #F2F2F2;
+        i{
+          color: #999999;
+        }
       }
       .p_main_item {
         width: 100%;
@@ -1106,6 +874,9 @@
           white-space: nowrap;
           text-overflow: ellipsis;
           border-bottom: 1px solid #F2F2F2;
+          &:first-child {
+            width: 46%;
+          }
         }
       }
     }
@@ -1403,16 +1174,6 @@
                 color: #999999;
               }
             }
-          }
-          &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.7rem;
-            right: -.7rem;
-            transform: rotate(-46deg);
-            border: .7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0C70F8;
           }
           &:after {
             display: block;

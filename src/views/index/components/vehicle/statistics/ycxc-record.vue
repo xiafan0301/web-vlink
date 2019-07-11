@@ -2,25 +2,44 @@
     <div class="th-ycxc-record">
       <Breadcrumb :oData="[{name: '夜间行车分析', routerName: 'vehicle_search_ycxc'}, {name: '抓拍记录'}]"></Breadcrumb>
       <div class="th-ycxc-record-list">
-        <div class="list-sort">
+        <div class="result_sort">
+          <!-- <h3 class="result">检索结果（{{ total }}）</h3> -->
+          <div class="sort">
+            <div class="sort_item" :class="{ 'active_sort': sortType === 1 }" @click="clickTime">
+              时间排序
+              <i
+                :class="{'el-icon-arrow-down': timeSortType, 'el-icon-arrow-up': !timeSortType }"
+                v-show="sortType === 1"
+              ></i>
+            </div>
+            <div class="sort_item" :class="{ 'active_sort': sortType === 2 }" @click="clickCamera">
+              监控排序
+              <i
+                :class="{'el-icon-arrow-down': cameraSortType, 'el-icon-arrow-up': !cameraSortType }"
+                v-show="sortType === 2"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="list-sort">
           <div>
             <span>时间排序</span>
             <span class="sort_icon">
-              <i class="el-icon-caret-top" :class="{'sortActive': sortTimeType === 1}" @click="onSortByTime(1)"></i>
-              <i class="el-icon-caret-bottom" :class="{'sortActive': sortTimeType === 2}" @click="onSortByTime(2)"></i>
+              <i class="el-icon-caret-top" :class="{'sortActive': sortTimeType === 'asc'}" @click="onSortByTime('asc')"></i>
+              <i class="el-icon-caret-bottom" :class="{'sortActive': sortTimeType === 'desc'}" @click="onSortByTime('desc')"></i>
             </span>
           </div>
           <div>
             <span>监控排序</span>
             <span class="sort_icon">
-              <i class="el-icon-caret-top" :class="{'sortActive': sortMonitoryType === 1}" @click="onSortByMonitory(1)"></i>
-              <i class="el-icon-caret-bottom" :class="{'sortActive': sortMonitoryType === 2}" @click="onSortByMonitory(2)"></i>
+              <i class="el-icon-caret-top" :class="{'sortActive': sortMonitoryType === 'asc'}" @click="onSortByMonitory('asc')"></i>
+              <i class="el-icon-caret-bottom" :class="{'sortActive': sortMonitoryType === 'desc'}" @click="onSortByMonitory('desc')"></i>
             </span>
           </div>
-        </div>
+        </div> -->
         <div class="list-box">
             <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-              <img :src="item.subStoragePath" alt="">
+              <img :src="item.storagePath" alt="">
               <p class="time"><i></i>{{item.shotTime}}</p>
               <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
             </div>
@@ -106,7 +125,7 @@
         <div class="struc-list">
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
-            <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
+            <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
               <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
                 <img style="display: block; width: 100%; height: .88rem;" :src="item.storagePath" alt="">
               </div>
@@ -129,13 +148,18 @@
     },
     data () {
       return {
+        sortType: 1, // 1为时间排序， 2为监控排序
+        timeSortType: true, // true为时间降序， false为时间升序
+        cameraSortType: true, // true为监控降序， false为监控升序
         pagination: {
           pageNum: 1,
-          pageSize: 15,
-          total: 0
+          pageSize: 10,
+          total: 0,
+          order: 'asc',
+          orderBy: 'shotTime' // 默认抓拍时间升序
         },
         currentPage: 1,
-        sortTimeType: null, // 时间排序active
+        sortTimeType: 'asc', // 时间排序active  默认升序
         sortMonitoryType: null, // 监控排序active
         /* 抓拍记录页面参数 */
         strucDetailDialog: false, // 抓拍记录弹窗
@@ -145,6 +169,7 @@
         sturcDetail: {},
         bResize: {},
         markerPoint: null, // 地图icon
+        newMarker: null,
         playUrl: {},
         videoUrl: null, // 下载地址
         map: null,
@@ -187,6 +212,10 @@
       getList () {
         const params = JSON.parse(this.$route.query.obj);
         params['vehicleNumber'] = this.$route.query.number;
+        params['pageSize'] = this.pagination.pageSize;
+        params['pageNum'] = this.pagination.pageNum;
+        params['order'] = this.pagination.order;
+        params['orderBy'] = this.pagination.orderBy;
         getNightVehicleRecordList(params)
           .then(res => {
             if (res && res.data) {
@@ -199,15 +228,15 @@
       /**
        * 弹框地图初始化
        */
-      initMap () {
+      initMap (obj) {
         // this.map.setZoomAndCenter(iZoom, aCenter);
         let map = new window.AMap.Map('container', {
           zoom: 14, // 级别
-          center: [this.sturcDetail.shotPlaceLongitude, this.sturcDetail.shotPlaceLatitude], // 中心点坐标
+          center: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 中心点坐标
         });
         map.setMapStyle('amap://styles/whitesmoke');
         this.map = map;
-        this.drawPoint(this.sturcDetail)
+        this.drawPoint(obj)
       },
       /**
        * 地图描点
@@ -216,6 +245,10 @@
         console.log(data)
         if (this.markerPoint) {
           this.map.remove(this.markerPoint)
+        }
+        if (this.newMarker) {
+          this.map.remove(this.newMarker);
+          this.newMarker = null;
         }
         let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
         this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
@@ -227,8 +260,8 @@
           content: _content
         });
         this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.shotPlaceFullAdress}</p></div>`
-        this.infoWindow = new window.AMap.InfoWindow({
+        let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+        this.newMarker = new window.AMap.InfoWindow({
           map: this.map,
           isCustom: true,
           closeWhenClickMap: false,
@@ -237,18 +270,76 @@
           content: sConent
         })
       },
+      /*sort排序方法*/
+      clickTime() {
+        if (this.sortType === 1) {
+          this.timeSortType = !this.timeSortType;
+          if (this.timeSortType) {
+            this.pagination.order = 'desc';
+          } else {
+            this.pagination.order = 'asc';
+          }
+        } else if (this.sortType === 2) {
+          this.sortType = 1;
+        }
+        // this.pagination.order = type;
+        this.pagination.orderBy = 'shotTime';
+
+        this.$nextTick(() => {
+          this.getList();
+        })
+      },
+      // 点击监控排序
+      clickCamera() {
+        if (this.sortType === 2) {
+          this.cameraSortType = !this.cameraSortType;
+          if (this.cameraSortType) {
+            this.pagination.order = 'desc';
+          } else {
+            this.pagination.order = 'asc';
+          }
+        } else if (this.sortType === 1) {
+          this.sortType = 2;
+        }
+
+        // this.pagination.order = type;
+        this.pagination.orderBy = 'deviceName';
+
+        this.$nextTick(() => {
+          this.getList();
+        })
+      },
       /**
        * 按照时间排序
        */
-      onSortByTime (type) {
-        this.sortTimeType = type
-      },
-      /**
-       * 按照监控排序
-       */
-      onSortByMonitory (type) {
-        this.sortMonitoryType = type
-      },
+      // onSortByTime (type) {
+
+      //   this.sortTimeType = type;
+
+      //   this.sortMonitoryType = null;
+
+      //   this.pagination.order = type;
+      //   this.pagination.orderBy = 'shotTime';
+
+      //   this.$nextTick(() => {
+      //     this.getList();
+      //   })
+      // },
+      // /**
+      //  * 按照监控排序
+      //  */
+      // onSortByMonitory (type) {
+      //   this.sortMonitoryType = type;
+
+      //   this.sortTimeType = null;
+
+      //   this.pagination.order = type;
+      //   this.pagination.orderBy = 'deviceName';
+
+      //   this.$nextTick(() => {
+      //     this.getList();
+      //   })
+      // },
       /**
        * 分页赋值
        */
@@ -260,40 +351,39 @@
        * 打开抓拍弹框
        */
       onOpenDetail (obj) {
-        this.$_showLoading({text: '加载中...'});
 
+        this.sturcDetail = obj;
         this.strucDetailDialog = true;
         this.$nextTick(() => {
-          this.getVehicleDetail(obj);
+          this.initMap(obj);
         })
-        this.$_hideLoading();
       },
       // 获取车辆抓拍详情
-      getVehicleDetail (obj) {
-        const data = JSON.parse(this.$route.query.obj);
-        const params = {
-          dateStart: data.startDate,
-          dateEnd: data.endDate,
-          devIds: obj.deviceID,
-          hasPlate: obj.plateNo ? 1 : 0, // 1--有牌车 0 --无牌车
-          plateNo: obj.plateNo
-        }
-          // const params = {
-          //   dateStart: '2019-01-01 00:00:00',
-          //   dateEnd: '2019-09-01 23:59:59',
-          //   hasPlate: 1, // 1--有牌车 0 --无牌车
-          //   // devIds: obj.deviceID,
-          //   plateNo: '湘A77777'
-          // }
-        getSnapDetail(params)
-          .then(res => {
-            if (res && res.data) {
-              this.strucInfoList = res.data.snapDtoList;
-              this.sturcDetail = res.data.snapDtoList[0];
-              this.initMap();
-            }
-          })
-      },
+      // getVehicleDetail (obj) {
+      //   const data = JSON.parse(this.$route.query.obj);
+      //   const params = {
+      //     dateStart: data.startDate,
+      //     dateEnd: data.endDate,
+      //     devIds: obj.deviceID,
+      //     hasPlate: obj.plateNo ? 1 : 0, // 1--有牌车 0 --无牌车
+      //     plateNo: obj.plateNo
+      //   }
+      //     // const params = {
+      //     //   dateStart: '2019-01-01 00:00:00',
+      //     //   dateEnd: '2019-09-01 23:59:59',
+      //     //   hasPlate: 1, // 1--有牌车 0 --无牌车
+      //     //   // devIds: obj.deviceID,
+      //     //   plateNo: '湘A77777'
+      //     // }
+      //   getSnapDetail(params)
+      //     .then(res => {
+      //       if (res && res.data) {
+      //         this.strucInfoList = res.data.snapDtoList;
+      //         this.sturcDetail = res.data.snapDtoList[0];
+      //         this.initMap();
+      //       }
+      //     })
+      // },
       /**
        * 关闭抓拍弹框
        */
@@ -308,6 +398,9 @@
         this.sturcDetail = {};
         this.curImgIndex = i;
         this.sturcDetail = obj;
+        this.$nextTick(() => {
+          this.initMap(obj);
+        })
       }
     },
   }
@@ -322,30 +415,32 @@
     // height: calc(100% - 55px);
     padding: 0 20px;
     background: #f7f9f9;
-    .list-sort {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%; height: 45px;
-      line-height: 45px;
-      div {
-        width: 120px;height: 100%;
-        display: flex;
-        justify-content: flex-end;
-        span {
-          color: #999999;
+    // 检索结果与排序
+    .result_sort {
+      overflow: hidden;
+      height: 40px;
+      line-height: 40px;
+      .result {
+        font-size: 14px;
+        color: #666;
+        float: left;
+      }
+      .sort {
+        font-size: 14px;
+        width: 220px;
+        height: 14px;
+        margin: 0 auto;
+        .sort_item {
+          text-align: center;
+          width: 110px;
+          float: left;
+          color: #999;
+          cursor: pointer;
         }
-        .sort_icon {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          padding: 13px 0;
+        .active_sort {
+          color: #2580fc;
           i {
-            height: 6px;
-            cursor: pointer;
-            color: #999999;
-          }
-          .sortActive {
-            color: #0466DF;
+            color: #2580fc;
           }
         }
       }
@@ -361,6 +456,7 @@
         height: 320px;
         padding: 15px;
         margin-bottom: 15px;
+        cursor: pointer;
         background: #fff;
         margin-left: 1.25%;
         &:nth-child(5n - 4) {
@@ -416,12 +512,6 @@
 </style>
 
 <style lang="scss">
-html {font-size: 100px;}
-@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-@media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .struc_detail_dialog {
   .el-dialog {
     max-width: 13.06rem;
@@ -768,6 +858,7 @@ html {font-size: 100px;}
   padding: .18rem;
   font-size: .14rem;
   color: #666666;
+  margin-bottom: -15px;
   position: relative;
   &:after {
     display: block;

@@ -18,7 +18,7 @@
           </ul>
         </div>
         <div class="vehicle_content_nr_box_right_bot">
-          <div class="cont">
+          <div class="cont" v-if="selectIndex === 1">
             <div class="top">
               最相似人员档案
             </div>
@@ -52,6 +52,36 @@
               <p>底库信息：底库1，底库2</p>
               <p>分组信息：分组1，分组2</p>
             </div>
+
+          </div>
+          <div class="cont1 cont" v-else-if="selectIndex === 0">
+            <div>
+              <div class="list-box">
+                <ul class="rlcx_r_list clearfix">
+                  <li v-for="item in 12" :key="item">
+                    <div style="">
+                      <img src="../../../../assets/img/666.jpg" alt="">
+                      <div>
+                        <h4>检索资料</h4>
+                        <div><i class="vl_icon rlcx_sj"></i>18-12-24 14:12:17</div>
+                        <p>
+                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;">男性</span>
+                          <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">青年</span>
+                        </p>
+                        <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">04</b><span style="color: #0C70F8;"> 同行次</span></p>
+                        <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;">查看同行记录</div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+          <div class="cont2 cont" v-else-if="selectIndex === 2">
+
+          </div>
+          <div class="cont3 cont" v-else>
 
           </div>
         </div>
@@ -219,6 +249,56 @@ export default {
               color: #666666;
               p{
                 padding-bottom: 10px;
+              }
+            }
+          }
+          .cont1{
+            .list-box {
+              display: flex;
+              flex-wrap: wrap;
+              // justify-content: space-between;
+              flex-flow: row wrap;
+              // height: calc(100% - 45px);
+              > .rlcx_r_list {
+                padding: 5px;
+                > li {
+                  padding: 5px;
+                  float: left;
+                  > div {
+                    position: relative;
+                    width: 380px; height: 210px;
+                    padding: 10px;
+                    background-color: #fff;
+                    box-shadow:0px 5px 16px 0px rgba(169,169,169,0.2);
+                    > img {
+                      position: absolute; top: 10px; left: 10px;
+                      width: 190px; height: 190px;
+                    }
+                    > div {
+                      height: 100%;
+                      margin-left: 210px; padding-right: 10px;
+                      > h4 {
+                        color: #999;
+                        margin-bottom: 10px;
+                      }
+                      > div {
+                        position: relative;
+                        height: 30px; line-height: 30px;
+                        margin-bottom: 10px; padding-left: 30px;
+                        font-size: 12px;
+                        background:rgba(250,250,250,1);
+                        border:1px solid rgba(242,242,242,1);
+                        border-radius:3px;
+                        > i {
+                          position: absolute; top: 7px; left: 10px;
+                          width: 12px; height: 15px;
+                          &.rlcx_sxt { background-position: -325px -377px; }
+                          &.rlcx_sj { background-position: -787px -376px; }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }

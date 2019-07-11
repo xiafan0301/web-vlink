@@ -25,7 +25,7 @@
     </div>
     <el-dialog
       :visible.sync="strucDetailDialog"
-      class="struc_detail_dialog"
+      class="struc_detail_dialog_qyph"
       :close-on-click-modal="false"
       top="4vh"
       :show-close="false">
@@ -39,10 +39,10 @@
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
             <img :src="sturcDetail.subStoragePath" alt="">
-            <span>上传图</span>
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
-            <div class="struc_c_d_img">
+            <div class="struc_c_d_img ">
               <img :src="sturcDetail.storagePath" alt="">
               <span>全景图</span>
             </div>
@@ -64,8 +64,8 @@
                 <span>{{sturcDetail.vehicleColor}} {{sturcDetail.vehicleClass}} {{sturcDetail.vehicleBrand}} {{sturcDetail.vehicleStyles}} <font>特征</font></span>
               </div>
               <div class="struc_cdi_line">
-                <!--<p v-if="strucInfoList[curShowIndex] && strucInfoList[curShowIndex].isInSur">该车牌信息已存在布控库中</p>-->
-                <!--<el-button :disabled="strucInfoList[curShowIndex].isInSur" type="primary" size="mini">加入布控库</el-button>-->
+                <p v-if="curInSur">该车牌信息已存在布控库中</p>
+                <el-button :disabled="curInSur" type="primary" size="mini">加入布控库</el-button>
               </div>
             </div>
           </div>
@@ -111,6 +111,7 @@
     components: {vehicleBreadcrumb, flvplayer},
     data () {
       return {
+        curInSur: null,
         swiperOption: {
           slidesPerView: 10,
           spaceBetween: 10,
@@ -190,6 +191,7 @@
         this.getTheList();
       },
       showStrucInfo (data, index) {
+        this.curInSur = data.isInSur;
         this.curImgIndex = 0;
         this.strucCurTab = 1;
         this.curShowIndex = index;
@@ -329,13 +331,7 @@
   }
 </style>
 <style lang="scss">
-  html {font-size: 100px;}
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
-  .struc_detail_dialog {
+  .struc_detail_dialog_qyph {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
@@ -382,6 +378,34 @@
           height: 3.6rem;
           background: #EAEAEA;
           position: relative;
+          &:before {
+            display: block;
+            content: '';
+            position: absolute;
+            top: -.5rem;
+            left: -.5rem;
+            transform: rotate(-45deg);
+            border: .5rem solid #0C70F8;
+            border-color: transparent transparent #0C70F8;
+            z-index: 9;
+          }
+          span {
+            display: block;
+            position: absolute;
+            top: .1rem;
+            left: .1rem;
+            width: .6rem;
+            height: .6rem;
+            text-align: center;
+            color: #FFFFFF;
+            font-size: .12rem;
+            -webkit-transform: rotate(-45deg);
+            -moz-transform: rotate(-45deg);
+            -ms-transform: rotate(-45deg);
+            -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+            z-index: 99;
+          }
           img {
             width: 100%;
             height: auto;
@@ -411,32 +435,8 @@
         .struc_c_d_qj {
           margin-right: .3rem;
           &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.5rem;
-            left: -.5rem;
-            transform: rotate(-45deg);
-            border: .5rem solid #0c70f8;
-            border-color: transparent transparent #0C70F8;
-            z-index: 9;
-          }
-          span {
-            display: block;
-            position: absolute;
-            top: .1rem;
-            left: .1rem;
-            width: .6rem;
-            height: .6rem;
-            text-align: center;
-            color: #FFFFFF;
-            font-size: .12rem;
-            -webkit-transform: rotate(-45deg);
-            -moz-transform: rotate(-45deg);
-            -ms-transform: rotate(-45deg);
-            -o-transform: rotate(-45deg);
-            transform: rotate(-45deg);
-            z-index: 99;
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
           }
         }
         .struc_c_d_box {
@@ -497,26 +497,6 @@
                 color: #999999;
               }
             }
-          }
-          &:before {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.7rem;
-            right: -.7rem;
-            transform: rotate(-46deg);
-            border: .7rem solid #0c70f8;
-            border-color: transparent transparent transparent #0C70F8;
-          }
-          &:after {
-            display: block;
-            content: '';
-            position: absolute;
-            top: -.4rem;
-            right: -.4rem;
-            transform: rotate(-45deg);
-            border: .4rem solid #FFFFFF;
-            border-color: transparent transparent transparent #FFFFFF;
           }
           >span {
             display: block;

@@ -515,7 +515,7 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
-        // orderBy: 'shotTime'
+        orderBy: 'shotTimes'
       };
 
       this.searchStr = JSON.stringify(params);
@@ -526,16 +526,11 @@ export default {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
             this.searchLoading = false;
-          } else {}
-          this.searchLoading = false;
+          } else {
+            this.searchLoading = false;
+          }
         })
         .catch(() => {this.searchLoading = false;})
-    },
-    /**
-     * 树选择框关闭
-     */
-    chooseDevice() {
-      this.treeTabShow = false
     },
     /**
      * 导出按钮
@@ -572,7 +567,7 @@ export default {
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
-        // orderBy: 'shotTime'
+        orderBy: 'shotTimes'
       };
       const params = {
         viewType: 1, // 1--夜间行车

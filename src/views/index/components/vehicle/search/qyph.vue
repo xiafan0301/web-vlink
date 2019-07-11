@@ -11,13 +11,21 @@
       <div class="mapbox" id="mapSelect"></div>
       <div class="setPost">
         <div>
-          <el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">
+          <el-autocomplete
+            class="inline-input"
+            v-model="input3"
+            :fetch-suggestions="querySearch"
+            placeholder="请输入地名，快速定位地址"
+            value-key="name"
+            :trigger-on-focus="false"
+            @select="handleSelect"
+          ></el-autocomplete>
+          <!--<el-input placeholder="请输入地名，快速定位地址" v-model="input3" class="input-with-select">-->
             <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
-          </el-input>
+          <!--</el-input>-->
         </div>
         <div style="width: 272px;height: 100%;">
-          <vue-scroll>
-            <div class="search_main">
+          <div class="search_main">
               <!--区域选择-->
               <div class="search_line">
                 <span class="red_star">区域:</span>
@@ -38,11 +46,11 @@
               <div class="search_line">
                 <span class="time">开始</span>
                 <el-date-picker
-                        v-model="searchData.startTime"
-                        style="width: 212px;"
-                        :picker-options="pickerOptions"
-                        type="datetime"
-                        placeholder="选择日期时间">
+                    v-model="searchData.startTime"
+                    style="width: 212px;"
+                    :picker-options="pickerOptions"
+                    type="datetime"
+                    placeholder="选择日期时间">
                 </el-date-picker>
               </div>
               <p class="red_star"></p>
@@ -57,7 +65,7 @@
                 </el-date-picker>
               </div>
               <div class="search_line">
-                <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,'')" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
+                <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
               </div>
               <el-divider></el-divider>
               <!--按钮-->
@@ -65,8 +73,7 @@
                 <el-button @click="resetS">重置</el-button>
                 <el-button type="primary" @click="tcDiscuss">徘徊分析</el-button>
               </div>
-            </div>
-          </vue-scroll>
+          </div>
         </div>
       </div>
     </div>
@@ -102,7 +109,7 @@
           area: null, // 区域
           startTime: '',
           endTime: '',
-          minTimes: ''// 最少次数
+          minTimes: 3// 最少次数
         },
         pickerOptions: {
           disabledDate (time) {
@@ -113,9 +120,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -130,9 +137,9 @@
             let threeMonths = '';
             let start = '';
             if (parseFloat(m) >= 4) {
-              start = y + '-' + (m - 3) + '-' + d;
+              start = y + '-' + (m - 1) + '-' + d;
             } else {
-              start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+              start = (y - 1) + '-' + (m - 1 + 12) + '-' + d;
             }
             threeMonths = new Date(start).getTime();
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -152,6 +159,61 @@
 
     },
     methods: {
+      querySearch(queryString, cb) {
+        //this.seacher(queryString)
+
+        this.$nextTick(() => {
+          this.seacher(queryString).then(v => {
+            //console.log(v);
+            var restaurants = v;
+            //  console.log(restaurants)
+            var results = queryString
+                ? restaurants.filter(this.createFilter(queryString))
+                : restaurants;
+            // console.log(results)
+            cb(results);
+            // 调用 callback 返回建议列表的数据
+            // clearTimeout(this.timeout);
+            //   this.timeout = setTimeout(() => {
+            //     cb(results);
+            //   }, 3000 * Math.random());
+            // cb(results);
+          });
+        });
+      },
+      handleSelect(item) {
+        // console.log(item);
+        let new_center = item.location;
+        this.map.setZoomAndCenter(16, new_center);
+      },
+      createFilter(queryString) {
+        return restaurant => {
+          // console.log(restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()));
+
+          return (
+              restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) > -1
+          );
+        };
+      },
+      seacher(v) {
+        var placeSearch = new AMap.PlaceSearch({
+          // city 指定搜索所在城市，支持传入格式有：城市名、citycode和adcode
+          city: "湖南"
+        });
+
+        if (!!v) {
+          let _this = this;
+          return new Promise((resolve, reject) => {
+            placeSearch.search(v, (status, result) => {
+              // 查询成功时，result即对应匹配的POI信息
+              let pois = result.poiList.pois;
+              _this.restaurants = pois;
+              resolve(pois);
+            });
+          });
+        }
+        //return pois
+      },
       setFitV () {
         this.map.setFitView([this.searchData.area]);
       },
@@ -167,9 +229,9 @@
           }).then(resBon => {
             console.log(resBon.data);
             if(resBon.data && resBon.data.length>0){
-              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 0});
+              this.objSetItem(resBon.data, {infoName: 'bayonetName', dataType: 1});
             }
-            this.mapTreeData = Object.assign([], res.data, resBon.data)
+            this.mapTreeData = res.data.concat(resBon.data)
             console.log(this.mapTreeData)
             this.mapMark(this.mapTreeData)
           })
@@ -369,7 +431,7 @@
           str += '<li><span>卡口名称：</span><p>' + data.infoName + '</p></li>';
           str += '<li><span>卡口编号：</span><p>' + data.bayonetNo + '</p></li>';
           str += '<li><span>地理位置：</span><p>' + data.bayonetAddress + '</p></li>';
-          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
+//          str += '<li><span>设备数量：</span><p>' + data.devNum + '</p></li>';
           str += '</ul></div>'
         }
         return str;
@@ -382,11 +444,21 @@
       setDTime () {
         let date = new Date();
         let curDate = date.getTime();
-        let curS = 3 * 24 * 3600 * 1000;
-        let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-        this.searchData.startTime = _s;
-        this.searchData.endTime = _e;
+        let curS = 1 * 24 * 3600 * 1000;
+        let sM = '', sD = '';
+        if ((new Date(curDate - curS).getMonth() + 1) < 10 ) {
+          sM = '0' + (new Date(curDate - curS).getMonth() + 1);
+        } else {
+          sM = (new Date(curDate - curS).getMonth() + 1)
+        }
+        if ( new Date(curDate - curS).getDate() < 10 ) {
+          sD = '0' +  new Date(curDate - curS).getDate();
+        } else {
+          sD =  new Date(curDate - curS).getDate()
+        }
+        let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
+        this.searchData.startTime = _s + " 00:00:00";
+        this.searchData.endTime = _s + " 23:59:59";
       },
       // 选择区域
       selArea (v) {
@@ -455,7 +527,11 @@
       },
       tcDiscuss () {
         if (!this.searchData.minTimes) {
-          this.$message.info('频次你得填一个');
+          this.$message.info('请输入频次');
+          return false;
+        }
+        if (!this.searchData.area) {
+          this.$message.info('请先选择区域');
           return false;
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
@@ -495,18 +571,21 @@
       top: 0px;
       width: 328px;
       height: 100%;
+      .inline-input {
+        width: 272px;
+      }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
       }
       .search_main {
         width: 272px;
-        height: 569px;
+        height: 334px;
         margin-top: 20px;
         background: #ffffff;
         .search_btn {
           text-align: center;
-          margin-top: 255px;
+          /*margin-top: 255px;*/
         }
         >p {
           padding-left: 10px;

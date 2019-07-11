@@ -368,6 +368,7 @@
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}
+.vl_icon_th_01 {width: 100px; height: 85px; background-position: -88px -587px;}
 .vl_icon_vehicle_02 {width: 30px; height: 162px; background-position: -976px -1280px;}  
 .vl_icon_vehicle_02:hover {width: 30px; height: 162px; background-position: -1036px -1280px;}     
 .vl_icon_vehicle_03 {width: 30px; height: 162px; background-position: -1096px -1280px;}
@@ -384,9 +385,9 @@
 
 /* 车辆侦查  --过车数据统计 */
 .vl_icon_vehicle_gcsj_01{width: 83px;height: 83px;background-position: -966px -939px;}
-.vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1072px -939px;}
-.vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1177px -939px;}
-.vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1280px -939px;}
+.vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1070px -938px;}
+.vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1172px -937px;}
+.vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1274px -931px;}
 
 /* 人脸检索  --人脸数据分析 */
 .vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1039px;}
@@ -437,11 +438,11 @@
 /* 左侧二级菜单样式 */
 .vl_smenu {
   background-color: #ffffff;
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; left: 0; z-index: 19;
   width: 200px; height: 100%;
   box-shadow:4px 0px 10px 0px #838383;
   box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
-  animation: fadeInLeft .4s ease-out .3s both;
+  /* animation: fadeInLeft .4s ease-out .3s both; */
 }
 .vl_smenu > li {
   height: 60px; line-height: 60px;
@@ -1019,7 +1020,7 @@
 
 /* th css style create by th */
 .th-breadcrumb {
-  width: 100%; height: 60px;
+  width: 100%; height: 50px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -1054,6 +1055,13 @@
 .the-table .el-table__body .el-table__row:hover td {
   background: #E6F7FF;
 }
+
+/*elementui primary标注button颜色*/
+.el-button--primary {
+    background-color: #0C70F8;
+    border-color: #0C70F8;
+}
+
 /* th css style create by th */
 html {
     font-size: 100px;

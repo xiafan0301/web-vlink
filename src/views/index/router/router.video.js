@@ -34,5 +34,9 @@ export default {
     path: 'statistics',
     name: 'video_statistics',
     component: () => import('@/views/index/components/video/statistics.vue')
+  }, {
+    path: 'relay',
+    name: 'video_relay',
+    component: () => import('@/views/index/components/video/relay.vue')
   }]
 }

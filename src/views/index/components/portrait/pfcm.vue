@@ -1,11 +1,15 @@
 <template>
   <vue-scroll>
     <div class="frequent-appearances">
-      <div class="breadcrumb_heaer">
-        <el-breadcrumb separator=">">
+      <div class="">
+        <!-- <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
           <el-breadcrumb-item>频繁出没</el-breadcrumb-item>
-        </el-breadcrumb>
+        </el-breadcrumb> -->
+        <div is="vlBreadcrumb" 
+          :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '频繁出没'}]">
+        </div>
       </div>
       <div class="frequent-a-content">
         <ul class="tab-menu">
@@ -146,7 +150,9 @@
 <script>
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
 import { formatDate} from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       tabList: [
@@ -286,7 +292,7 @@ export default {
 <style lang="scss" scoped>
 .frequent-appearances {
   width: 100%;
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
     border-bottom: 1px solid #D3D3D3;
