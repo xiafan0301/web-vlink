@@ -819,74 +819,95 @@ export default {
           let queryParams;
           if (this.selectType === 2) {
             queryParams = {
-              "where.startTime":
+              where: {
+              "startTime":
                 formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
                 " 00:00:00", // 开始时间
-              "where.endTime":
+              "endTime":
                 formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
                 " 23:59:59", // 结束时间
-              "where.deviceUid":
+              "deviceUid":
                 deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "where.bayonetUid":
+              "bayonetUid":
                 bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-              "where.plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
-              "where.plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
-              "where.vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
-              "where.vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              "where.sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              "where.descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-              "where.vehicleNumber": null, // 车牌号码
-              "where.vehicleModel": null, // 车辆型号
+              "plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
+              "plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
+              "vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
+              "vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
+              "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+              "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+              "vehicleNumber": null, // 车牌号码
+              "vehicleModel": null, // 车辆型号
+              },
+              // "where.startTime":
+              //   formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
+              //   " 00:00:00", // 开始时间
+              // "where.endTime":
+              //   formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
+              //   " 23:59:59", // 结束时间
+              // "where.deviceUid":
+              //   deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
+              // "where.bayonetUid":
+              //   bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+              // "where.plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
+              // "where.plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
+              // "where.vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
+              // "where.vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
+              // "where.sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+              // "where.descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+              // "where.vehicleNumber": null, // 车牌号码
+              // "where.vehicleModel": null, // 车辆型号
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
           } else {
             // 自定义的特征
             queryParams = {
-              "where.startTime":
+               where: {
+              "startTime":
                 formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
                 " 00:00:00", // 开始时间
-              "where.endTime":
+              "endTime":
                 formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
                 " 23:59:59", // 结束时间
-              "where.deviceUid":
+              "deviceUid":
                 deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "where.bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+              "bayonetUid":
+                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+              },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
             const selectedArr = this.characteristicList.filter(item => {
               return item.checked;
             });
-            
             for (let i = 0; i < selectedArr.length; i++) {
               if (selectedArr[i].plateClass) { // 号牌类型
-                queryParams['where.plateClass'] = selectedArr[i].plateClass;
+                queryParams['where'].plateClass = selectedArr[i].plateClass;
               }
               if (selectedArr[i].plateColor) {
-                queryParams['where.plateColor'] = selectedArr[i].plateColor;
+                queryParams['where'].plateColor = selectedArr[i].plateColor;
               }
               if (selectedArr[i].vehicleClass) {
-                queryParams['where.vehicleClass'] = selectedArr[i].vehicleClass;
+                queryParams['where'].vehicleClass = selectedArr[i].vehicleClass;
               }
               if (selectedArr[i].vehicleColor) {
-                queryParams['where.vehicleColor'] = selectedArr[i].vehicleColor;
+                queryParams['where'].vehicleColor = selectedArr[i].vehicleColor;
               }
               if (selectedArr[i].sunvisor) {
-                queryParams['where.sunvisor'] = selectedArr[i].sunvisor;
+                queryParams['where'].sunvisor = selectedArr[i].sunvisor;
               }
               if (selectedArr[i].descOfFrontItem) { // 年检标数量
-                queryParams['where.descOfRearItem'] = selectedArr[i].descOfFrontItem;
+                queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
               }
               if (selectedArr[i].plateNo) { // 车牌
-                queryParams['where.vehicleNumber'] = selectedArr[i].plateNo;
+                queryParams['where'].vehicleNumber = selectedArr[i].plateNo;
               }
               if (selectedArr[i].vehicleBrand) { // 车辆型号
-                queryParams['where.vehicleModel'] = selectedArr[i].vehicleBrand;
+                queryParams['where'].vehicleModel = selectedArr[i].vehicleBrand;
               }
               if (selectedArr[i].vehicleStyles) { // 车辆型号
-                queryParams['where.vehicleModel'] = selectedArr[i].vehicleStyles;
+                queryParams['where'].vehicleModel = selectedArr[i].vehicleStyles;
               }
             }
           }
@@ -917,6 +938,7 @@ export default {
                   this.total = res.data.total;
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
+                  this.total = res.data.total;
                 }
               } else {
                 this.strucInfoList = []; // 清空搜索结果
