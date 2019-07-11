@@ -1477,7 +1477,8 @@ export default {
             color: #999;
           }
           .color_blue {
-            color: #0c70f8;
+            color: #fff;
+            background: #0C70F8;
           }
         }
       }
