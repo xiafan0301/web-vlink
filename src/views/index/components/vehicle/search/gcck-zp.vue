@@ -315,7 +315,7 @@ export default {
         this.daysList[sDay].state = 2;
         if (res && res.data && res.data.list && res.data.list.length > 0) {
           this.daysList[sDay].total = res.data.total;
-          this.daysList[sDay].pageNum = res.data.pageNum; // 当前页数
+          this.daysList[sDay].pageNum = pageNum; // 当前页数
           this.daysList[sDay].pages = res.data.pages; // 总页数
           if (!this.daysList[sDay].list) {
             this.daysList[sDay].list = [];
