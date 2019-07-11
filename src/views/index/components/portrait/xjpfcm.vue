@@ -1,11 +1,16 @@
 <template>
   <div class="new-analysis-task">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
         <el-breadcrumb-item>新建分析任务</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
+      <div is="vlBreadcrumb" 
+          :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '频繁出没', routerName: 'portrait_pfcm'},
+            {name: '新建分析任务'}]">
+        </div>
     </div>
     <div class="new-a-t-content">
       <!-- 搜索条件 -->
@@ -186,7 +191,9 @@ import {
 import { validateSimilarity, validateFrequency } from '@/utils/validator.js';
 import { postTaskAnalysis } from "../../api/api.analysis.js";
 import { formatDate, random14} from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       searchData: {
@@ -300,8 +307,8 @@ export default {
     resetSearch(formName) {
       this.$refs[formName].resetFields();
       this.setDate();
+      this.drawClear();
       /* this.resetZoom(); */
-      /* this.closeDraw(1) */
     },
     //新建
     submitForm(formName) {
@@ -341,6 +348,58 @@ export default {
             return false;
           }
       });
+    },
+    drawClear () {
+      // 矩形
+      if (this.drawObj.rectangle) {
+        for (let k in this.drawObj.rectangle) {
+          this.drawClearDo(this.drawObj.rectangle[k]);
+        }
+        this.drawObj.rectangle = {};
+      }
+      // 圆形
+      if (this.drawObj.circle) {
+        for (let k in this.drawObj.circle) {
+          this.drawClearDo(this.drawObj.circle[k]);
+        }
+        this.drawObj.circle = {};
+      }
+      // 线
+      if (this.drawObj.polyline) {
+        for (let k in this.drawObj.polyline) {
+          this.drawClearDo(this.drawObj.polyline[k]);
+        }
+        this.drawObj.polyline = {};
+      }
+      // 多边形
+      if (this.drawObj.polygon) {
+        for (let k in this.drawObj.polygon) {
+          this.drawClearDo(this.drawObj.polygon[k]);
+        }
+        this.drawObj.polygon = {};
+      }
+      if (this.drawObj.circle10km) {
+        for (let k in this.drawObj.circle10km) {
+          this.drawClearDo(this.drawObj.circle10km[k]);
+        }
+        this.drawObj.circle10km = {};
+      }
+    },
+    drawClearDo (obj) {
+      if (obj.obj) {
+        this.amap.remove(obj.obj);
+        obj.obj = null;
+      }
+      if (obj.marker) {
+        this.amap.remove(obj.marker);
+        obj.marker = null;
+      }
+      if (obj.editor) {
+        obj.editor.close();
+        this.amap.remove(obj.editor);
+        obj.editor = null;
+      }
+      obj = null;
     },
     // 地图定位
     resetZoom() {
@@ -1105,7 +1164,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .new-analysis-task {
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
   }
@@ -1368,34 +1427,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .new-analysis-task {
   // 搜索框
   .search-wrap {

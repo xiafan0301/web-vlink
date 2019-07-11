@@ -117,7 +117,7 @@
       </div>
     </div>
     <div class="vid_content">
-      <ul class="vid_show_list vid_list_st2">
+      <ul class="vid_show_list vid_list_st2" style="padding-top: 5px;">
         <li v-for="(item, index) in videoList" :key="'video_list_' + index"
           @drop="dragDrop(item, index)" @dragover.prevent="dragOver">
           <div v-if="item && item.video">
@@ -363,7 +363,7 @@ export default {
   }
 }
 .show_search {
-  position: absolute; top: 24px; left: 0; z-index: 2;
+  position: absolute; top: 20px; left: 0; z-index: 2;
   width: 100%;
   padding-top: 15px; padding-bottom: 5px;
   border-bottom: 1px solid #f0f0f0;

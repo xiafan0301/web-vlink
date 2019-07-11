@@ -1,23 +1,31 @@
 <template>
   <div class="control_map">
     <!-- 侧边栏搜索框 -->
-    <div class="search_box">
+    <div class="search_box" :style="{'width': hideleft ? '232px' : '0'}">
       <p>选择一个或多个条件进行搜索</p>
       <el-form :model="mapForm" class="map_form" ref="mapForm">
+        <el-form-item style="width: 192px;" prop="state">
+          <el-select v-model="mapForm.state" placeholder="布控状态" @change="changeControlState(null)">
+            <el-option
+              v-for="item in stateList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item style="width: 192px;" prop="name">
-          <el-input v-model="mapForm.name" placeholder="请输入布控名称"></el-input>
+          <el-select v-model="mapForm.name" filterable placeholder="请输入布控名称">
+            <el-option
+              v-for="item in controlNameList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.label">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="event">
-          <el-select
-            v-model="mapForm.event"
-            filterable
-            remote
-            clearable
-            @clear="eventList = []"
-            value-key="value"
-            placeholder="请输入事件编号"
-            :remote-method="getEventList"
-            :loading="loading">
+          <el-select v-model="mapForm.event" filterable placeholder="请输入事件编号">
             <el-option
               v-for="item in eventList"
               :key="item.value"
@@ -27,31 +35,12 @@
           </el-select>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="obj">
-          <el-select
-            v-model="mapForm.obj"
-            filterable
-            remote
-            clearable
-            @clear="controlObjDropdownList = []"
-            value-key="uid"
-            placeholder="请输入布控对象"
-            :remote-method="getControlObject"
-            :loading="loading">
+          <el-select v-model="mapForm.obj" value-key="uid" filterable placeholder="请输入布控对象">
             <el-option
               v-for="item in controlObjDropdownList"
               :key="item.uid"
               :label="item.name"
-              :value="item">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item style="width: 192px;" prop="state">
-          <el-select v-model="mapForm.state" placeholder="布控状态">
-            <el-option
-              v-for="item in stateList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :value="item">  
             </el-option>
           </el-select>
         </el-form-item>
@@ -66,8 +55,7 @@
           </el-select>
         </el-form-item>
         <el-form-item style="width: 192px;" prop="alarmId">
-          <el-select v-model="mapForm.alarmId" placeholder="告警级别">
-            <el-option label="全部告警级别" :value="null"></el-option>
+          <el-select v-model="mapForm.alarmId" multiple collapse-tags placeholder="告警级别">
             <el-option
               v-for="item in alarmLevelList"
               :key="item.value"
@@ -94,7 +82,9 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="map_box">
+    <div class="insetLeft vl_icon vl_icon_map_shrinkage_01" @click="hideLeft" v-show="hideleft"></div>
+    <div class="insetLeft vl_icon vl_icon_map_shrinkage_02" @click="hideLeft" v-show="!hideleft"></div>
+    <div class="map_box" :style="{'width': hideleft ? 'calc(100% - 252px)' : '100%', 'margin-left': hideleft ? '252px' : '0'}">
       <!-- 地图 -->
       <div id="mapBox"></div>
       <!-- 抓拍列表 -->
@@ -181,14 +171,15 @@
 <script>
 import flvplayer from '@/components/common/flvplayer.vue';
 import {random14} from '@/utils/util.js';
-import {getControlObject, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
+import {getControlNameBySelect, getControlEventBySelect, getControlObjBySelect, getControlMap, getControlMapByDevice, getAlarmListByDev, getAllAlarmSnapListByDev} from '@/views/index/api/api.control.js';
 import {dataList} from '@/utils/data.js';
-import {getEventList} from '@/views/index/api/api.event.js';
 import {mapXupuxian} from '@/config/config.js';
+import { Promise } from 'q';
 export default {
   components: {flvplayer},
   data () {
     return {
+      hideleft: false,
       swiperOption: {
         slidesPerView: 8,
         spaceBetween: 10,
@@ -216,9 +207,10 @@ export default {
         },
         state: 1,
         type: null,
-        alarmId: null,
+        alarmId: [],
         time: null
       },
+      controlNameList: [],
       eventList: [],
       controlObjDropdownList: [],
       stateList: [
@@ -261,7 +253,11 @@ export default {
     }
   },
   mounted () {
-    this.getControlMap(1);
+    new Promise((resolve) => {
+      this.changeControlState(resolve);
+    }).then(() => {
+      this.getControlMap(1);
+    })
     let map = new window.AMap.Map('mapBox', {
       zoom: 10,
       center: mapXupuxian.center
@@ -270,44 +266,11 @@ export default {
     this.map = map;
   },
   methods: {
+    hideLeft() {
+      this.hideleft = !this.hideleft;
+    },
     skipIsCreateControl () {
       this.$router.push({name: 'control_create'});
-    },
-    // 获取关联事件列表
-    getEventList (query) {
-      const _query = this.Trim(query, 'g');
-      if (_query) {
-        const params = {
-          'where.keyword': _query,
-          pageSize: 1000000,
-          orderBy: 'report_time',
-          order: 'desc'
-        }
-        getEventList(params).then(res => {
-          if (res && res.data) {
-            this.eventList = res.data.list.map(m => {
-              return {
-                label: m.eventCode,
-                value: m.uid
-              }
-            });
-          }
-        })
-      }
-    },
-    // 获取所有布控对象
-    getControlObject (query) {
-      const _query = this.Trim(query, 'g');
-      if (_query) {
-        const params = {
-          name: _query
-        }
-        getControlObject(params).then(res => {
-          if (res && res.data) {
-            this.controlObjDropdownList = res.data;
-          }
-        })
-      }
     },
     sikpISalarmToday () {
       this.$router.push({ name: 'today_alarm' });
@@ -327,6 +290,52 @@ export default {
           this.isShowV = true;
       }, 100)
       this.isShowFullScreen = false;
+    },
+    // 获取布控名称下拉列表
+    getControlNameBySelect () {
+      getControlNameBySelect({surveillanceStatus: this.mapForm.state}).then(res => {
+        if (res) {
+          this.controlNameList = res.data.map(m => {
+            return {label: m.surveillanceName, value: m.uid}
+          });
+        }
+      })
+    },
+    // 获取事件编号下拉列表
+    getControlEventBySelect () {
+      getControlEventBySelect({surveillanceStatus: this.mapForm.state}).then(res => {
+        if (res) {
+          this.eventList = res.data.filter(f => f !== null);
+          this.eventList = this.eventList.map(m => {
+            return {label: m.eventNumber, value: m.eventId}
+          });
+        }
+      })
+    },
+    // 获取布控对象下拉列表
+    getControlObjBySelect () {
+      getControlObjBySelect({surveillanceStatus: this.mapForm.state}).then(res => {
+        if (res) {
+          this.controlObjDropdownList = res.data;
+        }
+      })
+    },
+    // 切换布控状态后，重新获取布控名称列表、事件列表、布控对象列表数据
+    changeControlState (resolve) {
+      this.controlNameList = [];
+      this.eventList = [];
+      this.controlObjDropdownList = [];
+      this.mapForm.name = null;
+      this.mapForm.event = null;
+      this.mapForm.obj = {
+        objId: null,
+        objType: null,
+        name: null
+      };
+      this.getControlNameBySelect();
+      this.getControlEventBySelect();
+      this.getControlObjBySelect();
+      if (resolve) resolve();
     },
     // 获得设备报警列表
     getAlarmListByDev () {
@@ -373,7 +382,7 @@ export default {
       const params = {
         deviceType: this.mapForm.type,//设备类型
         surveillanceStatus: this.mapForm.state,//布控状态
-        alarmLevel: this.mapForm.alarmId,//告警级别
+        alarmLevel: this.mapForm.alarmId.length > 0 ? this.mapForm.alarmId.join(',') : null,//告警级别
         surveillanceDateStart: this.mapForm.time && this.mapForm.time[0],//布控开始时间
         surveillanceDateEnd: this.mapForm.time && this.mapForm.time[1],//布控结束时间
         surveillanceName: this.mapForm.name,//布控名称
@@ -812,10 +821,10 @@ export default {
       top: 0;
       z-index: 99;
       height: 100%;
-      width: 232px;
       background: #fff;
+      overflow: hidden;
       box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
-      animation: fadeInLeft .4s ease-out .3s both;
+      transition: all .1s linear;
       p{
         line-height: 60px;
         text-align: center;
@@ -826,9 +835,28 @@ export default {
         padding: 20px;
       }
     }
+    .insetLeft {
+      position: absolute;
+      top: 50%;
+      margin-top: -89px;
+      z-index: 999;
+      display: inline-block;
+      cursor: pointer;
+      &.vl_icon_map_shrinkage_01{
+        left: 252px;
+      }
+      &.vl_icon_map_shrinkage_02{
+        left: 0;
+      }
+      &.vl_icon_map_shrinkage_01:hover{
+        background-position: -1036px -1269px!important;
+      }
+      &.vl_icon_map_shrinkage_02:hover{
+        background-position: -1156px -1269px!important;
+      }
+    }
     .map_box{
       height: 100%;
-      width: calc(100% - 252px);
       margin-left: 252px;
       position: relative;
       #mapBox{
@@ -1254,7 +1282,7 @@ export default {
 .control_map_message{
   width: 300px;
   > p, > i{
-    color: #0C70F8;
+    color: #000;
   }
   > i{
     font-weight: bold;

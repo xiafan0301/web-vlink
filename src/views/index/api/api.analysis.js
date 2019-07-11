@@ -43,6 +43,19 @@ export function getDrivingAnalysis(data) {
     data
   })
 }
+/**
+ * postExport
+ * 导出接口
+ * @param {object} data
+ */
+export function postExport(data) {
+  return request({
+    url: '/export',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
 
 /*-------------------------- 特征搜车start -------------------------------*/
 /**
@@ -195,3 +208,19 @@ export function getShotNumAreaDetail(data) {
     data
   })
 }
+
+/*-------------------------- 区域人员分析start -------------------------------*/
+/**
+ * postPeopleTask
+ * 新增行人同行分析任务
+ * @param {object} data
+ */
+export function postPeopleTask(data) {
+  return request({
+    url: '/person/peer-analysis',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+/*-------------------------- 区域人员分析 end -------------------------------*/

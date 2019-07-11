@@ -55,6 +55,11 @@ export default {
       component: () => import('@/views/index/components/portrait/peer-analysis-result.vue')
     },
     {
+      path: 'peer-analysis-record', // 同行分析记录
+      name: 'peer_analysis_record',
+      component: () => import('@/views/index/components/portrait/peer-analysis-record.vue')
+    },
+    {
       path: 'xjpfcm',     //新建分析任务
       name: 'portrait_xjpfcm',
       component: () => import('@/views/index/components/portrait/xjpfcm.vue')
@@ -98,6 +103,11 @@ export default {
       path: 'fxjg',    //分析结果
       name: 'portrait_fxjg',
       component: () => import('@/views/index/components/portrait/fxjg.vue')
+    },
+    {
+      path: 'reportnr',    //人员侦察报告内容
+      name: 'portrait_nr',
+      component: () => import('@/views/index/components/portrait/reportnr.vue')
     },
     {
       path: 'report',
