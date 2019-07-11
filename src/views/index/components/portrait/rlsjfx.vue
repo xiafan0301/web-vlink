@@ -369,7 +369,7 @@ export default {
         chart = new G2.Chart({
           container: 'faceNumContainer',
           forceFit: true,
-          padding: [ 40, 0, 20, 60 ],
+          padding: [ 40, 20, 20, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -397,12 +397,16 @@ export default {
       view2.axis(false);
       chart.interval()
       .position('time*count1') 
-      .color('count', '#F2F2F2')
+      .color('#F2F2F2')
       .size(20);
 
       chart.source(dv, {});
       // 坐标轴刻度
-      chart.scale('count', {
+      chart.axis('value', {
+        title: null,
+        position: 'left'
+      })
+      chart.scale('value', {
         max: 50000,
         min: 0,
         tickCount: 5,
@@ -425,12 +429,13 @@ export default {
           lineWidth: 0
         }
       });
+      chart.axis('count1', false)
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
           return `<div class="my_tooltip">
             <h1>${title}</h1>
-            <span>${items[0].value}</span><span>张</span></div>`;
+            <span>${items[1].value}</span><span>张</span></div>`;
         }
       });
       chart.legend(false);

@@ -395,7 +395,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer3',
           forceFit: true,
-          padding: [ 20, 20, 80, 60 ],
+          padding: [ 20, 20, 60, 30 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -465,7 +465,7 @@ export default {
         chart = new G2.Chart({
           container: 'chartContainer4',
           forceFit: true,
-          padding: [ 20, 60, 60, 30 ],
+          padding: [ 20, 20, 60, 30 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
