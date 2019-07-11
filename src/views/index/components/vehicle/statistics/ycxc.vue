@@ -293,9 +293,7 @@ export default {
     }
   },
   created () {
-    console.log('params', this.$route)
     if (this.$route.params.startDate) {
-      console.log('asdsadsadasdsad')
       this.handleQueryData();
     }
   },
@@ -329,7 +327,7 @@ export default {
       const endTime = this.$route.params.endhour;
       const minShotTimes = this.$route.params.minShotTimes;
       const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
-      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(':');
+      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
 
       this.queryForm.startDate = startDate;
       this.queryForm.endDate = endDate;
@@ -339,7 +337,6 @@ export default {
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
 
-      console.log('selectDeviceArr', this.selectDeviceArr)
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -591,7 +588,7 @@ export default {
         startDate: this.queryForm.startDate + ' 00:00:00',
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
-        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(':') : null,
+        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
         surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
         isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
         pageNum: this.pagination.pageNum,
