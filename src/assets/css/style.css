@@ -403,6 +403,10 @@
 
 .vl_content_pad { padding: 10px; }
 
+/* 地图收缩图标 */
+.vl_icon_map_shrinkage_01{ width: 28px;height: 178px;background-position: -976px -1269px;}
+.vl_icon_map_shrinkage_02 { width: 28px;height: 178px;background-position: -1096px -1269px;}
+
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
 .vl_f_666{color: #666;}

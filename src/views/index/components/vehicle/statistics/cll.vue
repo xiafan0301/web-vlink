@@ -8,10 +8,10 @@
     </div>
     <div class="con_box">
       <div class="con_left">
-        <el-radio-group v-model="queryForm.radio" class="left_type">
-          <el-radio :label="1">按卡口</el-radio>
+        <!-- <el-radio-group v-model="queryForm.radio" class="left_type">
+          <el-radio :label="1">按卡口</el-radio> -->
           <!-- <el-radio :label="6">按单位</el-radio> -->
-        </el-radio-group>
+        <!-- </el-radio-group> -->
         <el-select v-model="queryForm.bayonet" filterable placeholder="请选择卡口" style="width: 100%;">
           <el-option
             v-for="item in listBayonet"
@@ -240,22 +240,22 @@ export default {
         value: 'value', // value字段
       });
       // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: '车流量1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 120     // 补全字段值时执行的规则
-      });
+      // dv.transform({
+      //   type: 'impute',
+      //   field: '车流量1',       // 待补全字段
+      //   // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
+      //   method: 'value',  // 补全常量
+      //   value: 1     // 补全字段值时执行的规则
+      // });
 
       console.log(dv.rows, 'dv.rows')
-      let view2 = chart.view();
-      view2.source(dv, {});
+      // let view2 = chart.view();
+      // view2.source(dv, {});
       
-      chart.interval()
-      .position('date*车流量1') 
-      .color('#F2F2F2')
-      .size(30);
+      // chart.interval()
+      // .position('date*车流量1') 
+      // .color('#F2F2F2')
+      // .size(30);
       chart.source(dv, {});
       chart.axis('value', {
         title: null,
@@ -270,7 +270,7 @@ export default {
         }
       });
 
-      chart.axis('车流量1', false);
+      // chart.axis('车流量1', false);
       chart.axis('date', {
         label: {
           textStyle: {
@@ -300,7 +300,7 @@ export default {
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30);
 
-console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
+      console.log("-----------------",dv.rows, this.queryForm.warningNum)
       chart.guide().line({
         top: true,
         start: [dv.rows[0].date, this.queryForm.warningNum],
@@ -444,7 +444,11 @@ console.log("-----------------",dv.rows[0].date, this.queryForm.warningNum)
               key['warnNum'] = this.queryForm.warningNum
             }
           }
-          if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || this.queryForm.statementType === 5) {
+          const _startTime = new Date(this.queryForm.startTime).getTime();
+          const _endTime = new Date(this.queryForm.endTime).getTime();
+          const threeDays = 259199000;
+          console.log(_endTime - _startTime, threeDays)
+          if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || (this.queryForm.statementType === 5 && (_endTime - _startTime) > threeDays)) {
             for(let item of this.chartData) {
               item['date'] = formatDate(item.date,'yy-MM-dd')
             }

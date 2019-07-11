@@ -79,14 +79,14 @@
               <h1>设备过车数（Top5）</h1>
               <!-- <p>数量（次）</p> -->
               <div id="chartContainer1">
-                <vue-scroll>
+                <!-- <vue-scroll> -->
                   <div class="chart_table">
-                <el-table :data="chartData1">
+                <el-table :data="chartData1" height="192">
                   <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
                   <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
                 </el-table>
                 </div>
-                </vue-scroll>
+                <!-- </vue-scroll> -->
               </div>
             </div>
           </div>
@@ -142,43 +142,10 @@ export default {
       currentPage: 1,
       pageSize: 10,
       // 图表参数
-      chartData1: [
-        { devName: '设备1', '过车数': 10, '过车数1': 1},
-        { devName: '设备2', '过车数': 20, '过车数1': 1},
-        { devName: '设备3', '过车数': 40, '过车数1': 1},
-        { devName: '设备4', '过车数': 30, '过车数1': 1},
-        { devName: '设备5', '过车数': 25, '过车数1': 1}
-      ],
-      chartData2: [
-        { item: '大众', count: 12352 },
-        { item: '本田', count: 45285 },
-        { item: '马自达', count: 52452 },
-        { item: '红旗', count: 22452 },
-        { item: '北京现代', count: 9857 }
-      ],
-      chartData3: [
-        { time: '0点', count: 12352 },
-        { time: '2点', count: 45285 },
-        { time: '4点', count: 2452 },
-        { time: '6点', count: 22452 },
-        { time: '8点', count: 9857 },
-        { time: '10点', count: 19857 },
-        { time: '12点', count: 18557 },
-        { time: '14点', count: 29857 },
-        { time: '16点', count: 39857 },
-        { time: '18点', count: 49857 },
-        { time: '20点', count: 35857 },
-        { time: '22点', count: 5857 },
-        { time: '24点', count: 8857 }
-      ],
-      chartData4: [
-        { carType: '货车', count: 1987, count1: 1 },
-        { carType: '客车', count: 9857, count1: 1 },
-        { carType: '公交车', count: 2252, count1: 1 },
-        { carType: '面包车', count: 5252, count1: 1 },
-        { carType: '摩托车', count: 4525, count1: 1 },
-        { carType: '轿车', count: 1235, count1: 1 }
-      ],
+      chartData1: [],
+      chartData2: [],
+      chartData3: [],
+      chartData4: [],
       // 保存生成的图表用来删除
       charts: {
         chart1: null,
@@ -218,97 +185,6 @@ export default {
     // 获得选择设备组件传过来的数据
     getSelectData (data) {
       this.queryForm.devIdData = data;
-    },
-    // 画图表
-    drawChart1 () {
-      let chart = null;
-      if (this.charts.chart1) {
-        this.charts.chart1.clear();
-        chart = this.charts.chart1;
-      } else {
-        let temp = document.getElementById('chartContainer1');
-        chart = new G2.Chart({
-          container: 'chartContainer1',
-          forceFit: true,
-          padding: [ 20, 20, 25, 25 ],
-          width: G2.DomUtil.getWidth(temp),
-          height: G2.DomUtil.getHeight(temp)
-        });
-      }
-      let dv = new View().source(this.chartData1);
-      dv.transform({
-        type: 'fold',
-        fields: ['过车数'], // 展开字段集
-        key: 'type', // key字段
-        value: 'value', // value字段
-        retains: ['devName']
-      });
-       // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: '过车数1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 40     // 补全字段值时执行的规则
-      });
-      let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
-      chart.interval()
-      .position('devName*过车数1')
-      .color('devName', '#F2F2F2')
-      .size(34)
-      .shape('cylinder');
-    
-      chart.source(dv);
-      chart.axis('value', {
-        title: null,
-        position: 'left'
-      });
-      // 坐标轴刻度
-      chart.scale('value', {
-        tickCount: 6,
-        title: {
-          offset: 50
-        }
-      });
-      chart.axis('devName', {
-        label: {
-          textStyle: {
-            fill: '#999999',
-            fontSize: 12
-          }
-        },
-        tickLine: {
-          alignWithLabel: false,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
-        }
-      });
-      chart.axis('过车数1', false);
-      chart.tooltip(false);
-      chart.legend(false);
-      chart.interval()
-      .position('devName*value')
-      .color('devName', [ 'l(270) 0:#0D9DF4 1:#0C70F8' ])
-      .size(34)
-      .shape('cylinder')
-      .label('value', {
-        offset: 10,
-        textStyle: {
-          fill: '#0080FE', 
-          fontSize: 16,
-          shadowBlur: 2,
-          shadowColor: 'rgba(0, 0, 0, .45)'
-        },
-      });
-
-     
-      chart.render();
-      this.charts.chart1 = chart;
     },
     drawChart2 () {
       let _this = this, chart = null;
@@ -579,9 +455,6 @@ export default {
         if (res) {
           this.gcsjDetail = res.data;
           this.chartData1 = res.data.device;
-          /* this.chartData1 = res.data.device.map(m => {
-            return {devName: m.name, '过车数': m.total, '过车数1': 1};
-          }) */
           this.chartData2 = res.data.brandDto.map(m => {
             return { item: m.name, count: m.total };
           })

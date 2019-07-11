@@ -2,7 +2,7 @@
   <div class="vl_control clearfix">
     <ul class="vl_smenu">
       <li>
-        <router-link :to="{name: 'control_map'}">布控地图</router-link>
+        <router-link :to="{name: 'control_map'}">布控分布</router-link>
       </li>
       <li>
         <router-link :to="{name: 'control_manage'}">布控管理</router-link>
