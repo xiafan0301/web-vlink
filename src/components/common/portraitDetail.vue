@@ -81,9 +81,6 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
-import {mapXupuxian} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */

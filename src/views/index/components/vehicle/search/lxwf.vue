@@ -51,22 +51,59 @@
               </div>
             </div>
             <div class="license-plate-search">
-              <el-button type="primary" :disabled="curImageUrl=='' || disab" @click="getItem" :loading="searchings" class="select_btn full">获取特征</el-button>
+              <el-button
+                type="primary"
+                :disabled="curImageUrl=='' || disab"
+                @click="getItem"
+                :loading="searchings"
+                class="select_btn full"
+              >获取特征</el-button>
               <div class="chara" v-if="photoAnalysis">
-                <span v-if="photoAnalysis.plateNo">车牌：{{photoAnalysis.plateNo}}</span>
-                <span v-if="photoAnalysis.vehicleColor">车身颜色：{{photoAnalysis.vehicleColor}}</span>
-                <span v-if="photoAnalysis.vehicleBrand">车辆品牌:{{photoAnalysis.vehicleBrand}}</span>
-                <span v-if="photoAnalysis.vehicleRoof">车顶{{photoAnalysis.vehicleRoof}}</span>
-                <span v-if="photoAnalysis.vehicleClass">{{photoAnalysis.vehicleClass}}</span>
-                <span v-if="photoAnalysis.sunvisor">遮阳板{{photoAnalysis.sunvisor}}</span>
-                <span v-if="photoAnalysis.plateColor">车牌{{photoAnalysis.plateColor}}色</span>
-                <span v-if="photoAnalysis._plateClass">{{photoAnalysis._plateClass}}</span>
+                <span
+                  @click="clickTabItem('plateNo')"
+                  :class="{red:sou.plateNo}"
+                  v-if="photoAnalysis.plateNo"
+                >车牌：{{photoAnalysis.plateNo}}</span>
+                <span
+                  @click="clickTabItem('vehicleColor')"
+                  :class="{red:sou.vehicleColor}"
+                  v-if="photoAnalysis.vehicleColor"
+                >车身颜色：{{photoAnalysis.vehicleColor}}</span>
+                <span
+                  @click="clickTabItem('vehicleBrand')"
+                  :class="{red:sou.vehicleBrand}"
+                  v-if="photoAnalysis.vehicleBrand"
+                >车辆品牌:{{photoAnalysis.vehicleBrand}}</span>
+                <span
+                  @click="clickTabItem('vehicleRoof')"
+                  :class="{red:sou.vehicleRoof}"
+                  v-if="photoAnalysis.vehicleRoof"
+                >车顶{{photoAnalysis.vehicleRoof}}</span>
+                <span
+                  @click="clickTabItem('vehicleClass')"
+                  :class="{red:sou.vehicleClass}"
+                  v-if="photoAnalysis.vehicleClass"
+                >{{photoAnalysis.vehicleClass}}</span>
+                <span
+                  @click="clickTabItem('sunvisor')"
+                  :class="{red:sou.sunvisor}"
+                  v-if="photoAnalysis.sunvisor"
+                >遮阳板{{photoAnalysis.sunvisor}}</span>
+                <span
+                  @click="clickTabItem('plateColor')"
+                  :class="{red:sou.plateColor}"
+                  v-if="photoAnalysis.plateColor"
+                >车牌{{photoAnalysis.plateColor}}色</span>
+                <span
+                  @click="clickTabItem('_plateClass')"
+                  :class="{red:sou._plateClass}"
+                  v-if="photoAnalysis._plateClass"
+                >{{photoAnalysis._plateClass}}</span>
               </div>
             </div>
           </div>
-           
-          
-          <div class="chbox" >
+
+          <div class="chbox">
             <el-form :model="tzscMenuForm" ref="tzscMenuForm" :rules="rules">
               <div style="padding-right: 20px;" v-if="input5 == 2">
                 <el-form-item label="号牌类型" label-width="70px" prop>
@@ -125,8 +162,8 @@
                 </el-form-item>
                 <el-form-item label="遮阳板" label-width="70px" prop>
                   <el-select v-model="tzscMenuForm.sunVisor" class="width132" placeholder="选择选项">
-                    <el-option   key="收起" label="收起" value="收起"></el-option>
-                    <el-option   key="放下" label="放下" value="放下"></el-option>
+                    <el-option key="收起" label="收起" value="收起"></el-option>
+                    <el-option key="放下" label="放下" value="放下"></el-option>
                   </el-select>
                 </el-form-item>
                 <!-- <el-form-item label="年检标数量" label-width="90px" prop>
@@ -142,11 +179,11 @@
                       :value="item.value"
                     ></el-option>
                   </el-select>
-                </el-form-item> -->
-                </div>
-                 <!-- 时间 -->
-                 <el-form-item >
-                 <div class="time-search">
+                </el-form-item>-->
+              </div>
+              <!-- 时间 -->
+              <el-form-item>
+                <div class="time-search">
                   <el-date-picker
                     v-model="data1"
                     type="daterange"
@@ -155,12 +192,12 @@
                     value-format="yyyy-MM-dd"
                     range-separator="至"
                     start-placeholder="开始日期"
-                    end-placeholder="结束日期">
-                  </el-date-picker>
+                    end-placeholder="结束日期"
+                  ></el-date-picker>
                 </div>
-                </el-form-item>
-                 <el-form-item prop="input4">
-                   <div class="license-plate-search">
+              </el-form-item>
+              <el-form-item prop="input4">
+                <div class="license-plate-search">
                   <el-row :gutter="5">
                     <el-col :span="22">
                       <div>
@@ -174,14 +211,10 @@
                     </el-col>
                   </el-row>
                 </div>
-                </el-form-item>
-                
-                
+              </el-form-item>
             </el-form>
-              </div>
-          
-          
-          
+          </div>
+
           <div class="search-btn">
             <el-row :gutter="10">
               <el-col :span="12">
@@ -210,11 +243,10 @@
                 <el-table-column label="序号" type="index" width="100"></el-table-column>
                 <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
                 <el-table-column label="违法次数" sortable prop="counts" show-overflow-tooltip></el-table-column>
-                <el-table-column label="操作"  show-overflow-tooltip>
- <template slot-scope="scope">
-        <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
-      </template>
-
+                <el-table-column label="操作" show-overflow-tooltip>
+                  <template slot-scope="scope">
+                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看详情</el-button>
+                  </template>
                 </el-table-column>
               </el-table>
             </div>
@@ -279,23 +311,24 @@ import BigImg from "@/components/common/bigImg.vue";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList,
-  JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
+  JtcPUTAppendixsOrder,
+  getPhotoAnalysis,
+  getViolation
 } from "../../../api/api.judge.js";
 import { getCarmodelList } from "../../../api/api.base.js";
 // import { setTimeout } from "timers";
-import { dataList } from '@/utils/data.js';
+import { dataList } from "@/utils/data.js";
 // import { callbackify, error } from 'util';
 export default {
   components: { BigImg },
   data() {
-    
     return {
-      disab:false,
-      photoAnalysis:null,//图片分析特征
-      plateType:[],// 号牌类型
-      plateColor:[],// 号牌颜色
-      vehicleType:[],// 车辆类型
-      carColor:[],// 车辆颜色
+      disab: false,
+      photoAnalysis: null, //图片分析特征
+      plateType: [], // 号牌类型
+      plateColor: [], // 号牌颜色
+      vehicleType: [], // 车辆类型
+      carColor: [], // 车辆颜色
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
       uploadFileList: [],
@@ -306,8 +339,8 @@ export default {
       imgData: null,
       input5: "1",
       data1: "",
-      
-       // 菜单表单变量
+
+      // 菜单表单变量
       tzscMenuForm: {
         input4: 3,
         selectDate: "",
@@ -351,12 +384,14 @@ export default {
       isShowImg: false, // 是否放大图片
       imgList: [],
       rules: {
-        input4:  [{
-              //pattern: /^[0-9]?$/,
-              pattern: /^(0|([1-9]\d{0,2}))$/,
-              trigger: 'blur',
-							message: '请输入不大于999的整数值'
-						}]
+        input4: [
+          {
+            //pattern: /^[0-9]?$/,
+            pattern: /^(0|([1-9]\d{0,2}))$/,
+            trigger: "blur",
+            message: "请输入不大于999的整数值"
+          }
+        ]
       },
       options: [
         {
@@ -378,12 +413,21 @@ export default {
         {
           value: "5",
           label: "5"
-        },
+        }
       ],
-      carModel:[],
-      regulationsList: [
-      ], //违章信息列表
-      pagination: { total: 0, pageSize: 10, pageNum: 1 }
+      carModel: [],
+      regulationsList: [], //违章信息列表
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      sou: {
+        plateNo: false,
+        vehicleColor: false,
+        vehicleBrand: false,
+        vehicleRoof: false,
+        vehicleClass: false,
+        sunvisor: false,
+        plateColor: false,
+        _plateClass: false
+      }
     };
   },
   computed: {
@@ -392,26 +436,30 @@ export default {
     }
   },
   mounted() {
-    let dic=this.dicFormater(dataList.vehicleType);
-    let dic1=this.dicFormater(dataList.plateType);
-    let dic2=this.dicFormater(dataList.plateColor);
-    let dic3=this.dicFormater(dataList.carColor);
-     
-    this.plateType= [...dic1[0].dictList]// 号牌类型
-    this.plateColor= [...dic2[0].dictList]// 号牌颜色
-    this.vehicleType= [...dic[0].dictList]// 车辆类型
-    this.carColor= [...dic3[0].dictList]// 车辆颜色
-   // console.log(this.plateType[1]);
-    
+    let dic = this.dicFormater(dataList.vehicleType);
+    let dic1 = this.dicFormater(dataList.plateType);
+    let dic2 = this.dicFormater(dataList.plateColor);
+    let dic3 = this.dicFormater(dataList.carColor);
+
+    this.plateType = [...dic1[0].dictList]; // 号牌类型
+    this.plateColor = [...dic2[0].dictList]; // 号牌颜色
+    this.vehicleType = [...dic[0].dictList]; // 车辆类型
+    this.carColor = [...dic3[0].dictList]; // 车辆颜色
+    // console.log(this.plateType[1]);
+
     this.setDTime();
   },
   methods: {
-    getCarmodelList(){
-      getCarmodelList().then(res=>{
-        if(res && res.data && res.data.length>0){
-          this.carModel=res.data
+    clickTabItem(v) {
+      this.sou[v] = !this.sou[v];
+      //if(this.sou[v])
+    },
+    getCarmodelList() {
+      getCarmodelList().then(res => {
+        if (res && res.data && res.data.length > 0) {
+          this.carModel = res.data;
         }
-      })
+      });
     },
     //获取图片信息
     // getPhotoAnalysis(){
@@ -425,14 +473,14 @@ export default {
     //   })
     // },
     //查看详情
-    handleClick(v){
+    handleClick(v) {
       console.log(v);
-      v.datastart=this.data1[0]
-      v.dataend=this.data1[1]
-      if(this.curImageUrl){
-        v.imgurl=this.curImageUrl
+      v.datastart = this.data1[0];
+      v.dataend = this.data1[1];
+      if (this.curImageUrl) {
+        v.imgurl = this.curImageUrl;
       }
-      this.$router.push({name: 'vehicle_search_lxwfdetail', query: v});
+      this.$router.push({ name: "vehicle_search_lxwfdetail", query: v });
     },
     // 上传图片
     beforeAvatarUpload(file) {
@@ -479,7 +527,7 @@ export default {
           });
           this.imgData = x;
           this.curImageUrl = x.path;
-          this.disab=false
+          this.disab = false;
         }
       }
       this.uploadFileList = fileList;
@@ -513,7 +561,7 @@ export default {
     delPic() {
       this.uploadFileList.splice(0, 1);
       this.curImageUrl = "";
-      this.photoAnalysis=null
+      this.photoAnalysis = null;
     },
     //选择最近上传的图片
     chooseHisPic(item) {
@@ -523,23 +571,25 @@ export default {
       item.checked = true;
     },
     //获取特征
-    getItem(){
-      this.searchings=true
+    getItem() {
+      this.searchings = true;
       //this.curImageUrl =
       getPhotoAnalysis({
-        uploadImgUrls :this.curImageUrl
-      }).then(res=>{
-        if(res && res.data && res.data.length>0){
+        uploadImgUrls: this.curImageUrl
+      }).then(res => {
+        if (res && res.data && res.data.length > 0) {
           // console.log(res);
-          this.searchings=false
-          this.photoAnalysis=res.data[0]
-           let a=this.plateType.map(el=>el.enumField==this.photoAnalysis.plateClass)
-        this.photoAnalysis._plateClass=a.enumValue
-          this.disab=true
-        }else{
-           this.searchings=false
+          this.searchings = false;
+          this.photoAnalysis = res.data[0];
+          let a = this.plateType.map(
+            el => el.enumField == this.photoAnalysis.plateClass
+          );
+          this.photoAnalysis._plateClass = a.enumValue;
+          this.disab = true;
+        } else {
+          this.searchings = false;
         }
-      })
+      });
     },
     //从历史上传图片中上传
     addHisToImg() {
@@ -548,7 +598,7 @@ export default {
       this.choosedHisPic.forEach(x => {
         _ids.push(x.uid);
         this.curImageUrl = x.path;
-        this.disab=false
+        this.disab = false;
         this.imgData = x;
       });
       let _obj = {
@@ -559,13 +609,16 @@ export default {
     //设置默认时间
     setDTime() {
       let date = new Date();
-      //let curDate = date.getTime(); 
+      //let curDate = date.getTime();
       //let curS = 30 * 24 * 3600 * 1000;
       //let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
       //let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
-      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
-      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
-      
+      let _em =
+        date.getMonth() + 1 > 9
+          ? date.getMonth() + 1
+          : "0" + (date.getMonth() + 1);
+      let _ed = date.getDate() > 9 ? date.getDate() : "0" + date.getDate();
+
       //let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.data1 = [_e, _e];
@@ -577,7 +630,7 @@ export default {
       this.imgData = null;
       this.curImageUrl = "";
       //this.tzscMenuForm.input4 = 3,
-      this.tzscMenuForm= {
+      (this.tzscMenuForm = {
         input4: 3,
         selectDate: "",
         selectDevice: "",
@@ -588,64 +641,82 @@ export default {
         carModel: "",
         sunVisor: "",
         inspectionCount: ""
-      },
-      this.setDTime();
-    //this.getVehicleDetail();
+      }),
+        this.setDTime();
+      //this.getVehicleDetail();
     },
     //查询
     getVehicleDetail() {
       this.searching = true;
-     // console.log("======getVehicleDetail=====", this.searchData, this.imgData);
+      // console.log("======getVehicleDetail=====", this.searchData, this.imgData);
 
-      
-      if(this.input5==1){
-        let a=this.plateType.map(el=>el.enumField==this.photoAnalysis.plateClass)
-        let datas={
-        dateStart:this.data1[0] + " 00:00:00",
-        dateEnd:this.data1[1] + " 23:59:59" ,
-        vilolationNum:this.tzscMenuForm.input4,
-        plateClass:a.enumValue,
-        plateColor:this.photoAnalysis.plateColor,
-        vehicleClass:this.photoAnalysis.vehicleClass,
-        vehicleColor:this.photoAnalysis.vehicleColor,
-        vehicleModel:this.photoAnalysis.vehicleModel,
-        sunvisor:this.photoAnalysis.sunVisor
-      }
-        this.getViolation(datas)
-      }else{
+      if (this.input5 == 1) {
+        let a = this.plateType.map(
+          el => el.enumField == this.photoAnalysis.plateClass
+        );
+   
+        let datas = {
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4
+        };
+        if (this.sou.plateNo) {
+          datas.plateNo = this.photoAnalysis.plateNo;
+        }
+        if (this.sou.vehicleColor) {
+          datas.vehicleColor = this.photoAnalysis.vehicleColor;
+        }
+        if (this.sou.vehicleBrand) {
+          datas.vehicleBrand = this.photoAnalysis.vehicleBrand;
+        }
+        if (this.sou.vehicleRoof) {
+          datas.vehicleRoof = this.photoAnalysis.vehicleRoof;
+        }
+        if (this.sou.vehicleClass) {
+          datas.vehicleClass = this.photoAnalysis.vehicleClass;
+        }
+        if (this.sou.sunvisor) {
+          datas.sunvisor = this.photoAnalysis.sunVisor;
+        }
+        if (this.sou.plateColor) {
+          datas.plateColor = this.photoAnalysis.plateColor;
+        }
+        if (this.sou._plateClass) {
+          datas.plateClass = a.enumValue;
+        }
+
+        this.getViolation(datas);
+      } else {
         let params = {
-        dateStart:this.data1[0] + " 00:00:00",
-        dateEnd:this.data1[1] + " 23:59:59" ,
-        vilolationNum:this.tzscMenuForm.input4,
-        plateClass:this.tzscMenuForm.licenseType,
-        plateColor:this.tzscMenuForm.licenseColor,
-        vehicleClass:this.tzscMenuForm.carType,
-        vehicleColor:this.tzscMenuForm.carColor,
-        vehicleModel:this.tzscMenuForm.carModel,
-        sunvisor:this.tzscMenuForm.sunVisor,
-        // plateClass:this.input4,
+          dateStart: this.data1[0] + " 00:00:00",
+          dateEnd: this.data1[1] + " 23:59:59",
+          vilolationNum: this.tzscMenuForm.input4,
+          plateClass: this.tzscMenuForm.licenseType,
+          plateColor: this.tzscMenuForm.licenseColor,
+          vehicleClass: this.tzscMenuForm.carType,
+          vehicleColor: this.tzscMenuForm.carColor,
+          vehicleModel: this.tzscMenuForm.carModel,
+          sunvisor: this.tzscMenuForm.sunVisor
+          // plateClass:this.input4,
+        };
 
-      };
-      
-        this.getViolation(params)
+        this.getViolation(params);
       }
-      
-    
     },
     //按条件查询违章
-    getViolation(d){
-      getViolation(d).then(res=>{
-        if(res && res.data){
-           this.searching = false;
+    getViolation(d) {
+      getViolation(d).then(res => {
+        if (res && res.data) {
+          this.searching = false;
           // pagination: { total: 20, pageSize: 10, pageNum: 1 }
-          this.pagination.total=res.data.total
-          this.pagination.pageNum=res.data.pageNum
+          this.pagination.total = res.data.total;
+          this.pagination.pageNum = res.data.pageNum;
           // this.pagination.total=res.data.total
-          this.regulationsList=res.data.list
-        }else{
-           this.searching = false;
+          this.regulationsList = res.data.list;
+        } else {
+          this.searching = false;
         }
-      })
+      });
     },
     // 图片放大
     openBigImg(index, data) {
@@ -681,8 +752,8 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.chbox{
-  padding-right:20px;
+.chbox {
+  padding-right: 20px;
   padding-top: 10px;
 }
 .vehicle-info {
@@ -855,11 +926,11 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
-.select_btn:hover{
-   background-color: #0466de;
+.select_btn:hover {
+  background-color: #0466de;
 }
-.select_btn.el-button--primary.is-disabled{
-background-color: #a0cfff;
+.select_btn.el-button--primary.is-disabled {
+  background-color: #a0cfff;
   color: #ffffff;
 }
 .inset {
@@ -874,7 +945,9 @@ background-color: #a0cfff;
   margin-top: 10px;
   padding-bottom: 10px;
   border-bottom: solid 1px #eeeeee;
+
   span {
+    cursor: pointer;
     display: inline-block;
     line-height: 35px;
     height: 35px;
@@ -885,13 +958,46 @@ background-color: #a0cfff;
     margin-top: 10px;
     padding: 0px 10px;
   }
+  .red {
+    border: 1px solid red;
+    color: red;
+  }
 }
 </style>
 <style lang="scss">
-.info-left{
-.el-date-editor .el-range-input{
- font-size: 12px;
+
+html {
+  font-size: 100px;
 }
+@media screen and (min-width: 960px) and (max-width: 1119px) {
+  html {
+    font-size: 60px !important;
+  }
+}
+@media screen and (min-width: 1200px) and (max-width: 1439px) {
+  html {
+    font-size: 70px !important;
+  }
+}
+@media screen and (min-width: 1440px) and (max-width: 1679px) {
+  html {
+    font-size: 80px !important;
+  }
+}
+@media screen and (min-width: 1680px) and (max-width: 1919px) {
+  html {
+    font-size: 90px !important;
+  }
+}
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 100px !important;
+  }
+}
+.info-left {
+  .el-date-editor .el-range-input {
+    font-size: 12px;
+  }
 }
 .vehicle-info {
   .vl_judge_tc_c_item {
@@ -899,7 +1005,7 @@ background-color: #a0cfff;
       .el-upload {
         width: 100%;
         height: 100%;
-       
+
         img {
           width: 100%;
           height: 100%;
@@ -908,8 +1014,8 @@ background-color: #a0cfff;
           border-radius: 10px;
         }
       }
-      .el-upload:hover{
-         background: #2981f8;
+      .el-upload:hover {
+        background: #2981f8;
         border: none;
         span {
           color: #ffffff;
