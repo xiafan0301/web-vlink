@@ -84,9 +84,9 @@
                 <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
                   <div class="vc_gcck_rbl">
                     <p @click="goToDetail(item.plateNo)">
-                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
+                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.subStoragePath">
                     </p>
-                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
+                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.shotTime}}</div>
                     <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
                   </div>
                 </li>

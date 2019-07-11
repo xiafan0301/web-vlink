@@ -67,12 +67,12 @@
                     <div class="gcck_rbl_i">
                       <div>
                         <div @click="goToDetail(sitem.plateNo)">
-                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.imagePath">
+                          <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.subStoragePath">
                         </div>
                       </div>
                     </div>
                     <div class="gcck_rbl_t com_ellipsis" :title="sitem.deviceName" style="color: #333;"><i class="vl_icon vl_icon_sm_cl"></i>{{sitem.plateNo}}</div>
-                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.snapTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
+                    <div class="gcck_rbl_t com_ellipsis" :title="sitem.shotTime"><i class="vl_icon vl_icon_sm_sj"></i>{{sitem.snapTime}}</div>
                   </div>
                 </li>
               </ul>
