@@ -624,11 +624,13 @@ export default {
                 }
               } else {
                 this.strucInfoList = []; // 清空搜索结果
+                this.total = 0;
               }
             })
             .catch(err => {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
+              this.total = 0;
             });
         } else {
           return false;

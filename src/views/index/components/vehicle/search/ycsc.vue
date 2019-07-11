@@ -609,7 +609,6 @@ export default {
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
-                    // this.pageNum = res.data.pageNum;
                     this.total = res.data.total;
                   } else {
                     this.strucInfoList = []; // 清空搜索结果
@@ -617,11 +616,13 @@ export default {
                   }
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
+                  this.total = 0;
                 }
               })
               .catch(err => {
                 this.getStrucInfoLoading = false; // 关闭加载效果
                 this.strucInfoList = []; // 清空搜索结果
+                this.total = 0;
               });
           } else {
             return false;
