@@ -383,14 +383,6 @@ export default {
 }
 </script>
 <style lang="scss">
-  html {
-    font-size: 100px;
-  }
-@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-@media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .alarm_dialog {
   height: 100%;
   .struc_detail_dialog {

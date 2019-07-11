@@ -1,69 +1,90 @@
 <template>
-  <div class="point">
+  <div class="point detail">
     <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '过车详情'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
-        <el-breadcrumb-item>车辆查询</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/clcx' }">车辆查询</el-breadcrumb-item>
         <el-breadcrumb-item>过车详情</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
 
     <div class="left">
       <div class="plane">
         <h3 class="title">车辆详情</h3>
         <div class="infomation">
-          <div class="first">
-            <span>{{detailData.plateNo}}</span>
-            <span>{{detailData.vehicleColor}}</span>
+          <!-- <div class="first">
+            <span>{{detailData.plateno}}</span>
+            <span v-if="detailData.color">{{detailData.color}}色</span>
+          </div> -->
+          <div class="div">
+             <label>车牌</label>
+            <span>{{detailData.plateno}}</span>
+           
+          </div>
+          <div class="div" v-if="detailData.color">
+             <label>车身颜色</label>
+            <span>{{detailData.color}}色</span>
+           
           </div>
           <div class="div">
-            <span>{{detailData.vehicleBrand}}</span>
-            <label>中文品牌</label>
+             <label>中文品牌</label>
+            <span>{{detailData.brand}}</span>
+           
           </div>
           <div class="div">
-            <span>{{detailData.vehicleStatus}}</span>
             <label>机动车状态</label>
+            <span>{{detailData.status}}</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.vehicleLocation}}</span>
-            <label>归属地</label>
+             <label>车辆类型</label>
+            <span>{{detailData.platetype}}</span>
+           
+          </div>
+          <div class="div" v-if="detailData.owner">
+             <label>车辆所有人</label>
+            <span>{{detailData.owner}}</span>
+           
           </div>
           <div class="div">
-            <span>{{detailData.vehicleOwner}}</span>
-            <label>车辆所有人</label>
+            <label>年 款</label>
+            <span>{{detailData.model}}</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.idCard}}</span>
-            <label>身份证</label>
-          </div>
-          <div class="div">
-            <span>{{detailData.approvedPassNum}}人</span>
             <label>核定载客</label>
+            <span>{{detailData.seatnumber}}人</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.validityPeriod}}</span>
+            <label>使用性质</label>
+            <span>{{detailData.usecharacter}}人</span>
+            
+          </div>
+          <div class="div">
             <label>有效期</label>
+            <span>{{detailData.validuntil}}</span>
+            
           </div>
-          <div class="div">
+          <!-- <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
-          </div>
-          <p class="blue">查看违章记录</p>
+          </div> -->
+          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
         </div>
       </div>
     </div>
     <div class="right disflex">
       <div class="main">
         <div class="infobox">
-          <div class="flex1 bkt">
-            <img
-              :src="snapObj.storagePath"
-              class="spimg"
-              v-if="showimg"
-            >
-            <video
-              v-if="!showimg"
-              id="capVideo"
+          <div class="flex1 bkt mrg10">
+            <div>
+            <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
               autoplay
@@ -72,34 +93,46 @@
               <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
               <i class="vl_icon vl_icon_control_09" v-else></i>
             </div>
+             </div>
+          </div>
+          <div class="flex1 bkt">
+            <img
+              :src="snapObj.storagePath"
+              class="spimg"
+             
+            >
+            
           </div>
           <div class="flex1">
             <h3 class="titles">抓拍信息</h3>
             <div class="infom">
               <div>
                 <p class="div">
-                  <span>{{snapObj.snapTime}}</span>
                   <label>抓拍时间</label>
+                  <span>{{snapObj.snapTime}}</span>
+                  
                 </p>
               </div>
               <div>
                 <p class="div">
+                   <label>抓拍设备</label>
                   <span>{{snapObj.snapDevice}}</span>
-                  <label>抓拍设备</label>
+                 
                 </p>
               </div>
               <div>
                 <p class="div">
-                  <span>{{snapObj.snapAddress}}</span>
                   <label>抓拍地址</label>
+                  <span>{{snapObj.address}}</span>
+                  
                 </p>
               </div>
-              <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
-              <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span>
+              <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
+              <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
           </div>
         </div>
-        <div class="struc-list">
+        <div class="struc-list" v-if="strucInfoList && strucInfoList.length>1">
           <swiper :options="swiperOption" ref="mySwiper">
             <!-- slides -->
             <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
@@ -108,7 +141,7 @@
                 :class="{'active': index === curImgIndex}"
                 @click="imgListTap(item, index)"
               >
-                <img style="width: 100%; height: 100%;" :src="item.subStoragePath" >
+                <img style="width: 100%; height: 100%; min-height:0.88rem;" :src="item.subStoragePath" >
                 <!-- <div class="vl_jfo_sim" v-show="showSim">
                   <i
                     class="vl_icon vl_icon_retrieval_05"
@@ -128,20 +161,22 @@
       </div>
       <div class="ment">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>尾随分析</a>
-          <a>以车搜车</a>
+          <a @click="goToPage('control_create')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_ws')">尾随分析</a>
+          <a @click="goToPage('vehicle_search_ycsc')">以图搜车</a>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { ScpGETstrucInfoList } from "@/views/index/api/api.search.js";
 import { getSnapDetail,getArchives } from "@/views/index/api/api.judge.js";
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       curImgIndex: 0,
@@ -201,6 +236,22 @@ export default {
     this.getArchives()
   },
   methods: {
+    goToPage(v){
+      if(v=="vehicle_search_lxwfdetail"){
+        this.$router.push({name:v , query:{
+          datastart:this.$route.query.dateStart,
+          dataend:this.$route.query.dateEnd,
+          plateNo:this.$route.query.plateNo,
+           
+        }});
+      }else{
+        this.$router.push({name:v ,query:{
+           plateNo:this.detailData.plateno,
+           imgurl:this.snapObj.storagePath
+        }});
+      }
+        
+    },
     getArchives(){
       let d={
         plateNo:this.$route.query.plateNo || "湘AN8888"
@@ -215,10 +266,11 @@ export default {
     //
     getSnapDetail(){
       let d={
-        dateStart:'2019-06-01',
-        dateEnd:'2019-07-02',
+        dateStart:this.$route.query.dateStart,
+        dateEnd:this.$route.query.dateEnd,
         devIds:'',
-        plateNo:'湘A77777',
+        plateNo:this.$route.query.plateNo,
+        hasPlate:this.$route.query.plateNo?'1':'0'
       }
       getSnapDetail(d).then(res=>{
         if(res){
@@ -234,7 +286,7 @@ export default {
     imgListTap(data, index) {
       this.curImgIndex = index;
       console.log(index);
-      this.snapObj = this.detailData.snapDtoList[index]
+      this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);
     },
@@ -260,17 +312,21 @@ export default {
   width: 100%;
   height: 100%;
 }
-.breadcrumb_heaer {
-  height: 54px;
-  line-height: 54px;
-  background: #ffffff;
+.mrg10{
+  margin-right: 10px;
 }
+// .breadcrumb_heaer {
+//   height: 54px;
+//   line-height: 54px;
+//   background: #ffffff;
+// }
 .full {
   width: 100%;
 }
 .blue {
   color: #0c70f8;
   cursor: pointer;
+  line-height: 48px;
 }
 .title {
   padding: 10px 20px;
@@ -301,12 +357,12 @@ export default {
     background: #ffffff;
   }
   .ment {
-    width: 227px;
+    width: 175px;
     height: calc(100% - 20px);
 
     .tablink {
       height: 100%;
-      width: 197px;
+      width: 160px;
       background: #ffffff;
       margin: 0px auto;
       padding: 0px 20px;
@@ -353,17 +409,17 @@ export default {
     margin-bottom: 5px;
   }
   .infomation {
-    div:first-child {
-      padding: 10px 0px;
-      span {
-        display: inline-block;
-        padding: 6px 10px;
-        background: rgba(250, 250, 250, 1);
-        border: 1px solid rgba(242, 242, 242, 1);
-        border-radius: 3px;
-        margin-right: 10px;
-      }
-    }
+    // div:first-child {
+    //   padding: 10px 0px;
+    //   span {
+    //     display: inline-block;
+    //     padding: 6px 10px;
+    //     background: rgba(250, 250, 250, 1);
+    //     border: 1px solid rgba(242, 242, 242, 1);
+    //     border-radius: 3px;
+    //     margin-right: 10px;
+    //   }
+    // }
   }
 }
 .playSee {
@@ -379,7 +435,7 @@ export default {
 .div {
   display: inline-block;
   padding: 5px 10px;
-  margin: 5px 0px;
+  margin: 5px 10px 5px 0px;
   background: rgba(250, 250, 250, 1);
   border: 1px solid rgba(242, 242, 242, 1);
   label {
@@ -387,11 +443,11 @@ export default {
     font-weight: 400;
     color: rgba(153, 153, 153, 1);
     line-height: 24px;
-    border-left: solid 1px rgba(242, 242, 242, 1);
-    padding-left: 10px;
+    border-right: solid 1px rgba(242, 242, 242, 1);
+    padding-right: 10px;
   }
   span {
-    padding-right: 10px;
+    padding-left: 10px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(51, 51, 51, 1);
@@ -402,9 +458,12 @@ export default {
   background-color: #0c70f8;
   color: #ffffff;
 }
+.select_btn:hover{
+   background-color: #0466de;
+}
 .infobox {
   margin: 35px auto;
-  width: 90%;
+  width: 95%;
   height: calc(100% - 270px);
   min-height: 260px;
   box-shadow: 5px 5px 15px 1px #dddddd;
@@ -554,4 +613,10 @@ export default {
 }
 </style>
 <style lang="scss">
+.detail{
+  .breadcrumb_heaer {
+    padding: 0px;
+  }
+}
+
 </style>

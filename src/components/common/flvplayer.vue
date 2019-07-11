@@ -385,7 +385,7 @@ export default {
     bResize () {
       window.setTimeout(() => {
         this.sizeHandler();
-      }, 500);
+      }, 400);
     }
   },
   computed: {

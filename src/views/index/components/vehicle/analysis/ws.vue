@@ -5,7 +5,7 @@
       <div class="left">
         <el-form class="left_form" :model="searchForm" ref="searchForm" :rules="rules">
           <el-form-item prop="plateNo">
-            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo"></el-input>
+            <el-input type="text" v-model="searchForm.plateNo" placeholder="请输入车牌号" style="width: 100%" @blur="handlePlateNo('searchForm')"></el-input>
           </el-form-item>
           <el-form-item label="开始" label-width="20px" class="date_time" prop="shotTime">
             <el-date-picker
@@ -14,9 +14,8 @@
               :clearable="false"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']"
               style="width: 100%"
-              @blur="handleStartTime"
+              @blur="blurStartTime"
               :picker-options="pickerStart"
               placeholder="开始时间">
             </el-date-picker>
@@ -26,17 +25,17 @@
               v-model="searchForm.dateEnd"
               style="width: 100%"
               :clearable="false"
-              @blur="handleEndTime"
+              @blur="blurEndTime"
+              @focus="handleEndTime"
               :picker-options="pickerEnd"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              :default-time="['00:00:00', '23:59:59']"
               type="datetime"
               placeholder="结束时间"
               >
             </el-date-picker>
           </el-form-item>
-          <el-form-item prop="deviceCode">
+          <el-form-item prop="deviceCode" class="device_code">
             <el-select placeholder="请选择起点设备" style="width: 100%" v-model="searchForm.deviceCode" @change="handleChangeDeviceCode">
               <el-option
                 v-for="(item, index) in deviceList"
@@ -45,6 +44,7 @@
                 :value="item.deviceID"
               ></el-option>
             </el-select>
+            <span class="span_tips" v-show="isShowDeviceTip">该车辆在该时间内无抓拍设备</span>
           </el-form-item>
           <el-form-item prop="vehicleClass">
             <el-select placeholder="请选择尾随车辆类型" style="width: 100%" v-model="searchForm.vehicleClass" multiple clearable>
@@ -52,7 +52,7 @@
                 v-for="(item, index) in vehicleTypeList"
                 :key="index"
                 :label="item.enumValue"
-                :value="item.enumField"
+                :value="item.enumValue"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -127,6 +127,7 @@ export default {
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
+      isShowDeviceTip: false, // 显示设备列表无数据提示
       deviceStartTime: null, // 起点设备抓拍时间
       searchForm: {
         plateNo: null, // 车牌号码
@@ -145,6 +146,7 @@ export default {
       ],
       rules: {
         plateNo: [
+          { required: true, message: '请输入正确的车牌号码', trigger: 'blur' },
           { validator: checkPlateNumber, trigger: 'blur' }
         ]
       },
@@ -153,18 +155,41 @@ export default {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
-      },
+      pickerEnd: {},
       deviceList: [], // 抓拍设备列表
       vehicleTypeList: [], // 车辆类型列表
       dataList: [], // 查询的抓拍结果列表
     }
   },
+  watch: {
+    'searchForm.shotTime' () {
+      let _this = this;
+      const threeDays = 2 * 3600 * 24 * 1000;
+      const endTime = new Date(_this.searchForm.shotTime).getTime() + threeDays;
+      _this.searchForm.dateEnd = formatDate(endTime);
+    }
+  },
   created () {
     this.getVehicleTypeList();
+
+    const plateNo = this.$route.query.plateNo;
+    const dateStart = this.$route.query.dateStart;
+    const dateEnd = this.$route.query.dateEnd;
+    if (plateNo) { // 从其他模块跳转过来的
+      this.searchForm.plateNo = plateNo;
+    }
+    if (plateNo && dateStart && dateEnd) { // 从分析结果页面跳过来的
+      this.searchForm.plateNo = plateNo;
+      this.searchForm.shotTime = dateStart;
+      this.searchForm.dateEnd = dateEnd;
+      this.searchForm.interval = this.$route.query.interval;
+      this.searchForm.deviceCode = this.$route.query.deviceCode;
+      this.searchForm.vehicleClass = this.$route.query.vehicleClass && this.$route.query.vehicleClass.join(',');
+      this.getDeviceList();
+      setTimeout(() => {
+        this.searchData('searchForm');
+      }, 1000)
+    }
   },
   methods: {
     // 获取车辆类型列表
@@ -178,32 +203,41 @@ export default {
         })
     },
     // 车牌号码change
-    handlePlateNo () {
-      if (this.searchForm.plateNo && this.searchForm.shotTime && this.searchForm.dateEnd) {
-        this.getDeviceList();
-      }
-    },
-    // 开始时间change
-    handleStartTime () {
-      let _this = this;
-      if (_this.searchForm.shotTime) {
-        _this.pickerEnd.disabledDate = function (time) {
-          return time.getTime() > new Date(_this.searchForm.shotTime).getTime() + 3 * 24 * 3600 * 1000;
+    handlePlateNo (form) {
+      this.$refs[form].validateField('plateNo', (error) => {
+        if (!error) {
+          if (this.searchForm.shotTime && this.searchForm.dateEnd) {
+            this.getDeviceList();
+          }
         }
+      })
+    },
+    // 开始时间blur
+    blurStartTime (form) {
+      let _this = this;
+    
+      if (_this.searchForm.shotTime) {
         if (_this.searchForm.plateNo && _this.searchForm.dateEnd) {
           _this.getDeviceList();
         }
       }
     },
-    // 结束时间change
-    handleEndTime () {
+    // 结束时间blur
+    blurEndTime () {
       let _this = this;
       if (_this.searchForm.dateEnd) {
-        _this.pickerStart.disabledDate = function (time) {
-          return time.getTime() > new Date(_this.searchForm.dateEnd).getTime();
-        }
         if (_this.searchForm.shotTime && _this.searchForm.plateNo) {
           _this.getDeviceList();
+        }
+      }
+    },
+    // 结束时间focus
+    handleEndTime () {
+      let _this = this;
+      const startDate = new Date(_this.searchForm.shotTime).getTime();
+      _this.pickerEnd = {
+        disabledDate (time) {
+         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
         }
       }
     },
@@ -215,11 +249,25 @@ export default {
         startTime: formatDate(this.searchForm.shotTime),
         endTime: formatDate(this.searchForm.dateEnd)
       };
-      console.log('params', params)
       getShotDevice(params)
         .then(res => {
-          if (res) {
-            this.deviceList = res.data;
+          if (res && res.code === '00000000') {
+            if (res.data) {
+              this.deviceList = res.data;
+              this.searchForm.deviceCode = this.deviceList[0].deviceID;
+              this.isShowDeviceTip = false;
+
+              if (this.$route.query.deviceCode) {
+              this.deviceList.map(item => {
+                if (item.deviceID === this.$route.query.deviceCode) {
+                  this.deviceStartTime = item.shotTime;
+                }
+              })
+            }
+
+            } else {
+              this.isShowDeviceTip = true;
+            }
           }
         })
     },
@@ -240,6 +288,9 @@ export default {
         dateStart: formatDate(this.deviceStartTime),
         dateEnd: formatDate(this.searchForm.dateEnd),
         plateNoTb: obj.plateNo,
+        vehicleClass: this.searchForm.vehicleClass.join(',') || null,
+        interval: this.searchForm.interval,
+        deviceCode: this.searchForm.deviceCode,
         dateStartTb: formatDate(obj.shotTime)
        }});
     },
@@ -249,6 +300,7 @@ export default {
     },
     // 搜索数据
     searchData (form) {
+      this.dataList = [];
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.searchForm.plateNo) {
@@ -267,7 +319,7 @@ export default {
             });
             return;
           };
-          const vehicleType = this.searchForm.vehicleClass.join(':');
+          const vehicleType = this.searchForm.vehicleClass.join(',');
           const params = {
             deviceCode: this.searchForm.deviceCode,
             startTime: formatDate(this.searchForm.shotTime),
@@ -307,6 +359,19 @@ export default {
         width: 100%;
         padding: 15px 20px;
         font-size: 12px !important;
+        .device_code {
+          .el-form-item__content {
+            .span_tips {
+              color: #F56C6C;
+              font-size: 12px;
+              line-height: 1;
+              padding-top: 4px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
+          }
+        }
         /deep/ .el-form-item {
           margin-bottom: 20px;
         }

@@ -3,28 +3,74 @@
     <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
-        <h2>尾随人员的库信息</h2>
-        <ul>
-          <li>
-            <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
-          </li>
-          <li>
-            <span>姓名：</span>
-            <span>雪佛兰科鲁兹</span>
-          </li>
-          <li>
-            <span>性别：</span>
-            <span>红色</span>
-          </li>
-          <li>
-            <span>身份证号：</span>
-            <span>430322199709831112</span>
-          </li>
-          <li>
-            <span>布控组：</span>
-            <span>你猜咯</span>
-          </li>
-        </ul>
+        <vue-scroll>
+          <h2>尾随人员的特征信息</h2>
+          <ul class="detail_ul">
+            <li>
+              <img src="../../../../../assets/img/temp/vis-eg.png" alt="">
+            </li>
+            <li>
+              <span>性别：</span>
+              <span>红色</span>
+            </li>
+            <li>
+              <span>年龄段：</span>
+              <span>少年</span>
+            </li>
+            <li>
+              <span>发型：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>上身款式：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>上身纹理：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>上身颜色：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>下身款式：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>下身颜色：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否打伞：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否戴帽子：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否背包：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否拎东西：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否抱小孩：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否戴眼镜：</span>
+              <span>你猜咯</span>
+            </li>
+            <li>
+              <span>是否戴口罩：</span>
+              <span>你猜咯</span>
+            </li>
+          </ul>
+        </vue-scroll>
       </div>
       <div class="right">
         <div class="operation_box">
@@ -304,6 +350,7 @@ export default {
     padding-top: 50px;
     // height: calc(100% - 55px);
     .left {
+      height: 100%;
       width: 272px;
       background-color: #ffffff;
       box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
@@ -313,7 +360,7 @@ export default {
         font-weight: bold;
         font-size: 18px;
       }
-      >ul {
+      .detail_ul {
         margin-top: 15px;
         >li {
           line-height: 30px;

@@ -258,7 +258,7 @@ export default {
       searchForm: {
         startDate: null,
         endDate: null,
-        passageway: null
+        passageway: []
       },
       tracksForm: {
         startDate: null,

@@ -2,13 +2,13 @@ import request from '@/config/axios';
 /*================车辆侦查=================== */
 /**
  * 过车数据统计接口
- * @param {*} params 
+ * @param {*} data 
  */
-export const apiPassingCarSta = (params) => {
+export const apiPassingCarSta = (data) => {
   return request({
     url: '/analysis/passing-car',
-    method: 'get',
-    params,
+    method: 'post',
+    data,
     mode: 'judge'
   });
 }
@@ -38,11 +38,23 @@ export function getAllBayonetListByName(params) {
 }
 /**
  * getAllMonitorList 布控车辆出城统计接口   
- * @param {object} params
+ * @param {object} data
  */
-export function apiOutCityStatistics(params) {
+export function apiOutCityStatistics(data) {
   return request({
     url: '/vehicle-investigate/out-city-statistics',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
+/**
+ * getAllMonitorList 所有出城卡口列表查询   
+ * @param {object} params
+ */
+export function getOutCityBayonet(params) {
+  return request({
+    url: '/analysis-device/out-city-bayonet',
     method: 'get',
     params,
     mode: 'judge'

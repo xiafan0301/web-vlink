@@ -4,13 +4,6 @@
       <router-link :to="{name: 'portrait_rlcx'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_101"></span>
-        <span class="ptt_li_text">人脸查询</span>
-      </router-link>
-    </li>
-    <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
-        <img src="../../../../assets/img/portrait_li_bg.png" alt="">
-        <span class="ptt_li_icon vl_icon2 vl_icon2_101"></span>
         <span class="ptt_li_text">特征搜人</span>
       </router-link>
     </li>
@@ -32,7 +25,7 @@
       <router-link :to="{name: 'portrait_rxbd'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_104"></span>
-        <span class="ptt_li_text">人像对比</span>
+        <span class="ptt_li_text">人像比对</span>
       </router-link>
     </li>
     <li>
@@ -50,7 +43,7 @@
       </router-link>
     </li>
     <li>
-      <router-link :to="{name: 'vehicle_search_clcx'}">
+      <router-link :to="{name: 'portrait_ljd'}">
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_107"></span>
         <span class="ptt_li_text">落脚点分析</span>
@@ -89,6 +82,13 @@
         <img src="../../../../assets/img/portrait_li_bg.png" alt="">
         <span class="ptt_li_icon vl_icon2 vl_icon2_112"></span>
         <span class="ptt_li_text">跟踪尾随</span>
+      </router-link>
+    </li>
+    <li>
+      <router-link :to="{name: 'portrait_report'}">
+        <img src="../../../../assets/img/portrait_li_bg.png" alt="">
+        <span class="ptt_li_icon vl_icon2 vl_icon2_113"></span>
+        <span class="ptt_li_text">人员侦察报告</span>
       </router-link>
     </li>
   </ul>

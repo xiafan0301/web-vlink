@@ -73,3 +73,45 @@ export function getDeviceByBayonetUid(params) {
   })
 }
 
+/**
+ * 查询全国车辆型号列表信息   
+ * @param {object} params
+ */
+export function getCarmodelList(params) {
+  return request({
+    url: '/vehicle-brands',
+    method: 'get',
+    params,
+    mode: baseModeName
+  })
+}
+
+/**
+ * 通过设备id监控设备详情查询   
+ * @param {object} params
+ */
+export function getDeviceDetailById(params) {
+  return request({
+    url: '/device-service/device-details',
+    method: 'get',
+    params: params,
+    mode: baseModeName
+  })
+}
+
+/**
+ * 根据卡口标识集合查询设备列表信息   
+ * @param {object} params
+ */
+export function getDeviceByBayonetUids(params) {
+  let str = '';
+  for (let i = 0; i < params.length; i++) {
+    str += (i === 0 ? '' : '&') + 'bayonetUids=' + params[i] + '&';
+  }
+  return request({
+    url: '/device-service/bayonetUids?' + str,
+    method: 'get',
+    // params: params,
+    mode: baseModeName
+  })
+}

@@ -105,11 +105,7 @@
                 <div>
                   <h1>抓拍人脸数TOP5</h1>
                   <ul>
-                    <li><span>设备1</span><span>25,156张</span></li>
-                    <li><span>设备2</span><span>25,156张</span></li>
-                    <li><span>设备3</span><span>25,156张</span></li>
-                    <li><span>设备4</span><span>25,156张</span></li>
-                    <li><span>设备5</span><span>25,156张</span></li>
+                    <li v-for="(item,index) in faceSnapSta.device" :key="index"><span>{{item.name}}</span><span>{{item.total}}张</span></li>
                   </ul>
                 </div>
                 <span slot="reference" class="five">TOP5</span>
@@ -150,15 +146,15 @@
         </div>
       </div>
       <div>
-        <div class="box">
+        <div class="box chart_box">
           <h1>各时间段的抓拍人脸数</h1>
           <p>人脸抓拍数(张)</p>
           <div id="faceNumContainer"></div>
         </div>
       </div>
       <div>
-        <div class="box">
-          <h1>各时间人脸布控的告警次数</h1>
+        <div class="box chart_box">
+          <h1>各时间段人脸布控的告警次数</h1>
           <p>告警次数(次)</p>
           <div id="alarmNumContainer"> </div>
         </div>
@@ -260,9 +256,8 @@ export default {
     this.getFaceControlSta();
     setTimeout(() => {
       this.getFaceSnapSta();
-    }, 2000)
+    }, 1500)
 
-    this.drawChart1();
     this.drawChart2();
   },
   methods: {
@@ -327,6 +322,7 @@ export default {
       //   startTime: this.faceSnapForm.queryDate[0],
       //   endTime: this.faceSnapForm.queryDate[1]
       // }
+      this.chartData1 = [];
       const params = {
         deviceIds: this.faceSnapForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.faceSnapForm.devIdData.selSelectedData2.map(m => m.id).join(','),
@@ -338,6 +334,13 @@ export default {
       apiFaceSnap(params).then(res => {
         if (res) {
           this.faceSnapSta = res.data;
+          let timeDto = this.faceSnapSta.timeDto
+          if(timeDto && timeDto.length > 0) {
+            this.chartData1 = timeDto.map(m => {
+              return { time: m.name, count: m.total };
+            })
+            this.drawChart1();
+          }
         }
       }).finally(() => {
         this.loadingBtn1 = false;
@@ -345,6 +348,7 @@ export default {
     },
     // 获取人脸布控告警数据分析
     getFaceControlSta () {
+      this.chartData2 = []
       const params = {
         startTime: this.faceControlQueryDate[0],
         endTime: this.faceControlQueryDate[1],
@@ -353,14 +357,26 @@ export default {
       apiFaceWarning(params).then(res => {
         if (res) {
           this.faceControlSta = res.data;
+          let timeDto = this.faceControlSta.timeDto
+          if(timeDto && timeDto.length > 0) {
+            this.chartData2 = timeDto.map(m => {
+              return { time: m.name, count: m.total };
+            })
+            this.drawChart2();
+          }
         }
       }).finally(() => {
         this.loadingBtn2 = false;
       })
     },
+    // 转换时间间隔
+    transformTime (title) {
+      if (title === '0点') return 0;
+      return title.length === 2 ? parseInt(title.slice(0, 1)) - 1 : parseInt(title.slice(0, 2)) - 1;
+    },
     // 画抓拍人脸数图表
     drawChart1 () {
-      let chart = null;
+      let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
         chart = this.charts.chart1;
@@ -383,36 +399,13 @@ export default {
         retains: ['time']
       });
 
-      // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: 'count1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 50000    // 补全字段值时执行的规则
-      });
-      let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
-      chart.interval()
-      .position('time*count1') 
-      .color('#F2F2F2')
-      .size(20);
-
       chart.source(dv, {});
       // 坐标轴刻度
-      chart.axis('value', {
-        title: null,
-        position: 'left'
-      })
       chart.scale('value', {
-        max: 50000,
-        min: 0,
         tickCount: 5,
-        title: {
-          offset: 50
-        }
+      });
+      chart.axis('value', {
+        title: null
       });
       chart.axis('time', {
         label: {
@@ -433,22 +426,25 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          return `<div class="my_tooltip">
-            <h1>${title}</h1>
-            <span>${items[1].value}</span><span>张</span></div>`;
+          let str = `<div class="my_tooltip">`;
+          if (title === '0点') {
+            str += `<h1>${title}</h1>`;
+          } else {
+            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          }
+          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          return str;
         }
       });
       chart.legend(false);
-      chart.interval()
-      .position('time*value')
-      .color('type', [ 'l(270) 0:#0C70F8 1:#0D9DF4' ])
-      .size(20)
+      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
+      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart1 = chart;
     },
     // 画布控告警次数图表
     drawChart2 () {
-      let chart = null;
+      let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
         chart = this.charts.chart2;
@@ -471,32 +467,13 @@ export default {
         retains: ['time']
       });
 
-      // impute 补全列/补全字段
-      dv.transform({
-        type: 'impute',
-        field: 'count1',       // 待补全字段
-        // groupBy: [ 'value' ], // 分组字段集（传空则不分组）
-        method: 'value',  // 补全常量
-        value: 50000    // 补全字段值时执行的规则
-      });
-      let view2 = chart.view();
-      view2.source(dv);
-      view2.tooltip(false);
-      view2.axis(false);
-      chart.interval()
-      .position('time*count1') 
-      .color('count', '#F2F2F2')
-      .size(20);
-
       chart.source(dv, {});
       // 坐标轴刻度
-      chart.scale('count', {
-        max: 50000,
-        min: 0,
+      chart.scale('value', {
         tickCount: 5,
-        title: {
-          offset: 50
-        }
+      });
+      chart.axis('value', {
+        title: null
       });
       chart.axis('time', {
         label: {
@@ -516,16 +493,19 @@ export default {
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
-          return `<div class="my_tooltip">
-            <h1>${title}</h1>
-            <span>${items[0].value}</span><span>次</span></div>`;
+          let str = `<div class="my_tooltip">`;
+          if (title === '0点') {
+            str += `<h1>${title}</h1>`;
+          } else {
+            str += `<h1>${_this.transformTime(title)}-${title}</h1>`;
+          }
+          str += `<span><span>${items[0].value}</span><span>辆</span></span></div>`;
+          return str;
         }
       });
       chart.legend(false);
-      chart.interval()
-      .position('time*value')
-      .color('type', [ 'l(270) 0:#0C70F8 1:#0D9DF4' ])
-      .size(20)
+      chart.line().position('time*value').color('type', [ '#00C4FC']).size(2).shape('smooth');
+      chart.area().position('time*value').color([ 'l(270) 0:#ffffff 1:#00C4FC' ]).shape('smooth');
       chart.render();
       this.charts.chart2 = chart;
     }
@@ -667,9 +647,12 @@ export default {
         }
         #faceNumContainer, #alarmNumContainer{
           width: 100%;
-          height: calc(100% - 50px);
+          height: 350px;
           min-height: 350px;
         }
+      }
+      .chart_box {
+        height: 430px;
       }
     }
   }

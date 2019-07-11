@@ -1,16 +1,19 @@
 <template>
   <div class="vehicle-info">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '车辆档案'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>车辆档案</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
     <div class="vehicle-info-content">
       <!-- 搜索条件 -->
       <div class="info-left">
         <vue-scroll>
-          <p class="tip">可选择一个或多个条件进行搜索</p>
           <!-- 车牌号搜索 -->
           <div class="license-plate-search">
             <el-input v-model="searchData.licensePlateNum" placeholder="请输入车牌号码搜索" clearable></el-input>
@@ -130,7 +133,10 @@
 </template>
 <script>
 import { getArchives, getViolation } from "../../../api/api.analysis.js";
+import { formatDate} from '@/utils/util.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       searchData: {
@@ -140,7 +146,7 @@ export default {
       },
       pickerOptions: {
         disabledDate(time) {
-          let date = new Date();
+         /*  let date = new Date();
           let y = date.getFullYear();
           let m =
             date.getMonth() + 1 < 10
@@ -154,8 +160,8 @@ export default {
           } else {
             start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
           }
-          threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          threeMonths = new Date(start).getTime(); */
+          return time.getTime() > Date.now();
         }
       },
       searching: false,
@@ -165,10 +171,28 @@ export default {
   },
   computed: {},
   mounted() {
+    if(this.$route.query.plateNo) {
+      this.searchData.licensePlateNum = this.$route.query.plateNo
+    }
     this.setDTime();
     this.getSearchData();
   },
   methods: {
+    // 验证车牌号方法
+    checkPlateNumber (value) {
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      if(value) {
+        if(!reg.test(value)) {
+          this.$message.error('请正确输入车牌号码');
+          return false;
+        }else {
+          return true;
+        }
+      }else {
+        this.$message.error("请输入车牌号码");
+        return false;
+      }
+    },
     //设置默认时间
     setDTime() {
       let date = new Date();
@@ -193,18 +217,15 @@ export default {
     },
     //查询
     search() {
-      if (this.searchData.licensePlateNum) {
+      if(this.checkPlateNumber(this.searchData.licensePlateNum)) {
         this.getSearchData();
-      } else {
-        this.$message.error("请输入车牌号码");
-        return false;
       }
     },
     getSearchData() {
       let params = {};
       if (this.searchData.time && this.searchData.time.length > 0) {
-        params["dateStart"] = this.searchData.time[0] + " 00:00:00";
-        params["dateEnd"] = this.searchData.time[1] + " 23:59:59";
+        params["dateStart"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
+        params["dateEnd"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
       }
       if (this.searchData.licensePlateNum) {
         params["plateNo"] = this.searchData.licensePlateNum;
@@ -260,7 +281,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .vehicle-info {
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
   }
@@ -372,34 +393,6 @@ export default {
 }
 </style>
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .vehicle-info {
   //时间搜索
   .time-search {

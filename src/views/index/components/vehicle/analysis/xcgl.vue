@@ -1,10 +1,14 @@
 <template>
   <div class="driving-rules">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
+          {name: '行车规律分析'}]">
+      </div>
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>行车规律分析</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
     </div>
     <div class="driving-rules-content">
       <!-- 搜索条件 -->
@@ -259,8 +263,10 @@ import {
 } from "../../../api/api.judge.js";
 import { MapGETmonitorList } from "../../../api/api.map.js";
 import { getDrivingAnalysis } from "../../../api/api.analysis.js";
-import { random14, objDeepCopy } from "../../../../../utils/util.js";
+import { random14, objDeepCopy, formatDate } from "../../../../../utils/util.js";
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
+  components: {vlBreadcrumb},
   data() {
     return {
       uploadAcion: ajaxCtx.base + "/new", //上传路径
@@ -279,7 +285,7 @@ export default {
       },
       pickerOptions: {
         disabledDate(time) {
-          let date = new Date();
+          /* let date = new Date();
           let y = date.getFullYear();
           let m =
             date.getMonth() + 1 < 10
@@ -293,8 +299,8 @@ export default {
           } else {
             start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
           }
-          threeMonths = new Date(start).getTime();
-          return time.getTime() > Date.now() || time.getTime() < threeMonths;
+          threeMonths = new Date(start).getTime(); */
+          return time.getTime() > Date.now();
         }
       },
       searching: false,
@@ -761,6 +767,7 @@ export default {
     //重置
     resetSearch() {
       this.searchData.licensePlateNum = null;
+      this.searchData.licensePlateColor = '';
       this.uploadFileList.splice(0, this.uploadFileList.length);
       this.imgData = null;
       this.curImageUrl = "";
@@ -774,15 +781,32 @@ export default {
     //查询
     search() {
       console.log("==================", this.searchData);
-      this.emptyData(1);
-      if ((this.searchData.licensePlateNum || this.imgData) && (this.selectDeviceArr && this.selectDeviceArr.length > 0)) {
-        this.getSearchData();
-      }else if(!this.searchData.licensePlateNum && !this.imgData){
-         this.$message.error("请上传车的图片或者输入车牌号");
-         return false;  
-      }else {
-         this.$message.error("请选择设备");
-         return false; 
+      /* this.emptyData(1); */
+      let reg = /^([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}(([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳]{1})$/;
+      
+      if(this.selectIndex === 1) {
+        if(this.searchData.licensePlateNum && reg.test(this.searchData.licensePlateNum) && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+          this.getSearchData();
+        }else if(!this.searchData.licensePlateNum) {
+          this.$message.error("请输入车牌号码");
+          return false;  
+        }else if(!reg.test(this.searchData.licensePlateNum)) {
+          this.$message.error('请正确输入车牌号码');
+          return false;
+        }else {
+          this.$message.error("请选择设备");
+          return false; 
+        }
+      }else if(this.selectIndex === 0) {
+        if(this.imgData && this.selectDeviceArr && this.selectDeviceArr.length > 0) {
+          this.getSearchData();
+        }else if(!this.imgData) {
+          this.$message.error("请上传带车牌的清晰图片");
+          return false;  
+        }else {
+          this.$message.error("请选择设备");
+          return false; 
+        }
       }
     },
     //置空数据
@@ -799,8 +823,8 @@ export default {
     getSearchData() {
       let params = {};
       if (this.searchData.time && this.searchData.time.length > 0) {
-        params["startDate"] = this.searchData.time[0] + " 00:00:00";
-        params["endDate"] = this.searchData.time[1] + " 23:59:59";
+        params["startDate"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
+        params["endDate"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
       }
       if (!this.checkAllTree) {
         if (this.selectCameraArr && this.selectCameraArr.length > 0) {
@@ -874,7 +898,7 @@ export default {
         center: _this.mapCenter // 中心点坐标
       });
 
-      map.setMapStyle("amap://styles/whitesmoke");
+      map.setMapStyle("amap://styles/light");
       console.log("===========", map);
       this.map = map;
     },
@@ -1240,7 +1264,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .driving-rules {
-  height: calc(100% - 54px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
   }
@@ -1536,34 +1560,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .driving-rules {
   .vl_judge_tc_c_item {
     .vl_jtc_upload {
@@ -1572,6 +1568,13 @@ html {
         height: 100%;
         background: #f2f2f2;
         border: none;
+        &:hover {
+          background: #2981f8;
+          border: none;
+        }
+        &:hover span {
+          color: #fff;
+        }
         span {
           color: #999;
         }

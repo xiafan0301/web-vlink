@@ -4,7 +4,7 @@
     <!-- 面包屑通用样式 -->
     <div class="link_bread">
       <el-breadcrumb separator=">" class="bread_common">
-        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">侦查</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/vehicle/menu' }">车辆侦查</el-breadcrumb-item>
         <el-breadcrumb-item>以图搜车</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -28,6 +28,7 @@
                     :picker-options="pickerOptions"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
+                    :clearable="false"
                   ></el-date-picker>
                 </el-form-item>
                 <!-- 选择设备 -->
@@ -133,7 +134,11 @@
             <!-- 按钮样式 -->
             <div class="btn_warp">
               <el-button class="reset_btn" @click="resetMenu">重置</el-button>
-              <el-button class="select_btn" @click="getStrucInfo">确定</el-button>
+              <el-button
+                class="select_btn"
+                :loading="getStrucInfoLoading"
+                @click="getStrucInfo(true)"
+              >确定</el-button>
             </div>
           </div>
         </vue-scroll>
@@ -254,7 +259,7 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt />
+            <img :src="sturcDetail.storagePath" alt />
             <span>全景图</span>
           </div>
           <div class="struc_c_d_box">
@@ -275,19 +280,27 @@
               </h2>
               <!-- 特征展示框 -->
               <div class="struc_cdi_box">
-                <div class="item" v-if="sturcDetail.plateColor">{{sturcDetail.plateColor}}</div>
-                <div class="item" v-if="sturcDetail.plateNo">{{sturcDetail.plateNo}}</div>
                 <div
                   class="item"
+                  v-if="sturcDetail.plateColor"
+                >{{ '车牌颜色：' + sturcDetail.plateColor}}</div>
+                <div class="item" v-if="sturcDetail.plateNo">{{ sturcDetail.plateNo}}</div>
+                <!-- <div
+                  class="item"
                   v-if="sturcDetail.plateReliability"
-                >{{sturcDetail.plateReliability}}</div>
-
-                <div class="item" v-if="sturcDetail.vehicleBrand">{{sturcDetail.vehicleBrand}}</div>
-                <div class="item" v-if="sturcDetail.vehicleClass">{{sturcDetail.vehicleClass}}</div>
-                <div class="item" v-if="sturcDetail.vehicleColor">{{sturcDetail.vehicleColor}}</div>
+                >{{sturcDetail.plateReliability}}</div>-->
+                <div class="item" v-if="sturcDetail.vehicleBrand">{{ sturcDetail.vehicleBrand}}</div>
+                <div class="item" v-if="sturcDetail.vehicleClass">{{ sturcDetail.vehicleClass}}</div>
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleColor"
+                >{{ '车辆颜色：' + sturcDetail.vehicleColor}}</div>
                 <div class="item" v-if="sturcDetail.vehicleModel">{{sturcDetail.vehicleModel}}</div>
-                <div class="item" v-if="sturcDetail.vehicleRoof">{{sturcDetail.vehicleRoof}}</div>
-                <!-- <div class="item" v-if="sturcDetail.vehicleStyles">{{sturcDetail.vehicleStyles}}</div> -->
+                <div
+                  class="item"
+                  v-if="sturcDetail.vehicleRoof"
+                >{{ '车顶(天窗)：' + sturcDetail.vehicleRoof}}</div>
+                <div class="item" v-if="sturcDetail.sunvisor">{{ '遮阳板：' + sturcDetail.sunvisor}}</div>
               </div>
               <!-- 车辆的信息栏 -->
               <div class="struc_cdi_line">
@@ -337,7 +350,7 @@
           </div>
         </div>
       </div>
-      <div class="struc-list">
+      <div class="struc-list" v-show="strucInfoList.length > 1">
         <swiper :options="swiperOption" ref="mySwiper">
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="'my_swiper' + index">
@@ -369,7 +382,7 @@
 </template>
 <script>
 import { ajaxCtx, mapXupuxian } from "@/config/config"; // 引入一个地图的地址
-import {formatDate} from '@/utils/util.js';
+import { formatDate } from "@/utils/util.js";
 import {
   JtcPOSTAppendixInfo,
   JtcGETAppendixInfoList
@@ -399,6 +412,8 @@ export default {
           }
         ]
       },
+      getStrucInfoLoading: false, // 查询按钮加载
+
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -411,9 +426,9 @@ export default {
           let threeMonths = "";
           let start = "";
           if (parseFloat(m) >= 4) {
-            start = y + "-" + (m - 3) + "-" + d;
+            start = y + "-" + (m - 1) + "-" + d;
           } else {
-            start = y - 1 + "-" + (m - 3 + 12) + "-" + d;
+            start = y - 1 + "-" + (m - 1 + 12) + "-" + d;
           }
           threeMonths = new Date(start).getTime();
           let treeDays = time.getTime() - 3600 * 1000 * 24 * 3;
@@ -508,6 +523,10 @@ export default {
     });
     map.setMapStyle("amap://styles/whitesmoke");
     this.amap = map;
+    // 处理其他页面跳转的参数
+    if (this.$route.query.imgurl) {
+      this.curImageUrl = this.$route.query.imgurl;
+    }
   },
   computed: {
     choosedHisPic() {
@@ -517,6 +536,9 @@ export default {
   methods: {
     /*重置菜单的数据 */
     resetMenu() {
+      // 置空数据数量
+      this.total = 0;
+      this.pageNum = 1;
       this.selectDeviceArr = []; // 清空选中的设备列表
       this.selectCameraArr = []; // 清空选中的摄像头与卡口列表
       this.selectBayonetArr = [];
@@ -525,16 +547,20 @@ export default {
       this.curImageUrl = ""; // 清空上传的图片
       this.initCheckTree(); // 初始化全选树节点
     },
-    getStrucInfo() {
+    getStrucInfo(isClick = false) {
       // 根据特征数组来获取到检索的结果
       if (this.curImageUrl) {
         this.$refs.ytscMenuForm.validate(valid => {
+          if (isClick) {
+            this.getStrucInfoLoading = true; // 打开加载效果
+          }
           if (valid) {
             if (
               this.selectCameraArr.length <= 0 &&
               this.selectBayonetArr <= 0
             ) {
               this.$message.warning("请选择至少一个卡口与摄像头");
+              this.getStrucInfoLoading = false; // 关闭加载效果
               return;
             }
             // 处理设备UID
@@ -545,8 +571,12 @@ export default {
               return item.id;
             });
             const queryParams = {
-              "where.startTime": this.ytscMenuForm.selectDate[0] + ' 00:00:00' || null, // 开始时间
-              "where.endTime": this.ytscMenuForm.selectDate[1] + ' 23:59:59' || null, // 结束时间
+              "where.startTime":
+                formatDate(this.ytscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                  " 00:00:00" || null, // 开始时间
+              "where.endTime":
+                formatDate(this.ytscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                  " 23:59:59" || null, // 结束时间
               "where.uploadImgUrl": this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
               "where.deviceUid": deviceUidArr.join(), // 摄像头标识
               "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
@@ -564,7 +594,7 @@ export default {
               }
             } else if (this.sortType === 2) {
               // 监控排序
-              queryParams.orderBy = "shotTime";
+              queryParams.orderBy = "deviceNamePinyin";
               if (this.cameraSortType) {
                 queryParams.order = "desc";
               } else {
@@ -573,15 +603,23 @@ export default {
             }
             getPhotoSearch(queryParams)
               .then(res => {
+                this.getStrucInfoLoading = false; // 关闭加载效果
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
                     // this.pageNum = res.data.pageNum;
                     this.total = res.data.total;
+                  } else {
+                    this.strucInfoList = []; // 清空搜索结果
                   }
+                } else {
+                  this.strucInfoList = []; // 清空搜索结果
                 }
               })
-              .catch(err => {});
+              .catch(err => {
+                this.getStrucInfoLoading = false; // 关闭加载效果
+                this.strucInfoList = []; // 清空搜索结果
+              });
           } else {
             return false;
           }
@@ -602,17 +640,10 @@ export default {
     /*选择日期的方法 */
     setDTime() {
       //设置默认时间
-      let date = new Date();
-      let curDate = date.getTime();
-      let curS = 1 * 24 * 3600 * 1000;
-      let _s =
-        new Date(curDate - curS).getFullYear() +
-        "-" +
-        (new Date(curDate - curS).getMonth() + 1) +
-        "-" +
-        new Date(curDate - curS).getDate();
-      // let _e = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-      this.ytscMenuForm.selectDate = [_s, _s];
+      this.ytscMenuForm.selectDate = [
+        formatDate(new Date().getTime() - 3600 * 1000 * 24 * 2, "yyyy-MM-dd"),
+        formatDate(new Date(), "yyyy-MM-dd")
+      ];
     },
     /*sort排序方法*/
     clickTime() {
@@ -912,7 +943,7 @@ export default {
     showHistoryPic() {
       //获取上传记录
       this.loadingHis = true;
-      this.historyPicDialog = true;
+      this.historyPicDialog = true; // 打开加载效果
       let params = {
         userId: this.$store.state.loginUser.uid,
         fileType: 1
@@ -920,13 +951,13 @@ export default {
       JtcGETAppendixInfoList(params)
         .then(res => {
           if (res) {
-            this.loadingHis = false;
+            this.loadingHis = false; // 关闭加载效果
             res.data.forEach(x => (x.checked = false));
             this.historyPicList = res.data;
           }
         })
         .catch(() => {
-          this.historyPicDialog = false;
+          this.historyPicDialog = false; // 关闭加载效果
         });
     },
     delPic() {
@@ -1283,34 +1314,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 //弹窗
 .ytsc_wrap {
   // 上传

@@ -2,7 +2,7 @@
   <div class="custom_group">
     <div class="custom_group_left">
       <div class="search_box">
-        <el-input  placeholder="搜索组" size="small" style="width: 220px;" v-model="keyWord">
+        <el-input placeholder="搜索组" size="small" style="width: 220px;" v-model="keyWord">
           <i v-show="closeShow" slot="suffix" @click="onClear" class="search_icon el-icon-close" style="font-size: 16px;margin-right: 5px"></i>
           <i
             v-show="!closeShow"
@@ -89,6 +89,17 @@ export default {
       deleteId: null, // 要删除的分组设备id
     }
   },
+  watch: {
+    keyWord (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        if (this.closeShow) {
+          this.getGroupList();
+        }
+      }
+    }
+  },
   mounted () {
     this.getGroupList();
   },
@@ -116,7 +127,9 @@ export default {
     },
     // 搜索
     searchData () {
-      this.closeShow = true;
+      if (this.keyWord) {
+        this.closeShow = true;
+      }
       this.getGroupList();
     },
     // 点击左边分组获取右边设备信息
@@ -223,7 +236,7 @@ export default {
             .operation_btn {
               display: none;
               float: right;
-              margin: 5px 5px 0;
+              margin: 5px 2px 0;
             }
             .del_btn {
               &:hover {

@@ -5,61 +5,61 @@
         <el-form-item prop="vehicleType">
           <el-select style="width: 240px;" v-model="searchForm.vehicleType" placeholder="类型">
             <el-option value='全部类型'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <el-option
+              v-for="(item, index) in cameraTypeList"
               :key="index"
               :label="item.enumValue"
               :value="item.enumField"
             >
-            </el-option> -->
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="character">
           <el-select  style="width: 240px;" v-model="searchForm.character" placeholder="特性">
             <el-option value='全部特性'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+            <el-option
+              v-for="(item, index) in cameraFeatureList"
               :key="index"
               :label="item.enumValue"
               :value="item.enumField"
             >
-            </el-option> -->
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="level">
           <el-select style="width: 240px;" v-model="searchForm.level" placeholder="级别">
             <el-option value='全部级别'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <el-option
+              v-for="(item, index) in cameraLevelList"
               :key="index"
               :label="item.enumValue"
               :value="item.enumField"
             >
-            </el-option> -->
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="status">
           <el-select  style="width: 240px;" v-model="searchForm.status" placeholder="状态">
             <el-option value='全部状态'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventTypeList"
+            <el-option
+              v-for="(item, index) in cameraStatusList"
               :key="index"
               :label="item.enumValue"
               :value="item.enumField"
             >
-            </el-option> -->
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="factory">
           <el-select style="width: 240px;" v-model="searchForm.factory" placeholder="厂家">
             <el-option value='全部厂家'></el-option>
-            <!-- <el-option
-              v-for="(item, index) in eventStatusList"
+            <el-option
+              v-for="(item, index) in cameraUnitList"
               :key="index"
               :label="item.enumValue"
               :value="item.enumField"
             >
-            </el-option> -->
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="name">
@@ -100,25 +100,25 @@
         </el-table-column>
         <el-table-column
           label="类型"
-          prop="vechileNo"
+          prop="cameraType"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="所属单位"
-          prop="type"
+          prop="organName"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="智能特性"
-          prop="vechileType"
+          prop="character"
           show-overflow-tooltip
           >
         </el-table-column>
         <el-table-column
           label="重要级别"
-          prop="personNum"
+          prop="importLevel"
           show-overflow-tooltip
           >
         </el-table-column>
@@ -160,58 +160,117 @@
 export default {
   data () {
     return {
-      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      pagination: { total: 3, pageSize: 10, pageNum: 1 },
       searchForm: {
-        vehicleType: null,
-        companyName: null,
-        character: null,
-        level: null,
-        status: null,
-        factory: null,
-        name: null
+        vehicleType: '全部类型', // 类型
+        character: '全部特性', // 特性
+        level: '全部级别', // 级别
+        status: '全部状态', // 状态
+        factory: '全部厂家', // 厂家
+        name: null // 摄像头名称
       },
       dataList: [
         {
-          number: '1',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '正常',
-          monitorName: 'IPC100102'
-        },
-        {
-          number: '2',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '告警',
-          monitorName: 'IPC100102'
-        },
-        {
           number: '3',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '离线',
-          monitorName: 'IPC100102'
+          monitorName: 'IPC100102',
+          cameraType: '球机',
+          organName: '溆浦县公安局',
+          character: '人脸识别、红外感应',
+          importLevel: '关键点位',
+          company: '大华',
+          status: '正常',
         },
         {
-          number: '4',
-          vechileNo: 'XXXX路口治安亭',
-          type: '湖南省怀化市溆浦县城中路1号',
-          vechileType: '县公安局',
-          personNum: '张三',
-          company: '13912345678',
-          status: '离线',
-          monitorName: 'IPC100102'
+          number: '25',
+          monitorName: 'IPC122104',
+          cameraType: '半球机',
+          organName: '卢峰镇公安局',
+          character: '人脸识别',
+          importLevel: '重要点位',
+          company: '大华',
+          status: '告警',
         },
-      ]
+        {
+          number: '2466',
+          monitorName: 'IPC100115',
+          cameraType: '枪机',
+          organName: '卢峰镇城管队',
+          character: '人脸识别、车牌抓拍',
+          importLevel: '一般点位',
+          company: '海康威视',
+          status: '离线',
+        },
+      ],
+      cameraTypeList: [
+        {
+          enumValue: '球机',
+          enumField: '1'
+        },
+        {
+          enumValue: '半球机',
+          enumField: '2'
+        },
+        {
+          enumValue: '枪机',
+          enumField: '3'
+        }
+      ], // 摄像头类型列表
+      cameraFeatureList: [
+        {
+          enumValue: '人脸识别',
+          enumField: '1'
+        },
+        {
+          enumValue: '车辆抓拍',
+          enumField: '2'
+        },
+        {
+          enumValue: '红外感应',
+          enumField: '3'
+        }
+      ], // 摄像头特性
+      cameraLevelList: [
+        {
+          enumValue: '关键点位',
+          enumField: '1'
+        },
+        {
+          enumValue: '重要点位',
+          enumField: '2'
+        },
+        {
+          enumValue: '一般点位',
+          enumField: '3'
+        },
+        {
+          enumValue: '次要点位',
+          enumField: '4'
+        }
+      ], // 摄像头级别列表
+      cameraStatusList: [
+        {
+          enumValue: '正常',
+          enumField: '1'
+        },
+        {
+          enumValue: '告警',
+          enumField: '2'
+        },
+        {
+          enumValue: '离线',
+          enumField: '3'
+        }
+      ], // 车辆状态列表
+      cameraUnitList: [
+        {
+          enumValue: '大华',
+          enumField: '1'
+        },
+        {
+          enumValue: '海康威视',
+          enumField: '2'
+        }
+      ] // 摄像头厂家列表
     }
   },
   methods: {
@@ -235,8 +294,8 @@ export default {
     selectDataList () {},
     resetForm (form) {},
     // 跳至查看档案页面
-    skipSelectDetail () {
-      this.$router.push({name: 'machine_detail'});
+    skipSelectDetail (obj) {
+      this.$router.push({name: 'machine_detail', query: { status: obj.status }});
     },
     handleCurrentChange () {}
   }

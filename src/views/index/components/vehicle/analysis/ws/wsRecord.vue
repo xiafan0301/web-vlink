@@ -1,6 +1,13 @@
 <template>
   <div class="ws_record">
-    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws'}, {name: '尾随记录'}]"></Breadcrumb>
+    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws', query: {
+      plateNo: $route.query.plateNo,
+      dateStart: $route.query.dateStart,
+      dateEnd: $route.query.dateEnd,
+      vehicleClass: $route.query.vehicleClass,
+      interval: $route.query.interval,
+      deviceCode: $route.query.deviceCode
+    }}, {name: '尾随记录'}]"></Breadcrumb>
     <div class="content_box">
       <div class="left">
         <h2>{{vehicleDetail.plateno ? vehicleDetail.plateno : $route.query.plateNoTb}}</h2>
@@ -66,7 +73,7 @@
       <div class="right">
         <div class="operation_box">
           <p @click="skipBreakRecordPage">查看违章记录</p>
-          <p>车辆布控</p>
+          <p @click="skipVehicleControlPage">车辆布控</p>
           <p @click="skipTrajectoryPage">轨迹分析</p>
           <p @click="skipFootholdPage">落脚点分析</p>
           <!-- <p>以车搜车</p> -->
@@ -128,17 +135,21 @@ export default {
     }, 500)
   },
   methods: {
+    // 跳至新建布控页面
+    skipVehicleControlPage () {
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo }});
+    },
     // 跳至查看违章记录页面
     skipBreakRecordPage () {
-      this.$router.push({name: 'vehicle_search_lxwfdetail'});
+      this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
-      this.$router.push({name: 'vehicle_analysis_clgj'});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
-      this.$router.push({name: 'vehicle_search_ljd'});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
     },
     // 获取车辆信息（车管所）
     getVehicleDetail () {

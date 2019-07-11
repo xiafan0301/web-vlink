@@ -3,7 +3,7 @@
     <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ name: 'vehicle' }">车辆侦查</el-breadcrumb-item>
         <template v-for="(item, index) in oData">
-          <el-breadcrumb-item :key="'vc_db_' + index" v-if="item.routerName" :to="{ name: item.routerName }">{{item.name}}</el-breadcrumb-item>
+          <el-breadcrumb-item :key="'vc_db_' + index" v-if="item.routerName" :to="{ name: item.routerName, query: item.query && item.query }">{{item.name}}</el-breadcrumb-item>
           <el-breadcrumb-item :key="'vc_db_' + index" v-else>{{item.name}}</el-breadcrumb-item>
         </template>
       </el-breadcrumb>
@@ -25,7 +25,7 @@ export default {
   height: 50px; width: 100%;
   padding-left: 20px; padding-top: 17px;
   border-bottom: 1px solid #D3D3D3;
-  box-shadow: 0 0 5px #ddd;
+  /*box-shadow: 0 0 5px #ddd;*/
   background-color: #fff;
 }
 </style>

@@ -1,6 +1,13 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '过车查看', routerName: 'vehicle_search_gcck'}, {name: '全部抓拍'}]"></div>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': $route.query.deviceIds, bId: $route.query.bId}},
+          {name: '全部抓拍'}]">
+      </div>
+    </div>
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="gcck_s">
@@ -20,9 +27,11 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item>
-              <!-- deptList -->
               <el-select v-model="formInline.lb" placeholder="请选择车辆类别" style="width: 150px;">
+                <el-option :label="'布控车辆'" :value="1"></el-option>
+                <el-option :label="'无牌车'" :value="2"></el-option>
                 <el-option v-for="(item, index) in lbList" :label="item.enumValue" :key="'dept-list-' + index" :value="item.uid"></el-option>
+                <el-option v-for="(item, index) in lbtsList" :label="item.name" :key="'dept-list-ts-' + index" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -31,12 +40,13 @@
               </el-select>
             </el-form-item>
             <el-form-item style="margin-right: 2px;">
-              <el-checkbox class="gcck_ck_f" v-model="formInline.no">非</el-checkbox>
+              <el-checkbox class="gcck_ck_f" v-model="formInline.no">排除</el-checkbox>
             </el-form-item>
             <el-form-item>
-              <el-input placeholder="请输入车牌" style="width: 200px;" v-model="formInline.cp">
-                <el-select style="width: 70px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
+              <el-input placeholder="A00000" style="width: 200px;" v-model="formInline.cp">
+                <el-select style="width: 80px;" v-model="formInline.cpp" slot="prepend" placeholder="归属">
                   <el-option v-for="(item, index) in cppList" :label="item.enumValue" :key="'afawe-list-' + index" :value="item.enumValue"></el-option>
+                  <el-option :label="'不选'" :value="''"></el-option>
                 </el-select>
               </el-input>
             </el-form-item>
@@ -56,7 +66,7 @@
                   <div class="vc_gcck_rbl">
                     <div class="gcck_rbl_i">
                       <div>
-                        <div>
+                        <div @click="goToDetail(sitem.plateNo)">
                           <img :title="sitem.deviceName" :alt="sitem.deviceName" :src="sitem.imagePath">
                         </div>
                       </div>
@@ -95,13 +105,15 @@
   </div>
 </template>
 <script>
-import vehicleBreadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
-import {formatDate} from '@/utils/util.js';
+import {formatDate, getDate} from '@/utils/util.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {getDiciData} from '../../../api/api.js';
+import {getSpecialGroup} from '../../../api/api.manage.js';
+import { constants } from 'crypto';
 export default {
-  components: {vehicleBreadcrumb, flvplayer},
+  components: {vlBreadcrumb, flvplayer},
   data () {
     let nDate = new Date();
     return {
@@ -110,11 +122,12 @@ export default {
         lb: '',
         lx: '',
         no: false,
-        cpp: '',
+        cpp: '湘',
         cp: ''
       },
       searchLoading: false,
       lbList: [],
+      lbtsList: [],
       lxList: [],
       cppList: [],
       aDay: [],
@@ -139,17 +152,63 @@ export default {
       return val;
     }
   },
+  created () {
+    // this.queryData = {this.$route.query.deviceIds{};
+    if (this.$route.query.st && this.$route.query.et) {
+      this.formInline.time = [getDate(this.$route.query.st), getDate(this.$route.query.et)]
+    }
+    if (this.$route.query.lb) { this.formInline.lb = this.$route.query.lb; }
+    if (this.$route.query.lx) { this.formInline.lb = this.$route.query.lx; }
+    if (this.$route.query.no) { this.formInline.no = this.$route.query.no == 1 ? true : false; }
+    if (this.$route.query.cpp) { this.formInline.cpp = this.$route.query.cpp; }
+    if (this.$route.query.cp) { this.formInline.cp = this.$route.query.cp; }
+  },
   mounted () {
     this.searchSubmit();
     this.getLxList();
-    this.getLbList();
+    // this.getLbList();
+    this.getLbtsList();
     this.getCppList();
   },
   methods: {
+    goToDetail (plateNo) {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.$route.query.deviceIds, bId: this.$route.query.bId}},
+          { name: '全部抓拍', routerName: 'vehicle_search_gcck_zp', 
+            query: {
+              deviceIds: this.$route.query.deviceIds,
+              bId: this.$route.query.bId,
+              st: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
+              et: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+              lb: this.formInline.lb,
+              lx: this.formInline.lx,
+              no: this.formInline.no ? 1 : 2,
+              cpp: this.formInline.cpp,
+              cp: this.formInline.cp
+            }
+          },
+          {name: '车辆详情'}
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        breadcrumb: 2,
+        plateNo: plateNo
+      }});
+    },
     getLxList () {
       getDiciData(44).then(res => {
         if (res && res.data) {
           this.lxList = res.data;
+        }
+      });
+    },
+    getLbtsList () {
+      console.log('getLbtsList');
+      getSpecialGroup().then(res => {
+        if (res && res.data) {
+          this.lbtsList = res.data;
         }
       });
     },
@@ -164,7 +223,6 @@ export default {
       getDiciData(48).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.cppList = res.data;
-          // this.formInline.cpp = res.data[0].enumValue;
         }
       });
     },
@@ -213,8 +271,8 @@ export default {
     getDeviceSnapSum (dId) {
       getDeviceSnapImagesSum({
         deviceIds: this.$route.query.deviceIds,
-        startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd'),
-        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd'),
+        startTime: formatDate(this.formInline.time[0], 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(this.formInline.time[1], 'yyyy-MM-dd 23:59:59'),
         vehicleClass: this.formInline.lx,
         vehicleGroupUid: this.formInline.lb,
         isPlateNo: this.formInline.no ? 2 : 1,
@@ -242,13 +300,15 @@ export default {
       let dId = this.$route.query.deviceIds;
       if (!pageNum) { pageNum = 1; }
       getDeviceSnapImagesPage({
-        'where.deviceIds': dId,
-        'where.startTime': sDay,
-        'where.endTime': sDay,
-        'where.vehicleClass': this.formInline.lx,
-        'where.vehicleGroupUid': this.formInline.lb,
-        'where.isPlateNo': this.formInline.no ? 2 : 1,
-        'where.plateNo': this.formInline.cpp + this.formInline.cp,
+        where: {
+          deviceIds: dId,
+          startTime: sDay + ' 00:00:00',
+          endTime: sDay + ' 23:59:59',
+          vehicleClass: this.formInline.lx,
+          vehicleGroupUid: this.formInline.lb,
+          isPlateNo: this.formInline.no ? 2 : 1,
+          plateNo: this.formInline.cpp + this.formInline.cp
+        },
         pageNum: pageNum,
         pageSize: 16
       }).then(res => {
@@ -281,6 +341,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .vc_gcck {
   height: 100%;
   padding-top: 50px;
@@ -362,6 +426,7 @@ export default {
               width: 100%; height: 100%;
               display: flex; justify-content: center; align-items: center;
               position: relative;
+              cursor: pointer;
               > img {
                 visibility: visible;
                 width: 100%; height: 100%;

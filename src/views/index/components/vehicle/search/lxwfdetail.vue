@@ -24,42 +24,75 @@
                 <label class="title">车牌号牌：</label>
                 <span>{{carInfo.plateno}}</span>
               </div>
-              <div class="card-item">
+              <!-- <div class="card-item">
                 <label class="title">归属地：</label>
                 <span>{{carInfo.vehicleLocation}}</span>
+              </div> -->
+              <div class="card-item">
+                <label class="title">所有人：</label>
+                <span>{{carInfo.owner	}}</span>
+              </div>
+              
+              <div class="card-item">
+                <label class="title">中文品牌：</label>
+                <span>{{carInfo.brand}}</span>
               </div>
               <div class="card-item">
                 <label class="title">车身颜色：</label>
-                <span>{{carInfo.vehicleColor}}</span>
+                <span>{{carInfo.color}}</span>
               </div>
               <div class="card-item">
-                <label class="title">中文品牌：</label>
-                <span>{{carInfo.vehicleBrand}}</span>
+                <label class="title">车身形式：</label>
+                <span>{{carInfo.bodyform}}</span>
               </div>
               <div class="card-item">
-                <label class="title">所有人：</label>
-                <span>{{carInfo.vehicleOwner}}</span>
+                <label class="title">车门数：</label>
+                <span>{{carInfo.doornumber}}</span>
               </div>
               <div class="card-item">
-                <label class="title">身份证号：</label>
-                <span>{{carInfo.idCard}}</span>
+                <label class="title">发动机号：</label>
+                <span>{{carInfo.engineno}}</span>
               </div>
               <div class="card-item">
-                <label class="title">核定载客：</label>
-                <span>{{carInfo.approvedPassNum}}</span>
+                <label class="title">车辆类型：</label>
+                <span>{{carInfo.platetype}}</span>
               </div>
               <div class="card-item">
-                <label class="title">机动车状态：</label>
+                <label class="title">年款：</label>
+                <span>{{carInfo.model}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">座位数：</label>
+                <span>{{carInfo.seatnumber}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车辆状态：</label>
                 <span>{{carInfo.status}}</span>
               </div>
-              <div class="card-item vehicle-img">
+              <div class="card-item">
+                <label class="title">使用性质：</label>
+                <span>{{carInfo.usecharacter}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">车型：</label>
+                <span>{{carInfo.vehicletype}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">厂商名称：</label>
+                <span>{{carInfo.vendor}}</span>
+              </div>
+              <div class="card-item">
+                <label class="title">有效期止：</label>
+                <span>{{carInfo.validuntil}}</span>
+              </div>
+              <!-- <div class="card-item vehicle-img">
                 <label class="title">车辆登记照片：</label>
                 <div class='upload_box'>
-                  <!-- <div class="img-box" v-for="(item, index) in historyPicList" :key="index"> -->
+                  <div class="img-box" v-for="(item, index) in historyPicList" :key="index">
                      <div class="img-box"><img :src="carInfo.vehicleImage"/></div>
-                  <!-- </div> @click="openBigImg(index, historyPicList)" -->
+                  </div> @click="openBigImg(index, historyPicList)"
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
       </div>
@@ -125,10 +158,10 @@
     </div>
     <div class="bottom">
         <div class="tablink">
-          <a>车辆布控</a>
-          <a>轨迹分析</a>
-          <a>落脚点分析</a>
-          <a>同行车分析</a>
+           <a @click="goToPage('control_create')">车辆布控</a>
+          <a @click="goToPage('vehicle_analysis_clgj')">轨迹分析</a>
+          <a @click="goToPage('vehicle_search_ljd')">落脚点分析</a>
+          <a @click="goToPage('vehicle_search_txcl')">同行车分析</a>
         </div>
       </div>
   </div>
@@ -157,11 +190,23 @@ export default {
     this.getViolationInfo()
   },
   methods: {
+    goToPage(v){
+        this.$router.push({name:v,query:{
+            plateNo:this.$route.query.plateNo,
+            imgurl:this.$route.query.imgurl || ''
+        } });
+    },
     getViolationInfo(){
       let today = new Date()
+      let y = today.getFullYear()
+      let m = today.getMonth()+1
+      let r = today.getDay()
+      let day= y +"-"+ m +"-" + r
+      let sdate = this.$route.query.datastart ? this.$route.query.datastart.substr(0,10) : ''
+      let edate = this.$route.query.dataend ? this.$route.query.dataend.substr(0,10) : ''
       let d={
-        dateStart:this.$route.query.datastart,
-        dateEnd:this.$route.query.dataend,
+        dateStart:(sdate || day) + " 00:00:00",
+        dateEnd:(edate || day) + " 23:59:59",
         plateNo:this.$route.query.plateNo
       }
       getViolationInfo(d).then(res=>{
@@ -212,6 +257,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover{
+   background-color: #0466de;
 }
 .vehicle-info-content{
   height: calc(100% - 60px);

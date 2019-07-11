@@ -1,6 +1,9 @@
 <template>
   <div class="vehicle_content">
-    <div class="vc_gcck_bd" is="vehicleBreadcrumb" :oData="[{name: '过车查看'}]"></div>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '过车查看'}]">
+      </div>
+    </div>
     <div class="vc_gcck">
       <div class="vc_gcck_con">
         <div class="vc_gcck_l">
@@ -12,7 +15,7 @@
           <div v-show="showType === 1">
             <div class="gcck_ll_s">
               <el-input
-                placeholder="搜索"
+                placeholder="搜索设备"
                 size="small"
                 @keyup.enter.native="getTreeList1()"
                 v-model="searchVal1">
@@ -42,7 +45,7 @@
               </el-date-picker>
               <el-input
                 style="margin-top: 10px"
-                placeholder="搜索"
+                placeholder="搜索设备"
                 size="small"
                 @keyup.enter.native="getTreeList2()"
                 v-model="searchVal2">
@@ -77,15 +80,22 @@
                   <el-button size="small" @click="goToZP">查看更多</el-button>
                 </div>
               </li>
-              <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
-                <div class="vc_gcck_rbl">
-                  <p>
-                    <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
-                  </p>
-                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
-                  <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
-                </div>
-              </li>
+              <template v-if="zpList && zpList.length > 0">
+                <li v-for="(item, index) in zpList" :key="'jrzp_' + index">
+                  <div class="vc_gcck_rbl">
+                    <p @click="goToDetail(item.plateNo)">
+                      <img :title="item.deviceName" :alt="item.deviceName" :src="item.imagePath">
+                    </p>
+                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>{{item.snapTime}}</div>
+                    <div class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>{{item.deviceName}}</div>
+                  </div>
+                </li>
+              </template>
+              <template v-else>
+                <li class="vc_gcck_rb_empty">
+                  暂无数据
+                </li>
+              </template>
             </ul>
           </div>
           <div class="vc_gcck_r" v-else-if="videoTotal === 0">
@@ -99,7 +109,7 @@
           <!-- <div class="vc_gcck_r">
             <p class="vc_gcck_r_empty">选择左侧的摄像头或卡口进行查看</p>
           </div> -->
-          <div class="gcck_rh" v-if="zpDeviceIdsHis && picList.length > 0">
+          <div class="gcck_rh" style="overflow: auto;" v-if="zpDeviceIdsHis && picList.length > 0">
             <div>
               <div class="gcck_rh_tos">
                 <el-input-number size="small" :disabled="picAutoPlayActive" v-model="picPlayTime" @change="picPlayChange" :min="1" :max="60"></el-input-number>&nbsp;秒/张&nbsp;&nbsp;&nbsp;&nbsp;
@@ -145,15 +155,15 @@
   </div>
 </template>
 <script>
-import vehicleBreadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import dbTree from '@/components/common/dbTree.vue';
-import {getDeviceByBayonetUid} from '../../../api/api.base.js';
+import {getDeviceByBayonetUid, getDeviceDetailById} from '../../../api/api.base.js';
 import {MapGETmonitorList} from '../../../api/api.map.js';
 import {getDeviceSnapImagesSum, getDeviceSnapImagesPage} from '../../../api/api.judge.js';
 import {formatDate} from '@/utils/util.js';
 export default {
-  components: {vehicleBreadcrumb, flvplayer, dbTree},
+  components: {vlBreadcrumb, flvplayer, dbTree},
   data () {
     let nDate = new Date();
     return {
@@ -178,6 +188,7 @@ export default {
       picList: [],
       picListAll: [],
       zpDeviceIdsHis: '',
+      zpBId: '',
 
       picTotal: 0,
       picIndex: 1,
@@ -185,6 +196,7 @@ export default {
       picPageSize: 100,
       picPageNum: 1,
       picPages: 0,
+      
       picAutoPlayActive: false,
       picAntoPlayInval: null,
       picCKEmpty: false,
@@ -197,17 +209,48 @@ export default {
     }
   },
   mounted () {
+    let did = this.$route.query.deviceIds;
+    let bid = this.$route.query.bId;
+    if (bid) {
+      this.selectItem(2, {
+        uid: bid
+      });
+    } else if (did) {
+      getDeviceDetailById({
+        id: did
+      }).then(res => {
+        if (res && res.data) {
+          this.selectItem(1, {
+            uid: res.data.uid,
+            deviceName: res.data.deviceName
+          });
+        }
+      });
+    }
   },
   methods: {
+    goToDetail (plateNo) {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '过车查看', routerName: 'vehicle_search_gcck', query: {'deviceIds': this.zpDeviceIds, bId: this.zpBId}},
+          {name: '全部抓拍'}
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_clcxdetail', query: {
+        breadcrumb: 2,
+        plateNo: plateNo
+      }});
+    },
+
     goToZP () {
-      this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds }});
+      this.$router.push({name: 'vehicle_search_gcck_zp', query: { deviceIds: this.zpDeviceIds, bId: this.zpBId }});
     },
     changeShowType (type) {
       if (type !== this.showType) {
         this.showType = type;
       }
     },
-
     selectItem (type, item) {
       console.log(type, item);
       let ids = '';
@@ -225,6 +268,7 @@ export default {
         this.getDeviceSnapSum(ids);
         this.getDeviceSnapPage(ids);
         this.zpDeviceIds = ids;
+        this.zpBId = '';
       } else if (type === 2) {
         getDeviceByBayonetUid({
           bayonetUid: item.uid
@@ -279,6 +323,7 @@ export default {
               this.getDeviceSnapSum(ids);
               this.getDeviceSnapPage(ids);
               this.zpDeviceIds = ids;
+              this.zpBId = item.uid;
             }
             // this.zpTotal = res.data[0].snapImagesCount;
             // this.zpList = res.data.slice(0, 10);
@@ -291,8 +336,8 @@ export default {
     getDeviceSnapSum (dId) {
       getDeviceSnapImagesSum({
         deviceIds: dId,
-        startTime: formatDate(new Date(), 'yyyy-MM-dd'),
-        endTime: formatDate(new Date(), 'yyyy-MM-dd'),
+        startTime: formatDate(new Date(), 'yyyy-MM-dd 00:00:00'),
+        endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59'),
       }).then(res => {
         if (res && res.data && res.data.length > 0) {
           this.zpTotal = res.data[0].snapImagesCount;
@@ -306,9 +351,11 @@ export default {
 
     getDeviceSnapPage (dId) {
       getDeviceSnapImagesPage({
-        'where.deviceIds': dId,
-        'where.startTime': formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-        'where.endTime': formatDate(new Date(), 'yyyy-MM-dd'),
+        where: {
+          deviceIds: dId,
+          startTime: formatDate(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(new Date(), 'yyyy-MM-dd 23:59:59')
+        },
         pageNum: 1,
         pageSize: 8
       }).then(res => {
@@ -367,9 +414,11 @@ export default {
       if (!pageNum) { pageNum = 1; }
       // this.picTotal = 0;
       getDeviceSnapImagesPage({
-        'where.deviceIds': this.zpDeviceIdsHis,
-        'where.startTime': formatDate(this.searchTime2[0], 'yyyy-MM-dd'),
-        'where.endTime': formatDate(this.searchTime2[1], 'yyyy-MM-dd'),
+        where: {
+          deviceIds: this.zpDeviceIdsHis,
+          startTime: formatDate(this.searchTime2[0], 'yyyy-MM-dd 00:00:00'),
+          endTime: formatDate(this.searchTime2[1], 'yyyy-MM-dd 23:59:59')
+        },
         pageNum: pageNum,
         pageSize: this.picPageSize
       }).then(res => {
@@ -475,6 +524,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .vc_gcck {
   height: 100%;
   padding-top: 50px;
@@ -617,6 +670,7 @@ export default {
                 > p {
                   width: 142px; height: 142px;
                   margin-bottom: 5px;
+                  cursor: pointer;
                   > img {
                     width: 100%; height: 100%;
                   }
@@ -632,6 +686,13 @@ export default {
                   }
                 }
               }
+            }
+            &.vc_gcck_rb_empty {
+              float: none !important;
+              margin-left: 170px; padding-right: 50px !important; padding-top: 20px;
+              width: auto;
+              text-align: center;
+              color: #999;
             }
           }
         }

@@ -1,7 +1,7 @@
 <template>
 <div class="judge_content">
   <div class="vl_judge_tc">
-    <div class="vl_j_left">
+    <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
@@ -80,8 +80,9 @@
             </el-row>
         </div>
       </div>
+      <span class="insetLeft2" @click="hideResult"></span>
     </div>
-    <div class="vl_j_right">
+    <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
@@ -205,20 +206,19 @@
   </div>
 
   <!-- 地图选择 -->
-    <el-dialog :visible.sync="dialogVisible" width="80%">
-        <mapselect @selectMap="mapPoint" @closeMap="hideMap" :allPoints="allDevice"></mapselect>
-    </el-dialog>
+   <!-- D设备 B卡口  这里是设备和卡口 -->
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
   </div>
 </template>
 <script>
 let AMap = window.AMap;
-import {JfoGETSurveillanceObject, JigGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
+import {getFocusList, JigGETAlarmSnapList, JfoGETEventList,getAllDevice } from "@/views/index/api/api.judge.js";
 import {MapGETmonitorList} from '../../api/api.map.js';
 import {getGroupListIsPortrait, getGroupListIsVehicle} from '../../api/api.control.js';
-import mapselect from "@/views/index/components/common/mapSelect";
+import mapSelector from '@/components/common/mapSelector.vue';
 export default {
    components: {
-    mapselect
+    mapSelector
   },
   data() {
     return {
@@ -252,43 +252,15 @@ export default {
       ],
       ageGroupList: [
         {value: 0, label: '不限'},
-        {value: 1, label: '0-10'},
-        {value: 2, label: '10-20'},
-        {value: 3, label: '20-30'},
-        {value: 4, label: '30-40'},
-        {value: 5, label: '40-50'},
-        {value: 6, label: '50-70'},
-        {value: 7, label: '70-'}
+        {value: 1, label: '儿童'},
+        {value: 2, label: '少年'},
+        {value: 3, label: '青年'},
+        {value: 4, label: '中年'},
+        {value: 5, label: '老年'},
+        // {value: 6, label: '50-70'},
+        // {value: 7, label: '70-'}
       ],
-      vehicleColorList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '白'},
-        {value: 2, label: '灰'},
-        {value: 3, label: '黄'},
-        {value: 4, label: '粉'},
-        {value: 5, label: '红'},
-        {value: 6, label: '紫'},
-        {value: 7, label: '绿'},
-        {value: 8, label: '蓝'},
-        {value: 9, label: '棕'},
-        {value: 10, label: '黑'},
-        {value: 11, label: '其他'}
-      ],
-      plateTypeList: [
-        {value: 0, label: '不限'},
-        {value: 1, label: '大型汽车'},
-        {value: 2, label: '小型汽车'},
-        {value: 8, label: '轻便摩托车'},
-        {value: 15, label: '挂车'},
-        {value: 23, label: '警用汽车'},
-        {value: 24, label: '警用摩托'},
-        {value: 25, label: '小型新能源汽车'},
-        {value: 26, label: '大型新能源汽车'},
-        {value: 27, label: '小吨位货车'},
-        {value: 28, label: '大吨位货车'},
-        {value: 29, label: '客车'},
-        {value: 99, label: '其他'}
-      ],
+      
       pickerOptions: {
         disabledDate (time) {
           let date = new Date();
@@ -297,10 +269,16 @@ export default {
           let d = date.getDate();
           let threeMonths = '';
           let start = '';
-          if (parseFloat(m) >= 4) {
-            start = y + '-' + (m - 3) + '-' + d;
+          if (parseFloat(d) >= 3) {
+            start = y + '-' + m + '-' + (d - 2);
           } else {
-            start = (y - 1) + '-' + (m - 3 + 12) + '-' + d;
+            let o =30
+            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
+              o=31
+            }else if(m == 2){
+              o=28
+            }
+            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
           }
           threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -331,7 +309,9 @@ export default {
       dialogVisible:false,
       allDevice:[],
       selectDevice:[],
+      selectBayonet:[],
       selectValue:"已选设备0个",
+      hideleft:false,
     }
   },
   mounted () {
@@ -343,7 +323,7 @@ export default {
     map.setMapStyle('amap://styles/whitesmoke');
     this.amap = map;
     this.getAllAreas();
-    this.getAllDevice()
+    // this.getAllDevice()
     // 获取人员组，跟车辆组列表
     getGroupListIsPortrait().then(res => {
       if (res) {
@@ -357,34 +337,35 @@ export default {
     })
   },
   methods: {
+    hideResult(){
+      this.hideleft = !this.hideleft;
+    },
     changeTab(v) {
-      //console.log(v);
-      if (v == "2") {
-        this.dialogVisible = true;
-      } else {
-        this.dialogVisible = false;
-      }
+     
     },
     clickTab() {
-      if (!this.dialogVisible) {
-        this.dialogVisible = true;
-      }
+        this.dialogVisible = !this.dialogVisible;
     },
-    hideMap(){
-      this.dialogVisible=false
-    },
-    mapPoint(v){
-      this.dialogVisible=false;
+    mapPoint(data){
+      let v = data.deviceList;
+      let p = data.bayonetList;
+      this.selectDevice = [];
+      this.selectBayonet = [];
       //返回有效点集合
-      if(v && v.length>0){
+      if (v && v.length > 0) {
         v.forEach(element => {
-          this.selectDevice.push(element.uid)
+          this.selectDevice.push(element.uid);
         });
       }
-      this.selectValue="已选设备"+this.selectDevice.length+"个"
-      //this.selectDevice=v
-
-      // console.log(this.selectDevice);
+      if (p && p.length > 0) {
+        p.forEach(element => {
+          this.selectBayonet.push(element.uid);
+        });
+      }
+      this.selectValue =
+        "已选设备" +
+        (this.selectDevice.length + this.selectBayonet.length) +
+        "个";
       
     },
     //查询所有的设备
@@ -422,9 +403,15 @@ export default {
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 15 * 24 * 3600 * 1000;
-      let _s = new Date(curDate - curS).getFullYear() + '-' + (new Date(curDate - curS).getMonth() + 1) + '-' + new Date(curDate - curS).getDate();
-      let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      let curS = 1 * 24 * 3600 * 1000;
+        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+      let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+      
+      let _s = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+      let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.searchData.time = [_s, _e]
     },
     resetSearch () {
@@ -454,32 +441,43 @@ export default {
         target: '.se_hi_box'
       })
       let params = {
-        dateStart: this.searchData.time[0],
-        dateEnd: this.searchData.time[1]
+        startTime: this.searchData.time[0] + " 00:00:00",
+        endTime: this.searchData.time[1] + " 23:59:59" ,
+        personGroupId: this.searchData.portraitGroupId || "" ,
+        sex: this.searchData.sex || "",
+        age: this.searchData.ageGroup || "" ,
       }
-      for (let key in this.searchData) {
-        if (this.searchData[key] && key !== 'time') {
-          params[key] = this.searchData[key];
-        }
-      }
+      // for (let key in this.searchData) {
+      //   if (this.searchData[key] && key !== 'time') {
+      //     params[key] = this.searchData[key];
+      //   }
+      // }
       if (this.areaIds.length) {
         params['areaIds'] = this.areaIds.join(',');
       }
-      JfoGETSurveillanceObject(params)
+      if (this.selectBayonet.length) {
+        params['bayonetIds'] = this.selectBayonet.join(',');
+      }
+      if (this.selectDevice.length) {
+        params['deviceIds'] = this.selectDevice.join(',');
+      }
+      getFocusList(params)
         .then(res => {
           if (res) {
-            if (!res.data || res.data.list.length === 0) {
+            if (!res.data || res.data.length === 0) {
               this.$message.info('抱歉，没有找到匹配结果')
               this.amap.clearMap();
               this.searching = false;
               return false;
             }
-             res.data.list.forEach(z => {
-              if (z.surveillanceId) {
-                this.surveillanceIds.push(z.surveillanceId)
-              }
-            });
-            this.evData = res.data.list.map(x => {
+            console.log(res);
+            
+            //  res.data.forEach(z => {
+            //   if (z.surveillanceId) {
+            //     this.surveillanceIds.push(z.surveillanceId)
+            //   }
+            // });
+            this.evData = res.data.map(x => {
               x.checked = false;
               return x;
             })
@@ -496,12 +494,12 @@ export default {
       for (let  i = 0; i < data.length; i++) {
         let obj = data[i];
         let _idWin = 'vlJfoImg' + i;
-        if (obj.addLongitude > 0 && obj.addLatitude > 0) {
-          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.snapPhoto}"><div><p>${obj.deviceName}</p><p>抓拍${obj.snapNum}次</p></div></div>`;
+        if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
+          let _sContent = `<div id="${_idWin}" class="vl_jig_mk_img"><img src="${obj.subStoragePath}"><div><p>${obj.deviceName}</p><p>抓拍${obj.shotNum}次</p></div></div>`;
           // 窗体
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-50, -144), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -513,7 +511,7 @@ export default {
           let _content = '<div id=' + _id + ' class="vl_icon vl_jfo_sxt vl_icon_judge_04"></div>'
           new AMap.Marker({ // 添加自定义点标记
             map: this.amap,
-            position: [obj.addLongitude, obj.addLatitude], // 基点位置 [116.397428, 39.90923]
+            position: [obj.shotPlaceLongitude, obj.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
             offset: new AMap.Pixel(-28.5, -50), // 相对于基点的偏移位置
             draggable: false, // 是否可拖动
             extData: obj,
@@ -705,14 +703,6 @@ export default {
 }
 </script>
 <style lang="scss">
-  html {
-    font-size: 100px;
-  }
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
   .vl_jfo_switch {
     width: 2.34rem;
     height: .5rem;
@@ -891,12 +881,17 @@ export default {
         }
       }
     }
+    .hideleft.vl_j_left{
+      margin-left: -3rem;
+    }
     .vl_j_left {
+      position: relative;
+      z-index: 11;
       float: left;
       width: 3rem;
       padding-top: 24px;
       height: 100%;
-      margin-left: 0.2rem;
+      // margin-left: 0.2rem;
       background: #ffffff;
       box-shadow:4px 0px 10px 0px #838383;
       box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
@@ -1005,14 +1000,14 @@ export default {
         height: auto;
         padding: 0 .2rem;
         padding-top: .4rem;
-        .el-input__inner {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
-        .el-input__icon {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
+        // .el-input__inner {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
+        // .el-input__icon {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
         .el-range-editor {
           width: 100%;
           padding: 0;
@@ -1030,22 +1025,25 @@ export default {
           }
         }
         button {
-          height: .4rem;
-          line-height: .4rem;
+          height: .5rem;
+          line-height: .5rem;
           padding: 0 .12rem;
           margin-top: .14rem;
         }
         .el-select {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
         > div {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
       }
     }
+    .vl_j_right.hideleft{
+      width: 100%;
+    }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3.2rem);
+      width: calc(100% - 3rem);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1286,12 +1284,53 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.hideleft {
+  .insetLeft2 {
+    transform: rotate(180deg);
+    background-position: -504px -1269px;
+  }
+  .insetLeft2:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
+}
+.insetLeft2{
+  position: absolute;
+  right: -28px;
+  width: 25px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -380px -1269px;
+  cursor: pointer;
+}
+.insetLeft2:hover{
+  position: absolute;
+  right: -28px;
+  width: 28px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -318px -1269px;
+  cursor: pointer;
+}
 .full {
   width: 100%;
 }
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover {
+   background-color: #0466de;
 }
 .judge_content {
       height: 100%;

@@ -68,6 +68,17 @@
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
 .vl_icon_cl { width: 41px; height: 48px; background-position: -217px -188px; }
 .vl_icon_sxt { width: 41px; height: 48px; background-position: -280px -188px; }
+.qyryfx_vl_icon_wrap { width: 125px; height: 50px; }
+.qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 3px 0 0 3px; }
+.qyryfx_vl_icon_wrap .vl_icon { float: left; }
+
+.qyryfx_vl_icon_wrap .level1 { background: #fa453a; }
+.qyryfx_vl_icon_wrap .level2 { background: #f4ba18; }
+.qyryfx_vl_icon_wrap .level3 { background: #8949f3; }
+.qyryfx_vl_icon_wrap .level4 { background: #6262FF; }
+.qyryfx_vl_icon_wrap .level5 { background: #0C70F8; }
+.qyryfx_vl_icon_wrap .level6 { background: #0D9DF4; }
+
 
 .vl_icon_sxt_not_choose { width: 41px; height: 48px; background-position: -344px -188px; }
 .vl_icon_zzd { width: 41px; height: 48px; background-position: -700px -188px; }
@@ -145,6 +156,7 @@
 .vl_icon_retrieval_05 {width: 16px; height: 16px; background-position: -777px -640px;}
 .vl_icon_retrieval_06 {width: 16px; height: 16px; background-position: -777px -669px;}
 .vl_icon_retrieval_07 {width: 140px; height: 114px; background-position: -680px -1303px;}
+.vl_icon_retrieval_08 {width: 20px; height: 20px; background-position: -620px -376px;}
 /* 布控状态 */
 .vl_control_s{width: 120px; height: 120px; background-position: -526px -716px;}
 .vl_control_o{width: 120px; height: 120px; background-position: -665px -716px;}
@@ -263,6 +275,10 @@
 .vl_icon_archives_6{width: 117px; height: 117px;background-position: -498px -1732px;} /*停用状态*/
 .vl_icon_archives_7{width: 117px; height: 117px;background-position: -765px -1732px;} /*警告状态*/
 
+.vl_icon_map_o01 { width: 34px; height: 34px; background-position: -640px -130px; }
+.vl_icon_map_o02 { width: 34px; height: 34px; background-position: -686px -130px; }
+.vl_icon_map_o03 { width: 34px; height: 34px; background-position: -780px -130px; }
+
 .vl_icon_sm_sj { width: 14px; height: 15px; background-position: -786px -376px; }
 .vl_icon_sm_sxt { width: 14px; height: 15px; background-position: -324px -377px; }
 .vl_icon_sm_cl { width: 14px; height: 15px; background-position: -939px -530px; }
@@ -276,80 +292,83 @@
   width: 102px; height: 108px;
   background-repeat: no-repeat;
   background-image: url(../img/icons2.png);
-  transition: .4s ease-out;
+  /* transition: .4s ease-out; */
 }
 /**车辆侦察**/
 .vl_icon2_001 { background-position: -36px -38px; }
-.vl_icon2_001:hover { background-position: -36px -148px; }
+.vl_icon2_001:hover { background-position: -35px -148px; }
 .vl_icon2_002 { background-position: -172px -38px; }
-.vl_icon2_002:hover { background-position: -172px -148px; }
+.vl_icon2_002:hover { background-position: -171px -148px; }
 .vl_icon2_003 { background-position: -308px -38px; }
-.vl_icon2_003:hover { background-position: -308px -148px; }
+.vl_icon2_003:hover { background-position: -307px -148px; }
 .vl_icon2_004 { background-position: -444px -38px; }
-.vl_icon2_004:hover { background-position: -444px -148px; }
+.vl_icon2_004:hover { background-position: -443px -148px; }
 .vl_icon2_005 { background-position: -582px -38px; }
-.vl_icon2_005:hover { background-position: -582px -148px; }
+.vl_icon2_005:hover { background-position: -581px -148px; }
 .vl_icon2_006 { background-position: -718px -38px; }
-.vl_icon2_006:hover { background-position: -718px -148px; }
+.vl_icon2_006:hover { background-position: -717px -148px; }
 .vl_icon2_007 { background-position: -854px -38px; }
-.vl_icon2_007:hover { background-position: -854px -148px; }
+.vl_icon2_007:hover { background-position: -853px -148px; }
 .vl_icon2_011 { background-position: -36px -293px; }
-.vl_icon2_011:hover { background-position: -36px -418px; }
+.vl_icon2_011:hover { background-position: -35px -417px; }
 .vl_icon2_012 { background-position: -172px -293px; }
-.vl_icon2_012:hover { background-position: -172px -418px; }
+.vl_icon2_012:hover { background-position: -171px -417px; }
 .vl_icon2_013 { background-position: -308px -293px; }
-.vl_icon2_013:hover { background-position: -308px -418px; }
+.vl_icon2_013:hover { background-position: -307px -417px; }
 .vl_icon2_014 { background-position: -444px -293px; }
-.vl_icon2_014:hover { background-position: -444px -418px; }
+.vl_icon2_014:hover { background-position: -443px -417px; }
 .vl_icon2_015 { background-position: -582px -293px; }
-.vl_icon2_015:hover { background-position: -582px -418px; }
+.vl_icon2_015:hover { background-position: -581px -417px; }
 .vl_icon2_016 { background-position: -718px -293px; }
-.vl_icon2_016:hover { background-position: -718px -418px; }
+.vl_icon2_016:hover { background-position: -717px -417px; }
 .vl_icon2_017 { background-position: -854px -293px; }
-.vl_icon2_017:hover { background-position: -854px -418px; }
+.vl_icon2_017:hover { background-position: -853px -417px; }
 .vl_icon2_018 { background-position: -990px -293px; }
-.vl_icon2_018:hover { background-position: -990px -418px; }
+.vl_icon2_018:hover { background-position: -989px -417px; }
 .vl_icon2_021 { background-position: -990px -38px; }
-.vl_icon2_021:hover { background-position: -990px -148px; }
+.vl_icon2_021:hover { background-position: -989px -148px; }
 .vl_icon2_022 { background-position: -1126px -38px; }
-.vl_icon2_022:hover { background-position: -1126px -148px; }
+.vl_icon2_022:hover { background-position: -1125px -148px; }
 .vl_icon2_023 { background-position: -1262px -38px; }
-.vl_icon2_023:hover { background-position: -1262px -148px; }
+.vl_icon2_023:hover { background-position: -1261px -148px; }
 .vl_icon2_024 { background-position: -1398px -38px; }
-.vl_icon2_024:hover { background-position: -1398px -148px; }
+.vl_icon2_024:hover { background-position: -1397px -148px; }
 .vl_icon2_025 { background-position: -1126px -293px; }
-.vl_icon2_025:hover { background-position: -1126px -418px; }
+.vl_icon2_025:hover { background-position: -1125px -417px; }
 
 .vl_icon2_027 { background-position: -1398px -293px; }
-.vl_icon2_027:hover { background-position: -1398px -418px; }
+.vl_icon2_027:hover { background-position: -1397px -417px; }
 /**人像检索**/
 .vl_icon2_101 { background-position: -23px -566px; }
-.vl_icon2_101:hover { background-position: -23px -684px; }
+.vl_icon2_101:hover { background-position: -22px -683px; }
 .vl_icon2_102 { background-position: -159px -566px; }
-.vl_icon2_102:hover { background-position: -159px -684px; }
+.vl_icon2_102:hover { background-position: -158px -683px; }
 .vl_icon2_103 { background-position: -295px -566px; }
-.vl_icon2_103:hover { background-position: -295px -684px; }
+.vl_icon2_103:hover { background-position: -294px -683px; }
 .vl_icon2_104 { background-position: -431px -566px; }
-.vl_icon2_104:hover { background-position: -431px -684px; }
+.vl_icon2_104:hover { background-position: -430px -683px; }
 .vl_icon2_105 { background-position: -567px -566px; }
-.vl_icon2_105:hover { background-position: -567px -684px; }
+.vl_icon2_105:hover { background-position: -566px -683px; }
 .vl_icon2_106 { background-position: -703px -566px; }
-.vl_icon2_106:hover { background-position: -703px -684px; }
+.vl_icon2_106:hover { background-position: -702px -683px; }
 .vl_icon2_107 { background-position: -839px -566px; }
-.vl_icon2_107:hover { background-position: -839px -684px; }
+.vl_icon2_107:hover { background-position: -838px -683px; }
 .vl_icon2_108 { background-position: -975px -566px; }
-.vl_icon2_108:hover { background-position: -975px -684px; }
+.vl_icon2_108:hover { background-position: -974px -683px; }
 .vl_icon2_109 { background-position: -1111px -566px; }
-.vl_icon2_109:hover { background-position: -1111px -684px; }
+.vl_icon2_109:hover { background-position: -1110px -683px; }
 .vl_icon2_110 { background-position: -1247px -566px; }
-.vl_icon2_110:hover { background-position: -1247px -684px; }
-.vl_icon2_111 { background-position: -1373px -566px; }
-.vl_icon2_111:hover { background-position: -1373px -684px; }
+.vl_icon2_110:hover { background-position: -1246px -683px; }
+.vl_icon2_111 { background-position: -1375px -566px; }
+.vl_icon2_111:hover { background-position: -1374px -683px; }
 .vl_icon2_112 { background-position: -23px -815px; }
-.vl_icon2_112:hover { background-position: -23px -933px; }
+.vl_icon2_112:hover { background-position: -22px -932px; }
+.vl_icon2_113 { background-position: -159px -815px; }
+.vl_icon2_113:hover { background-position: -157px -933px; }
 
 /* 车辆侦查 */
 .vl_icon_vehicle_01 {width: 100px; height: 85px; background-position: -916px -1478px;}
+.vl_icon_th_01 {width: 100px; height: 85px; background-position: -88px -587px;}
 .vl_icon_vehicle_02 {width: 30px; height: 162px; background-position: -976px -1280px;}  
 .vl_icon_vehicle_02:hover {width: 30px; height: 162px; background-position: -1036px -1280px;}     
 .vl_icon_vehicle_03 {width: 30px; height: 162px; background-position: -1096px -1280px;}
@@ -366,9 +385,9 @@
 
 /* 车辆侦查  --过车数据统计 */
 .vl_icon_vehicle_gcsj_01{width: 83px;height: 83px;background-position: -966px -939px;}
-.vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1072px -939px;}
-.vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1177px -939px;}
-.vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1280px -939px;}
+.vl_icon_vehicle_gcsj_02{width: 83px;height: 83px;background-position: -1070px -938px;}
+.vl_icon_vehicle_gcsj_03{width: 83px;height: 83px;background-position: -1172px -937px;}
+.vl_icon_vehicle_gcsj_04{width: 83px;height: 83px;background-position: -1274px -931px;}
 
 /* 人脸检索  --人脸数据分析 */
 .vl_icon_portrait_rlsjfx_01{width: 70px;height: 70px;background-position: -924px -1039px;}
@@ -419,11 +438,11 @@
 /* 左侧二级菜单样式 */
 .vl_smenu {
   background-color: #ffffff;
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; left: 0; z-index: 19;
   width: 200px; height: 100%;
   box-shadow:4px 0px 10px 0px #838383;
   box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
-  animation: fadeInLeft .4s ease-out .3s both;
+  /* animation: fadeInLeft .4s ease-out .3s both; */
 }
 .vl_smenu > li {
   height: 60px; line-height: 60px;
@@ -1001,7 +1020,7 @@
 
 /* th css style create by th */
 .th-breadcrumb {
-  width: 100%; height: 60px;
+  width: 100%; height: 50px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -1036,6 +1055,13 @@
 .the-table .el-table__body .el-table__row:hover td {
   background: #E6F7FF;
 }
+
+/*elementui primary标注button颜色*/
+.el-button--primary {
+    background-color: #0C70F8;
+    border-color: #0C70F8;
+}
+
 /* th css style create by th */
 html {
     font-size: 100px;

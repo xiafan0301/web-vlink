@@ -48,14 +48,14 @@ export function getDrivingAnalysis(data) {
 /**
  * getFeatureSearch
  * 查询特征搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getFeatureSearch(params) {
+export function getFeatureSearch(data) {
   return request({
     url: '/vehicle-investigate/feature-search',
-    method: 'get',
-    mode: 'analysis',
-    params: params
+    method: 'post',
+    mode: 'judge',
+    data
   })
 }
 
@@ -68,7 +68,7 @@ export function getPhotoAnalysis(url) {
   return request({
     url: '/vehicle-investigate/photo-analysis?uploadImgUrls=' + url,
     method: 'get',
-    mode: 'analysis'
+    mode: 'judge'
   })
 }
 
@@ -76,14 +76,14 @@ export function getPhotoAnalysis(url) {
 /**
  * getPhotoSearch
  * 查询以图搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getPhotoSearch(params) {
+export function getPhotoSearch(data) {
   return request({
     url: '/vehicle-investigate/photo-search',
-    method: 'get',
-    mode: 'analysis',
-    params: params
+    method: 'post',
+    mode: 'judge',
+    data
   })
 }
 
@@ -91,14 +91,14 @@ export function getPhotoSearch(params) {
 /**
  * getVagueSearch
  * 查询模糊搜车分页接口
- * @param {object} params
+ * @param {object} data
  */
-export function getVagueSearch(params) {
+export function getVagueSearch(data) {
   return request({
     url: '/vehicle-investigate/vague-search',
-    method: 'get',
-    mode: 'analysis',
-    params: params
+    method: 'post',
+    mode: 'judge',
+    data
   })
 }
 
@@ -166,3 +166,48 @@ export function postTaskAnalysis(data) {
     data
   })
 }
+
+/*-------------------------- 区域人员分析start -------------------------------*/
+/**
+ * postShotNumArea
+ * 区域人员抓拍统计接口
+ * @param {object} data
+ */
+export function postShotNumArea(data) {
+  return request({
+    url: '/portrait/shot-num/area',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/**
+ * postShotNumAreaDetail
+ * 区域人员抓拍详情接口
+ * @param {object} data
+ */
+export function getShotNumAreaDetail(data) {
+  return request({
+    url: '/portrait/shot-num/area/detail',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+
+/*-------------------------- 区域人员分析start -------------------------------*/
+/**
+ * postPeopleTask
+ * 新增行人同行分析任务
+ * @param {object} data
+ */
+export function postPeopleTask(data) {
+  return request({
+    url: '/person/peer-analysis',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
+/*-------------------------- 区域人员分析 end -------------------------------*/

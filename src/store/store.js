@@ -11,6 +11,8 @@ const state = {
   loginToken: null,
   loginUser: null, // 登录用户信息
 
+  breadcrumbData: null, // 面包屑数据
+
   // 视频通话相关
   oAdd: {},
   oDel: {},

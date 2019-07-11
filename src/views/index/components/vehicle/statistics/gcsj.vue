@@ -31,7 +31,7 @@
         </div>
         <div class="left_btn">
           <el-button class="reset_btn" @click="resetQueryForm">重置</el-button>
-          <el-button class="select_btn" @click="getCarBeforeSta" :loading="loadingBtn">查询</el-button>
+          <el-button class="select_btn" @click="search" :loading="loadingBtn">查询</el-button>
         </div>
       </div>
       <div class="con_right">
@@ -77,8 +77,17 @@
           <div>
             <div class="chart_item">
               <h1>设备过车数（Top5）</h1>
-              <p>数量（次）</p>
-              <div id="chartContainer1"></div>
+              <!-- <p>数量（次）</p> -->
+              <div id="chartContainer1">
+                <vue-scroll>
+                  <div class="chart_table">
+                <el-table :data="chartData1">
+                  <el-table-column label="设备名称" prop="name" show-overflow-tooltip></el-table-column>
+                  <el-table-column label="过车数" prop="total" width="100" show-overflow-tooltip></el-table-column>
+                </el-table>
+                </div>
+                </vue-scroll>
+              </div>
             </div>
           </div>
           <div>
@@ -118,7 +127,7 @@ export default {
     return {
       queryForm: {
         startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
@@ -195,7 +204,7 @@ export default {
   mounted () {
     setTimeout(() => {
       this.getCarBeforeSta();
-    }, 2000);
+    }, 1500);
   },
   methods: {
     getEndTime(time) {
@@ -259,8 +268,6 @@ export default {
       });
       // 坐标轴刻度
       chart.scale('value', {
-        max: 40,
-        min: 0,
         tickCount: 6,
         title: {
           offset: 50
@@ -411,8 +418,6 @@ export default {
       chart.source(dv, {});
       // 坐标轴刻度
       chart.scale('value', {
-        max: 100,
-        min: 0,
         tickCount: 7,
         title: {
           offset: 50
@@ -498,8 +503,6 @@ export default {
       chart.source(dv, {});
       // 坐标轴刻度
       chart.scale('value', {
-        max: 100,
-        min: 0,
         tickCount: 6,
         title: {
           offset: 50
@@ -552,12 +555,17 @@ export default {
       this.$refs.devSelect.resetSelect();
       this.queryForm = {
         startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() + 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
+        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
         devIdData: {
           selSelectedData1: [],
           selSelectedData2: []
         }
       };
+    },
+    //查询
+    search() {
+      this.loadingBtn = true;
+      this.getCarBeforeSta();
     },
     // 获取过车数据统计
     getCarBeforeSta () {
@@ -567,13 +575,13 @@ export default {
         startTime: this.queryForm.startTime + ' 00:00:00',
         endTime: this.queryForm.endTime + ' 23:59:59'
       }
-      this.loadingBtn = true;
       apiPassingCarSta(params).then(res => {
         if (res) {
           this.gcsjDetail = res.data;
-          this.chartData1 = res.data.device.map(m => {
+          this.chartData1 = res.data.device;
+          /* this.chartData1 = res.data.device.map(m => {
             return {devName: m.name, '过车数': m.total, '过车数1': 1};
-          })
+          }) */
           this.chartData2 = res.data.brandDto.map(m => {
             return { item: m.name, count: m.total };
           })
@@ -583,7 +591,7 @@ export default {
           this.chartData4 = res.data.carTypeDto.map(m => {
             return { carType: m.name, count: m.total, count1: 1 };
           })
-          this.drawChart1();
+          /* this.drawChart1(); */
           this.drawChart2();
           this.drawChart3();
           this.drawChart4();
@@ -675,19 +683,19 @@ export default {
               font-weight:normal;
               color: #fff;
             }
-            &:nth-child(1){
+          }
+          &:nth-child(1) >div{
               background: #0C70F8;
             }
-            &:nth-child(2){
-              background: #00C4FC;
+            &:nth-child(2) >div{
+              background: #489CED;
             }
-            &:nth-child(3){
-              background: #8E62FF;
+            &:nth-child(3) >div{
+              background: #6166F6;
             }
-            &:nth-child(4){
-              background: #00C888;
+            &:nth-child(4) >div{
+              background: #7F51EA;
             }
-          }
         }
       }
       .chart_bottom{
@@ -727,6 +735,9 @@ export default {
             }
             #chartContainer2{
               width: 50%;
+            }
+            .chart_table {
+              padding: 8px 38px 0 38px;
             }
           }
         }
@@ -795,12 +806,15 @@ export default {
     }
   }
 }
-html {
-  font-size: 100px;
+.chart_table {
+  .el-table th {
+    background-color: #0567E2;
+    color: #fff;
+  }
 }
-@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-@media screen and (min-width: 1920px) {html {font-size: 100px !important;}}
+.chart_item {
+  .__view {
+        width: 100% !important;
+      }
+}
 </style>

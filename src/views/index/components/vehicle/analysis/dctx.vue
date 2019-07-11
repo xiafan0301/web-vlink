@@ -13,7 +13,6 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
-                @blur="handleStartTime"
                 :picker-options="pickerStart"
                 v-model="filterObj.startDate"
                 type="datetime"
@@ -29,14 +28,14 @@
                 value-format="yyyy-MM-dd HH:mm:ss"
                 format="yyyy-MM-dd HH:mm:ss"
                 style="width: 100%"
-                @blur="handleEndTime"
-                :picker-options="pickerStart"
+                @focus="handleEndTime"
+                :picker-options="pickerEnd"
                 type="datetime" 
                 placeholder="选择日期" 
               ></el-date-picker>
             </div>
             <div class="input-box-line" v-for="(item, index) in filterObj.vehicleNumberList" :key="index + 'ssd'">
-              <el-input class="left-none-border" v-model="item.vehicleNumber" placeholder="请输入车牌号码">
+              <el-input class="left-none-border" v-model="item.vehicleNumber" placeholder="请输入车牌号码" @blur="handleChangeVNumber(item.vehicleNumber)">
                 <template slot="prepend">车辆{{ index + 1 }}:</template>
                 <i v-if="index > 1" slot="suffix" class="el-input__icon el-icon-remove" @click="onDeleteVehicleNumber(index)"></i>
               </el-input>
@@ -58,7 +57,7 @@
             <vue-scroll>
               <div class="list-box">
                 <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-                  <img :src="item.shotRecord.subStoragePath" alt="">
+                  <img :src="item.shotRecord.storagePath" alt="">
                   <p class="time"><i></i>{{item.shotRecord.shotTime}}</p>
                   <p class="address"><i></i>抓拍设备:{{item.shotRecord.deviceName}}</p>
                 </div>
@@ -66,7 +65,7 @@
                   <el-pagination
                     class="cum_pagination th-center-pagination"
                     @current-change="onPageChange"
-                    :current-page.sync="currentPage"
+                    :current-page.sync="pagination.pageNum"
                     :page-size="pagination.pageSize"
                     layout="prev, pager, next"
                     :total="pagination.total">
@@ -106,7 +105,7 @@
             <div class="struc_c_d_info" style="padding-left: 14px;">
               <div class="th-dctx-tab">
                 <p class="line">
-                  <span>卡口名称：</span>
+                  <span>设备名称：</span>
                   <span>{{ sturcDetail.deviceName }}</span>
                 </p>
                 <p class="line">
@@ -141,22 +140,26 @@
         </div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.subStoragePath" alt="">
+            <img :src="sturcDetail.storagePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <span class="th-video-text">视频回放</span>
-            <div is="flvplayer" :index="1" :oData="playUrl" :bResize="bResize" :oConfig="{sign: false, close: false, pause: true}" ></div>
+            <video id="capVideo" :src="sturcDetail.videoPath"></video>
+              <div class="play_btn" @click="videoTap" v-show="!playing">
+                <i class="vl_icon vl_icon_judge_01" v-if="playing"></i>
+                <i class="vl_icon vl_icon_control_09" v-else></i>
+              </div>
           </div>
           <a class="download_btn" target="_blank" download="视频" :href="sturcDetail.videoPath">下载视频</a>
         </div>
       </div>
       <div class="struc-list">
-        <swiper :options="swiperOption" ref="mySwiper">
+        <swiper :options="swiperOption" ref="mySwiper"> 
           <!-- slides -->
-          <swiper-slide v-for="(item, index) in strucInfoList" :key="index + 'isgm'">
-            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
+          <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
+            <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item.shotRecord, index)">
+              <img style="display: block; width: 100%; height: .88rem;" :src="item.shotRecord.storagePath" alt="">
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -170,46 +173,43 @@
 import Breadcrumb from '../breadcrumb.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { formatDate } from "@/utils/util.js";
-import { getMultiVehicleList, getSnapDetail } from '@/views/index/api/api.judge.js';
+import { checkPlateNumber } from '@/utils/validator.js';
+import { getMultiVehicleList } from '@/views/index/api/api.judge.js';
+const overStartTime = new Date() - 24 * 60 * 60 *1000;
+const reg = /^(([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z](([0-9]{5}[DF])|([DF]([A-HJ-NP-Z0-9])[0-9]{4})))|([京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z][A-HJ-NP-Z0-9]{4}[A-HJ-NP-Z0-9挂学警港澳使领]))$/;
 export default {
   components: {
     flvplayer,
     Breadcrumb
   },
   data () {
-    const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
       pickerStart: {
         disabledDate (time) {
           return time.getTime() > (new Date().getTime());
         }
       },
-      pickerEnd: {
-        disabledDate (time) {
-          return time.getTime() > (new Date().getTime());
-        }
-      },
-      isSelect: false,
+      pickerEnd: {},
       pagination: {
         pageNum: 1,
         pageSize: 15,
         total: 0
       },
-      currentPage: 1,
       /* 抓拍记录页面参数 */
       strucDetailDialog: false, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
       curImgIndex: 0, // 当前选择的图片index
-      strucInfoList: [],
+      // strucInfoList: [],
       sturcDetail: {},
       vehicleList: [], // 同行车辆
       bResize: {},
       markerPoint: null, // 地图icon
+      newMarker: null,
       playUrl: {},
       videoUrl: null, // 下载地址
       map: null,
       filterObj: {
-        startDate: new Date(startTime),
+        startDate: new Date(overStartTime),
         endDate: new Date(),
         vehicleNumberList: [
           {vehicleNumber: '沪D008CP'},
@@ -217,8 +217,6 @@ export default {
         ],
         vehicleNumbers: null
       },
-      // startDate: new Date(startTime), // 开始时间
-      // endDate: new Date(), // 结束时间
       resetLoading: false,
       searchLoading: false,
       swiperOption: {
@@ -234,13 +232,38 @@ export default {
         },
       },
       dataList: [], // 查询结果列表数据
+      hasError: false, // 是否符合查询条件
+      playing: false, // 视频播放是否
+    }
+  },
+  watch: {
+    'filterObj.startDate' () {
+      let _this = this;
+      const threeDays = 2 * 3600 * 24 * 1000;
+      const endTime = new Date(_this.filterObj.startDate).getTime() + threeDays;
+      _this.filterObj.endDate = formatDate(endTime);
     }
   },
   methods: {
+    // 播放视频
+      videoTap() {
+      // 播放视频
+      let vDom = document.getElementById("capVideo");
+      if (this.playing) {
+        vDom.pause();
+      } else {
+        vDom.play();
+      }
+      vDom.addEventListener("ended", e => {
+        e.target.currentTime = 0;
+        this.playing = false;
+      });
+      this.playing = !this.playing;
+    },
     /**
      * 弹框地图初始化
      */
-    initMap () {
+    initMap (obj) {
       // this.map.setZoomAndCenter(iZoom, aCenter);
       let map = new window.AMap.Map('container', {
         zoom: 14, // 级别
@@ -248,7 +271,7 @@ export default {
       });
       map.setMapStyle('amap://styles/whitesmoke');
       this.map = map;
-      this.drawPoint(this.sturcDetail)
+      this.drawPoint(obj)
     },
     /**
      * 地图描点
@@ -258,7 +281,12 @@ export default {
       if (this.markerPoint) {
         this.map.remove(this.markerPoint)
       }
-      let _content = '<div class="vl_icon vl_icon_judge_02"></div>'
+      if (this.newMarker) {
+        this.map.remove(this.newMarker);
+        this.newMarker = null;
+      }
+      // let _infoWindow = null;
+      let _content = '<div class="vl_icon vl_icon_judge_02"></div>';
       this.markerPoint = new window.AMap.Marker({ // 添加自定义点标记
         map: this.map,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude], // 基点位置 [116.397428, 39.90923]
@@ -268,28 +296,24 @@ export default {
         content: _content
       });
       this.map.setZoomAndCenter(16, [data.shotPlaceLongitude, data.shotPlaceLatitude]); // 自适应点位置
-      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.shotPlaceFullAdress}</p></div>`
-      this.infoWindow = new window.AMap.InfoWindow({
+      let sConent = `<div class="cap_info_win"><p>设备名称：${data.deviceName}</p><p>抓拍地址：${data.address}</p></div>`
+      this.newMarker = new window.AMap.InfoWindow({
         map: this.map,
         isCustom: true,
         closeWhenClickMap: false,
         position: [data.shotPlaceLongitude, data.shotPlaceLatitude],
         offset: new window.AMap.Pixel(0, -70),
         content: sConent
-      })
-    },
-    // 开始时间change
-    handleStartTime () {
-      let _this = this;
-      _this.pickerEnd.disabledDate = function (time) {
-        return time.getTime() > new Date(_this.filterObj.startDate).getTime() + 3 * 24 * 3600 * 1000;
-      }
+      });
     },
     // 结束时间change
-    handleEndTime () {
+    handleEndTime (time) {
       let _this = this;
-      _this.pickerStart.disabledDate = function (time) {
-        return time.getTime() > new Date(_this.filterObj.endDate).getTime();
+      const startDate = new Date(_this.filterObj.startDate).getTime();
+      _this.pickerEnd = {
+        disabledDate (time) {
+         return time.getTime() < (startDate - 8.64e7) || time.getTime() > ((startDate + 2 * 3600 * 24 * 1000) - 8.64e6);
+        }
       }
     },
     /**
@@ -304,14 +328,27 @@ export default {
     onDeleteVehicleNumber (i) {
       this.filterObj.vehicleNumberList.splice(i, 1);
     },
+    // 车牌号change
+    handleChangeVNumber (number) {
+      if (number) {
+        if (!reg.test(number)) {
+          this.hasError = true;
+          this.$message.warning('请输入正确的车牌号码');
+        } else {
+          this.hasError = false;
+        }
+      } else {
+        this.hasError = true;
+      }
+    },
     /**
      * 重置按钮
      */
     onReset () {
       this.resetLoading = true;
       let obj = {
-        startDate: null,
-        endDate: null,
+        startDate: new Date(overStartTime),
+        endDate: new Date(),
         vehicleNumberList: [
           {vehicleNumber: ''},
           {vehicleNumber: ''},
@@ -325,23 +362,35 @@ export default {
      * 查询按钮
      */
     onSearch () {
-      this.searchLoading = true;
       let arr = [];
-      this.filterObj.vehicleNumberList.forEach(item => {arr.push(item.vehicleNumber)});
+      this.filterObj.vehicleNumberList.forEach(item => {
+        if (!reg.test(item.vehicleNumber)) {
+          this.hasError = true;
+        }
+        arr.push(item.vehicleNumber)
+      });
+
+      if (this.hasError) {
+        this.$message.warning('请输入正确的车牌号码');
+        return;
+      }
+
       this.filterObj.vehicleNumbers = arr.join('-');
+
+      this.searchLoading = true;
+
       const params = {
-        // startDate: formatDate(this.filterObj.startDate),
-        startDate: '2019-07-01 00:12:12',
+        startDate: formatDate(this.filterObj.startDate),
         endDate: formatDate(this.filterObj.endDate),
         vehicleNumbers: this.filterObj.vehicleNumbers,
         order:"asc",
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
-      }
+      };
+
       getMultiVehicleList(params)
         .then(res => {
           if (res && res.data) {
-            console.log('res', res)
             this.pagination.total = res.data.total;
             this.dataList = res.data.list;
             this.searchLoading = false;
@@ -355,50 +404,18 @@ export default {
      * 打开抓拍弹框
      */
     onOpenDetail (obj) {
-      this.$_showLoading({text: '加载中...'});
-      console.log(obj)
-      console.log(this.sturcDetail.videoPath)
       if (obj.peerVehicleInfoDtoList && obj.peerVehicleInfoDtoList.length > 0) {
         this.vehicleList = obj.peerVehicleInfoDtoList;
       }
-      // this.videoUrl = this.sturcDetail.videoPath;
-      // this.playUrl = {
-      //   type: 3,
-      //   title: '',
-      //   video: {
-      //     uid: 1,
-      //     downUrl: this.sturcDetail.videoPath
-      //   }
-      // }
-      this.strucDetailDialog = true;
+      this.sturcDetail = obj.shotRecord;
+
       this.$nextTick(() => {
-        this.getVehicleDetail(obj);
+        this.initMap(obj.shotRecord);
       })
-      this.$_hideLoading();
+      this.strucDetailDialog = true;
+
     },
-    // 获取车辆抓拍详情
-    getVehicleDetail (obj) {
-      // const params = {
-      //   dateStart: formatDate(this.filterObj.startDate),
-      //   dateEnd: formatDate(this.filterObj.endDate),
-      //   devIds: obj.deviceID,
-      //   plateNo: obj.plateNo
-      // }
-      const params = {
-        dateStart: '2019-01-01',
-        dateEnd: '2019-09-01',
-        // devIds: obj.deviceID,
-        plateNo: '湘A77777'
-      }
-      getSnapDetail(params)
-        .then(res => {
-          if (res && res.data) {
-            this.strucInfoList = res.data.snapDtoList;
-            this.sturcDetail = res.data.snapDtoList[0];
-            this.initMap();
-          }
-        })
-    },
+   
     /**
      * 关闭抓拍弹框
      */
@@ -413,7 +430,9 @@ export default {
       this.sturcDetail = {};
       this.curImgIndex = i;
       this.sturcDetail = obj;
-      console.log(this.sturcDetail)
+      this.$nextTick(() => {
+        this.initMap(obj);
+      })
     },
     /**
      * 分页赋值
@@ -552,12 +571,6 @@ export default {
 
 
 <style lang="scss">
-html {font-size: 100px;}
-@media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-@media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
 .the-right-result .__view {
   background-color: none;
 }
@@ -611,6 +624,11 @@ html {font-size: 100px;}
       text-decoration: none;
       color: #B2B2B2;
       cursor: pointer;
+      &:hover {
+        background-color: #FFFFFF;
+        border-color: #0C70F8;
+        color: #0C70F8;
+      }
     }
     .struc_c_detail {
       width:  100%;
@@ -724,6 +742,42 @@ html {font-size: 100px;}
         border-radius: 1px;
         position: relative;
         overflow: hidden;
+        &:hover {
+          .play_btn {
+            display: block !important;
+          }
+        }
+        .play_btn {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+          background: rgba(0, 0, 0, 0.4);
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          line-height: 1rem;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+          border-radius: 50%;
+          cursor: pointer;
+          i {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            height: 22px !important;
+          }
+        }
+        > video {
+          width: 100%;
+          height: 100%;
+          background-color: #E9E7E8;
+        }
         &:before {
           display: block;
           content: '';
@@ -899,6 +953,7 @@ html {font-size: 100px;}
   font-size: .14rem;
   color: #666666;
   position: relative;
+  margin-bottom: -15px;
   &:after {
     display: block;
     content: '';

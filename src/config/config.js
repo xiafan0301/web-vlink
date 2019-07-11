@@ -45,11 +45,10 @@ const oDomains = {
     },
     // 研判检索服务
     judge: {
+        // dev: 'http://10.116.64.142:8087/',
         dev: 'https://apidev.aorise.org/vlink-judge/',
-        // dev: 'http://10.116.64.127:8082',
-        // dev: 'http://10.116.64.107:8081',
         test: 'https://apirel.aorise.org/vlink-judge/',
-        prod: 'https://apirel.aorise.org/vlink-judge/'
+        prod: 'https://apirel.aorise.org/vlink-judge/',
     },
     // 调度和预案部分地址
     ctc: {
@@ -105,16 +104,9 @@ const oDomains = {
       test: 'https://apirel.aorise.org/vlink-gis',
       prod: 'https://apidev.aorise.org/vlink-gis'
     },
-    // 无服务
-    noServe: {
-      // dev: 'https://apidev.aorise.org',
-      dev: 'http://10.116.64.142:8087',
-      test: 'https://apirel.aorise.org',
-      prod: 'https://apidev.aorise.org'
-    },
     //研判分析服务
     analysis: {
-      dev: 'https://apidev.aorise.org/vlink-judge',
+      dev: 'http://apidev.aorise.org/vlink-judge',
       test: 'http://10.116.65.15:8081',
       prod: 'https://apidev.aorise.org/vlink-buz-judge-analysis'
     }
@@ -178,3 +170,4 @@ export const mapXupuxian = {
     name: '溆浦县',
     center: [110.594280, 27.908490]
 };
+

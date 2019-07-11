@@ -39,11 +39,11 @@
               <i class="vl_icon2 vl_icon2_006"></i><span>连续违法</span>
             </router-link>
           </li>
-          <li>
+          <!-- <li>
             <router-link :to="{name: 'vehicle_search_pfgc'}">
               <i class="vl_icon2 vl_icon2_007"></i><span>频繁过车</span>
             </router-link>
-          </li>
+          </li> -->
           <li>
             <router-link :to="{name: 'vehicle_search_qyph'}">
               <i class="vl_icon2 vl_icon2_007"></i><span>区域徘徊</span>
@@ -66,7 +66,7 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_qy'}">
-              <i class="vl_icon2 vl_icon2_013"></i><span>区域分析</span>
+              <i class="vl_icon2 vl_icon2_013"></i><span>区域碰撞</span>
             </router-link>
           </li>
           <li>
@@ -79,11 +79,11 @@
               <i class="vl_icon2 vl_icon2_015"></i><span>套牌车分析</span>
             </router-link>
           </li>
-          <li>
+          <!-- <li>
             <router-link :to="{name: 'vehicle_search_txcl'}">
               <i class="vl_icon2 vl_icon2_016"></i><span>同行车辆分析</span>
             </router-link>
-          </li>
+          </li> -->
           <li>
             <router-link :to="{name: 'vehicle_search_ws'}">
               <i class="vl_icon2 vl_icon2_017"></i><span>尾随分析</span>
@@ -92,11 +92,6 @@
           <li>
             <router-link :to="{name: 'vehicle_search_dctx'}">
               <i class="vl_icon2 vl_icon2_018"></i><span>多车同行分析</span>
-            </router-link>
-          </li>
-          <li>
-            <router-link :to="{name: 'vehicle_report'}">
-              <i class="vl_icon2 vl_icon2_027"></i><span>车辆侦察报告</span>
             </router-link>
           </li>
         </ul>
@@ -126,7 +121,12 @@
           </li>
           <li>
             <router-link :to="{name: 'vehicle_search_ycxc'}">
-              <i class="vl_icon2 vl_icon2_025"></i><span>夜车行车统计</span>
+              <i class="vl_icon2 vl_icon2_025"></i><span>夜间行车统计</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{name: 'vehicle_report'}">
+              <i class="vl_icon2 vl_icon2_027"></i><span>车辆侦察报告</span>
             </router-link>
           </li>
         </ul>
