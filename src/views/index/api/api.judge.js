@@ -492,7 +492,7 @@ export function getNightVehicleRecordList(params) {
  */
 export function getVehicleInvestigationReport(params) {
   return request({
-    url: '/vehicle-investigation-report-service/report',
+    url: '/report-service/vehicle-report',
     method: 'post',
     data: params,
     mode: 'judge'

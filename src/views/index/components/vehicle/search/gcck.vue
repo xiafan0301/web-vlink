@@ -670,6 +670,7 @@ export default {
                 > p {
                   width: 142px; height: 142px;
                   margin-bottom: 5px;
+                  cursor: pointer;
                   > img {
                     width: 100%; height: 100%;
                   }

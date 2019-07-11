@@ -282,9 +282,9 @@ import {
   JtcPUTAppendixsOrder,getPhotoAnalysis,getViolation
 } from "../../../api/api.judge.js";
 import { getCarmodelList } from "../../../api/api.base.js";
-import { setTimeout } from "timers";
+// import { setTimeout } from "timers";
 import { dataList } from '@/utils/data.js';
-import { callbackify, error } from 'util';
+// import { callbackify, error } from 'util';
 export default {
   components: { BigImg },
   data() {
@@ -559,15 +559,14 @@ export default {
     //设置默认时间
     setDTime() {
       let date = new Date();
-      let curDate = date.getTime();
-      let curS = 30 * 24 * 3600 * 1000;
-        let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
-      let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+      //let curDate = date.getTime(); 
+      //let curS = 30 * 24 * 3600 * 1000;
+      //let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+      //let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
       let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
       
-      let _s = new Date(curDate - curS).getFullYear() +
-        "-" + _sm + "-" +_sd;
+      //let _s = new Date(curDate - curS).getFullYear() + "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
       this.data1 = [_e, _e];
     },
@@ -670,7 +669,7 @@ export default {
       this.pagination.pageNum = page;
     },
 
-    changeTab(v) {
+    changeTab() {
       //console.log(v);
       // if (v == "2") {
       //   this.dialogVisible = true;
@@ -889,34 +888,6 @@ background-color: #a0cfff;
 }
 </style>
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .info-left{
 .el-date-editor .el-range-input{
  font-size: 12px;

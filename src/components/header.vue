@@ -177,7 +177,7 @@
       <span style="color: #999999;">您确定退出登录吗?</span>
       <div slot="footer" class="dialog-footer">
         <el-button @click="loginoutDialog = false">取消</el-button>
-        <el-button class="operation_btn function_btn" @click="loginOut">确认</el-button>
+        <el-button :loading="loginoutLoading" class="operation_btn function_btn" @click="loginOut">确认</el-button>
       </div>
     </el-dialog>
     <!--修改密码弹出框-->
@@ -261,6 +261,7 @@ export default {
       },
       userInfo: null,
       loginoutDialog: false, // 退出登录弹出框
+      loginoutLoading: false,
       updatePwdDialog: false, // 修改密码弹出框
       pageNum: 1,
       pageSize: 10,
@@ -309,6 +310,7 @@ export default {
     },
     // 退出登录
     loginOut () {
+      this.loginoutLoading = true;
       const params = {
         userMobile: this.userInfo.userMobile
       }
@@ -324,7 +326,10 @@ export default {
               customClass: 'request_tip'
             })
           }
-        })
+          this.loginoutLoading = false;
+        }).catch(() => {
+          this.loginoutLoading = false;
+        });
     },
     // 显示修改密码弹出框
     showUpdatePwdDialog () {

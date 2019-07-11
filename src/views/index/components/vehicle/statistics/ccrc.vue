@@ -76,6 +76,9 @@
             </el-select>
           </el-input>
         </div>
+        <div style="padding-top: 10px">
+          <el-checkbox v-model="onlySurveillance"><span style="color: #999999">只查看布控库内车辆</span></el-checkbox>
+        </div>
         <div class="kakou">
           <el-button style="width: 110px" @click="reset">重置</el-button>
           <el-button type="primary" style="width: 110px" @click="tongji">统计</el-button>
@@ -204,6 +207,7 @@ export default {
       bayonetTreeNodeCount: 0, // 卡口节点数量
       selectDeviceArr: [], // 选中的设备数组
       unvehicleFlag: false,
+      onlySurveillance: false,
       isShowSelectList: false,
       pagination: { total: 0, pageSize: 10, pageNum: 1 },
       tableData: [],
@@ -216,11 +220,10 @@ export default {
   },
   created () {
     this.setDTime();
-    this.JfoGETCity()
     this.cityCode = cityCode
-    this.getMonitorList()
   },
   mounted() {
+    this.getMonitorList()
     this.setDTime();
   },
   methods: {
@@ -252,10 +255,13 @@ export default {
           let camera = objDeepCopy(res.data.areaTreeList);
           let bayonet = objDeepCopy(res.data.areaTreeList);
           this.kakou = this.getTreeList1(bayonet)
-          console.log('lopjhkjjk', this.kakou)
+          this.lll = this.kakou.map((item)=> {
+            return item.uid
+          })
           this.videoTree = this.getTreeList(camera);
           this.getLeafCountTree(this.videoTree, 'camera');
           this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          this.JfoGETCity()
 
           // this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
           // this.$refs.videotree.setCheckedNodes(this.videoTree);
@@ -425,13 +431,11 @@ export default {
       this.v = '湘'
       this.vehicleNumber = ''
       this.lll = []
-      this.selectDeviceArr = []
-      this.checkAllTreeBayonet = false
-      this.$refs.bayonetTree.setCheckedKeys([]);
-      this.JfoGETCity()
+      this.onlySurveillance = false
+      this.getMonitorList()
     },
     see () {
-      this.$router.push({name: 'clxx'});
+      this.$router.push({name: 'vehicle_search_clxx'});
     },
     hhh (val) {
       console.log(val)
@@ -450,13 +454,15 @@ export default {
       const params = {
         startTime: this.value1,
         endTime: this.value2,
-        unvehicleFlag: this.unvehicleFlag
+        unvehicleFlag: this.unvehicleFlag,
+        onlySurveillance: this.onlySurveillance,
+        vehicleNumber: this.v
       }
-      if (this.lll) {
+      if (this.lll&& this.lll.length > 0) {
         params['bayonetUid'] = this.lll.join(',')
       }
       if (this.vehicleNumber) {
-        params['vehicleNumber'] = this.v + this.vehicleNumber
+        params.vehicleNumber = this.v + this.vehicleNumber
       }
       JfoGETCity(params).then(res => {
         if (res) {
@@ -538,9 +544,6 @@ export default {
     }
     .statistics_select_list{
       display: none !important;
-    }
-    /deep/ .el-checkbox__inner{
-      border-radius: 50%;
     }
   }
 </style>
