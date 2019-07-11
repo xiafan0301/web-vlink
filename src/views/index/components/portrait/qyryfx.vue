@@ -229,7 +229,9 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3 class="camera_name">{{ selectedDevice.deviceName + '(' + currentClickDevice.shotNum + '次)' }}</h3>
+            <h3
+              class="camera_name"
+            >{{ selectedDevice.deviceName + '(' + currentClickDevice.shotNum + '次)' }}</h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
@@ -506,7 +508,7 @@ export default {
       showTypes: "DB", //设备类型
       totalData: [],
       selectedDevice: {}, // 当前选中的设备信息
-      currentClickDevice: {}, 
+      currentClickDevice: {},
       swiper: null
     };
   },
@@ -733,8 +735,16 @@ export default {
         queryParams = {
           ...this.qyryfxFrom,
           deviceCode: device.viewClassCode,
-          startTime: timeArr.map(item => {  return this.drawObj[item].startTime }).join(),
-          endTime: timeArr.map(item => {  return this.drawObj[item].endTime }).join()
+          startTime: timeArr
+            .map(item => {
+              return this.drawObj[item].startTime;
+            })
+            .join(),
+          endTime: timeArr
+            .map(item => {
+              return this.drawObj[item].endTime;
+            })
+            .join()
         };
       }
       getShotNumAreaDetail(queryParams)
@@ -888,7 +898,6 @@ export default {
       this.mouseTool = new window.AMap.MouseTool(map);
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
-        // console.log('draw event', event);
         let _sid = random14();
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
@@ -928,7 +937,6 @@ export default {
       nContent
         .on("click", ".el-icon-close", function() {
           // 删除
-          console.log("点击了这个方法");
           let nOpt = $(this).closest(".ms_marker_opt");
           let _sid = nOpt.attr("_sid"),
             _type = Number(nOpt.attr("_type"));
@@ -1446,8 +1454,10 @@ export default {
           "</div></div>"
       });
       this.zIndex += 1;
-      if (this.drawObj.polygon[sid]) {
-        this.drawObj.polygon[sid].marker = marker;
+      for (let i = 0; i < this.drawObj.length; i++) {
+        if (this.drawObj[i].polygon[sid]) {
+          this.drawObj[i].polygon[sid].marker = marker;
+        }
       }
     },
     drawCircle10km() {
