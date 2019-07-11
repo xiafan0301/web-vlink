@@ -310,26 +310,29 @@ export default {
     },
     // 退出登录
     loginOut () {
+      if (!this.userInfo) {
+        this.$router.push({name: 'login'});
+        return false;
+      }
       this.loginoutLoading = true;
       const params = {
         userMobile: this.userInfo.userMobile
       }
-      logout(params)
-        .then(res => {
-          if (res) {
-            this.loginoutDialog = false;
-            this.$router.push({name: 'login'});
-          } else {
-            this.$message({
-              type: 'error',
-              message: '退出登录失败',
-              customClass: 'request_tip'
-            })
-          }
-          this.loginoutLoading = false;
-        }).catch(() => {
-          this.loginoutLoading = false;
-        });
+      logout(params).then(res => {
+        if (res) {
+          this.loginoutDialog = false;
+          this.$router.push({name: 'login'});
+        } else {
+          this.$message({
+            type: 'error',
+            message: '退出登录失败',
+            customClass: 'request_tip'
+          })
+        }
+        this.loginoutLoading = false;
+      }).catch(() => {
+        this.loginoutLoading = false;
+      });
     },
     // 显示修改密码弹出框
     showUpdatePwdDialog () {
