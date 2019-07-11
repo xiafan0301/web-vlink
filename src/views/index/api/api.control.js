@@ -599,3 +599,39 @@ export function getAllAlarmSnapListByDev(params) {
     mode: 'control'
   })
 }
+/**
+ * getControlNameBySelect 根据条件取得布控(下拉框选择用)
+ * @param {object} params
+ */
+export function getControlNameBySelect(params) {
+  return request({
+    url: '/surveillances/select',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
+ * getControlObjBySelect 根据条件取得布控对象(下拉框选择用)
+ * @param {object} params
+ */
+export function getControlObjBySelect(params) {
+  return request({
+    url: '/surveillances/objects/select',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
+/**
+ * getControlEventBySelect 根据条件取得布控关联事件(下拉框选择用)
+ * @param {object} params
+ */
+export function getControlEventBySelect(params) {
+  return request({
+    url: '/surveillances/event/select',
+    method: 'get',
+    params,
+    mode: 'control'
+  })
+}
