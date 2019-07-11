@@ -15,6 +15,18 @@
       </div>
       <div v-else>视频加载中，请稍后...</div>
     </div>
+    <!-- oData.type === 5 视频接力 -->
+    <div class="player_relay_i">
+      <div class="player_relay_icp">
+        <ul>
+          <li>车牌号码</li>
+          <li>湘A234A1</li>
+        </ul>
+      </div>
+      <div class="player_relay_imp">
+        <span title="接力地图" class="vl_icon vl_icon_rpm"></span>
+      </div>
+    </div>
     <span v-show="fullScreen" class="vl_icon player_out_fullscreen vl_icon_v30" @click="playerFullScreen(false)" title="退出全屏"></span>
     <span v-if="config.close && !fullScreen && !optionsDis" class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span>
     <!-- <span v-else class="vl_icon vl_icon_close" @click="playerClose" title="关闭"></span> -->
@@ -429,7 +441,7 @@ export default {
     initPlayer () {
       this.videoLoadingFailed = false;
       let obj = {deviceId: this.oData.video.uid};
-      if (this.oData.type === 1) {
+      if (this.oData.type === 1 || this.oData.type === 5) {
         // 直播
         apiVideoPlay(obj).then(res => {
           if (res && res.data) {
@@ -1264,6 +1276,28 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+/* 视频接力 begin */
+.player_relay_i {
+  position: absolute; top: 10px; left: 10px; z-index: 100;
+  > .player_relay_icp {
+    > ul {
+      width: 76px;
+      margin: 0 auto; padding: 8px 0;
+      background-color: #f2f2f2;
+      border:1px solid rgba(211, 211, 211, 0.97);
+      border-radius:3px;
+      > li {
+        text-align: center;
+        font-size: 12px;
+      }
+    }
+  }
+  > .player_relay_imp {
+    padding-top: 10px;
+    > span { cursor: pointer; }
+  }
+}
+/* 视频接力 end */
 .flvplayer_ptz {
   width: 174px;
   position: absolute; bottom: 50px; left: 50%; z-index: 200;
