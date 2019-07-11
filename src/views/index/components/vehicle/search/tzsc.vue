@@ -958,7 +958,7 @@ export default {
                 for (let i = 0; i < this.characterTypes.length; i++) {
                   if (key === this.characterTypes[i]) {
                     let obj = {
-                      checked: false
+                      checked: true
                     };
                     obj[key] = data[key];
                     obj["name"] = data[key];
