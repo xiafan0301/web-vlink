@@ -229,53 +229,51 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3 class="camera_name">{{ selectedDevice.deviceName }}（50次）</h3>
+            <h3 class="camera_name">{{ selectedDevice.deviceName + '(' + currentClickDevice.shotNum + '次)' }}</h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
                 v-for="(item, index) in cameraPhotoList"
                 :key="'people_item' + index"
               >
-                <!-- <div  v-for="(sItem, sIndex) in item.detailList"
-                    :key="'my_swiper' + sIndex">
-
-                <div class="swiper_contents" v-if="item.currentIndex === sIndex" >
-                  <div class="img_warp">
-                    <img :src="sItem.upPhotoUrl" alt />
-                  </div>
-                  <div class="similarity">
-                    <p class="similarity_count">{{sItem.semblance}}</p>
-                    <p class="similarity_title">相似度</p>
-                    <div class="select_time">
-                      <el-select
-                        v-model="searchCamera"
-                        @change="slideToIndex(index, searchCamera)"
-                        placeholder="请选择"
-                      >
-                        <el-option
-                          v-for="(gItem, gIndex) in item.detailList"
-                          :key="gIndex"
-                          :label="gIndex + 1"
-                          :value="gIndex"
-                        ></el-option>
-                      </el-select>
+                <div v-for="(sItem, sIndex) in item.detailList" :key="'my_swiper' + sIndex">
+                  <div class="swiper_contents" v-if="item.currentIndex === sIndex">
+                    <div class="img_warp">
+                      <img :src="sItem.upPhotoUrl" alt />
                     </div>
-                  </div>
-                  <div class="img_warp">
-                    <img :src="sItem.subStoragePath" alt />
-                  </div>
-                  <div class="people_message">
-                    <h2 class="name">{{item.name}}</h2>
-                    <div class="tips_wrap">
-                      <p class="tip">{{item.sex}}</p>
-                      <p class="tip">{{item.age}}</p>
+                    <div class="similarity">
+                      <p class="similarity_count">{{sItem.semblance}}</p>
+                      <p class="similarity_title">相似度</p>
+                      <div class="select_time">
+                        <el-select
+                          v-model="item.currentIndex"
+                          @change="slideToIndex(item.currentIndex, index)"
+                          placeholder="请选择"
+                        >
+                          <el-option
+                            v-for="(gItem, gIndex) in item.detailList"
+                            :key="gIndex"
+                            :label="gIndex + 1"
+                            :value="gIndex"
+                          ></el-option>
+                        </el-select>
+                      </div>
+                    </div>
+                    <div class="img_warp">
+                      <img :src="sItem.subStoragePath" alt />
+                    </div>
+                    <div class="people_message">
+                      <h2 class="name">{{item.name}}</h2>
+                      <div class="tips_wrap">
+                        <p class="tip">{{item.sex}}</p>
+                        <p class="tip">{{item.age}}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-                  <div @click="prev(index)" class="swiper-button-prev change_img"></div>
-                <div @click="next(index)" class="swiper-button-next change_img"></div>-->
-                <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
+                <div @click="prev(index)" class="swiper-button-prev change_img"></div>
+                <div @click="next(index)" class="swiper-button-next change_img"></div>
+                <!-- <swiper :options="swiperOption" :ref="'mySwiper' + index" :id="'mySwiper' + index">
                   <swiper-slide
                     v-for="(sItem, sIndex) in item.detailList"
                     :key="index + 'my_swiper' + sIndex"
@@ -316,7 +314,7 @@
                   </swiper-slide>
                   <div class="swiper-button-prev change_img" slot="button-prev"></div>
                   <div class="swiper-button-next change_img" slot="button-next"></div>
-                </swiper>
+                </swiper>-->
               </div>
             </div>
           </vue-scroll>
@@ -508,6 +506,7 @@ export default {
       showTypes: "DB", //设备类型
       totalData: [],
       selectedDevice: {}, // 当前选中的设备信息
+      currentClickDevice: {}, 
       swiper: null
     };
   },
@@ -530,21 +529,31 @@ export default {
     prev(val) {
       const ind = this.cameraPhotoList[val].detailList.length - 1;
       if (this.cameraPhotoList[val].currentIndex === 0) {
-        // this.$set(this.cameraPhotoList[val], 'currentIndex', ind);
-        this.cameraPhotoList[val].currentIndex = ind;
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = ind;
+        this.$set(this.cameraPhotoList, val, obj);
       } else {
-        this.cameraPhotoList[val].currentIndex =
-          this.cameraPhotoList[val].currentIndex - 1;
-
-        // this.$set(this.cameraPhotoList[val], 'currentIndex', this.cameraPhotoList[val].currentIndex - 1);
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = obj.currentIndex - 1;
+        this.$set(this.cameraPhotoList, val, obj);
       }
-      console.log("为什么不变呢", this.cameraPhotoList);
     },
-    slideToIndex(index, val) {
-      // this.$nextTick(() => {
-      //   console.log('swiper', this.$refs.mySwiper1);
-      // });
-      // this.$refs['mySwiper' + val].swiper.slideTo(index, 1000, false);
+    next(val) {
+      const ind = this.cameraPhotoList[val].detailList.length - 1;
+      if (this.cameraPhotoList[val].currentIndex === ind) {
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = 0;
+        this.$set(this.cameraPhotoList, val, obj);
+      } else {
+        const obj = objDeepCopy(this.cameraPhotoList[val]);
+        obj.currentIndex = obj.currentIndex + 1;
+        this.$set(this.cameraPhotoList, val, obj);
+      }
+    },
+    slideToIndex(val, ind) {
+      const obj = objDeepCopy(this.cameraPhotoList[ind]);
+      obj.currentIndex = val;
+      this.$set(this.cameraPhotoList, ind, obj);
     },
     /**重置左边菜单的方法 */
     resetLeftMenu() {
@@ -636,6 +645,7 @@ export default {
       // 校验每一个时间区域中是否都有设备存在
       for (let j = 0; j < this.totalData.length; j++) {
         const area = this.totalData[j];
+        // console.log('area', area.ad.map(item => item.uid));
         if (area.ab.length <= 0 && area.ad.length <= 0) {
           this.$message.warning(
             `您在第${j + 1}个选择区域未选中设备，请您重新选择`
@@ -645,8 +655,9 @@ export default {
           deviceAndTimeList = [
             ...deviceAndTimeList,
             {
-              deviceIds: area.ad.join(),
-              bayonetIds: area.ab.join(),
+              deviceIds: area.ad.map(item => item.uid).join(),
+              // deviceIds: "5",
+              bayonetIds: area.ab.map(item => item.uid).join(),
               startTime: this.drawObj[j].startTime,
               endTime: this.drawObj[j].endTime
             }
@@ -664,13 +675,11 @@ export default {
         ...this.qyryfxFrom,
         deviceAndTimeList: deviceAndTimeList
       };
-      console.log("检索摄像头", this.totalData);
+      // console.log("检索摄像头", this.totalData);
       postShotNumArea(queryParams)
         .then(res => {
           if (res) {
             this.setMarks(res.data);
-            console.log("对比", res.data);
-            console.log("dui", this.listDevice);
           }
         })
         .catch(() => {});
@@ -698,11 +707,34 @@ export default {
         };
       } else {
         // 根据设备的不同来查找时间段
-        // for (let i = 0; i < this.totalData.length; i++) {
-        //   const dataItem = this.totalData[i];
-        //   if (dataItem.ad.length) {
-        //   }
-        // }
+        const timeArr = [];
+        for (let i = 0; i < this.totalData.length; i++) {
+          const dataItem = this.totalData[i];
+          let isAd = false;
+          if (dataItem.ad.length > 0) {
+            for (let j = 0; j < dataItem.ad.length; j++) {
+              if (dataItem.ad[j].viewClassCode === device.viewClassCode) {
+                timeArr.push(i);
+                isAd = true;
+                break;
+              }
+            }
+          }
+          if (!isAd) {
+            for (let j = 0; j < dataItem.ab.length; j++) {
+              if (dataItem.ab[j].viewClassCode === device.viewClassCode) {
+                timeArr.push(i);
+                break;
+              }
+            }
+          }
+        }
+        queryParams = {
+          ...this.qyryfxFrom,
+          deviceCode: device.viewClassCode,
+          startTime: timeArr.map(item => {  return this.drawObj[item].startTime }).join(),
+          endTime: timeArr.map(item => {  return this.drawObj[item].endTime }).join()
+        };
       }
       getShotNumAreaDetail(queryParams)
         .then(res => {
@@ -796,25 +828,25 @@ export default {
     },
     delArea(val, clearAll) {
       for (let item in this.drawObj[val]) {
-          switch (item) {
-            case "rectangle":
-              this.removeMarkers(1, this.drawObj[val][item].sid);
-              break;
-            case "circle":
-              this.removeMarkers(2, this.drawObj[val][item].sid);
-              break;
-            case "polyline":
-              this.removeMarkers(3, this.drawObj[val][item].sid);
-              break;
-            case "polygon":
-              this.removeMarkers(4, this.drawObj[val][item].sid);
-              break;
-            case "circle10km":
-              this.removeMarkers(5, this.drawObj[val][item].sid);
-              break;
-            default:
-              break;
-          }
+        switch (item) {
+          case "rectangle":
+            this.removeMarkers(1, this.drawObj[val][item].sid);
+            break;
+          case "circle":
+            this.removeMarkers(2, this.drawObj[val][item].sid);
+            break;
+          case "polyline":
+            this.removeMarkers(3, this.drawObj[val][item].sid);
+            break;
+          case "polygon":
+            this.removeMarkers(4, this.drawObj[val][item].sid);
+            break;
+          case "circle10km":
+            this.removeMarkers(5, this.drawObj[val][item].sid);
+            break;
+          default:
+            break;
+        }
       }
       if (!clearAll) {
         // 是否全部清除地图标记
@@ -862,27 +894,27 @@ export default {
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].rectangle['sid'] = _sid;
+          this.drawObj[this.currenDrawobj].rectangle["sid"] = _sid;
           this.drawRectangleMark(_sid, event.obj);
         } else if (drawActive === 2) {
           this.drawObj[this.currenDrawobj].circle[_sid] = {};
           this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle['sid'] = _sid;
+          this.drawObj[this.currenDrawobj].circle["sid"] = _sid;
           this.drawCircleMark(_sid, event.obj);
         } else if (drawActive === 3) {
           this.drawObj[this.currenDrawobj].polyline[_sid] = {};
           this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polyline['sid'] = _sid;
+          this.drawObj[this.currenDrawobj].polyline["sid"] = _sid;
           this.drawPolylineMark(_sid, event.obj);
         } else if (drawActive === 4) {
           this.drawObj[this.currenDrawobj].polygon[_sid] = {};
           this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].polygon['sid'] = _sid;
+          this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
           this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
           this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
           this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
-          this.drawObj[this.currenDrawobj].circle10km['sid'] = _sid;
+          this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
         }
         this.mouseTool.close(false);
         this.amap.setDefaultCursor();
@@ -1368,28 +1400,27 @@ export default {
     },
     drawPolygonEditor(sid) {
       for (let i = 0; i < this.drawObj.length; i++) {
-
-      if (this.drawObj[i].polygon[sid]) {
-        let _this = this,
-          obj = this.drawObj[i].polygon[sid];
-        if (obj.editor) {
-          obj.editor.open();
-        } else {
-          var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
-          polyEditor.on("adjust", function(event) {
-            // event.target 即为编辑后的对象
-            // 需要重新定位marker
-            if (obj.marker) {
-              obj.marker.setPosition(
-                event.target.getPath()[event.target.getPath().length - 1]
-              );
-            }
-          });
-          obj.editor = polyEditor;
-          polyEditor.open();
+        if (this.drawObj[i].polygon[sid]) {
+          let _this = this,
+            obj = this.drawObj[i].polygon[sid];
+          if (obj.editor) {
+            obj.editor.open();
+          } else {
+            var polyEditor = new window.AMap.PolyEditor(this.amap, obj.obj);
+            polyEditor.on("adjust", function(event) {
+              // event.target 即为编辑后的对象
+              // 需要重新定位marker
+              if (obj.marker) {
+                obj.marker.setPosition(
+                  event.target.getPath()[event.target.getPath().length - 1]
+                );
+              }
+            });
+            obj.editor = polyEditor;
+            polyEditor.open();
+          }
+          break;
         }
-        break;
-      }
       }
     },
     drawPolygonMark(sid, obj) {
@@ -1661,8 +1692,8 @@ export default {
         ab.push(bObj[k]);
       }
       this.totalData.push({
-          ad: ad,
-          ab: ab
+        ad: ad,
+        ab: ab
       });
     },
     getTreeList() {
@@ -1696,22 +1727,16 @@ export default {
         const listItem = this.listDevice[i];
         for (let j = 0; j < deviceList.length; j++) {
           const deviceItem = deviceList[j];
-          // if (
-          //   deviceItem.shotPlaceLongitude === listItem.longitude &&
-          //   deviceItem.shotPlaceLatitude === listItem.latitude
-          // ) {
-          this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt");
-          // }
+          if (deviceItem.groupName === listItem.viewClassCode) {
+            this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt");
+          }
         }
       }
       for (let i = 0; i < this.listBayonet.length; i++) {
         const listItem = this.listBayonet[i];
         for (let j = 0; j < deviceList.length; j++) {
           const deviceItem = deviceList[j];
-          if (
-            deviceItem.shotPlaceLongitude === listItem.longitude &&
-            deviceItem.shotPlaceLatitude === listItem.latitude
-          ) {
+          if (deviceItem.groupName === listItem.viewClassCode) {
             this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
           }
         }
@@ -1734,7 +1759,6 @@ export default {
       } else if (device.shotNum > 500) {
         level = "level1";
       }
-
       let marker = new window.AMap.Marker({
         // 添加自定义点标记
         map: this.amap,
@@ -1746,6 +1770,7 @@ export default {
         content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
       });
       console.log("数量", device.shotNum);
+      this.currentClickDevice = device;
       let _this = this;
       marker.on("click", function() {
         _this.selectedDevice = obj;
@@ -2199,9 +2224,9 @@ export default {
             }
             .change_img {
               position: absolute;
-              top: 55px;
               width: 12px;
               height: 26px;
+              top: 80px;
               background: url("../../../../assets/img/icons.png") no-repeat;
               cursor: pointer;
             }
