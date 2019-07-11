@@ -242,7 +242,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item prop="sunVisor">
+                <!-- <el-form-item prop="sunVisor">
                   <el-select
                     v-model="tzscMenuForm.sunVisor"
                     clearable
@@ -271,7 +271,7 @@
                       :value="item.enumValue"
                     ></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
               </div>
             </el-form>
             <!-- 按钮样式 -->
@@ -564,7 +564,6 @@ export default {
         ]
       },
       getStrucInfoLoading: false, // 查询按钮加载
-
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -591,63 +590,62 @@ export default {
       vehicleClassOptions: [], // 车辆类型
       vehicleColorOptions: [], // 车辆颜色
       carModelOptions: [], // 车辆型号
-      sunvisorOptions: [
-        // 遮阳板
-        {
-          enumField: "打开",
-          enumValue: "打开"
-        },
-        {
-          enumField: "收起",
-          enumValue: "收起"
-        }
-      ],
-      descOfRearItemOptions: [
-        {
-          enumField: "年检标数量0个",
-          enumValue: "年检标数量0个"
-        },
-        {
-          enumField: "年检标数量1个",
-          enumValue: "年检标数量1个"
-        },
-        {
-          enumField: "年检标数量2个",
-          enumValue: "年检标数量2个"
-        },
-        {
-          enumField: "年检标数量3个",
-          enumValue: "年检标数量3个"
-        },
-        {
-          enumField: "年检标数量4个",
-          enumValue: "年检标数量4个"
-        },
-        {
-          enumField: "年检标数量5个",
-          enumValue: "年检标数量5个"
-        },
-        {
-          enumField: "年检标数量6个",
-          enumValue: "年检标数量6个"
-        },
-        {
-          enumField: "年检标数量7个",
-          enumValue: "年检标数量7个"
-        },
-        {
-          enumField: "年检标数量8个",
-          enumValue: "年检标数量8个"
-        },
-        {
-          enumField: "年检标数量9个",
-          enumValue: "年检标数量9个"
-        },
-        {
-          enumField: "年检标数量10个",
-          enumValue: "年检标数量10个"
-        }
-      ], // 年检标数量
+      // sunvisorOptions: [ // 遮阳板
+      //   {
+      //     enumField: "打开",
+      //     enumValue: "打开"
+      //   },
+      //   {
+      //     enumField: "收起",
+      //     enumValue: "收起"
+      //   }
+      // ],
+      // descOfRearItemOptions: [ // 年检标数量
+      //   {
+      //     enumField: "年检标数量0个",
+      //     enumValue: "年检标数量0个"
+      //   },
+      //   {
+      //     enumField: "年检标数量1个",
+      //     enumValue: "年检标数量1个"
+      //   },
+      //   {
+      //     enumField: "年检标数量2个",
+      //     enumValue: "年检标数量2个"
+      //   },
+      //   {
+      //     enumField: "年检标数量3个",
+      //     enumValue: "年检标数量3个"
+      //   },
+      //   {
+      //     enumField: "年检标数量4个",
+      //     enumValue: "年检标数量4个"
+      //   },
+      //   {
+      //     enumField: "年检标数量5个",
+      //     enumValue: "年检标数量5个"
+      //   },
+      //   {
+      //     enumField: "年检标数量6个",
+      //     enumValue: "年检标数量6个"
+      //   },
+      //   {
+      //     enumField: "年检标数量7个",
+      //     enumValue: "年检标数量7个"
+      //   },
+      //   {
+      //     enumField: "年检标数量8个",
+      //     enumValue: "年检标数量8个"
+      //   },
+      //   {
+      //     enumField: "年检标数量9个",
+      //     enumValue: "年检标数量9个"
+      //   },
+      //   {
+      //     enumField: "年检标数量10个",
+      //     enumValue: "年检标数量10个"
+      //   }
+      // ], 
       characterTypes: [
         "plateClass", // 号牌类型
         "plateColor", // 车牌颜色
@@ -656,8 +654,8 @@ export default {
         "vehicleBrand", // 汽车型号
         "vehicleStyles", // 汽车的型号
         "vehicleColor", // 汽车颜色
-        "sunvisor", // 遮阳板
-        "descOfFrontItem", // 年检标数量
+        // "sunvisor", // 遮阳板
+        // "descOfFrontItem", // 年检标数量
       ],
       options: [
         {
@@ -834,29 +832,11 @@ export default {
               "plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
               "vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
               "vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+              // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+              // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
               "vehicleNumber": null, // 车牌号码
               "vehicleModel": null, // 车辆型号
               },
-              // "where.startTime":
-              //   formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
-              //   " 00:00:00", // 开始时间
-              // "where.endTime":
-              //   formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
-              //   " 23:59:59", // 结束时间
-              // "where.deviceUid":
-              //   deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              // "where.bayonetUid":
-              //   bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-              // "where.plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
-              // "where.plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
-              // "where.vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
-              // "where.vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              // "where.sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              // "where.descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-              // "where.vehicleNumber": null, // 车牌号码
-              // "where.vehicleModel": null, // 车辆型号
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
@@ -894,12 +874,12 @@ export default {
               if (selectedArr[i].vehicleColor) {
                 queryParams['where'].vehicleColor = selectedArr[i].vehicleColor;
               }
-              if (selectedArr[i].sunvisor) {
-                queryParams['where'].sunvisor = selectedArr[i].sunvisor;
-              }
-              if (selectedArr[i].descOfFrontItem) { // 年检标数量
-                queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
-              }
+              // if (selectedArr[i].sunvisor) { // 遮阳板
+              //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
+              // }
+              // if (selectedArr[i].descOfFrontItem) { // 年检标数量
+              //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
+              // }
               if (selectedArr[i].plateNo) { // 车牌
                 queryParams['where'].vehicleNumber = selectedArr[i].plateNo;
               }
