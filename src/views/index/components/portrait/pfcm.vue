@@ -138,7 +138,7 @@
         :close-on-press-escape="false"
         class="dialog_comp"
       >
-        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，人物不在可以恢复</span>
+        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，任务不再可以恢复</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="interruptConfirm(2)">确认</el-button>
@@ -181,6 +181,11 @@ export default {
   },
   created() {
     this.userInfo = this.$store.state.loginUser;
+    if(this.$route.query.selectIndex == 0) {
+      this.selectIndex = 0
+    }else {
+      this.selectIndex = 1
+    }
   },
   mounted() {
     this.selectDataList();
@@ -192,6 +197,7 @@ export default {
       this.pagination.pageNum = 1;
       this.taskForm.taskName = "";
       this.taskForm.reportTime = "";
+      this.$router.push({ name: "portrait_pfcm", query: {selectIndex: val} });
       this.selectDataList();
     },
     handleCurrentChange(page) {

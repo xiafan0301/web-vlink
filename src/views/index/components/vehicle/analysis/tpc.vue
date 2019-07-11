@@ -464,7 +464,7 @@ export default {
       this.setDTime();
       this.searchData.licensePlateNum = null
       this.regulationsList = []
-      this.getSearchData();
+      this.search()
     },
     /**
      * 打开抓拍弹框

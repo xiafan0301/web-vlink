@@ -56,11 +56,11 @@
                 </div>
                 <div class="card-item">
                   <label class="title">中文品牌：</label>
-                  <span>{{vehicleArch.vehicleBrand}}</span>
+                  <span>{{vehicleArch.brand}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车身颜色：</label>
-                  <span>{{vehicleArch.vehicleColor}}</span>
+                  <span>{{vehicleArch.color}}</span>
                 </div>
                 <div class="card-item">
                   <label class="title">车身形式：</label>

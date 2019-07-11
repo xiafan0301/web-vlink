@@ -256,7 +256,7 @@ export default {
     this.getFaceControlSta();
     setTimeout(() => {
       this.getFaceSnapSta();
-    }, 2000)
+    }, 1500)
 
     this.drawChart2();
   },
@@ -385,7 +385,7 @@ export default {
         chart = new G2.Chart({
           container: 'faceNumContainer',
           forceFit: true,
-          padding: [ 40, 0, 20, 60 ],
+          padding: [ 40, 20, 20, 60 ],
           width: G2.DomUtil.getWidth(temp),
           height: G2.DomUtil.getHeight(temp)
         });
@@ -422,6 +422,7 @@ export default {
           lineWidth: 0
         }
       });
+      chart.axis('count1', false)
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
