@@ -296,34 +296,21 @@ export default {
       finalData: []
     }
   },
-  // created () {
-  //   this.$nextTick(() => {
-  //     this.$refs.departTree.setCurrentKey(this.userInfo.organList[0].uid);
-  //   });
-  // },
+  watch: {
+    // keyWord (val) {
+    //   if (val) {
+    //     this.closeShow = false;
+    //   } else {
+    //     this.getDepartList();
+    //   }
+    // }
+  },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
     this.addUnit.proKey = this.userInfo.proKey;
     this.editUnit.proKey = this.userInfo.proKey;
-    
-    // if (localStorage.getItem('organId')) {
-    //   console.log('3333')
-    //   console.log(localStorage.getItem('organId'))
-    //   // this.activeSelect = localStorage.getItem('organId');
-    //   // this.$nextTick(() => {
-    //   //   console.log('asdasd')
-    //   setTimeout(() => {
-    //     this.$nextTick(() => {
 
-    //       this.$refs.departTree.setCurrentKey(100);
-    //       console.log(this.$refs.departTree.getCurrentKey);
-    //     })
-
-    //   }, 1000)
-    //   // });
-    // }
-    // console.log(this.activeSelect)
     this.getDepartList();
     this.getAreaList();
     this.getUsersData();
@@ -480,17 +467,14 @@ export default {
       this.$store.commit('setCurrentOrgan', {
         currentOrganObj: obj
       });
-      // // this.$nextTick(() => {
-      //   this.$refs.departTree.setCurrentKey(obj.uid);
-      // // });
-      // console.log(this.$refs.departTree.getCurrentKey())
-      // localStorage.setItem('organId', obj.uid);
     },
     // 根据部门进行搜索
     searchData () {
+      // if (this.keyWord) {
+      //   }
+      this.closeShow = true;
       this.isSearch = true;
       this.getDepartList();
-      this.closeShow = true;
     },
     // 清空搜索框
     onClear () {

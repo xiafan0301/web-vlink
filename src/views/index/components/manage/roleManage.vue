@@ -123,7 +123,7 @@
         <el-form :model="editRole" :rules="rules" ref="editRole" label-width="15px">
           <el-form-item prop="roleName" label=" " class="role_name">
             <el-input v-model="editRole.roleName" placeholder="请输入角色名字2-20位，中英文皆可，但不可重复" maxlength="20"></el-input>
-            <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p>
+            <!-- <p class="group_error_tip" v-show="isShowOrganError">角色已存在</p> -->
           </el-form-item>
           <el-form-item prop="roleDesc">
             <el-input type="textarea" rows="6" v-model="editRole.roleDesc" placeholder="请简要描述角色，文字限制50字。" maxlength="50"></el-input>
@@ -299,6 +299,15 @@ export default {
       isDeleteLoading: false, // 删除角色加载中
     }
   },
+  watch: {
+    roleName (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        this.getList();
+      }
+    }
+  },
   created () {
     this.userInfo = this.$store.state.loginUser;
     this.addRole.proKey = this.userInfo.proKey;
@@ -336,8 +345,8 @@ export default {
     searchData () {
       if (this.roleName) {
         this.closeShow = true;
-        this.getList();
       }
+      this.getList();
     },
     handleNodeClick () {},
     handleCurrentChange (page) {
@@ -451,22 +460,22 @@ export default {
     // 编辑角色 
     editRoleInfo (form) {
       this.$refs[form].validate(valid => {
-        this.isShowOrganError = false;
+        // this.isShowOrganError = false;
         if (valid) {
-          const params = {
-            proKey: this.userInfo.proKey,
-            roleName: this.editRole.roleName
-          };
-          judgeRoleName(params)
-            .then(res => {
-              if (res.data) {
-                this.isShowOrganError = true;
-              } else {
-                this.isShowOrganError = false;
+          // const params = {
+          //   proKey: this.userInfo.proKey,
+          //   roleName: this.editRole.roleName
+          // };
+          // judgeRoleName(params)
+          //   .then(res => {
+          //     if (res.data) {
+          //       this.isShowOrganError = true;
+          //     } else {
+          //       this.isShowOrganError = false;
                 this.handleEditRoleInfo();
-              }
-            })
-            .catch(() => {})
+            //   }
+            // })
+            // .catch(() => {})
         }
       })
     },
@@ -484,11 +493,11 @@ export default {
             this.isEditLoading = false;
             this.getList();
           } else {
-            this.$message({
-              type: 'error',
-              message: '修改失败',
-              customClass: 'request_tip'
-            });
+            // this.$message({
+            //   type: 'error',
+            //   message: '修改失败',
+            //   customClass: 'request_tip'
+            // });
             this.isEditLoading = false;
           }
         })
@@ -496,7 +505,7 @@ export default {
     },
     // 取消编辑
     cancelEdit (form) {
-      this.isShowOrganError = false;
+      // this.isShowOrganError = false;
       this.$refs[form].resetFields();
       this.editRoleDialog = false;
     },
@@ -626,7 +635,7 @@ export default {
     }
   }
   .dialog_comp {
-    .group_name {
+    .role_name {
       position: relative;
       .group_error_tip {
         position: absolute;

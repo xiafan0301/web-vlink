@@ -121,8 +121,8 @@
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button class="reset_btn" @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button class="select_btn" @click="playerCutSave">保 存</el-button>
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>

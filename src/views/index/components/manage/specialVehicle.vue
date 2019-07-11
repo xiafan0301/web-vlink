@@ -78,14 +78,14 @@
           </el-form-item>
           <el-form-item class="operation_form_btn" style="width: 260px;">
             <el-button class="reset_btn" @click="exportVehicle">导出车辆</el-button>
-            <el-button class="select_btn" @click="searchData">查询</el-button>
+            <el-button class="select_btn" type="primary" @click="searchData">查询</el-button>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
       </div>
       <div class="button_box">
-        <el-button class="select_btn" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
+        <el-button class="select_btn" type="primary" @click="showAddVehicleDialog('carForm', 'add')">新增车辆</el-button>
         <el-button class="reset_btn" @click="importVehicle">导入车辆</el-button>
         <el-button :class="[!isDisabled ? 'reset_btn' : 'disabled_btn']" :disabled="isDisabled" :loading="isDeleteVehicleLoading" @click="showDeleteVehicleDialog">删除车辆</el-button>
       </div>
@@ -290,10 +290,10 @@
               <el-form-item style="margin-left: 20px;">
                 <el-button class="reset_btn" style="width: 140px;" @click="cancelOperation('carForm')">取消</el-button>
                 <template v-if="isAddVehicle">
-                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']" type="primary" :loading="isVehicleLoading" @click="addVehicle('carForm')" style="width: 140px;">保存</el-button>
                 </template>
                 <template v-else>
-                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']"  :loading="isVehicleLoading" @click="updateVehicle('carForm')" style="width: 140px;">确定</el-button>
+                  <el-button :class="[isSubmitData ? 'select_btn' : 'disabled_btn']" type="primary" :loading="isVehicleLoading" @click="updateVehicle('carForm')" style="width: 140px;">确定</el-button>
                 </template>
               </el-form-item>
             </el-form>

@@ -94,9 +94,9 @@ export default {
       if (val) {
         this.closeShow = false;
       } else {
-        if (this.closeShow) {
+        // if (this.closeShow) {
           this.getGroupList();
-        }
+        // }
       }
     }
   },

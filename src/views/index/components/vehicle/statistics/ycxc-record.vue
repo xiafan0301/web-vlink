@@ -29,7 +29,7 @@
       </div>
       <div class="list-box">
         <div class="list-item" v-for="item in dataList" :key="item.id" @click="onOpenDetail(item)">
-          <img :src="item.storagePath" alt="">
+          <img :src="item.subStoragePath" alt="">
           <p class="time"><i></i>{{item.shotTime}}</p>
           <p class="address"><i></i>抓拍设备:{{item.deviceName}}</p>
         </div>
@@ -117,7 +117,7 @@
           <!-- slides -->
           <swiper-slide v-for="(item, index) in dataList" :key="index + 'isgm'">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="display: block; width: 100%; height: .88rem;" :src="item.storagePath" alt="">
+              <img style="display: block; width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
