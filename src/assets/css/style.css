@@ -64,6 +64,10 @@
 .vl_icon_v51 { width: 80px; height: 80px; background-position: -659px -254px; }
 .vl_icons_ptz { width: 24px; height: 24px; background-position: -820px -303px; }
 .vl_icon_rpm { width: 48px; height: 48px; background-position: -980px -251px; }
+.vid_icon_ssz { width: 30px; height: 160px; background-position: -1096px -1280px; }
+.vid_icon_ssz:hover { background-position: -1156px -1280px; }
+.vid_icon_ssz.vid_icon_sss { background-position: -976px -1280px; }
+.vid_icon_ssz.vid_icon_sss:hover { background-position: -1036px -1280px; }
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
@@ -835,6 +839,7 @@
   background-color: #0C70F8;
   color: #ffffff;
 }
+
 
 /******提示信息样式**********/
 .el-message {

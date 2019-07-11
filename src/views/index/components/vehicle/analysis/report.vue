@@ -403,13 +403,13 @@ export default {
         }
         this.searchLoading = false;
       }).catch(error => {
-        console.log('error');
+        console.log('getVehicleInvestigationReport error', error);
         this.searchLoading = false;
       });
     },
 
     setMapMarkerForYjcm () {
-      this.yjcmMap.remove();
+      this.yjcmMap.clearMap();
       if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
         let _this = this;
         let oList = {};
@@ -472,7 +472,7 @@ export default {
       }
     },
     setMapMarkerForClgj () {
-      this.clgjMap.remove();
+      this.clgjMap.clearMap();
       let gjPath = [];
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);

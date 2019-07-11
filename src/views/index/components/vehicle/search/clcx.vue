@@ -93,9 +93,9 @@
           </el-select>
           </el-form-item>
           <el-form-item prop="plateNo">
-            <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">非</el-checkbox></p>
+            <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="请选择">
+              <el-select v-model="select" slot="prepend" placeholder="">
                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
@@ -246,18 +246,11 @@ export default {
     }
   },
   mounted() {
-   this.setDTime()
+    this.setDTime()
     this.getMapGETmonitorList()//查询行政区域
-    //this.getAllDevice()
     this.getGroups()
-    //this.getAllDevice()
-    //let dic= JSON.parse(localStorage.getItem("dic"));
-    //this.ruleForm.vehicleClass=dic.
-     let dic=this.dicFormater(dataList.vehicleType);
-     this.vehicleOptions= [...dic[0].dictList]
-    //console.log(this.ruleForm.vehicleClass);
-    
-    
+    let dic=this.dicFormater(dataList.vehicleType);
+    this.vehicleOptions= [...dic[0].dictList]
   },
   methods: {
     //设置默认时间
@@ -330,7 +323,10 @@ export default {
       this.ruleForm.vehicleGroup = this.ruleForm._vehicleGroup?this.ruleForm._vehicleGroup.join(","):''
       this.ruleForm.dateStart = this.ruleForm.dateStart.indexOf(":")>0?(this.ruleForm.dateStart):(this.ruleForm.dateStart +" 00:00:00")
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
-      let d=this.ruleForm
+      let d = JSON.stringify(this.ruleForm)
+      d = JSON.parse(d)
+      d.plateNo= this.select+this.ruleForm.plateNo 
+      // localStorage.setItem("searchD",JSON.stringify(d))
       getSnapList(d).then(res=>{
         if(res && res.data && res.data.length>0){
           this.isload=false

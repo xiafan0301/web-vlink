@@ -39,12 +39,12 @@
                       <!-- <div class="struc_cdi_line">
                         <span><b>性别</b>{{sturcDetail.sex}}</span>
                       </div> -->
-                      <div class="struc_cdi_line">
-                        <span><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
+                      <div class="struc_cdi_line" v-if="sturcDetail.semblance">
+                        <span ><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
                       </div>
                       <div class="struc_cdi_line">
                         <span v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span v-else><b>特征</b>{{sturcDetail.sex+"，"+sturcDetail.age+ "，"+ sturcDetail.baby+ "，" + sturcDetail.bag+ "，" + sturcDetail.bottomColor +sturcDetail.bottomType+ "，" + sturcDetail.hair+ "，" +sturcDetail.hat+ "，"+sturcDetail.upperColor+sturcDetail.upperTexture+sturcDetail.upperType}}</span>
+                        <span v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>
@@ -81,9 +81,6 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
-import {mapXupuxian} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */

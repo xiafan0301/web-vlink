@@ -9,7 +9,7 @@
 
     <div class="vl_judge_ct">
       <div class="vl_judge_tc_h">
-        <div class="judge_title"><i></i>CONTRAST<span>人像<br/>对比</span><i></i></div>
+        <div class="judge_title"><i></i>CONTRAST<span>人像<br/>比对</span><i></i></div>
         <p>两张人脸比对，或一张人像与证件号比对</p>
       </div>
       <div class="vl_judge_tc_c">
@@ -19,14 +19,14 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload"
-                  :on-success="uploadSucess"
-                  :on-error="handleError">
+            :class="{'vl_jtc_upload': true}"
+            :show-file-list="false"
+            accept="image/*"
+            :action="uploadAcion"
+            list-type="picture-card"
+            :before-upload="beforeAvatarUpload"
+            :on-success="uploadSucess"
+            :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
             <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
@@ -38,14 +38,14 @@
         </div>
         <div class="vl_judge_tc_c_item">
           <el-upload
-                  :class="{'vl_jtc_upload': true}"
-                  :show-file-list="false"
-                  accept="image/*"
-                  :action="uploadAcion"
-                  list-type="picture-card"
-                  :before-upload="beforeAvatarUpload2"
-                  :on-success="uploadSucess2"
-                  :on-error="handleError2">
+            :class="{'vl_jtc_upload': true}"
+            :show-file-list="false"
+            accept="image/*"
+            :action="uploadAcion"
+            list-type="picture-card"
+            :before-upload="beforeAvatarUpload2"
+            :on-success="uploadSucess2"
+            :on-error="handleError2">
             <i v-if="uploading2" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl2" :src="curImageUrl2">
             <i style="width: 140px;height: 114px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;" class="vl_icon vl_icon_retrieval_07" v-else></i>
@@ -73,11 +73,11 @@
     </div>
     <!--历史记录弹窗-->
     <el-dialog
-            :visible.sync="historyPicDialog"
-            class="history-pic-dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            title="最近上传的图片">
+        :visible.sync="historyPicDialog"
+        class="history-pic-dialog"
+        :close-on-click-modal="false"
+        top="4vh"
+        title="最近上传的图片">
       <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
       <vue-scroll class="his-pic-box" v-else-if="historyPicList.length">
         <div class="his-pic-item" :class="{'active': item.checked}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
@@ -367,6 +367,47 @@
   }
 </script>
 <style lang="scss">
+  .history-pic-dialog {
+    .el-dialog {
+      max-width: 12.6rem;
+      width: 100%!important;
+    }
+    .el-dialog__title {
+      font-size: .16rem;
+      color: #333333;
+    }
+    .el-dialog__body {
+      padding: 0 .76rem .3rem;
+    }
+    .his-pic-box {
+      width: 100%;
+      height: 4.6rem!important;
+      .his-pic-item {
+        float: left;
+        width: 1.38rem;
+        height: 1.38rem;
+        border: .02rem solid #FFFFFF;
+        margin-right: .2rem;
+        margin-bottom: .2rem;
+        cursor: pointer;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .active {
+        border-color: #0C70F8;
+      }
+    }
+    .el-dialog__footer {
+      button {
+        width: 1.4rem!important;
+        height: .4rem;
+        line-height: .4rem;
+        padding: 0;
+      }
+    }
+  }
   .breadcrumb_heaer {
     background: #ffffff;
   }
