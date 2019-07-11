@@ -445,8 +445,6 @@ export default {
     this.plateColor = [...dic2[0].dictList]; // 号牌颜色
     this.vehicleType = [...dic[0].dictList]; // 车辆类型
     this.carColor = [...dic3[0].dictList]; // 车辆颜色
-    // console.log(this.plateType[1]);
-
     this.setDTime();
   },
   methods: {
@@ -474,7 +472,6 @@ export default {
     // },
     //查看详情
     handleClick(v) {
-      console.log(v);
       v.datastart = this.data1[0];
       v.dataend = this.data1[1];
       if (this.curImageUrl) {
