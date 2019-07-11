@@ -63,6 +63,7 @@
 .vl_icon_v32 { width: 24px; height: 24px; background-position: -923px -134px; }
 .vl_icon_v51 { width: 80px; height: 80px; background-position: -659px -254px; }
 .vl_icons_ptz { width: 24px; height: 24px; background-position: -820px -303px; }
+.vl_icon_rpm { width: 48px; height: 48px; background-position: -980px -251px; }
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
@@ -309,6 +310,9 @@
 .vl_icon2_006:hover { background-position: -717px -148px; }
 .vl_icon2_007 { background-position: -854px -38px; }
 .vl_icon2_007:hover { background-position: -853px -148px; }
+.vl_icon2_008 { background-position: -1400px -296px; }
+.vl_icon2_008:hover { background-position: -1400px -420px; }
+
 .vl_icon2_011 { background-position: -36px -293px; }
 .vl_icon2_011:hover { background-position: -35px -417px; }
 .vl_icon2_012 { background-position: -172px -293px; }

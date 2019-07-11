@@ -1,650 +1,382 @@
 <template>
   <div class="vehicle_content">
     <div class="vc_rep_bd" is="vehicleBreadcrumb" :oData="[{name: '人员侦察报告'}]"></div>
-    <div class="vc_rep">
-      <div class="vc_rep_t">
-        <div class="vc_rep_sc">
-          <el-input style="width: 200px;" v-model="searchForm.plateNo" placeholder="请输入车牌信息" size="small"></el-input>&nbsp;&nbsp;&nbsp;&nbsp;
-          <el-date-picker style="width: 280px;" size="small" 
-            v-model="searchForm.time"
-            type="daterange"
-            align="left"
-            unlink-panels
-            :editable="false"
-            :clearable="false"
-            range-separator="至"
-            start-placeholder="开始日期"
-            @change="pickerChanged"
-            :picker-options="pickerOptions"
-            end-placeholder="结束日期">
-          </el-date-picker>&nbsp;&nbsp;&nbsp;&nbsp;
-          <el-button size="small" :disabled="!searchForm.plateNo" :loading="searchLoading" type="primary" @click="searchSubmit">查询</el-button>
-        </div>
-        <ul class="vc_rep_mu">
-          <li><span :class="{'vc_rep_mu_sed': showType === 1}" @click="changeShowType(1)">人员档案信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 2}" @click="changeShowType(2)">人员入城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 3}" @click="changeShowType(3)">人员出城信息</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 4}" @click="changeShowType(4)">人员行驶轨迹</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 5}" @click="changeShowType(5)">夜间活动规律</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 6}" @click="changeShowType(6)">频繁出没分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 7}" @click="changeShowType(7)">套牌车分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 8}" @click="changeShowType(8)">同行人员分析</span></li>
-          <li><span :class="{'vc_rep_mu_sed': showType === 9}" @click="changeShowType(9)">区域碰撞</span></li>
+    <div style="height: 50px"></div>
+    <div class="vehicle_content_box">
+      <div class="vehicle_content_out">
+        <ul class="tab-menu">
+          <li
+              v-for="(item,index) in tabList"
+              :key="index"
+              :class="{'is-active': selectIndex === item.value}"
+              @click="selectTab(item.value)"
+          >{{item.label}}</li>
         </ul>
-      </div>
-      <div class="vc_rep_c">
-        <div id="report_content">
-          <div>
-            <!-- 人员档案信息-人员信息  showType 1 -->
-            <div class="vc_rep_cl" id="report_showtype_1">
-              <div>
-                <h2>人员档案信息-人员信息</h2>
-                <div>
-                  <ul class="rep_clxx" v-if="clInfo">
-                    <li><span>车牌号码：</span><p>{{clInfo.plateno}}</p></li>
-                    <li><span>人员所有人：</span><p>{{clInfo.owner}}</p></li>
-                    <li><span>中文品牌：</span><p>{{clInfo.brand}}</p></li>
-                    <li><span>车身颜色：</span><p>{{clInfo.color}}</p></li>
-                    <li><span>车身形式：</span><p>{{clInfo.bodyform}}</p></li>
-                    <li><span>车门数：</span><p>{{clInfo.doornumber}}</p></li>
-                    <li><span>发动机号：</span><p>{{clInfo.engineno}}</p></li>
-                    <li><span>人员类型：</span><p>{{clInfo.platetype}}</p></li>
-                    <li><span>年款：</span><p>{{clInfo.model}}</p></li>
-                    <li><span>座位数：</span><p>{{clInfo.seatnumber}}</p></li>
-                    <li><span>人员状态：</span><p>{{clInfo.status}}</p></li>
-                    <li><span>使用性质：</span><p>{{clInfo.usecharacter}}</p></li>
-                    <li><span>车型：</span><p>{{clInfo.vehicletype}}</p></li>
-                    <li><span>厂商名称：</span><p>{{clInfo.vendor}}</p></li>
-                    <li><span>有效期止：</span><p>{{clInfo.validuntil}}</p></li>
-                  </ul>
-                  <div class="rep_cl_empty" v-else>暂无数据</div>
-                </div>
-              </div>
-            </div>
-            <!-- 人员档案信息-违章信息 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>人员档案信息-违章信息</h2>
-                <div>
-                  <el-table :data="wzList" max-height="300">
-                    <el-table-column label="序号" type="index" width="80"></el-table-column>
-                    <el-table-column label="违法时间" prop="vioDate" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违法地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="城市名称" prop="city" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="罚款金额" prop="fine" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违章归属地" prop="vioAsPlace" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="违法行为" prop="vioName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="分类类型" prop="vioCategory" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="采集机关" prop="vioCollectionOffice" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 人员入城分析-入城记录 showType 2 -->
-            <div class="vc_rep_cl" id="report_showtype_2">
-              <div>
-                <h2>人员入城分析-入城记录</h2>
-                <div>
-                  <el-table :data="rcList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="入城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="入城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 人员出城分析-出城记录 showType 3 -->
-            <div class="vc_rep_cl" id="report_showtype_3">
-              <div>
-                <h2>人员出城分析-出城记录</h2>
-                <div>
-                  <el-table :data="ccList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="出城时间" prop="inOutTime" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="出城卡口" prop="inOutBayonetName" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="抓拍摄像头" prop="inOutDeviceName" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 人员行驶轨迹-人员轨迹 showType 4 -->
-            <div class="vc_rep_cl" id="report_showtype_4">
-              <div>
-                <h2>人员行驶轨迹-人员轨迹</h2>
-                <div style="padding: 0;">
-                  <div class="rep_map">
-                    <div class="rep_map_c" id="map_report_clgj"></div>
-                    <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('clgj', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('clgj', 2)"></i></li>
-                      <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('clgj', 3)"></i>
-                        <span></span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- 夜间活动规律-夜间出没记录 showType 5 -->
-            <div class="vc_rep_cl" id="report_showtype_5">
-              <div>
-                <h2>夜间活动规律-夜间出没记录</h2>
-                <div>
-                  <el-table :data="yjcmList">
-                    <el-table-column label="设备名称" prop="deviceName"></el-table-column>
-                    <el-table-column label="过车时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="时间间隔" prop="nums" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="参考时间" prop="nums" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 夜间活动规律-出没点分布 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>夜间活动规律-出没点分布</h2>
-                <div style="padding: 0;">
-                  <div class="rep_map">
-                    <div class="rep_map_c" id="map_report_yjcm"></div>
-                    <ul class="rep_map_o">
-                      <li><i class="vl_icon vl_icon_map_o01" @click="mapChangeState('yjcm', 1)"></i></li>
-                      <li><i class="vl_icon vl_icon_map_o02" @click="mapChangeState('yjcm', 2)"></i></li>
-                      <li>
-                        <i class="vl_icon vl_icon_map_o03" @click="mapChangeState('yjcm', 3)"></i>
-                        <span></span>
-                      </li>
-                    </ul>
-                    <div class="rep_map_sk">
-                      <h2>全部时刻</h2>
-                      <div>
-                        <div>
-                          <span>出没时间段</span>
-                          <span>出没次数</span>
-                        </div>
-                        <ul>
-                          <li v-for="item in 15" :key="item">
-                            <span>99:99-99:99</span><span>39次</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- 夜间活动规律-夜间出没结论 -->
-            <div class="vc_rep_cl">
-              <div>
-                <h2>夜间活动规律-夜间出没结论</h2>
-                <div>
-                  <ul class="rep_yjcm">
-                    <li>
-                      <span>较常在出没时间段：</span>
-                      <div><span>03:00-05:00</span>|<span>05:00-07:00</span></div>
-                    </li>
-                    <li>
-                      <span>较常出没地点为：</span>
-                      <div><span>摄像头地点1摄像头地点</span>|<span>摄像头地点1摄像头地点2</span></div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!-- 频繁出没分析 showType 6 -->
-            <div class="vc_rep_cl" id="report_showtype_6">
-              <div>
-                <h2>频繁出没分析</h2>
-                <div>
-                  <el-table :data="pfcmList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="摄像头安装地点" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="人员出没次数（次）" prop="nums" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="较多出没时间" prop="timeSegment" show-overflow-tooltip></el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 套牌车分析 showType 7 -->
-            <div class="vc_rep_cl" id="report_showtype_7">
-              <div>
-                <h2>套牌车分析</h2>
-                <div style="padding: 10px;" v-if="tpcList && tpcList.length > 0">
-                  <ul class="rep_tpc_list">
-                    <li v-for="(item, index) in tpcList" :key="'tpc_list_' + index">
-                      <div>
-                        <div class="com_width_to_height" style="margin-bottom: 5px;">
-                          <div>
-                            <div>
-                              <img :src="item.vehicleDto.storagePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
-                            </div>
-                          </div>
-                        </div>
-                        <p class="tpc_list_fst com_ellipsis"><i class="vl_icon vl_icon_sm_sj"></i>&nbsp;&nbsp;{{ item.vehicleDto.shotTime }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.vehicleDto.deviceName }}</p>
-                        <p class="com_ellipsis"><i class="vl_icon vl_icon_sm_sxt"></i>&nbsp;&nbsp;{{ item.fakeReason }}</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-                <div v-else>
-                  <div class="rep_cl_empty">暂无数据</div>
-                </div>
-              </div>
-            </div>
-            <!-- 同行人员分析 showType 8 -->
-            <div class="vc_rep_cl" id="report_showtype_8">
-              <div>
-                <h2>同行人员分析</h2>
-                <div>
-                  <el-table :data="txclList">
-                    <el-table-column label="序号" type="index" width="100"></el-table-column>
-                    <el-table-column label="车牌号码" prop="plateNo" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="号牌颜色" prop="plateColor" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="登记信息" prop="address" show-overflow-tooltip></el-table-column>
-                    <el-table-column label="同行次数" prop="name" show-overflow-tooltip></el-table-column>
-                    <el-table-column
-                      label="操作"
-                      width="120">
-                      <template slot-scope="scope">
-                        <el-button
-                          @click.native.prevent="cktxjlEvent(scope.$index, tableData)"
-                          type="text" size="small">
-                          查看同行记录
-                        </el-button>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </div>
-            <!-- 区域碰撞 showType 9 -->
-            <div class="vc_rep_cl" id="report_showtype_9">
-              <div>
-                <h2>区域碰撞</h2>
-                <div>
-                  请前往
-                   <router-link :to="{name: 'vehicle_search_qy'}">
-                    区域碰撞
-                  </router-link>
-                  进行操作查看
-                </div>
-              </div>
+        <div class="search_box">
+          <el-form :inline="true" :model="taskForm" class="event_form" ref="taskForm">
+            <el-form-item prop="taskName">
+              <el-input
+                  style="width: 240px;"
+                  type="text"
+                  placeholder="请输入任务名称"
+                  v-model="taskForm.taskName"
+              />
+            </el-form-item>
+            <el-form-item prop="reportTime" class="time">
+              <el-date-picker
+                  v-model="taskForm.reportTime"
+                  type="datetimerange"
+                  value-format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  range-separator="-"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :default-time="['00:00:00', '23:59:59']"
+              ></el-date-picker>
+            </el-form-item>
+            <el-form-item>
+              <el-button class="select_btn" @click="selectDataList">查询</el-button>
+              <el-button class="reset_btn" @click="resetForm('taskForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+          <div class="divide"></div>
+        </div>
+        <div class="content-box">
+          <div class="button_box">
+            <div class="add_event_btn" @click="skipAddTaskPage">
+              <span>+</span>
+              <span>新增分析任务</span>
             </div>
           </div>
+          <div class="table_box" v-loading="isLoading">
+            <el-table :data="list">
+              <el-table-column label="序号" type="index" width="100"></el-table-column>
+              <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
+              <el-table-column label="相似度" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="频次阈值" prop="taskName" show-overflow-tooltip></el-table-column>
+              <el-table-column label="频次阈值" v-if="selectIndex === 0" show-overflow-tooltip>
+                <template slot-scope="scope">
+                  {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" fixed="right">
+                <template slot-scope="scope">
+                  <span
+                      class="operation_btn"
+                      @click="skipDetailPage(scope.row)"
+                      v-if="selectIndex === 1"
+                  >查看</span>
+                  <span
+                      class="operation_btn"
+                      @click="interrupt(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus === 1"
+                  >中断任务</span>
+                  <span
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus === 4"
+                  >恢复任务</span>
+                  <span
+                      class="operation_btn"
+                      @click="recoveryOrRestart(scope.row)"
+                      v-if="selectIndex === 0 && scope.row.taskStatus === 3"
+                  >重启任务</span>
+                  <span
+                      class="operation_btn"
+                      @click="cancel(scope.row)"
+                      v-if="selectIndex === 0 && (scope.row.taskStatus === 3 || scope.row.taskStatus === 4)"
+                  >删除任务</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </div>
+        <template v-if="pagination.total > 0">
+          <el-pagination
+              class="cum_pagination"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pagination.pageNum"
+              :page-sizes="[100, 200, 300, 400]"
+              :page-size="pagination.pageSize"
+              layout="total, prev, pager, next, jumper"
+              :total="pagination.total"
+          ></el-pagination>
+        </template>
+
+        <!--中断任务弹出框-->
+        <el-dialog
+            title="中断任务确认?"
+            :visible.sync="interruptDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+        >
+          <span style="color: #999999;">任务中断，任务的数据处理进程将中止，可以在列表中恢复任务的数据处理</span>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="interruptDialog = false">取消</el-button>
+            <el-button class="operation_btn function_btn" @click="interruptConfirm(1)">确认</el-button>
+          </div>
+        </el-dialog>
+
+        <!--删除任务弹出框-->
+        <el-dialog
+            title="删除任务确认"
+            :visible.sync="deleteDialog"
+            width="482px"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            class="dialog_comp"
+        >
+          <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，人物不在可以恢复</span>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="deleteDialog = false">取消</el-button>
+            <el-button class="operation_btn function_btn" @click="interruptConfirm(2)">确认</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
   </div>
 </template>
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
-import {formatDate} from '@/utils/util.js';
-import {mapXupuxian} from '@/config/config.js';
-import {getVehicleInvestigationReport, JfoGETSurveillanceObject} from '@/views/index/api/api.judge.js';
+import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
+import { formatDate} from '@/utils/util.js';
+// import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
     return {
-      searchForm: {
-        plateNo: '湘AN8888',
-        time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()]
-      },
-      searchLoading: false,
-
-      clInfo: null,
-      wzList: [], // 违章信息
-      rcList: [], // 入城记录
-      ccList: [], // 出城记录
-      yjcmList: [], // 夜间出没记录
-      pfcmList: [], // 频繁出没分析
-      txclList: [], // 同行车分析
-
-      tpcList: [], // 套牌车
-
-      clgjList: [], // 人员轨迹
-
-      showType: 1,
-
-      zoom: 11,
-      yjcmMap: null,
-      clgjMap: null,
-
-      pickerOptions: {
-        disabledDate (d) {
-          return d > new Date();
+      tabList: [
+        {
+          label: "已完成任务",
+          value: 1
+        },
+        {
+          label: "未完成任务",
+          value: 0
         }
-      }
+      ],
+      selectIndex: 1,
+      pagination: { total: 0, pageSize: 10, pageNum: 1 },
+      taskForm: {
+        reportTime: "", // 日期
+        taskName: "" // 任务名称
+      },
+      list: [], //已完成列表
+      userInfo: {}, // 存储的用户信息
+      deleteDialog: false,
+      interruptDialog: false,    //中断任务
+      isLoading: false,
+      taskObj: '',     //单个列表任务
     }
+  },
+  created() {
+    this.userInfo = this.$store.state.loginUser;
   },
   mounted () {
-    this.initClgjMap();
-    this.initYjcmMap();
+    this.selectDataList();
   },
   methods: {
-    // 湘AN8888 2019-07-01 00:00:00 2019-07-04 00:00:00
-    searchSubmit () {
-      this.searchLoading = true;
-      getVehicleInvestigationReport({
-        plateNo: this.searchForm.plateNo,
-        startTime: formatDate(this.searchForm.time[0]),
-        endTime: formatDate(this.searchForm.time[1])
-      }).then(res => {
-        if (res && res.data && res.data.vehicleArchivesDto) {
-          let data = res.data;
-          this.clInfo = data.vehicleArchivesDto;
-          this.wzList = data.violationDtoList;
-          this.rcList = data.inCityDtoList;
-          this.ccList = data.outCityDtoList;
-          this.yjcmList = data.nightHauntConclusionList;
-          this.pfcmList = data.oftenCarAnalysisDtoList;
-          this.tpcList = data.fakePlateResultDtoList;
-          this.txclList =  data.tailBehindListForReportList; // 同行车
-          this.clgjList = data.struVehicleDtoList;
-          this.setMapMarkerForClgj(); // 人员轨迹
+    //tab切换
+    selectTab(val) {
+      this.selectIndex = val;
+      this.pagination.pageNum = 1;
+      this.taskForm.taskName = "";
+      this.taskForm.reportTime = "";
+      this.selectDataList();
+    },
+    handleCurrentChange(page) {
+      this.pagination.pageNum = page;
+      this.selectDataList();
+    },
+    // 根据搜索条件查询
+    selectDataList() {
+      this.list = [];
+      this.pagination.total = 0;
+      let params = {
+        pageNum: this.pagination.pageNum,
+        pageSize: this.pagination.pageSize,
+        orderBy: 'create_time',
+        order: 'desc',
+        'where.taskType': 1,    //任务类型 1：频繁出没人像分析 2：人员同行分析 3：人员跟踪尾随分析
+        'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
+      }
+      this.taskForm.taskName && (params['where.taskName'] = this.taskForm.taskName);
+      if(this.taskForm.reportTime && this.taskForm.reportTime.length > 0) {
+        params["where.startTime"] = formatDate(this.taskForm.reportTime[0]);
+        params["where.endTime"] = formatDate(this.taskForm.reportTime[1]);
+      }
+      console.log("---------params-----------",JSON.stringify(params))
+      this.isLoading = true;
+      getTaskInfosPage(params).then(res => {
+        console.log("--------getTaskInfosPage--------",res)
+        if(res.data) {
+          this.list = res.data.list;
+          this.pagination.total = res.data.total;
         }
-        this.searchLoading = false;
+        this.$nextTick(() => {
+          this.isLoading = false;
+        })
       }).catch(error => {
-        console.log('error');
-        this.searchLoading = false;
-      });
+        console.log(error);
+        this.isLoading = false;
+      })
     },
-
-    setMapMarkerForClgj () {
-      let gjPath = [];
-      for (let i = 0; i < this.clgjList.length; i++) {
-        // console.log('doMark', obj);
-        let obj = this.clgjList[i];
-        let marker = new window.AMap.Marker({ // 添加自定义点标记
-          map: this.clgjMap,
-          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-          draggable: false, // 是否可拖动
-          // extData: obj,
-          // 自定义点标记覆盖物内容
-          content: '<div class="map_icons vl_icon vl_icon_sxt"></div>'
-        });
-        gjPath.push([obj.longitude, obj.latitude]);
-      }
-      // 绘制轨迹
-      var polyline = new window.AMap.Polyline({
-          map: this.clgjMap,
-          path: gjPath,
-          strokeColor: "#00A",  //线颜色
-          strokeOpacity: 1,     //线透明度
-          strokeWeight: 3,      //线宽
-          strokeStyle: "solid"  //线样式
-      });
-      this.clgjMap.setFitView();
-
+    // 重置查询条件
+    resetForm(form) {
+      this.$refs[form].resetFields();
+      this.selectDataList();
     },
-
-    changeShowType (val) {
-      if (val != this.showType) {
-        this.showType = val;
-        let $tar = $('#report_showtype_' + val);
-        if ($tar && $tar.length > 0) {
-          let osTop = $tar.offset().top -250;
-          let sTop = $('#report_content').scrollTop();
-          // $('#report_content').scrollTop(osTop + sTop);
-          $('#report_content').animate({scrollTop: (osTop + sTop) + 'px'}, 500);
+    skipAddTaskPage() {
+      // 跳到新增任务页面
+      this.$router.push({ name: "portrait_xjpfcm" });
+    },
+    // 跳至详情页面
+    skipDetailPage(obj) {
+      this.$router.push({ name: "portrait_nr" , query: {uid: obj.uid}});
+    },
+    //中断
+    interrupt(obj) {
+      this.taskObj = obj;
+      this.interruptDialog = true;
+    },
+    //删除
+    cancel(obj) {
+      this.taskObj = obj;
+      this.deleteDialog = true;
+    },
+    //确认中断或者删除
+    interruptConfirm(val) {
+      let params = {};
+      if(val === 1) {    //中断
+        this.interruptDialog = false;
+        params = {
+          taskStatus: 4,
+          uid: this.taskObj.uid,
+        }
+      }else if(val === 2) {     //删除
+        this.deleteDialog = false;
+        params = {
+          delFlag: true,
+          uid: this.taskObj.uid,
         }
       }
+      putAnalysisTask(params).then(res => {
+        console.log(res);
+        if(res) {
+          this.selectDataList();
+        }
+      }).catch(() => {})
     },
-    initClgjMap () {
-      // 初始化地图
-      let map = new window.AMap.Map('map_report_clgj', {
-        zoom: this.zoom,
-        center: mapXupuxian.center,
-        zooms: [2, 18]
-      });
-      map.setMapStyle('amap://styles/light');
-      // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
-      // console.log('_config', _config)
-      this.clgjMap = map;
+    //恢复任务,重启任务
+    recoveryOrRestart(obj) {
+      putTaskInfosResume(obj.uid).then(res => {
+        console.log(res)
+        if(res) {
+          this.selectDataList();
+        }
+      }).catch(() => {})
     },
-    initYjcmMap () {
-      // 初始化地图
-      let map = new window.AMap.Map('map_report_yjcm', {
-        zoom: 11,
-        center: mapXupuxian.center,
-        zooms: [2, 18]
-      });
-      map.setMapStyle('amap://styles/light');
-      // map.setMapStyle('amap://styles/a00b8c5653a6454dd8a6ec3b604ec50c');
-      // console.log('_config', _config)
-      this.yjcmMap = map;
-    },
-    cktxjlEvent () {
-    },
-    mapChangeState (type, state) {
-      let _map = this.yjcmMap;
-      if (type === 'clgj') { _map = this.clgjMap; }
-      if (state === 1) {
-        _map.setZoomAndCenter(this.zoom, mapXupuxian.center);
-      } else if (state === 2) {
-        _map.setZoom(_map.getZoom() + 1);
-      } else if (state === 3) {
-        _map.setZoom(_map.getZoom() - 1);
-      }
-    },
-    pickerChanged () {
-      if ((this.searchForm.time[1].getTime() - this.searchForm.time[0].getTime()) > 2 * 24 * 60 * 60 * 1000) {
-        this.searchForm.time[1] = new Date(this.searchForm.time[0].getTime() + 2 * 24 * 60 * 60 * 1000);
-        this.$message('最多不能超过3天.');
-      }
-    }
   }
 }
 </script>
 <style lang="scss" scoped>
-.vc_rep {
-  position: relative;
-  height: 100%;
-  padding-top: 50px;
-  > .vc_rep_t {
-    position: absolute; top: 50px; left: 0;
-    width: 100%;
-    background-color: #fff;
-  }
-  > .vc_rep_c {
-    padding-top: 99px;
+  .vehicle_content{
     height: 100%;
-    > div {
-      height: 100%;
-      padding: 10px 0 10px 0;
+    .vehicle_content_box{
+      height: calc(100% - 50px);
       overflow: auto;
-      overflow-x: hidden;
-      overflow-y: auto;
-      > div {
-      }
-    }
-  }
-}
-.vc_rep_sc {
-  padding: 20px 0 5px 20px;
-}
-.vc_rep_mu {
-  overflow: hidden;
-  border-bottom: 1px solid #eee;
-  > li {
-    float: left;
-    padding: 0 20px;
-    > span {
-      color: #333;
-      display: inline-block;
-      height: 40px; line-height: 40px;
-      padding: 0 2px;
-      border-bottom: 2px solid #fff;
-      cursor: pointer;
-      &.vc_rep_mu_sed {
-        cursor: default;
-        color: #0C70F8;
-        border-bottom-color: #0C70F8;
-      }
-    }
-  }
-}
-.vc_rep_cl {
-  padding: 10px 20px;
-  > div {
-    background:rgba(255,255,255,1);
-    box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
-    border-radius:4px;
-    > h2 {
-      height: 48px; line-height: 48px;
-      color: #333; font-size: 16px;
-      padding-left: 20px;
-      border-bottom: 1px solid #eee;
-    }
-    > div {
-      padding: 20px 20px;
-    }
-  }
-
-  .rep_cl_empty { text-align: center; color: #999; }
-
-  .rep_clxx {
-    overflow: hidden;
-    > li {
-      width: 25%;
-      float: left;
-      padding: 8px 0;
-      > span {
-        float: left;
-        width: 120px;
-        padding-right: 15px;
-        color: #666;
-        text-align: right;
-      }
-      > div {
-        margin-left: 120px;
-        color: #333;
-      }
-    }
-  }
-  .rep_yjcm {
-    > li {
-      overflow: hidden;
-      padding: 5px 0;
-      > span {
-        float: left;
-        width: 150px;
-        padding-right: 5px;
-        color: #666;
-        text-align: right;
-      }
-      > div {
-        margin-left: 150px;
-        color: #333;
-        > span {
-          display: inline-block;
-          padding: 0 10px;
-        }
-      }
-    }
-  }
-  .rep_tpc_list {
-    overflow: hidden;
-    > li {
-      float: left;
-      width: 20%;
-      padding: 10px;
-      > div {
-        border-radius:4px;
-        border:1px solid rgba(211,211,211,1);
-        padding-bottom: 10px;
-        > p {
-          padding-left: 10px;
-          height: 24px; line-height: 24px;
+      padding: 20px;
+      .vehicle_content_out{
+        background: #ffffff;
+        min-height: 100%;
+        box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
+        .tab-menu {
+          background-color: #fff;
+          padding-top: 8px;
           overflow: hidden;
-          color: #999;
-          &.tpc_list_fst { color: #333; }
-          > i { position: relative; top: 2px; }
-        }
-      }
-    }
-  }
-  .rep_map {
-    position: relative;
-    width: 100%; height: 500px;
-    > .rep_map_c {
-      width: 100%; height: 100%;
-    }
-    > .rep_map_o {
-      position: absolute; bottom: 10px; right: 10px;
-      > li {
-        padding: 10px;
-        background-color: #fff;
-        box-shadow: 0px 5px 5px 0px rgba(131,131,131,0.28);
-        &:nth-child(1) { margin-bottom: 10px; }
-        &:nth-child(2) { border-bottom: 0; }
-        &:nth-child(3) { 
-          border-top: 0;
-          position: relative;
-          > span {
-            display: block;
-            position: absolute; top: 0; left: 10px;
-            width: 34px; height: 1px;
-            background-color: #ddd;
-            overflow: hidden;
+          border-bottom: 1px solid #f2f2f2;
+          li {
+            float: left;
+            width: auto;
+            font-size: 16px;
+            margin: 0 20px;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+            color: #333;
+            cursor: pointer;
+          }
+          .is-active {
+            color: #0c70f8;
+            border-bottom: 1px solid #0c70f8;
           }
         }
-      }
-    }
-    > .rep_map_sk {
-      position: absolute; top: 10px; left: 10px;
-      width: 260px;
-      background-color: #fff;
-      box-shadow:4px 0px 15px 0px rgba(131,131,131,0.23),0px 0px 13px 0px rgba(255,255,255,0.55);
-      > h2 {
-        height: 50px; line-height: 50px;
-        padding-left: 20px;
-        border-bottom: 1px solid #ddd;
-        font-size: 16px;
-      }
-      > div {
-        padding: 0;
-        > div {
-          padding: 10px 20px 0 20px;
-          > span {
-            display: inline-block;
-            width: 55%;
-            height: 40px; line-height: 40px;
-            background:rgba(246,246,246,1);
-            border-radius:4px 4px 0px 0px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            &:last-child {
-              width: 45%;
+        .search_box {
+          width: 100%;
+          padding: 20px;
+          .event_form {
+            width: 100%;
+            .select_btn,
+            .reset_btn {
+              width: 80px;
+            }
+            .select_btn {
+              background-color: #0c70f8;
+              color: #ffffff;
+            }
+            .reset_btn {
+              background-color: #ffffff;
+              color: #666666;
+              border-color: #dddddd;
             }
           }
+          .divide {
+            border: 1px dashed #fafafa;
+          }
         }
-        > ul {
-          max-height: 300px;
-          overflow: auto;
-          padding: 0 20px 10px 20px;
-          > li {
-            border-bottom: 1px solid #ddd;
-            > span {
-              display: inline-block;
-              width: 55%;
-              height: 40px; line-height: 40px;
-              color: #333;
-              padding-left: 20px;
-              &:last-child {
-                width: 45%;
+        .content-box {
+          padding: 0 20px;
+          .button_box {
+            display: flex;
+            justify-content: space-between;
+            .add_event_btn {
+              height: 40px;
+              background-color: #0c70f8;
+              color: #ffffff;
+              font-size: 14px;
+              line-height: 40px;
+              text-align: center;
+              border-radius: 3px;
+              padding: 0 16px;
+              cursor: pointer;
+              span:nth-child(1) {
+                font-size: 16px;
+              }
+              span:nth-child(2) {
+                margin-left: 5px;
               }
             }
-            &:last-child {
-              border-bottom: 0;
+          }
+          .table_box {
+            margin-top: 10px;
+            .operation_btn {
+              display: inline-block;
+              padding: 0 10px;
+              border-right: 1px solid #f2f2f2;
+              &:first-child {
+                padding: 0 10px 0 0;
+              }
+              &:last-child {
+                border-right: none;
+              }
             }
           }
         }
       }
     }
   }
-}
+
 </style>

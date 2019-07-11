@@ -105,6 +105,11 @@ export default {
       component: () => import('@/views/index/components/portrait/fxjg.vue')
     },
     {
+      path: 'reportnr',    //人员侦察报告内容
+      name: 'portrait_nr',
+      component: () => import('@/views/index/components/portrait/reportnr.vue')
+    },
+    {
       path: 'report',
       name: 'portrait_report',
       component: () => import('@/views/index/components/portrait/report.vue')
