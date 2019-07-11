@@ -175,8 +175,8 @@
           <vue-scroll>
             <div class="title">
               <p>该车行驶时经过{{nDeviceList.length}}个设备</p>
-              <div>
-                <el-button type="primary">导出</el-button>
+              <div class="export">
+                <el-button type="primary" @click="exportExcel()" :loading="exportLoading">导出</el-button>
               </div>
             </div>
             <div class="table_box">
@@ -262,8 +262,8 @@ import {
   JtcPUTAppendixsOrder
 } from "../../../api/api.judge.js";
 import { MapGETmonitorList } from "../../../api/api.map.js";
-import { getDrivingAnalysis } from "../../../api/api.analysis.js";
-import { random14, objDeepCopy, formatDate } from "../../../../../utils/util.js";
+import { getDrivingAnalysis, postExport } from "../../../api/api.analysis.js";
+import { random14, objDeepCopy, formatDate, autoDownloadUrl } from "../../../../../utils/util.js";
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
   components: {vlBreadcrumb},
@@ -313,275 +313,61 @@ export default {
           label: "全部时刻",
           value: 0,
           checked: true,
-          key: "allRecords"
+          key: "allRecords",
+          timeQuantums: null,
         },
         {
           label: "00:00 - 04:00",
           value: 1,
           checked: false,
-          key: "period0_4Records"
+          key: "period0_4Records",
+          timeQuantums: '00:00-04:00',
         },
         {
           label: "04:00 - 08:00",
           value: 2,
           checked: false,
-          key: "period4_8Records"
+          key: "period4_8Records",
+          timeQuantums: '04:00-08:00',
         },
         {
           label: "08:00 - 12:00",
           value: 3,
           checked: false,
-          key: "period8_12Records"
+          key: "period8_12Records",
+          timeQuantums: '08:00-12:00',
         },
         {
           label: "12:00 - 16:00",
           value: 4,
           checked: false,
-          key: "period12_16Records"
+          key: "period12_16Records",
+          timeQuantums: '12:00-16:00',
         },
         {
           label: "16:00 - 20:00",
           value: 5,
           checked: false,
-          key: "period16_20Records"
+          key: "period16_20Records",
+          timeQuantums: '16:00-20:00',
         },
         {
           label: "20:00 - 24:00",
           value: 6,
           checked: false,
-          key: "period20_24Records"
+          key: "period20_24Records",
+          timeQuantums: '20:00-24:00',
         }
       ],
       selectTimeList: [], //选中的时间段
       deviceList: [],
       nDeviceList: [], //设备列表
       list: {
-        allRecords: [
-          {
-            deviceName: "设备1",
-            shotTime: "2019-6-20 00:08",
-            timeSlot: "1小时10分钟",
-            refTime: "1小时",
-            deviceId: 1,
-            longitude: 110.594972,
-            latitude: 27.908316
-          },
-          {
-            deviceName: "设备2",
-            shotTime: "2019-6-20 01:18",
-            timeSlot: "1小时10分钟",
-            refTime: "1小时",
-            deviceId: 2,
-            longitude: 110.595908,
-            latitude: 27.909847
-          },
-          {
-            deviceName: "设备3",
-            shotTime: "2019-6-20 01:48",
-            timeSlot: "30分钟",
-            refTime: "30分钟",
-            deviceId: 3,
-            longitude: 110.585509,
-            latitude: 27.911629
-          },
-          {
-            deviceName: "设备1",
-            shotTime: "2019-6-20 04:10",
-            timeSlot: "2小时10分钟",
-            refTime: "2小时",
-            deviceId: 1,
-            longitude: 110.594972,
-            latitude: 27.908316
-          },
-          {
-            deviceName: "设备4",
-            shotTime: "2019-6-20 05:10",
-            timeSlot: "1小时",
-            refTime: "1小时",
-            deviceId: 4,
-            longitude: 110.586619,
-            latitude: 27.917929
-          },
-          {
-            deviceName: "设备5",
-            shotTime: "2019-6-20 07:48",
-            timeSlot: "2小时38分钟",
-            refTime: "2.5小时",
-            deviceId: 5,
-            longitude: 110.585404,
-            latitude: 27.920138
-          },
-          {
-            deviceName: "设备3",
-            shotTime: "2019-6-20 08:00",
-            timeSlot: "12分钟",
-            refTime: "12分钟",
-            deviceId: 3,
-            longitude: 110.585509,
-            latitude: 27.911629
-          },
-          {
-            deviceName: "设备5",
-            shotTime: "2019-6-20 10:00",
-            timeSlot: "2小时",
-            refTime: "2小时",
-            deviceId: 5,
-            longitude: 110.585404,
-            latitude: 27.920138
-          },
-          {
-            deviceName: "设备6",
-            shotTime: "2019-6-20 11:00",
-            timeSlot: "1小时",
-            refTime: "1小时",
-            deviceId: 6,
-            longitude: 110.587003,
-            latitude: 27.916535
-          },
-          {
-            deviceName: "设备7",
-            shotTime: "2019-6-20 12:30",
-            timeSlot: "1小时30分钟",
-            refTime: "1.5小时",
-            deviceId: 7,
-            longitude: 110.583937,
-            latitude: 27.921475
-          },
-          {
-            deviceName: "设备8",
-            shotTime: "2019-6-20 13:00",
-            timeSlot: "0.5小时",
-            refTime: "0.5小时",
-            deviceId: 8,
-            longitude: 110.583893,
-            latitude: 27.924006
-          },
-          {
-            deviceName: "设备2",
-            shotTime: "2019-6-20 15:48",
-            timeSlot: "2小时48分钟",
-            refTime: "3小时",
-            deviceId: 2,
-            longitude: 110.595908,
-            latitude: 27.909847
-          }
-        ],
-        period0_4Records: [
-          {
-            deviceName: "设备1",
-            shotTime: "2019-6-20 00:08",
-            timeSlot: "1小时10分钟",
-            refTime: "1小时",
-            deviceId: 1,
-            longitude: 110.594972,
-            latitude: 27.908316
-          },
-          {
-            deviceName: "设备2",
-            shotTime: "2019-6-20 01:18",
-            timeSlot: "1小时10分钟",
-            refTime: "1小时",
-            deviceId: 2,
-            longitude: 110.595908,
-            latitude: 27.909847
-          },
-          {
-            deviceName: "设备3",
-            shotTime: "2019-6-20 01:48",
-            timeSlot: "30分钟",
-            refTime: "30分钟",
-            deviceId: 3,
-            longitude: 110.585509,
-            latitude: 27.911629
-          }
-        ],
-        period4_8Records: [
-          {
-            deviceName: "设备1",
-            shotTime: "2019-6-20 04:10",
-            timeSlot: "2小时10分钟",
-            refTime: "2小时",
-            deviceId: 1,
-            longitude: 110.587003,
-            latitude: 27.916535
-          },
-          {
-            deviceName: "设备4",
-            shotTime: "2019-6-20 05:10",
-            timeSlot: "1小时",
-            refTime: "1小时",
-            deviceId: 4,
-            longitude: 110.586619,
-            latitude: 27.917929
-          },
-          {
-            deviceName: "设备5",
-            shotTime: "2019-6-20 07:48",
-            timeSlot: "2小时38分钟",
-            refTime: "2.5小时",
-            deviceId: 5,
-            longitude: 110.585404,
-            latitude: 27.920138
-          }
-        ],
-        period8_12Records: [
-          {
-            deviceName: "设备3",
-            shotTime: "2019-6-20 08:00",
-            timeSlot: "12分钟",
-            refTime: "12分钟",
-            deviceId: 3,
-            longitude: 110.585509,
-            latitude: 27.911629
-          },
-          {
-            deviceName: "设备5",
-            shotTime: "2019-6-20 10:00",
-            timeSlot: "2小时",
-            refTime: "2小时",
-            deviceId: 5,
-            longitude: 110.585404,
-            latitude: 27.920138
-          },
-          {
-            deviceName: "设备6",
-            shotTime: "2019-6-20 11:00",
-            timeSlot: "1小时",
-            refTime: "1小时",
-            deviceId: 6,
-            longitude: 110.587003,
-            latitude: 27.916535
-          }
-        ],
-        period12_16Records: [
-          {
-            deviceName: "设备7",
-            shotTime: "2019-6-20 12:30",
-            timeSlot: "1小时30分钟",
-            refTime: "1.5小时",
-            deviceId: 7,
-            longitude: 110.583937,
-            latitude: 27.921475
-          },
-          {
-            deviceName: "设备8",
-            shotTime: "2019-6-20 13:00",
-            timeSlot: "0.5小时",
-            refTime: "0.5小时",
-            deviceId: 8,
-            longitude: 110.583893,
-            latitude: 27.924006
-          },
-          {
-            deviceName: "设备2",
-            shotTime: "2019-6-20 15:48",
-            timeSlot: "2小时48分钟",
-            refTime: "3小时",
-            deviceId: 2,
-            longitude: 110.595908,
-            latitude: 27.909847
-          }
-        ],
+        allRecords: [],
+        period0_4Records: [],
+        period4_8Records: [],
+        period8_12Records: [],
+        period12_16Records: [],
         period16_20Records: [],
         period20_24Records: []
       },
@@ -614,7 +400,7 @@ export default {
         children: "children",
         label: "label"
       },
-      params: {} //参数
+      exportLoading: false,
     };
   },
   computed: {
@@ -747,8 +533,8 @@ export default {
         (new Date(curDate - curS).getMonth() + 1) +
         "-" +
         new Date(curDate - curS).getDate();
-      let _e =
-        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+      /* let _e =
+        date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate(); */
       this.searchData.time = [_s, _s];
     },
     //日期选择
@@ -812,8 +598,21 @@ export default {
     //置空数据
     emptyData(val) {
       if(val === 1) {
-        this.list = [];
-        this.doubleDeviceList = [];
+        this.list = {};
+        this.doubleDeviceList = {};
+        this.selectTimeList = [{
+          label: "全部时刻",
+          value: 0,
+          checked: true,
+          key: "allRecords",
+          timeQuantums: null,
+        }];
+        this.$set(this.timeSlot[0], "checked", true);
+        for (let i = 0; i < this.timeSlot.length; i++) {
+          if (this.timeSlot[i].value !== 0) {
+            this.$set(this.timeSlot[i], "checked", false);
+          }
+        }
       }
       this.deviceList = [];
       this.nDeviceList = [];
@@ -870,6 +669,62 @@ export default {
         })
         .catch(error => {
           this.searching = false;
+          console.log(error);
+        });
+    },
+    //导出
+    exportExcel() {
+      let params = {}, drivingDiscipline = {};
+      if (this.searchData.time && this.searchData.time.length > 0) {
+        drivingDiscipline["startDate"] = formatDate(this.searchData.time[0],'yyyy-MM-dd') + " 00:00:00";
+        drivingDiscipline["endDate"] = formatDate(this.searchData.time[1],'yyyy-MM-dd') + " 23:59:59";
+      }
+      if (!this.checkAllTree) {
+        if (this.selectCameraArr && this.selectCameraArr.length > 0) {
+          let cameraIds = this.selectCameraArr.map(res => res.id);
+          drivingDiscipline["cameraIds"] = cameraIds.join("-");
+        }
+        if (this.selectBayonetArr && this.selectBayonetArr.length > 0) {
+          let bayonentIds = this.selectBayonetArr.map(res => res.id);
+          drivingDiscipline["bayonentIds"] = bayonentIds.join("-");
+        }
+      }
+      if(this.selectTimeList && this.selectTimeList.length > 0) {
+        let timeQuantums = this.selectTimeList.map(res => res.timeQuantums);
+        drivingDiscipline["timeQuantums"] = timeQuantums.join(",");
+      }
+      if (this.selectIndex === 0) {
+        if (this.imgData) {
+          drivingDiscipline["vehicleNumberPic"] = this.imgData.path;
+        }
+      } else if (this.selectIndex === 1) {
+        if (this.searchData.licensePlateNum) {
+          drivingDiscipline["vehicleNumber"] = this.searchData.licensePlateNum;
+        }
+        this.searchData.licensePlateColor &&
+          (drivingDiscipline["plateColor"] = this.searchData.licensePlateColor);
+      }
+      params = {
+        drivingDisciplineAnalysisQueryDto: drivingDiscipline,
+        viewType: 5,        //导出类型：1夜间行车；2车辆查询-抓拍次数；3连续违章-次数；4连续违章-详情；5-行车规律
+      }
+      this.exportLoading = true;
+      console.log(
+        "======export=====",
+        JSON.stringify(params)
+      );
+      postExport(params)
+        .then(res => {
+          console.log("-------postExport------", res);
+          if(res && res.data) {
+            autoDownloadUrl(res.data.fileUrl);
+          }
+          this.$nextTick(() => {
+            this.exportLoading = false;
+          });
+        })
+        .catch(error => {
+          this.exportLoading = false;
           console.log(error);
         });
     },
@@ -944,9 +799,17 @@ export default {
           label: "全部时刻",
           value: 0,
           checked: true,
-          key: "allRecords"
+          key: "allRecords",
+          timeQuantums: null,
         }
       ];
+      //全部时刻
+        this.$set(this.timeSlot[0], "checked", true);
+        for (let i = 0; i < this.timeSlot.length; i++) {
+          if (this.timeSlot[i].value !== 0) {
+            this.$set(this.timeSlot[i], "checked", false);
+          }
+        }
       this.getList();
     },
     //获取数据
@@ -954,37 +817,39 @@ export default {
       this.emptyData(2);
       let result = [];
       this.list = objDeepCopy(this.doubleDeviceList);
-      for (let i = 0; i < this.selectTimeList.length; i++) {
-        let item = this.selectTimeList[i];
-        let temp = result[result.length - 1];
-        if (!i) {
-          result.push([item]);
-          if (this.list[item.key] && this.list[item.key].length > 0) {
-            this.$set(this.list[item.key][0], "timeSlot", "——");
-            this.$set(this.list[item.key][0], "refTime", "——");
+      if(this.list.allRecords) {
+        for (let i = 0; i < this.selectTimeList.length; i++) {
+          let item = this.selectTimeList[i];
+          let temp = result[result.length - 1];
+          if (!i) {
+            result.push([item]);
+            if (this.list[item.key] && this.list[item.key].length > 0) {
+              this.$set(this.list[item.key][0], "timeSlot", "——");
+              this.$set(this.list[item.key][0], "refTime", "——");
+            }
+          } else if (
+            item.value % 1 === 0 &&
+            item.value - temp[temp.length - 1].value == 1
+          ) {
+            temp.push(item);
+          } else {
+            result.push([item]);
+            if (this.list[item.key] && this.list[item.key].length > 0) {
+              this.$set(this.list[item.key][0], "timeSlot", "——");
+              this.$set(this.list[item.key][0], "refTime", "——");
+            }
           }
-        } else if (
-          item.value % 1 === 0 &&
-          item.value - temp[temp.length - 1].value == 1
-        ) {
-          temp.push(item);
-        } else {
-          result.push([item]);
-          if (this.list[item.key] && this.list[item.key].length > 0) {
-            this.$set(this.list[item.key][0], "timeSlot", "——");
-            this.$set(this.list[item.key][0], "refTime", "——");
-          }
+          this.deviceList.push(...this.list[item.key]);
         }
-        this.deviceList.push(...this.list[item.key]);
-      }
-      console.log(
-        "=====deviceList=====",
-        result,
-        this.deviceList,
-        this.doubleDeviceList
-      );
-      this.getNDeviceList();
-      this.mapMark(this.nDeviceList, this.cameraMapMarkers);
+        console.log(
+          "=====deviceList=====",
+          result,
+          this.deviceList,
+          this.doubleDeviceList
+        );
+        this.getNDeviceList();
+        this.mapMark(this.nDeviceList, this.cameraMapMarkers);
+      } 
     },
     //获取设备列表
     getNDeviceList() {
@@ -1022,9 +887,9 @@ export default {
         for (let i = 0; i < data.length; i++) {
           let obj = data[i];
           obj.sid = i + "_" + random14();
+          /* let selClass = ""; */
           if (obj.longitude > 0 && obj.latitude > 0) {
-            let offSet = [-20, -50],
-              selClass = "";
+            let offSet = [-20, -50];
             if (
               _this.selAreaPolygon &&
               !_this.selAreaPolygon.contains(
@@ -1032,7 +897,7 @@ export default {
               )
             ) {
               // 多边形存在且不在多边形之中
-              selClass = "vl_close";
+             /*  selClass = "vl_close"; */
             }
             let content = '<i class="vl_icon vl_icon_vehicle_04"></i>';
             let marker = new window.AMap.Marker({
@@ -1639,6 +1504,13 @@ html {
     .el-button {
       width: 45%;
     }
+    .el-button--primary {
+      background-color: #0c70f8;
+      border-color: #0c70f8;
+    }
+  }
+  //导出
+  .export {
     .el-button--primary {
       background-color: #0c70f8;
       border-color: #0c70f8;
