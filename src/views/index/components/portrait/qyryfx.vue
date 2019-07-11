@@ -587,7 +587,8 @@ export default {
             " 00:00:00",
           endTime:
             formatDate(new Date().getTime() - 3600 * 1000 * 24, "yyyy-MM-dd") +
-            " 23:59:59"
+            " 23:59:59",
+          drawActiveType: 0 // 当前活跃的选中区域
         }
       ];
       this.startDateOptArr = [
