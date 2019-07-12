@@ -521,6 +521,7 @@ export default {
       this.mouseTool = new window.AMap.MouseTool(map);
       this.amap.on("click", event => {
         if(this.drawActiveType === 5) {
+          this.mouseTool.close(true);
           this.drawClear();
           this.drawCircle10kmClick(event)
         }
