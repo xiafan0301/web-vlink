@@ -269,8 +269,10 @@ export default {
           let d = date.getDate();
           let threeMonths = '';
           let start = '';
-          if (parseFloat(d) >= 3) {
-            start = y + '-' + m + '-' + (d - 2);
+          if (parseFloat(d) >= 4) {
+            start = y + '-' + m + '-' + (d - 3);
+            // console.log(888888888888,start);
+            
           } else {
             let o =30
             if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
@@ -278,7 +280,7 @@ export default {
             }else if(m == 2){
               o=28
             }
-            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
+            start = (y - 1) + '-' + m + '-' + (d - 3 + o);
           }
           threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -554,7 +556,7 @@ export default {
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
             $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
-            self.showVideo(obj);
+           // self.showVideo(obj);
             break;
         }
       })

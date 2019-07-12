@@ -1,9 +1,7 @@
 <template>
   <div class="vl_vehicle clearfix">
     <div class="vc_content">
-      <keep-alive>
       <router-view></router-view>
-      </keep-alive>
     </div>
   </div>
 </template>
