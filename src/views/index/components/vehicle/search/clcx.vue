@@ -78,7 +78,7 @@
             </el-input>
           </el-form-item>
           <el-form-item v-if="input5=='1'">
-            <el-select v-model="value1" multiple collapse-tags placeholder="全部地区" class="full">
+            <el-select v-model="value1" multiple collapse-tags placeholder="请选择" class="full">
             <el-option-group
               v-for="group in options"
               :key="group.areaName"
@@ -95,7 +95,7 @@
           <el-form-item prop="plateNo">
             <p class="carCold">车牌：<el-checkbox v-model="ruleForm._include">排除</el-checkbox></p>
             <el-input placeholder="请输入车牌号" v-model="ruleForm.plateNo" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="">
+              <!-- <el-select v-model="select" slot="prepend" placeholder=""> -->
                <!-- <el-option v-for="item in pricecode" :label="item" :value="item"></el-option> -->
                <el-option v-for="(item, index) in pricecode" :label="item" :value="item" :key="'cph_' + index"></el-option>
               </el-select>
@@ -268,12 +268,12 @@ export default {
         vehicleClass:this.$route.query.vehicleClass,
         include:this.$route.query.include,
         _include:0,
-        plateNo:this.$route.query.plateNo?this.$route.query.plateNo.substr(1,10):"",
+        plateNo:this.$route.query.plateNo,
         pageNum:1,
         pageSize:10,
       }
       this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
-      this.select=this.$route.query.plateNo?this.$route.query.plateNo.substr(0,1):""
+      //this.select=this.$route.query.plateNo?this.$route.query.plateNo.substr(0,1):""
     }
     
   },
@@ -302,9 +302,10 @@ export default {
       }
       MapGETmonitorList(d).then(res=>{
         if(res && res.data){
-          
-          
           this.options.push(res.data)
+          res.data.areaTreeList.forEach(el=>{
+            this.value1.push(el.areaId)
+          })
         }
       })
     },
@@ -350,7 +351,7 @@ export default {
       this.ruleForm.dateEnd = this.ruleForm.dateEnd.indexOf(":")>0?(this.ruleForm.dateEnd):(this.ruleForm.dateEnd+" 23:59:59")
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
-      d.plateNo= this.select+this.ruleForm.plateNo 
+      d.plateNo= this.ruleForm.plateNo 
       if(v){
         d=v
       }else{
@@ -421,7 +422,7 @@ export default {
     resetForm (){
       this.value1=null
       this.selectValue="已选设备0个",
-      this.select=""
+      // this.select=""
       this.ruleForm._vehicleGroup="" 
       this.ruleForm.vehicleClass="" 
       this.ruleForm.include="" 

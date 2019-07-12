@@ -880,17 +880,18 @@ export default {
       }
     }
   }
-
+ 
+ 
   .vl_judge_tc {
-.Breadc{
-  position: absolute;
-  top: 0px;
-  width: 100%;
-  height: 50px;
-  left: 0px;
-}
+    .Breadc{
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      height: 50px;
+      left: 0px;
+    }
     position: relative;
-    padding-top: 50px;
+   
     width: 100%;
     height: 100%;
     .camera-select {
@@ -1309,6 +1310,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+ .vl_judge_tc{
+    padding-top: 50px;
+  }
 .hideleft {
   .insetLeft2 {
     transform: rotate(180deg);

@@ -17,12 +17,12 @@
               <div class="struc_main" v-if="sturcDetail">
                 <div v-show="strucCurTab === 1" class="struc_c_detail">
                   <div class="struc_c_d_qj struc_c_d_img">
-                    <img :src="sturcDetail.storagePath" alt="">
+                    <img :src="sturcDetail.storagePath" alt="" :class="{'active':isChoose}"  @click.stop="bigImg(1)">
                     <span>抓拍图</span>
                   </div>
                   <div class="struc_c_d_box">
                     <div class="struc_c_d_qii struc_c_d_img">
-                      <img :src="sturcDetail.personStoragePath" alt="">
+                      <img :src="sturcDetail.personStoragePath"  :class="{'active':isChoose2}"  @click.stop="bigImg(2)">
                       <span>全景图</span>
                     </div>
                     <div class="struc_c_d_info">
@@ -81,7 +81,7 @@
                   <div class="swiper-button-next" slot="button-next"></div>
                 </swiper>
               </div>
-      
+  
   </el-dialog>
 </template>
 <script>
@@ -129,6 +129,8 @@ export default {
   props: ['open', 'detailData','scrollData','showItem'],
   data () {
     return {
+      isChoose: false,
+      isChoose2: false,
       show: false,
       strucDetailDialog:this.open, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
@@ -208,6 +210,15 @@ export default {
       //this.$_hideLoading()
   },
   methods: {
+    bigImg(v){
+      if(v==1){
+        this.isChoose=!this.isChoose;
+      }else if(v==2){
+        this.isChoose2=!this.isChoose2;
+        
+      }
+      
+    },
     /**
      * 弹框地图初始化
      */
@@ -367,6 +378,15 @@ export default {
             right: 0;
             bottom: 0;
             margin: auto;
+            transform: scale(1);         
+            transition: all ease 0.2s;
+          }
+          img.active{
+             transform: scale(3);          /*图片需要放大3倍*/
+              position: absolute;           /*是相对于前面的容器定位的，此处要放大的图片，不能使用position：relative；以及float，否则会导致z-index无效*/
+              z-index: 100;
+              left: 50%;
+              
           }
           i {
             display: block;
@@ -452,7 +472,7 @@ export default {
           box-shadow: 0px 5px 16px 0px rgba(169,169,169,0.2);
           border-radius: 1px;
           position: relative;
-          overflow: hidden;
+          // overflow: hidden;
           &:before {
             display: block;
             content: '';
