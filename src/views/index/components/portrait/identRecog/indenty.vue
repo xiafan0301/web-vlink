@@ -1,6 +1,13 @@
 <template>
   <div class="identy_container">
-    <Breadcrumb :oData="[{name: '身份核实'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '身份核实'}]">
+      </div>
+    </div>
+    <!-- <Breadcrumb :oData="[{name: '身份核实'}]"></Breadcrumb> -->
     <div class="content_box">
       <div class="left">
         <vue-scroll>
@@ -186,11 +193,11 @@
 </template>
 <script>
 import { ajaxCtx } from '@/config/config.js';
-import Breadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { checkIdCard } from '@/utils/validator.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     const validateSimilar = (rule, val, callback) => {
       if (val) {
@@ -473,9 +480,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// html {
-//   font-size: 100px;
-// }
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .identy_container {
   height: 100%;
   .content_box {
