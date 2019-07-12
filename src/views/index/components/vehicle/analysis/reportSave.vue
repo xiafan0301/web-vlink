@@ -454,9 +454,10 @@ export default {
       var polyline = new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
+          showDir: true,
           strokeColor: "#61c772",  //线颜色
           strokeOpacity: 1,     //线透明度
-          strokeWeight: 2,      //线宽
+          strokeWeight: 8,      //线宽
           strokeStyle: "solid"  //线样式
       });
       this.clgjMap.setFitView();

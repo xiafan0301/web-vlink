@@ -482,13 +482,13 @@ export default {
       if (val) {
         this.closeShow = false;
       } else {
-        if (this.closeShow) { 
+        // if (this.closeShow) { 
           if (this.selectMethod === 1) {
             this.getVeGroupInfo();
           } else {
             this.getVelBottomNameInfo();
           }
-        }
+        // }
       }
     }
   },

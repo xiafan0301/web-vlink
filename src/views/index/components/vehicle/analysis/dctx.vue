@@ -51,7 +51,7 @@
         </div>
         <div class="btn-box">
           <el-button class="reset_btn" @click="onReset" :loading="resetLoading">重置</el-button>
-          <el-button class="select_btn" @click="onSearch" :loading="searchLoading">查询</el-button>
+          <el-button class="select_btn" type="primary" @click="onSearch" :loading="searchLoading">查询</el-button>
         </div>
       </div>
       <div class="the-right-result">
@@ -576,6 +576,9 @@ export default {
         }
       }
     }
+  }
+  .reset_btn, .select_btn {
+    width: 110px;
   }
 }
 </style>

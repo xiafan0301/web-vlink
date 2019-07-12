@@ -325,6 +325,29 @@ export default {
       isAddMemberLoading: false, // 添加成员加载中
     }
   },
+  watch: {
+    groupName (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        this.getList();
+      }
+    },
+    userRoleName (val) {
+      if (val) {
+        this.closeShowRole = false;
+      } else {
+        this.searchRole();
+      }
+    },
+    memberName (val) {
+      if (val) {
+        this.closeShowMember = false;
+      } else {
+        this.searchMember();
+      }
+    }
+  },
   created () {
     this.storageInfo = this.$store.state.loginUser;
   },
@@ -352,16 +375,20 @@ export default {
     },
     // 搜索角色
     searchRole () {
-      let reg = new RegExp(this.userRoleName);
-      let arr = [];
-      this.searchSelectRoles.map((item) => {
-        let name = item.roleName;
-        if (name.match(reg)) {
-          arr.push(item);
-        }
-      })
-      this.searchSelectRoles = JSON.parse(JSON.stringify(arr));
-      this.closeShowRole = true;
+      if (this.userRoleName) {
+        let reg = new RegExp(this.userRoleName);
+        let arr = [];
+        this.searchSelectRoles.map((item) => {
+          let name = item.roleName;
+          if (name.match(reg)) {
+            arr.push(item);
+          }
+        })
+        this.searchSelectRoles = JSON.parse(JSON.stringify(arr));
+        this.closeShowRole = true;
+      } else {
+        this.searchSelectRoles = JSON.parse(JSON.stringify(this.selectRoles));
+      }
     },
     // 清空搜索角色搜索框
     onClearRole () {
@@ -371,16 +398,20 @@ export default {
     },
     // 搜索成员
     searchMember () {
-      let reg = new RegExp(this.memberName);
-      let arr = [];
-      this.searchSelectMembers.map((item) => {
-        let name = item.userName;
-        if (name.match(reg)) {
-          arr.push(item);
-        }
-      })
-      this.searchSelectMembers = JSON.parse(JSON.stringify(arr));
-      this.closeShowMember = true;
+      if (this.memberName) {
+        let reg = new RegExp(this.memberName);
+        let arr = [];
+        this.searchSelectMembers.map((item) => {
+          let name = item.userName;
+          if (name.match(reg)) {
+            arr.push(item);
+          }
+        })
+        this.searchSelectMembers = JSON.parse(JSON.stringify(arr));
+        this.closeShowMember = true;
+      } else {
+        this.searchSelectMembers = JSON.parse(JSON.stringify(this.selectMembers));
+      }
     },
     // 清空搜索成员搜索框
     onClearMember () {
@@ -507,7 +538,8 @@ export default {
     },
     // 显示管理成员弹出框
     showAdminMember (obj) {
-      console.log(obj);
+      this.checkSelectMember = [];
+      this.checkCurrMember = [];
       this.currentMembers = [];
       this.searchSelectMembers = [];
       this.selectMembers = [];
@@ -622,6 +654,8 @@ export default {
     },
     // 显示配置角色弹出框
     showConfigRoleDialog (obj) {
+      this.checkSelectRoles = [];
+      this.checkCurrRoles = [];
       this.currRoleId = obj.uid;
       let allRoles = []; // 所有角色
       this.currentRoles = [];
@@ -842,101 +876,6 @@ export default {
       }
     }
   }
-  .dialog_comp_group {
-    /deep/ .el-dialog__body {
-      padding: 0 0 30px 0;
-      .userGroup_body {
-        width: 100%;
-        clear: both;
-        height: 577px;
-        border-top: 1px solid #F2F2F2;
-        .group_left {
-          padding-top: 8px;
-          width: 50%;
-          height: 100%;
-          border-right: 1px solid #F2F2F2;
-          float: left;
-          padding-left: 20px;
-          .checkbox_box_left {
-            height: calc(577px - 25px - 40px - 20px);
-            margin-bottom: 20px;
-            margin-top: 15px;
-          }
-          .group_btn_left {
-            border: 1px solid #D3D3D3;
-            color: #666666;
-          }
-        }
-        .group_right {
-          padding-top: 8px;
-          width: 50%;
-          height: 100%;
-          padding-left: 20px;
-          float: left;
-          .checkbox_box_right {
-            height: calc(577px - 25px - 40px - 20px - 42px);
-            margin-bottom: 20px;
-            margin-top: 15px;
-          }
-          /deep/ .el-input__inner {
-            border-radius: 30px;
-            background-color: #F2F2F2;
-            color: #999999;
-            border-color: #F2F2F2;
-            margin-top: 10px;
-          }
-          .search_icon{
-            margin-top: 17px;
-            cursor: pointer;
-          }
-          .group_btn_right {
-            background-color: #0C70F8;
-            color: #ffffff;
-          }
-        }
-        .group_btn {
-          // text-align: center;
-          // line-height: 40px;
-          width: 220px;
-          height: 40px;
-          // border-radius: 4px;
-          // cursor: pointer;
-        }
-        .group_number {
-          color: #999999;
-          font-size: 12px;
-        }
-        /deep/ .el-checkbox-group {
-          display: flex;
-          flex-wrap: wrap;
-          flex-direction: column;
-        }
-        /deep/ .el-checkbox {
-          padding-right: 20px;
-          height: 25px;
-        }
-        /deep/ .el-checkbox:last-child {
-          margin-right: 30px;
-        }
-        /deep/ .el-checkbox+.el-checkbox {
-          margin-left: 0;
-        }
-        /deep/ .el-checkbox__label {
-          float: left;
-        }
-        /deep/ .el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner {
-          background-color: #0C70F8;
-          border-color: #0C70F8;
-        }
-        /deep/ .el-checkbox__input.is-checked+.el-checkbox__label{
-          color: #666666;
-        }
-        /deep/ .el-checkbox__input {
-          float: right;
-        }
-      }
-    }
-  }
   .dialog_comp {
     .group_name {
       position: relative;
@@ -974,4 +913,103 @@ export default {
   }
 }
 </style>
+// <style lang="scss">
+// .dialog_comp_group {
+//   .el-dialog__body {
+//     padding: 0 0 30px 0;
+//     .userGroup_body {
+//       width: 100%;
+//       // clear: both;
+//       height: 577px;
+//       display: flex;
+//       border-top: 1px solid #F2F2F2;
+//       .group_left {
+//         padding-top: 8px;
+//         width: 50%;
+//         height: 100%;
+//         border-right: 1px solid #F2F2F2;
+//         // float: left;
+//         padding-left: 20px;
+//         .checkbox_box_left {
+//           height: calc(577px - 25px - 40px - 20px);
+//           margin-bottom: 20px;
+//           margin-top: 15px;
+//         }
+//         .group_btn_left {
+//           border: 1px solid #D3D3D3;
+//           color: #666666;
+//         }
+//       }
+//       .group_right {
+//         padding-top: 8px;
+//         width: 50%;
+//         height: 100%;
+//         padding-left: 20px;
+//         // float: left;
+//         .checkbox_box_right {
+//           height: calc(577px - 25px - 40px - 20px - 42px);
+//           margin-bottom: 20px;
+//           margin-top: 15px;
+//         }
+//         .el-input__inner {
+//           border-radius: 30px;
+//           background-color: #F2F2F2;
+//           color: #999999;
+//           border-color: #F2F2F2;
+//           margin-top: 10px;
+//         }
+//         .search_icon{
+//           margin-top: 17px;
+//           cursor: pointer;
+//         }
+//         .group_btn_right {
+//           border: 1px solid #0C70F8;
+//           background-color: #0C70F8;
+//           color: #ffffff;
+//         }
+//       }
+//       .group_btn {
+//         // text-align: center;
+//         // line-height: 40px;
+//         width: 220px;
+//         height: 40px;
+//         // border-radius: 4px;
+//         // cursor: pointer;
+//       }
+//       .group_number {
+//         color: #999999;
+//         font-size: 12px;
+//       }
+//       .el-checkbox-group {
+//         display: flex;
+//         flex-wrap: wrap;
+//         flex-direction: column;
+//       }
+//       .el-checkbox {
+//         padding-right: 20px;
+//         height: 25px;
+//       }
+//       .el-checkbox+.el-checkbox {
+//         margin-left: 0;
+//       }
+//       .el-checkbox:last-child {
+//         margin-right: 30px;
+//       }
+//      .el-checkbox__label {
+//         float: left;
+//       }
+//       .el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+//         background-color: #0C70F8;
+//         border-color: #0C70F8;
+//       }
+//       .el-checkbox__input.is-checked+.el-checkbox__label{
+//         color: #666666;
+//       }
+//      .el-checkbox__input {
+//         float: right;
+//       }
+//     }
+//   }
+// }
+// </style>
 
