@@ -113,11 +113,12 @@ export default {
       // 绘制轨迹
       var polyline = new window.AMap.Polyline({
         map: this.amap,
+        showDir: true,
         path: gjPath,
-        strokeColor: "#61c772",  //线颜色
-        strokeOpacity: 1,     //线透明度
-        strokeWeight: 2,      //线宽
-        strokeStyle: "solid"  //线样式
+        strokeColor: "#61c772",  // 线颜色
+        strokeOpacity: 1,     // 线透明度
+        strokeWeight: 8,      // 线宽
+        strokeStyle: "solid"  // 线样式 dashed solid
       });
       this.amap.setFitView();
     },
@@ -283,7 +284,7 @@ export default {
   }
   > .vl_icon_map_hover_mark0 {
     display: none;
-    position: absolute; bottom: 0; left: -3px;
+    position: absolute; bottom: 0; left: -2px;
   }
   &.relay_marker_mk_sed {
     > .vl_icon_sxt_dis {
