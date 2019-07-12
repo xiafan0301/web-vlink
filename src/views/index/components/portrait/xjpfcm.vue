@@ -369,6 +369,7 @@ export default {
       this.amap.setFitView(this.area);
     },
     getArea() {
+      this.area = []
       // 矩形
       if (this.drawObj.rectangle) {
         for (let k in this.drawObj.rectangle) {
