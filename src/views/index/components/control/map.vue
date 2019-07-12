@@ -9,7 +9,7 @@
             <el-option
               v-for="item in stateList"
               :key="item.value"
-              :label="item.label"
+              :label="item.label" 
               :value="item.value">
             </el-option>
           </el-select>

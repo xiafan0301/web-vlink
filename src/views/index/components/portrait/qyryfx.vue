@@ -85,7 +85,7 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02"></i>
+                  <i class="vl_icon vl_icon_portrait_02" title="定位当前选中区域" @click="setFitV(index)"></i>
                 </div>
                 <ul>
                   <li>
@@ -229,13 +229,11 @@
       <div class="info_right" v-show="infoRightShow">
         <div class="danger_people_wrap">
           <vue-scroll>
-            <h3
-              class="camera_name"
-            >
-            <span>{{ selectedDevice.deviceName }}</span>
-            &nbsp;
-            <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
-            <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+            <h3 class="camera_name">
+              <span>{{ selectedDevice.deviceName }}</span>
+              &nbsp;
+              <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
+              <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
             </h3>
             <div class="danger_people_list">
               <div
@@ -481,6 +479,7 @@ export default {
       drawType: 0,
       amap: null, // 地图对象
       markerList: [], // 设备卡口标记的数组
+      areaList: [], // 点击定位的数组
       mouseTool: null,
       drawType: 0,
       currenDrawobj: 0, // 当前的时间区域
@@ -523,7 +522,7 @@ export default {
   mounted() {
     //获取数据
     this.getTreeList();
-    this.mapEvents();
+    // this.mapEvents();
     //加载地图
     this.initMap();
     // 获取到监控人群分组
@@ -946,36 +945,168 @@ export default {
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
         let _sid = random14();
+        this.drawClear(this.currenDrawobj);
         //  return
         let drawActive = this.drawObj[this.currenDrawobj].drawActiveType; // 获取到当前要画的图形
         if (drawActive === 1) {
           this.drawObj[this.currenDrawobj].rectangle[_sid] = {};
           this.drawObj[this.currenDrawobj].rectangle[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].rectangle["sid"] = _sid;
-          this.drawRectangleMark(_sid, event.obj);
+          // this.drawRectangleMark(_sid, event.obj);
         } else if (drawActive === 2) {
           this.drawObj[this.currenDrawobj].circle[_sid] = {};
           this.drawObj[this.currenDrawobj].circle[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].circle["sid"] = _sid;
-          this.drawCircleMark(_sid, event.obj);
+          // this.drawCircleMark(_sid, event.obj);
         } else if (drawActive === 3) {
           this.drawObj[this.currenDrawobj].polyline[_sid] = {};
           this.drawObj[this.currenDrawobj].polyline[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].polyline["sid"] = _sid;
-          this.drawPolylineMark(_sid, event.obj);
+          // this.drawPolylineMark(_sid, event.obj);
         } else if (drawActive === 4) {
           this.drawObj[this.currenDrawobj].polygon[_sid] = {};
           this.drawObj[this.currenDrawobj].polygon[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].polygon["sid"] = _sid;
-          this.drawPolygonMark(_sid, event.obj);
+          // this.drawPolygonMark(_sid, event.obj);
         } else if (drawActive === 5) {
           this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
           this.drawObj[this.currenDrawobj].circle10km[_sid].obj = event.obj;
           this.drawObj[this.currenDrawobj].circle10km["sid"] = _sid;
         }
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
+        // this.mouseTool.close(false);
+        // this.amap.setDefaultCursor();
       });
+    },
+    drawClear(ind) {
+      // 矩形
+      if (this.drawObj[ind].rectangle) {
+        for (let k in this.drawObj[ind].rectangle) {
+          this.drawClearDo(this.drawObj[ind].rectangle[k]);
+        }
+        this.drawObj[ind].rectangle = {};
+      }
+      // 圆形
+      if (this.drawObj[ind].circle) {
+        for (let k in this.drawObj[ind].circle) {
+          this.drawClearDo(this.drawObj[ind].circle[k]);
+        }
+        this.drawObj[ind].circle = {};
+      }
+      // 线
+      if (this.drawObj[ind].polyline) {
+        for (let k in this.drawObj[ind].polyline) {
+          this.drawClearDo(this.drawObj[ind].polyline[k]);
+        }
+        this.drawObj[ind].polyline = {};
+      }
+      // 多边形
+      if (this.drawObj[ind].polygon) {
+        for (let k in this.drawObj[ind].polygon) {
+          this.drawClearDo(this.drawObj[ind].polygon[k]);
+        }
+        this.drawObj[ind].polygon = {};
+      }
+      if (this.drawObj[ind].circle10km) {
+        // console.log('进来清理了吗');
+        for (let k in this.drawObj[ind].circle10km) {
+          this.drawClearDo(this.drawObj[ind].circle10km[k]);
+        }
+        this.drawObj[ind].circle10km = {};
+      }
+    },
+    drawClearDo(obj) {
+      if (obj.obj) {
+        this.amap.remove(obj.obj);
+        obj.obj = null;
+      }
+      if (obj.marker) {
+        this.amap.remove(obj.marker);
+        obj.marker = null;
+      }
+      if (obj.editor) {
+        obj.editor.close();
+        this.amap.remove(obj.editor);
+        obj.editor = null;
+      }
+      obj = null;
+    },
+    setFitV(ind) {
+      this.getArea(ind);
+      this.amap.setFitView(this.areaList[ind]);
+      console.log("定位数组", this.areaList);
+    },
+    getArea(ind) {
+      // 矩形
+      const curInd = this.drawObj[ind].drawActiveType;
+      // const sid =
+      if (curInd === 1) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList.push(
+            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
+          );
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].rectangle[this.drawObj[ind].rectangle.sid].obj
+          );
+        }
+      }
+      // 圆形
+      if (curInd === 2) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList.push(
+            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
+          );
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle[this.drawObj[ind].circle.sid].obj
+          );
+        }
+      }
+      // 线
+      if (curInd === 3) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList.push(
+            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
+          );
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polyline[this.drawObj[ind].polyline.sid].obj
+          );
+        }
+      }
+      // 多边形
+      if (curInd === 4) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList.push(
+            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
+          );
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].polygon[this.drawObj[ind].polygon.sid].obj
+          );
+        }
+      }
+      if (curInd === 5) {
+        if (this.areaList.length < ind + 1) {
+          this.areaList.push(
+            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
+          );
+        } else {
+          this.areaList.splice(
+            ind,
+            1,
+            this.drawObj[ind].circle10km[this.drawObj[ind].circle10km.sid].obj
+          );
+        }
+      }
     },
     mapEvents() {
       let _this = this,
@@ -1145,8 +1276,15 @@ export default {
       }
     },
     selDrawType(drawType, index) {
-      this.currenDrawobj = index; // 确定当前的时间区域
-      this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+      if (this.drawObj[index].drawActiveType === drawType) {
+        this.drawObj[index].drawActiveType = 0;
+        this.mouseTool.close(false);
+        this.amap.setDefaultCursor();
+        return;
+      } else {
+        this.drawObj[index].drawActiveType = drawType; // 当前要画的图形类别
+        this.currenDrawobj = index; // 确定当前的时间区域
+      }
       if (drawType === 1) {
         // 矩形
         this.drawRectangle();
@@ -1509,6 +1647,7 @@ export default {
     },
     drawCircle10km() {
       this.amap.setDefaultCursor("crosshair");
+       
       this.amap.on("click", this.drawCircle10kmClick);
     },
     drawCircle10kmClick(e) {
@@ -1529,13 +1668,13 @@ export default {
       circle.setMap(this.amap);
       // 缩放地图到合适的视野级别
       this.amap.setFitView([circle]);
-      let _sid = random14();
-      this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
-      this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
-      this.drawObj[this.currenDrawobj].drawActiveType = 0;
+      // let _sid = random14();
+      // this.drawObj[this.currenDrawobj].circle10km[_sid] = {};
+      // this.drawObj[this.currenDrawobj].circle10km[_sid].obj = circle;
+      // this.amap.setDefaultCursor();
+      // this.drawObj[this.currenDrawobj].drawActiveType = 0;
       this.amap.off("click", this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
+      // this.drawCircle10kmMark(_sid, circle);
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1640,7 +1779,7 @@ export default {
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
               let so = this.drawObj[index].polyline[k];
-              console.log('线', so);
+              console.log("线", so);
               if (
                 window.AMap.GeometryUtil.distanceToLine(
                   new window.AMap.LngLat(o.longitude, o.latitude),
@@ -2313,7 +2452,7 @@ export default {
           border-bottom: 1px solid #d3d3d3;
           width: 428px;
           position: relative;
-          >i {
+          > i {
             position: absolute;
             z-index: 10;
             right: 0;

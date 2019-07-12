@@ -83,7 +83,7 @@
       <div class="main">
         <div class="infobox">
           <div class="flex1 bkt mrg10">
-            <div>
+            <div v-if="snapObj.videoPath">
             <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
