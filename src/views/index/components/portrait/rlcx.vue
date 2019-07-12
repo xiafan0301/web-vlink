@@ -96,7 +96,7 @@
           </ul>
         </div>
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
-          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index">
+          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item)">
             <div>
               <img :src="item.subStoragePath" :alt="item.deviceName">
               <div>
@@ -125,6 +125,8 @@
         </div>
       </div>
     </div>
+    <!-- 详情 -->
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
@@ -133,14 +135,18 @@
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrieval} from '../../api/api.judge.js';
+import {getFaceRetrieval, getFaceRetrievalPerson} from '../../api/api.judge.js';
 import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
+import portraitDetail from '@/components/common/portraitDetail.vue';
 export default {
-  components: {vehicleBreadcrumb, mapSelector},
+  components: {vehicleBreadcrumb, mapSelector,portraitDetail},
   data () {
     return {
+      showDetail:false,
+       deData:null,
+      seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
         type: 1, // 列表选择 地图选择
@@ -179,6 +185,16 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    onCloseDetail () {
+      this.showDetail=false
+    },
+    goToDetail(v){
+      // console.log(v);
+      this.showDetail=true;
+      this.deData = v
+      this.seData = this.dataList
+      
+    },
     //查询行政区域
     getMapGETmonitorList(){
       let d={
@@ -198,7 +214,7 @@ export default {
       })
     },
     mapSelectorEmit (result) {
-      // console.log('mapSelectorEmit', result);
+      console.log('mapSelectorEmit', result);
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -211,19 +227,12 @@ export default {
         }
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
-          // getDeviceByBayonetUids
-          let ab = [];
-          for (let i = 0; i < result.bayonetList.length; i++) {
-            ab.push(result.bayonetList[i].uid);
+        }
+        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+          this.dSum += result.bayonetDeviceList.length;
+          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+            this.dIds.push(result.bayonetDeviceList[i].uid);
           }
-          getDeviceByBayonetUids(ab).then(res => {
-            if (res && res.data) {
-              for (let i = 0; i < res.data.length; i++) {
-                this.dIds.push(res.data[i].uid);
-              }
-            }
-          }).catch(() => {
-          });
         }
       }
     },
@@ -263,7 +272,8 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
-      getFaceRetrieval(params).then(res => {
+      // getFaceRetrieval getFaceRetrievalPerson
+      getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
           this.pagination.total = res.data.total;

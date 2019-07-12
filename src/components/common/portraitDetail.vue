@@ -39,15 +39,19 @@
                       <!-- <div class="struc_cdi_line">
                         <span><b>性别</b>{{sturcDetail.sex}}</span>
                       </div> -->
-                      <div class="struc_cdi_line">
-                        <span><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
+                      <div class="struc_cdi_line" v-if="sturcDetail.semblance">
+                        <span ><b>相似度</b>{{(sturcDetail.semblance*1).toFixed(2)}}%</span>
                       </div>
                       <div class="struc_cdi_line">
                         <span v-if="sturcDetail.features"><b>特征</b>{{sturcDetail.features}}</span>
-                        <span v-else><b>特征</b>{{sturcDetail.sex+"，"+sturcDetail.age+ "，"+ sturcDetail.baby+ "，" + sturcDetail.bag+ "，" + sturcDetail.bottomColor +sturcDetail.bottomType+ "，" + sturcDetail.hair+ "，" +sturcDetail.hat+ "，"+sturcDetail.upperColor+sturcDetail.upperTexture+sturcDetail.upperType}}</span>
+                        <span v-else><b>特征</b>{{sturcDetail.sex+" "+(sturcDetail.age || "")+ " "+ (sturcDetail.baby || "")+ " " + (sturcDetail.bag || "")+ " " + (sturcDetail.bottomColor || "") +(sturcDetail.bottomType || "")+ " " + (sturcDetail.hair || "")+ " " +(sturcDetail.hat || "")+ " "+(sturcDetail.upperColor || "")+(sturcDetail.upperTexture || "")+(sturcDetail.upperType || "")}}</span>
                       </div>
                       <div class="struc_cdi_line"></div>
                     </div>
+                  </div>
+                  <div class="tablink" v-if="show">
+                    <a @click="goToPage('portrait_gjfx')">轨迹分析</a>
+                    <a @click="goToPage('control_create')">新建布控</a>
                   </div>
                 </div>
                 <div v-show="strucCurTab === 2" class="struc_c_address">
@@ -81,9 +85,6 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
-import {mapXupuxian} from '@/config/config.js';
-import {random14} from '@/utils/util.js';
 import flvplayer from '@/components/common/flvplayer.vue';
 export default {
   /* 提交成功后通过在父组件 emit mapSelectorEmit 事件获取所框选的东西 */
@@ -125,9 +126,10 @@ export default {
  components: {
     flvplayer,
   },
-  props: ['open', 'detailData','scrollData'],
+  props: ['open', 'detailData','scrollData','showItem'],
   data () {
     return {
+      show: false,
       strucDetailDialog:this.open, // 抓拍记录弹窗
       strucCurTab: 1, // 抓拍记录弹窗tab
       curImgIndex: 0, // 当前选择的图片index
@@ -161,6 +163,12 @@ export default {
         }, 200)
       }
     },
+   goToPage(v){
+      this.$router.push({
+        name: v,
+        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
+      });
+   },
     scrollData (v) {
      
      this.strucInfoList=v
@@ -187,6 +195,8 @@ export default {
     
   },
   mounted () {
+    this.show=this.showItem
+    
     // this.getTreeList();
     // this.mapEvents();
    // this.$_showLoading({text: '加载中...'})
@@ -616,6 +626,33 @@ export default {
     margin-left: -50vw; margin-top: -50vh;
   }
   }
+  .tablink {
+      height: 50px;
+      width:100%;
+      background: #ffffff;
+      margin: 0px auto;
+      padding: 0px 0px;
+      text-align: right;
+      a {
+        display: inline-block;
+        text-align: center;
+        line-height: 38px;
+        border: solid 1px #eeeeee;
+        border-radius: 4px;
+        margin-top: 10px;
+        padding: 0px 15px;
+        text-decoration: none;
+        margin-left: 10px;
+        background: rgba(246, 248, 249, 1);
+        border: 1px solid rgba(211, 211, 211, 1);
+        cursor: pointer;
+      }
+      a:hover {
+        background: #0c70f8;
+        border: solid 1px #0c70f8;
+        color: #ffffff;
+      }
+    }
 </style>
 
 

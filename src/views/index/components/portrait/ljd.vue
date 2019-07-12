@@ -10,6 +10,7 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
+        :rules="rules"
           :model="ruleForm"
           status-icon
           ref="ruleForm"
@@ -135,7 +136,7 @@
             <el-collapse-item  v-for="(item,index) in evData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
               <div class="itembox" v-for="(v,d) in item.personDetailList" @click="onOpenDetail(v , item)">
                 <div class="imgInfo">
-                   <img :src="v.personStoragePath" class="img">
+                   <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
                     <span class="subdata">
@@ -158,7 +159,7 @@
 
     <!-- 地图选择 -->
     <!-- D设备 B卡口  这里是设备和卡口 -->
-    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint"></div>
+    <div is="mapSelector" :open="dialogVisible" :showTypes="'DB'" @mapSelectorEmit="mapPoint" ></div>
     <!-- <el-dialog :visible.sync="dialogVisible" width="80%">
       <mapselect
         @selectMap="mapPoint"
@@ -179,7 +180,7 @@
             <el-collapse-item  v-for="(item,index) in chooseData" :key="index" :title="item.groupName+'（'+item.totalNum+'次）'" :name="index">
               <div class="itembox" v-for="(v,d) in item.personDetailList">
                 <div class="imgInfo">
-                   <img :src="v.personStoragePath" class="img">
+                   <img :src="v.subStoragePath" class="img">
                    <div>
                      <p class="timedata"><i class="el-icon-time"></i>{{v.shotTime}}</p>
                     <span class="subdata">
@@ -205,7 +206,7 @@
     </el-dialog>
 <!-- 抓拍信息 -->
      
-    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" :showItem="true" ></portraitDetail>
   </div>
 </template>
 <script>
@@ -231,6 +232,16 @@ export default {
   },
   data() {
     return {
+      rules: {
+        minFootholdTimes: [
+          {
+            //pattern: /^[0-9]?$/,
+            pattern: /^(0|([1-9]\d{0,2}))$/,
+            trigger: "blur",
+            message: "请输入不大于999的整数值"
+          }
+        ]
+      },
       deData:null,
       seData:null,
       isload:false,
@@ -239,23 +250,15 @@ export default {
       pickerOptions: {
         disabledDate (time) {
           let date = new Date();
-          let y = date.getFullYear();
-          let m = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1);
-          let d = date.getDate();
-          let threeMonths = '';
-          let start = '';
-          if (parseFloat(d) >= 3) {
-            start = y + '-' + m + '-' + (d - 2);
-          } else {
-            let o =30
-            if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
-              o=31
-            }else if(m == 2){
-              o=28
-            }
-            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
-          }
-          threeMonths = new Date(start).getTime();
+          let curDate = date.getTime();
+          let curS = 30 * 24 * 3600 * 1000;
+            let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
+          let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
+          let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
+          let _ed =  date.getDate()>9?date.getDate():("0"+ date.getDate())
+          let start = new Date(curDate - curS).getFullYear() +
+        "-" + _sm + "-" +_sd;
+          let threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
         }
       },
@@ -294,7 +297,10 @@ export default {
     };
   },
   mounted() {
-    this.curImageUrl= this.$route.query.path
+    if(this.$route.query.path){
+      this.curImageUrl= this.$route.query.path
+    }
+    
 
     //this.getControlMap(1);
     this.setDTime()
@@ -313,7 +319,7 @@ export default {
     setDTime () {
       let date = new Date();
       let curDate = date.getTime();
-      let curS = 3 * 24 * 3600 * 1000;
+      let curS = 1 * 24 * 3600 * 1000;
         let _sm =(new Date(curDate - curS).getMonth() + 1)>9?(new Date(curDate - curS).getMonth() + 1):("0"+(new Date(curDate - curS).getMonth() + 1))
       let _sd = new Date(curDate - curS).getDate()>9? new Date(curDate - curS).getDate() : ("0"+ new Date(curDate - curS).getDate())
       let _em = (date.getMonth() + 1)>9?(date.getMonth() + 1):("0"+(date.getMonth() + 1))
@@ -322,7 +328,7 @@ export default {
       let _s = new Date(curDate - curS).getFullYear() +
         "-" + _sm + "-" +_sd;
       let _e = date.getFullYear() + "-" + _em + "-" + _ed;
-      this.ruleForm.data1 = [_s, _e]
+      this.ruleForm.data1 = [_s, _s]
     },
     /**
      * 弹框地图初始化
@@ -488,6 +494,12 @@ export default {
       MapGETmonitorList(d).then(res => {
         if (res && res.data) {
           this.options.push(res.data);
+          //res.data.
+          // console.log(res.data);
+          res.data.areaTreeList.forEach(el=>{
+            this.ruleForm.value1.push(el.areaId)
+          })
+          //this.ruleForm.value1=[]
         }
       });
     },

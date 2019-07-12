@@ -52,7 +52,7 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
+import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import {random14} from '@/utils/util.js';
 export default {
@@ -84,6 +84,8 @@ export default {
       mouseTool: null,
       drawType: 0,
 
+      mapEventActive: false,
+
       drawActiveType: null, // 
       drawObj: {
         rectangle: {
@@ -109,9 +111,14 @@ export default {
       this.dialogVisible = true;
       if (this.amap) {
       } else {
-        setTimeout(() => {
-          this.initMap();
-        }, 200)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.initMap();
+            if (!this.mapEventActive) {
+              this.mapEvents();
+            }
+          }, 100);
+        });
       }
     },
     clear () {
@@ -127,7 +134,6 @@ export default {
   },
   mounted () {
     this.getTreeList();
-    this.mapEvents();
   },
   methods: {
     initMap () {
@@ -186,8 +192,9 @@ export default {
 
       _this.setMarks();
     },
+    // 编辑 删除 完成事件
     mapEvents () {
-      let _this = this, nContent = $('body');
+      let _this = this, nContent = $('#' + this.sid);
       // el-icon-edit el-icon-close el-icon-check
       nContent.on('click', '.el-icon-close', function () {
         // 删除
@@ -773,17 +780,39 @@ export default {
           }
         }
       }
-      let ad = [], ab = [];
+      let ad = [], ab = [], abIds = [];
       for (let k in dObj) { ad.push(dObj[k]); }
-      for (let k in bObj) { ab.push(bObj[k]); }
+      for (let k in bObj) { 
+        ab.push(bObj[k]);
+        abIds.push(k);
+      }
+      if (abIds && abIds.length > 0) {
+        getDeviceByBayonetUids(abIds).then(res => {
+          let bayonetDeviceList = [];
+          if (res && res.data) {
+            bayonetDeviceList = res.data;
+          }
+          this.$emit('mapSelectorEmit', {
+            deviceList: ad,
+            bayonetList: ab,
+            bayonetDeviceList: bayonetDeviceList
+          });
+          this.submitLoading = false;
+          this.dialogVisible = false;
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      } else {
+        this.$emit('mapSelectorEmit', {
+          deviceList: ad,
+          bayonetList: ab,
+          bayonetDeviceList: []
+        });
+        this.submitLoading = false;
+        this.dialogVisible = false;
+      }
       console.log('设备 ad', ad);
       console.log('卡口 ab', ab);
-      this.$emit('mapSelectorEmit', {
-        deviceList: ad,
-        bayonetList: ab
-      });
-      this.submitLoading = false;
-      this.dialogVisible = false;
     },
     drawClear () {
       // 矩形

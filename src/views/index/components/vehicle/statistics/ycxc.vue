@@ -108,13 +108,13 @@
           </el-select>
           <div class="left_btn">
             <el-button class="reset_btn" :loading="resetLoading" @click="onReset">重置</el-button>
-            <el-button class="select_btn" :loading="searchLoading" @click="onSearch">查询</el-button>
+            <el-button class="select_btn" type="primary" :loading="searchLoading" @click="onSearch">查询</el-button>
           </div>
         </div>
       </div>
       <div class="the-right-result">
         <template v-if="dataList.length > 0">
-          <el-button :loading="exportLoadingbtn" @click="onExport" class="select_btn">导出</el-button>
+          <el-button :loading="exportLoadingbtn" type="primary" @click="onExport" class="th-button-export">导出</el-button>
           <vue-scroll>
             <div class="the-table">
               <el-table
@@ -293,9 +293,7 @@ export default {
     }
   },
   created () {
-    console.log('params', this.$route)
     if (this.$route.params.startDate) {
-      console.log('asdsadsadasdsad')
       this.handleQueryData();
     }
   },
@@ -305,7 +303,9 @@ export default {
     //获取摄像头卡口数据
     this.getMonitorList();
 
-    this.handleSubmitData();
+    setTimeout(() => {
+      this.handleSubmitData();
+    }, 1000)
   },
   watch: {
     queryDate: {
@@ -329,7 +329,7 @@ export default {
       const endTime = this.$route.params.endhour;
       const minShotTimes = this.$route.params.minShotTimes;
       const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
-      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(':');
+      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
 
       this.queryForm.startDate = startDate;
       this.queryForm.endDate = endDate;
@@ -339,7 +339,6 @@ export default {
       this.queryForm.surveillanceIds = surveillanceIds;
       this.queryForm.vehicleTypes = vehicleTypes;
 
-      console.log('selectDeviceArr', this.selectDeviceArr)
     },
     // 获取布控车辆
     getControlVehicleList () {
@@ -591,7 +590,7 @@ export default {
         startDate: this.queryForm.startDate + ' 00:00:00',
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
-        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(':') : null,
+        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
         surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
         isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
         pageNum: this.pagination.pageNum,
@@ -775,12 +774,12 @@ export default {
             width: 110px;
           }
           .select_btn {
-            background-color: #0C70F8;
-            color: #ffffff;
-            &:hover {
-              background:#0466de;
-              color: #ffffff;
-            }
+            // background-color: #0C70F8;
+            // color: #ffffff;
+            // &:hover {
+            //   background:#0466de;
+            //   color: #ffffff;
+            // }
           }
           .reset_btn {
             // background-color: #ffffff;
@@ -876,9 +875,9 @@ export default {
       .th-button-export {
         float: right;
         margin-bottom: 10px;
-        background:rgba(12,112,248,1);
-        border-radius:4px;
-        color: #ffffff;
+        // background:rgba(12,112,248,1);
+        // border-radius:4px;
+        // color: #ffffff;
       }
       .the-table {
         width: 100%; height: 100%;

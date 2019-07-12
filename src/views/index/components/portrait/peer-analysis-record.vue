@@ -1,40 +1,56 @@
 <template>
-  <div>
-    <div is="vehicleBreadcrumb" :oData="[{name: '同行分析', routerName: 'peer_analysis_result'}, {name: '分析结果', routerName: 'peer_analysis_result'}, {name: '同行记录'}]"></div>
+  <div style="height: 100%;">
+    <div class="th-breadcrumb">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-result?uid=' + $route.query.uid }">同行分析</el-breadcrumb-item>
+        <el-breadcrumb-item>同行记录</el-breadcrumb-item>
+      </el-breadcrumb>
+      <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
+    </div>
     <div class="rlcx_r">
-      <div class="rlcx_r_order">
-        <ul>
-          <li @click="orderHandler(1)" :class="{'rlcx_r_order_sed': orderType === 1}">时间排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
-          <li @click="orderHandler(2)" :class="{'rlcx_r_order_sed': orderType === 2}">监控排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
-          <span :class="{'rlcx_r_order_line2': orderType === 2}"></span>
+      <template v-if="pagination.total !== 0">
+        <div class="rlcx_r_order">
+          <ul>
+            <li @click="orderHandler(1)" :class="{'rlcx_r_order_sed': orderType === 1}">时间排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
+            <li @click="orderHandler(2)" :class="{'rlcx_r_order_sed': orderType === 2}">监控排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
+            <span :class="{'rlcx_r_order_line2': orderType === 2}"></span>
+          </ul>
+        </div>
+        <ul class="rlcx_r_list clearfix">
+          <li v-for="(item, index) in list" :key="index + 'pp'" @click="onOpenCompair(item)">
+            <div class="box">
+              <div class="top">
+                <img :src="item.targetStoragePath" alt="">
+                <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
+                <img style="padding-left: 12px;" :src="item.peerStoragePath" alt="">
+                <div class="left-float">目标对象</div>
+                <div class="right-float">同行对象</div>
+                <div class="left-time">{{item.shotTime}}</div>
+                <div class="right-time">{{item.shotTime}}</div>
+              </div>
+              <div class="bottom">
+                <p>{{item.deviceName ? item.deviceName : '无'}}</p>
+                <p>{{item.address ? item.address : '无'}}</p>
+              </div>
+            </div>
+          </li>
         </ul>
-      </div>
-      <ul class="rlcx_r_list clearfix">
-        <li v-for="item in 7" :key="item" @click="onOpenCompair(item)">
-          <div class="box">
-            <div class="top">
-              <img src="../../../../assets/img/666.jpg" alt="">
-              <img style="padding-left: 12px;" src="../../../../assets/img/666.jpg" alt="">
-              <div class="left-float">目标对象</div>
-              <div class="right-float">同行对象</div>
-              <div class="left-time">2018-11-12 13:14:52  </div>
-              <div class="right-time">2018-11-12 13:14:52  </div>
-            </div>
-            <div class="bottom">
-              <p>抓拍设备名称123</p>
-              <p>湖南省长沙市天心区桂花坪社区雀园路与君逸路交叉口</p>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <el-pagination
-        class="cum_pagination th-center-pagination"
-        @current-change="onPageChange"
-        :current-page.sync="pagination.currentPage"
-        :page-size="pagination.pageSize"
-        layout="prev, pager, next"
-        :total="32">
-      </el-pagination>
+        <el-pagination
+          class="cum_pagination th-center-pagination"
+          @current-change="onPageChange"
+          :current-page.sync="pagination.currentPage"
+          :page-size="pagination.pageSize"
+          layout="prev, pager, next"
+          :total="pagination.total">
+        </el-pagination>
+      </template>
+      <template v-else>
+        <div class="not_content">
+          <img src="../../../../assets/img/not-content.png" alt="">
+          <p>暂无相关数据</p>
+        </div>
+      </template>
     </div>
     <el-dialog
       :visible.sync="compairDialog"
@@ -44,36 +60,36 @@
       class="dialog_comp dialog_comp_compair">
         <div class="box">
           <div class="top">
-            <img src="../../../../assets/img/666.jpg" alt="">
-            <img style="padding-left: 24px;" src="../../../../assets/img/666.jpg" alt="">
+            <img :src="dialogObj.targetStoragePath" alt="">
+            <img style="padding-left: 24px;" :src="dialogObj.peerStoragePath" alt="">
             <div class="left-float">目标对象</div>
             <div class="right-float">同行对象</div>
-            <div class="left-time">2018-11-12 13:14:52  </div>
-            <div class="right-time">2018-11-12 13:14:52  </div>
+            <div class="left-time">{{dialogObj.shotTime}}</div>
+            <div class="right-time">{{dialogObj.shotTime}}</div>
           </div>
           <div class="bottom">
             <div class="text left-text">
               <p>详细资料</p>
               <p>
-                <span>王英南</span>
-                <span>男</span>
-                <span>汉族</span>
-                <span>失踪儿童</span>
-                <span>分组2</span>
-                <br/>
-                <span>43068419970215013X <b>身份证</b> </span>
+                <!-- <span>王英南</span> -->
+                <span>{{dialogObj.sex}}</span>
+                <span>{{dialogObj.age}}</span>
+                <!-- <span>失踪儿童</span> -->
+                <!-- <span>分组2</span> -->
+                <!-- <br/> -->
+                <!-- <span>43068419970215013X <b>身份证</b> </span> -->
               </p>
             </div>
             <div class="text right-text">
               <p>详细资料</p>
               <p>
-                <span>王英南</span>
-                <span>男</span>
-                <span>汉族</span>
-                <span>失踪儿童</span>
-                <span>分组2</span>
-                <br/>
-                <span>43068419970215013X <b>身份证</b> </span>
+                <!-- <span>王英南</span> -->
+                <span>{{dialogObj.sex}}</span>
+                <span>{{dialogObj.age}}</span>
+                <!-- <span>失踪儿童</span> -->
+                <!-- <span>分组2</span> -->
+                <!-- <br/> -->
+                <!-- <span>43068419970215013X <b>身份证</b> </span> -->
               </p>
             </div>
           </div>
@@ -84,6 +100,7 @@
 
 <script>
 import vehicleBreadcrumb from './breadcrumb.vue';
+import { getPeopleTaskDetail } from '@/views/index/api/api.analysis.js';
 export default {
   components: {vehicleBreadcrumb},
   data () {
@@ -91,31 +108,94 @@ export default {
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
-        pageNum: 1,
-        pageSize: 9,
+        total: 0,
+        pageSize: 12,
         currentPage: 1
       },
-      compairDialog: false
+      compairDialog: false,
+      listbox: [],
+      list: [],
+      dialogObj: {}
     }
   },
+  mounted () {
+    this.getDetail()
+  },
   methods: {
-    orderHandler (type) {
-      if (type === this.orderType) {
-        if (this.order === 1) {
-          this.order = 2;
-        } else {
-          this.order = 1;
-        }
-      } else {
-        this.orderType = type;
+    // 获取离线任务详情
+    getDetail () {
+      const id = this.$route.query.uid
+      if (id) {
+        getPeopleTaskDetail(id)
+          .then(res => {
+            if (res) {
+              this.$set(res.data, 'taskResult', JSON.parse(res.data.taskResult))
+              this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
+              // console.log(res.data.taskResult)
+              // res.data.taskResult[0].uid = 1
+              console.log(res.data)
+              let o = null
+              if (this.$route.query.id) {
+                o = res.data.taskResult.find(item => {return item.uid + '' === this.$route.query.id + ''})
+              }
+              console.log(o)
+              if (o && o.personRetrieveDetailDtoList) {
+                this.listbox = [...o.personRetrieveDetailDtoList]
+                this.list = [...o.personRetrieveDetailDtoList.slice(0, 12)]
+                // console.log(new Date(this.list[0].shotTime).getTime())
+                // console.log(this.list)
+                this.list.sort((a, b) => {return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime()})
+              }
+              // res.data.taskResult.push(...res.data.taskResult)
+              this.pagination.total = this.listbox.length
+              // this.boxList = [...res.data.taskResult.slice(0, 12)]
+            }
+          })
       }
     },
+    orderHandler (type) {
+      if (type === 1) {
+        this.orderType = 1
+        if (this.order === 1) {
+          this.list.sort((a, b) => {return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime()})
+          this.order = 2
+        } else {
+          this.list.sort((a, b) => {return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime()})
+          this.order = 1
+        }
+      } else if (type === 2) {
+        this.orderType = 2
+        if (this.order === 1) {
+          this.order = 2
+          if (!this.list.find(x => {return !x.deviceName}))
+            this.list.sort((b, a) => {return a.deviceName.localeCompare(b.deviceName, 'zh-CN')})
+        } else {
+          this.order = 1
+          if (!this.list.find(x => {return !x.deviceName}))
+            this.list.sort((a, b) => {return a.deviceName.localeCompare(b.deviceName, 'zh-CN')})
+        }
+      }
+      // if (type === this.orderType) {
+      //   if (this.order === 1) {
+      //     this.list.sort((a, b) => {return new Date(b.shotTime).getTime() - new Date(a.shotTime).getTime()})
+      //     this.order = 2;
+      //   } else {
+      //     this.list.sort((a, b) => {return new Date(a.shotTime).getTime() - new Date(b.shotTime).getTime()})
+      //     this.order = 1;
+      //   }
+      // } else {
+      //   this.orderType = type;
+      // }
+    },
     onOpenCompair (obj) {
-      console.log(obj)
+      // console.log(obj)
+      this.dialogObj = Object.assign({}, obj)
       this.compairDialog = true
     },
     onPageChange (page) {
-      this.pagination.pageNum = page;
+      this.list.splice(0, this.list.length)
+      this.list = [...this.listbox.slice((page - 1) * 12, 12 + (page - 1) * 12)]
+      // console.log(this.list)
     },
   }
 }
@@ -124,8 +204,7 @@ export default {
 <style lang="scss" scoped>
 .rlcx_r {
   position: relative;
-  height: 100%;
-  margin-top: 50px;
+  height: calc(100% - 50px);
   overflow: auto;
   overflow-x: hidden;
   overflow-y: auto;
@@ -305,9 +384,10 @@ export default {
         width: 340px;
         height: 30px;
         line-height: 30px;
-        text-align: center;
+        text-align: left;
         background:rgba(0,0,0,.52);
         color: #fff;
+        padding-left: 15px;
       }
       .right-time {
         position: absolute;
@@ -315,9 +395,10 @@ export default {
         width: 316px;
         height: 30px;
         line-height: 30px;
-        text-align: center;
+        text-align: left;
         background:rgba(0,0,0,.52);
         color: #fff;
+        padding-left: 15px;
       }
     }
     .bottom {

@@ -121,6 +121,14 @@ export function JigGETAlarmSnapList(params) {
     mode: 'judge'
   })
 }
+export function newGETAlarmSnapList(params) {
+  return request({
+    url: '/portrait/shot-num/focus/detail',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
 /**
  * JfoGETGroup 分组列表查询接口
  * @param {object} params
@@ -547,6 +555,18 @@ export function getFoothold(params) {
 export function getFaceRetrieval(params) {
   return request({
     url: '/face-retrieval/query',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人体查询接口
+ * @param {object} params
+ */
+export function getFaceRetrievalPerson(params) {
+  return request({
+    url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
     mode: 'judge'

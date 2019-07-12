@@ -50,35 +50,62 @@
               <div class="sd-opts">
                 <div class="sd-opts-title">
                   <h4>区域选择</h4>
-                  <i class="vl_icon vl_icon_portrait_02"></i>
+                  <i class="vl_icon vl_icon_portrait_02" @click="setFitV"></i>
                 </div>
                 <ul>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 1 }" @click="selDrawType(1)">
+                    <div
+                      title="选择矩形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 1 }"
+                      @click="selDrawType(1)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 2 }" @click="selDrawType(2)">
+                    <div
+                      title="选择圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 2 }"
+                      @click="selDrawType(2)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 3 }" @click="selDrawType(3)">
+                    <div
+                      title="选择折线100米范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 3 }"
+                      @click="selDrawType(3)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 4 }" @click="selDrawType(4)">
+                    <div
+                      title="选择多边形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 4 }"
+                      @click="selDrawType(4)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 5 }" @click="selDrawType(5)">
+                    <div
+                      title="选择10公里圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 5 }"
+                      @click="selDrawType(5)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon5"></span>
                     </div>
                   </li>
                 </ul>
+                <p v-if="drawActiveType > 0">
+                  <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
             </el-form-item>
             <!-- 时间 -->
@@ -285,7 +312,8 @@ export default {
       listBayonet: [], // 卡口
       showTypes: "DB", //设备类型
       cameraIds: [], //摄像头
-      bayonetIds: [] //卡口
+      bayonetIds: [], //卡口
+      area: []
     };
   },
   computed: {},
@@ -295,7 +323,7 @@ export default {
     this.getTreeList();
     //加载地图
     this.initMap();
-    this.mapEvents();
+    // this.mapEvents();
   },
   methods: {
     //设置时间
@@ -335,7 +363,10 @@ export default {
               this.bayonetIds.length > 0 &&
               (params["bayonetIds"] = this.bayonetIds.join(","));
           } else {
-            this.$message.error("请选择区域");
+            /* console.log("11111111111111",document.querySelector('.el-message--info')) */
+            if (!document.querySelector(".el-message")) {
+              this.$message.info("请选择区域");
+            }
             return false;
           }
           console.log("-------submitForm-------", params);
@@ -344,7 +375,9 @@ export default {
             .then(res => {
               console.log(res);
               if (res && res.data) {
-                this.$router.push({ name: "portrait_pfcm", query: {selectIndex: 0} });
+                this.$router.push({
+                  name: "portrait_pfcm"
+                });
               }
               this.$nextTick(() => {
                 this.searching = false;
@@ -359,6 +392,44 @@ export default {
           return false;
         }
       });
+    },
+    setFitV() {
+      this.getArea();
+      console.log(this.area);
+      this.amap.setFitView(this.area);
+    },
+    getArea() {
+      this.area = [];
+      // 矩形
+      if (this.drawObj.rectangle) {
+        for (let k in this.drawObj.rectangle) {
+          console.log("------------------", this.drawObj.rectangle[k]);
+          this.area.push(this.drawObj.rectangle[k].obj);
+        }
+      }
+      // 圆形
+      if (this.drawObj.circle) {
+        for (let k in this.drawObj.circle) {
+          this.area.push(this.drawObj.circle[k].obj);
+        }
+      }
+      // 线
+      if (this.drawObj.polyline) {
+        for (let k in this.drawObj.polyline) {
+          this.area.push(this.drawObj.polyline[k].obj);
+        }
+      }
+      // 多边形
+      if (this.drawObj.polygon) {
+        for (let k in this.drawObj.polygon) {
+          this.area.push(this.drawObj.polygon[k].obj);
+        }
+      }
+      if (this.drawObj.circle10km) {
+        for (let k in this.drawObj.circle10km) {
+          this.area.push(this.drawObj.circle10km[k].obj);
+        }
+      }
     },
     drawClear() {
       // 矩形
@@ -448,34 +519,42 @@ export default {
 
       // 在地图中添加MouseTool插件
       this.mouseTool = new window.AMap.MouseTool(map);
+      this.amap.on("click", event => {
+        if(this.drawActiveType === 5) {
+          this.mouseTool.close(true);
+          this.drawClear();
+          this.drawCircle10kmClick(event)
+        }
+      });
       this.mouseTool.on("draw", event => {
         // event.obj 为绘制出来的覆盖物对象
         // console.log('draw event', event);
         let _sid = random14();
+        _this.drawClear();
         //  return
         if (this.drawActiveType === 1) {
           this.drawObj.rectangle[_sid] = {};
           this.drawObj.rectangle[_sid].obj = event.obj;
-          this.drawRectangleMark(_sid, event.obj);
+          // this.drawRectangleMark(_sid, event.obj);
         } else if (this.drawActiveType === 2) {
           this.drawObj.circle[_sid] = {};
           this.drawObj.circle[_sid].obj = event.obj;
-          this.drawCircleMark(_sid, event.obj);
+          // this.drawCircleMark(_sid, event.obj);
         } else if (this.drawActiveType === 3) {
           this.drawObj.polyline[_sid] = {};
           this.drawObj.polyline[_sid].obj = event.obj;
-          this.drawPolylineMark(_sid, event.obj);
+          // this.drawPolylineMark(_sid, event.obj);
         } else if (this.drawActiveType === 4) {
           this.drawObj.polygon[_sid] = {};
           this.drawObj.polygon[_sid].obj = event.obj;
-          this.drawPolygonMark(_sid, event.obj);
+          // this.drawPolygonMark(_sid, event.obj);
         } else if (this.drawActiveType === 5) {
           this.drawObj.circle10km[_sid] = {};
           this.drawObj.circle10km[_sid].obj = event.obj;
         }
-        this.mouseTool.close(false);
-        this.amap.setDefaultCursor();
-        this.drawActiveType = 0;
+        /* this.mouseTool.close(false);
+        this.amap.setDefaultCursor(); */
+        /* this.drawActiveType = 0; */
       });
     },
     selectArea(e) {
@@ -504,7 +583,7 @@ export default {
             _type = Number(nOpt.attr("_type"));
           nOpt.find(".el-icon-edit").hide();
           nOpt.find(".el-icon-check").show();
-          _this.editMarkers(_type, _sid);
+          _this.editMarkers(_type, _sid, 1);
         })
         .on("click", ".el-icon-check", function() {
           // 完成
@@ -551,7 +630,8 @@ export default {
         obj = null;
       }
     },
-    editMarkers(drawType, sid) {
+    editMarkers(drawType, sid, i) {
+      this.type = i;
       if (drawType === 1) {
         // 矩形
         this.drawRectangleEditor(sid);
@@ -597,22 +677,33 @@ export default {
     //选择类型
     selDrawType(drawType) {
       this.drawType = drawType;
+      if (this.drawActiveType !== drawType) {
+        /* this.drawClear(); */
+      } else {
+        this.drawType = "";
+      }
       this.drawActiveType = drawType;
-      if (drawType === 1) {
-        // 矩形
-        this.drawRectangle();
-      } else if (drawType === 2) {
-        // 圆形
-        this.drawCircle();
-      } else if (drawType === 3) {
-        // 折线
-        this.drawPolyline();
-      } else if (drawType === 4) {
-        // 多边形
-        this.drawPolygon();
-      } else if (drawType === 5) {
-        // 多边形
-        this.drawCircle10km();
+      if (!this.drawType) {
+        this.mouseTool.close(false);
+        this.amap.setDefaultCursor();
+        this.drawActiveType = 0;
+      } else {
+        if (drawType === 1) {
+          // 矩形
+          this.drawRectangle();
+        } else if (drawType === 2) {
+          // 圆形
+          this.drawCircle();
+        } else if (drawType === 3) {
+          // 折线
+          this.drawPolyline();
+        } else if (drawType === 4) {
+          // 多边形
+          this.drawPolygon();
+        } else if (drawType === 5) {
+          // 多边形
+          // this.drawCircle10km();
+        }
       }
     },
     // 矩形
@@ -938,10 +1029,15 @@ export default {
     },
     drawCircle10km() {
       this.amap.setDefaultCursor("crosshair");
-      this.amap.on("click", this.drawCircle10kmClick);
+      this.amap.on("click", event => {
+        this.mouseTool.close(false);
+        this.drawClear();
+        this.drawCircle10kmClick(event)
+      });
     },
     drawCircle10kmClick(e) {
       // e.lnglat.getLng()+','+e.lnglat.getLat()
+      this.amap.setDefaultCursor("crosshair");
       let circle = new AMap.Circle({
         center: e.lnglat,
         radius: 1000 * 10, //半径
@@ -957,14 +1053,15 @@ export default {
       this.zIndex += 1;
       circle.setMap(this.amap);
       // 缩放地图到合适的视野级别
-      this.amap.setFitView([circle]);
+      // this.amap.setFitView([circle]);
       let _sid = random14();
       this.drawObj.circle10km[_sid] = {};
       this.drawObj.circle10km[_sid].obj = circle;
-      this.amap.setDefaultCursor();
-      this.drawActiveType = 0;
+      this.map.setDefaultCursor();
+      /* this.drawActiveType = 0; */
       this.amap.off("click", this.drawCircle10kmClick);
-      this.drawCircle10kmMark(_sid, circle);
+      // this.drawCircle10kmMark(_sid, circle);
+      this.checkout(_this.circle,'AMap.circle')
     },
     drawCircle10kmEditor(sid) {
       if (this.drawObj.circle10km[sid]) {
@@ -1437,6 +1534,9 @@ export default {
             }
           }
         }
+        > p {
+          margin: -18px 5px 18px 5px;
+        }
       }
       .sd-opts-icon {
         display: inline-block;
@@ -1445,6 +1545,7 @@ export default {
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 100% 100%;
+        cursor: pointer;
         &.sd-opts-icon1 {
           background-image: url(../../../../assets/img/vehicle/cut1.png);
           &:hover {

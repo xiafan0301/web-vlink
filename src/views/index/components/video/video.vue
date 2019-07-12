@@ -328,16 +328,6 @@ export default {
     width: 25%; height: 25%;
   }
 }
-.vid_icon_ssz { 
-  width: 30px; height: 160px; background-position: -1096px -1280px;
-  &:hover { background-position: -1156px -1280px; }
-  &.vid_icon_sss {
-    background-position: -976px -1280px;
-    &:hover {
-      background-position: -1036px -1280px;
-    }
-  }
-}
 .show_list_empty { padding: 0 20px; color: #999; text-align: center; }
 </style>
 <style lang="scss" scoped>

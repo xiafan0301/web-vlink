@@ -70,7 +70,7 @@
           </el-form-item>
           <el-form-item>
             <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
-            <el-button class="select_btn" @click="searchData('searchForm')">查询</el-button>
+            <el-button class="select_btn" type="primary" @click="searchData('searchForm')">查询</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -477,22 +477,8 @@ export default {
       }
     }
   }
-  .reset_btn {
+  .reset_btn, .select_btn {
     width: 110px;
-    // background-color: #D3D3D3;
-    // color: #666666;
-    // border-radius: 4px;
-    // &:hover {
-    //   background-color: #ffffff;
-    //   color: #0C70F8;
-    //   border-color: #0C70F8;
-    // }
-  }
-  .select_btn {
-    width: 110px;
-    // background-color: #0C70F8;
-    // color: #ffffff;
-    // border-radius: 4px;
   }
 }
 </style>

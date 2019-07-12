@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <div is="vlBreadcrumb" 
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx',query:urldata},
           {name: '过车详情'}]">
       </div>
       <!-- <el-breadcrumb separator=">">
@@ -75,7 +75,7 @@
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
+          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@
       <div class="main">
         <div class="infobox">
           <div class="flex1 bkt mrg10">
-            <div>
+            <div v-if="snapObj.videoPath">
             <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
@@ -179,6 +179,7 @@ export default {
   components: {vlBreadcrumb},
   data() {
     return {
+      urldata:JSON.parse(localStorage.getItem("searchD")),
       curImgIndex: 0,
       showSim: false,
       showimg: true,
@@ -232,6 +233,11 @@ export default {
   },
   mounted() {
     // this.tcDiscuss();
+    // let d= 
+    
+    // this.urldata=
+    console.log(this.urldata);
+    
     this.getSnapDetail()
     this.getArchives()
   },
@@ -247,7 +253,8 @@ export default {
       }else{
         this.$router.push({name:v ,query:{
            plateNo:this.detailData.plateno,
-           imgurl:this.snapObj.storagePath
+           imgurl:this.snapObj.storagePath,
+           modelName:'车辆追踪'
         }});
       }
         
