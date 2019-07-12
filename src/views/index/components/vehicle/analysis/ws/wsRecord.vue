@@ -178,20 +178,8 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', params: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
     },
-    // // 跳至查看违章记录页面
-    // skipBreakRecordPage () {
-    //   this.$store.commit('setBreadcrumbData', {
-    //     breadcrumbData: [
-    //       {name: '车辆侦查', routerName: 'vehicle'},
-    //       {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-    //       { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
-    //       { name: '连续违法详情' }
-    //     ]
-    //   });
-    //   this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
-    // },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
       this.$store.commit('setBreadcrumbData', {

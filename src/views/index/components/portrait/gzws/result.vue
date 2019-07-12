@@ -58,60 +58,6 @@
                   <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
                 </div>
               </li>
-              <!-- <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li> -->
             </ul>
           </div>
         </template>
@@ -159,9 +105,9 @@ export default {
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
-      this.$router.push({name: 'gzws_detail', query: {
-        
-      }})
+      console.log('obj', obj)
+      let queryObj = JSON.stringify(obj);
+      this.$router.push({name: 'gzws_detail', query: {obj: queryObj, id: this.$route.query.id}})
       // this.$router.push({name: 'gzws_detail', query: { 
       //   plateNo: this.searchForm.plateNo,
       //   dateStart: this.deviceStartTime,
