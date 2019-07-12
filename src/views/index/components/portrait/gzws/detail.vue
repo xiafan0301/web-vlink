@@ -1,6 +1,14 @@
 <template>
   <div class="gzws_record">
-    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: {id: $route.query.id}}, {name: '尾随记录'}]">
+      </div>
+    </div>
+    <!-- <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb> -->
     <div class="content_box">
       <div class="left">
         <vue-scroll>
@@ -110,10 +118,10 @@
   </div>
 </template>
 <script>
-import Breadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { random14 } from '@/utils/util.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     return {
       cutDialogVisible: false, // 截屏弹出框
@@ -389,6 +397,10 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .gzws_record {
   height: 100%;
   .content_box {

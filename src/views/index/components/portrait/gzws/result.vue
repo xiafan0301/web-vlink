@@ -1,6 +1,12 @@
 <template>
   <div class="result_container">
-    <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},{name: '分析结果'}]">
+      </div>
+    </div>
     <div class="content_box">
       <div class="left">
         <ul>
@@ -72,11 +78,10 @@
   </div>
 </template>
 <script>
-import Breadcrumb from '../breadcrumb.vue';
-// import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { getTaskInfosDetail } from '@/views/index/api/api.analysis.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     return {
       dataList: [], // 查询的抓拍结果列表
@@ -98,7 +103,6 @@ export default {
               this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
               this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
 
-              console.log(this.taskDetail)
             }
           })
       }
@@ -108,19 +112,15 @@ export default {
       console.log('obj', obj)
       let queryObj = JSON.stringify(obj);
       this.$router.push({name: 'gzws_detail', query: {obj: queryObj, id: this.$route.query.id}})
-      // this.$router.push({name: 'gzws_detail', query: { 
-      //   plateNo: this.searchForm.plateNo,
-      //   dateStart: this.deviceStartTime,
-      //   dateEnd: this.searchForm.dateEnd,
-      //   plateNoTb: obj.plateNo,
-      //   dateStartTb: obj.shotTime
-      //  }});
-    },
-    
+    }
   }
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .result_container {
   height: 100%;
   .content_box {
