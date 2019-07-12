@@ -2,6 +2,24 @@
 import Vue from 'vue';
 import {formatDate} from './util.js';
 /*
+ * 求百分比
+ * */
+Vue.filter('fnPercent', function (val, total) {
+  if (isNaN(val) || isNaN(total)) { return ''; }
+  return Math.round(val / total * 100) + '%';
+});
+/*
+ * 时间戳处理
+ * */
+Vue.filter('transSeconds', function (seconds) {
+  let iH = Math.floor(seconds / (60 * 60));
+  let iM = Math.floor((seconds - iH * 60 * 60) / 60);
+  let iS = seconds % 60;
+  return ((iH < 10) ? ('0' + iH) : iH) + ':' +
+  ((iM < 10) ? ('0' + iM) : iM) + ':' +
+  ((iS < 10) ? ('0' + iS) : iS);
+});
+/*
  * 时间戳处理
  * */
 Vue.filter('fmTimestamp', function (timestamp, fm) {
@@ -9,14 +27,16 @@ Vue.filter('fmTimestamp', function (timestamp, fm) {
 });
 /*
  * 数量处理
+ * @param {int} number 熟练
+ * @param {string} currency 单位
  * */
-Vue.filter('fmTenThousand', function (numer, currency) {
-  if (isNaN(numer)) { return 0; }
-  if (numer < 10000) { return numer; }
+Vue.filter('fmTenThousand', function (number, currency) {
+  if (isNaN(number)) { return 0; }
+  if (number < 10000) { return number; }
   if (!currency) { currency = '万'; }
-  numer = Math.round((numer / 10000) * 100) / 100;
-  numer = numer + currency;
-  return numer;
+  number = Math.round((number / 10000) * 100) / 100;
+  number = number + currency;
+  return number;
 });
 /*
  * 截取字符串
@@ -48,4 +68,24 @@ Vue.filter('strCutWithLen', function (str, len, clen, siff) {
     }
   }
   return srtn;
+});
+/*
+ * 手机号安全处理
+ * @param {int|string} mobile 手机号
+ * */
+Vue.filter('mobileSecurity', function (mobile) {
+  if (mobile && mobile > 0) {
+    if (!mobile || mobile.length < 7) { return mobile; }
+    mobile = mobile + '';
+    if (mobile.length > 7) {
+      let str = '';
+      str = mobile.substring(0, 3);
+      for (let i = 0; i < mobile.length - 7; i++) {
+        str += '*';
+      }
+      str += mobile.substring(mobile.length - 4, mobile.length);
+      return str;
+    }
+  }
+  return mobile;
 });

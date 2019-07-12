@@ -5,6 +5,7 @@
 :after,:before { box-sizing: border-box }
 html, body{
   margin: 0; padding: 0;
+  font-size: 14px; color: #333;
   font-family: "Microsoft YaHei","微软雅黑","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB",Arial,sans-serif;
 }
 
@@ -73,9 +74,29 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
  * common style
  * start with com-
  */
-.com-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all; }
-.com-keepall { word-break:keep-all; white-space:nowrap; }
-.com-trans50-l {
+.com_ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: break-all; }
+.com_keepall { word-break:keep-all; white-space:nowrap; }
+
+/* 
+ * 高度适应宽度,可调整 padding-top: 100% 控制高度大小, 默认100%与宽度一致
+ */
+.com_width_to_height {
+  position: relative;
+  width: 100%; height: 0;
+  padding-top: 100%;
+}
+.com_width_to_height > div { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+.com_width_to_height > div > div {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+}
+.com_width_to_height > div > div > img {
+  visibility: visible;
+  width: 100%; height: 100%;
+}
+
+.com_trans50_l {
   position: absolute; left: 50%;
   -webkit-transform: translate3d(-50%, 0, 0);
   -moz-transform: translate3d(-50%, 0, 0);
@@ -83,7 +104,7 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
   -o-transform: translate3d(-50%, 0, 0);
   transform: translate3d(-50%, 0, 0);
 }
-.com-trans50-t {
+.com_trans50_t {
   position: absolute; top: 50%;
   -webkit-transform: translate3d(0, -50%, 0);
   -moz-transform: translate3d(0, -50%, 0);
@@ -91,13 +112,90 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
   -o-transform: translate3d(0, -50%, 0);
   transform: translate3d(0, -50%, 0);
 }
-.com-trans50-lt {
+.com_trans50_lt {
   position: absolute; top: 50%; left: 50%;
   -webkit-transform: translate3d(-50%, -50%, 0);
   -moz-transform: translate3d(-50%, -50%, 0);
   -ms-transform: translate3d(-50%, -50%, 0);
   -o-transform: translate3d(-50%, -50%, 0);
   transform: translate3d(-50%, -50%, 0);
+}
+
+/* ========== animation ========== */
+/* fadeIn */
+@-webkit-keyframes fadeIn {
+  0% { opacity: 0; }
+  100%{opacity: 1; }
+}
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100%{opacity: 1; }
+}
+/* fadeInUp */
+@-webkit-keyframes fadeInUp {
+  0% { opacity: 0; -webkit-transform: translate3d(0, 100%, 0); transform: translate3d(0, 100%, 0); }
+  100%{ -webkit-transform:none; transform:none; opacity:1; }
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; -webkit-transform: translate3d(0, 100%, 0); transform: translate3d(0, 100%, 0); }
+  100%{ -webkit-transform:none; transform:none; opacity:1; }
+}
+@-webkit-keyframes fadeInUpControl {
+  0% { opacity: 0; -webkit-transform: translate3d(0, 40%, 0); transform: translate3d(0, 40%, 0); }
+  100%{ -webkit-transform:none; transform:none; opacity:0.5; }
+}
+@keyframes fadeInUpControl {
+  0% { opacity: 0; -webkit-transform: translate3d(0, 40%, 0); transform: translate3d(0, 40%, 0); }
+  100%{ -webkit-transform:none; transform:none; opacity:0.5; }
+}
+/* fadeInDown */
+@-webkit-keyframes fadeInDown {
+  0% { opacity: 0; -webkit-transform: translate3d(0,-100%, 0); transform: translate3d(0, -100%, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+@keyframes fadeInDown {
+  0% { opacity: 0; -webkit-transform: translate3d(0, -100%, 0); transform: translate3d(0, -100%, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+/* fadeInLeft */
+@-webkit-keyframes fadeInLeft {
+  0% { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+@keyframes fadeInLeft {
+  0% { opacity: 0; -webkit-transform: translate3d(-100%, 0, 0); transform: translate3d(-100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+/* fadeInRight */
+@-webkit-keyframes fadeInRight {
+  0% { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+@keyframes fadeInRight {
+  0% { opacity: 0; -webkit-transform: translate3d(100%, 0, 0); transform: translate3d(100%, 0, 0); }
+  100%{opacity:1; -webkit-transform:none; transform:none; }
+}
+/* 闪烁 */
+@-webkit-keyframes twinkle {
+  0% { opacity: 1; }
+  50%{ opacity: 0; }
+  100%{ opacity: 1; }
+}
+@keyframes twinkle {
+  0% { opacity: 1; }
+  50%{ opacity: 0; }
+  100%{ opacity: 1; }
+}
+/* 圆圈波浪 */
+@keyframes circleWave {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 

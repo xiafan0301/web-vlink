@@ -4,12 +4,39 @@ export const km2 = (m) => {
   return (m / 1000).fixed(2);
 };
 /**
+ * 零点的时间戳
+ * @param {boolean} flag true: 结束，false：开始
+ * @param {date} date 时间
+ * */
+export const dateOrigin = (flag, date) => {
+  if (!date) { date = new Date(); }
+  date.setHours(flag ? 23 : 0);
+  date.setMinutes(flag ? 59 : 0);
+  date.setSeconds(flag ? 59 : 0);
+  date.setMilliseconds(flag ? 999 : 0);
+  return date;
+};
+/**
  * 随机数，10位时间戳 连接4位随机整数 e.g. 1428910956 + "" +3482
- * @example $.zUtils.random14(newTime);
  * */
 export const random14 = () => {
   return Math.round(new Date().getTime() / 1000) + '' + Math.floor(Math.random() * 9000 + 1000);
 };
+
+/**
+ * @summary 根据时间及格式获取时间的字符串
+ * @param {int|string} mDate 时间戳或格式化时间（yyyy-MM-dd HH:mm:ss）
+ * @return {date} 时间
+ * @example
+ *    formatDate(new Date(),'yyyy-MM-dd HH:mm:ss SSS');// 2017-6-6 11:11:11
+ */
+export const getDate = (mDate) => {
+  if (!mDate) { return ''; }
+  if (typeof iDate === 'string') {
+    mDate = mDate.replace(/-/g, '/');
+  }
+  return new Date(mDate);
+}
 
 /**
  * @summary 根据时间及格式获取时间的字符串
@@ -38,6 +65,43 @@ export const formatDate = (iDate, sFormat = 'yyyy-MM-dd HH:mm:ss') => {
   if (second < 10) { second = '0' + second; }
   let millisecond = dDate.getMilliseconds();// 毫秒
   if (sFormat.indexOf('yyyy') >= 0) { sFormat = sFormat.replace('yyyy', year + ''); }
+  if (sFormat.indexOf('yy') >= 0) { sFormat = sFormat.replace('yy', (year + '').slice(2, 4)); }
+  if (sFormat.indexOf('MM') >= 0) { sFormat = sFormat.replace('MM', month + ''); }
+  if (sFormat.indexOf('dd') >= 0) { sFormat = sFormat.replace('dd', date + ''); }
+  if (sFormat.indexOf('HH') >= 0) { sFormat = sFormat.replace('HH', hour + ''); }
+  if (sFormat.indexOf('mm') >= 0) { sFormat = sFormat.replace('mm', minute + ''); }
+  if (sFormat.indexOf('ss') >= 0) { sFormat = sFormat.replace('ss', second + ''); }
+  if (sFormat.indexOf('SSS') >= 0) { sFormat = sFormat.replace('SSS', millisecond + ''); }
+  return sFormat;
+};
+/**
+ * @summary 根据时间及格式获取时间的字符串     ES检索服务
+ * @param {int} iDate 时间
+ * @param {string} sFormat 格式，默认：yyyy-MM-dd-HH-mm-ss
+ * @return {string} 格式化后的日期字符串
+ * @example
+ *    formatDate(new Date(),'yyyy-MM-dd HH:mm:ss SSS');// 2017-6-6 11:11:11
+ */
+export const formatESDate = (iDate, sFormat = 'yyyy-MM-dd-HH-mm-ss') => {
+  if (!iDate) { return ''; }
+  if (typeof iDate === 'string') {
+    iDate = iDate.replace(/-/g, '/');
+  }
+  let dDate = new Date(iDate);
+  let year = dDate.getFullYear();// 年
+  let month = dDate.getMonth() + 1;// 月
+  if (month < 10) { month = '0' + month; }
+  let date = dDate.getDate();// 日
+  if (date < 10) { date = '0' + date; }
+  let hour = dDate.getHours();// 时
+  if (hour < 10) { hour = '0' + hour; }
+  let minute = dDate.getMinutes();// 分
+  if (minute < 10) { minute = '0' + minute; }
+  let second = dDate.getSeconds();// 秒
+  if (second < 10) { second = '0' + second; }
+  let millisecond = dDate.getMilliseconds();// 毫秒
+  if (sFormat.indexOf('yyyy') >= 0) { sFormat = sFormat.replace('yyyy', year + ''); }
+  if (sFormat.indexOf('yy') >= 0) { sFormat = sFormat.replace('yy', (year + '').slice(2, 4)); }
   if (sFormat.indexOf('MM') >= 0) { sFormat = sFormat.replace('MM', month + ''); }
   if (sFormat.indexOf('dd') >= 0) { sFormat = sFormat.replace('dd', date + ''); }
   if (sFormat.indexOf('HH') >= 0) { sFormat = sFormat.replace('HH', hour + ''); }
@@ -212,3 +276,71 @@ export const getLunarDateString = (lunarDate) => {
   }
   return data;
 }
+// 深度拷贝
+export const objDeepCopy = (obj) => { //递归拷贝
+  if(obj === null) return null; //null 的情况
+  if(obj instanceof RegExp) return new RegExp(obj);
+  if(obj instanceof Date) return new Date(obj);
+  if(typeof obj !== 'object') {
+      //如果不是复杂数据类型，直接返回
+      return obj;
+  }
+  /**
+   * 如果obj是数组，那么 obj.constructor 是 [Function: Array]
+   * 如果obj是对象，那么 obj.constructor 是 [Function: Object]
+   */
+  let t = new obj.constructor();
+  for(let key in obj) {
+      //如果 obj[key] 是复杂数据类型，递归
+      t[key] = objDeepCopy(obj[key]);
+  }
+  return t;
+}
+// 数组去重
+export const unique = (array) => {
+  let obj = {}, resultArray = [];
+  resultArray = array.reduce((item, next) => {
+    if (!obj[next.uid]) {
+      obj[next.uid] = true;
+      item.push(next);
+    }
+    return item;
+  }, []);
+  return resultArray;
+}
+
+// 数组转树结构方法
+export const translateDataToTree = (data) => {
+  let parents = data.filter(value => value.parentId === 'undefined' || value.parentId === null)
+  let children = data.filter(value => value.parentId !== 'undefined' && value.parentId !== null)
+  let translator = (parents, children) => {
+    parents.forEach((parent) => {
+      children.forEach((current, index) => {
+        if (current.parentId === parent.id) {
+          let temp = objDeepCopy(children);//深度拷贝
+          temp.splice(index, 1)
+          translator([current], temp)
+          typeof parent.children !== 'undefined' ? parent.children.push(current) : parent.children = [current]
+        }
+      })
+    })
+  }
+  translator(parents, children)
+  return parents
+}
+
+/**
+ * 自动创建一个a标签下载/导出文件
+ */
+export const autoDownloadUrl = (url) => {
+  let a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.target = '_self';
+  a.onload = function () {
+    document.body.removeChild(a);
+  }
+  document.body.appendChild(a);
+  a.click();
+}
+
