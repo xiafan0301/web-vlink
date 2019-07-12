@@ -122,7 +122,6 @@
                   </li>
                   <li>
                     <div
-                      style="cursor: not-allowed;"
                       :class="{'sd-opts-sed': item.drawActiveType === 5 }"
                       @click="selDrawType(5, index)"
                     >
@@ -143,6 +142,7 @@
                     :picker-options="startDateOptArr[index]"
                     placeholder="开始时间"
                     class="width212px"
+                    @change="timeChange(index)"
                   ></el-date-picker>
                 </div>
                 <div class="time-search">
@@ -156,6 +156,7 @@
                     default-time="23:59:59"
                     placeholder="结束时间"
                     class="width212px"
+                    @change="timeChange(index, 'end')"
                   ></el-date-picker>
                 </div>
               </div>
@@ -181,7 +182,6 @@
         <!-- 地图信息 -->
         <div class="gis_content" id="gis_content">
           <div class="map_rm" id="mapMap"></div>
-
           <!-- 地图控制按钮（放大，缩小，定位） -->
           <div class="map_control">
             <!-- 摄像头拍摄数量 -->
@@ -231,7 +231,12 @@
           <vue-scroll>
             <h3
               class="camera_name"
-            >{{ selectedDevice.deviceName + '(' + currentClickDevice.shotNum + '次)' }}</h3>
+            >
+            <span>{{ selectedDevice.deviceName }}</span>
+            &nbsp;
+            <span>{{'(' + currentClickDevice.shotNum + '次)'}}</span>
+            <i class="el-icon-close" @click="infoRightShow = false;" title="关闭"></i>
+            </h3>
             <div class="danger_people_list">
               <div
                 class="people_item"
@@ -255,7 +260,7 @@
                           <el-option
                             v-for="(gItem, gIndex) in item.detailList"
                             :key="gIndex"
-                            :label="gIndex + 1"
+                            :label="item.shotTimes[gIndex]"
                             :value="gIndex"
                           ></el-option>
                         </el-select>
@@ -365,12 +370,14 @@ export default {
           disabledDate: time => {
             if (this.drawObj[0].endTime) {
               return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
+                // ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -388,7 +395,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -473,6 +480,7 @@ export default {
       // 选择地图
       drawType: 0,
       amap: null, // 地图对象
+      markerList: [], // 设备卡口标记的数组
       mouseTool: null,
       drawType: 0,
       currenDrawobj: 0, // 当前的时间区域
@@ -528,6 +536,32 @@ export default {
     });
   },
   methods: {
+    // 日期控制
+    timeChange(ind, type = "start") {
+      this.$nextTick(() => {
+        if (this.drawObj[ind].startTime && this.drawObj[ind].endTime) {
+          if (
+            new Date(this.drawObj[ind].endTime).getTime() -
+              new Date(this.drawObj[ind].startTime).getTime() >
+            3 * 24 * 3600 * 1000
+          ) {
+            this.$message.warning("最大选择时间段为三天");
+            if (type === "start") {
+              this.drawObj[ind].endTime = formatDate(
+                new Date(this.drawObj[ind].startTime).getTime() +
+                  3600 * 1000 * 24 * 3
+              );
+            } else {
+              this.drawObj[ind].startTime = formatDate(
+                new Date(this.drawObj[ind].endTime).getTime() -
+                  3600 * 1000 * 24 * 3
+              );
+            }
+          }
+        }
+      });
+    },
+    // 切换照片
     prev(val) {
       const ind = this.cameraPhotoList[val].detailList.length - 1;
       if (this.cameraPhotoList[val].currentIndex === 0) {
@@ -598,12 +632,14 @@ export default {
           disabledDate: time => {
             if (this.drawObj[0].endTime) {
               return (
-                time.getTime() > new Date(this.drawObj[0].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[0].endTime).getTime()
+                // ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -621,7 +657,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -648,7 +684,6 @@ export default {
       // 校验每一个时间区域中是否都有设备存在
       for (let j = 0; j < this.totalData.length; j++) {
         const area = this.totalData[j];
-        // console.log('area', area.ad.map(item => item.uid));
         if (area.ab.length <= 0 && area.ad.length <= 0) {
           this.$message.warning(
             `您在第${j + 1}个选择区域未选中设备，请您重新选择`
@@ -678,14 +713,25 @@ export default {
         ...this.qyryfxFrom,
         deviceAndTimeList: deviceAndTimeList
       };
-      // console.log("检索摄像头", this.totalData);
       postShotNumArea(queryParams)
         .then(res => {
-          if (res) {
-            this.setMarks(res.data);
+          if (res && res.data) {
+            if (res.data.length) {
+              this.clearMarkList(); // 清除地图标记
+              this.setMarks(res.data, false);
+            } else {
+              this.clearMarkList(); // 清除地图标记
+              this.setMarks();
+            }
+          } else {
+            this.clearMarkList(); // 清除地图标记
+            this.setMarks();
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          this.clearMarkList(); // 清除地图标记
+          this.setMarks();
+        });
     },
     /** 点击摄像头查看此摄像头抓拍详情信息 */
     clickGetCameraData(device) {
@@ -781,13 +827,14 @@ export default {
           disabledDate: time => {
             if (this.drawObj[index].endTime) {
               return (
-                time.getTime() >
-                  new Date(this.drawObj[index].endTime).getTime() ||
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                time.getTime() > new Date(this.drawObj[index].endTime).getTime()
+                //   ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3
+                // ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -806,7 +853,7 @@ export default {
               );
             } else {
               return (
-                time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
+                // time.getTime() < new Date().getTime() - 3600 * 1000 * 24 * 3 ||
                 time.getTime() > new Date().getTime()
               );
             }
@@ -1593,6 +1640,7 @@ export default {
           if (this.drawObj[index].polyline) {
             for (let k in this.drawObj[index].polyline) {
               let so = this.drawObj[index].polyline[k];
+              console.log('线', so);
               if (
                 window.AMap.GeometryUtil.distanceToLine(
                   new window.AMap.LngLat(o.longitude, o.latitude),
@@ -1720,6 +1768,7 @@ export default {
       getAllMonitorList({ ccode: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listDevice = res.data;
+          this.setMarks(); // 初始化设备
         }
       });
     },
@@ -1728,65 +1777,110 @@ export default {
       getAllBayonetList({ areaId: mapXupuxian.adcode }).then(res => {
         if (res) {
           this.listBayonet = res.data;
+          this.setMarks(); // 初始化卡口
         }
       });
     },
     // D设备 B卡口
-    setMarks(deviceList) {
+    setMarks(deviceList = null, init = true) {
       // 展示设备和卡口
-      for (let i = 0; i < this.listDevice.length; i++) {
-        const listItem = this.listDevice[i];
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt");
+      if (init) {
+        // 初始化的时候展示所有的设备
+        for (let i = 0; i < this.listDevice.length; i++) {
+          this.doMark(this.listDevice[i], deviceList, "vl_icon vl_icon_sxt");
+        }
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          this.doMark(this.listBayonet[i], deviceList, "vl_icon vl_icon_kk");
+        }
+        this.amap.setFitView();
+      } else {
+        for (let i = 0; i < this.listDevice.length; i++) {
+          const listItem = this.listDevice[i];
+          let flag = false;
+          for (let j = 0; j < deviceList.length; j++) {
+            const deviceItem = deviceList[j];
+            if (deviceItem.groupName === listItem.viewClassCode) {
+              this.doMark(listItem, deviceItem, "vl_icon vl_icon_sxt", false);
+              flag = true;
+              break;
+            }
+          }
+          if (!flag) {
+            this.doMark(this.listDevice[i], null, "vl_icon vl_icon_sxt");
+          }
+        }
+        for (let i = 0; i < this.listBayonet.length; i++) {
+          const listItem = this.listBayonet[i];
+          let flag = false;
+          for (let j = 0; j < deviceList.length; j++) {
+            const deviceItem = deviceList[j];
+            if (deviceItem.groupName === listItem.viewClassCode) {
+              this.doMark(listItem, deviceItem, "vl_icon vl_icon_kk", false);
+              flag = true;
+              break;
+            }
+          }
+          if (!flag) {
+            this.doMark(this.listBayonet[i], null, "vl_icon vl_icon_kk");
           }
         }
       }
-      for (let i = 0; i < this.listBayonet.length; i++) {
-        const listItem = this.listBayonet[i];
-        for (let j = 0; j < deviceList.length; j++) {
-          const deviceItem = deviceList[j];
-          if (deviceItem.groupName === listItem.viewClassCode) {
-            this.doMark(this.listBayonet[i], "vl_icon vl_icon_kk");
-          }
-        }
-      }
-      this.amap.setFitView();
     },
     // 地图标记
-    doMark(obj, device, sClass) {
-      let level;
-      if (device.shotNum < 20) {
-        level = "level6";
-      } else if (device.shotNum <= 50 && device.shotNum >= 20) {
-        level = "level5";
-      } else if (device.shotNum <= 100 && device.shotNum >= 51) {
-        level = "level4";
-      } else if (device.shotNum <= 200 && device.shotNum >= 101) {
-        level = "level3";
-      } else if (device.shotNum <= 500 && device.shotNum >= 201) {
-        level = "level2";
-      } else if (device.shotNum > 500) {
-        level = "level1";
+    doMark(obj, device, sClass, init = true) {
+      let marker;
+      if (!init) {
+        // 非初始化的状态
+        let level;
+        if (device.shotNum < 20) {
+          level = "level6";
+        } else if (device.shotNum <= 50 && device.shotNum >= 20) {
+          level = "level5";
+        } else if (device.shotNum <= 100 && device.shotNum >= 51) {
+          level = "level4";
+        } else if (device.shotNum <= 200 && device.shotNum >= 101) {
+          level = "level3";
+        } else if (device.shotNum <= 500 && device.shotNum >= 201) {
+          level = "level2";
+        } else if (device.shotNum > 500) {
+          level = "level1";
+        }
+        marker = new window.AMap.Marker({
+          // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // extData: obj,
+          // 自定义点标记覆盖物内容
+          content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
+        });
+        this.currentClickDevice = device;
+        let _this = this;
+        // 给标记绑定一个点击事件
+        marker.on("click", function() {
+          _this.selectedDevice = obj;
+          _this.clickGetCameraData(obj);
+        });
+        this.markerList = [...this.markerList, marker];
+      } else {
+        marker = new window.AMap.Marker({
+          // 添加自定义点标记
+          map: this.amap,
+          position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
+          offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
+          draggable: false, // 是否可拖动
+          // extData: obj,
+          // 自定义点标记覆盖物内容
+          content: `<div class="map_icons ${sClass}"></div>`
+        });
+        this.markerList = [...this.markerList, marker];
       }
-      let marker = new window.AMap.Marker({
-        // 添加自定义点标记
-        map: this.amap,
-        position: [obj.longitude, obj.latitude], // 基点位置 [116.397428, 39.90923]
-        offset: new window.AMap.Pixel(-20, -48), // 相对于基点的偏移位置
-        draggable: false, // 是否可拖动
-        // extData: obj,
-        // 自定义点标记覆盖物内容
-        content: `<div class='qyryfx_vl_icon_wrap'> <div class="map_icons ${sClass}"></div> <div class='people_counts_l1 ${level}'> ${device.shotNum}人次 </div> </div>`
-      });
-      console.log("数量", device.shotNum);
-      this.currentClickDevice = device;
-      let _this = this;
-      marker.on("click", function() {
-        _this.selectedDevice = obj;
-        _this.clickGetCameraData(obj);
-      });
+    },
+    clearMarkList() {
+      for (let i = 0; i < this.markerList.length; i++) {
+        this.amap.remove(this.markerList[i]);
+      }
     }
   },
   beforeDestroy() {
@@ -1797,7 +1891,7 @@ export default {
   watch: {
     cameraPhotoList: {
       handler(newName, oldName) {
-        console.log("obj.a changed");
+        // console.log("obj.a changed");
       },
       immediate: true,
       deep: true
@@ -2218,6 +2312,16 @@ export default {
           color: #333333;
           border-bottom: 1px solid #d3d3d3;
           width: 428px;
+          position: relative;
+          >i {
+            position: absolute;
+            z-index: 10;
+            right: 0;
+            font-size: 16px;
+            top: 20px;
+            color: #999;
+            cursor: pointer;
+          }
         }
         .danger_people_list {
           padding-top: 28px;

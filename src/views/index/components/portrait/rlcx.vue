@@ -135,7 +135,7 @@
 import { mapXupuxian } from "@/config/config.js";
 import vehicleBreadcrumb from './breadcrumb.vue';
 import mapSelector from '@/components/common/mapSelector.vue';
-import {getFaceRetrieval} from '../../api/api.judge.js';
+import {getFaceRetrieval, getFaceRetrievalPerson} from '../../api/api.judge.js';
 import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
@@ -279,7 +279,8 @@ export default {
           deviceIds: this.dIds.join(',')
         });
       }
-      getFaceRetrieval(params).then(res => {
+      // getFaceRetrieval getFaceRetrievalPerson
+      getFaceRetrievalPerson(params).then(res => {
         if (res && res.data) {
           this.dataList = res.data.list;
           this.pagination.total = res.data.total;
