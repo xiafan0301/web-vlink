@@ -192,6 +192,7 @@ export default {
 
       _this.setMarks();
     },
+    // 编辑 删除 完成事件
     mapEvents () {
       let _this = this, nContent = $('#' + this.sid);
       // el-icon-edit el-icon-close el-icon-check
