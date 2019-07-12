@@ -115,6 +115,7 @@
       </div>
     </div>
     <div class="right">
+      <div v-if="!isNull">
       <h3 class="title">查询结果</h3>
       <el-table
       :data="tableData"
@@ -152,6 +153,12 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
+    <div v-if="isNull" class="fnull">
+      <div><img src="../../../../../assets/img/null-content.png" alt="">
+      请在左侧输入查询条件</div>
+       
+    </div>
     <!-- <el-pagination
       class="cum_pagination"
       @size-change="handleSizeChange"
@@ -203,6 +210,7 @@ export default {
             return time.getTime() > Date.now() || time.getTime() < threeMonths;
           }
         },
+        isNull:true,
       pricecode:cityCode,
       input5: "1",
       dialogVisible: false,
@@ -215,7 +223,6 @@ export default {
         dateEnd:'',
         _vehicleGroup:'',
         vehicleClass:'',
-        devIds:'',
         include:1,
         _include:0,
         plateNo:'',
@@ -251,6 +258,24 @@ export default {
     this.getGroups()
     let dic=this.dicFormater(dataList.vehicleType);
     this.vehicleOptions= [...dic[0].dictList]
+    let vd= JSON.parse(localStorage.getItem("searchD"))
+    if(vd && this.$route.query.dateStart){
+      this.getSnapList(vd)
+      this.ruleForm= {
+        dateStart:this.$route.query.dateStart,
+        dateEnd:this.$route.query.dateEnd,
+        _vehicleGroup:this.$route.query.vehicleGroup?this.$route.query.vehicleGroup.split(","):'',
+        vehicleClass:this.$route.query.vehicleClass,
+        include:this.$route.query.include,
+        _include:0,
+        plateNo:this.$route.query.plateNo?this.$route.query.plateNo.substr(1,10):"",
+        pageNum:1,
+        pageSize:10,
+      }
+      this.value1 = this.$route.query.areaIds?this.$route.query.areaIds.split(","):''
+      this.select=this.$route.query.plateNo?this.$route.query.plateNo.substr(0,1):""
+    }
+    
   },
   methods: {
     //设置默认时间
@@ -306,7 +331,7 @@ export default {
       })  
     },
     //查询车辆
-    getSnapList(){
+    getSnapList(v){
       this.isload=true
       if(!this.ruleForm.dateStart || !this.ruleForm.dateEnd){
         this.$message.error("请输入开始时间和结束时间!");
@@ -326,8 +351,13 @@ export default {
       let d = JSON.stringify(this.ruleForm)
       d = JSON.parse(d)
       d.plateNo= this.select+this.ruleForm.plateNo 
-      // localStorage.setItem("searchD",JSON.stringify(d))
+      if(v){
+        d=v
+      }else{
+        localStorage.setItem("searchD",JSON.stringify(d))
+      }
       getSnapList(d).then(res=>{
+         this.isNull=false
         if(res && res.data && res.data.length>0){
           this.isload=false
           // console.log(res.data);
@@ -394,23 +424,15 @@ export default {
       this.select=""
       this.ruleForm._vehicleGroup="" 
       this.ruleForm.vehicleClass="" 
-      this.ruleForm.devIds="" 
       this.ruleForm.include="" 
       this.ruleForm._include="" 
       this.ruleForm.plateNo="" 
-      //   = {
-      //   _vehicleGroup:'',
-      //   vehicleClass:'',
-      //   devIds:'',
-      //   include:1,
-      //   _include:0,
-      //   plateNo:'',
-      // }
       this.setDTime()
     },
     submitForm(){
       this.ruleForm.include=this.ruleForm._include?0:1
       // console.log(this.ruleForm);
+     
       this.getSnapList()
       
     },
@@ -432,6 +454,21 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.fnull{
+  text-align: center;
+  line-height: 48px;
+  font-size: 16px;
+  color: #666666;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  height: 100%;;
+  img{
+    display: block;
+    margin: auto;
+    padding-bottom: 10px;
+  }
+}
 .point {
   width: 100%;
   height: 100%;

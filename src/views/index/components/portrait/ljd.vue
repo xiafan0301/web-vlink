@@ -253,7 +253,7 @@ export default {
             }else if(m == 2){
               o=28
             }
-            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
+            start = (y - 1) + '-' + m + '-' + (d - 2 + o);
           }
           threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
