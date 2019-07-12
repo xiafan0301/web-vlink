@@ -41,7 +41,8 @@ export default {
       },
       checked: false,
       tabIndex: 1, // select 下拉 tab 切换下标
-      treeList: []
+      treeList: [],
+      selectNum: null
     }
   },
   created () {
@@ -91,6 +92,20 @@ export default {
               })
             }
           })
+          // 获取设备和卡口总数
+          let arr = [];
+          this.selectNum = this.treeList.forEach(f => {
+            if (f.children) {
+              f.children.forEach(c => {
+                if (c.children) {
+                  c.children.forEach(a => {
+                    arr.push(a)
+                  })
+                }
+              })
+            }
+          })
+          this.selectNum = arr.length;
           this.checked = true;
           this.$nextTick(() => {
             this.checkedAll();//  全选
@@ -118,19 +133,8 @@ export default {
     removeSeletedDev (data) {
       this.$refs.selectTree.setChecked(data, false);
       this.$emit('sendSelectData', this.selObj);
+      this.$emit('allSelectLength', this.selectNum);
     },
-    // 数组去重
-    // unique (array) {
-    //   let obj = {}, resultArray = [];
-    //   resultArray = array.reduce((item, next) => {
-    //     if (!obj[next.id]) {
-    //       obj[next.id] = true;
-    //       item.push(next);
-    //     }
-    //     return item;
-    //   }, []);
-    //   return resultArray;
-    // },
     // 切换下拉列表的选中状态并关联到select上
     changeSeletedStatus () {
       let data = [], obj = null;
@@ -138,12 +142,11 @@ export default {
         data.push(f);
       })
       data = data.filter(f => !f.children);
-      console.log(data, 'datadatadatadata')
-      // data = this.unique(data);
       this.selObj.selSelectedData1 = data.filter(f => f.type === 1);
       this.selObj.selSelectedData2 = data.filter(f => f.type === 2);
       this.devIdData = data;
       this.$emit('sendSelectData', this.selObj);
+      this.$emit('allSelectLength', this.selectNum);
     }
   }
 }
