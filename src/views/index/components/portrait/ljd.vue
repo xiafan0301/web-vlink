@@ -266,7 +266,7 @@ export default {
       /* 上传图片变量 */
       uploadAcion: ajaxCtx.base + "/new", //上传路径
       uploading: false, // 是否上传中
-      curImageUrl: "http://file.aorise.org/vlink/image/1ce01a07-e6c9-428d-9bfd-3bf7dc42b741.jpg", // 当前上传的图片
+      curImageUrl: "", // 当前上传的图片
       historyPicList: [], // 上传历史记录
       selectedHistoryPic: null, // 当前选中的历史图片
       historyPicDialog: false,
@@ -284,7 +284,7 @@ export default {
       hideleft: false,
       ruleForm: {
         data1: null,
-        minFootholdTimes: 1,
+        minFootholdTimes: 3,
         input5: "1",
         value1: null
       },
