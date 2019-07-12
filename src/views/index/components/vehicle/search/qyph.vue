@@ -27,14 +27,13 @@
         <div style="width: 272px;height: 100%;">
           <div class="search_main">
               <!--区域选择-->
-              <div class="search_line">
-                <span class="red_star">区域:</span>
-                <span @click="activeArea = true" class="choose_btn vl_icon vl_icon_041"></span>
-                <span class="choose_btn el-icon-delete" @click="delDialog = true"></span>
-                <span class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></span>
-                <div class="drawBox" v-show="activeArea">
+              <div class="search_line_ts">
+                <div class="title">
+                  <span class="red_star">区域:</span>
+                  <span class="choose_btn el-icon-location-outline" @click="setFitV" :class="{'not-active': !searchData.area}"></span>
+                </div>
+                <div class="drawBox">
                   <div class="items">
-                    <span class="el-icon-arrow-left" @click="activeArea = false"></span>
                     <span @click="clickTab('cut1')" :class="['cut1',{'hover':hover=='cut1'}]"></span>
                     <span @click="clickTab('cut2')"  :class="['cut2',{'hover':hover=='cut2'}]"></span>
                     <span @click="clickTab('cut3')"  :class="['cut3',{'hover':hover=='cut3'}]"></span>
@@ -76,6 +75,12 @@
           </div>
         </div>
       </div>
+      <!--地图操作按钮-->
+      <ul class="map_rrt_u2">
+        <li @click="resetZoom"><i class="el-icon-aim"></i></li>
+        <li @click="mapZoomSet(1)"><i class="el-icon-plus"></i></li>
+        <li @click="mapZoomSet(-1)"><i class="el-icon-minus"></i></li>
+      </ul>
     </div>
     <el-dialog
       title="清除确认"
@@ -109,7 +114,7 @@
           area: null, // 区域
           startTime: '',
           endTime: '',
-          minTimes: 3// 最少次数
+          minTimes: 5// 最少次数
         },
         pickerOptions: {
           disabledDate (time) {
@@ -159,6 +164,16 @@
 
     },
     methods: {
+      mapZoomSet (val) {
+        if (this.map) {
+          this.map.setZoom(this.map.getZoom() + val);
+        }
+      },
+      resetZoom () {
+        if (this.map) {
+          this.map.setZoomAndCenter(14, mapXupuxian.center);
+        }
+      },
       querySearch(queryString, cb) {
         //this.seacher(queryString)
 
@@ -438,8 +453,9 @@
       },
 
       resetS () {
-        this.searchData.minTimes = '';
+        this.searchData.minTimes = 5;
         this.clearArea();
+        this.setDTime();
       },
       setDTime () {
         let date = new Date();
@@ -534,6 +550,10 @@
           this.$message.info('请先选择区域');
           return false;
         }
+        if (this.pointData.length === 0) {
+          this.$message.info('选择的区域没有设备，请重新选择区域');
+          return false;
+        }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
         let eT = formatDate(this.searchData.endTime, 'yyyy-MM-dd HH:mm:ss');
         let query = {'where': {}};
@@ -548,6 +568,29 @@
   };
 </script>
 <style lang="scss" scoped>
+  .map_rrt_u2 {
+    position: absolute; right: 30px;
+    bottom: 30px;
+    margin-top: .2rem;
+    font-size: 26px;
+    background: #ffffff;
+    width: 78px;
+    padding: 0 10px;
+    > li {
+      line-height: 70px;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #F2F2F2;
+      > i {
+        margin-top: 0;
+        display: inline-block;
+      }
+      color: #999999;
+      &:hover {
+        color: #0C70F8;
+      }
+    }
+  }
   .vl_ph_main {
     /*position: fixed;*/
     width: 100%;
@@ -570,7 +613,7 @@
       left: 0px;
       top: 0px;
       width: 328px;
-      height: 100%;
+      /*height: 100%;*/
       .inline-input {
         width: 272px;
       }
@@ -580,9 +623,10 @@
       }
       .search_main {
         width: 272px;
-        height: 334px;
+        height: 394px;
         margin-top: 20px;
         background: #ffffff;
+        padding-top: 20px;
         .search_btn {
           text-align: center;
           /*margin-top: 255px;*/
@@ -592,51 +636,48 @@
           height: 10px;
           line-height: 10px;
         }
-        .search_line {
-          position: relative;
-          height: 50px;
-          line-height: 50px;
-          padding-left: 20px;
-          color: #999999;
-          .el-range-editor {
-            > i {
-              display: none;
+        .search_line_ts {
+          width: 232px;
+          height: 106px;
+          margin: 0 auto;
+          margin-bottom: 10px;
+          border: 1px solid #D3D3D3;
+          .title {
+            height: 38px;
+            line-height: 38px;
+            border-bottom: 1px solid #D3D3D3;
+            display: flex;
+            span {
+              display: block;
+              width: 50%;
+              padding-left: 10px;
+              &:last-child {
+                text-align: right;
+                padding-right: 10px;
+                padding-top: 10px;
+                color: #999999;
+              }
+            }
+            .choose_btn {
+              cursor: pointer;
+              font-size: 20px;
+            }
+            .not-active {
+              cursor:not-allowed;
             }
           }
-          >span {
-            display: inline-block;
-            margin-right: 20px;
-            vertical-align: middle;
-          }
-          .choose_btn {
-            cursor: pointer;
-            font-size: 20px;
-          }
-          .not-active {
-            cursor:not-allowed;
-          }
-          .time {
-            width: 10px;
-            line-height: 20px;
-          }
           .drawBox{
-            position: absolute;
-            background: #ffffff;
-            left: 0;
-            top: 0;
-            padding: 0 10px 10px 10px;
             width: 100%;
-            animation: fadeInLeft .4s ease-out both;
+            padding-top: 10px;
             .items{
               padding-top: 0px;
               span{
                 display: inline-block;
-                width: 34px;
-                height: 34px;
+                width: 46px;
+                height: 46px;
                 text-align: center;
                 vertical-align: middle;
-                line-height: 34px;
-                border-right: solid 1px #eeeeee;
+                line-height: 46px;
                 cursor: pointer;
                 &:last-child{
                   border-right: none;
@@ -683,6 +724,27 @@
                 background-size: 80% 80%;
               }
             }
+          }
+        }
+        .search_line {
+          position: relative;
+          height: 50px;
+          line-height: 50px;
+          padding: 0 20px;
+          color: #999999;
+          .el-range-editor {
+            > i {
+              display: none;
+            }
+          }
+          >span {
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+          }
+          .time {
+            width: 10px;
+            line-height: 20px;
           }
         }
       }

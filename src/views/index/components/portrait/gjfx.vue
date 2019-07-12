@@ -2,7 +2,7 @@
   <div class="point">
     <div class="breadcrumb_heaer">
       <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像侦查</el-breadcrumb-item>
         <el-breadcrumb-item>轨迹分析</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -18,16 +18,15 @@
         >
           <el-form-item>
             <el-upload
-                    :class="{'vl_jtc_upload': true}"
-                    :limit="1"
-                    multiple
-                    :show-file-list="false"
-                    accept="image/*"
-                    :action="uploadAcion"
-                    list-type="picture-card"
-                    :before-upload="beforeAvatarUpload"
-                    :on-success="uploadSucess"
-                    :on-error="handleError">
+                :class="{'vl_jtc_upload': true}"
+                multiple
+                :show-file-list="false"
+                accept="image/*"
+                :action="uploadAcion"
+                list-type="picture-card"
+                :before-upload="beforeAvatarUpload"
+                :on-success="uploadSucess"
+                :on-error="handleError">
               <i v-if="uploading" class="el-icon-loading"></i>
               <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
               <i class="el-icon-plus avatar-uploader-icon" v-else></i>
@@ -114,7 +113,7 @@
                     </div>
                     <div class="info_right">
                       <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
-                      <div><i class="vl_icon vl_icon_retrieval_03"></i>98.00%</div>
+                      <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance}}%</div>
                     </div>
                   </div>
                   <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
@@ -311,6 +310,9 @@
       this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
+      if (this.$route.query.plateNo) {
+        this.ruleForm.input3 = this.$route.query.plateNo;
+      }
     },
     methods: {
       beforeAvatarUpload (file) {
@@ -444,15 +446,22 @@
         if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3){
           let pg = {
           }
+          if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
+            this.$message.info('选择的区域没有设备，请重新选择区域');
+            return false;
+          } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
+            this.$message.info('您没有选择区域，请点击下拉框选择镇');
+            return false;
+          }
           pg['startTime'] = this.ruleForm.data1[0]+" 00:00:00";
           pg['endTime'] = this.ruleForm.data1[1]+" 23:59:59";
           pg['imageUrl'] = this.ruleForm.input3;
-          if(this.ruleForm.input5==1 && this.ruleForm.value1.length!=0){
-            pg['areaUid']=this.ruleForm.value1.join(",")
+          if(this.ruleForm.input5 == "1" && this.ruleForm.value1.length!=0){
+            pg['areaIds']=this.ruleForm.value1.join(",")
           }
-          if(this.ruleForm.input5==2){
-            pg.where['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
-            pg.where['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
+          if(this.ruleForm.input5 == "2"){
+            pg['bayonetIds'] = this.pointData.bayonetList.map(y => {return y.uid}).join(',');
+            pg['deviceUid'] = this.pointData.deviceList.map(y => {return y.uid}).join(',');
           }
           this.storeParam = objDeepCopy(pg);
           this.getVehicleShot(pg);
@@ -728,6 +737,7 @@
   }
   .breadcrumb_heaer {
     background: #ffffff;
+    border-bottom: 1px solid #D3D3D3;
   }
   .full {
     width: 100%;

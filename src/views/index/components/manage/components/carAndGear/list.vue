@@ -230,11 +230,16 @@ export default {
     },
     // 获取车辆列表
     getList () {
-      let vehicleType, organId;
+      let vehicleType, organId, brandNo;
       if (this.searchForm.vehicleType === '全部车辆类型') {
         vehicleType = null;
       } else {
         vehicleType = this.searchForm.vehicleType;
+      }
+      if (this.searchForm.brandNo === '全部运营公司') {
+        brandNo = null;
+      } else {
+        brandNo = this.searchForm.brandNo;
       }
     //  let organId = null;
       if (this.$store.state.currentOrganObj) {
@@ -246,6 +251,7 @@ export default {
         'where.vehicleNumber': this.searchForm.vehicleNumber,
         'where.vehicleType': vehicleType,
         'where.organId': organId,
+        'where.brandNo': brandNo,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         orderBy: 'create_time',

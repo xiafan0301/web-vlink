@@ -9,7 +9,7 @@
             <li class="show_title_line" :class="{'show_title_line2': showConTitle === 2}"></li>
           </ul>
           <div class="show_content" v-show="showConTitle === 1">
-            <div class="show_search">
+            <div class="show_search" style="z-index: 2;">
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
@@ -41,64 +41,58 @@
                 </el-date-picker>
               </div>
               <div style="margin-left: 8%; width: 84%;">
-                <el-input
-                  placeholder="请输入设备或区域名称"
-                  size="small"
-                  @keyup.enter.native="getDeviceList(1)"
-                  v-model="searchVal">
-                  <i slot="suffix" @click="getDeviceList(1)" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
-                </el-input>
+                <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
+                  <el-option :label="'人员'" :value="'人员'"></el-option>
+                  <el-option :label="'车辆'" :value="'车辆'"></el-option>
+                </el-select>
               </div>
             </div>
-            <div class="show_list" style="padding-top: 142px;">
+            <div class="show_list" style="padding-top: 142px; position: relative;">
               <!-- 直播列表 -->
-              <ul class="show_list_c show_tree" id="videoListTree">
-                <template v-if="deviceList && deviceList.areaTreeList && deviceList.areaTreeList.length > 0">
-                  <li v-for="(item, index) in deviceList.areaTreeList" :key="'tree_' + index">
-                    <div>
-                      <div class="tree_title">
-                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
+              <div class="relay_ul_list">
+                <ul>
+                  <li>
+                    <div v-if="!deviceIsPlaying({uid: 3}, 1)"
+                      @dragstart="dragStart($event, {uid: 3}, 1)" @dragend="dragEnd"
+                      draggable="true" style="cursor: move;">
+                      <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t2">告警</span></div>
+                      <div class="relay_ul_lim">
+                        <ul>
+                          <li>车牌号码</li>
+                          <li>湘A234A1</li>
+                        </ul>
                       </div>
+                      <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
                     </div>
-                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                        <div class="com_ellipsis"
-                          v-if="!deviceIsPlaying(sitem, 1)"
-                          @dragstart="dragStart($event, sitem, 1)" @dragend="dragEnd"
-                          draggable="true" style="cursor: move;">
-                          {{sitem.deviceName}}
-                          <span class="vl_icon vl_icon_v11"></span>
-                        </div>
-                        <div class="tree_li_dis" draggable="false" v-else>
-                          {{sitem.deviceName}}
-                          <span class="vl_icon vl_icon_v11"></span>
-                        </div>
-                      </li>
-                    </ul>
-                    <ul class="tree_sli" v-else>
-                      <li class="tree_sli_empty">暂无</li>
-                    </ul>
+                    <div  class="relay_ul_list_active" draggable="false" v-else>
+                      <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t1">播放中</span></div>
+                      <div class="relay_ul_lim">
+                        <ul>
+                          <li>车牌号码</li>
+                          <li>湘A234A1</li>
+                        </ul>
+                      </div>
+                      <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
+                    </div>
                   </li>
-                </template>
-                <template v-else>
-                  <li class="show_list_empty">
-                    暂无记录
+                  <li v-for="(item, index) in 10" :key="index">
+                    <div>
+                      <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t2">告警</span></div>
+                      <div class="relay_ul_lii">
+                        <img src="../../../../assets/img/666.jpg" alt="">
+                      </div>
+                      <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
+                    </div>
                   </li>
-                </template>
-              </ul>
+                </ul>
+              </div>
+              <div class="relay_ul_btn">
+                <el-button size="small" type="primary" style="width:60%;">新建任务</el-button>
+              </div>
             </div>
           </div>
           <div class="show_content" v-show="showConTitle === 2">
-            <div class="show_search">
-              <div style="margin-left: 7%; width: 86%; padding-bottom: 15px;">
-                <el-input
-                  placeholder="请输入设备或区域名称"
-                  size="small"
-                  @keyup.enter.native="getDeviceList(2)"
-                  v-model="searchVal2">
-                  <i slot="suffix" @click="getDeviceList(2)" class="el-input__icon el-icon-search" style="font-size: 20px;"></i>
-                </el-input>
-              </div>
+            <div class="show_search" style="z-index: 2;">
               <div class="show_search_ti">
                 <span>开始</span>
                 <el-date-picker
@@ -106,7 +100,7 @@
                   style="width: 175px"
                   size="small"
                   v-model="startTime"
-                  type="datetime"
+                  type="date"
                   time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="startTimeOptions"
@@ -121,7 +115,7 @@
                   style="width: 175px"
                   size="small"
                   v-model="endTime"
-                  type="datetime"
+                  type="date"
                   time-arrow-control
                   :editable="false" :clearable="false"
                   :picker-options="endTimeOptions"
@@ -129,44 +123,43 @@
                   placeholder="选择结束时间">
                 </el-date-picker>
               </div>
+              <div style="margin-left: 8%; width: 84%;">
+                <el-select size="small" style="width: 100%;" v-model="targetType" placeholder="选择目标类型">
+                  <el-option :label="'人员'" :value="'人员'"></el-option>
+                  <el-option :label="'车辆'" :value="'车辆'"></el-option>
+                </el-select>
+              </div>
             </div>
-            <div class="show_list" style="padding-top: 152px;">
-              <!-- 回放列表 -->
-              <ul class="show_list_c show_tree" id="videoListTree2">
-                <template v-if="deviceList2 && deviceList2.areaTreeList && deviceList2.areaTreeList.length > 0">  
-                  <li v-for="(item, index) in deviceList2.areaTreeList" :key="'tree_' + index">
+            <div class="show_list" style="padding-top: 142px; position: relative;">
+              <!-- 直播列表 -->
+              <div class="relay_ul_list">
+                <ul>
+                  <li>
                     <div>
-                      <div class="tree_title">
-                        <i class="show_list_pi el-icon-arrow-right"></i>{{item.areaName}}
+                      <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t3">重启任务</span></div>
+                      <div class="relay_ul_lim">
+                        <ul>
+                          <li>车牌号码</li>
+                          <li>湘A234A1</li>
+                        </ul>
                       </div>
+                      <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
                     </div>
-                    <ul class="tree_sli" v-if="item.deviceBasicList && item.deviceBasicList.length > 0">
-                      <li v-for="(sitem, sindex) in item.deviceBasicList" :title="sitem.deviceName" :key="'dev_list_' + sindex">
-                        <div class="com_ellipsis"
-                          @dragstart="dragStart($event, sitem, 2)" @dragend="dragEnd"
-                          draggable="true" style="cursor: move;">
-                          {{sitem.deviceName}}
-                          <span class="vl_icon vl_icon_v11"></span>
-                        </div>
-                        <!-- 
-                          v-if="!deviceIsPlaying(sitem, 2)"
-                          <div class="tree_li_dis" v-else>
-                          {{sitem.deviceName}}
-                          <span class="vl_icon vl_icon_v11"></span>
-                        </div> -->
-                      </li>
-                    </ul>
-                    <ul class="tree_sli" v-else>
-                      <li class="tree_sli_empty">暂无</li>
-                    </ul>
                   </li>
-                </template>
-                <template v-else>
-                  <li class="show_list_empty">
-                    暂无记录
+                  <li v-for="(item, index) in 10" :key="index">
+                    <div>
+                      <div class="relay_ul_lit">2018-11-25 09:12<span class="relay_ul_lit_t3">重启任务</span></div>
+                      <div class="relay_ul_lii">
+                        <img src="../../../../assets/img/666.jpg" alt="">
+                      </div>
+                      <div class="relay_ul_lid com_ellipsis">备注只显示一行，为空时不显示...</div>
+                    </div>
                   </li>
-                </template>
-              </ul>
+                </ul>
+              </div>
+              <div class="relay_ul_btn">
+                <el-button size="small" type="primary" style="width:60%;">新建任务</el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -188,7 +181,7 @@
             <div is="flvplayer" @playerClose="playerClose" :index="index" :oData="item" :signAble="true" :bResize="showMenuActive"></div>
           </div>
           <div class="vid_show_empty" v-else>
-            <div is="videoEmpty" @btnEvent="showListEvent" :btn="true" :btnText="'视频直播'" :btn2="true" :btnText2="'视频回放'"></div>
+            <div is="videoEmpty" :btn="false" :btn2="false" :tipMsg="'拖拽任务至窗口查看接力视频'"></div>
           </div>
         </li>
       </ul>
@@ -206,25 +199,20 @@ export default {
   data () {
     let _ndate = new Date();
     return {
-      // 直播列表
-      deviceList: [],
-      // 回放列表
-      deviceList2: [],
-
       // {video: {}, title: ''},
       videoList: [{}, {}, {}, {}],
       showVideoTotal: 4,
       showMenuActive: false,
       showConTitle: 1,
-      searchVal: '',
       startTime: '',
       endTime: '',
+      targetType: '人员',
       searchVal2: '',
       dragActiveObj: null,
 
       videoRecordList: [],
 
-      initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 1), _ndate],
+      initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
       startTime: '',
       endTime: '',
       startTimeOptions: {
@@ -255,34 +243,13 @@ export default {
   },
   created () {
     // window.localStorage.getItem(name);
-    let sType = window.localStorage.getItem('vlink_video_patrol_type3');
-    let sList = window.localStorage.getItem('vlink_video_patrol_list3');
-    if (sType && sType.length > 0) {
-      sType = Number(sType);
-      this.showVideoTotal = sType;
-      if (sList && sList.length > 0) {
-        this.$nextTick(() => {
-          sList = JSON.parse(sList);
-          // console.log(sList);
-          for (let i = 0; i < sList.length; i++) {
-            sList[i].record = false;
-          }
-          this.videoList = sList;
-        });
-      }
-    } else {
-      // 第一次打开
-      this.showMenuActive = true;
-    }
+    // 第一次打开
+    this.showMenuActive = true;
     this.startTime = this.initTime[0];
     this.endTime = this.initTime[1];
-    // 监控列表
-    this.getDeviceList();
   },
   mounted () {
-    videoTree('videoListTree');
     videoTree('videoListTree2');
-    $(window).on('unload', this.unloadSave);
   },
   methods: {
     startTimeChange (val) {
@@ -309,38 +276,16 @@ export default {
         }
       }
     },
-
-    /* 监控列表 */
-    getDeviceList (type) {
-      apiAreaServiceDeviceList({
-        areaUid: mapXupuxian.adcode,
-        likeKey: type === 1 ? this.searchVal : (type === 2 ? this.searchVal2 : '')
-      }).then(res => {
-        if (res && res.data) {
-          if (type === 1) {
-            this.deviceList = res.data;
-          } else if (type === 2) {
-            this.deviceList2 = res.data;
-          } else {
-            this.deviceList = res.data;
-            this.deviceList2 = res.data;
-          }
-        }
-      }).catch(error => {
-        console.log("apiDeviceList error：", error);
-      });
-    },
     deviceIsPlaying (item, type) {
       let flag = false;
       for (let i = 0; i < this.videoList.length; i++) {
-        if (this.videoList[i].video && this.videoList[i].type === type && this.videoList[i].video.uid === item.uid) {
+        if (this.videoList[i].video && this.videoList[i].video.uid === item.uid) {
           flag = true;
           break;
         }
       }
       return flag;
     },
-
     playersHandler (sum) {
       // videoList
       let na = [], ii = 0;
@@ -362,20 +307,6 @@ export default {
       }
       this.videoList = na;
     },
-    // 缓存播放列表
-    saveVideoList () {
-      // console.log(this.videoList);
-      window.localStorage.setItem('vlink_video_patrol_type3', JSON.stringify(this.showVideoTotal));
-      for (let i = 0; i < this.videoList.length; i++) {
-        if (this.videoList[i] && this.videoList[i].type != 1) {
-          this.videoList[i] = {};
-        }
-      }
-      window.localStorage.setItem('vlink_video_patrol_list3', JSON.stringify(this.videoList));
-    },
-    unloadSave () {
-      this.saveVideoList();
-    },
 
     // 拖拽开始
     dragStart (ev, item, type) {
@@ -395,16 +326,12 @@ export default {
         // let deviceSip = Math.random() > 0.5 ? 'rtmp://live.hkstv.hk.lxdns.com/live/hks1' : 'rtmp://10.16.1.139/live/livestream';
         let type = this.dragActiveObj.ui_type;
         let obj = {
-          type: type,
-          title: this.dragActiveObj.deviceName,
+          type: 5,
+          title: '视频接力测试视频',
           record: true,
-          video: Object.assign({}, this.dragActiveObj)
-        }
-        if (type === 2) {
-          Object.assign(obj, {
-            startTime: this.startTime,
-            endTime: this.endTime,
-          });
+          video: Object.assign({}, {
+            uid: this.dragActiveObj.uid
+          })
         }
         this.videoList.splice(index, 1, obj);
       }
@@ -433,10 +360,85 @@ export default {
     }
   },
   destroyed () {
-    $(window).off('unload', this.unloadSave);
-    this.saveVideoList();
   }
 }
 </script>
 <style lang="scss" scoped>
+.relay_ul_list {
+  height: 100%;
+  padding-bottom: 45px;
+  border-top: 1px solid #eee;
+  > ul {
+    height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    > li {
+      padding: 10px 10px 10px 20px;
+      border-bottom: 1px solid #eee;
+      > div {
+        > .relay_ul_lit {
+          position: relative;
+          font-size: 12px; color: #333;
+          margin-bottom: 5px;
+          height: 22px; line-height: 22px;
+          > span {
+            position: absolute; top: 2px; right: 0;
+            &.relay_ul_lit_t1 { color: #4FCB61; }
+            &.relay_ul_lit_t2 { color: #FA453A; }
+            &.relay_ul_lit_t3 {
+              display: none;
+              line-height: normal;
+              padding: 2px 5px;
+              background:rgba(12,112,248,1);
+              border-radius:4px;
+              color: #fff; font-size: 12px;
+              cursor: pointer;
+            }
+          }
+        }
+        > .relay_ul_lii {
+          height: 60px;
+          text-align: center;
+          margin-bottom: 5px;
+          > img { max-height: 100%; max-width: 100%; text-align: center; }
+        }
+        > .relay_ul_lid {
+          height: 20px; line-height: 20px;
+          font-size: 12px; color: #999;
+        }
+        > .relay_ul_lim {
+          padding: 5px 0;
+          > ul {
+            width: 76px;
+            margin: 0 auto; padding: 8px 0;
+            background:rgba(242,242,242,1);
+            border:1px solid rgba(211, 211, 211, 0.97);
+            border-radius:3px;
+            > li {
+              text-align: center;
+              font-size: 12px;
+            }
+          }
+        }
+        &.relay_ul_list_active {
+          > .relay_ul_lit { color: #999; }
+        }
+        &:hover {
+          > .relay_ul_lit {
+            > span {
+              &.relay_ul_lit_t3 { display: block; }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+.relay_ul_btn {
+  position: absolute; bottom: 0; left: 0;
+  border-top: 1px solid #eee;
+  width: 100%; height: 44px; line-height: 44px;
+  text-align: center;
+}
 </style>

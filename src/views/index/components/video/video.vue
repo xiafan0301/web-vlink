@@ -11,8 +11,8 @@
         <router-link :to="{name: 'video_query'}">智能查看</router-link>
       </li>
       <li>
-        <!-- <router-link :to="{name: 'video_relay'}">视频接力</router-link> -->
-        <a href="javascript: void(0);" class="vl_smenu_dis">视频接力</a>
+        <router-link :to="{name: 'video_relay'}">视频接力</router-link>
+        <!-- <a href="javascript: void(0);" class="vl_smenu_dis">视频接力</a> -->
       </li>
       <li>
         <router-link :to="{name: 'video_signList'}">查看标记</router-link>
@@ -140,7 +140,7 @@ export default {
         animation: fadeIn .4s ease-out both;
         > .show_search {
           position: absolute; top: 48px; left: 0;
-          width: 100%;  height: 66px;
+          width: 100%;
           padding-top: 15px;
           /* > div {
             position: relative;
@@ -326,16 +326,6 @@ export default {
   }
   &.vid_list_st16 > li {
     width: 25%; height: 25%;
-  }
-}
-.vid_icon_ssz { 
-  width: 30px; height: 160px; background-position: -1096px -1280px;
-  &:hover { background-position: -1156px -1280px; }
-  &.vid_icon_sss {
-    background-position: -976px -1280px;
-    &:hover {
-      background-position: -1036px -1280px;
-    }
   }
 }
 .show_list_empty { padding: 0 20px; color: #999; text-align: center; }

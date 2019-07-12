@@ -75,7 +75,7 @@
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
+          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
         </div>
       </div>
     </div>
@@ -232,6 +232,11 @@ export default {
   },
   mounted() {
     // this.tcDiscuss();
+    // let d= 
+    
+    // this.urldata=
+    console.log(this.urldata);
+    
     this.getSnapDetail()
     this.getArchives()
   },
@@ -285,7 +290,6 @@ export default {
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
-      console.log(index);
       this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);

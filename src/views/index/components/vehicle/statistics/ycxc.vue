@@ -1,6 +1,9 @@
 <template>
   <div class="th-driving-night">
-    <Breadcrumb :oData="[{name: '夜间行车分析'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle'}, {name: '夜间行车分析'}]"></div>
+    </div>
+    <!-- <Breadcrumb :oData="[{name: '夜间行车分析'}]"></Breadcrumb> -->
     <div class="the-bottom">
       <div class="the-left-search">
         <div class="con_left">
@@ -19,15 +22,7 @@
             <div class="no_device" v-else>选择设备</div>
             <!-- 树tab页面 -->
             <div class="device_tree_tab" v-show="treeTabShow">
-              <div style="overflow: hidden;">
-                <!-- <div
-                  class="tab_title"
-                  :class="{ 'current_title': index === selectedTreeTab }"
-                  @click="selectedTreeTab = index;"
-                  v-for="(item, index) in treeTabArr"
-                  :key="'tab_title' + index"
-                >{{ item.name }}</div> -->
-              </div>
+              <div style="overflow: hidden;"></div>
               <!-- 视频树 -->
               <div class="tree_content">
                 <vue-scroll>
@@ -78,16 +73,6 @@
               </el-option>
               <!-- <i class="el-icon-time"></i> -->
             </el-select>
-              <!-- <el-time-select
-              style="width: 208px;"
-                placeholder="起始时间"
-                v-model="startTime"
-                :picker-options="{
-                  start: '19:00',
-                  step: '01:00',
-                  end: '24:00'
-                }">
-              </el-time-select> -->
             <span class="left_time_separator">-</span>
             <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
               <el-option 
@@ -98,16 +83,6 @@
               >
               </el-option>
             </el-select>
-            <!-- <el-time-select
-              placeholder="结束时间"
-              class="end_time_select"
-              v-model="endTime"
-              :picker-options="{
-                start: '01:00',
-                step: '01:00',
-                end: '07:00'
-              }">
-            </el-time-select> -->
           </div>
           <div class="left_num">
             <el-input class="left-none-border" v-model="queryForm.minShotTimes">
@@ -123,7 +98,7 @@
               :value="item.enumValue">
             </el-option>
           </el-select>
-          <el-select v-model="queryForm.surveillanceId" placeholder="请选择布控车辆" style="width: 100%;" clearable>
+          <el-select v-model="queryForm.surveillanceIds" placeholder="请选择布控车辆" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in controlVehicleList"
               :key="item.uid"
@@ -133,13 +108,13 @@
           </el-select>
           <div class="left_btn">
             <el-button class="reset_btn" :loading="resetLoading" @click="onReset">重置</el-button>
-            <el-button class="select_btn" :loading="searchLoading" @click="onSearch">查询</el-button>
+            <el-button class="select_btn" type="primary" :loading="searchLoading" @click="onSearch">查询</el-button>
           </div>
         </div>
       </div>
       <div class="the-right-result">
         <template v-if="dataList.length > 0">
-          <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export">导出</el-button>
+          <el-button :loading="exportLoadingbtn" type="primary" @click="onExport" class="th-button-export">导出</el-button>
           <vue-scroll>
             <div class="the-table">
               <el-table
@@ -188,10 +163,10 @@ import { getNightVehicleList, exportNightVehicle } from "@/views/index/api/api.j
 import { getGroupListIsVehicle } from '@/views/index/api/api.control.js';
 import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
-import { objDeepCopy, formatDate } from "@/utils/util.js";
-import Breadcrumb from '../breadcrumb.vue';
+import { objDeepCopy, formatDate, autoDownloadUrl } from "@/utils/util.js";
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     return {
       startTimeOptions: [
@@ -284,13 +259,13 @@ export default {
         endTime: 7,
         minShotTimes: 5,
         vehicleTypes: [],
-        surveillanceId: null
+        surveillanceIds: []
       },
       queryDate: [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))],
       // 选择设备的数据
       isIndeterminate: false, // 是否处于全选与全不选之间
       checkAllTree: false, // 树是否全选
-      isIndeterminateBayonet: false, // 是否处于全选与全不选之间
+      // isIndeterminateBayonet: false, // 是否处于全选与全不选之间
       checkAllTreeBayonet: false, // 树是否全选
       cameraTree: [],
       videoTreeNodeCount: 0, // 摄像头节点数量
@@ -314,14 +289,23 @@ export default {
       exportLoadingbtn: false, // 导出按钮loading
       carTypeList: [], // 车辆类型列表
       controlVehicleList: [], // 布控车辆列表
-      searchStr: '', // 传到抓拍记录页面的数据
+      searchStr: {}, // 传到抓拍记录页面的数据
+    }
+  },
+  created () {
+    if (this.$route.params.startDate) {
+      this.handleQueryData();
     }
   },
   mounted() {
     this.getVehicleTypeList();
     this.getControlVehicleList();
     //获取摄像头卡口数据
-    this.getMonitorList()
+    this.getMonitorList();
+
+    setTimeout(() => {
+      this.handleSubmitData();
+    }, 1000)
   },
   watch: {
     queryDate: {
@@ -335,12 +319,37 @@ export default {
     }
   },
   methods: {
+    handleQueryData () {
+      // const cameraIds = this.$route.params.cameraIds.split(',');
+      // const bayonetIds = this.$route.params.bayonetIds.split(',');
+      const startDate = this.$route.params.startDate.split(' ');
+      const endDate = this.$route.params.endDate.split(' ');
+
+      const startTime = this.$route.params.startHour;
+      const endTime = this.$route.params.endhour;
+      const minShotTimes = this.$route.params.minShotTimes;
+      const surveillanceIds = this.$route.params.surveillanceIds && this.$route.params.surveillanceIds.split(',');
+      const vehicleTypes =  this.$route.params.vehicleTypes && this.$route.params.vehicleTypes.split(',');
+
+      this.queryForm.startDate = startDate;
+      this.queryForm.endDate = endDate;
+      this.queryForm.startTime = startTime;
+      this.queryForm.endTime = endTime;
+      this.queryForm.minShotTimes = minShotTimes;
+      this.queryForm.surveillanceIds = surveillanceIds;
+      this.queryForm.vehicleTypes = vehicleTypes;
+
+    },
     // 获取布控车辆
     getControlVehicleList () {
       getGroupListIsVehicle()
         .then(res => {
-          if (res) {
-            this.controlVehicleList = res.data;
+          if (res && res.data) {
+            res.data.map(item => {
+              if (item.uid) {
+                this.controlVehicleList.push(item);
+              }
+            });
           }
         })
     },
@@ -349,7 +358,7 @@ export default {
       const type = dataList.vehicleType;
       getDiciData(type)
         .then(res => {
-          if (res) {
+          if (res && res.data) {
             this.carTypeList = res.data;
           }
         })
@@ -359,11 +368,73 @@ export default {
       let params = {
         areaUid: mapXupuxian.adcode
       };
+      this.videoTreeNodeCount = 0;
+      this.selectDeviceArr = [];
+      this.selectCameraArr = [];
+      this.selectBayonetArr = [];
+
       MapGETmonitorList(params).then(res => {
         if (res && res.data) {
           let camera = objDeepCopy(res.data.areaTreeList);
           this.cameraTree = this.getTreeList(camera);
           this.getLeafCountTree(this.cameraTree);
+
+          console.log('mmmm', this.$route.params.cameraIds)
+          if (this.$route.params.cameraIds || this.$route.params.bayonetIds) {
+            console.log('asdasdasdasddddddddddddddddddddddds')
+            const cameraIds = this.$route.params.cameraIds.split(',');
+            const bayonetIds = this.$route.params.bayonetIds.split(',');
+
+            let arr = [], arrNodes = [];
+
+            this.cameraTree.map((item, index) => {
+              item.children.length > 0 && item.children.map((val, idx) => {
+                if (val.treeType === 1) {
+                  for(let i = 0; i < cameraIds.length; i ++) {
+                    if (val.id === cameraIds[i]) {
+                      arr.push(val.label);
+                      this.$refs.cameraTree.setCheckedKeys(arr);
+                      this.$refs.cameraTree.setCheckedNodes(arr);
+                    }
+                  }
+                }
+                if (val.treeType === 2) {
+                  for(let i = 0; i < bayonetIds.length; i ++) {
+                    if (val.id === bayonetIds[i]) {
+                      arr.push(val.label);
+                      this.$refs.cameraTree.setCheckedKeys(arr);
+                      this.$refs.cameraTree.setCheckedNodes(arr);
+                    }
+                  }
+                }
+              })
+            })
+
+            setTimeout(() => {
+              let checkedKeys = this.$refs.cameraTree.getCheckedKeys(true);
+              this.selectDeviceArr = this.$refs.cameraTree.getCheckedNodes(true);
+
+              this.handleData();
+
+              if (this.selectDeviceArr.length === this.videoTreeNodeCount) {
+                this.checkAllTree = true;
+                this.isIndeterminate = false;
+              } else if (this.selectDeviceArr.length > 0 && this.selectDeviceArr.length < this.videoTreeNodeCount) {
+                this.checkAllTree = false;
+                this.isIndeterminate = true;
+              } else if (this.selectDeviceArr.length === 0) {
+                this.checkAllTree = false;
+                this.isIndeterminate = false;
+              }
+            }, 500)
+
+          } else {
+            
+            this.$nextTick(() => {
+              this.checkAllTree = true;
+              this.handleCheckedAll(true);
+            });
+          }
         }
       });
     },
@@ -475,17 +546,27 @@ export default {
         endTime: 7,
         minShotTimes: 5,
         vehicleTypes: [],
-        surveillanceId: null
+        surveillanceIds: []
       })
-      this.selectDeviceArr.splice(0, this.selectDeviceArr.length)
-      this.$refs.cameraTree.setCheckedNodes([]);
-      this.isIndeterminate = false
-      this.isIndeterminateBayonet = false
+      
+      this.$route.params == {};
+
       this.queryDate = [(new Date() - (24 * 60 * 60 * 1000)), (new Date() - (24 * 60 * 60 * 1000))];
-      this.resetLoading = false
+      this.resetLoading = false;
+
+      this.$nextTick(() => {
+        this.checkAllTree = true;
+        this.handleCheckedAll(true);
+
+        this.handleSubmitData();
+      });
+
     },
     onSearch () {
       this.searchLoading = true;
+      this.handleSubmitData();
+    },
+    handleSubmitData () {
       this.queryForm.bayonetIds = null;
       this.queryForm.cameraIds = null;
 
@@ -509,8 +590,8 @@ export default {
         startDate: this.queryForm.startDate + ' 00:00:00',
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
-        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(':') : null,
-        surveillanceId: this.queryForm.surveillanceId,
+        vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
+        surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
         isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -518,7 +599,7 @@ export default {
         orderBy: 'shotTimes'
       };
 
-      this.searchStr = JSON.stringify(params);
+      this.searchStr = JSON.parse(JSON.stringify(params));
 
       getNightVehicleList(params)
         .then(res => {
@@ -562,7 +643,7 @@ export default {
         startHour: this.queryForm.startTime,
         minShotTimes: parseInt(this.queryForm.minShotTimes),
         vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(':') : null,
-        surveillanceId: this.queryForm.surveillanceId,
+        surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
         isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -578,18 +659,8 @@ export default {
       exportNightVehicle(params)
         .then(res => {
           if (res && res.data) {
-            console.log('res', res)
-            const eleA = document.getElementById('export_id');
-            if (eleA) {
-              document.body.removeChild(eleA);
-            }
-            let a = document.createElement('a');
-            a.setAttribute('href', res.data.fileUrl);
-            a.setAttribute('target', '_self');
-            a.setAttribute('id', 'export_id');
-
-            document.body.appendChild(a);
-            a.click();
+            autoDownloadUrl(res.data.fileUrl);
+           
             this.exportLoadingbtn = false;
           } else {
             this.exportLoadingbtn = false;
@@ -601,13 +672,24 @@ export default {
      * 查看抓拍记录
      */
     onOpenRecord (obj) {
-      this.$router.push({name: 'vehicle_search_ycxc_record', query: {obj: this.searchStr, number: obj.vehicleNumber}});
+      this.searchStr['vehicleNumber'] = obj.vehicleNumber;
+      this.$router.push({name: 'vehicle_search_ycxc_record', params: {
+        ...this.searchStr
+      }});
     },
     /**
      * 查看车辆信息
      */
     onOpenVehicleInfo (obj) {
-       this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
+      this.searchStr['vehicleNumber'] = obj.vehicleNumber;
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '夜间行车分析', routerName: 'vehicle_search_ycxc', params: { ...this.searchStr }},
+          { name: '车辆详情' }
+        ]
+      });
+      this.$router.push({name: 'vehicle_search_clxx', query: {plateNo: obj.vehicleNumber}});
     },
     /**
      * 分页赋值
@@ -626,6 +708,10 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .th-driving-night {
   width: 100%; height: 100%;
   padding-top: 50px;
@@ -688,13 +774,17 @@ export default {
             width: 110px;
           }
           .select_btn {
-            background-color: #0C70F8;
-            color: #ffffff;
+            // background-color: #0C70F8;
+            // color: #ffffff;
+            // &:hover {
+            //   background:#0466de;
+            //   color: #ffffff;
+            // }
           }
           .reset_btn {
-            background-color: #ffffff;
-            color: #666666;
-            border-color: #DDDDDD;
+            // background-color: #ffffff;
+            // color: #666666;
+            // border-color: #DDDDDD;
           }
         }
         // 选择设备下拉
@@ -785,9 +875,9 @@ export default {
       .th-button-export {
         float: right;
         margin-bottom: 10px;
-        background:rgba(12,112,248,1);
-        border-radius:4px;
-        color: #ffffff;
+        // background:rgba(12,112,248,1);
+        // border-radius:4px;
+        // color: #ffffff;
       }
       .the-table {
         width: 100%; height: 100%;

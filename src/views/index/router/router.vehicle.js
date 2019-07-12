@@ -14,6 +14,7 @@ export default {
     {
       path: 'clcx', // 车辆查询
       name: 'vehicle_search_clcx',
+      meta: { keepAlive: true },
       component: () => import('@/views/index/components/vehicle/search/clcx.vue')
     },{
       path: 'clcxdetail', // 车辆详情

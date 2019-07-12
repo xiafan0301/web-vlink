@@ -96,7 +96,7 @@
           </ul>
         </div>
         <ul class="rlcx_r_list clearfix" v-if="dataList && dataList.length > 0">
-          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index">
+          <li v-for="(item, index) in dataList" :key="'tzsr_list_' + index" @click="goToDetail(item)">
             <div>
               <img :src="item.subStoragePath" :alt="item.deviceName">
               <div>
@@ -125,6 +125,8 @@
         </div>
       </div>
     </div>
+    <!-- 详情 -->
+    <portraitDetail :open="showDetail" @closeDialog="onCloseDetail" :detailData="deData" :scrollData="seData" ></portraitDetail>
     <!-- D设备 B卡口  这里是设备和卡口 -->
     <div is="mapSelector" :open="openMap" :clear="msClear" :showTypes="'DB'" @mapSelectorEmit="mapSelectorEmit"></div>
   </div>
@@ -137,10 +139,14 @@ import {getFaceRetrieval} from '../../api/api.judge.js';
 import { getDeviceByBayonetUids } from "@/views/index/api/api.base.js";
 import { MapGETmonitorList } from "@/views/index/api/api.map.js";
 import {formatDate} from '@/utils/util.js';
+import portraitDetail from '@/components/common/portraitDetail.vue';
 export default {
-  components: {vehicleBreadcrumb, mapSelector},
+  components: {vehicleBreadcrumb, mapSelector,portraitDetail},
   data () {
     return {
+      showDetail:false,
+       deData:null,
+      seData:null,
       searchForm: {
         time: [new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), new Date()],
         type: 1, // 列表选择 地图选择
@@ -179,6 +185,16 @@ export default {
     this.getMapGETmonitorList();
   },
   methods: {
+    onCloseDetail () {
+      this.showDetail=false
+    },
+    goToDetail(v){
+      // console.log(v);
+      this.showDetail=true;
+      this.deData = v
+      this.seData = this.dataList
+      
+    },
     //查询行政区域
     getMapGETmonitorList(){
       let d={
@@ -240,18 +256,24 @@ export default {
           startDate: formatDate(this.searchForm.time[0], 'yyyy-MM-dd 00:00:00'),
           endDate: formatDate(this.searchForm.time[1], 'yyyy-MM-dd 23:59:59')
         },
-        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceName',
+        orderBy: this.orderType === 1 ? 'shotTime' : 'deviceNamePinyin',
         order: this.order === 1 ? 'desc' : 'asc',
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize
       }
       if (this.searchForm.type === 1) {
         params.where = Object.assign(params.where, {
-          areaUid: this.searchForm.area.join(','),
-          sex: this.searchForm.sex,
-          age: this.searchForm.age,
-          hat: this.searchForm.hat
+          areaUid: this.searchForm.area.join(',')
         });
+        if (this.searchForm.sex !== '不限') {
+          params.where.sex = this.searchForm.sex;
+        }
+        if (this.searchForm.age !== '不限') {
+          params.where.age = this.searchForm.age;
+        }
+        if (this.searchForm.hat !== '不限') {
+          params.where.hat = this.searchForm.hat;
+        }
       } else if (this.searchForm.type === 2) {
         params.where = Object.assign(params.where, {
           deviceIds: this.dIds.join(',')

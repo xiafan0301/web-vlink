@@ -1,6 +1,7 @@
 <template>
+<div class="frequent-appearances">
   <vue-scroll>
-    <div class="frequent-appearances">
+    <div>
       <div class="">
         <!-- <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
@@ -61,9 +62,17 @@
               <el-table-column label="序号" type="index" width="100"></el-table-column>
               <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
               <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-              <el-table-column label="相似度" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="频次阈值" prop="taskName" show-overflow-tooltip></el-table-column>
-              <el-table-column label="频次阈值" v-if="selectIndex === 0" show-overflow-tooltip>
+              <el-table-column label="相似度" show-overflow-tooltip>
+                <template  slot-scope="scope">
+                  {{scope.row.taskWebParamObj.semblance}}
+                </template>
+              </el-table-column>
+              <el-table-column label="频次阈值" show-overflow-tooltip>
+                <template  slot-scope="scope">
+                  {{scope.row.taskWebParamObj.frequency}}
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" v-if="selectIndex === 0" show-overflow-tooltip>
                   <template slot-scope="scope">
                       {{scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 2 ? '成功' : scope.row.taskStatus === 3 ? '失败' : scope.row.taskStatus === 4 ? '已中断' : ''}}
                   </template>
@@ -138,7 +147,7 @@
         :close-on-press-escape="false"
         class="dialog_comp"
       >
-        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，人物不在可以恢复</span>
+        <span style="color: #999999;">任务删除，任务的数据处理进程将被清理，任务不再可以恢复</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteDialog = false">取消</el-button>
           <el-button class="operation_btn function_btn" @click="interruptConfirm(2)">确认</el-button>
@@ -146,6 +155,7 @@
       </el-dialog>
     </div>
   </vue-scroll>
+</div>
 </template>
 <script>
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from "../../api/api.analysis.js";
@@ -181,6 +191,11 @@ export default {
   },
   created() {
     this.userInfo = this.$store.state.loginUser;
+    if(this.$route.query.selectIndex == 0) {
+      this.selectIndex = 0
+    }else {
+      this.selectIndex = 1
+    }
   },
   mounted() {
     this.selectDataList();
@@ -192,6 +207,7 @@ export default {
       this.pagination.pageNum = 1;
       this.taskForm.taskName = "";
       this.taskForm.reportTime = "";
+      this.$router.push({ name: "portrait_pfcm", query: {selectIndex: val} });
       this.selectDataList();
     },
     handleCurrentChange(page) {
@@ -222,6 +238,9 @@ export default {
             if(res.data) {
                 this.list = res.data.list;
                 this.pagination.total = res.data.total;
+                for(let item of this.list) {
+                  item['taskWebParamObj'] = JSON.parse(item.taskWebParam)
+                }
             }
             this.$nextTick(() => {
                 this.isLoading = false;
@@ -292,13 +311,14 @@ export default {
 <style lang="scss" scoped>
 .frequent-appearances {
   width: 100%;
-  height: calc(100% - 50px);
+  height: 100%;
+  padding-bottom: 20px;
   .breadcrumb_heaer {
     background: #fff;
     border-bottom: 1px solid #D3D3D3;
   }
   .frequent-a-content {
-    margin: 20px;
+    margin: 20px 20px 0;
     background: #ffffff;
     box-shadow: 4px 0px 10px 0px rgba(131, 131, 131, 0.28);
     .tab-menu {

@@ -472,13 +472,13 @@ export default {
       if (val) {
         this.closeShow = false;
       } else {
-        if (this.closeShow) {
+        // if (this.closeShow) {
           if (this.selectMethod === 1) {
             this.getGroupList();
           } else {
             this.getBottomBankList();
           }
-        }
+        // }
       }
     }
   },
@@ -862,6 +862,7 @@ export default {
           i {
             display: block;
             margin-left: 5px;
+            display: none;
             &:hover {
               background-position: -412px -350px;
             }

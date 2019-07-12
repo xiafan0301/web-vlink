@@ -41,11 +41,11 @@
               <span style="margin-left: 10px;">- 100</span>
             </el-form-item>
             <el-form-item prop="idNo">
-              <el-input placeholder="填写身份证信息" v-model="searchForm.idNo" type="text"></el-input>
+              <el-input placeholder=" 请填写证件号码" v-model="searchForm.idNo" type="text"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button class="reset_btn" style="width: 100px;" @click="resetData('searchForm')">重置</el-button>
-              <el-button class="select_btn" style="width: 100px;" @click="searchData('searchForm')">查询</el-button>
+              <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
+              <el-button class="select_btn" type="primary"  @click="searchData('searchForm')">查询</el-button>
             </el-form-item>
           </el-form>
         </vue-scroll>
@@ -215,7 +215,7 @@ export default {
       uploadUrl: ajaxCtx.base + '/new', // 图片上传地址
       isAddImgDisabled: false,
       searchForm: {
-        similarity: null, // 相似度
+        similarity: 85, // 相似度
         idNo: null // 身份证
       },
       searchRules: {
@@ -681,22 +681,8 @@ export default {
       }
     }
   }
-  .reset_btn {
-    width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
-  }
-  .select_btn {
-    width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
+  .reset_btn, .select_btn {
+    width: 100px;
   }
 }
 .history-pic-dialog {

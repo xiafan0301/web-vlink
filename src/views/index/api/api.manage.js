@@ -818,6 +818,17 @@ export function getSpecialVehicleList (params) {
   });
 }
 /**
+ * 根据车牌号获取车辆信息
+ * @param {*} data
+ */
+export function getReVehicleInfo (params) {
+  return request({
+    url: '/vehicle-special/vehicle',
+    params,
+    method: 'get'
+  });
+}
+/**
  * 验证特殊组是否重名
  * @param {*} data
  */

@@ -1,78 +1,98 @@
 <template>
   <div class="ws_record">
-    <Breadcrumb :oData="[{name: '尾随分析', routerName: 'vehicle_search_ws', query: {
-      plateNo: $route.query.plateNo,
-      dateStart: $route.query.dateStart,
-      dateEnd: $route.query.dateEnd,
-      vehicleClass: $route.query.vehicleClass,
-      interval: $route.query.interval,
-      deviceCode: $route.query.deviceCode
-    }}, {name: '尾随记录'}]"></Breadcrumb>
+    <div class="vc_gcck_bd">
+      <div is="vlBreadcrumb" 
+        :breadcrumbData="[
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', params: {
+            plateNo: $route.params.plateNo,
+            dateStart: $route.params.dateStart,
+            dateEnd: $route.params.dateEnd,
+            vehicleClass: $route.params.vehicleClass,
+            interval: $route.params.interval,
+            deviceCode: $route.params.deviceCode
+          }},
+          {name: '尾随记录'}]">
+      </div>
+    </div>
     <div class="content_box">
       <div class="left">
-        <h2>{{vehicleDetail.plateno ? vehicleDetail.plateno : $route.query.plateNoTb}}</h2>
-        <ul>
-          <li>
-            <span>车辆所有人：</span>
-            <span>{{vehicleDetail.owner ? vehicleDetail.owner : '未知'}}</span>
-          </li>
-          <li>
-            <span>中文品牌：</span>
-            <span>{{vehicleDetail.brand ? vehicleDetail.brand : '未知'}}</span>
-          </li>
-          <li>
-            <span>车身颜色：</span>
-            <span>{{vehicleDetail.color ? vehicleDetail.color : '未知'}}</span>
-          </li>
-          <li>
-            <span>车身形式：</span>
-            <span>{{vehicleDetail.bodyform ? vehicleDetail.bodyform : '未知'}}</span>
-          </li>
-          <li>
-            <span>车门数：</span>
-            <span>{{vehicleDetail.doornumber ? vehicleDetail.doornumber : '未知'}}</span>
-          </li>
-          <li>
-            <span>发动机号：</span>
-            <span>{{vehicleDetail.engineno ? vehicleDetail.engineno : '未知'}}</span>
-          </li>
-          <li>
-            <span>使用性质：</span>
-            <span>{{vehicleDetail.usecharacter ? vehicleDetail.usecharacter : '未知'}}</span>
-          </li>
-          <li>
-            <span>车辆类型：</span>
-            <span>{{vehicleDetail.platetype ? vehicleDetail.platetype : '未知'}}</span>
-          </li>
-          <li>
-            <span>年款：</span>
-            <span>{{vehicleDetail.model ? vehicleDetail.model : '未知'}}</span>
-          </li>
-          <li>
-            <span>车型：</span>
-            <span>{{vehicleDetail.vehicletype ? vehicleDetail.vehicletype : '未知'}}</span>
-          </li>
-          <li>
-            <span>座位数：</span>
-            <span>{{vehicleDetail.seatnumber ? vehicleDetail.seatnumber : '未知'}}</span>
-          </li>
-          <li>
-            <span>车辆状态：</span>
-            <span>{{vehicleDetail.status ? vehicleDetail.status : '未知'}}</span>
-          </li>
-          <li>
-            <span>厂商名称：</span>
-            <span>{{vehicleDetail.vendor ? vehicleDetail.vendor : '未知'}}</span>
-          </li>
-          <li>
-            <span>有效期止：</span>
-            <span>{{vehicleDetail.validuntil ? vehicleDetail.validuntil : '未知'}}</span>
-          </li>
-        </ul>
+        <vue-scroll>
+          <h2>尾随车辆的特征信息</h2>
+          <ul class="left_ul">
+            <li>
+              <img :src="resultList.length > 0 && resultList[0].struVehicleDto.storagePath" alt="">
+            </li>
+            <li>
+              <span>有无车牌：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.hasPlate ? resultList[0].struVehicleDto.hasPlate : '未知'}}</span>
+            </li>
+            <li>
+              <span>车牌号：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateNo ? resultList[0].struVehicleDto.plateNo : '未知'}}</span>
+            </li>
+            <li>
+              <span>号牌种类：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateClass ? resultList[0].struVehicleDto.plateClass : '未知'}}</span>
+            </li>
+            <li>
+              <span>车牌颜色：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.plateColor ? resultList[0].struVehicleDto.plateColor : '未知'}}</span>
+            </li>
+            <li>
+              <span>车辆类型：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleClass ? resultList[0].struVehicleDto.vehicleClass : '未知'}}</span>
+            </li>
+            <li>
+              <span>车辆品牌：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleBrand ? resultList[0].struVehicleDto.vehicleBrand : '未知'}}</span>
+            </li>
+            <li>
+              <span>车辆型号：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleModel ? resultList[0].struVehicleDto.vehicleModel : '未知'}}</span>
+            </li>
+            <li>
+              <span>车辆年款：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleStyles ? resultList[0].struVehicleDto.vehicleStyles : '未知'}}</span>
+            </li>
+            <li>
+              <span>车辆颜色：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleColor ? resultList[0].struVehicleDto.vehicleColor : '未知'}}</span>
+            </li>
+            <li>
+              <span>车顶：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.vehicleRoof ? resultList[0].struVehicleDto.vehicleRoof : '未知'}}</span>
+            </li>
+            <li>
+              <span>撞痕：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.hitMarkInfo ? resultList[0].struVehicleDto.hitMarkInfo : '未知'}}</span>
+            </li>
+            <li>
+              <span>车前物品描述：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.descOfFrontItem ? resultList[0].struVehicleDto.descOfFrontItem : '未知'}}</span>
+            </li>
+            <li>
+              <span>车后物品描述：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.descOfRearItem ? resultList[0].struVehicleDto.descOfRearItem : '未知'}}</span>
+            </li>
+            <li>
+              <span>遮阳板状态：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.sunvisor ? resultList[0].struVehicleDto.sunvisor : '未知'}}</span>
+            </li>
+            <li>
+              <span>安全带状态：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.safetyBelt ? resultList[0].struVehicleDto.safetyBelt : '未知'}}</span>
+            </li>
+            <li>
+              <span>打电话状态：</span>
+              <span>{{resultList.length > 0 && resultList[0].struVehicleDto.calling ? resultList[0].struVehicleDto.calling : '未知'}}</span>
+            </li>
+          </ul>
+        </vue-scroll>
       </div>
       <div class="right">
         <div class="operation_box">
-          <p @click="skipBreakRecordPage">查看违章记录</p>
+          <!-- <p @click="skipBreakRecordPage">查看违章记录</p> -->
           <p @click="skipVehicleControlPage">车辆布控</p>
           <p @click="skipTrajectoryPage">轨迹分析</p>
           <p @click="skipFootholdPage">落脚点分析</p>
@@ -101,19 +121,19 @@
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button type="primary" @click="playerCutSave">保 存</el-button>
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import Breadcrumb from '../../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { getTailBehindDetail, getVehicleArchives } from '@/views/index/api/api.judge.js'
 import { random14 } from '@/utils/util.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     return {
       cutDialogVisible: false, // 截屏弹出框
@@ -125,11 +145,24 @@ export default {
       vehicleDetail: {}, // 尾随车辆详细信息
       marker: {},
       flvplayerId: 'flv_' + random14(),
+      queryObj: {}
     }
+  },
+  created () {
+    this.queryObj = {
+      plateNo: this.$route.params.plateNo,
+      dateStart: this.$route.params.dateStart,
+      dateEnd: this.$route.params.dateEnd,
+      plateNoTb: this.$route.params.dateStart,
+      vehicleClass: this.$route.params.vehicleClass,
+      interval: this.$route.params.interval,
+      deviceCode: this.$route.params.deviceCode,
+      dateStartTb: this.$route.params.dateStartTb
+    };
   },
   mounted () {
     this.initMap();
-    this.getVehicleDetail();
+    // this.getVehicleDetail();
     setTimeout(() => {
       this.getDetail();
     }, 500)
@@ -137,39 +170,59 @@ export default {
   methods: {
     // 跳至新建布控页面
     skipVehicleControlPage () {
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo }});
-    },
-    // 跳至查看违章记录页面
-    skipBreakRecordPage () {
-      this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          { name: '新建布控' }
+        ]
+      });
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          { name: '车辆轨迹' }
+        ]
+      });
       this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '车辆侦查', routerName: 'vehicle'},
+          {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
+          { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
+          { name: '落脚点分析' }
+        ]
+      });
       this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
     },
     // 获取车辆信息（车管所）
-    getVehicleDetail () {
-      const plateNo = this.$route.query.plateNoTb;
-      if (plateNo) {
-        getVehicleArchives({plateNo})
-          .then(res => {
-            if (res) {
-              this.vehicleDetail = res.data;
-            }
-          })
-      }
-    },
+    // getVehicleDetail () {
+    //   const plateNo = this.$route.params.plateNoTb;
+    //   if (plateNo) {
+    //     getVehicleArchives({plateNo})
+    //       .then(res => {
+    //         if (res) {
+    //           this.vehicleDetail = res.data;
+    //         }
+    //       })
+    //   }
+    // },
     // 获取尾随车辆详情
     getDetail () {
-      const plateNo = this.$route.query.plateNo;
-      const startTime = this.$route.query.dateStart;
-      const endTime = this.$route.query.dateEnd;
-      const plateNoTb = this.$route.query.plateNoTb;
-      const startTimeTb = this.$route.query.dateStartTb;
+      const plateNo = this.$route.params.plateNo;
+      const startTime = this.$route.params.dateStart;
+      const endTime = this.$route.params.dateEnd;
+      const plateNoTb = this.$route.params.plateNoTb;
+      const startTimeTb = this.$route.params.dateStartTb;
       const params = {
         plateNo,
         startTime,
@@ -179,7 +232,7 @@ export default {
       };
       getTailBehindDetail(params)
         .then(res => {
-          if (res && res.data) {
+          if (res && res.data && res.data.length > 0) {
             console.log('res', res)
             this.resultList = res.data;
 
@@ -206,8 +259,8 @@ export default {
           let obj = data[i];
           if (obj.shotPlaceLongitude > 0 && obj.shotPlaceLatitude > 0) {
             let offSet = [-20.5, -55];
-            
-            let _idBtn = 'vlJtcPlayBtn' + obj.deviceID;
+            console.log('obj', obj)
+            let _idBtn = 'vlJtcPlayBtn' + obj.struVehicleDto.deviceID;
             let _id = 'vlJtcVideo' + obj.deviceID;
 
             let marker = new window.AMap.Marker({
@@ -226,10 +279,10 @@ export default {
               $('#vehicle' + obj.deviceID).addClass('vl_icon_map_hover_mark0');
 
               let sContent = "<div class='tip_box'><div class='select_target'><p class='select_p'>查询目标</p>"
-                    +"<img src="+ obj.subStoragePath +" /><div class='mongolia'>"
+                    +"<img src="+ obj.storagePath +" /><div class='mongolia'>"
                     +"<span>"+ obj.shotTime +"</span><i id="+ _id +" class='vl_icon vl_icon_control_09'></i></div></div>"
-                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.subStoragePathTb +" />"
-                    +"<div class='mongolia'><span>"+ obj.shotTimeTb +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
+                    +"<div class='tail_vehicle'><p class='tail_p'>尾随车辆</p><img src="+ obj.struVehicleDto.storagePath +" />"
+                    +"<div class='mongolia'><span>"+ obj.struVehicleDto.shotTime +"</span><i id="+ _idBtn +" class='vl_icon vl_icon_control_09'></i></div></div>"
                     +"<div class='divide'></div><div class='device_name'>"+ obj.deviceName +"</div></div>";
 
                 hoverWindow = new window.AMap.InfoWindow({
@@ -241,7 +294,7 @@ export default {
                 hoverWindow.open(_this.map, new window.AMap.LngLat(obj.shotPlaceLongitude, obj.shotPlaceLatitude));
 
                 setTimeout(() => {
-                  _this.addListen(_idBtn, obj);
+                  _this.addListen(_idBtn, obj.struVehicleDto);
                   _this.addListen(_id, obj);
                 }, 500);
             });
@@ -434,6 +487,10 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+.vc_gcck_bd {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 50px; line-height: 50px;
+}
 .ws_record {
   height: 100%;
   .content_box {
@@ -442,18 +499,23 @@ export default {
     padding-top: 50px;
     .left {
       width: 272px;
+      height: 100%;
       background-color: #ffffff;
       box-shadow:2px 3px 10px 0px rgba(131,131,131,0.28);
       padding: 20px;
-      >h2 {
+      h2 {
         color: #222222;
         font-weight: bold;
         font-size: 18px;
       }
-      >ul {
+      .left_ul {
         margin-top: 15px;
         >li {
           line-height: 30px;
+          >img {
+            width: 120px;
+            height: 120px;
+          }
           span:first-child {
             color: #666666;
           }
