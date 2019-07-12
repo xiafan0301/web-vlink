@@ -60,3 +60,16 @@ export function getOutCityBayonet(params) {
     mode: 'judge'
   })
 }
+
+/**
+ * 导出接口 
+ * @param {object} params
+ */
+export function exportExcel(data) {
+  return request({
+    url: '/export',
+    method: 'post',
+    data,
+    mode: 'judge'
+  })
+}
