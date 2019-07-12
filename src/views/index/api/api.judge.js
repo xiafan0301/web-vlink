@@ -121,6 +121,14 @@ export function JigGETAlarmSnapList(params) {
     mode: 'judge'
   })
 }
+export function newGETAlarmSnapList(params) {
+  return request({
+    url: '/portrait/shot-num/focus/detail',
+    method: 'get',
+    params: params,
+    mode: 'judge'
+  })
+}
 /**
  * JfoGETGroup 分组列表查询接口
  * @param {object} params
