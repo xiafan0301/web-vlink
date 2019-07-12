@@ -90,6 +90,10 @@
           <div class="main_box" v-show="tabIndex === 2">
             <p>车流量（辆）</p>
             <div id="chartContainer2"></div>
+            <div v-if="this.chartData && this.chartData.length > 30" class="chart_time">
+              <span>{{beforeDate}}</span>
+              <span>{{afterDate}}</span>
+            </div>
           </div>
           <div class="main_box" v-show="tabIndex === 3">
             <el-table :data="bodyList">
@@ -124,7 +128,7 @@ export default {
         bayonet: {value: ''},
         // lane: null,
         statementType: 1,
-        warningNum: null,
+        warningNum: '',
         startTime: startTime,
         endTime: endTime
       },
@@ -161,6 +165,9 @@ export default {
       isShowChart: false, // 选择卡口，点统计按钮后，显示右边统计图表
       headerList: [], // 表格头部数据
       bodyList: [], // 表格主体数据
+      //当时间间隔超过30天时，X轴 只取第一个，和最后一个现实
+      beforeDate: null,
+      afterDate: null
     }
   },
   computed: {
@@ -288,7 +295,6 @@ export default {
       //   value: 1     // 补全字段值时执行的规则
       // });
 
-      console.log(dv.rows, 'dv.rows')
       // let view2 = chart.view();
       // view2.source(dv, {});
       
@@ -340,17 +346,18 @@ export default {
       .color('l(270) 0:#0C70F8 1:#0D9DF4')
       .size(30);
 
-      console.log("-----------------",dv.rows, this.queryForm.warningNum)
-      chart.guide().line({
-        top: true,
-        start: [dv.rows[0].date, this.queryForm.warningNum],
-        end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
-        lineStyle: {
-          stroke: '#ef5555',
-          lineWidth: 2,
-          lineDash: [3, 3]
-        },
-      });
+      if (this.queryForm.warningNum > 0) {
+        chart.guide().line({
+          top: true,
+          start: [dv.rows[0].date, this.queryForm.warningNum],
+          end: [dv.rows[dv.rows.length - 1].date, this.queryForm.warningNum],
+          lineStyle: {
+            stroke: '#ef5555',
+            lineWidth: 2,
+            lineDash: [3, 3]
+          },
+        });
+      }
 
       /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
@@ -387,21 +394,25 @@ export default {
           offset: 50
         }
       });
-      chart.axis('date', {
-        label: {
-          textStyle: {
-            fill: '#999999',
-            fontSize: 12
+      if (this.chartData && this.chartData.length > 30) {
+        chart.axis('date', false);
+      } else {
+        chart.axis('date', {
+          label: {
+            textStyle: {
+              fill: '#999999',
+              fontSize: 12
+            }
+          },
+          tickLine: {
+            alignWithLabel: true,
+            length: 0
+          },
+          line: {
+            lineWidth: 0
           }
-        },
-        tickLine: {
-          alignWithLabel: true,
-          length: 0
-        },
-        line: {
-          lineWidth: 0
-        }
-      });
+        });
+      }
       chart.tooltip({
         useHtml: true,
         htmlContent: function (title, items) {
@@ -414,16 +425,18 @@ export default {
       chart.area().position('date*value').color('type', ['#007EFF']).shape('smooth').opacity(0.6);
       chart.line().position('date*value').color('type', ['#207BF1']).size(1).shape('smooth');
       chart.point().position('date*value').color('type', ['#207BF1']).size(2).shape('smooth');
-      chart.guide().line({
-        top: true,
-        start: [dv.rows[0].date, this.queryForm.warningNum],
-        end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
-        lineStyle: {
-          stroke: '#ef5555',
-          lineWidth: 2,
-          lineDash: [3, 3]
-        },
-      });
+      if (this.queryForm.warningNum > 0) {
+        chart.guide().line({
+          top: true,
+          start: [dv.rows[0].date, this.queryForm.warningNum],
+          end: [dv.rows[dv.rows.length -1].date, this.queryForm.warningNum],
+          lineStyle: {
+            stroke: '#ef5555',
+            lineWidth: 2,
+            lineDash: [3, 3]
+          },
+        });
+      }
       /* chart.line().position('date*warnNum').color('#ef5555'); */
       chart.render();
       this.charts.chart2 = chart;
@@ -491,7 +504,6 @@ export default {
           const _startTime = new Date(this.queryForm.startTime).getTime();
           const _endTime = new Date(this.queryForm.endTime).getTime();
           const threeDays = 259199000;
-          console.log(_endTime - _startTime, threeDays)
           if(this.queryForm.statementType === 3 || this.queryForm.statementType === 2 || (this.queryForm.statementType === 5 && (_endTime - _startTime) > threeDays)) {
             for(let item of this.chartData) {
               item['date'] = formatDate(item.date,'yy-MM-dd')
@@ -502,6 +514,8 @@ export default {
             this.isShowChart = true;
             this.$nextTick(() => {
               this.drawChart2();
+              this.beforeDate = this.chartData[0].date;
+              this.afterDate = this.chartData[this.chartData.length - 1].date;
             })
           } else {
             this.charts = {
@@ -609,6 +623,17 @@ export default {
           }
           .el-table{
             margin-top: 20px;
+          }
+          .chart_time{
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: relative;
+            bottom: 50px;
+            > span{
+              font-size: 12px;
+              color: #999999;
+            }
           }
         }
       }
