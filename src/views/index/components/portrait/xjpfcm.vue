@@ -346,8 +346,7 @@ export default {
               console.log(res);
               if (res && res.data) {
                 this.$router.push({
-                  name: "portrait_pfcm",
-                  query: { selectIndex: 0 }
+                  name: "portrait_pfcm"
                 });
               }
               this.$nextTick(() => {
