@@ -250,7 +250,7 @@
                         <div class="com_width_to_height" style="margin-bottom: 5px;">
                           <div>
                             <div>
-                              <img :src="item.vehicleDto.storagePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
+                              <img :src="item.vehicleDto.subStoragePath" :alt="item.vehicleDto.plateNo" :title="item.vehicleDto.plateNo">
                             </div>
                           </div>
                         </div>
@@ -403,13 +403,13 @@ export default {
         }
         this.searchLoading = false;
       }).catch(error => {
-        console.log('error');
+        console.log('getVehicleInvestigationReport error', error);
         this.searchLoading = false;
       });
     },
 
     setMapMarkerForYjcm () {
-      this.yjcmMap.remove();
+      this.yjcmMap.clearMap();
       if (this.yjcmList && this.yjcmList.allRecords && this.yjcmList.allRecords.length > 0) {
         let _this = this;
         let oList = {};
@@ -472,7 +472,7 @@ export default {
       }
     },
     setMapMarkerForClgj () {
-      this.clgjMap.remove();
+      this.clgjMap.clearMap();
       let gjPath = [];
       for (let i = 0; i < this.clgjList.length; i++) {
         // console.log('doMark', obj);
@@ -500,9 +500,10 @@ export default {
       var polyline = new window.AMap.Polyline({
           map: this.clgjMap,
           path: gjPath,
+          showDir: true,
           strokeColor: "#61c772",  //线颜色
           strokeOpacity: 1,     //线透明度
-          strokeWeight: 2,      //线宽
+          strokeWeight: 8,      //线宽
           strokeStyle: "solid"  //线样式
       });
       this.clgjMap.setFitView();

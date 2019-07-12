@@ -5,13 +5,14 @@
         <router-link :to="{name: 'video_patrol'}">视频巡逻</router-link>
       </li>
       <li>
-        <!-- <router-link :to="{name: 'video_playback'}">录像回放</router-link> -->
-        <!-- <router-link :to="{name: 'video_playback', query: {uid: 5, deviceName: '测试设备4'}}">录像回放</router-link> -->
         <router-link :to="{name: 'video_playback'}">视频回放</router-link>
       </li>
       <li>
-        <!-- <a href="javascript: void(0);" class="vl_smenu_dis">智能查看</a> -->
         <router-link :to="{name: 'video_query'}">智能查看</router-link>
+      </li>
+      <li>
+        <router-link :to="{name: 'video_relay'}">视频接力</router-link>
+        <!-- <a href="javascript: void(0);" class="vl_smenu_dis">视频接力</a> -->
       </li>
       <li>
         <router-link :to="{name: 'video_signList'}">查看标记</router-link>
@@ -43,6 +44,31 @@ export default {
 </script>
 <!-- 视频模块公用CSS -->
 <style lang="scss">
+.vl_vid {
+  height: 100%;
+  position: relative;
+  > .vid_opes {
+    position: absolute; top: 2px; right: 10px;
+    height: 60px;
+    padding: 16px 0 0 0;
+  }
+  > .vid_content {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    &.vid_content2 {
+      margin-left: 240px;
+    }
+    > .vid_title {
+      position: absolute; top: 0; left: 10px;
+      height: 60px;
+      padding: 16px 0 0 0;
+    }
+    > .vid_show_list {
+      height: 100%; padding-top: 65px;
+    }
+  }
+}
 .vid_show_type {
   float: left;
   > li {
@@ -61,28 +87,11 @@ export default {
   }
 }
 .vid_show_menu {
-  position: absolute; top: 0; left: 10px; z-index: 20;
-  width: 230px; height: 70px;
-  > .show_menu_t {
-    position: absolute; top: 10px; left: 0; z-index: 2;
-    width: 100%; height: 50px; line-height: 50px;
-    background: #fff;
-    border: 1px solid #D3D3D3;
-    box-shadow: 0px 0px 68px 0px rgba(94,86,254,0.06);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 0 20px 0 20px;
-    transition: all 0.3s ease-out;
-    > i {
-      position: absolute; top: 14px; right: 10px;
-      color: #999; font-size: 20px;
-      transition: color 0.3s ease-out;
-    }
-  }
+  position: absolute; top: 0; left: -230px; z-index: 10;
+  width: 230px; height: 100%;
+  transition: left 0.3s ease-out;
   > .show_menu_b {
-    display: none;
     width: 100%; height: 100%;
-    padding-top: 70px;
     animation: fadeIn .4s ease-out both;
     > div {
       position: relative;
@@ -131,7 +140,7 @@ export default {
         animation: fadeIn .4s ease-out both;
         > .show_search {
           position: absolute; top: 48px; left: 0;
-          width: 100%;  height: 66px;
+          width: 100%;
           padding-top: 15px;
           /* > div {
             position: relative;
@@ -264,29 +273,16 @@ export default {
     }
   }
   &.vid_show_menu_active {
-    height: 100%;
-    > .show_menu_t {
-      border-color: #186DFB;
-      color: #186DFB;
-      > i {
-        color: #186DFB;
-      }
-      &:after {
-        display: inline-block;
-        content: "";
-        position: absolute; bottom: -8px; right: 15px;
-        border-top: 8px solid #186DFB;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-      }
-    }
-    > .show_menu_b {
-      display: block;
-    }
+    left: 10px;
+  }
+  > .vl_icon {
+    position: absolute; top: 50%; left: 100%;
+    margin-top: -80px;
+    cursor: pointer;
   }
 }
 .vid_show_list {
-  width: 100%; height: 100%; padding: 5px;
+  width: 100%; padding: 5px;
   > li {
     float: left;
     padding: 5px;

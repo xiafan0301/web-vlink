@@ -620,15 +620,17 @@ export default {
                   this.total = res.data.length;
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
+                  this.total = 0;
                 }
               } else {
                 this.strucInfoList = []; // 清空搜索结果
+                this.total = 0;
               }
             })
             .catch(err => {
               this.getStrucInfoLoading = false; // 关闭加载效果
-
               this.strucInfoList = []; // 清空搜索结果
+              this.total = 0;
             });
         } else {
           return false;
@@ -1216,34 +1218,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 //弹窗
 .mhsc_wrap {
   .el-input-group__append,

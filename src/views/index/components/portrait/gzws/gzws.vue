@@ -1,11 +1,14 @@
 <template>
   <div class="gzws_container">
     <div class="pt_breadcrumb">
-      <el-breadcrumb separator=">">
-        <el-breadcrumb-item :to="{ name: 'portrait' }">人像检索</el-breadcrumb-item>
-        <el-breadcrumb-item>跟踪尾随</el-breadcrumb-item>
-      </el-breadcrumb>
-      <el-button class="add_btn" @click="showAddTaskDialog('add')">新建任务</el-button>
+      <div class="vc_gcck_bd">
+        <div is="vlBreadcrumb" 
+          :breadcrumbData="[
+            {name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '跟踪尾随'}]">
+        </div>
+      </div>
+      <el-button class="add_btn" type="primary" @click="showAddTaskDialog('add')">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -32,15 +35,15 @@
               type="datetimerange"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :default-time="['00:00:00', '23:59:59']"
             ></el-date-picker>
           </el-form-item>
           <el-form-item>
-            <el-button class="select_btn" @click="selectDataList">查询</el-button>
-            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+            <el-button type="primary" @click="selectDataList">查询</el-button>
+            <el-button @click="resetForm('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
@@ -50,8 +53,16 @@
           <el-table-column label="序号" type="index" width="100"></el-table-column>
           <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
           <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-          <el-table-column label="分析时间范围" prop="taskName" show-overflow-tooltip></el-table-column>
-          <el-table-column label="尾随间隔" prop="taskName" show-overflow-tooltip></el-table-column>
+          <el-table-column label="分析时间范围" prop="taskWebParam" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span>{{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="尾随间隔" prop="taskWebParam" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span>{{scope.row.taskWebParam.interval}}分钟</span>
+            </template>
+          </el-table-column>
           <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
             <template slot-scope="scope">
               <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -178,7 +189,7 @@
                 >
               </el-date-picker>
             </el-form-item>
-            <el-form-item prop="deviceCode">
+            <el-form-item prop="deviceCode" class="device_code">
               <el-select placeholder="请选择起点设备" style="width: 100%" v-model="addForm.deviceCode">
                 <el-option
                   v-for="(item, index) in deviceList"
@@ -187,6 +198,7 @@
                   :value="item.deviceID"
                 ></el-option>
               </el-select>
+              <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -202,14 +214,14 @@
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="resetData('addForm')">取消</el-button>
-        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="searchData('addForm')">确认</el-button>
+        <el-button @click="cancelAdd('addForm')">取消</el-button>
+        <el-button class="operation_btn function_btn" :loading="isAddLoading" @click="submitData('addForm')">确认</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import Breadcrumb from '../breadcrumb.vue';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 import { ajaxCtx } from '@/config/config.js';
 import { checkPlateNumber } from '@/utils/validator.js';
 import { getShotDevice, getTailBehindList } from '@/views/index/api/api.judge.js';
@@ -217,7 +229,7 @@ import { getPersonShotDev, getPersonFollowing } from '@/views/index/api/api.port
 import { getTaskInfosPage, putAnalysisTask, putTaskInfosResume } from '@/views/index/api/api.analysis.js';
 import { formatDate } from '@/utils/util.js';
 export default {
-  components: { Breadcrumb },
+  components: { vlBreadcrumb },
   data () {
     const startTime = new Date() - 24 * 60 * 60 *1000;
     return {
@@ -231,6 +243,7 @@ export default {
           value: 0
         }
       ],
+      isShowDeviceTip: false, // 是否显示设备有否提示
       isAddTaskTitle: true, // 是否是新增任务
       selectIndex: 1, // 默认选中已完成的任务
       taskId: null, // 要操作的任务id
@@ -252,10 +265,8 @@ export default {
       addForm: {
         taskName: null, // 任务名称
         deviceCode: null, // 起点设备编号
+        deviceName: null, // 起点设备名称
         dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
-        // shotTime: new Date(startTime), // 开始时间
-        // dateEnd: new Date(), // 结束时间
-        // vehicleClass: [], // 车辆类型
         interval: 3 // 尾随间隔
       },
       intervalList: [
@@ -285,7 +296,6 @@ export default {
     }
   },
   created () {
-    // this.getVehicleTypeList();
     this.getDataList();
   },
   methods: {
@@ -307,8 +317,8 @@ export default {
       const params = {
         'where.taskName': this.searchForm.taskName,
         'where.taskType': 3, // 3：人员跟踪尾随分析
-        'where.dateStart': this.searchForm.reportTime[0],
-        'where.dateEnd': this.searchForm.reportTime[1],
+        'where.startTime': this.searchForm.reportTime[0],
+        'where.endTime': this.searchForm.reportTime[1],
         'where.isFinish': this.selectIndex,   //是否完成 0:未完成(包含处理中、处理失败、处理中断) 1：已完成(处理成功)
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
@@ -317,9 +327,14 @@ export default {
       };
       getTaskInfosPage(params)
         .then(res => {
-          if (res) {
+          if (res && res.data) {
             this.list = res.data.list;
             this.pagination.total = res.data.total;
+            this.list.map(item => {
+              item.taskWebParam = JSON.parse(item.taskWebParam);
+            })
+
+            console.log(this.list)
           }
         })
         .catch(() => {})
@@ -358,27 +373,41 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        targetPicUrl : this.dialogImageUrl,
-        startTime : formatDate(this.addForm.dateTime[0]),
-        endTime: formatDate(this.addForm.dateTime[1])
+        // targetPicUrl : this.dialogImageUrl,
+        targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+        startTime : '2019-07-09 09:59:00',
+        endTime: '2019-07-09 10:03:00'
+        // startTime : formatDate(this.addForm.dateTime[0]),
+        // endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
       getPersonShotDev(params)
         .then(res => {
-          if (res) {
-            this.deviceList = res.data;
+          if (res && res.code === '00000000') {
+            if (res.data) {
+
+              this.deviceList = res.data;
+
+              // 初始化页面时默认选中第一个设备
+              this.addForm.deviceCode = this.deviceList[0].deviceID;
+              this.addForm.deviceName = this.deviceList[0].deviceName;
+              
+              this.isShowDeviceTip = false;
+            } else {
+              this.isShowDeviceTip = true;
+            }
           }
         })
     },
     // 起点设备change
     handleChangeDeviceCode (obj) {
-      // if (obj) {
-      //   this.deviceList.map(item => {
-      //     if (item.deviceID === obj) {
-      //       // this.deviceStartTime = item.shotTime;
-      //     }
-      //   })
-      // }
+      if (obj) {
+        this.deviceList.map(item => {
+          if (item.deviceID === obj) {
+            this.addForm.deviceName = item.deviceName;
+          }
+        })
+      }
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
@@ -391,14 +420,14 @@ export default {
       //   dateStartTb: obj.shotTime
       //  }});
     },
-    // 重置查询条件
-    resetData (form) {
+    // 取消新建
+    cancelAdd (form) {
       this.$refs[form].resetFields();
       this.addTaskDialog = false;
       this.dialogImageUrl = null;
     },
-    // 搜索数据
-    searchData (form) {
+    // 新建任务
+    submitData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
@@ -419,29 +448,33 @@ export default {
           };
           // const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            targetPicUrl: this.dialogImageUrl,
+            targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+            startTime : '2019-07-09 09:59:00',
+            endTime: '2019-07-09 10:03:00',
+            // targetPicUrl: this.dialogImageUrl,
             deviceId: this.addForm.deviceCode,
-            startTime: formatDate(this.addForm.dateTime[0]),
-            endTime: formatDate(this.addForm.dateTime[1]),
-            taskName: this.addForm.plateNo,
+            deviceName: this.addForm.deviceName,
+            // startTime: formatDate(this.addForm.dateTime[0]),
+            // endTime: formatDate(this.addForm.dateTime[1]),
+            taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
           this.isAddLoading = true;
           getPersonFollowing(params)
             .then(res => {
-              if (res && res.data) {
-                this.$message({
-                  type: 'success',
-                  message: '新建成功',
-                  customClass: 'request_tip'
-                });
-                // this.dataList = res.data;
-                this.isAddLoading = false;
-                this.addTaskDialog = false;
-                this.getDataList();
-              } else {
-                this.isAddLoading = false;
-              }
+              this.$message({
+                type: 'success',
+                message: '新建成功',
+                customClass: 'request_tip'
+              });
+              // this.dataList = res.data;
+              this.isAddLoading = false;
+              this.addTaskDialog = false;
+              this.getDataList();
+              // if (res && res.data) {
+              // } else {
+              //   this.isAddLoading = false;
+              // }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -557,21 +590,21 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+
 .gzws_container {
   height: 100%;
   .pt_breadcrumb {
     display: flex;
     justify-content: space-between;
     height: 50px; width: 100%;
-    padding-left: 20px;
     align-items: center;
     border-bottom: 1px solid #f6f6f6;
     box-shadow: 0 0 5px #ddd;
     background-color: #fff;
+    .vc_gcck_bd {
+      width: 100%;
+    }
     .add_btn {
-      background-color: #0C70F8;
-      color: #ffffff;
-      border-radius: 4px;
       margin-right: 10px;
     }
   }
@@ -619,23 +652,6 @@ export default {
       }
     }
   }
-  .reset_btn {
-    // width: 110px;
-    background-color: #D3D3D3;
-    color: #666666;
-    border-radius: 4px;
-    &:hover {
-      background-color: #ffffff;
-      color: #0C70F8;
-      border-color: #0C70F8;
-    }
-  }
-  .select_btn {
-    // width: 110px;
-    background-color: #0C70F8;
-    color: #ffffff;
-    border-radius: 4px;
-  }
 }
 .dialog_comp_add {
   .content_body {
@@ -650,7 +666,6 @@ export default {
         height: 225px;
         overflow: hidden;
         margin-top: 30px;
-        // margin-bottom: 25px;
         /deep/ .el-upload {
           width: 225px;
           height: 225px;
@@ -668,9 +683,6 @@ export default {
           }
           &:hover{
             background: #0C70F8;
-            // i.vl_icon_control_14 {
-            //   background-position: -228px -570px;
-            // }
             .upload_text {
               color: #ffffff;
             }
@@ -684,84 +696,6 @@ export default {
           height: 225px;
         }
       }
-      // .upload_box {
-      //   padding: 15px 20px;
-      //   //  .img_list {
-      //   //    display: flex;
-      //   //    margin-top: 10px;
-      //   //    .img_box {
-      //   //     width: 70px;
-      //   //     height: 70px;
-      //   //     background:rgba(255,255,255,1);
-      //   //     border:1px dashed rgba(211,211,211,1);
-      //   //     border-radius:1px;
-      //   //     position: relative;
-      //   //     &:hover {
-      //   //       .delete_box {
-      //   //         display: block;
-      //   //       }
-      //   //     }
-      //   //     .delete_box {
-      //   //       display: none;
-      //   //       position: absolute;
-      //   //       left: 0;
-      //   //       top: 0;
-      //   //       width: 100%;
-      //   //       height: 100%;
-      //   //       background-color: #000;
-      //   //       opacity: 0.7;
-      //   //       text-align: center;
-      //   //       i {
-      //   //         margin-top: 35%;
-      //   //         cursor: pointer; 
-      //   //       }
-      //   //     }
-      //   //     &:not(:last-child) {
-      //   //       margin-right: 5px;
-      //   //     }
-      //   //     img {
-      //   //       width: 100%;
-      //   //       height: 100%;
-      //   //     }
-      //   //    }
-      //   //  }
-      //    /deep/ .el-upload {
-      //     width: 225px;
-      //     height: 225px;
-      //     position: relative;
-      //     .upload_text {
-      //       line-height: 0;
-      //       color: #999999;
-      //       margin-top: -60px;
-      //     }
-      //     // >img {
-      //     //   width: 100%;
-      //     //   height: 100%;
-      //     // }
-      //     i {
-      //       margin-top: 40px;
-      //       margin-left: 15px;
-      //       width: 120px;
-      //       height: 120px;
-      //     }
-      //     &:hover {
-      //       background: #2981F8;
-      //       // i.vl_icon_control_14{
-      //       //   background-position: -228px -570px;
-      //       // }
-      //       .upload_text {
-      //         color: #ffffff;
-      //       }
-      //     }
-      //   }
-      //   &.hidden /deep/ .el-upload--picture-card {
-      //     display: none!important;
-      //   }
-      //   /deep/ .el-upload-list__item {
-      //     width: 225px;
-      //     height: 225px;
-      //   }
-      // }
     }
     .right {
       width: 100%;
@@ -769,6 +703,19 @@ export default {
         width: 100%;
         padding: 50px 20px 0;
         font-size: 12px !important;
+        .device_code {
+          .el-form-item__content {
+            .span_tips {
+              color: #F56C6C;
+              font-size: 12px;
+              line-height: 1;
+              padding-top: 4px;
+              position: absolute;
+              top: 100%;
+              left: 0;
+            }
+          }
+        }
         /deep/ .el-form-item {
           margin-bottom: 20px;
         }

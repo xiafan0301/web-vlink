@@ -492,7 +492,7 @@ export function getNightVehicleRecordList(params) {
  */
 export function getVehicleInvestigationReport(params) {
   return request({
-    url: '/vehicle-investigation-report-service/report',
+    url: '/report-service/vehicle-report',
     method: 'post',
     data: params,
     mode: 'judge'
@@ -547,6 +547,18 @@ export function getFoothold(params) {
 export function getFaceRetrieval(params) {
   return request({
     url: '/face-retrieval/query',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
+/**
+ * 人体查询接口
+ * @param {object} params
+ */
+export function getFaceRetrievalPerson(params) {
+  return request({
+    url: '/face-retrieval/query-person',
     method: 'post',
     data: params,
     mode: 'judge'

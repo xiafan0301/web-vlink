@@ -1,7 +1,7 @@
 <template>
 <div class="judge_content">
   <div class="vl_judge_tc">
-    <div class="vl_j_left">
+    <div :class="['vl_j_left',{hideleft:hideleft}]">
       <div class="vl_jtc_search" style="padding-top: 0;">
           <el-select class="full" v-model="searchData.portraitGroupId" placeholder="关注人群">
             <el-option
@@ -80,8 +80,9 @@
             </el-row>
         </div>
       </div>
+      <span class="insetLeft2" @click="hideResult"></span>
     </div>
-    <div class="vl_j_right">
+    <div :class="['vl_j_right',{hideleft:hideleft}]">
       <div id="tcMap"></div>
       <div class="vl_jfo_switch">
         <div><span :class="{'active': switchType === 0}" @click="switchType = 0">抓拍结果</span></div>
@@ -268,8 +269,10 @@ export default {
           let d = date.getDate();
           let threeMonths = '';
           let start = '';
-          if (parseFloat(d) >= 3) {
-            start = y + '-' + m + '-' + (d - 2);
+          if (parseFloat(d) >= 4) {
+            start = y + '-' + m + '-' + (d - 3);
+            // console.log(888888888888,start);
+            
           } else {
             let o =30
             if(m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12){
@@ -277,7 +280,7 @@ export default {
             }else if(m == 2){
               o=28
             }
-            start = (y - 1) + '-' + m + '-' + (m - 2 + o);
+            start = (y - 1) + '-' + m + '-' + (d - 3 + o);
           }
           threeMonths = new Date(start).getTime();
           return time.getTime() > Date.now() || time.getTime() < threeMonths;
@@ -310,6 +313,7 @@ export default {
       selectDevice:[],
       selectBayonet:[],
       selectValue:"已选设备0个",
+      hideleft:false,
     }
   },
   mounted () {
@@ -335,6 +339,9 @@ export default {
     })
   },
   methods: {
+    hideResult(){
+      this.hideleft = !this.hideleft;
+    },
     changeTab(v) {
      
     },
@@ -549,7 +556,7 @@ export default {
             }
             $('#vlJfoImg' + key).addClass('vl_jig_mk_img_hover')
             $('#vlJfoSxt' + key).addClass('vl_icon_judge_02')
-            self.showVideo(obj);
+           // self.showVideo(obj);
             break;
         }
       })
@@ -698,14 +705,6 @@ export default {
 }
 </script>
 <style lang="scss">
-  html {
-    font-size: 100px;
-  }
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
   .vl_jfo_switch {
     width: 2.34rem;
     height: .5rem;
@@ -884,12 +883,17 @@ export default {
         }
       }
     }
+    .hideleft.vl_j_left{
+      margin-left: -3rem;
+    }
     .vl_j_left {
+      position: relative;
+      z-index: 11;
       float: left;
       width: 3rem;
       padding-top: 24px;
       height: 100%;
-      margin-left: 0.2rem;
+      // margin-left: 0.2rem;
       background: #ffffff;
       box-shadow:4px 0px 10px 0px #838383;
       box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
@@ -998,14 +1002,14 @@ export default {
         height: auto;
         padding: 0 .2rem;
         padding-top: .4rem;
-        .el-input__inner {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
-        .el-input__icon {
-          height: .4rem!important;
-          line-height: .4rem!important;
-        }
+        // .el-input__inner {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
+        // .el-input__icon {
+        //   height: .4rem!important;
+        //   line-height: .4rem!important;
+        // }
         .el-range-editor {
           width: 100%;
           padding: 0;
@@ -1023,22 +1027,25 @@ export default {
           }
         }
         button {
-          height: .4rem;
-          line-height: .4rem;
+          height: .5rem;
+          line-height: .5rem;
           padding: 0 .12rem;
           margin-top: .14rem;
         }
         .el-select {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
         > div {
-          margin-bottom: .1rem;
+          margin-bottom: .2rem;
         }
       }
     }
+    .vl_j_right.hideleft{
+      width: 100%;
+    }
     .vl_j_right {
       display: inline-block;
-      width: calc(100% - 3.2rem);
+      width: calc(100% - 3rem);
       height: calc(100% - 5px);
       position: relative;
       #tcMap {
@@ -1279,12 +1286,53 @@ export default {
 }
 </style>
 <style lang="scss" scoped="scoped">
+.hideleft {
+  .insetLeft2 {
+    transform: rotate(180deg);
+    background-position: -504px -1269px;
+  }
+  .insetLeft2:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
+}
+.insetLeft2{
+  position: absolute;
+  right: -28px;
+  width: 25px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -380px -1269px;
+  cursor: pointer;
+}
+.insetLeft2:hover{
+  position: absolute;
+  right: -28px;
+  width: 28px;
+  height: 178px;
+  top: 50%;
+  margin-top: -89px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  transform: rotate(180deg);
+  background-image: url(../../../../assets/img/icons.png);
+  background-position: -318px -1269px;
+  cursor: pointer;
+}
 .full {
   width: 100%;
 }
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover {
+   background-color: #0466de;
 }
 .judge_content {
       height: 100%;

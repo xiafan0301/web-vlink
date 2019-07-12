@@ -242,7 +242,7 @@
                     ></el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item prop="sunVisor">
+                <!-- <el-form-item prop="sunVisor">
                   <el-select
                     v-model="tzscMenuForm.sunVisor"
                     clearable
@@ -271,7 +271,7 @@
                       :value="item.enumValue"
                     ></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item> -->
               </div>
             </el-form>
             <!-- 按钮样式 -->
@@ -564,7 +564,6 @@ export default {
         ]
       },
       getStrucInfoLoading: false, // 查询按钮加载
-
       pickerOptions: {
         disabledDate(time) {
           let date = new Date();
@@ -591,63 +590,62 @@ export default {
       vehicleClassOptions: [], // 车辆类型
       vehicleColorOptions: [], // 车辆颜色
       carModelOptions: [], // 车辆型号
-      sunvisorOptions: [
-        // 遮阳板
-        {
-          enumField: "打开",
-          enumValue: "打开"
-        },
-        {
-          enumField: "收起",
-          enumValue: "收起"
-        }
-      ],
-      descOfRearItemOptions: [
-        {
-          enumField: "年检标数量0个",
-          enumValue: "年检标数量0个"
-        },
-        {
-          enumField: "年检标数量1个",
-          enumValue: "年检标数量1个"
-        },
-        {
-          enumField: "年检标数量2个",
-          enumValue: "年检标数量2个"
-        },
-        {
-          enumField: "年检标数量3个",
-          enumValue: "年检标数量3个"
-        },
-        {
-          enumField: "年检标数量4个",
-          enumValue: "年检标数量4个"
-        },
-        {
-          enumField: "年检标数量5个",
-          enumValue: "年检标数量5个"
-        },
-        {
-          enumField: "年检标数量6个",
-          enumValue: "年检标数量6个"
-        },
-        {
-          enumField: "年检标数量7个",
-          enumValue: "年检标数量7个"
-        },
-        {
-          enumField: "年检标数量8个",
-          enumValue: "年检标数量8个"
-        },
-        {
-          enumField: "年检标数量9个",
-          enumValue: "年检标数量9个"
-        },
-        {
-          enumField: "年检标数量10个",
-          enumValue: "年检标数量10个"
-        }
-      ], // 年检标数量
+      // sunvisorOptions: [ // 遮阳板
+      //   {
+      //     enumField: "打开",
+      //     enumValue: "打开"
+      //   },
+      //   {
+      //     enumField: "收起",
+      //     enumValue: "收起"
+      //   }
+      // ],
+      // descOfRearItemOptions: [ // 年检标数量
+      //   {
+      //     enumField: "年检标数量0个",
+      //     enumValue: "年检标数量0个"
+      //   },
+      //   {
+      //     enumField: "年检标数量1个",
+      //     enumValue: "年检标数量1个"
+      //   },
+      //   {
+      //     enumField: "年检标数量2个",
+      //     enumValue: "年检标数量2个"
+      //   },
+      //   {
+      //     enumField: "年检标数量3个",
+      //     enumValue: "年检标数量3个"
+      //   },
+      //   {
+      //     enumField: "年检标数量4个",
+      //     enumValue: "年检标数量4个"
+      //   },
+      //   {
+      //     enumField: "年检标数量5个",
+      //     enumValue: "年检标数量5个"
+      //   },
+      //   {
+      //     enumField: "年检标数量6个",
+      //     enumValue: "年检标数量6个"
+      //   },
+      //   {
+      //     enumField: "年检标数量7个",
+      //     enumValue: "年检标数量7个"
+      //   },
+      //   {
+      //     enumField: "年检标数量8个",
+      //     enumValue: "年检标数量8个"
+      //   },
+      //   {
+      //     enumField: "年检标数量9个",
+      //     enumValue: "年检标数量9个"
+      //   },
+      //   {
+      //     enumField: "年检标数量10个",
+      //     enumValue: "年检标数量10个"
+      //   }
+      // ], 
       characterTypes: [
         "plateClass", // 号牌类型
         "plateColor", // 车牌颜色
@@ -656,8 +654,8 @@ export default {
         "vehicleBrand", // 汽车型号
         "vehicleStyles", // 汽车的型号
         "vehicleColor", // 汽车颜色
-        "sunvisor", // 遮阳板
-        "descOfFrontItem", // 年检标数量
+        // "sunvisor", // 遮阳板
+        // "descOfFrontItem", // 年检标数量
       ],
       options: [
         {
@@ -819,74 +817,77 @@ export default {
           let queryParams;
           if (this.selectType === 2) {
             queryParams = {
-              "where.startTime":
+              where: {
+              "startTime":
                 formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
                 " 00:00:00", // 开始时间
-              "where.endTime":
+              "endTime":
                 formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
                 " 23:59:59", // 结束时间
-              "where.deviceUid":
+              "deviceUid":
                 deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "where.bayonetUid":
+              "bayonetUid":
                 bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
-              "where.plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
-              "where.plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
-              "where.vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
-              "where.vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
-              "where.sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
-              "where.descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
-              "where.vehicleNumber": null, // 车牌号码
-              "where.vehicleModel": null, // 车辆型号
+              "plateClass": this.tzscMenuForm.licenseType || null, // 号牌类型
+              "plateColor": this.tzscMenuForm.licenseColor || null, // 号牌颜色
+              "vehicleClass": this.tzscMenuForm.carType || null, // 车辆类型
+              "vehicleColor": this.tzscMenuForm.carColor || null, // 车辆颜色
+              // "sunvisor": this.tzscMenuForm.sunVisor || null, // 遮阳板
+              // "descOfRearItem": this.tzscMenuForm.inspectionCount || null, // 年检标数量
+              "vehicleNumber": null, // 车牌号码
+              "vehicleModel": null, // 车辆型号
+              },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
           } else {
             // 自定义的特征
             queryParams = {
-              "where.startTime":
+               where: {
+              "startTime":
                 formatDate(this.tzscMenuForm.selectDate[0], "yyyy-MM-dd") +
                 " 00:00:00", // 开始时间
-              "where.endTime":
+              "endTime":
                 formatDate(this.tzscMenuForm.selectDate[1], "yyyy-MM-dd") +
                 " 23:59:59", // 结束时间
-              "where.deviceUid":
+              "deviceUid":
                 deviceUidArr.length > 0 ? deviceUidArr.join() : null, // 摄像头标识
-              "where.bayonetUid":
-                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null, // 卡口标识
+              "bayonetUid":
+                bayonetUidArr.length > 0 ? bayonetUidArr.join() : null // 卡口标识
+              },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
             const selectedArr = this.characteristicList.filter(item => {
               return item.checked;
             });
-            
             for (let i = 0; i < selectedArr.length; i++) {
               if (selectedArr[i].plateClass) { // 号牌类型
-                queryParams['where.plateClass'] = selectedArr[i].plateClass;
+                queryParams['where'].plateClass = selectedArr[i].plateClass;
               }
               if (selectedArr[i].plateColor) {
-                queryParams['where.plateColor'] = selectedArr[i].plateColor;
+                queryParams['where'].plateColor = selectedArr[i].plateColor;
               }
               if (selectedArr[i].vehicleClass) {
-                queryParams['where.vehicleClass'] = selectedArr[i].vehicleClass;
+                queryParams['where'].vehicleClass = selectedArr[i].vehicleClass;
               }
               if (selectedArr[i].vehicleColor) {
-                queryParams['where.vehicleColor'] = selectedArr[i].vehicleColor;
+                queryParams['where'].vehicleColor = selectedArr[i].vehicleColor;
               }
-              if (selectedArr[i].sunvisor) {
-                queryParams['where.sunvisor'] = selectedArr[i].sunvisor;
-              }
-              if (selectedArr[i].descOfFrontItem) { // 年检标数量
-                queryParams['where.descOfRearItem'] = selectedArr[i].descOfFrontItem;
-              }
+              // if (selectedArr[i].sunvisor) { // 遮阳板
+              //   queryParams['where'].sunvisor = selectedArr[i].sunvisor;
+              // }
+              // if (selectedArr[i].descOfFrontItem) { // 年检标数量
+              //   queryParams['where'].descOfRearItem = selectedArr[i].descOfFrontItem;
+              // }
               if (selectedArr[i].plateNo) { // 车牌
-                queryParams['where.vehicleNumber'] = selectedArr[i].plateNo;
+                queryParams['where'].vehicleNumber = selectedArr[i].plateNo;
               }
               if (selectedArr[i].vehicleBrand) { // 车辆型号
-                queryParams['where.vehicleModel'] = selectedArr[i].vehicleBrand;
+                queryParams['where'].vehicleModel = selectedArr[i].vehicleBrand;
               }
               if (selectedArr[i].vehicleStyles) { // 车辆型号
-                queryParams['where.vehicleModel'] = selectedArr[i].vehicleStyles;
+                queryParams['where'].vehicleModel = selectedArr[i].vehicleStyles;
               }
             }
           }
@@ -917,14 +918,17 @@ export default {
                   this.total = res.data.total;
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
+                  this.total = 0;
                 }
               } else {
                 this.strucInfoList = []; // 清空搜索结果
+                this.total = 0;
               }
             })
             .catch(err => {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
+              this.total = 0;
             });
         } else {
           return false;
@@ -958,7 +962,7 @@ export default {
                 for (let i = 0; i < this.characterTypes.length; i++) {
                   if (key === this.characterTypes[i]) {
                     let obj = {
-                      checked: false
+                      checked: true
                     };
                     obj[key] = data[key];
                     obj["name"] = data[key];
@@ -1455,7 +1459,8 @@ export default {
             color: #999;
           }
           .color_blue {
-            color: #0c70f8;
+            color: #fff;
+            background: #0C70F8;
           }
         }
       }
@@ -1725,34 +1730,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .tzsc_wrap {
   .characteristic {
     .get_character_btn {

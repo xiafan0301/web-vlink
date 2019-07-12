@@ -3,7 +3,7 @@
     <div class="breadcrumb_heaer">
       <div is="vlBreadcrumb" 
         :breadcrumbData="[{name: '车辆侦查', routerName: 'vehicle_menu'},
-          {name: '车辆查询', routerName: 'vehicle_search_clcx'},
+          {name: '车辆查询', routerName: 'vehicle_search_clcx',query:urldata},
           {name: '过车详情'}]">
       </div>
       <!-- <el-breadcrumb separator=">">
@@ -17,60 +17,73 @@
       <div class="plane">
         <h3 class="title">车辆详情</h3>
         <div class="infomation">
-          <div class="first">
+          <!-- <div class="first">
             <span>{{detailData.plateno}}</span>
-            <span>{{detailData.color}}</span>
+            <span v-if="detailData.color">{{detailData.color}}色</span>
+          </div> -->
+          <div class="div">
+             <label>车牌</label>
+            <span>{{detailData.plateno}}</span>
+           
+          </div>
+          <div class="div" v-if="detailData.color">
+             <label>车身颜色</label>
+            <span>{{detailData.color}}色</span>
+           
           </div>
           <div class="div">
+             <label>中文品牌</label>
             <span>{{detailData.brand}}</span>
-            <label>中文品牌</label>
+           
           </div>
           <div class="div">
-            <span>{{detailData.status}}</span>
             <label>机动车状态</label>
+            <span>{{detailData.status}}</span>
+            
           </div>
           <div class="div">
+             <label>车辆类型</label>
             <span>{{detailData.platetype}}</span>
-            <label>车辆类型</label>
+           
           </div>
-          <div class="div">
+          <div class="div" v-if="detailData.owner">
+             <label>车辆所有人</label>
             <span>{{detailData.owner}}</span>
-            <label>车辆所有人</label>
+           
           </div>
           <div class="div">
-            <span>{{detailData.model}}</span>
             <label>年 款</label>
+            <span>{{detailData.model}}</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.seatnumber}}人</span>
             <label>核定载客</label>
+            <span>{{detailData.seatnumber}}人</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.usecharacter}}人</span>
             <label>使用性质</label>
+            <span>{{detailData.usecharacter}}人</span>
+            
           </div>
           <div class="div">
-            <span>{{detailData.validuntil}}</span>
             <label>有效期</label>
+            <span>{{detailData.validuntil}}</span>
+            
           </div>
           <!-- <div class="div">
             <span>{{detailData.isSurveillance}}</span>
             <label>布控车辆</label>
           </div> -->
-          <p class="blue" @click="goToPage('vehicle_search_lxwfdetail')">查看违章记录</p>
+          <el-button type="primary"  @click="goToPage('vehicle_search_lxwfdetail')" class="select_btn full">查看违章记录</el-button>
         </div>
       </div>
     </div>
     <div class="right disflex">
       <div class="main">
         <div class="infobox">
-          <div class="flex1 bkt">
-            <img
-              :src="snapObj.storagePath"
-              class="spimg"
-              v-if="showimg"
-            >
-            <div v-if="!showimg">
+          <div class="flex1 bkt mrg10">
+            <div>
             <video id="capVideo"
               :src="snapObj.videoPath"
               class="spimg"
@@ -82,29 +95,40 @@
             </div>
              </div>
           </div>
+          <div class="flex1 bkt">
+            <img
+              :src="snapObj.storagePath"
+              class="spimg"
+             
+            >
+            
+          </div>
           <div class="flex1">
             <h3 class="titles">抓拍信息</h3>
             <div class="infom">
               <div>
                 <p class="div">
-                  <span>{{snapObj.snapTime}}</span>
                   <label>抓拍时间</label>
+                  <span>{{snapObj.snapTime}}</span>
+                  
                 </p>
               </div>
               <div>
                 <p class="div">
+                   <label>抓拍设备</label>
                   <span>{{snapObj.snapDevice}}</span>
-                  <label>抓拍设备</label>
+                 
                 </p>
               </div>
               <div>
                 <p class="div">
-                  <span>{{snapObj.address}}</span>
                   <label>抓拍地址</label>
+                  <span>{{snapObj.address}}</span>
+                  
                 </p>
               </div>
-              <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
-              <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span>
+              <!-- <span class="playSee" v-if="showimg" @click="showimg=!showimg">视频回放</span>
+              <span class="playSee" v-if="!showimg" @click="showimg=!showimg">抓拍图</span> -->
             </div>
           </div>
         </div>
@@ -155,6 +179,7 @@ export default {
   components: {vlBreadcrumb},
   data() {
     return {
+      urldata:JSON.parse(localStorage.getItem("searchD")),
       curImgIndex: 0,
       showSim: false,
       showimg: true,
@@ -208,6 +233,11 @@ export default {
   },
   mounted() {
     // this.tcDiscuss();
+    // let d= 
+    
+    // this.urldata=
+    console.log(this.urldata);
+    
     this.getSnapDetail()
     this.getArchives()
   },
@@ -223,7 +253,8 @@ export default {
       }else{
         this.$router.push({name:v ,query:{
            plateNo:this.detailData.plateno,
-           imgurl:this.snapObj.storagePath
+           imgurl:this.snapObj.storagePath,
+           modelName:'车辆追踪'
         }});
       }
         
@@ -261,7 +292,6 @@ export default {
     },
     imgListTap(data, index) {
       this.curImgIndex = index;
-      console.log(index);
       this.snapObj = this.strucInfoList[index]
       // this.sturcDetail = data;
       //this.drawPoint(data);
@@ -288,6 +318,9 @@ export default {
   width: 100%;
   height: 100%;
 }
+.mrg10{
+  margin-right: 10px;
+}
 // .breadcrumb_heaer {
 //   height: 54px;
 //   line-height: 54px;
@@ -299,6 +332,7 @@ export default {
 .blue {
   color: #0c70f8;
   cursor: pointer;
+  line-height: 48px;
 }
 .title {
   padding: 10px 20px;
@@ -329,12 +363,12 @@ export default {
     background: #ffffff;
   }
   .ment {
-    width: 227px;
+    width: 175px;
     height: calc(100% - 20px);
 
     .tablink {
       height: 100%;
-      width: 197px;
+      width: 160px;
       background: #ffffff;
       margin: 0px auto;
       padding: 0px 20px;
@@ -381,17 +415,17 @@ export default {
     margin-bottom: 5px;
   }
   .infomation {
-    div:first-child {
-      padding: 10px 0px;
-      span {
-        display: inline-block;
-        padding: 6px 10px;
-        background: rgba(250, 250, 250, 1);
-        border: 1px solid rgba(242, 242, 242, 1);
-        border-radius: 3px;
-        margin-right: 10px;
-      }
-    }
+    // div:first-child {
+    //   padding: 10px 0px;
+    //   span {
+    //     display: inline-block;
+    //     padding: 6px 10px;
+    //     background: rgba(250, 250, 250, 1);
+    //     border: 1px solid rgba(242, 242, 242, 1);
+    //     border-radius: 3px;
+    //     margin-right: 10px;
+    //   }
+    // }
   }
 }
 .playSee {
@@ -407,7 +441,7 @@ export default {
 .div {
   display: inline-block;
   padding: 5px 10px;
-  margin: 5px 0px;
+  margin: 5px 10px 5px 0px;
   background: rgba(250, 250, 250, 1);
   border: 1px solid rgba(242, 242, 242, 1);
   label {
@@ -415,11 +449,11 @@ export default {
     font-weight: 400;
     color: rgba(153, 153, 153, 1);
     line-height: 24px;
-    border-left: solid 1px rgba(242, 242, 242, 1);
-    padding-left: 10px;
+    border-right: solid 1px rgba(242, 242, 242, 1);
+    padding-right: 10px;
   }
   span {
-    padding-right: 10px;
+    padding-left: 10px;
     font-size: 14px;
     font-weight: 400;
     color: rgba(51, 51, 51, 1);
@@ -435,7 +469,7 @@ export default {
 }
 .infobox {
   margin: 35px auto;
-  width: 90%;
+  width: 95%;
   height: calc(100% - 270px);
   min-height: 260px;
   box-shadow: 5px 5px 15px 1px #dddddd;

@@ -1,14 +1,20 @@
 <template>
   <div class="analysis-results">
-    <div class="breadcrumb_heaer">
-      <el-breadcrumb separator=">">
+    <div class="">
+      <!-- <el-breadcrumb separator=">">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">检索</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/portrait/pfcm' }">频繁出没</el-breadcrumb-item>
         <el-breadcrumb-item>分析结果</el-breadcrumb-item>
-      </el-breadcrumb>
+      </el-breadcrumb> -->
+      <div is="vlBreadcrumb" 
+          :breadcrumbData="[{name: '人像侦查', routerName: 'portrait_menu'},
+            {name: '频繁出没', routerName: 'portrait_pfcm'},
+            {name: '分析结果'}]">
+        </div>
     </div>
     <vue-scroll>
-      <div class="analysis-rc-info">
+      <div v-loading="loading">
+      <div class="analysis-rc-info" v-if="list && list.length > 0">
         <div class="analysis-r-content">
           <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
             <div class="img-box" @click="toSnapDetail(item)">
@@ -33,6 +39,13 @@
           ></el-pagination>
         </template>
       </div>
+      <div class="no-data" v-if="isShow && (!list || list.length <= 0) ">
+        <div class="content">
+        <img src="../../../../assets/img/not-content.png" alt="">
+        <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+        </div>
+      </div>
+      </div>
       <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
     </vue-scroll>  
   </div>
@@ -40,15 +53,18 @@
 
 <script>
 import { getTaskInfosDetail } from "../../api/api.analysis.js";
-import snapDialog from './components/snapDetail'
+import snapDialog from './components/snapDetail';
+import vlBreadcrumb from '@/components/common/breadcrumb.vue';
 export default {
-  components: { snapDialog },
+  components: { snapDialog , vlBreadcrumb},
   data() {
     return {
       uid: '',
       pagination: { total: 0, pageSize: 24, pageNum: 1 },
       list: [],
       snapObj: {},
+      isShow: false,
+      loading: false,
     };
   },
   mounted() {
@@ -110,6 +126,7 @@ export default {
     },
     //分析结果
     getDetail() {
+      this.loading = true
       getTaskInfosDetail(this.uid).then(res => {
         console.log("------getTaskInfosDetail-------",res,JSON.parse(res.data.taskResult))
         if(res && res.data) {
@@ -118,9 +135,18 @@ export default {
           if(this.list && this.list.length > 0) {
             this.list.sort(this.sortVal)
             this.pagination.total = this.list.length
+          }else {
+            this.$nextTick(() => {
+              this.isShow = true
+            })
           }
         }
+        this.$nextTick(() => {
+          this.loading = false
+        })
       }).catch(error => {
+        this.isShow = true
+        this.loading = false
         console.log(error)
       })
     },
@@ -142,7 +168,7 @@ export default {
 <style lang="scss" scoped>
 .analysis-results {
   width: 100%;
-  height: calc(100% - 55px);
+  height: calc(100% - 50px);
   .breadcrumb_heaer {
     background: #fff;
     border-bottom: 1px solid #d3d3d3;
@@ -205,6 +231,32 @@ export default {
     .cum_pagination {
       padding: 30px 0 40px 0;
       text-align: center;
+    }
+  }
+  .no-data {
+    position: fixed;
+    top: 150px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    font-size: 0;
+    white-space: nowrap;
+    overflow: auto;
+    &:after {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+      margin-top: -30px;
+    }
+    .content {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 14px;
+      white-space: normal;
+      margin-top: -30px;
     }
   }
 }

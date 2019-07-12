@@ -36,4 +36,8 @@ if (loginInfo) {
   store.commit('setLoginToken', {
     loginToken: true
   });
+} else {
+  store.commit('setLoginToken', {
+    loginToken: false
+  });
 }

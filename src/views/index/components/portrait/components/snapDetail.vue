@@ -271,13 +271,13 @@ export default {
     spinToControl() {
       this.$router.push({
         name: "control_create",
-        query: { path: this.sturcDetail.subStoragePath, modelType: 1 }
+        query: { imgurl: this.sturcDetail.subStoragePath, modelName: '人员追踪' }
       });
     },
     //跳转到落脚点分析页面
     spinToLJD() {
       this.$router.push({
-        name: "portrait_gjfx",
+        name: "portrait_ljd",
         query: { path: this.sturcDetail.subStoragePath }
       });
     },
@@ -285,38 +285,13 @@ export default {
     spinToGJFX() {
       this.$router.push({
         name: "portrait_gjfx",
-        query: { path: this.sturcDetail.subStoragePath }
+        query: { imgurl: this.sturcDetail.subStoragePath }
       });
     },
   }
 };
 </script>
 <style lang="scss">
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 .snap_dialog {
   height: 100%;
   .struc_detail_dialog_comp {
@@ -359,10 +334,10 @@ export default {
         position: relative;
         text-decoration: none;
         text-align: center;
-        width: 1.1rem;
         height: 0.4rem;
         float: right !important;
         margin-top: 0.2rem;
+        padding: 0 0.12rem;
         background: rgba(246, 248, 249, 1);
         border: 1px solid rgba(211, 211, 211, 1);
         border-radius: 4px;

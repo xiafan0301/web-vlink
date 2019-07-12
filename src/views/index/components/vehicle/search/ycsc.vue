@@ -571,15 +571,17 @@ export default {
               return item.id;
             });
             const queryParams = {
-              "where.startTime":
-                formatDate(this.ytscMenuForm.selectDate[0], "yyyy-MM-dd") +
-                  " 00:00:00" || null, // 开始时间
-              "where.endTime":
-                formatDate(this.ytscMenuForm.selectDate[1], "yyyy-MM-dd") +
-                  " 23:59:59" || null, // 结束时间
-              "where.uploadImgUrl": this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
-              "where.deviceUid": deviceUidArr.join(), // 摄像头标识
-              "where.bayonetUid": bayonetUidArr.join(), // 卡口标识
+              where: {
+                startTime:
+                  formatDate(this.ytscMenuForm.selectDate[0], "yyyy-MM-dd") +
+                    " 00:00:00" || null, // 开始时间
+                endTime:
+                  formatDate(this.ytscMenuForm.selectDate[1], "yyyy-MM-dd") +
+                    " 23:59:59" || null, // 结束时间
+                uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
+                deviceUid: deviceUidArr.join(), // 摄像头标识
+                bayonetUid: bayonetUidArr.join() // 卡口标识
+              },
               pageNum: this.pageNum,
               pageSize: this.pageSize
             };
@@ -607,18 +609,20 @@ export default {
                 if (res.data && res.data.list) {
                   if (res.data.list.length > 0) {
                     this.strucInfoList = res.data.list;
-                    // this.pageNum = res.data.pageNum;
                     this.total = res.data.total;
                   } else {
                     this.strucInfoList = []; // 清空搜索结果
+                    this.total = 0;
                   }
                 } else {
                   this.strucInfoList = []; // 清空搜索结果
+                  this.total = 0;
                 }
               })
               .catch(err => {
                 this.getStrucInfoLoading = false; // 关闭加载效果
                 this.strucInfoList = []; // 清空搜索结果
+                this.total = 0;
               });
           } else {
             return false;
@@ -926,7 +930,7 @@ export default {
           JtcPOSTAppendixInfo(x).then(jRes => {
             if (jRes) {
               x["uid"] = jRes.data;
-              console.log(x);
+              // console.log(x);
             }
           });
           this.imgData = x;
@@ -1314,34 +1318,6 @@ export default {
 </style>
 
 <style lang="scss">
-html {
-  font-size: 100px;
-}
-@media screen and (min-width: 960px) and (max-width: 1119px) {
-  html {
-    font-size: 60px !important;
-  }
-}
-@media screen and (min-width: 1200px) and (max-width: 1439px) {
-  html {
-    font-size: 70px !important;
-  }
-}
-@media screen and (min-width: 1440px) and (max-width: 1679px) {
-  html {
-    font-size: 80px !important;
-  }
-}
-@media screen and (min-width: 1680px) and (max-width: 1919px) {
-  html {
-    font-size: 90px !important;
-  }
-}
-@media screen and (min-width: 1920px) {
-  html {
-    font-size: 100px !important;
-  }
-}
 //弹窗
 .ytsc_wrap {
   // 上传

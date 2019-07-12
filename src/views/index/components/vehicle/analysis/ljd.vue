@@ -21,9 +21,9 @@
             <el-date-picker
           v-model="ruleForm.data1"
           type="daterange"
-           class="full"
-              value-format="yyyy-MM-dd"
-              :picker-options="pickerOptions"
+          class="full"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptions"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期">
@@ -92,7 +92,7 @@
                 <el-button @click="resetForm('ruleForm')" class="full">重置</el-button>
               </el-col>
               <el-col :span="12">
-                <el-button type="primary" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
+                <el-button type="primary" :loading="isload" @click="submitForm('ruleForm')" class="select_btn full">分析</el-button>
               </el-col>
             </el-row>
           </el-form-item>
@@ -136,6 +136,7 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      isload: false,
       amap: null,
       allDevice:[],
       allBayonet:[],
@@ -158,11 +159,13 @@ export default {
 							message: '请输入正确的数值'
 						}
           ],
-          input3:{
+          input3:[{
+             required: true, message: '请输入正确车牌', trigger: 'blur'
+          },{
             pattern:/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
             message: '常规格式：湘A12345',
             trigger: 'blur'
-            }
+            }]
        },
       pricecode:cityCode,
      
@@ -267,6 +270,8 @@ export default {
       // }
     },
     submitForm(v) {
+      let isP=/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/
+      let  result = isP.test(this.ruleForm.input3);
       if(this.ruleForm && this.ruleForm.data1 && this.ruleForm.data1.length>0 && this.ruleForm.input3 && this.select){
       let pg={
         //shotTime:+"_"+this.ruleForm.data1[1]+" 23:59:59",
@@ -283,7 +288,12 @@ export default {
          pg.deviceIds=this.selectDevice.join(",")
          pg.bayonetIds=this.selectBayonet.join(",")
       }
-        
+      
+      if(!result){
+         this.$message.info("请输入正确的车牌号码。");
+         return;
+      }
+
       this.getVehicleShot(pg);
       }else{
          this.$message.info("请输入开始时间和车牌号码。");
@@ -331,8 +341,10 @@ export default {
       } 
     },
     getVehicleShot(d) {
+      this.isload=true
       getVehicleShot(d).then(res => {
         if (res) {
+          this.isload=false
           // console.log(res);
           this.reselt = true;
           if (!res.data || res.data.length === 0) {
@@ -352,6 +364,8 @@ export default {
           this.evData.sort(this.compare("shotNum"))
           this.drawMarkers(this.evData);
           //this.showEventList();
+        }else{
+          this.isload=false
         }
       });
     },
@@ -370,7 +384,7 @@ export default {
       getAllBayonetList({
         areaId:mapXupuxian.adcode
       }).then(res=>{
-           console.log(res.data);
+          //  console.log(res.data);
           if(res.data && res.data.length>0){
             this.allBayonet=res.data
           }
@@ -542,7 +556,7 @@ export default {
     margin-bottom: 5px;
   }
 }
-.insetLeft {
+.insetLeft,.insetLeft2 {
   position: absolute;
   right: -28px;
   width: 25px;
@@ -561,8 +575,13 @@ export default {
     transform: rotate(180deg);
     background-position: -504px -1269px;
   }
+  .insetLeft:hover{
+    transform: rotate(180deg);
+    background-position: -440px -1269px;
+  }
+  
 }
-.insetLeft2 {
+.insetLeft2:hover,.insetLeft:hover {
   position: absolute;
   right: -28px;
   width: 28px;
@@ -579,6 +598,9 @@ export default {
 .select_btn {
   background-color: #0c70f8;
   color: #ffffff;
+}
+.select_btn:hover {
+   background-color: #0466de;
 }
 </style>
 <style lang="scss">

@@ -86,6 +86,11 @@ const router = new VueRouter({
       name: 'vehicle_report_save',
       meta: { unrequireLogin: true },
       component: () => import('@/views/index/components/vehicle/analysis/reportSave.vue')
+    }, {
+      path: '/video-relay-map',
+      name: 'video_relay_map',
+      meta: { unrequireLogin: true },
+      component: () => import('@/views/index/components/video/relay-map.vue')
     }
   ]
 })

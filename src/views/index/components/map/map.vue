@@ -28,43 +28,50 @@
                   <li :id="'db_area_' + item.areaId" v-for="(item, index) in mapTreeData" :key="'tl_' + index">
                     <i class="el-icon-arrow-right" @click="selFirstEvent(item.areaId)"></i>
                     <span @click="selFirstEvent(item.areaId)">{{item.areaName}}</span>
-                    <ul class="db_tree_s" v-if="item.infoList && item.infoList.length > 0">
-                      <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in item.infoList" :key="'stl_' + sindex">
-                        <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
+                    <ul class="db_tree_s" v-show="item.infoList && item.infoList.length > 0">
+                      <li :id="'db_area_' + sitem.areaId" v-for="(sitem, sindex) in getCurList(item.infoList)" :key="'stl_' + sindex">
+                        <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId, item.areaId)"></i>
                         <span @click="selSecondEvent(sitem.areaId, item.areaId)">{{sitem.areaName}}</span>
-                        <ul class="db_tree_c">
-                          <li :id="'db_area_' + sitem.areaId + '000001'">
-                            <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId + '000001')"></i>
+                        <!--车辆-->
+                        <div class="db_tree_c"  v-if="sitem.infoName === '车辆' && getCurList([sitem]).length">
+                          <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
+                            <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurList([sitem])[0].infoList" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                              {{ditem.infoName}}
+                            </li>
+                          </ul>
+                        </div>
+                        <!--非车辆-->
+                        <ul class="db_tree_s db_tree_c db_tree_s_s" v-show="sitem.infoName !== '车辆'">
+                          <li :id="'db_area_' + sitem.areaId + '000001'" v-show="getCurTypeData(sitem, 0).length">
+                            <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId + '000001')"></i>
                             <span @click="selSecondEvent(sitem.areaId + '000001')">摄像头</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li @click="selectItem(1, ditem, $event)" v-for="(ditem, dindex) in getCurTypeData(sitem, 0)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 0)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
                                   <i class="vl_icon vl_icon_v11"></i>
                                 </li>
                               </ul>
                             </div>
                           </li>
-                          <li :id="'db_area_' + sitem.areaId + '000002'">
-                            <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId + '000002')"></i>
+                          <li :id="'db_area_' + sitem.areaId + '000002'" v-show="getCurTypeData(sitem, 1).length">
+                            <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId + '000002')"></i>
                             <span @click="selSecondEvent(sitem.areaId + '000002')">卡口</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li @click="selectItem(1, ditem, $event)" v-for="(ditem, dindex) in getCurTypeData(sitem, 1)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 1)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
-                                  <i class="vl_icon vl_icon_v11"></i>
                                 </li>
                               </ul>
                             </div>
                           </li>
-                          <li :id="'db_area_' + sitem.areaId + '000004'">
-                            <i class="el-icon-caret-right" @click="selSecondEvent(sitem.areaId + '000004')"></i>
+                          <li :id="'db_area_' + sitem.areaId + '000004'"  v-show="getCurTypeData(sitem, 0).length">
+                            <i class="el-icon-arrow-right" @click="selSecondEvent(sitem.areaId + '000004')"></i>
                             <span @click="selSecondEvent(sitem.areaId + '000004')">人员</span>
                             <div class="db_tree_c">
                               <ul class="db_tree_cul db_tree_cd db_tree_cul_open">
-                                <li @click="selectItem(1, ditem, $event)" v-for="(ditem, dindex) in getCurTypeData(sitem, 3)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
+                                <li :title="ditem.infoName" @click="signListTap(ditem, 'InfoWindow')" v-for="(ditem, dindex) in getCurTypeData(sitem, 3)" :key="'dl_' + index + '_' + sindex + '_' + dindex">
                                   {{ditem.infoName}}
-                                  <i class="vl_icon vl_icon_v11"></i>
                                 </li>
                               </ul>
                             </div>
@@ -141,9 +148,9 @@
           <li :class="{'vl_icon_sed': activeType ===  1}" @click="selArea">
             <i class="vl_icon vl_icon_041"></i>
             <el-popover
-                    placement="left"
-                    trigger="hover"
-                    content="单击选择范围，双击完成">
+              placement="left"
+              trigger="hover"
+              content="单击选择范围，双击完成">
               <span slot="reference">选择区域</span>
             </el-popover>
           </li>
@@ -495,8 +502,12 @@
 
     },
     methods: {
+      getCurList (list) {
+        // 过滤出list下对象的infoList，有isShow的元素
+        return list.filter(x => x.infoList.find(y => y.isShow))
+      },
       getCurTypeData (data, type) {
-        return data.infoList.filter(x => x.dataType === type);
+        return data.infoList.filter(x => x.dataType === type && x.isShow);
       },
       changeType (areaId, type) {
         let $li = $('#' + this.dbId).find('#db_area_' + areaId);
@@ -543,16 +554,7 @@
           }
         }
       },
-      // type 1摄像头，2卡口
-      // item 摄像头/卡口对象
-      selectItem (type, item, $event) {
-        let $t = $($event.target);
-//        if (!$t.hasClass('bd_tree_dbli_sed')) {
-//          this.$emit('selectItem', type, item);
-//          $('#' + this.dbId).find('.db_tree_cul').children('li').removeClass('bd_tree_dbli_sed');
-//          $($event.target).addClass('bd_tree_dbli_sed');
-//        }
-      },
+
       filterMapTree () {
         if (this.mapInfoVal) {
           if (this.mapTreeData[0].infoName.indexOf(this.mapInfoVal) !== -1) {
@@ -2336,6 +2338,9 @@
           padding-left: 48px;
           cursor: pointer;
         }
+        .db_tree_s_s {
+          padding-left: 20px;
+        }
         > i {
           position: absolute; top: 11px; left: 30px;
           font-size: 14px; font-weight: bold;
@@ -2389,6 +2394,7 @@
           padding: 0 30px 0 40px;
           color: #666;
           cursor: default;
+          overflow: hidden;
           &:hover {
             background-color: #f2f2f2;
           }

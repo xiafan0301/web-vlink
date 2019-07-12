@@ -63,11 +63,18 @@
 .vl_icon_v32 { width: 24px; height: 24px; background-position: -923px -134px; }
 .vl_icon_v51 { width: 80px; height: 80px; background-position: -659px -254px; }
 .vl_icons_ptz { width: 24px; height: 24px; background-position: -820px -303px; }
+.vl_icon_rpm { width: 48px; height: 48px; background-position: -980px -251px; }
+.vid_icon_ssz { width: 30px; height: 160px; background-position: -1096px -1280px; }
+.vid_icon_ssz:hover { background-position: -1156px -1280px; }
+.vid_icon_ssz.vid_icon_sss { background-position: -976px -1280px; }
+.vid_icon_ssz.vid_icon_sss:hover { background-position: -1036px -1280px; }
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
+.vl_icon_kk_dis { width: 41px; height: 48px; background-position: -885px -188px; }
 .vl_icon_cl { width: 41px; height: 48px; background-position: -217px -188px; }
 .vl_icon_sxt { width: 41px; height: 48px; background-position: -280px -188px; }
+.vl_icon_sxt_dis { width: 41px; height: 48px; background-position: -344px -188px; }
 .qyryfx_vl_icon_wrap { width: 125px; height: 50px; }
 .qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 3px 0 0 3px; }
 .qyryfx_vl_icon_wrap .vl_icon { float: left; }
@@ -309,6 +316,9 @@
 .vl_icon2_006:hover { background-position: -717px -148px; }
 .vl_icon2_007 { background-position: -854px -38px; }
 .vl_icon2_007:hover { background-position: -853px -148px; }
+.vl_icon2_008 { background-position: -1400px -296px; }
+.vl_icon2_008:hover { background-position: -1400px -420px; }
+
 .vl_icon2_011 { background-position: -36px -293px; }
 .vl_icon2_011:hover { background-position: -35px -417px; }
 .vl_icon2_012 { background-position: -172px -293px; }
@@ -398,10 +408,14 @@
 .vl_icon_portrait_rlsjfx_06{width: 70px;height: 70px;background-position: -1442px -1039px;}
 
 /* 人像检索 */
-.vl_icon_portrait_01 {width: 62px; height: 56px; background-position: -858px -1168px;}
+.vl_icon_portrait_01 {width: 62px; height: 56px; background-position: -850px -1168px;}
 .vl_icon_portrait_02 {width: 14px; height: 19px; background-position: -964px -376px;}
 
 .vl_content_pad { padding: 10px; }
+
+/* 地图收缩图标 */
+.vl_icon_map_shrinkage_01{ width: 28px;height: 178px;background-position: -976px -1269px;}
+.vl_icon_map_shrinkage_02 { width: 28px;height: 178px;background-position: -1096px -1269px;}
 
 /* 全局字体颜色 */
 .vl_f_333{color: #333;}
@@ -438,11 +452,11 @@
 /* 左侧二级菜单样式 */
 .vl_smenu {
   background-color: #ffffff;
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; left: 0; z-index: 19;
   width: 200px; height: 100%;
   box-shadow:4px 0px 10px 0px #838383;
   box-shadow:4px 0px 10px 0px rgba(131,131,131,0.28);
-  animation: fadeInLeft .4s ease-out .3s both;
+  /* animation: fadeInLeft .4s ease-out .3s both; */
 }
 .vl_smenu > li {
   height: 60px; line-height: 60px;
@@ -826,6 +840,7 @@
   color: #ffffff;
 }
 
+
 /******提示信息样式**********/
 .el-message {
   width: auto;
@@ -1055,6 +1070,29 @@
 .the-table .el-table__body .el-table__row:hover td {
   background: #E6F7FF;
 }
+
+/**  重置--查询按钮  **/
+/* .reset_btn {
+  background:rgba(246,248,249,1);
+  border:1px solid rgba(211,211,211,1);
+  border-radius:4px;
+  color: #666666;
+}
+.select_btn {
+  background:rgba(12,112,248,1);
+  border-radius:4px;
+  color: #ffffff;
+}
+.select_btn:hover {
+  background:#0466de;
+  color: #ffffff;
+} */
+/*elementui primary标注button颜色*/
+.el-button--primary {
+    background-color: #0C70F8;
+    border-color: #0C70F8;
+}
+
 /* th css style create by th */
 html {
     font-size: 100px;

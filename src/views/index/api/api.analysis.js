@@ -43,6 +43,19 @@ export function getDrivingAnalysis(data) {
     data
   })
 }
+/**
+ * postExport
+ * 导出接口
+ * @param {object} data
+ */
+export function postExport(data) {
+  return request({
+    url: '/export',
+    method: 'post',
+    mode: 'judge',
+    data
+  })
+}
 
 /*-------------------------- 特征搜车start -------------------------------*/
 /**

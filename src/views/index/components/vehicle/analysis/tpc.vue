@@ -464,7 +464,7 @@ export default {
       this.setDTime();
       this.searchData.licensePlateNum = null
       this.regulationsList = []
-      this.getSearchData();
+      this.search()
     },
     /**
      * 打开抓拍弹框
@@ -655,12 +655,6 @@ export default {
   }
 </style>
 <style lang="scss">
-  html {font-size: 100px;}
-  @media screen and (min-width: 960px) and (max-width: 1119px) {html {font-size: 60px !important;}}
-  @media screen and (min-width: 1200px) and (max-width: 1439px) {html {font-size: 70px !important;}}
-  @media screen and (min-width: 1440px) and (max-width: 1679px) {html {font-size: 80px !important;}}
-  @media screen and (min-width: 1680px) and (max-width: 1919px) {html {font-size: 90px !important;}}
-  @media screen and (min-width: 1920px) {html {font-size: 100px !important;} }
   .struc_detail_dialog {
     .el-dialog {
       max-width: 13.06rem;

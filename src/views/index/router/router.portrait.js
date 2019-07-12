@@ -95,7 +95,7 @@ export default {
     },
     {
 
-      path: 'ljd', // 重点关注
+      path: 'ljd', // 落脚点分析
       name: 'portrait_ljd',
       component: () => import('@/views/index/components/portrait/ljd.vue')
     },
@@ -103,6 +103,11 @@ export default {
       path: 'fxjg',    //分析结果
       name: 'portrait_fxjg',
       component: () => import('@/views/index/components/portrait/fxjg.vue')
+    },
+    {
+      path: 'reportnr',    //人员侦察报告内容
+      name: 'portrait_nr',
+      component: () => import('@/views/index/components/portrait/reportnr.vue')
     },
     {
       path: 'report',
