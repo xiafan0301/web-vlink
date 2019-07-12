@@ -552,4 +552,16 @@ export function getFaceRetrieval(params) {
     mode: 'judge'
   })
 }
+/**
+ * 人体查询接口
+ * @param {object} params
+ */
+export function getFaceRetrievalPerson(params) {
+  return request({
+    url: '/face-retrieval/query-person',
+    method: 'post',
+    data: params,
+    mode: 'judge'
+  })
+}
 

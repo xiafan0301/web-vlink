@@ -84,6 +84,8 @@ export default {
       mouseTool: null,
       drawType: 0,
 
+      mapEventActive: false,
+
       drawActiveType: null, // 
       drawObj: {
         rectangle: {
@@ -109,9 +111,14 @@ export default {
       this.dialogVisible = true;
       if (this.amap) {
       } else {
-        setTimeout(() => {
-          this.initMap();
-        }, 200)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.initMap();
+            if (!this.mapEventActive) {
+              this.mapEvents();
+            }
+          }, 100);
+        });
       }
     },
     clear () {
@@ -127,7 +134,6 @@ export default {
   },
   mounted () {
     this.getTreeList();
-    this.mapEvents();
   },
   methods: {
     initMap () {
@@ -186,8 +192,9 @@ export default {
 
       _this.setMarks();
     },
+    // 编辑 删除 完成事件
     mapEvents () {
-      let _this = this, nContent = $('body');
+      let _this = this, nContent = $('#' + this.sid);
       // el-icon-edit el-icon-close el-icon-check
       nContent.on('click', '.el-icon-close', function () {
         // 删除
