@@ -198,7 +198,14 @@
       <div class="relay_task_m">
         <div>
           <div class="relay_task_mt">
-            <div class="relay_task_mtl"></div>
+            <div class="relay_task_mtl">
+              <div>
+                <el-radio-group v-model="xjType" @change="xjTypeChanged">
+                  <el-radio :label="1">人员</el-radio>
+                  <el-radio :label="2">车辆</el-radio>
+                </el-radio-group>
+              </div>
+            </div>
             <div class="relay_task_mtr"></div>
           </div>
         </div>
@@ -239,6 +246,11 @@ export default {
       initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
       startTime: '',
       endTime: '',
+
+      /* 新建任务 begin */
+      xjType: 1,
+      /* 新建任务 end */
+
       startTimeOptions: {
         disabledDate: (d) => {
           // d > new Date() || d > this.endTime
@@ -384,6 +396,10 @@ export default {
       } else {
         this.showConTitle = 1;
       }
+    },
+
+    /* 新建任务 */
+    xjTypeChanged (type) {
     }
   },
   destroyed () {
@@ -394,6 +410,15 @@ export default {
 .relay_task_mtl {
   float: left;
   width: 260px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+}
+.relay_task_mtr {
+  margin-left: 270px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
 }
 .relay_task {
   position: relative;
@@ -405,7 +430,7 @@ export default {
   }
   > .relay_task_m {
     height: 100%;
-    padding: 46px 16px 76px 16px;
+    padding: 40px 10px 70px 10px;
     > div {
       height: 100%;
       padding: 10px;
