@@ -1481,6 +1481,13 @@ export default {
         background:rgba(242,242,242,1)!important;
         border: none;
       }
+      .el-icon-search{
+        cursor: pointer;
+        font-size: 20px!important;
+        &:hover{
+          color: #0C70F8;
+        }
+      }
     }
     .lib_form .el-form-item{
       margin-bottom: 10px!important;

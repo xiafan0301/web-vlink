@@ -379,6 +379,7 @@ export default {
       chart.source(dv, {});
       // 坐标轴刻度
       chart.scale('value', {
+        min: 0,
         tickCount: 6,
         title: {
           offset: 50
@@ -428,15 +429,8 @@ export default {
     },
     // 重置表单
     resetQueryForm () {
-      this.$refs.devSelect.resetSelect();
-      this.queryForm = {
-        startTime: formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'), //默认开始时间为当前时间前一天
-        endTime: formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd'),//默认结束时间为开始时间后第三天
-        devIdData: {
-          selSelectedData1: [],
-          selSelectedData2: []
-        }
-      };
+      this.queryForm.startTime = formatDate(new Date().getTime() - 24*60*60*1000, 'yyyy-MM-dd'); //默认开始时间为当前时间前一天
+      this.queryForm.endTime = formatDate(new Date().getTime() - 1 * 3600 * 24 * 1000, 'yyyy-MM-dd');//默认结束时间为开始时间后第三天
     },
     //查询
     search() {
@@ -445,12 +439,14 @@ export default {
     },
     // 获取过车数据统计
     getCarBeforeSta () {
+      console.log(this.queryForm.devIdData, 'console.log(this.queryForm.devIdData)')
       const params = {  
         deviceIds: this.queryForm.devIdData.selSelectedData1.map(m => m.id).join(','),
         bayonetIds: this.queryForm.devIdData.selSelectedData2.map(m => m.id).join(','),
         startTime: this.queryForm.startTime + ' 00:00:00',
         endTime: this.queryForm.endTime + ' 23:59:59'
       }
+      
       apiPassingCarSta(params).then(res => {
         if (res) {
           this.gcsjDetail = res.data;
@@ -610,7 +606,7 @@ export default {
               width: 50%;
             }
             .chart_table {
-              padding: 8px 38px 0 38px;
+              padding: 8px 0 0;
             }
           }
         }
