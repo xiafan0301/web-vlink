@@ -157,7 +157,7 @@
         </vue-scroll>
       </div>
       <!-- 通用的右边列表 -->
-      <div class="right_img_list">
+      <div class="right_img_list" v-if="strucInfoList.length > 0">
         <!-- 排序和结果 -->
         <div class="result_sort">
           <h3 class="result">检索结果（{{ total }}）</h3>
@@ -218,6 +218,13 @@
               ></el-pagination>
             </template>-->
           </vue-scroll>
+        </div>
+      </div>
+      <!-- 没有数据的情况 -->
+      <div v-else class="fnull">
+        <div>
+          <img src="../../../../../assets/img/null-content.png" alt />
+          {{noDataTips}}
         </div>
       </div>
     </div>
@@ -493,6 +500,7 @@ export default {
       },
       /* 检索结果变量 */
       strucInfoList: [],
+      noDataTips: "请在左侧输入查询条件",
       pageNum: 1,
       pageSize: 10,
       total: 0,
@@ -614,6 +622,7 @@ export default {
           getVagueSearch(queryParams)
             .then(res => {
               this.getStrucInfoLoading = false; // 关闭加载效果
+              this.noDataTips = "暂无搜索结果";
               if (res.data) {
                 if (res.data.length > 0) {
                   this.strucInfoList = res.data;
@@ -631,6 +640,7 @@ export default {
               this.getStrucInfoLoading = false; // 关闭加载效果
               this.strucInfoList = []; // 清空搜索结果
               this.total = 0;
+              this.noDataTips = "暂无搜索结果";
             });
         } else {
           return false;
@@ -1118,6 +1128,33 @@ export default {
           -moz-border-radius: 4px;
           border-radius: 4px;
           color: #ffffff;
+        }
+      }
+    }
+    // 没有数据的样式
+    .fnull {
+      text-align: center;
+      line-height: 48px;
+      font-size: 16px;
+      color: #666666;
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      height: 100%;
+      background: #fff;
+      margin: 24px 20px 20px 20px;
+      position: relative;
+      > div {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%); /* IE 9 */
+        -webkit-transform: translate(-50%, -50%); /* Safari and Chrome */
+        img {
+          display: block;
+          margin: auto;
+          padding-bottom: 10px;
         }
       }
     }
