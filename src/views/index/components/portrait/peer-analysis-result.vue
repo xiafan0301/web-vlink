@@ -62,7 +62,7 @@
                           <span style="height: 30px;line-height: 30px;padding: 0 10px;display: inline-block;background: #fafafa;border: 1px solid #f2f2f2;border-radius: 3px;margin-left: 8px;">{{item.age ? item.age : '无'}}</span>
                         </p>
                         <p><img src="../../../../assets/img/txfx_pao.png" alt=""><b style="color: #0C70F8;font-size: 34px;padding-left: 8px;">{{item.peerNumber}}</b><span style="color: #0C70F8;"> 同行次</span></p>
-                        <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord">查看同行记录</div>
+                        <div style="margin-top: 15px; cursor: pointer;border:1px solid #D3D3D3;border-radius:4px;background:rgba(246,248,249,1);color: #666;" @click="goRecord(item)">查看同行记录</div>
                       </div>
                     </div>
                   </li>
@@ -170,13 +170,15 @@ export default {
         }
       });
     },
-    goRecord () {
-      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid}})
+    goRecord (obj) {
+      // console.log(obj)
+      // obj.uid = 1
+      this.$router.push({name: 'peer_analysis_record', query: {uid: this.$route.query.uid, id: obj.uid}})
     },
     onPageChange (page) {
       this.boxList.splice(0, this.boxList.length)
       this.boxList = [...this.taskDetail.taskResult.slice((page - 1) * 12, 12 + (page - 1) * 12)]
-      console.log(this.boxList)
+      // console.log(this.boxList)
     },
   }
 }
