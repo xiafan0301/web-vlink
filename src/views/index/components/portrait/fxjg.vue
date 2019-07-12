@@ -13,7 +13,8 @@
         </div>
     </div>
     <vue-scroll>
-      <div class="analysis-rc-info">
+      <div v-loading="loading">
+      <div class="analysis-rc-info" v-if="list && list.length > 0">
         <div class="analysis-r-content">
           <div class="img-item" v-for="(item,index) of list.slice((pagination.pageNum-1)*pagination.pageSize,pagination.pageNum*pagination.pageSize)" :key="index">
             <div class="img-box" @click="toSnapDetail(item)">
@@ -38,6 +39,13 @@
           ></el-pagination>
         </template>
       </div>
+      <div class="no-data" v-if="isShow && (!list || list.length <= 0) ">
+        <div class="content">
+        <img src="../../../../assets/img/not-content.png" alt="">
+        <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
+        </div>
+      </div>
+      </div>
       <snapDialog ref="snapDialogComp" :snapObj="snapObj"></snapDialog>
     </vue-scroll>  
   </div>
@@ -55,6 +63,8 @@ export default {
       pagination: { total: 0, pageSize: 24, pageNum: 1 },
       list: [],
       snapObj: {},
+      isShow: false,
+      loading: false,
     };
   },
   mounted() {
@@ -116,6 +126,7 @@ export default {
     },
     //分析结果
     getDetail() {
+      this.loading = true
       getTaskInfosDetail(this.uid).then(res => {
         console.log("------getTaskInfosDetail-------",res,JSON.parse(res.data.taskResult))
         if(res && res.data) {
@@ -124,9 +135,18 @@ export default {
           if(this.list && this.list.length > 0) {
             this.list.sort(this.sortVal)
             this.pagination.total = this.list.length
+          }else {
+            this.$nextTick(() => {
+              this.isShow = true
+            })
           }
         }
+        this.$nextTick(() => {
+          this.loading = false
+        })
       }).catch(error => {
+        this.isShow = true
+        this.loading = false
         console.log(error)
       })
     },
@@ -211,6 +231,32 @@ export default {
     .cum_pagination {
       padding: 30px 0 40px 0;
       text-align: center;
+    }
+  }
+  .no-data {
+    position: fixed;
+    top: 150px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    font-size: 0;
+    white-space: nowrap;
+    overflow: auto;
+    &:after {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+      margin-top: -30px;
+    }
+    .content {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 14px;
+      white-space: normal;
+      margin-top: -30px;
     }
   }
 }

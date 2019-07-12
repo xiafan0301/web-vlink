@@ -40,7 +40,7 @@
       </el-select>
     </el-form-item>
     <template v-if="modelType === '1' || modelType === '2'">
-      <el-form-item :label="'追踪点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: calc(50% - 30px);padding-left: 20px;" class="point">
+      <el-form-item :label="'布控中心点' + (index + 1) + ':'" :prop="'points.' + index + '.point'" :rules="{ required: true, message: '追踪点不能为空', trigger: 'blur'}" v-for="(item, index) in modelForm.points" :key="index" style="width: calc(50% - 30px);padding-left: 20px;" class="point">
         <el-autocomplete
           :disabled="isDisabled"
           style="width: 100%;"
@@ -63,7 +63,7 @@
       <div :id="mapId"></div>
       <div class="manage_d_s_m_l">
         <!-- 人员追踪/车辆追踪 -->
-        <div class="manage_t" style="height: 130px;padding: 20px 20px;position: relative;" v-if="modelType === '1' || modelType === '2'">
+        <div class="manage_t" style="padding: 20px 20px;position: relative;" v-if="modelType === '1' || modelType === '2'">
           <el-popover
             placement="right"
             width="200"
@@ -72,17 +72,17 @@
             <el-input slot="reference" v-model="scopeRadius" @blur="setCircleRadius" placeholder="请输入范围半径值（单位千米）" style="width: 220px;margin-bottom: 10px;"></el-input>
           </el-popover>
           <span v-show="scopeRadius" style="position: absolute;top: 30px;left: 52px;">km</span>
-          <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
+          <!-- <el-select value-key="uid" v-model="featuresId" filterable placeholder="选择设备特性" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option
               v-for="item in featuresTypeList"
               :key="item.uid"
               :label="item.label"
               :value="item.value">
             </el-option>
-          </el-select>
+          </el-select> -->
         </div>
-        <!-- 范围分析 -->
-        <div class="manage_t equ_h" style="height: 130px;padding: 20px 20px;" v-if="modelType === '4'">
+        <!-- 区域布防 -->
+        <div class="manage_t equ_h" style="padding: 20px 20px;" v-if="modelType === '4'">
           <el-select value-key="uid" v-model="devGroupId" filterable placeholder="选择设备组" style="width: 220px;" @change="getAllMonitorList(null)">
             <el-option label="不限" :value="null"></el-option>
             <el-option
@@ -103,7 +103,7 @@
               <div class="track_t" @click="dropdown(trackPoint)" :class="{'active': trackPoint.isDropdown}">
                 <i class="el-icon-arrow-down" v-show="trackPoint.isDropdown"></i><i class="el-icon-arrow-right" v-show="!trackPoint.isDropdown"></i><span>{{trackPoint.trackPointName}}</span>
               </div>
-              <!-- 人员追踪、车辆追踪、范围分析 -->
+              <!-- 人员追踪、车辆追踪、区域布防 -->
               <el-collapse-transition v-if="modelType !== '3'">
                 <div v-show="trackPoint.isDropdown">
                   <vue-scroll>
@@ -263,7 +263,7 @@ import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour', 'imgurl'],
   data () {
     return {
       // 模型表单
@@ -301,7 +301,7 @@ export default {
       type: '0',// 设备类型
       tid: null,//追踪点列表id
       devId: null,//设备列表id
-      featuresId: null,//设备特性
+      // featuresId: null,//设备特性
       featuresTypeList: [
         {label: '不限特性', value: null},
         {label: '人脸识别', value: 1},
@@ -387,7 +387,7 @@ export default {
         return true;
       }
       if (this.modelType === '4') {
-        if (this.checkListCommon('范围分析')) return false;
+        if (this.checkListCommon('区域布防')) return false;
         return true;
       }
     }
@@ -424,6 +424,19 @@ export default {
     } else {
       this.getAreas();
     }
+    if (this.imgurl) {
+      this.fileList.push({
+        // response: {
+        //   data: {
+        //     sysAppendixInfo: {uid: random14()},
+        //     sysCommonImageInfo: {fileFullPath: this.imgurl}
+        //   }
+        // }
+        url: this.imgurl,
+        uid: random14()
+      });
+      console.log(this.fileList, 'this.fileList')
+    }
   },
   methods: {
     // 公共方法
@@ -436,6 +449,7 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
+      console.log(this.fileList, 'fileList')
     },
     // 弹出从库中选择框
     popSel () {
@@ -460,6 +474,7 @@ export default {
             }
           })
           this.fileList = this.fileList.concat(arr);
+          
         })
       }
       // 过滤成员对象
@@ -473,6 +488,7 @@ export default {
           }
         })
         this.fileList = this.fileList.concat(fileList);
+        console.log(this.fileList, 'this.fileList')
       }
       this.createSelDialog = false;
     },
@@ -595,10 +611,18 @@ export default {
             //本地上传的
             if (this.fileList.filter(f => f.objType === undefined).length > 0) {
               fileListTwo = this.fileList.filter(f => !f.objType).map(m => {
-                return {
-                  objId: m.response.data.sysAppendixInfo.uid,
-                  objType: 3,
-                  photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
+                if (m.response) {
+                  return {
+                    objId: m.response.data.sysAppendixInfo.uid,
+                    objType: 3,
+                    photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
+                  }
+                } else {
+                  return {
+                    objId: m.uid,
+                    objType: 3,
+                    photoUrl: m.url//编辑参数
+                  }
                 }
               })
             }
@@ -739,7 +763,7 @@ export default {
     },
     // 验证范围分析的必填项
     validateModelFour () {
-      if (this.checkListCommon('范围分析')) {
+      if (this.checkListCommon('区域布防')) {
         if (this.fileList.length === 0) {
           this.$emit('sendModelDataFour', null);
           this.$message.error('请上传图片！');
@@ -814,7 +838,7 @@ export default {
         // 回填半径
         this.scopeRadius = this.modelDataOne.pointDtoList[0].radius;
         // 回填设备特性
-        this.featuresId = this.modelDataOne.pointDtoList[0].deviceChara;
+        // this.featuresId = this.modelDataOne.pointDtoList[0].deviceChara;
         this.getAllMonitorList(1);
       }
     },
@@ -843,7 +867,7 @@ export default {
         // 回填半径
         this.scopeRadius = this.modelDataTwo.pointDtoList[0].radius;
         // 回填设备特性
-        this.featuresId = this.modelDataTwo.pointDtoList[0].deviceChara;
+        // this.featuresId = this.modelDataTwo.pointDtoList[0].deviceChara;
         this.getAllMonitorList(1);
       }
     },
@@ -870,7 +894,7 @@ export default {
           return this.areaList.find(f => f.label === m.address);
         });
         // 回填设备特性
-        this.featuresId = this.modelDataThree.pointDtoList[0].deviceChara;
+        // this.featuresId = this.modelDataThree.pointDtoList[0].deviceChara;
         let _data = [];
             _data = this.modelDataThree.pointDtoList.map(m => {
               return {
@@ -1361,7 +1385,7 @@ export default {
     getAllMonitorList (type) {
       const params = {
         ccode: mapXupuxian.adcode,
-        intelligentCharac: this.featuresId,// 设备特性id
+        // intelligentCharac: this.featuresId,// 设备特性id
         groupId: this.devGroupId// 设备组id
       }
       getAllMonitorList(params).then(res => {
@@ -1587,7 +1611,7 @@ export default {
         tid: index, 
         trackPointName: '追踪点00' + (index + 1),
         address: _this.modelForm.points[index].point,
-        deviceChara: _this.featuresId,//设备特性
+        // deviceChara: _this.featuresId,//设备特性
         longitude: lnglat[0],//追踪点经度
         latitude: lnglat[1],//追踪点纬度
         radius: _this.scopeRadius,//范围半径
@@ -1756,7 +1780,7 @@ export default {
       let data = objDeepCopy(_this.allBayData);
       let obj = {
         tid: _this.trackPointList.length + 1, 
-        deviceChara: 1,//设备特性
+        // deviceChara: 1,//设备特性
         groupId: 1,//设备组id,随便传个
         bayonetList: []//设备列表
       }
@@ -1860,7 +1884,7 @@ export default {
         tid: _this.trackPointList.length + 1, 
         trackPointName: '范围00' + (_this.trackPointList.length + 1),
         address: '范围00' + (_this.trackPointList.length + 1),
-        deviceChara: 1,//设备特性,随便传个
+        // deviceChara: 1,//设备特性,随便传个
         latitude: _this.polygonLnglat.map(m => m.lat).join(','),
         longitude: _this.polygonLnglat.map(m => m.lng).join(','),
         groupId: _this.devGroupId,//设备组id,先写死

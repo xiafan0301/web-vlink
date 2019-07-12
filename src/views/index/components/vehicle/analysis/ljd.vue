@@ -159,11 +159,13 @@ export default {
 							message: '请输入正确的数值'
 						}
           ],
-          input3:{
+          input3:[{
+             required: true, message: '请输入正确车牌', trigger: 'blur'
+          },{
             pattern:/(^[A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
             message: '常规格式：湘A12345',
             trigger: 'blur'
-            }
+            }]
        },
       pricecode:cityCode,
      
@@ -382,7 +384,7 @@ export default {
       getAllBayonetList({
         areaId:mapXupuxian.adcode
       }).then(res=>{
-           console.log(res.data);
+          //  console.log(res.data);
           if(res.data && res.data.length>0){
             this.allBayonet=res.data
           }

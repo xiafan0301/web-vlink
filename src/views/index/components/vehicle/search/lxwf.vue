@@ -234,7 +234,7 @@
       </div>
       <!-- 车辆信息 -->
       <div class="info-right" v-loading="searching">
-        <div class="info-r-content">
+        <div class="info-r-content" v-if="!isNull" >
           <!-- 违章信息 -->
           <div class="info-card">
             <p class="card-header">查询结果</p>
@@ -263,6 +263,11 @@
               ></el-pagination>
             </template>
           </div>
+        </div>
+        <div v-if="isNull" class="fnull">
+          <div><img src="../../../../../assets/img/null-content.png" alt="">
+          请在左侧输入查询条件</div>
+          
         </div>
       </div>
     </div>
@@ -324,6 +329,7 @@ export default {
   data() {
     return {
       disab: false,
+      isNull: true,
       photoAnalysis: null, //图片分析特征
       plateType: [], // 号牌类型
       plateColor: [], // 号牌颜色
@@ -445,8 +451,6 @@ export default {
     this.plateColor = [...dic2[0].dictList]; // 号牌颜色
     this.vehicleType = [...dic[0].dictList]; // 车辆类型
     this.carColor = [...dic3[0].dictList]; // 车辆颜色
-    // console.log(this.plateType[1]);
-
     this.setDTime();
   },
   methods: {
@@ -474,7 +478,6 @@ export default {
     // },
     //查看详情
     handleClick(v) {
-      console.log(v);
       v.datastart = this.data1[0];
       v.dataend = this.data1[1];
       if (this.curImageUrl) {
@@ -650,10 +653,8 @@ export default {
       this.searching = true;
       // console.log("======getVehicleDetail=====", this.searchData, this.imgData);
 
-      if (this.input5 == 1) {
-        let a = this.plateType.map(
-          el => el.enumField == this.photoAnalysis.plateClass
-        );
+      if (this.input5 == 1 ) {
+        
    
         let datas = {
           dateStart: this.data1[0] + " 00:00:00",
@@ -682,6 +683,9 @@ export default {
           datas.plateColor = this.photoAnalysis.plateColor;
         }
         if (this.sou._plateClass) {
+          let a = this.plateType.map(
+            el => el.enumField == this.photoAnalysis.plateClass
+          );
           datas.plateClass = a.enumValue;
         }
 
@@ -707,6 +711,7 @@ export default {
     getViolation(d) {
       getViolation(d).then(res => {
         if (res && res.data) {
+          this.isNull=false
           this.searching = false;
           // pagination: { total: 20, pageSize: 10, pageNum: 1 }
           this.pagination.total = res.data.total;
@@ -714,6 +719,7 @@ export default {
           // this.pagination.total=res.data.total
           this.regulationsList = res.data.list;
         } else {
+          this.isNull=false
           this.searching = false;
         }
       });
@@ -752,6 +758,21 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.fnull{
+  text-align: center;
+  line-height: 48px;
+  font-size: 16px;
+  color: #666666;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  height: 100%;;
+  img{
+    display: block;
+    margin: auto;
+    padding-bottom: 10px;
+  }
+}
 .chbox {
   padding-right: 20px;
   padding-top: 10px;

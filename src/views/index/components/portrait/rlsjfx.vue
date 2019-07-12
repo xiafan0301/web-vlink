@@ -185,36 +185,8 @@ export default {
       faceControlQueryDate: [startTime, endTime],
       devList: [],//人脸抓拍统计设备列表
       // 图表参数
-      chartData1: [
-        { time: '0点', count: 12352, cout1: 1 },
-        { time: '2点', count: 45285, cout1: 1 },
-        { time: '4点', count: 2452, cout1: 1 },
-        { time: '6点', count: 22452, cout1: 1 },
-        { time: '8点', count: 9857, cout1: 1 },
-        { time: '10点', count: 19857, cout1: 1 },
-        { time: '12点', count: 18557, cout1: 1 },
-        { time: '14点', count: 29857, cout1: 1 },
-        { time: '16点', count: 39857, cout1: 1 },
-        { time: '18点', count: 49857, cout1: 1 },
-        { time: '20点', count: 35857, cout1: 1 },
-        { time: '22点', count: 5857, cout1: 1 },
-        { time: '24点', count: 8857, cout1: 1 }
-      ],
-      chartData2: [
-         { time: '0点', count: 12352, cout1: 1 },
-        { time: '2点', count: 45285, cout1: 1 },
-        { time: '4点', count: 2452, cout1: 1 },
-        { time: '6点', count: 22452, cout1: 1 },
-        { time: '8点', count: 9857, cout1: 1 },
-        { time: '10点', count: 19857, cout1: 1 },
-        { time: '12点', count: 18557, cout1: 1 },
-        { time: '14点', count: 29857, cout1: 1 },
-        { time: '16点', count: 39857, cout1: 1 },
-        { time: '18点', count: 49857, cout1: 1 },
-        { time: '20点', count: 35857, cout1: 1 },
-        { time: '22点', count: 5857, cout1: 1 },
-        { time: '24点', count: 8857, cout1: 1 }
-      ],
+      chartData1: [],
+      chartData2: [],
       // 保存生成的图表用来删除
       charts: {
         chart1: null,
@@ -290,21 +262,14 @@ export default {
       this.faceSnapForm.devIdData = data;
     },
     // 重置人脸抓拍统计表单
-    resetFaceSnapForm () {
-      this.$refs.devSelect.resetSelect();
-      this.faceSnapForm = {
-        devIdData: {
-          selSelectedData1: [],
-          selSelectedData2: []
-        },
-        queryDate: [startTime, endTime]
-      }
-      this.getFaceSnapSta();
+    resetFaceSnapForm () {     
+      this.faceSnapForm.queryDate = [startTime, endTime]
+      // this.getFaceSnapSta();
     },
     // 重置人脸布控告警数据分析表单
     resetFaceControlDate () {
       this.faceControlQueryDate = [startTime, endTime];
-      this.getFaceControlSta();
+      // this.getFaceControlSta();
     },
     // 获取人脸数据汇总分析
     getFaceTotal () {
@@ -362,6 +327,7 @@ export default {
             this.chartData2 = timeDto.map(m => {
               return { time: m.name, count: m.total };
             })
+            console.log(this.chartData2, 'this.chartData2')
             this.drawChart2();
           }
         }
@@ -376,6 +342,7 @@ export default {
     },
     // 画抓拍人脸数图表
     drawChart1 () {
+      if (this.chartData1.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart1) {
         this.charts.chart1.clear();
@@ -444,6 +411,7 @@ export default {
     },
     // 画布控告警次数图表
     drawChart2 () {
+      if (this.chartData2.length === 0) return;
       let chart = null,_this = this;
       if (this.charts.chart2) {
         this.charts.chart2.clear();
@@ -470,6 +438,7 @@ export default {
       chart.source(dv, {});
       // 坐标轴刻度
       chart.scale('value', {
+        min: 0,
         tickCount: 5,
       });
       chart.axis('value', {

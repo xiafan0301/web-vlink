@@ -121,8 +121,8 @@
         <canvas :id="flvplayerId + '_cut_canvas'"></canvas>
       </div>
       <div slot="footer" class="dialog-footer" style="padding: 0 0 20px 0;">
-        <el-button class="reset_btn" @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
-        <el-button class="select_btn" @click="playerCutSave">保 存</el-button>
+        <el-button  @click="cutDialogVisible = false">取 消</el-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <el-button  type="priamry" @click="playerCutSave">保 存</el-button>
         <a :id="flvplayerId + '_cut_a'" style="display: none;">保存</a>
       </div>
     </el-dialog>
@@ -178,20 +178,8 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', params: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.params.plateNo, modelName: '车辆追踪' }});
     },
-    // // 跳至查看违章记录页面
-    // skipBreakRecordPage () {
-    //   this.$store.commit('setBreadcrumbData', {
-    //     breadcrumbData: [
-    //       {name: '车辆侦查', routerName: 'vehicle'},
-    //       {name: '尾随分析', routerName: 'vehicle_search_ws', params: { ...this.queryObj }},
-    //       { name: '尾随记录', routerName: 'ws_record', params: { ...this.queryObj }},
-    //       { name: '连续违法详情' }
-    //     ]
-    //   });
-    //   this.$router.push({name: 'vehicle_search_lxwfdetail', query: { plateNo: this.$route.query.plateNo }});
-    // },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
       this.$store.commit('setBreadcrumbData', {
@@ -202,7 +190,7 @@ export default {
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.params.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
@@ -214,20 +202,8 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.params.plateNo }});
     },
-    // 获取车辆信息（车管所）
-    // getVehicleDetail () {
-    //   const plateNo = this.$route.params.plateNoTb;
-    //   if (plateNo) {
-    //     getVehicleArchives({plateNo})
-    //       .then(res => {
-    //         if (res) {
-    //           this.vehicleDetail = res.data;
-    //         }
-    //       })
-    //   }
-    // },
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.params.plateNo;
