@@ -428,7 +428,6 @@ import { getDiciData } from '@/views/index/api/api.js';
 import { getSpecialGroup, addSpecialVehicle, editSpecialVehicle, getSpecialVehicleDetail, 
   getSpecialVehicleList, addGroup, checkRename, editVeGroup, delGroup,
   getVehicleBrand, getVehicleModel, moveoutGroup, vehicleImport, vehicleExport, getReVehicleInfo } from '@/views/index/api/api.manage.js';
-// import { getVehicleByVehicleNumber } from '@/views/index/api/api.control.js';
 export default {
   data () {
     return {
@@ -735,12 +734,21 @@ export default {
             let numberType = carInfo.numberType;
             let numberColor = carInfo.numberColor;
 
+            if (res.data.groupList.length > 0) {
+              res.data.groupList.map(item => {
+                if (item.uid !== this.activeId) {
+                  this.carForm.groupList.push(item.uid);
+                }
+              });
+            }
+
             this.fileList = carInfo.vehicleImagePath ? [{url: carInfo.vehicleImagePath}] : [];//回填图片
             this.dialogImageUrl = carInfo.vehicleImagePath;
 
             this.carForm.vehicleNumber = carInfo.vehicleNumber;
             this.carForm.desci = carInfo.desci;
             this.carForm.ownerIdType = carInfo.ownerIdType || null;
+
 
             this.carForm.vehicleColor = vehicleColor && vehicleColor.toString() || null;
             this.carForm.vehicleType = vehicleType && vehicleType.toString() || null;

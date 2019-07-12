@@ -8,7 +8,6 @@
           {name: '分析结果', routerName: 'gzws_result', query: {id: $route.query.id}}, {name: '尾随记录'}]">
       </div>
     </div>
-    <!-- <Breadcrumb :oData="[{name: '跟踪尾随', routerName: 'gzws_portrait'}, {name: '分析结果', routerName: 'gzws_result'}, {name: '尾随记录'}]"></Breadcrumb> -->
     <div class="content_box">
       <div class="left">
         <vue-scroll>
@@ -82,10 +81,10 @@
       </div>
       <div class="right">
         <div class="operation_box">
-          <p>人员布控</p>
-          <p>人脸检索</p>
-          <p>轨迹碰撞</p>
-          <p>落脚点分析</p>
+          <p @click="skipCreateControlPage">人员布控</p>
+          <p @click="skipYtsrPortraitPage">以图搜人</p>
+          <p @click="skipPjfxPortraitPage">轨迹分析</p>
+          <p @click="skipLjdPortraitPage">落脚点分析</p>
         </div>
         <div id="rightMap"></div>
       </div>
@@ -324,6 +323,58 @@ export default {
         saveLink.click();
         // console.log(base64);
       }
+    },
+    // 跳至新建布控页面
+    skipCreateControlPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '新建布控' }
+        ]
+      });
+      this.$router.push({name: 'control_create', query: { imgurl: this.detailInfo.subStoragePath, modelName: '人员追踪' }});
+    },
+    // 跳至人像检索页面
+    skipYtsrPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '以图搜人' }
+        ]
+      });
+      this.$router.push({name: 'portrait_ytsr', query: { imgUrl: this.detailInfo.subStoragePath }});
+    },
+    // 跳至轨迹分析页面
+    skipPjfxPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '轨迹分析' }
+        ]
+      });
+      this.$router.push({name: 'portrait_gjfx', query: { imgUrl: this.detailInfo.subStoragePath }});
+    },
+    // 跳至落脚点分析页面
+    skipLjdPortraitPage () {
+      this.$store.commit('setBreadcrumbData', {
+        breadcrumbData: [
+          {name: '人像侦查', routerName: 'portrait_menu'},
+          {name: '跟踪尾随', routerName: 'gzws_portrait'},
+          {name: '分析结果', routerName: 'gzws_result', query: { id: this.$route.query.id }},
+          {name: '尾随记录', query: { id: this.$route.query.id }},
+          { name: '落脚点分析' }
+        ]
+      });
+      this.$router.push({name: 'portrait_ljd', query: { imgUrl: this.detailInfo.subStoragePath }});
     }
   }
 }

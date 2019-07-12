@@ -95,7 +95,7 @@ export default {
     },
     {
 
-      path: 'ljd', // 重点关注
+      path: 'ljd', // 落脚点分析
       name: 'portrait_ljd',
       component: () => import('@/views/index/components/portrait/ljd.vue')
     },

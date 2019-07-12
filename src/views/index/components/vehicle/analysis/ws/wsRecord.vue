@@ -178,7 +178,7 @@ export default {
           { name: '新建布控' }
         ]
       });
-      this.$router.push({name: 'control_create', query: { plateNo: this.$route.query.plateNo, modelName: '车辆追踪' }});
+      this.$router.push({name: 'control_create', query: { plateNo: this.$route.params.plateNo, modelName: '车辆追踪' }});
     },
     // 跳至轨迹分析页面
     skipTrajectoryPage () {
@@ -190,7 +190,7 @@ export default {
           { name: '车辆轨迹' }
         ]
       });
-      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_analysis_clgj', query: { plateNo: this.$route.params.plateNo }});
     },
     // 跳至落脚点分析页面
     skipFootholdPage () {
@@ -202,20 +202,8 @@ export default {
           { name: '落脚点分析' }
         ]
       });
-      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.query.plateNo }});
+      this.$router.push({name: 'vehicle_search_ljd', query: { plateNo: this.$route.params.plateNo }});
     },
-    // 获取车辆信息（车管所）
-    // getVehicleDetail () {
-    //   const plateNo = this.$route.params.plateNoTb;
-    //   if (plateNo) {
-    //     getVehicleArchives({plateNo})
-    //       .then(res => {
-    //         if (res) {
-    //           this.vehicleDetail = res.data;
-    //         }
-    //       })
-    //   }
-    // },
     // 获取尾随车辆详情
     getDetail () {
       const plateNo = this.$route.params.plateNo;
