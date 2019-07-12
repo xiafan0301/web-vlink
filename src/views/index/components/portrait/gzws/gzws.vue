@@ -198,7 +198,7 @@
                   :value="item.deviceID"
                 ></el-option>
               </el-select>
-              <span class="span_tips" v-show="isShowDeviceTip">该车辆在该时间内无抓拍设备</span>
+              <span class="span_tips" v-show="isShowDeviceTip">该人像在该时间内无抓拍设备</span>
             </el-form-item>
             <el-form-item prop="interval">
               <el-select placeholder="请选择尾随时间间隔" style="width: 100%" v-model="addForm.interval">
@@ -243,7 +243,7 @@ export default {
           value: 0
         }
       ],
-      isShowDeviceTip: true, // 是否显示设备有否提示
+      isShowDeviceTip: false, // 是否显示设备有否提示
       isAddTaskTitle: true, // 是否是新增任务
       selectIndex: 1, // 默认选中已完成的任务
       taskId: null, // 要操作的任务id
@@ -265,6 +265,7 @@ export default {
       addForm: {
         taskName: null, // 任务名称
         deviceCode: null, // 起点设备编号
+        deviceName: null, // 起点设备名称
         dateTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         interval: 3 // 尾随间隔
       },
@@ -382,20 +383,31 @@ export default {
       console.log('params', params)
       getPersonShotDev(params)
         .then(res => {
-          if (res) {
-            this.deviceList = res.data;
+          if (res && res.code === '00000000') {
+            if (res.data) {
+
+              this.deviceList = res.data;
+
+              // 初始化页面时默认选中第一个设备
+              this.addForm.deviceCode = this.deviceList[0].deviceID;
+              this.addForm.deviceName = this.deviceList[0].deviceName;
+              
+              this.isShowDeviceTip = false;
+            } else {
+              this.isShowDeviceTip = true;
+            }
           }
         })
     },
     // 起点设备change
     handleChangeDeviceCode (obj) {
-      // if (obj) {
-      //   this.deviceList.map(item => {
-      //     if (item.deviceID === obj) {
-      //       // this.deviceStartTime = item.shotTime;
-      //     }
-      //   })
-      // }
+      if (obj) {
+        this.deviceList.map(item => {
+          if (item.deviceID === obj) {
+            this.addForm.deviceName = item.deviceName;
+          }
+        })
+      }
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
@@ -441,6 +453,7 @@ export default {
             endTime: '2019-07-09 10:03:00',
             // targetPicUrl: this.dialogImageUrl,
             deviceId: this.addForm.deviceCode,
+            deviceName: this.addForm.deviceName,
             // startTime: formatDate(this.addForm.dateTime[0]),
             // endTime: formatDate(this.addForm.dateTime[1]),
             taskName: this.addForm.taskName,

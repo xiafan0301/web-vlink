@@ -58,7 +58,7 @@ export const getPersonFollowing = (params) => {
   return request({
     url: '/person/trace-following',
     method: 'post',
-    data: params,
+    params,
     mode: 'judge'
   });
 }

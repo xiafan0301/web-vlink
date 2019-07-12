@@ -19,11 +19,11 @@
           </li>
           <li>
             <span>分析时间：</span>
-            <span>{{taskDetail.taskWebParam ? taskDetail.taskWebParam.startTime + '-' + taskDetail.taskWebParam.endTime : '无'}}</span>
+            <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.startTime && taskDetail.taskWebParam.endTime ? taskDetail.taskWebParam.startTime + '-' + taskDetail.taskWebParam.endTime : '无'}}</span>
           </li>
           <li>
             <span>起点设备：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+            <span>{{taskDetail.taskWebParam&& taskDetail.taskWebParam.deviceName ? taskDetail.taskWebParam.deviceName : '无'}}</span>
           </li>
           <li>
             <span>尾随间隔：</span>
