@@ -24,7 +24,7 @@
           <el-button slot="append" icon="el-icon-search" class="select_btn" @click="setCenter()"></el-button>
           <!--</el-input>-->
         </div>
-        <div style="width: 272px;height: calc(100% - 40px)">
+        <div style="width: 272px;height: calc(100% - 40px);padding-top: 20px;">
           <vue-scroll>
             <div class="search_main">
               <div class="search_top">
@@ -69,7 +69,6 @@
                     placeholder="选择日期时间">
                   </el-date-picker>
                 </div>
-                <el-divider></el-divider>
               </div>
               <!--按钮-->
               <div class="search_btn">
@@ -107,6 +106,7 @@
   export default {
     data() {
       return {
+        tipInfo: null,
         map: null,
         input3: null,
         hover:{
@@ -450,7 +450,7 @@
           var pois = result.poiList.pois;
           if(pois.length>0){
             let new_center=pois[0].location
-            _this.amap.setZoomAndCenter(16, new_center);
+            _this.map.setZoomAndCenter(16, new_center);
           }
 
           // for(var i = 0; i < pois.length; i++){
@@ -506,10 +506,10 @@
         })
         this.hover = {
           0: null,
-          1: null,
-          2: null,
-          3: null,
-          4: null,
+            1: null,
+            2: null,
+            3: null,
+            4: null,
         }
         this.pointData.splice(2);
         this.searchData.splice(2);
@@ -520,8 +520,8 @@
             {
               activeArea: false,
               area: null, // 区域
-              startTime: this.setDTime().startTime,
-              endTime:  this.setDTime().endTime,
+              startTime: '',
+              endTime:  '',
             }
         )
         this.pointData.push([]);
@@ -611,12 +611,16 @@
       tcDiscuss () {
         let supQuery = {'where': {dtoList: []}};
         if (this.searchData.find((x, index) => !x.area || !x.startTime || !x.endTime)) {
-          this.$message.info('列表的每个区域跟起止时间都必须选择');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('列表的每个区域跟起止时间都必须选择');
+          }
           return false;
         } else  {
           for (let i = 0; i < this.searchData.length; i++) {
             if(this.pointData[i].length === 0) {
-              this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info('第' + (i + 1) + '个区域没有框选中设备，请重新选择第' + (i + 1) + '个区域');
+              }
               return false;
             }
           }
@@ -678,20 +682,22 @@
     .setPost{
       position: absolute;
       left: 0px;
-      top: 0px;
-      width: 328px;
-      height: 100%;
+      top: 10px;
+      width: 397px;
+      height: calc(100% - 10px);
       .inline-input {
-        width: 272px;
+        width: 336px;
       }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
+        width: 64px;
+        position: absolute;
+        right: 0;
       }
       .search_main {
         width: 272px;
         min-height: 569px;
-        margin-top: 20px;
         background: #ffffff;
         .search_top {
           height: 48px;
@@ -722,6 +728,9 @@
             height: 10px;
             line-height: 10px;
           }
+          border-bottom: 1px solid #F2F2F2;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
         }
         .search_line_ts {
           width: 232px;

@@ -66,7 +66,6 @@
               <div class="search_line">
                 <span class="red_star">频次：期间不少于 <el-input oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 200)value = 200" style="width: 65px;" v-model="searchData.minTimes"></el-input> 次</span>
               </div>
-              <el-divider></el-divider>
               <!--按钮-->
               <div class="search_btn">
                 <el-button @click="resetS">重置</el-button>
@@ -543,15 +542,21 @@
       },
       tcDiscuss () {
         if (!this.searchData.minTimes) {
-          this.$message.info('请输入频次');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请输入频次');
+          }
           return false;
         }
         if (!this.searchData.area) {
-          this.$message.info('请先选择区域');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请先选择区域');
+          }
           return false;
         }
         if (this.pointData.length === 0) {
-          this.$message.info('选择的区域没有设备，请重新选择区域');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('选择的区域没有设备，请重新选择区域');
+          }
           return false;
         }
         let sT = formatDate(this.searchData.startTime, 'yyyy-MM-dd HH:mm:ss');
@@ -611,25 +616,28 @@
     .setPost{
       position: absolute;
       left: 0px;
-      top: 0px;
-      width: 328px;
+      top: 10px;
+      width: 397px;
       /*height: 100%;*/
       .inline-input {
-        width: 272px;
+        width: 336px;
       }
       .select_btn {
         background-color: #0c70f8;
         color: #ffffff;
+        width: 64px;
+        position: absolute;
+        right: 0;
       }
       .search_main {
         width: 272px;
-        height: 394px;
-        margin-top: 20px;
+        height: 370px;
+        margin-top: 16px;
         background: #ffffff;
         padding-top: 20px;
         .search_btn {
           text-align: center;
-          /*margin-top: 255px;*/
+          margin-top: 18px;
         }
         >p {
           padding-left: 10px;

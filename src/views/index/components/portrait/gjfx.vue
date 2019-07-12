@@ -10,15 +10,15 @@
     <div :class="['left',{hide:hideleft}]">
       <div class="plane">
         <el-form
-                :model="ruleForm"
-                status-icon
-                ref="ruleForm"
-                label-width="0px"
-                class="demo-ruleForm"
+          :model="ruleForm"
+          status-icon
+          ref="ruleForm"
+          label-width="0px"
+          class="demo-ruleForm"
         >
           <el-form-item>
             <el-upload
-                :class="{'vl_jtc_upload': true}"
+                class="vl_jtc_upload gjfx_upload"
                 multiple
                 :show-file-list="false"
                 accept="image/*"
@@ -29,7 +29,13 @@
                 :on-error="handleError">
               <i v-if="uploading" class="el-icon-loading"></i>
               <img v-else-if="ruleForm.input3" :src="ruleForm.input3">
-              <i class="el-icon-plus avatar-uploader-icon" v-else></i>
+              <div v-else>
+                <i
+                        style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                        class="vl_icon vl_icon_vehicle_01"
+                ></i>
+                <span>点击上传图片</span>
+              </div>
             </el-upload>
           </el-form-item>
           <el-form-item class="firstItem" prop="data1">
@@ -95,50 +101,47 @@
     <div :class="['right',{hide:!hideleft}]" id="rightMap"></div>
     <div class="reselt" v-if="reselt">
       <div class="plane insetPadding">
-        <h3 class="title">分析结果</h3>
+        <h3 class="title">分析结果<p>共经过{{totalAddressNum}}个地方，出现{{totalMapNum}}次</p></h3>
         <!--<div class="sup_title">-->
           <!--<div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>-->
           <!--<div>({{}}次)</div>-->
         <!--</div>-->
-        <div class="plane_main_box">
-          <vue-scroll>
+        <div class="plane_main_box"  @scroll="scrollIt">
+          <!--<vue-scroll>-->
             <div class="plane_main">
               <!--可以展开列表-->
-              <div class="p_main_list" v-if="item.list.length" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
-                <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                  <div class="info">
-                    <div class="info_left">
-                      <img :src="sItem.subStoragePath" alt="">
+              <div class="infinite-list-wrapper" v-if="leftEvData.length" >
+                <ul>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}({{item.times}}次)</div>
+                    <div class="p_main_item" v-for="(sItem, sIndex) in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                      <div class="info">
+                        <div class="info_left">
+                          <img :src="sItem.subStoragePath" alt="">
+                        </div>
+                        <div class="info_right">
+                          <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
+                          <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance}}%</div>
+                        </div>
+                      </div>
+                      <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
+                      <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
                     </div>
-                    <div class="info_right">
-                      <p class="time"><i class="vl_icon vl_icon_retrieval_01"></i>{{sItem.shotTime.slice(-8)}}</p>
-                      <div><i class="vl_icon vl_icon_retrieval_03"></i>{{sItem.semblance}}%</div>
-                    </div>
-                  </div>
-                  <div :title="sItem.address" class="address"><i class="el-icon-location-outline"></i>{{sItem.address ? sItem.address : '无'}}</div>
-                  <div class="del_icon el-icon-delete" @click.stop="updateLine(sItem, item.list, sIndex)"></div>
-                </div>
+                  </li>
+                </ul>
+                <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
+                <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
               </div>
               <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
-              <el-pagination
-                v-show="pagination.total > 5"
-                class="cum_pagination th-center-pagination"
-                @current-change="onPageChange"
-                :current-page.sync="pagination.pageNum"
-                :page-size="pagination.pageSize"
-                layout="prev, pager, next"
-                :total="pagination.total">
-              </el-pagination>
             </div>
-          </vue-scroll>
+          <!--</vue-scroll>-->
         </div>
         <div class="insetLeft2" @click="hideResult"></div>
       </div>
     </div>
     <el-dialog
         :visible.sync="strucDetailDialog"
-        class="struc_detail_dialog"
+        class="struc_detail_dialog_gjfx"
         :close-on-click-modal="false"
         top="4vh"
         :show-close="false">
@@ -185,6 +188,11 @@
               <div class="struc_cdi_line"></div>
             </div>
             <span>抓拍信息</span>
+          </div>
+          <!--跳转按钮-->
+          <div class="struc_t_btn">
+            <el-button type="primary" @click="gotoControl(sturcDetail.subStoragePath)">新建布控</el-button>
+            <el-button type="primary" @click="gotoLjd(sturcDetail.subStoragePath)">落脚地分析</el-button>
           </div>
         </div>
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
@@ -234,6 +242,10 @@
     components: {mapSelector},
     data() {
       return {
+        loading: false,
+        count: 3,
+        totalAddressNum: 0,
+        totalMapNum: 4,
         searchLoading: false,
         curChooseNum: '已选择0个设备',
         uploadAcion: ajaxCtx.base + '/new',
@@ -254,7 +266,6 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 5, pageNum: 1 },
         dialogVisible: false,
         amap: null,
         map: null,
@@ -306,15 +317,39 @@
         videoUrl: '' // 弹窗视频回放里的视频
       };
     },
+    computed: {
+      noMore () {
+        return this.count >= this.totalMapNum;
+      }
+    },
     mounted() {
       this.getMapGETmonitorList()//查询行政区域
       this.renderMap();
       this.setDTime();
-      if (this.$route.query.plateNo) {
-        this.ruleForm.input3 = this.$route.query.plateNo;
+      if (this.$route.query.imgurl) {
+        this.ruleForm.input3 = this.$route.query.imgurl;
       }
     },
     methods: {
+      gotoControl (url) {
+        this.$router.push({ name: 'control_create', query: {modelName: "人员追踪", imgurl: url} })
+      },
+      gotoLjd (url) {
+        this.$router.push({ name: 'portrait_ljd', query: {imgurl: url} })
+      },
+      scrollIt (e) {
+        if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
+         console.log('到底了');
+         if (!this.loading && !this.noMore) {
+           this.loading = true;
+           setTimeout(() => {
+             this.count += 2;
+             this.operData();
+             this.loading = false;
+           }, 2000)
+         }
+        }
+      },
       beforeAvatarUpload (file) {
         const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
         const isLt = file.size / 1024 / 1024 < 100;
@@ -358,10 +393,6 @@
         let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
 //        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
         this.ruleForm.data1 = [_s, _s];
-      },
-      onPageChange (page) {
-        this.pagination.pageNum = page;
-        this.operData();
       },
       hideResult() {
         this.reselt = false;
@@ -540,6 +571,7 @@
       },
       getVehicleShot(d) {
         this.searchLoading = true;
+        this.count = 3;
         PortraitPostPersonTrace(d).then(res => {
           this.searchLoading = false;
           if (res) {
@@ -551,7 +583,16 @@
             this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.pagination.total = res.data.total;
+            this.totalMapNum = res.data.total;
+            // 计算经过多少个地方
+            let dvIds = [];
+            this.totalAddressNum = 0;
+            res.data.list.forEach(x => {
+              if(!dvIds.includes(x.deviceID)) {
+                this.totalAddressNum += 1;
+              }
+            })
+
             //  重组数据，给左边列表使用
             this.operData();
             this.amap.clearMap();
@@ -565,7 +606,7 @@
         this.leftEvData = [];
         let keyArr = [];
         this.evData.forEach((x, index) => {
-          if ((index + 1) <= this.pagination.pageNum * (this.pagination.pageSize) && (index + 1) > (this.pagination.pageNum - 1) * (this.pagination.pageSize)) {
+          if (index <= this.count) {
             let key = x.shotTime.slice(0, 10);
             if (!keyArr.includes(key)) {
               keyArr.push(key);
@@ -670,7 +711,7 @@
         let _i = this.evData.indexOf(obj);
         // list.splice(index, 1)
         this.evData.splice(_i, 1);
-        this.pagination.total = this.evData.length;
+        this.totalMapNum = this.evData.length;
         this.operData();
         this.drawMapMarker(this.evData)
       }, // 更新画线
@@ -738,6 +779,7 @@
   .breadcrumb_heaer {
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
+    padding: 19px 20px;
   }
   .full {
     width: 100%;
@@ -757,7 +799,7 @@
     float: right;
   }
   .reselt {
-    width: 272px;
+    width: 290px;
     height: calc(100% - 54px);
     background-color: #ffffff;
     position: absolute;
@@ -772,6 +814,14 @@
       padding-top: 10px;
       padding-bottom: 19px;
       color: #333333;
+      p {
+        color: #999999;
+        font-size: 12px;
+        font-weight: normal;
+        margin-left: 20px;
+        display: inline-block;
+        vertical-align: middle;
+      }
     }
     .sup_title {
       height: 40px;
@@ -875,8 +925,10 @@
     color: #ffffff;
   }
   .plane_main_box {
-    height: calc(100% - 100px);
+    height: calc(100% - 44px);
     padding-top: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .plane_main {
     .p_main_list {
@@ -1138,12 +1190,19 @@
       }
     }
   }
+  .gjfx_upload {
+    &:hover {
+      .el-upload--picture-card {
+        background: #0C70F8;
+      }
+    }
+  }
   .data_range {
     .el-range__close-icon {
       display: none;
     }
   }
-  .struc_detail_dialog {
+  .struc_detail_dialog_gjfx {
     .el-dialog {
       max-width: 13.06rem;
       width: 100%!important;
@@ -1182,6 +1241,7 @@
       .struc_c_detail {
         width:  100%;
         height: 3.6rem;
+        position: relative;
         >div {
           float: left;
         }
@@ -1215,9 +1275,6 @@
             font-size: 12px;
             padding: 0 .1rem;
           }
-        }
-        .struc_c_d_qj {
-          margin-right: .3rem;
           &:before {
             display: block;
             content: '';
@@ -1225,8 +1282,8 @@
             top: -.5rem;
             left: -.5rem;
             transform: rotate(-45deg);
-            border: .5rem solid #0c70f8;
-            border-color: transparent transparent #0C70F8;
+            border: .5rem solid #50CC62;
+            border-color: transparent transparent #50CC62;
             z-index: 9;
           }
           span {
@@ -1245,6 +1302,13 @@
             -o-transform: rotate(-45deg);
             transform: rotate(-45deg);
             z-index: 99;
+          }
+        }
+        .struc_c_d_qj {
+          margin-right: .3rem;
+          &:before {
+            border: .5rem solid #0c70f8;
+            border-color: transparent transparent #0C70F8;
           }
         }
         .struc_c_d_box {
@@ -1346,6 +1410,14 @@
             -o-transform: rotate(45deg);
             transform: rotate(45deg);
             z-index: 99;
+          }
+        }
+        .struc_t_btn {
+          margin-top: .2rem;
+          button {
+            height: .4rem;
+            line-height: .4rem;
+            padding: 0 .12rem;
           }
         }
       }
