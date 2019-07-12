@@ -578,7 +578,7 @@ export default {
                 endTime:
                   formatDate(this.ytscMenuForm.selectDate[1], "yyyy-MM-dd") +
                     " 23:59:59" || null, // 结束时间
-                uploadImgUrl: this.ytscMenuForm.curImageUrl || null, // 车辆图片信息
+                uploadImgUrl: this.curImageUrl || null, // 车辆图片信息
                 deviceUid: deviceUidArr.join(), // 摄像头标识
                 bayonetUid: bayonetUidArr.join() // 卡口标识
               },
@@ -930,7 +930,7 @@ export default {
           JtcPOSTAppendixInfo(x).then(jRes => {
             if (jRes) {
               x["uid"] = jRes.data;
-              console.log(x);
+              // console.log(x);
             }
           });
           this.imgData = x;
