@@ -124,6 +124,13 @@ export default {
       if (this.$store.state.currentOrganObj) {
         this.getList();
       }
+    },
+    searchUserName (val) {
+      if (val) {
+        this.closeShow = false;
+      } else {
+        this.getList();
+      }
     }
   },
   computed: {
@@ -131,9 +138,6 @@ export default {
       return this.$store.state.currentOrganObj;
     }
   },
-  created () {
-    
-    },
   mounted () {
     this.userInfo = this.$store.state.loginUser;
 
@@ -191,7 +195,9 @@ export default {
     },
     // 根据搜索条件进行搜索
     searchData () {
-      this.closeShow = true;
+      if (this.searchUserName) {
+        this.closeShow = true;
+      }
       this.getList();
     },
     // 清除

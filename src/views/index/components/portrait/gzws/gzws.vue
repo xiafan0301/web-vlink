@@ -5,7 +5,7 @@
         <el-breadcrumb-item :to="{ name: 'portrait' }">人像检索</el-breadcrumb-item>
         <el-breadcrumb-item>跟踪尾随</el-breadcrumb-item>
       </el-breadcrumb>
-      <el-button class="add_btn select_btn" @click="showAddTaskDialog('add')">新建任务</el-button>
+      <el-button class="add_btn" type="primary" @click="showAddTaskDialog('add')">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -32,15 +32,15 @@
               type="datetimerange"
               value-format="yyyy-MM-dd HH:mm:ss"
               format="yyyy-MM-dd HH:mm:ss"
-              range-separator="-"
+              range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :default-time="['00:00:00', '23:59:59']"
             ></el-date-picker>
           </el-form-item>
           <el-form-item>
-            <el-button class="select_btn" @click="selectDataList">查询</el-button>
-            <el-button class="reset_btn" @click="resetForm('searchForm')">重置</el-button>
+            <el-button type="primary" @click="selectDataList">查询</el-button>
+            <el-button @click="resetForm('searchForm')">重置</el-button>
           </el-form-item>
         </el-form>
         <div class="divide"></div>
@@ -50,8 +50,16 @@
           <el-table-column label="序号" type="index" width="100"></el-table-column>
           <el-table-column label="任务名称" prop="taskName" show-overflow-tooltip></el-table-column>
           <el-table-column label="创建时间" prop="createTime" show-overflow-tooltip></el-table-column>
-          <el-table-column label="分析时间范围" prop="taskName" show-overflow-tooltip></el-table-column>
-          <el-table-column label="尾随间隔" prop="taskName" show-overflow-tooltip></el-table-column>
+          <el-table-column label="分析时间范围" prop="taskWebParam" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span>{{scope.row.taskWebParam.startTime}} - {{scope.row.taskWebParam.endTime}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="尾随间隔" prop="taskWebParam" show-overflow-tooltip>
+            <template slot-scope="scope">
+              <span>{{scope.row.taskWebParam.interval}}分钟</span>
+            </template>
+          </el-table-column>
           <el-table-column label="状态" v-if="selectIndex === 0" prop="taskStatus" show-overflow-tooltip>
             <template slot-scope="scope">
               <span>{{scope.row.taskStatus && scope.row.taskStatus === 1 ? '进行中' : scope.row.taskStatus === 3 ? '失败' : '已中断'}}</span>
@@ -287,6 +295,7 @@ export default {
   created () {
     // this.getVehicleTypeList();
     this.getDataList();
+    // this.getDeviceList()
   },
   methods: {
     // 时间选择change
@@ -317,9 +326,14 @@ export default {
       };
       getTaskInfosPage(params)
         .then(res => {
-          if (res) {
+          if (res && res.data) {
             this.list = res.data.list;
             this.pagination.total = res.data.total;
+            this.list.map(item => {
+              item.taskWebParam = JSON.parse(item.taskWebParam);
+            })
+
+            console.log(this.list)
           }
         })
         .catch(() => {})
@@ -358,9 +372,12 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        targetPicUrl : this.dialogImageUrl,
-        startTime : formatDate(this.addForm.dateTime[0]),
-        endTime: formatDate(this.addForm.dateTime[1])
+        // targetPicUrl : this.dialogImageUrl,
+        targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+        startTime : '2019-07-09 09:59:00',
+        endTime: '2019-07-09 10:03:00'
+        // startTime : formatDate(this.addForm.dateTime[0]),
+        // endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
       getPersonShotDev(params)
@@ -419,29 +436,32 @@ export default {
           };
           // const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            targetPicUrl: this.dialogImageUrl,
+            targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+            startTime : '2019-07-09 09:59:00',
+            endTime: '2019-07-09 10:03:00',
+            // targetPicUrl: this.dialogImageUrl,
             deviceId: this.addForm.deviceCode,
-            startTime: formatDate(this.addForm.dateTime[0]),
-            endTime: formatDate(this.addForm.dateTime[1]),
-            taskName: this.addForm.plateNo,
+            // startTime: formatDate(this.addForm.dateTime[0]),
+            // endTime: formatDate(this.addForm.dateTime[1]),
+            taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
           this.isAddLoading = true;
           getPersonFollowing(params)
             .then(res => {
-              if (res && res.data) {
-                this.$message({
-                  type: 'success',
-                  message: '新建成功',
-                  customClass: 'request_tip'
-                });
-                // this.dataList = res.data;
-                this.isAddLoading = false;
-                this.addTaskDialog = false;
-                this.getDataList();
-              } else {
-                this.isAddLoading = false;
-              }
+              this.$message({
+                type: 'success',
+                message: '新建成功',
+                customClass: 'request_tip'
+              });
+              // this.dataList = res.data;
+              this.isAddLoading = false;
+              this.addTaskDialog = false;
+              this.getDataList();
+              // if (res && res.data) {
+              // } else {
+              //   this.isAddLoading = false;
+              // }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -618,23 +638,6 @@ export default {
         }
       }
     }
-  }
-  .reset_btn {
-    // width: 110px;
-    // background-color: #D3D3D3;
-    // color: #666666;
-    // border-radius: 4px;
-    // &:hover {
-    //   background-color: #ffffff;
-    //   color: #0C70F8;
-    //   border-color: #0C70F8;
-    // }
-  }
-  .select_btn {
-    // width: 110px;
-    // background-color: #0C70F8;
-    // color: #ffffff;
-    // border-radius: 4px;
   }
 }
 .dialog_comp_add {

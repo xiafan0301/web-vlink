@@ -108,13 +108,13 @@
           </el-select>
           <div class="left_btn">
             <el-button class="reset_btn" :loading="resetLoading" @click="onReset">重置</el-button>
-            <el-button class="select_btn" :loading="searchLoading" @click="onSearch">查询</el-button>
+            <el-button class="select_btn" type="primary" :loading="searchLoading" @click="onSearch">查询</el-button>
           </div>
         </div>
       </div>
       <div class="the-right-result">
         <template v-if="dataList.length > 0">
-          <el-button :loading="exportLoadingbtn" @click="onExport" class="select_btn">导出</el-button>
+          <el-button :loading="exportLoadingbtn" type="primary" @click="onExport" class="th-button-export">导出</el-button>
           <vue-scroll>
             <div class="the-table">
               <el-table
@@ -303,7 +303,9 @@ export default {
     //获取摄像头卡口数据
     this.getMonitorList();
 
-    this.handleSubmitData();
+    setTimeout(() => {
+      this.handleSubmitData();
+    }, 1000)
   },
   watch: {
     queryDate: {
@@ -772,12 +774,12 @@ export default {
             width: 110px;
           }
           .select_btn {
-            background-color: #0C70F8;
-            color: #ffffff;
-            &:hover {
-              background:#0466de;
-              color: #ffffff;
-            }
+            // background-color: #0C70F8;
+            // color: #ffffff;
+            // &:hover {
+            //   background:#0466de;
+            //   color: #ffffff;
+            // }
           }
           .reset_btn {
             // background-color: #ffffff;
@@ -873,9 +875,9 @@ export default {
       .th-button-export {
         float: right;
         margin-bottom: 10px;
-        background:rgba(12,112,248,1);
-        border-radius:4px;
-        color: #ffffff;
+        // background:rgba(12,112,248,1);
+        // border-radius:4px;
+        // color: #ffffff;
       }
       .the-table {
         width: 100%; height: 100%;
