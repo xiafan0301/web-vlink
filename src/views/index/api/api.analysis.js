@@ -210,4 +210,16 @@ export function postPeopleTask(data) {
     data
   })
 }
+/**
+ * getPeopleTaskDetail
+ * 行人同行分析任务详情
+ * @param {String} uid
+ */
+export function getPeopleTaskDetail(data) {
+  return request({
+    url: '/analysisTaskInfos/' + data,
+    method: 'get',
+    mode: 'judge'
+  })
+}
 /*-------------------------- 区域人员分析 end -------------------------------*/

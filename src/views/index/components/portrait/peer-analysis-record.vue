@@ -1,6 +1,13 @@
 <template>
   <div>
-    <div is="vehicleBreadcrumb" :oData="[{name: '同行分析', routerName: 'peer_analysis_result'}, {name: '分析结果', routerName: 'peer_analysis_result'}, {name: '同行记录'}]"></div>
+    <div class="th-breadcrumb">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/portrait/peer-analysis-result?uid=' + $route.query.uid }">同行分析</el-breadcrumb-item>
+        <el-breadcrumb-item>同行记录</el-breadcrumb-item>
+      </el-breadcrumb>
+      <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
+    </div>
     <div class="rlcx_r">
       <div class="rlcx_r_order">
         <ul>
@@ -125,7 +132,6 @@ export default {
 .rlcx_r {
   position: relative;
   height: 100%;
-  margin-top: 50px;
   overflow: auto;
   overflow-x: hidden;
   overflow-y: auto;
