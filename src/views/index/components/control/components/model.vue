@@ -263,7 +263,7 @@ import {mapXupuxian} from '@/config/config.js';
 export default {
   components: {uploadPic},
   name: 'model',
-  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour'],
+  props: ['mapId','operateType', 'allDevData', 'modelType', 'checkList', 'modelDataOne', 'modelDataTwo', 'modelDataThree', 'modelDataFour', 'imgurl'],
   data () {
     return {
       // 模型表单
@@ -424,6 +424,19 @@ export default {
     } else {
       this.getAreas();
     }
+    if (this.imgurl) {
+      this.fileList.push({
+        // response: {
+        //   data: {
+        //     sysAppendixInfo: {uid: random14()},
+        //     sysCommonImageInfo: {fileFullPath: this.imgurl}
+        //   }
+        // }
+        url: this.imgurl,
+        uid: random14()
+      });
+      console.log(this.fileList, 'this.fileList')
+    }
   },
   methods: {
     // 公共方法
@@ -436,6 +449,7 @@ export default {
     },
     uploadPicFileList (fileList) {
       this.fileList = fileList;
+      console.log(this.fileList, 'fileList')
     },
     // 弹出从库中选择框
     popSel () {
@@ -460,6 +474,7 @@ export default {
             }
           })
           this.fileList = this.fileList.concat(arr);
+          
         })
       }
       // 过滤成员对象
@@ -473,6 +488,7 @@ export default {
           }
         })
         this.fileList = this.fileList.concat(fileList);
+        console.log(this.fileList, 'this.fileList')
       }
       this.createSelDialog = false;
     },
@@ -595,10 +611,18 @@ export default {
             //本地上传的
             if (this.fileList.filter(f => f.objType === undefined).length > 0) {
               fileListTwo = this.fileList.filter(f => !f.objType).map(m => {
-                return {
-                  objId: m.response.data.sysAppendixInfo.uid,
-                  objType: 3,
-                  photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
+                if (m.response) {
+                  return {
+                    objId: m.response.data.sysAppendixInfo.uid,
+                    objType: 3,
+                    photoUrl: m.response.data.sysCommonImageInfo.fileFullPath//编辑参数
+                  }
+                } else {
+                  return {
+                    objId: m.uid,
+                    objType: 3,
+                    photoUrl: m.url//编辑参数
+                  }
                 }
               })
             }

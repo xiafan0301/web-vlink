@@ -21,7 +21,7 @@
             </el-form-item>
             <el-form-item label="关联事件:" prop="event" style="width: 25%;">
               <el-select 
-                v-model="createForm.event" 
+                v-model="createForm.event"
                 filterable 
                 placeholder="请输入关联事件编号"
                 :disabled="($route.query.eventId ? true : false) || (controlDetail.eventId && pageType === 2)"
@@ -113,9 +113,9 @@
               </div>
               <template v-if="allDevData && allDevData.length > 0">
                 <!-- 人员追踪 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDOne)" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDOne)" is="model" ref="mapOne" :class="{'model_height': modelType !== '1'}" :allDevData="allDevData" mapId="mapOne" :modelType="'1'" :checkList="checkList" @sendModelDataOne="getModelDataOne" :modelDataOne="modelDOne" :operateType="pageType" :imgurl="imgurl"></div>
                 <!-- 车辆追踪 -->
-                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType"></div>
+                <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDTwo)" is="model" ref="mapTwo" :class="{'model_height': modelType !== '2'}" :allDevData="allDevData" mapId="mapTwo" :modelType="'2'" :checkList="checkList" @sendModelDataTwo="getModelDataTwo" :modelDataTwo="modelDTwo" :operateType="pageType" :imgurl="imgurl"></div>
                 <!-- 区域布防 -->
                 <div v-if="pageType === 1 || ((pageType === 2 || pageType === 3) && modelDFour)" is="model" ref="mapFour" :class="{'model_height': modelType !== '4'}" :allDevData="allDevData" mapId="mapFour" :modelType="'4'" :checkList="checkList" @sendModelDataFour="getModelDataFour" :modelDataFour="modelDFour" :operateType="pageType"></div>
               </template>
@@ -210,6 +210,10 @@ export default {
       modelDFour: null,//传给子组件的回填数据-区域布防
       // 事件模块新增布控参数
       eventDetail: null,
+      // 车辆侦查和人像侦查跳转过来参数
+      imgurl: null,
+      modelName: null,
+      plateNo: null
     }
   },
   created () {
@@ -224,6 +228,25 @@ export default {
     // 新增页-1
     } else {
       this.pageType = 1;
+      // 从车辆侦查或者人像侦查跳转过来新建布控
+      const {imgurl, modelName, plateNo} = this.$route.query;
+      
+      this.modelName = modelName;
+      
+      this.checkList.push(this.modelName);
+      if (this.checkList.length > 0) {
+        if (this.checkList[0] === '人员追踪') {
+          this.modelType = '1';
+        } else if (this.checkList[0] === '车辆追踪') {
+          this.modelType = '2';
+        } else if (this.checkList[0] === '越界分析') {
+          this.modelType = '3';
+        } else if (this.checkList[0] === '区域布防') {
+          this.modelType = '4';
+        }
+      }
+      this.imgurl = imgurl;
+      this.plateNo = plateNo;
     }
     // 复用页-3
     if (this.$route.query.createType) {
@@ -401,7 +424,7 @@ export default {
             }
             this.loadingBtn = true;
             addControl(data).then(res => {
-              if (res && res.data) {
+              if (res) {
                 this.$message.success(this.pageType === 3 ? '复用成功' : '新增成功');
                 this.$router.push({ name: 'control_manage' });
               }
