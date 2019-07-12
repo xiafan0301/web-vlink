@@ -10,7 +10,7 @@
     <div class="vehicle-info-content">
       <vue-scroll>
       <p class="daochu">
-        <el-button type="primary" :loading="searching"
+        <el-button type="primary" :loading="daochu" @click="dOut"
                   class="select_btn"
                 >导出</el-button>
       </p>
@@ -169,7 +169,7 @@
 <script>
 import {
   getViolationInfo,
-  getArchives
+  getArchives,exportNightVehicle
 } from "../../../api/api.judge.js";
 export default {
  
@@ -177,6 +177,7 @@ export default {
     return {
       historyPicList: [], // 上传历史记录
       carInfo:{},
+      daochu:false,
       searching:false,
       regulationsList: [],      //违章信息列表
           pagination: { total: 20, pageSize: 10, pageNum: 1 },
@@ -190,6 +191,30 @@ export default {
     this.getViolationInfo()
   },
   methods: {
+    dOut(){
+       let today = new Date()
+      let y = today.getFullYear()
+      let m = today.getMonth()+1
+      let r = today.getDay()
+      let day= y +"-"+ m +"-" + r
+      let sdate = this.$route.query.datastart ? this.$route.query.datastart.substr(0,10) : ''
+      let edate = this.$route.query.dataend ? this.$route.query.dataend.substr(0,10) : ''
+      this.daochu=true
+      exportNightVehicle({
+        vehicleViolationDto:{
+          dateEnd:(edate || day) + " 23:59:59",
+          dateStart:(sdate || day) + " 00:00:00",
+          plateNo:this.$route.query.plateNo
+        }
+      }).then(res=>{
+        if(res){
+this.daochu=false
+        }else{
+          this.daochu=false
+           this.$message('导出失败！');
+        }
+      })
+    },
     goToPage(v){
         this.$router.push({name:v,query:{
             plateNo:this.$route.query.plateNo,
