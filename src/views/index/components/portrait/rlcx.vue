@@ -214,7 +214,7 @@ export default {
       })
     },
     mapSelectorEmit (result) {
-      // console.log('mapSelectorEmit', result);
+      console.log('mapSelectorEmit', result);
       if (result) {
         // bayonetList deviceList
         this.dSum = 0;
@@ -227,19 +227,12 @@ export default {
         }
         if (result.bayonetList && result.bayonetList.length > 0) {
           this.dSum += result.bayonetList.length;
-          // getDeviceByBayonetUids
-          let ab = [];
-          for (let i = 0; i < result.bayonetList.length; i++) {
-            ab.push(result.bayonetList[i].uid);
+        }
+        if (result.bayonetDeviceList && result.bayonetDeviceList.length > 0) {
+          this.dSum += result.bayonetDeviceList.length;
+          for (let i = 0; i < result.bayonetDeviceList.length; i++) {
+            this.dIds.push(result.bayonetDeviceList[i].uid);
           }
-          getDeviceByBayonetUids(ab).then(res => {
-            if (res && res.data) {
-              for (let i = 0; i < res.data.length; i++) {
-                this.dIds.push(res.data[i].uid);
-              }
-            }
-          }).catch(() => {
-          });
         }
       }
     },
