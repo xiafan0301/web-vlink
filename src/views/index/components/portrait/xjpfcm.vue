@@ -346,8 +346,7 @@ export default {
               console.log(res);
               if (res && res.data) {
                 this.$router.push({
-                  name: "portrait_pfcm",
-                  query: { selectIndex: 0 }
+                  name: "portrait_pfcm"
                 });
               }
               this.$nextTick(() => {
@@ -370,6 +369,7 @@ export default {
       this.amap.setFitView(this.area);
     },
     getArea() {
+      this.area = []
       // 矩形
       if (this.drawObj.rectangle) {
         for (let k in this.drawObj.rectangle) {
