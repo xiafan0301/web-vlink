@@ -44,8 +44,8 @@
               <el-input placeholder=" 请填写证件号码" v-model="searchForm.idNo" type="text"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button class="reset_btn" style="width: 100px;" @click="resetData('searchForm')">重置</el-button>
-              <el-button class="select_btn" style="width: 100px;" @click="searchData('searchForm')">查询</el-button>
+              <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
+              <el-button class="select_btn" type="primary"  @click="searchData('searchForm')">查询</el-button>
             </el-form-item>
           </el-form>
         </vue-scroll>
@@ -681,11 +681,8 @@ export default {
       }
     }
   }
-  .reset_btn {
-    width: 110px;
-  }
-  .select_btn {
-    width: 110px;
+  .reset_btn, .select_btn {
+    width: 100px;
   }
 }
 .history-pic-dialog {

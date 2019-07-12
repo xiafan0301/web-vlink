@@ -13,7 +13,7 @@
           </li>
           <li>
             <span>分析时间：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+            <span>{{taskDetail.taskWebParam ? taskDetail.taskWebParam.startTime + '-' + taskDetail.taskWebParam.endTime : '无'}}</span>
           </li>
           <li>
             <span>起点设备：</span>
@@ -21,7 +21,7 @@
           </li>
           <li>
             <span>尾随间隔：</span>
-            <span>{{taskDetail.taskName ? taskDetail.taskName : '无'}}</span>
+            <span>{{taskDetail.taskWebParam && taskDetail.taskWebParam.interval ? taskDetail.taskWebParam.interval + '分钟' : '无'}}</span>
           </li>
           <li>
             <span>创建时间：</span>
@@ -30,7 +30,7 @@
         </ul>
       </div>
       <div class="right">
-        <template v-if="taskDetail.taskResult && taskDetail.taskResult.length === 0">
+        <template v-if="taskDetail.taskResult && taskDetail.taskResult.length > 0">
           <div class="content_top">
             <p>
               <span>检索结果</span>
@@ -39,76 +39,23 @@
           </div>
           <div class="result_detail">
             <ul class="clearfix">
-              <li>
+              <li v-for="(item, index) in taskDetail.taskResult" :key="index">
                 <div class="de_left">
-                  <img src="" alt="">
+                  <img :src="item.subStoragePath" alt="">
                 </div>
                 <div class="de_right">
                   <span class="title">检索资料</span>
                   <p class="time">
                     <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
+                    <span>{{item.shotTime}}</span>
                   </p>
                   <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
+                    <span v-show="item.sex">{{item.sex}}性</span>
+                    <span v-show="item.age">{{item.age}}</span>
+                    <span v-show="item.hat">{{item.hat}}</span>
+                    <!-- <span v-show="item.mask">{{item.mask}}</span> -->
                   </p>
                   <div class="record_btn" @click="skipWsReocrdPage(item)">查看尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
-                </div>
-              </li>
-              <li>
-                <div class="de_left">
-                  <img src="" alt="">
-                </div>
-                <div class="de_right">
-                  <span class="title">检索资料</span>
-                  <p class="time">
-                    <i class="vl_icon_tail_1 vl_icon"></i>
-                    <span>2018-12-12 12:12:12</span>
-                  </p>
-                  <p class="detail_info">
-                    <span>男性</span>
-                    <span>青年</span>
-                    <span>带有帽子阿萨达萨达</span>
-                  </p>
-                  <div class="record_btn" @click="skipWsReocrdPage(item)">尾随记录</div>
                 </div>
               </li>
             </ul>
@@ -146,15 +93,21 @@ export default {
       if (id) {
         getTaskInfosDetail(id)
           .then(res => {
-            if (res) {
+            if (res && res.data) {
               this.taskDetail = res.data;
+              this.taskDetail.taskResult = JSON.parse(this.taskDetail.taskResult);
+              this.taskDetail.taskWebParam = JSON.parse(this.taskDetail.taskWebParam);
+
+              console.log(this.taskDetail)
             }
           })
       }
     },
     // 跳至尾随记录页面
     skipWsReocrdPage (obj) {
-      this.$router.push({name: 'gzws_detail'})
+      console.log('obj', obj)
+      let queryObj = JSON.stringify(obj);
+      this.$router.push({name: 'gzws_detail', query: {obj: queryObj, id: this.$route.query.id}})
       // this.$router.push({name: 'gzws_detail', query: { 
       //   plateNo: this.searchForm.plateNo,
       //   dateStart: this.deviceStartTime,

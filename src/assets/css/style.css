@@ -1072,7 +1072,7 @@
 }
 
 /**  重置--查询按钮  **/
-.reset_btn {
+/* .reset_btn {
   background:rgba(246,248,249,1);
   border:1px solid rgba(211,211,211,1);
   border-radius:4px;
@@ -1086,7 +1086,7 @@
 .select_btn:hover {
   background:#0466de;
   color: #ffffff;
-}
+} */
 /*elementui primary标注button颜色*/
 .el-button--primary {
     background-color: #0C70F8;
