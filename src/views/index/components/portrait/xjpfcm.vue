@@ -54,31 +54,58 @@
                 </div>
                 <ul>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 1 }" @click="selDrawType(1)">
+                    <div
+                      title="选择矩形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 1 }"
+                      @click="selDrawType(1)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon1"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 2 }" @click="selDrawType(2)">
+                    <div
+                      title="选择圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 2 }"
+                      @click="selDrawType(2)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon2"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 3 }" @click="selDrawType(3)">
+                    <div
+                      title="选择折线100米范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 3 }"
+                      @click="selDrawType(3)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon3"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 4 }" @click="selDrawType(4)">
+                    <div
+                      title="选择多边形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 4 }"
+                      @click="selDrawType(4)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon4"></span>
                     </div>
                   </li>
                   <li>
-                    <div :class="{'sd-opts-sed': drawActiveType === 5 }" @click="selDrawType(5)">
+                    <div
+                      title="选择10公里圆形范围内的设备"
+                      :class="{'sd-opts-sed': drawActiveType === 5 }"
+                      @click="selDrawType(5)"
+                    >
                       <span class="sd-opts-icon sd-opts-icon5"></span>
                     </div>
                   </li>
                 </ul>
+                <p v-if="drawActiveType > 0">
+                  <span v-if="drawActiveType === 1">在地图上按住鼠标左键拖动鼠标框选，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 2">在地图上按住鼠标左键选择圆心，拖动鼠标作为半径，松开鼠标完成选择</span>
+                  <span v-else-if="drawActiveType === 3">在地图上鼠标左键选择两个或两个以上点形成折线，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 4">在地图上鼠标左键选择三个或三个以上点形成封闭区域，双击或右键完成选择</span>
+                  <span v-else-if="drawActiveType === 5">在地图上鼠标左键选择圆心，形成10公里大小的圆形区域</span>
+                </p>
               </div>
             </el-form-item>
             <!-- 时间 -->
@@ -336,7 +363,10 @@ export default {
               this.bayonetIds.length > 0 &&
               (params["bayonetIds"] = this.bayonetIds.join(","));
           } else {
-            this.$message.error("请选择区域");
+            /* console.log("11111111111111",document.querySelector('.el-message--info')) */
+            if (!document.querySelector(".el-message")) {
+              this.$message.info("请选择区域");
+            }
             return false;
           }
           console.log("-------submitForm-------", params);
@@ -369,7 +399,7 @@ export default {
       this.amap.setFitView(this.area);
     },
     getArea() {
-      this.area = []
+      this.area = [];
       // 矩形
       if (this.drawObj.rectangle) {
         for (let k in this.drawObj.rectangle) {
@@ -1490,6 +1520,9 @@ export default {
               }
             }
           }
+        }
+        > p {
+          margin: -18px 5px 18px 5px;
         }
       }
       .sd-opts-icon {
