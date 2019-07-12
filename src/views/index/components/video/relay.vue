@@ -188,8 +188,32 @@
         </ul>
       </div>
     </div>
-    <div v-show="pageType === 2">
-      新建任务
+    <div class="vl_vid relay_task" v-show="pageType === 2">
+      <div class="relay_task_t">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item><span style="cursor: pointer;" @click="pageType = 1">视频接力</span></el-breadcrumb-item>
+          <el-breadcrumb-item>新建任务</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="relay_task_m">
+        <div>
+          <div class="relay_task_mt">
+            <div class="relay_task_mtl">
+              <div>
+                <el-radio-group v-model="xjType" @change="xjTypeChanged">
+                  <el-radio :label="1">人员</el-radio>
+                  <el-radio :label="2">车辆</el-radio>
+                </el-radio-group>
+              </div>
+            </div>
+            <div class="relay_task_mtr"></div>
+          </div>
+        </div>
+      </div>
+      <div class="relay_task_b">
+        <el-button size="small" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+        <el-button size="small">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+      </div>
     </div>
   </div>
   
@@ -222,6 +246,11 @@ export default {
       initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
       startTime: '',
       endTime: '',
+
+      /* 新建任务 begin */
+      xjType: 1,
+      /* 新建任务 end */
+
       startTimeOptions: {
         disabledDate: (d) => {
           // d > new Date() || d > this.endTime
@@ -367,6 +396,10 @@ export default {
       } else {
         this.showConTitle = 1;
       }
+    },
+
+    /* 新建任务 */
+    xjTypeChanged (type) {
     }
   },
   destroyed () {
@@ -374,6 +407,50 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.relay_task_mtl {
+  float: left;
+  width: 260px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+}
+.relay_task_mtr {
+  margin-left: 270px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+}
+.relay_task {
+  position: relative;
+  height: 100%;
+  > .relay_task_t {
+    position: absolute; top: 0; left: 0;
+    width: 100%;
+    padding: 15px 0 0 20px;
+  }
+  > .relay_task_m {
+    height: 100%;
+    padding: 40px 10px 70px 10px;
+    > div {
+      height: 100%;
+      padding: 10px;
+      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-color: #fff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+    }
+  }
+  > .relay_task_b {
+    position: absolute; bottom: 0; left: 0; z-index: 20;
+    width: 100%; height: 60px;
+    padding: 14px 0 0 20px;
+    background-color: #fff;
+    border-left: 1px solid #ddd;
+  }
+  
+}
 .relay_main { width: 100%; height: 100%; }
 .relay_ul_list {
   height: 100%;

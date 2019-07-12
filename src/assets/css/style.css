@@ -71,10 +71,10 @@
 /* 地图标记 */
 .vl_icon_ry { width: 41px; height: 48px; background-position: -90px -188px; }
 .vl_icon_kk { width: 41px; height: 48px; background-position: -153px -188px; }
-.vl_icon_kk_dis { width: 41px; height: 48px; background-position: -820px -188px; }
+.vl_icon_kk_dis { width: 41px; height: 48px; background-position: -885px -188px; }
 .vl_icon_cl { width: 41px; height: 48px; background-position: -217px -188px; }
 .vl_icon_sxt { width: 41px; height: 48px; background-position: -280px -188px; }
-.vl_icon_sxt_dis { width: 41px; height: 48px; background-position: -763px -188px; }
+.vl_icon_sxt_dis { width: 41px; height: 48px; background-position: -344px -188px; }
 .qyryfx_vl_icon_wrap { width: 125px; height: 50px; }
 .qyryfx_vl_icon_wrap .people_counts_l1 { width:76px; height:30px; line-height: 30px; color: #fff; font-size: 14px; text-align: center; float: left; border-radius:15px; margin: 3px 0 0 3px; }
 .qyryfx_vl_icon_wrap .vl_icon { float: left; }
@@ -143,13 +143,13 @@
 .vl_icon_control_06{ width: 24px; height: 28px; background-position: -202px -134px;}
 .vl_icon_control_07{width: 28px; height: 28px; background-position: -300px -134px;}
 .vl_icon_control_08{width: 28px; height: 28px; background-position: -350px -134px;}
-.vl_icon_control_09{width: 18px; height: 22px; background-position: -100px -132px;}
+.vl_icon_control_09{width: 22px; height: 28px; background-position: -100px -132px;}
 .vl_icon_control_10{width: 20px; height: 28px; background-position: -152px -134px;}
 .vl_icon_control_11{width: 24px; height: 28px; background-position: -250px -134px;}
 .vl_icon_control_12{width: 20px; height: 28px; background-position: -400px -134px;}
 .vl_icon_control_13{width: 28px; height: 28px; background-position: -504px -132px;}
 /* 研判 */
-.vl_icon_judge_01{width: 19px; height: 24px; background-position: -62px -134px;} /* 暂停*/
+.vl_icon_judge_01{width: 22px; height: 28px; background-position: -62px -134px;} /* 暂停*/
 .vl_icon_judge_03{width: 56px;  height: 68px;  background-position: -300px -1150px;} /* 次数1*/
 .vl_icon_judge_04{width: 56px;  height: 68px;  background-position: -455px -1150px;} /* 次数2*/
 .vl_icon_judge_05{width: 56px;  height: 68px;  background-position: -377px -1150px;} /* 次数3*/

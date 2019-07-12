@@ -52,7 +52,7 @@
   </el-dialog>
 </template>
 <script>
-import {getAllMonitorList, getAllBayonetList} from '@/views/index/api/api.base.js';
+import {getAllMonitorList, getAllBayonetList, getDeviceByBayonetUids} from '@/views/index/api/api.base.js';
 import {mapXupuxian} from '@/config/config.js';
 import {random14} from '@/utils/util.js';
 export default {
@@ -780,17 +780,39 @@ export default {
           }
         }
       }
-      let ad = [], ab = [];
+      let ad = [], ab = [], abIds = [];
       for (let k in dObj) { ad.push(dObj[k]); }
-      for (let k in bObj) { ab.push(bObj[k]); }
+      for (let k in bObj) { 
+        ab.push(bObj[k]);
+        abIds.push(k);
+      }
+      if (abIds && abIds.length > 0) {
+        getDeviceByBayonetUids(abIds).then(res => {
+          let bayonetDeviceList = [];
+          if (res && res.data) {
+            bayonetDeviceList = res.data;
+          }
+          this.$emit('mapSelectorEmit', {
+            deviceList: ad,
+            bayonetList: ab,
+            bayonetDeviceList: bayonetDeviceList
+          });
+          this.submitLoading = false;
+          this.dialogVisible = false;
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      } else {
+        this.$emit('mapSelectorEmit', {
+          deviceList: ad,
+          bayonetList: ab,
+          bayonetDeviceList: []
+        });
+        this.submitLoading = false;
+        this.dialogVisible = false;
+      }
       console.log('设备 ad', ad);
       console.log('卡口 ab', ab);
-      this.$emit('mapSelectorEmit', {
-        deviceList: ad,
-        bayonetList: ab
-      });
-      this.submitLoading = false;
-      this.dialogVisible = false;
     },
     drawClear () {
       // 矩形

@@ -72,12 +72,12 @@
                   >中断任务</span>
                   <span
                     class="operation_btn"
-                    @click="recoveryTask(scope.row)"
+                    @click="recoveryOrRestart(scope.row)"
                     v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 4"
                   >恢复任务</span>
                   <span
                     class="operation_btn"
-                    @click="showAddTaskDialog('edit', scope.row)"
+                    @click="recoveryOrRestart(scope.row)"
                     v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
                   >重启任务</span>
                   <span
@@ -131,7 +131,7 @@
         <span style="color: #999999;">任务删除，任务的数据处理进程将被清除，任务不再可以恢复</span>
         <div slot="footer" class="dialog-footer">
           <el-button @click="deleteDialog = false">取消</el-button>
-          <el-button class="operation_btn function_btn" @click="deleteDialog = false">确认</el-button>
+          <el-button class="operation_btn function_btn" :loading="isDeleteLoading" @click="sureDeleteTask">确认</el-button>
         </div>
       </el-dialog>
       <!--新建任务弹出框-->
@@ -179,7 +179,7 @@
               <div class="no_device" v-else>请选择设备</div>
               <!-- 树tab页面 -->
               <div class="device_tree_tab" v-show="treeTabShow">
-                <div style="overflow: hidden;">
+                <!-- <div style="overflow: hidden;">
                   <div
                     class="tab_title"
                     :class="{ 'current_title': index === selectedTreeTab }"
@@ -187,7 +187,7 @@
                     v-for="(item, index) in treeTabArr"
                     :key="'tab_title' + index"
                   >{{ item.name }}</div>
-                </div>
+                </div> -->
                 <!-- 视频树 -->
                 <div class="tree_content" v-show="selectedTreeTab === 0">
                   <vue-scroll>
@@ -210,7 +210,7 @@
                     ></el-tree>
                   </vue-scroll>
                 </div>
-                <div class="tree_content" v-show="selectedTreeTab === 1">
+                <!-- <div class="tree_content" v-show="selectedTreeTab === 1">
                   <vue-scroll>
                     <div class="checked_all">
                       <el-checkbox
@@ -230,7 +230,7 @@
                       :props="defaultProps"
                     ></el-tree>
                   </vue-scroll>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -238,6 +238,8 @@
               <el-date-picker
                 v-model="addData.taskTime"
                 style="width:100%;"
+                @change="handleDateTime"
+                :picker-options="pickerDateTime"
                 type="datetimerange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -270,6 +272,11 @@ import { objDeepCopy, formatDate } from "@/utils/util.js";
 export default {
   data() {
     return {
+      pickerDateTime: {
+        disabledDate (time) {
+          return time.getTime() > (new Date().getTime());
+        }
+      },
       tabList: [
         {
           label: "已完成任务",
@@ -289,6 +296,7 @@ export default {
       list: [], //已完成列表
       taskId: null, // 任务id
       deleteDialog: false,
+      isDeleteLoading: false,
       interruptDialog: false, //中断任务
       addTaskDialog: false,
       isAddLoading: false,
@@ -298,7 +306,7 @@ export default {
       addData: {
         taskName: null,
         deviceId: null,
-        taskTime: null,
+        taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
         startTime: null,
         endTime: null,
         number: null,
@@ -339,6 +347,15 @@ export default {
     this.getDataList();
   },
   methods: {
+    // 时间选择change
+    handleDateTime (val) {
+      if (val) {
+        if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
+          this.$message.warning('最多选择3天');
+          this.addData.taskTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()]
+        }
+      }
+    },
     // 获取离线任务
     getDataList () {
       const params = {
@@ -366,14 +383,26 @@ export default {
       this.selectIndex = val;
       this.getDataList();
     },
-    // 跳到新增任务页面
+    skipResultPage (obj) {
+      this.$router.push({name: 'peer_analysis_result', query: {uid: obj.uid}})
+    },
+    // 打开新增任务弹框
     skipAddTaskPage() {
+      this.addData = Object.assign({}, {
+        taskName: null,
+        deviceId: null,
+        taskTime: [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()],
+        startTime: null,
+        endTime: null,
+        number: null,
+        targetPicUrl: null
+      })
       this.addTaskDialog = true
     },
     // 删除图片
     // eslint-disable-next-line no-unused-vars
     handleRemove (file, fileList) {
-      this.dialogImageUrl = null;
+      this.dialogImageUrl = null
     },
     // 上传成功
     uploadPicSuccess (res) {
@@ -394,19 +423,56 @@ export default {
       return isJPG && isLt4M;
     },
     onConfirmAddTask () {
-      this.addTaskDialog = false
+      this.isAddLoading = true
+      if (!this.addData.targetPicUrl) {
+        this.$message({
+          type: 'warning',
+          message: '请先上传目标人员全身照',
+          customClass: 'request_tip'
+        })
+        this.isAddLoading = false
+        return false
+      }
+      // if (!this.addData.taskName) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '请输入任务名称',
+      //     customClass: 'request_tip'
+      //   })
+      //   this.isAddLoading = false
+      //   return false
+      // }
+      // if (!this.addData.taskTime) {
+      //   this.$message({
+      //     type: 'warning',
+      //     message: '请输入起始时间',
+      //     customClass: 'request_tip'
+      //   })
+      //   this.isAddLoading = false
+      //   return false
+      // }
       let arr = []
       this.selectDeviceArr.forEach(item => {arr.push(item.uid)})
       this.addData.deviceId = arr.join(',')
-      this.addData.startTime =  formatDate(this.addData.taskTime[0])
-      this.addData.endTime =  formatDate(this.addData.taskTime[1])
+      this.addData.startTime = this.addData.taskTime && this.addData.taskTime.length === 2 ? formatDate(this.addData.taskTime[0]) : null
+      this.addData.endTime =  this.addData.taskTime && this.addData.taskTime.length === 2 ? formatDate(this.addData.taskTime[1]) : null
       console.log(this.addData)
       postPeopleTask(this.addData).then(res => {
         if (res && res.data) {
+          this.$message({
+            type: 'success',
+            message: '新建成功',
+            customClass: 'request_tip'
+          })
+          this.isAddLoading = false
+          this.addTaskDialog = false
+          this.getDataList()
           console.log(res.data)
+        } else {
+          this.isAddLoading = false;
         }
       })
-      
+      .catch(() => {this.isAddLoading = false})
     },
     // 跳至详情页面
     // eslint-disable-next-line no-unused-vars
@@ -477,20 +543,14 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务
-    recoveryTask (obj) {
-      if (obj.uid) {
-        // const params = {
-        //   uid: obj.uid
-        //   // taskType: 3
-        // };
-        putTaskInfosResume(obj.uid)
-          .then(res => {
-            if (res) {
-              this.getDataList();
+    //恢复任务,重启任务
+    recoveryOrRestart(obj) {
+        putTaskInfosResume(obj.uid).then(res => {
+            console.log(res)
+            if(res) {
+                this.getDataList();
             }
-          })
-      }
+        }).catch(() => {})
     },
     // 查询任务列表数据
     selectDataList () {
@@ -515,12 +575,13 @@ export default {
       };
       MapGETmonitorList(params).then(res => {
         if (res && res.data) {
+          console.log('所有的设备++++++++', res.data)
           let camera = objDeepCopy(res.data.areaTreeList);
-          let bayonet = objDeepCopy(res.data.areaTreeList);
+          // let bayonet = objDeepCopy(res.data.areaTreeList);
           this.videoTree = this.getTreeList(camera);
-          this.bayonetTree = this.getBayTreeList(bayonet);
+          // this.bayonetTree = this.getBayTreeList(bayonet);
           this.getLeafCountTree(this.videoTree, 'camera');
-          this.getLeafCountTree(this.bayonetTree, 'bayonet');
+          // this.getLeafCountTree(this.bayonetTree, 'bayonet');
         }
       });
     },
@@ -538,25 +599,6 @@ export default {
             key['label'] = key.deviceName
             key['id'] = key.uid
             key['treeType'] = 1
-          }
-        }
-      }
-      return data;
-    },
-    /**
-     * 获取卡口数据
-     */
-    getBayTreeList(data) {
-      for(let item of data) {
-        item['id'] = item.areaId
-        item['label'] = item.areaName
-        if(item.bayonetList && item.bayonetList.length > 0) {
-          item['children'] = item.bayonetList
-          delete(item.bayonetList)
-          for(let key of item['children']) {
-            key['label'] = key.bayonetName
-            key['id'] = key.uid
-            key['treeType'] = 2
           }
         }
       }
@@ -595,35 +637,54 @@ export default {
       }
     },
     /**
+     * 获取卡口数据
+     */
+    // getBayTreeList(data) {
+    //   for(let item of data) {
+    //     item['id'] = item.areaId
+    //     item['label'] = item.areaName
+    //     if(item.bayonetList && item.bayonetList.length > 0) {
+    //       item['children'] = item.bayonetList
+    //       delete(item.bayonetList)
+    //       for(let key of item['children']) {
+    //         key['label'] = key.bayonetName
+    //         key['id'] = key.uid
+    //         key['treeType'] = 2
+    //       }
+    //     }
+    //   }
+    //   return data;
+    // },
+    /**
      * 卡口树全选按钮点击
      */
-    handleCheckedAllBayonet(val) {
-      this.isIndeterminateBayonet = false;
-      if (val) {
-        this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
-      } else {
-        this.$refs.bayonetTree.setCheckedNodes([]);
-      }
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-    },
+    // handleCheckedAllBayonet(val) {
+    //   this.isIndeterminateBayonet = false;
+    //   if (val) {
+    //     this.$refs.bayonetTree.setCheckedNodes(this.bayonetTree);
+    //   } else {
+    //     this.$refs.bayonetTree.setCheckedNodes([]);
+    //   }
+    //   this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+    //   this.handleData();
+    // },
     /**
      * 处理卡口树全选按钮
      */
-    listenCheckedBayonet(val, val1) {
-      this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
-      this.handleData();
-      if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
-        this.isIndeterminateBayonet = false;
-        this.checkAllTreeBayonet = true;
-      } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
-        this.checkAllTreeBayonet = false;
-        this.isIndeterminateBayonet = true;
-      } else if (val1.checkedNodes.length === 0) {
-        this.checkAllTreeBayonet = false;
-        this.isIndeterminateBayonet = false;
-      }
-    },
+    // listenCheckedBayonet(val, val1) {
+    //   this.selectBayonetArr = this.$refs.bayonetTree.getCheckedNodes(true);
+    //   this.handleData();
+    //   if (val1.checkedNodes.length === this.bayonetTreeNodeCount) {
+    //     this.isIndeterminateBayonet = false;
+    //     this.checkAllTreeBayonet = true;
+    //   } else if (val1.checkedNodes.length < this.bayonetTreeNodeCount && val1.checkedNodes.length > 0) {
+    //     this.checkAllTreeBayonet = false;
+    //     this.isIndeterminateBayonet = true;
+    //   } else if (val1.checkedNodes.length === 0) {
+    //     this.checkAllTreeBayonet = false;
+    //     this.isIndeterminateBayonet = false;
+    //   }
+    // },
     /**
      * 获取摄像头树节点的数量
      */
@@ -644,25 +705,11 @@ export default {
         }
       }
     },
-    /**
-     * 获取卡口树节点的数量
-     */
-    getLeafCountTreeBayonet(json) {
-      for (let i = 0; i < json.length; i++) {
-        if (json[i].hasOwnProperty("id")) {
-          this.bayonetTreeNodeCount++;
-        }
-        if (json[i].hasOwnProperty("children")) {
-          this.getLeafCountTreeBayonet(json[i].children);
-        } else {
-          continue;
-        }
-      }
-    },
     // 选中的设备数量处理
     handleData() {
-      this.selectDeviceArr = [...this.selectVedioArr, ...this.selectBayonetArr].filter(key => key.treeType);
-      // console.log('选中的数据', this.selectDeviceArr);
+      this.selectDeviceArr = [...this.selectVedioArr].filter(key => key.treeType);
+      console.log('摄像头++++++++', this.selectVedioArr)
+      console.log('卡口++++++++', this.selectBayonetArr)
     },
     /**
      * 树选择框关闭
