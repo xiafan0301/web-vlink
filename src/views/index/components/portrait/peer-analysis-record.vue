@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;">
     <div class="th-breadcrumb">
       <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item :to="{ path: '/portrait/menu' }">人像检索</el-breadcrumb-item>
@@ -9,40 +9,48 @@
       <!-- <el-button :loading="exportLoadingbtn" @click="onExport" class="th-button-export-color">导出</el-button> -->
     </div>
     <div class="rlcx_r">
-      <div class="rlcx_r_order">
-        <ul>
-          <li @click="orderHandler(1)" :class="{'rlcx_r_order_sed': orderType === 1}">时间排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
-          <li @click="orderHandler(2)" :class="{'rlcx_r_order_sed': orderType === 2}">监控排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
-          <span :class="{'rlcx_r_order_line2': orderType === 2}"></span>
+      <template v-if="pagination.total !== 0">
+        <div class="rlcx_r_order">
+          <ul>
+            <li @click="orderHandler(1)" :class="{'rlcx_r_order_sed': orderType === 1}">时间排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
+            <li @click="orderHandler(2)" :class="{'rlcx_r_order_sed': orderType === 2}">监控排序&nbsp;<i class="el-icon-arrow-down" :class="{'rlcx_r_order_up': order === 2}"></i></li>
+            <span :class="{'rlcx_r_order_line2': orderType === 2}"></span>
+          </ul>
+        </div>
+        <ul class="rlcx_r_list clearfix">
+          <li v-for="(item, index) in list" :key="index + 'pp'" @click="onOpenCompair(item)">
+            <div class="box">
+              <div class="top">
+                <img :src="item.targetStoragePath" alt="">
+                <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
+                <img style="padding-left: 12px;" :src="item.peerStoragePath" alt="">
+                <div class="left-float">目标对象</div>
+                <div class="right-float">同行对象</div>
+                <div class="left-time">{{item.shotTime}}</div>
+                <div class="right-time">{{item.shotTime}}</div>
+              </div>
+              <div class="bottom">
+                <p>{{item.deviceName ? item.deviceName : '无'}}</p>
+                <p>{{item.address ? item.address : '无'}}</p>
+              </div>
+            </div>
+          </li>
         </ul>
-      </div>
-      <ul class="rlcx_r_list clearfix">
-        <li v-for="(item, index) in list" :key="index + 'pp'" @click="onOpenCompair(item)">
-          <div class="box">
-            <div class="top">
-              <img :src="item.targetStoragePath" alt="">
-              <!-- <img src="../../../../assets/img/666.jpg" alt=""> -->
-              <img style="padding-left: 12px;" :src="item.peerStoragePath" alt="">
-              <div class="left-float">目标对象</div>
-              <div class="right-float">同行对象</div>
-              <div class="left-time">{{item.shotTime}}</div>
-              <div class="right-time">{{item.shotTime}}</div>
-            </div>
-            <div class="bottom">
-              <p>{{item.deviceName ? item.deviceName : '无'}}</p>
-              <p>{{item.address ? item.address : '无'}}</p>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <el-pagination
-        class="cum_pagination th-center-pagination"
-        @current-change="onPageChange"
-        :current-page.sync="pagination.currentPage"
-        :page-size="pagination.pageSize"
-        layout="prev, pager, next"
-        :total="pagination.total">
-      </el-pagination>
+        <el-pagination
+          class="cum_pagination th-center-pagination"
+          @current-change="onPageChange"
+          :current-page.sync="pagination.currentPage"
+          :page-size="pagination.pageSize"
+          layout="prev, pager, next"
+          :total="pagination.total">
+        </el-pagination>
+      </template>
+      <template v-else>
+        <div class="not_content">
+          <img src="../../../../assets/img/not-content.png" alt="">
+          <p>暂无相关数据</p>
+        </div>
+      </template>
     </div>
     <el-dialog
       :visible.sync="compairDialog"
@@ -100,7 +108,7 @@ export default {
       orderType: 1, // 1时间排序 2监控排序
       order: 1, // 1desc 2asc
       pagination: {
-        total: 1,
+        total: 0,
         pageSize: 12,
         currentPage: 1
       },
@@ -111,8 +119,6 @@ export default {
     }
   },
   mounted () {
-    console.log(this.$route.query.uid)
-    console.log(this.$route.query.id)
     this.getDetail()
   },
   methods: {
@@ -127,7 +133,12 @@ export default {
               this.$set(res.data, 'taskWebParam', JSON.parse(res.data.taskWebParam))
               // console.log(res.data.taskResult)
               // res.data.taskResult[0].uid = 1
-              let o = res.data.taskResult.find(item => {return item.uid + '' === this.$route.query.id + ''})
+              console.log(res.data)
+              let o = null
+              if (this.$route.query.id) {
+                o = res.data.taskResult.find(item => {return item.uid + '' === this.$route.query.id + ''})
+              }
+              console.log(o)
               if (o && o.personRetrieveDetailDtoList) {
                 this.listbox = [...o.personRetrieveDetailDtoList]
                 this.list = [...o.personRetrieveDetailDtoList.slice(0, 12)]
@@ -193,7 +204,7 @@ export default {
 <style lang="scss" scoped>
 .rlcx_r {
   position: relative;
-  height: 100%;
+  height: calc(100% - 50px);
   overflow: auto;
   overflow-x: hidden;
   overflow-y: auto;
