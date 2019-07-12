@@ -7,7 +7,6 @@
           {name: '身份核实'}]">
       </div>
     </div>
-    <!-- <Breadcrumb :oData="[{name: '身份核实'}]"></Breadcrumb> -->
     <div class="content_box">
       <div class="left">
         <vue-scroll>
@@ -58,8 +57,8 @@
         </vue-scroll>
       </div>
       <div class="right">
-        <vue-scroll>
-          <template v-if="dataList && dataList.length > 0">
+        <template v-if="dataList && dataList.length > 0">
+          <vue-scroll>
             <div class="content_top">
               <p>
                 <span>检索结果</span>
@@ -95,14 +94,11 @@
               layout="total, prev, pager, next, jumper"
               :total="pagination.total">
             </el-pagination>
-          </template>
-          <template v-else>
-            <div class="not_content">
-              <img src="../../../../../assets/img/not-content.png" alt="">
-              <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-            </div>
-          </template>
-        </vue-scroll>
+          </vue-scroll>
+        </template>
+        <template v-else>
+          <div is="noResult" :isInitPage="isInitPage"></div>
+        </template>
       </div>
     </div>
     <!--历史记录弹窗-->
@@ -128,7 +124,7 @@
     <!--身份核实详情弹窗-->
     <el-dialog
       :visible.sync="identyDetailDialog"
-      class="struc_detail_dialog"
+      class="struc_detail_idendty_dialog"
       :close-on-click-modal="false"
       top="4vh"
       :show-close="false">
@@ -194,10 +190,11 @@
 <script>
 import { ajaxCtx } from '@/config/config.js';
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 import { checkIdCard } from '@/utils/validator.js';
 import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList, JtcPUTAppendixsOrder, getIdNoList} from '@/views/index/api/api.judge.js';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     const validateSimilar = (rule, val, callback) => {
       if (val) {
@@ -212,6 +209,7 @@ export default {
       }
     }
     return {
+      isInitPage: true, // 是否是初始化页面
       identyDetailDialog: false, // 身份核实详情弹出框
       loadingHis: false, // 获取历史图片加载中
       historyPicDialog: false, // 历史图片弹出框
@@ -286,11 +284,9 @@ export default {
         path: e.dataTransfer.getData("imgSrc")
       }
       if (this.curImgNum >= 3) {
-         this.$message({
-            type: 'warning',
-            message: '最多可同时对比三张图片',
-            customClass: 'request_tip'
-          });
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('最多可同时对比三张图片');
+        }
         return;
       }
       this.curImgNum ++;
@@ -328,11 +324,9 @@ export default {
     // 选择历史图片
     chooseHisPic (item) {
       if ((this.choosedHisPic.length + this.curImgNum) === 3 && !item.checked) {
-        this.$message({
-          type: 'warning',
-          message: '最多上传3张照片',
-          customClass: 'request_tip'
-        });
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('最多上传3张照片');
+        }
       } else {
         item.checked = !item.checked;
       }
@@ -362,7 +356,9 @@ export default {
     },
     // 上传图片
     uploadPicExceed () {
-      this.$message.warning('最多可同时对比三张图片');
+      if (!document.querySelector('.el-message--info')) {
+        this.$message.info('最多可同时对比三张图片');
+      }
     },
     uploadPicSuccess (res) {
       this.uploading = true;
@@ -370,7 +366,9 @@ export default {
         let oRes = res.data;
 
         if (this.curImgNum >= 3) {
-          this.$message.error('最多可同时对比三张图片');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('最多可同时对比三张图片');
+          }
           return;
         }
         this.curImgNum ++;
@@ -409,28 +407,33 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
     // 重置查询条件
     resetData (form) {
+      this.isInitPage = false;
+      this.fileList = [];
+      this.curImageUrl = null;
       this.$refs[form].resetFields();
-      this.searchData();
+      // this.searchData('searchForm');
     },
     // 根据搜索条件进行查询
     searchData (form) {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (this.curImgNum === 0 && !this.searchForm.idNo) {
-            this.$message({
-              type: 'warning',
-              message: '请先选择要上传的图片或填写身份证信息',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先选择要上传的图片或填写身份证信息');
+            }
             return false;
           }
           const params = {
@@ -451,11 +454,14 @@ export default {
             params['where.appendixIds'] = _ids.join(',');
           }
           getIdNoList(params).then(res => {
-            if (res) {
-              console.log(res);
-              this.dataList = res.data.list;
-              this.pagination.pageNum = res.data.pageNum;
-              this.pagination.total = res.data.total;
+            if (res && res.data) {
+              if (res.data.list.length > 0) {
+                this.dataList = res.data.list;
+                this.pagination.pageNum = res.data.pageNum;
+                this.pagination.total = res.data.total;
+              } else {
+                this.isInitPage = false;
+              }
             }
           })
         }
@@ -715,7 +721,7 @@ export default {
     }
   }
 }
-.struc_detail_dialog {
+.struc_detail_idendty_dialog {
   // width: 1000px;
   /deep/ .el-dialog {
     max-width: 13.06rem;

@@ -303,7 +303,9 @@ export default {
     handleDateTime (val) {
       if (val) {
         if ( (new Date(val[1]).getTime() - new Date(val[0]).getTime()) >= 3* 24 * 3600 * 1000) {
-          this.$message.warning('最多选择3天');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('最多选择3天');
+          }
           this.addForm.dateTime = [new Date((new Date() - (24 * 60 * 60 * 1000))), new Date()];
         } else {
           if (this.dialogImageUrl) {
@@ -362,10 +364,14 @@ export default {
       const isLt4M = file.size / 1024 / 1024 < 4;
 
       if (!isJPG) {
-        this.$message.error('上传图片只能是 jpeg、jpg、png 格式!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片只能是 jpeg、jpg、png 格式!');
+        }
       }
       if (!isLt4M) {
-        this.$message.error('上传图片大小不能超过 4MB!');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('上传图片大小不能超过 4MB!');
+        }
       }
       return isJPG && isLt4M;
     },
@@ -431,19 +437,15 @@ export default {
       this.$refs[form].validate(valid => {
         if (valid) {
           if (!this.dialogImageUrl) {
-             this.$message({
-              type: 'warning',
-              message: '请先上传目标人员全身照',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请先上传目标人员全身照');
+            }
             return;
           }
           if (this.dialogImageUrl && !this.addForm.deviceCode) {
-            this.$message({
-              type: 'warning',
-              message: '请设置分析起点',
-              customClass: 'request_tip'
-            });
+            if (!document.querySelector('.el-message--info')) {
+              this.$message.info('请设置分析起点');
+            }
             return;
           };
           // const vehicleType = this.addForm.vehicleClass.join(':');
@@ -490,6 +492,7 @@ export default {
         this.isAddTaskTitle = true;
       } else {
         this.isAddTaskTitle = false;
+
       }
       this.addTaskDialog = true;
     },
@@ -559,14 +562,11 @@ export default {
     },
     // 恢复任务
     recoveryTask (obj) {
+      console.log(obj)
       if (obj.uid) {
-        const params = {
-          uid: obj.uid
-          // taskType: 3
-        };
-        putTaskInfosResume(params)
+        putTaskInfosResume(obj.uid)
           .then(res => {
-            if (res) {
+            if (res && res.data) {
               this.getDataList();
             }
           })

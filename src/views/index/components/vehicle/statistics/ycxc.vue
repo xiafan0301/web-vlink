@@ -63,15 +63,15 @@
             </el-date-picker>
           </div>
           <div class="left_time">
-            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 200px;">
+            <el-select v-model="queryForm.startTime" placeholder="开始时间" style="width: 216px;" @change="handleChangeStartTime">
               <el-option 
                 v-for="(item, index) in startTimeOptions" 
                 :key="index"
                 :label="item.label"
                 :value="item.value"
+                :disabled="item.disabled"
               >
               </el-option>
-              <!-- <i class="el-icon-time"></i> -->
             </el-select>
             <span class="left_time_separator">-</span>
             <el-select v-model="queryForm.endTime" placeholder="结束时间" style="width: 216px;">
@@ -80,16 +80,18 @@
                 :key="index"
                 :label="item.label"
                 :value="item.value"
+                :disabled="item.disabled"
               >
               </el-option>
             </el-select>
           </div>
           <div class="left_num">
-            <el-input class="left-none-border" v-model="queryForm.minShotTimes">
+            <el-input class="left-none-border" v-model="queryForm.minShotTimes" @blur="handleBlurShotTimes">
               <template slot="prepend">过车次数</template>
             </el-input>
             <span>次（范围2-100）</span>
           </div>
+          
           <el-select v-model="queryForm.vehicleTypes" placeholder="请选择车辆类型" style="width: 100%;" clearable multiple>
             <el-option
               v-for="item in carTypeList"
@@ -147,10 +149,7 @@
           </vue-scroll>
         </template>
         <template v-else>
-          <div class="not_content">
-            <img src="../../../../../assets/img/not-content.png" alt="">
-            <p style="color: #666666; margin-top: 30px;">抱歉，没有相关的结果!</p>
-          </div>
+          <div is="noResult" :isInitPage="isInitPage"></div>
         </template>
       </div>
     </div> 
@@ -165,84 +164,139 @@ import { dataList } from '@/utils/data.js';
 import { getDiciData } from '@/views/index/api/api.js';
 import { objDeepCopy, formatDate, autoDownloadUrl } from "@/utils/util.js";
 import vlBreadcrumb from '@/components/common/breadcrumb.vue';
+import noResult from '@/components/common/noResult.vue';
 export default {
-  components: { vlBreadcrumb },
+  components: { vlBreadcrumb, noResult },
   data () {
     return {
+      isInitPage: false, // 是否是初始化页面  因为初始化的时候就调了接口
       startTimeOptions: [
         {
           label: '19:00',
-          value: 19
+          value: 19,
+          disabled: false
         },
         {
           label: '20:00',
-          value: 20
+          value: 20,
+          disabled: false
         },
         {
           label: '21:00',
-          value: 21
+          value: 21,
+          disabled: false
         },
         {
           label: '22:00',
-          value: 22
+          value: 22,
+          disabled: false
         },
         {
           label: '23:00',
-          value: 23
+          value: 23,
+          disabled: false
         },
         {
           label: '24:00',
-          value: 24
+          value: 24,
+          disabled: false
+        },
+        {
+          label: '次日01:00',
+          value: 1,
+          disabled: false
+        },
+        {
+          label: '次日02:00',
+          value: 2,
+          disabled: false
+        },
+        {
+          label: '次日03:00',
+          value: 3,
+          disabled: false
+        },
+        {
+          label: '次日04:00',
+          value: 4,
+          disabled: false
+        },
+        {
+          label: '次日05:00',
+          value: 5,
+          disabled: false
+        },
+        {
+          label: '次日06:00',
+          value: 6,
+          disabled: false
+        },
+        {
+          label: '次日07:00',
+          value: 7,
+          disabled: false
         }
       ],
       endTimeOptions: [
         {
           label: '20:00',
-          value: 20
+          value: 20,
+          disabled: false
         },
         {
           label: '21:00',
-          value: 21
+          value: 21,
+          disabled: false
         },
         {
           label: '22:00',
-          value: 22
+          value: 22,
+          disabled: false
         },
         {
           label: '23:00',
-          value: 23
+          value: 23,
+          disabled: false
         },
         {
           label: '24:00',
-          value: 24
+          value: 24,
+          disabled: false
         },
         {
           label: '次日01:00',
-          value: 1
+          value: 1,
+          disabled: false
         },
         {
           label: '次日02:00',
-          value: 2
+          value: 2,
+          disabled: false
         },
         {
           label: '次日03:00',
-          value: 3
+          value: 3,
+          disabled: false
         },
         {
           label: '次日04:00',
-          value: 4
+          value: 4,
+          disabled: false
         },
         {
           label: '次日05:00',
-          value: 5
+          value: 5,
+          disabled: false
         },
         {
           label: '次日06:00',
-          value: 6
+          value: 6,
+          disabled: false
         },
         {
           label: '次日07:00',
-          value: 7
+          value: 7,
+          disabled: false
         }
       ],
       pickerOptions: {
@@ -582,6 +636,11 @@ export default {
       this.queryForm.startDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[0], 'yyyy-MM-dd')
       this.queryForm.endDate = this.queryDate && this.queryDate.length > 0 && formatDate(this.queryDate[1], 'yyyy-MM-dd')
 
+      if (!this.validatorShotTimes(this.queryForm.minShotTimes)) {
+        this.searchLoading = false;
+        return false;
+      }
+
       const params = {
         bayonetIds: this.queryForm.bayonetIds,
         cameraIds: this.queryForm.cameraIds,
@@ -600,9 +659,10 @@ export default {
       };
 
       this.searchStr = JSON.parse(JSON.stringify(params));
-
+      
       getNightVehicleList(params)
         .then(res => {
+          console.log('res',res)
           if (res && res.data) {
             this.dataList = res.data.list;
             this.pagination.total = res.data.total;
@@ -704,6 +764,39 @@ export default {
     indexMethod (index) {
       return index + 1 + 10 * (this.pagination.pageNum - 1);
     },
+    // 开始时间change
+    handleChangeStartTime (val) {
+      this.endTimeOptions.map((item) => {item.disabled = false;})
+      if (val) {
+        this.endTimeOptions.map(item => {
+          if (val < 19) { // 开始时间选择的次日
+            if (item.value > 7 || item.value <= val) { // 结束时间不是次日的不能选
+              item.disabled = true;
+            }
+          } else { // 开始时间选择的当日
+            if (item.value > 7 && item.value <= val) { // 结束时间不是当日的不能选
+              item.disabled = true;
+            }
+          }
+        })
+      }
+    },
+    // 过车次数 blur
+    handleBlurShotTimes () {
+      const time = this.queryForm.minShotTimes;
+      this.validatorShotTimes(time);
+    },
+    validatorShotTimes (val) {
+      let reg = /^[0-9]+$/;
+      if (!reg.test(val) || parseInt(val) < 2 || parseInt(val) > 100) {
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入2-100之间的整数');
+        }
+        return false;
+      } else {
+       return true;
+      }
+    }
   }
 }
 </script>
@@ -721,12 +814,12 @@ export default {
     display: flex;
     position: relative;
     .the-left-search {
-      width: 272px;height: 100%;
+      width: 285px;height: 100%;
       background: #fff;
       box-shadow: 5px 0 10px #E5E7E7;
       animation: fadeInLeft .4s ease-out .3s both;
       .con_left{
-        width: 272px;
+        width: 285px;
         height: 100%;
         padding: 20px;
         > .left_time{
@@ -759,7 +852,7 @@ export default {
           display: flex;
           padding-bottom: 10px;
           .el-input{
-            width: 133px;
+            width: 145px;
           }
           > span{
             margin-left: 4px;
@@ -773,25 +866,12 @@ export default {
           .select_btn, .reset_btn {
             width: 110px;
           }
-          .select_btn {
-            // background-color: #0C70F8;
-            // color: #ffffff;
-            // &:hover {
-            //   background:#0466de;
-            //   color: #ffffff;
-            // }
-          }
-          .reset_btn {
-            // background-color: #ffffff;
-            // color: #666666;
-            // border-color: #DDDDDD;
-          }
         }
         // 选择设备下拉
         .selected_device {
           margin-bottom: 10px;
           position: relative;
-          width: 232px;
+          width: 245px;
           height: 40px;
           border: 1px solid #dcdfe6;
           border-radius: 4px;
@@ -826,7 +906,7 @@ export default {
             left: -1px;
             z-index: 100;
             background: #fff;
-            width: 232px;
+            width: 245px;
             height: 350px;
             border-radius: 4px;
             border: 1px solid #d3d3d3;

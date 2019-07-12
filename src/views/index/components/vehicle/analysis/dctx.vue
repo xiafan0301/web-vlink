@@ -340,7 +340,9 @@ export default {
       if (number) {
         if (!reg.test(number)) {
           this.hasError = true;
-          this.$message.warning('请输入正确的车牌号码');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请输入正确的车牌号码');
+          }
         } else {
           this.hasError = false;
         }
@@ -378,7 +380,9 @@ export default {
       });
 
       if (this.hasError) {
-        this.$message.warning('请输入正确的车牌号码');
+        if (!document.querySelector('.el-message--info')) {
+          this.$message.info('请输入正确的车牌号码');
+        }
         return;
       }
 
