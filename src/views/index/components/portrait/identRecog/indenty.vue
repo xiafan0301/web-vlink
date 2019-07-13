@@ -51,7 +51,7 @@
             </el-form-item>
             <el-form-item>
               <el-button class="reset_btn" @click="resetData('searchForm')">重置</el-button>
-              <el-button class="select_btn" type="primary"  @click="searchData('searchForm')">查询</el-button>
+              <el-button class="select_btn" type="primary" :loading="isSearchLoading" @click="searchData('searchForm')">查询</el-button>
             </el-form-item>
           </el-form>
         </vue-scroll>
@@ -152,14 +152,14 @@
                   <span style="font-size: 12px;">%</span>
                 </div>
               </h2>
-              <div class="struc_cdi_line" v-show="sturcDetail.label">
-                <span>{{sturcDetail.label}}</span>
-              </div>
               <div class="struc_cdi_line" v-show="sturcDetail.birthDate">
                 <span>{{sturcDetail.birthDate}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.idNo">
                 <span>{{sturcDetail.idNo}}<i class="vl_icon vl_icon_retrieval_08"></i></span>
+              </div>
+              <div class="struc_cdi_line" v-show="sturcDetail.label">
+                <span>{{sturcDetail.label}}</span>
               </div>
               <div class="struc_cdi_line" v-show="sturcDetail.remarks">
                 <span :title="sturcDetail.remarks" style="height: auto;white-space: normal">{{sturcDetail.remarks ? sturcDetail.remarks.length > 74 ? (sturcDetail.remarks.slice(0, 74) + '...') : sturcDetail.remarks : ''}}</span>
@@ -251,6 +251,7 @@ export default {
       sturcDetail: {}, // 身份核实详情
       dataList: [],
       queryImgPath: null, // 从其他模块传过来的图片
+      isSearchLoading: false, // 搜索条件加载中
     }
   },
   computed: {
@@ -453,8 +454,10 @@ export default {
           if (_ids.length) {
             params['where.appendixIds'] = _ids.join(',');
           }
+          this.isSearchLoading = true;
           getIdNoList(params).then(res => {
             if (res && res.data) {
+              this.isSearchLoading = false;
               if (res.data.list.length > 0) {
                 this.dataList = res.data.list;
                 this.pagination.pageNum = res.data.pageNum;

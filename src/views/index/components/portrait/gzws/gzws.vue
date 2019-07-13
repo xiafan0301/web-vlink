@@ -8,7 +8,7 @@
             {name: '跟踪尾随'}]">
         </div>
       </div>
-      <el-button class="add_btn" type="primary" @click="showAddTaskDialog('add')">新建任务</el-button>
+      <el-button class="add_btn" type="primary" @click="showAddTaskDialog">新建任务</el-button>
     </div>
     <div class="content_box">
       <ul class="tab-menu">
@@ -87,7 +87,7 @@
               >恢复任务</span>
               <span
                 class="operation_btn"
-                @click="showAddTaskDialog('edit', scope.row)"
+                @click="recoveryTask(scope.row)"  
                 v-if="selectIndex === 0 && scope.row.taskStatus && scope.row.taskStatus === 3"
               >重启任务</span>
               <span
@@ -143,7 +143,7 @@
     </el-dialog>
     <!--新建任务弹出框-->
     <el-dialog
-      :title="isAddTaskTitle === true ? '新增分析任务' : '重启分析任务'"
+      title="新增分析任务"
       :visible.sync="addTaskDialog"
       width="720px"
       :close-on-click-modal="false"
@@ -244,7 +244,6 @@ export default {
         }
       ],
       isShowDeviceTip: false, // 是否显示设备有否提示
-      isAddTaskTitle: true, // 是否是新增任务
       selectIndex: 1, // 默认选中已完成的任务
       taskId: null, // 要操作的任务id
       deleteDialog: false, // 删除任务弹出框
@@ -379,12 +378,12 @@ export default {
     getDeviceList () {
       this.deviceList = [];
       const params = {
-        // targetPicUrl : this.dialogImageUrl,
-        targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-        startTime : '2019-07-09 09:59:00',
-        endTime: '2019-07-09 10:03:00'
-        // startTime : formatDate(this.addForm.dateTime[0]),
-        // endTime: formatDate(this.addForm.dateTime[1])
+        targetPicUrl : this.dialogImageUrl,
+        // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+        // startTime : '2019-07-09 09:59:00',
+        // endTime: '2019-07-09 10:03:00'
+        startTime : formatDate(this.addForm.dateTime[0]),
+        endTime: formatDate(this.addForm.dateTime[1])
       };
       console.log('params', params)
       getPersonShotDev(params)
@@ -450,14 +449,14 @@ export default {
           };
           // const vehicleType = this.addForm.vehicleClass.join(':');
           const params = {
-            targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
-            startTime : '2019-07-09 09:59:00',
-            endTime: '2019-07-09 10:03:00',
-            // targetPicUrl: this.dialogImageUrl,
+            // targetPicUrl: 'http://10.116.126.10/root/image/2019/07/10/34020000001320000016414920190709100000000009_1_1.jpeg',
+            // startTime : '2019-07-09 09:59:00',
+            // endTime: '2019-07-09 10:03:00',
+            targetPicUrl: this.dialogImageUrl,
             deviceId: this.addForm.deviceCode,
             deviceName: this.addForm.deviceName,
-            // startTime: formatDate(this.addForm.dateTime[0]),
-            // endTime: formatDate(this.addForm.dateTime[1]),
+            startTime: formatDate(this.addForm.dateTime[0]),
+            endTime: formatDate(this.addForm.dateTime[1]),
             taskName: this.addForm.taskName,
             interval: this.addForm.interval
           };
@@ -473,10 +472,6 @@ export default {
               this.isAddLoading = false;
               this.addTaskDialog = false;
               this.getDataList();
-              // if (res && res.data) {
-              // } else {
-              //   this.isAddLoading = false;
-              // }
             })
             .catch(() => {this.isAddLoading = false;})
         }
@@ -487,13 +482,7 @@ export default {
       this.$router.push({name: 'gzws_result', query: { id: obj.uid }});
     },
     // 显示新建任务弹出框
-    showAddTaskDialog (type, obj) {
-      if (type === 'add') {
-        this.isAddTaskTitle = true;
-      } else {
-        this.isAddTaskTitle = false;
-
-      }
+    showAddTaskDialog () {
       this.addTaskDialog = true;
     },
     // 显示中断任务弹出框
@@ -560,13 +549,12 @@ export default {
           .catch(() => {this.isDeleteLoading = false;})
       }
     },
-    // 恢复任务
+    // 恢复任务 --- 重启任务
     recoveryTask (obj) {
-      console.log(obj)
       if (obj.uid) {
         putTaskInfosResume(obj.uid)
           .then(res => {
-            if (res && res.data) {
+            if (res) {
               this.getDataList();
             }
           })

@@ -230,11 +230,6 @@ export default {
           label: '次日06:00',
           value: 6,
           disabled: false
-        },
-        {
-          label: '次日07:00',
-          value: 7,
-          disabled: false
         }
       ],
       endTimeOptions: [
@@ -641,6 +636,14 @@ export default {
         return false;
       }
 
+      let isNextDay;
+      if (this.queryForm.startTime < 7) {
+        isNextDay = false;
+      } else {
+        if (this.queryForm.endTime <= 7) {
+          isNextDay = true;
+        }
+      }
       const params = {
         bayonetIds: this.queryForm.bayonetIds,
         cameraIds: this.queryForm.cameraIds,
@@ -651,7 +654,7 @@ export default {
         minShotTimes: parseInt(this.queryForm.minShotTimes),
         vehicleTypes: this.queryForm.vehicleTypes.length > 0 ? this.queryForm.vehicleTypes.join(',') : null,
         surveillanceIds: this.queryForm.surveillanceIds.length > 0 ? this.queryForm.surveillanceIds.join(',') : null,
-        isNextDay: this.queryForm.endTime && this.queryForm.endTime > 7 ? false : true,
+        isNextDay: isNextDay,
         pageNum: this.pagination.pageNum,
         pageSize: this.pagination.pageSize,
         order: 'desc',
