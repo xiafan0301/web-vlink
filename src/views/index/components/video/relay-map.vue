@@ -117,7 +117,7 @@ export default {
         path: gjPath,
         strokeColor: "#61c772",  // 线颜色
         strokeOpacity: 1,     // 线透明度
-        strokeWeight: 8,      // 线宽
+        strokeWeight: 10,      // 线宽
         strokeStyle: "solid"  // 线样式 dashed solid
       });
       this.amap.setFitView();
