@@ -195,21 +195,103 @@
           <el-breadcrumb-item>新建任务</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
-      <div class="relay_task_m"></div>
+      <div class="relay_task_m">
+        <div>
+          <div class="relay_task_mt">
+            <div class="relay_task_mtl">
+              <div class="task_mtl_t">
+                <el-radio-group v-model="xjType" @change="xjTypeChanged">
+                  <el-radio :label="1">人员</el-radio>
+                  <el-radio :label="2">车辆</el-radio>
+                </el-radio-group>
+              </div>
+              <div class="task_mtl_m">
+                <i>*</i>
+                <template v-if="xjType === 2 && xjVechicleType === 2">
+                  车牌号码：
+                </template>
+                <template v-else>
+                  目标图片：
+                </template>
+                <span @click="xjVechicleType = 2" v-show="xjType === 2 && xjVechicleType ===1">输入车牌号</span>
+                <span @click="xjVechicleType = 1" v-show="xjType === 2 && xjVechicleType ===2">上传车辆图片</span>
+              </div>
+              <div class="task_mtl_u" v-if="xjType === 2 && xjVechicleType === 2">
+                <el-input v-model="xjPlateNo" placeholder="请输入车牌号码"></el-input>
+              </div>
+              <div class="task_mtl_u" v-else>
+                <el-upload
+                  class="vid_relay_upload"
+                  :show-file-list="false"
+                  accept="image/*"
+                  :action="uploadAcion"
+                  list-type="picture-card"
+                  :before-upload="beforeAvatarUpload"
+                  :on-success="uploadSucess"
+                  :on-error="handleError">
+                  <i v-if="uploading" class="el-icon-loading"></i>
+                  <img v-else-if="xjType === 1 && curImageUrl" :src="curImageUrl">
+                  <img v-else-if="xjType === 2 && curImageUrl2" :src="curImageUrl2">
+                  <div style="line-height: normal; padding-top: 35px;" v-else>
+                    <span style="font-size: 60px; color: #999;" class="el-icon-plus"></span>
+                    <p style="color: #999; padding-top: 15px;">请上传清晰图片</p>
+                  </div>
+                </el-upload>
+                <p @click="showHistoryPic(1)">从上传记录中选择</p>
+                <div v-show="curImageUrl" class="del_icon">
+                  <i class="el-icon-delete" @click="delPic(1)"></i>
+                </div>
+              </div>
+            </div>
+            <div class="relay_task_mtr"></div>
+          </div>
+          <div class="relay_task_mm">
+            <span @click="xjMoreInfo = !xjMoreInfo">
+              更多设置<i class="el-icon-arrow-down" :class="{'relay_task_mm_d2': xjMoreInfo}"></i>
+            </span>
+          </div>
+          <div class="relay_task_mb" v-show="xjMoreInfo">
+            更多
+          </div>
+        </div>
+      </div>
       <div class="relay_task_b">
         <el-button size="small" type="primary">&nbsp;&nbsp;&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
         <el-button size="small">&nbsp;&nbsp;&nbsp;&nbsp;取&nbsp;&nbsp;消&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
       </div>
     </div>
+    <!--历史记录弹窗-->
+    <el-dialog
+        :visible.sync="historyPicDialog"
+        class="history-pic-dialog"
+        :close-on-click-modal="false"
+        top="4vh"
+        title="最近上传的图片">
+      <div style="text-align: center;font-size: 20px;" v-if="loadingHis"><i class="el-icon-loading"></i></div>
+      <vue-scroll style="height: 4.6rem !important;" v-else-if="historyPicList.length">
+        <div style="float: left;width: 1.38rem;height: 1.38rem;border: 3px solid #FFFFFF;
+          margin-right: .2rem; margin-bottom: .2rem; cursor: pointer;" 
+          class="his-pic-item" :style="{'border-color': item.checked ? '#0C70F8' : '#FFFFFF'}" v-for="item in historyPicList" :key="item.id" @click="chooseHisPic(item)">
+          <img style="width: 100%; height: 100%;" :src="item.path" alt="">
+        </div>
+        <div style="clear: both;"></div>
+      </vue-scroll>
+      <p v-else>暂无历史记录</p>
+      <div slot="footer">
+        <el-button @click="historyPicDialog = false">取消</el-button>
+        <el-button type="primary" @click="addHisToImg()" :disabled="choosedHisPic.length === 0">确认</el-button>
+      </div>
+    </el-dialog>
   </div>
-  
 </template>
 <script>
+import {ajaxCtx} from '@/config/config';
 import {mapXupuxian} from '@/config/config.js';
 import {videoTree} from '@/utils/video.tree.js';
 import videoEmpty from './videoEmpty.vue';
 import flvplayer from '@/components/common/flvplayer.vue';
 import { apiAreaServiceDeviceList } from "@/views/index/api/api.base.js";
+  import {JtcPOSTAppendixInfo, JtcGETAppendixInfoList} from '@/views/index/api/api.judge.js'
 export default {
   components: {videoEmpty, flvplayer},
   data () {
@@ -232,6 +314,26 @@ export default {
       initTime: [new Date(_ndate.getTime() - 3600 * 1000 * 24 * 2), _ndate],
       startTime: '',
       endTime: '',
+
+      /* 新建任务 begin */
+      xjType: 1, // 1人员 2车辆
+      xjVechicleType: 1, // 1上传图片  2输入车牌号
+      xjPlateNo: '',
+      xjMoreInfo: false,
+      uploadAcion: ajaxCtx.base + '/new',
+      curImageUrl: '', // 当前上传的图片 人员
+      curImageUrl2: '', // 当前上传的图片 车辆
+      uploading: false, // 是否上传中
+      uploadFileList: [],
+      imgData: {
+        imgOne: null,
+        imgTwo: null
+      },
+      historyPicList: [], // 上传历史记录
+      historyPicDialog: false,
+      loadingHis: false,
+      /* 新建任务 end */
+
       startTimeOptions: {
         disabledDate: (d) => {
           // d > new Date() || d > this.endTime
@@ -256,6 +358,11 @@ export default {
   watch: {
     showVideoTotal () {
       this.playersHandler(this.showVideoTotal);
+    }
+  },
+  computed: {
+    choosedHisPic () {
+      return this.historyPicList.filter(x => x.checked)
     }
   },
   created () {
@@ -377,13 +484,199 @@ export default {
       } else {
         this.showConTitle = 1;
       }
-    }
+    },
+
+    /* 新建任务 */
+    xjTypeChanged (type) {
+    },
+    // 上传图片
+    beforeAvatarUpload (file) {
+      const isJPG = (file.type === 'image/jpeg' || file.type === 'image/png');
+      const isLt = file.size / 1024 / 1024 < 100;
+      if (!isJPG) {
+        this.$message.error('只能上传 JPG / PNG 格式图片!');
+      }
+      if (!isLt) {
+        this.$message.error('上传图片大小不能超过 100MB!');
+      }
+      this.uploading = true;
+      return isJPG && isLt;
+    },
+    uploadSucess (response, file, fileList) {
+      this.uploading = false;
+      this.compSim = '';
+      this.compSimWord = '';
+      if (response && response.data) {
+        let oRes = response.data;
+        if (oRes) {
+          let x = {
+            cname: oRes.fileName, // 附件名称 ,
+            contentUid: this.$store.state.loginUser.uid,
+            // desci: '', // 备注 ,
+            filePathName: oRes.fileName, // 附件保存名称 ,
+            fileType: 1, // 文件类型 ,
+            imgHeight: oRes.fileHeight, // 图片高存储的单位位px ,
+            imgSize: oRes.fileSize, // 图片大小存储的单位位byte ,
+            imgWidth: oRes.fileWidth, //  图片宽存储的单位位px ,
+            // otherFlag: '', // 其他标识 ,
+            path: oRes.fileFullPath, // 附件路径 ,
+            // path: oRes.path,
+            thumbnailName: oRes.thumbnailFileName, // 缩略图名称 ,
+            thumbnailPath: oRes.thumbnailFileFullPath // 缩略图路径 ,
+            // uid: '' //  附件标识
+          };
+          JtcPOSTAppendixInfo(x).then(jRes => {
+            if (jRes) {
+              x['uid'] = jRes.data;
+              console.log(x);
+            }
+          })
+          this.imgData.imgOne = x;
+          this.curImageUrl = x.path;
+        }
+      }
+      this.uploadFileList = fileList;
+    },
+    handleError () {
+      this.uploading = false;
+      this.$message.error('上传失败')
+    },
+    delPic (index) {
+      this.compSim = '';
+      this.compSimWord = '';
+      if (index === 1) {
+        this.uploadFileList.splice(0, 1);
+        this.curImageUrl = '';
+      } else {
+        this.uploadFileList2.splice(0, 1);
+        this.curImageUrl2 = '';
+      }
+    },
+    showHistoryPic (index) {
+      this.curIndex = index;
+      this.loadingHis = true;
+      this.historyPicDialog = true;
+      let params = {
+        userId: this.$store.state.loginUser.uid,
+        fileType: 1
+      }
+      JtcGETAppendixInfoList(params).then(res => {
+        if (res) {
+          this.loadingHis = false;
+          res.data.forEach(x => x.checked = false);
+          this.historyPicList = res.data;
+        }
+      }).catch(() => {
+        this.historyPicDialog = false;
+      })
+    },
+    chooseHisPic (item) {
+      this.historyPicList.forEach(x => {
+        x.checked = false;
+      })
+      item.checked = true;
+    },
+    addHisToImg () {
+      this.historyPicDialog = false;
+      let _ids = [];
+      this.choosedHisPic.forEach(x => {
+        _ids.push(x.uid)
+        if (this.xjType === 1) {
+          this.curImageUrl = x.path;
+          this.imgData.imgOne = x;
+        } else {
+          this.imgData.imgTwo = x;
+          this.curImageUrl2 = x.path;
+        }
+      })
+      let _obj = {
+        appendixInfoIds: _ids.join(',')
+      }
+      // JtcPUTAppendixsOrder(_obj);
+    },
   },
   destroyed () {
   }
 }
 </script>
 <style lang="scss" scoped>
+.relay_task_mm {
+  padding: 10px 0;
+  color: #0C70F8;
+  > i {
+    padding-left: 5px;
+    color: #0C70F8;
+    font-size: 16px;
+    &.relay_task_mm_d2 {
+      transform: rotate(90deg);
+    }
+  }
+}
+.relay_task_mtl {
+  float: left;
+  width: 260px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+  > .task_mtl_t {
+    padding: 14px 0 14px 20px;
+    text-align: left;
+    background-color: #F2F2F2;
+  }
+  > .task_mtl_m {
+    padding: 12px 25px 12px 25px;
+    color: #666;
+    overflow: hidden;
+    > i {
+      display: inline-block;
+      color: red;
+      font-style: normal;
+    }
+    > span {
+      float: right;
+      color: #0C70F8;
+      cursor: pointer;
+    }
+  }
+  > .task_mtl_u {
+    position: relative;
+    margin: 0 auto;
+    width: 200px; height: 200px;
+    > p {
+      display: none;
+      position: absolute; bottom: 0; left: 0;
+      text-align: center;
+      width: 100%; height: .4rem; line-height: .4rem;
+      color: #FFFFFF;
+      border-radius: 0 0 10px 10px;
+      background: #0C70F8;
+      cursor: pointer;
+    }
+    > .del_icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      color: #FFFFFF;
+    }
+    &:hover {
+      > p { display: block; }
+      > .del_icon { display: block; }
+    }
+  }
+}
+.relay_task_mtr {
+  margin-left: 270px;
+  height: 330px;
+  border-radius:4px 4px 0px 0px;
+  border:1px solid rgba(211,211,211,1);
+}
 .relay_task {
   position: relative;
   height: 100%;
@@ -394,7 +687,17 @@ export default {
   }
   > .relay_task_m {
     height: 100%;
-    padding: 50px 0 60px 0;
+    padding: 40px 10px 70px 10px;
+    > div {
+      height: 100%;
+      padding: 10px;
+      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-color: #fff;
+      box-shadow:5px 0px 16px 0px rgba(169,169,169,0.2);
+      border-radius:4px;
+    }
   }
   > .relay_task_b {
     position: absolute; bottom: 0; left: 0; z-index: 20;
@@ -482,5 +785,14 @@ export default {
   border-top: 1px solid #eee;
   width: 100%; height: 44px; line-height: 44px;
   text-align: center;
+}
+</style>
+<style lang="scss">
+.vid_relay_upload {
+  width: 200px; height: 200px;
+  > .el-upload--picture-card {
+    width: 200px; height: 200px; line-height: 200px;
+    > img { height: 100%; width: 100%; }
+  }
 }
 </style>

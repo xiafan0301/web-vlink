@@ -24,7 +24,12 @@
                   :on-error="handleError">
             <i v-if="uploading" class="el-icon-loading"></i>
             <img v-else-if="curImageUrl" :src="curImageUrl">
-            <i class="el-icon-plus avatar-uploader-icon" v-else></i>
+            <div v-else>
+              <i
+                style="width: 100px;height: 85px;opacity: .5; position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;"
+                class="vl_icon vl_icon_vehicle_01"
+              ></i>
+            </div>
           </el-upload>
           <p @click="showHistoryPic">从上传记录中选择</p>
         </div>
@@ -50,32 +55,32 @@
         </el-date-picker>
         <div><el-input style="width: 1.36rem" oninput="value=value.replace(/[^0-9.]/g,''); if(value >= 100)value = 100" v-model="searchData.minSemblance" placeholder="相似度"></el-input> - 100</div>
         <el-select
-                v-model="devIdData"
-                multiple
-                class="camera-select"
-                @remove-tag="removeCamera"
-                @click.native="vChange"
-                collapse-tags
-                :popper-append-to-body="false"
-                placeholder="选择监控">
+          v-model="devIdData"
+          multiple
+          class="camera-select"
+          @remove-tag="removeCamera"
+          @click.native="vChange"
+          collapse-tags
+          :popper-append-to-body="false"
+          placeholder="选择监控">
           <el-option value="0" label=" "></el-option>
         </el-select>
         <div class="vl_jtc_search_item">
           <vue-scroll>
             <el-tree
-                    v-show="showCameraList"
-                    :data="cameraData"
-                    class="camera-tree"
-                    ref="cameraTree"
-                    :default-checked-keys="defaultTreeKes"
-                    @check-change="chooseCamera"
-                    show-checkbox
-                    node-key="deviceName"
-                    :props="defaultProps">
+                v-show="showCameraList"
+                :data="cameraData"
+                class="camera-tree"
+                ref="cameraTree"
+                :default-checked-keys="defaultTreeKes"
+                @check-change="chooseCamera"
+                show-checkbox
+                node-key="deviceName"
+                :props="defaultProps">
             </el-tree>
           </vue-scroll>
         </div>
-        <div style="text-align: center">
+        <div style="text-align: center;margin-bottom: 0px;">
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="primary" :loading="searching" @click="tcDiscuss(false)">确定</el-button>
         </div>
@@ -90,30 +95,30 @@
           </div>
           <div class="vl_jr_t_item">
             <div :class="{'active-item': stucOrder === 3}" @click="stucOrder = 3">监控排序</div>
-            <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" v-show="showSim" style="margin-left: .1rem;">相似度排序</div>
+            <div :class="{'active-item': stucOrder === 4}" @click="stucOrder = 4" style="margin-left: .1rem;">相似度排序</div>
           </div>
         </div>
         <div class="vl_jfo_event">
           <vue-scroll>
             <div class="vl_jfo_event_box clearfix">
               <div class="vl_jfo_box_item" v-for="(item, index) in strucInfoList" :key="item.id" @click="showStrucInfo(item, index)">
-                <div class="vl_jfo_i_left"><img title="可以试着把我拖拽到左侧上传图片处" draggable="true" @dragstart="drag($event)" :src="item.photoPath" alt=""></div>
+                <div class="vl_jfo_i_left"><img title="可以试着把我拖拽到左侧上传图片处" draggable="true" @dragstart="drag($event)" :src="item.subStoragePath" alt=""></div>
                 <div class="vl_jfo_i_right">
                   <p>检索资料</p>
                   <div class="vl_jfo_line" :title="item.shotTime"><i class="vl_icon vl_icon_retrieval_01"></i>{{item.shotTime}}</div>
                   <div class="vl_jfo_line"><i class="vl_icon vl_icon_retrieval_02"></i>{{item.deviceName}}</div>
-                  <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_03"></i>{{item.semblance}}<span style="font-size: 12px;">%</span></div>
+                  <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_03"></i>{{item.semblance}}<span style="font-size: 12px;">%</span></div>
                 </div>
               </div>
             </div>
             <el-pagination
-                    v-show="pagination.total > 16"
-                    style="text-align: center"
-                    background
-                    @current-change="handleCurrentChange"
-                    :current-page="pagination.pageNum"
-                    layout="prev, pager, next"
-                    :total="pagination.total">
+                v-show="pagination.total > 12"
+                style="text-align: center"
+                background
+                @current-change="handleCurrentChange"
+                :current-page="pagination.pageNum"
+                layout="prev, pager, next"
+                :total="pagination.total">
             </el-pagination>
           </vue-scroll>
         </div>
@@ -141,11 +146,11 @@
     </el-dialog>
     <!--检索详情弹窗-->
     <el-dialog
-            :visible.sync="strucDetailDialog"
-            class="struc_detail_dialog"
-            :close-on-click-modal="false"
-            top="4vh"
-            :show-close="false">
+      :visible.sync="strucDetailDialog"
+      class="struc_detail_dialog_ytsr"
+      :close-on-click-modal="false"
+      top="4vh"
+      :show-close="false">
       <div class="struc_tab">
         <span :class="{'active': strucCurTab === 1}" @click="strucCurTab = 1">抓拍详情</span>
         <span :class="{'active': strucCurTab === 2}" @click="strucCurTab = 2">抓拍地点</span>
@@ -155,18 +160,27 @@
       <div class="struc_main">
         <div v-show="strucCurTab === 1" class="struc_c_detail">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="showSim ? sturcDetail.uploadPath : sturcDetail.panoramaPath" alt="">
-            <span>{{showSim ? '上传图' : '全景图'}}</span>
+            <img :src="sturcDetail.subStoragePath" alt="">
+            <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
             <div class="struc_c_d_img">
-              <img :src="sturcDetail.photoPath" alt="">
-              <i v-show="showSim">全景图</i>
+              <img :src="sturcDetail.storagePath" alt="">
+              <span>全景图</span>
             </div>
             <div class="struc_c_d_info">
-              <h2>对比信息<div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : 98.32}}<span style="font-size: 12px;">%</span></div></h2>
+              <h2>对比信息<div class="vl_jfo_sim" ><i class="vl_icon vl_icon_retrieval_03"></i>{{sturcDetail.semblance ? sturcDetail.semblance : '无'}}<span style="font-size: 12px;">%</span></div></h2>
               <div class="struc_cdi_line">
-                <span :title="sturcDetail.feature">{{sturcDetail.feature}}</span>
+                <span v-show="sturcDetail.age">{{sturcDetail.age}}</span>
+                <span v-show="sturcDetail.baby">{{sturcDetail.baby}}</span>
+                <span v-show="sturcDetail.mask">{{sturcDetail.mask}}</span>
+                <span v-show="sturcDetail.hat">{{sturcDetail.hat}}</span>
+                <span v-show="sturcDetail.glasses">{{sturcDetail.glasses}}</span>
+                <span v-show="sturcDetail.hair">{{sturcDetail.hair}}</span>
+                <span v-show="sturcDetail.umberlla">{{sturcDetail.umberlla}}</span>
+                <span v-show="sturcDetail.sex">{{sturcDetail.sex}}</span>
+                <span v-show="sturcDetail.bottomType">{{sturcDetail.bottomColor}}{{sturcDetail.bottomType}}</span>
+                <span v-show="sturcDetail.upperType">{{sturcDetail.upperColor}}{{sturcDetail.upperTexture}}{{sturcDetail.upperType}}</span>
               </div>
               <div class="struc_cdi_line">
                 <span>{{sturcDetail.shotTime}}<i class="vl_icon vl_icon_retrieval_01"></i></span>
@@ -185,7 +199,7 @@
         <div v-show="strucCurTab === 2" class="struc_c_address"></div>
         <div v-show="strucCurTab === 3" class="struc_c_detail struc_c_video">
           <div class="struc_c_d_qj struc_c_d_img">
-            <img :src="sturcDetail.photoPath" alt="">
+            <img :src="sturcDetail.subStoragePath" alt="">
             <span>抓拍图</span>
           </div>
           <div class="struc_c_d_box">
@@ -203,8 +217,8 @@
           <!-- slides -->
           <swiper-slide v-for="(item, index) in strucInfoList" :key="item.id">
             <div class="swiper_img_item" :class="{'active': index === curImgIndex}" @click="imgListTap(item, index)">
-              <img style="width: 100%; height: .88rem;" :src="item.photoPath" alt="">
-              <div class="vl_jfo_sim"  v-show="showSim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : 92}}<span style="font-size: 12px;">%</span></div>
+              <img style="width: 100%; height: .88rem;" :src="item.subStoragePath" alt="">
+              <div class="vl_jfo_sim"><i class="vl_icon vl_icon_retrieval_05" :class="{'vl_icon_retrieval_06':  index === curImgIndex}"></i>{{item.semblance ? item.semblance : '无'}}<span style="font-size: 12px;">%</span></div>
             </div>
           </swiper-slide>
           <div class="swiper-button-prev" slot="button-prev"></div>
@@ -236,7 +250,7 @@
             prevEl: '.swiper-button-prev',
           },
         },
-        pagination: { total: 0, pageSize: 16, pageNum: 1 },
+        pagination: { total: 0, pageSize: 12, pageNum: 1 },
         uploadAcion: ajaxCtx.base + '/new',
         mapData: [],
         searching: false,
@@ -284,7 +298,6 @@
         playing: false, // 视频播放是否
         historyPicDialog: false,
         stucOrder: 2, // 1升序，2降序，3监控，4相似度
-        showSim: false, // 展示相似度排序
         strucInfoList: [], // 检索抓拍信息
         strucCurTab: 1,
         curImgIndex: 0,
@@ -307,7 +320,6 @@
           ScpGETretrievalHisById(this.$route.query.hisId)
               .then(res => {
                 if (res) {
-                  this.showSim = true;
                   this.searchData.time = [res.data.startTime, res.data.endTime];
                   this.searchData.minSemblance = res.data.minSemblance ? res.data.minSemblance : '';
                   this.curImgNum = res.data.retrievalPicList.length;
@@ -325,7 +337,23 @@
                 this.tcDiscuss(true);
               })
         } else {
-          this.tcDiscuss(true);
+          if (this.$route.query.imgurl) {
+            let x = {
+              contentUid: this.$store.state.loginUser.uid,
+              cname: '带图' + Math.random(),
+              filePathName: '带图' + Math.random(),
+              path: this.$route.query.imgurl
+            }
+            this.curImgNum++;
+            JtcPOSTAppendixInfo(x).then(jRes => {
+              if (jRes) {
+                x['uid'] = jRes.data;
+                console.log(x);
+              }
+            })
+            this.imgList[0] = x;
+            this.showCurImg();
+          }
         }
       })
       let map = new AMap.Map('capMap', {
@@ -347,7 +375,9 @@
           path: e.dataTransfer.getData("Text")
         }
         if (this.curImgNum >= 3) {
-          this.$message.error('最多上传3张，请先删掉再上传');
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.error('最多上传3张，请先删掉再上传');
+          }
           return;
         }
         this.curImgNum++;
@@ -585,13 +615,14 @@
         this.curImgNum = 0;
       },
       tcDiscuss (boolean) {
-        if (!boolean) {
-          if (this.curImgNum === 0) {
-            this.$message.warning('请至少上传或选择一张图片')
-            return false;
+        if (this.curImgNum === 0) {
+          if (!document.querySelector('.el-message--info')) {
+            this.$message.info('请至少上传或选择一张图片')
           }
+          return false;
+        }
+        if (!boolean) {
           this.searching = true;
-          this.showSim = true;
         }
         this.$_showLoading({target: '.vl_jfo_event'});
         let _ids = [],devIds = [];
@@ -641,7 +672,7 @@
             _ids.push(x.uid);
           }
         })
-        if (_ids.length && this.showSim) {
+        if (_ids.length) {
           params.where['appendixIds'] = _ids.join(',');
         }
         ScpGETstrucInfoList(params).then(res => {
@@ -650,7 +681,7 @@
             console.log(res);
             this.strucInfoList = res.data.list;
             console.log(JSON.stringify(this.strucInfoList), 'this.strucInfoList')
-            this.pagination.pageNum = res.data.pageNum;
+//            this.pagination.pageNum = res.data.pageNum;
             this.pagination.total = res.data.total;
             this.searching = false;
           } else {
@@ -744,24 +775,6 @@
     background: #ffffff;
     border-bottom: 1px solid #D3D3D3;
   }
-  .vl_jtc_target_type {
-    position: absolute;
-    z-index: 9;
-    top: 4px;
-    .is-checked {
-      .el-radio__label{
-        color: #0C70F8!important;
-      }
-    }
-    .el-radio__label {
-      padding-left: 0px;
-    }
-    .el-radio {
-      margin-right: 0;
-      width: 1.16rem;
-      text-align: center;
-    }
-  }
   .camera-select {
     .el-select-dropdown {
       display: none;
@@ -791,99 +804,24 @@
       left: calc(50% - .05rem);
     }
   }
-  .struc_c_video {
-    .struc_c_d_box {
-      background: #E9E7E8;
-      height: 100%;
-      text-align: center;
-      &:hover {
-        .play_btn {
-          display: block!important;
-        }
-      }
-      .play_btn {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        margin: auto;
-        background: rgba(0, 0, 0, .4);
-        width: 1rem;
-        height: 1rem;
-        text-align: center;
-        line-height: 1rem;
-        -webkit-border-radius: 50%;
-        -moz-border-radius: 50%;
-        border-radius: 50%;
-        cursor: pointer;
-        i {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin: auto;
-          height: 22px!important;
-        }
-      }
-      >video {
-        width: auto;
-        height: 100%;
-      }
-      &:after {
-        content: none!important;
-      }
-      &:before {
-        content: none!important;
-      }
-      -webkit-box-shadow: 0 0 0!important;
-      -moz-box-shadow: 0 0 0!important;
-      box-shadow: 0 0 0!important;
-    }
-    .download_btn {
-      text-align: center;
-      width: 1.1rem;
-      height: .4rem;
-      float: right!important;
-      margin-top: .2rem;
-      background: rgba(246,248,249,1);
-      border: 1px solid rgba(211,211,211,1);
-      border-radius: 4px;
-      line-height: .4rem;
-      cursor: pointer;
-      color: #666666;
-      position: relative;
-      &:hover {
-        color: #FFFFFF;
-        background: #0C70F8;
-        border-color: #0C70F8;
-      }
-      a {
-        display: block;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
   .vl_judge_tc {
     width: 100%;
     height: 100%;
     .vl_j_left {
       float: left;
-      width: 2.32rem;
+      width: 272px;
       padding-top: 20px;
-      min-height: calc(100% - 55px);
+      height: calc(100% - 56px);
+      min-height: 763px;
       background: #ffffff;
       box-shadow:0px 0px 0px 0px rgba(131,131,131,0.28);
       animation: fadeInLeft .4s ease-out .3s both;
       .vl_jtc_img_box {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
+        padding: 0 20px;
         border-bottom: 1px dashed #D3D3D3;
-        padding-bottom: .44rem;
+        padding-bottom: 44px;
         .vl_jtc_upload_img {
           position: relative;
           .vl_jtc_upload {
@@ -915,7 +853,7 @@
             position: absolute;
             bottom: 7px;
             text-align: center;
-            font-size: 0.14rem;
+            font-size: 14px;
             width: 100%;
             color: #0C70F8;
             &:hover {
@@ -981,15 +919,15 @@
       .vl_jtc_search {
         width: 100%;
         height: auto;
-        padding: 0 .2rem;
-        padding-top: .4rem;
+        padding: 0 20px;
+        padding-top: 40px;
         .el-input__inner {
-          height: .4rem!important;
-          line-height: .4rem!important;
+          height: 40px!important;
+          line-height: 40px!important;
         }
         .el-input__icon {
-          height: .4rem!important;
-          line-height: .4rem!important;
+          height: 40px!important;
+          line-height: 40px!important;
         }
         .el-range-editor {
           width: 100%;
@@ -1001,25 +939,26 @@
             width: 50%;
           }
           .el-range-separator {
-            height: .4rem;
-            line-height: .4rem;
+            height: 40px;
+            line-height: 40px;
             width: 10px;
             padding: 0;
           }
         }
         button {
-          height: .4rem;
-          line-height: .4rem;
-          padding: 0 .12rem;
+          width: 110px;
+          height: 40px;
+          line-height: 40px;
+          padding: 0 12px;
         }
         .el-select {
-          margin-bottom: .1rem;
+          margin-bottom: 10px;
         }
         > div {
-          margin-bottom: .1rem;
+          margin-bottom: 10px;
         }
         .vl_jtc_search_item {
-          height: auto;
+          height: 140px;
           .camera-tree {
             border: 1px solid #e4e7ed;
             border-radius: 4px;
@@ -1033,24 +972,24 @@
     }
     .vl_s_right {
       display: inline-block;
-      width: calc(100% - 2.52rem);
-      height: calc(100% - 55px);
+      width: calc(100% - 272px);
+      height: calc(100% - 60px);
       position: relative;
       .vl_jig_right {
         width: 100%;
         height: 100%;
-        padding: 0 .2rem;
+        padding: 0 20px;
         padding-right: 0;
         .vl_jig_right_title {
           width: 100%;
-          height: .7rem;
-          line-height: .7rem;
+          height: 70px;
+          line-height: 70px;
           color: #999999;
           .vl_jr_t_item {
             float: left;
             width: 50%;
             text-align: left;
-            padding-left: .1rem;
+            padding-left: 10px;
             >div {
               cursor: pointer;
               display: inline-block;
@@ -1065,7 +1004,7 @@
               }
             }
             &:first-child {
-              padding-right: .1rem;
+              padding-right: 10px;
               padding-left: 0;
               >div {
                 float: right;
@@ -1082,45 +1021,46 @@
           }
         }
         .vl_jfo_event {
-          height: calc(100% - .7rem);
+          height: calc(100% - 70px);
+          min-height: 693px;
           .vl_jfo_event_box {
             width: 100%;
             height: auto;
             .vl_jfo_box_item {
               float: left;
               cursor: pointer;
-              width: 3.28rem;
-              height: 1.8rem;
-              padding: .2rem;
-              margin-right: .2rem;
-              margin-bottom: .2rem;
+              width: 387px;
+              height: 203px;
+              padding: 20px;
+              margin-right: 20px;
+              margin-bottom: 20px;
               background: rgba(255, 255, 255, 1);
               box-shadow: 0px 5px 16px 0px rgba(169, 169, 169, 0.2);
               .vl_jfo_i_left {
                 float: left;
-                width: 1.4rem;
-                height: 1.4rem;
+                width: 163px;
+                height: 163px;
                 >img {
                   width: 100%;
                   height: 100%;
                 }
               }
               .vl_jfo_i_right {
-                width: calc(100% - 1.4rem);
+                width: calc(100% - 163px);
                 height: 100%;
-                margin-left: 1.4rem;
-                padding-left: .1rem;
+                margin-left: 163px;
+                padding-left: 10px;
                 >p {
                   color: #999999;
-                  margin-bottom: .13rem;
+                  margin-bottom: 13px;
                 }
                 .vl_jfo_line {
                   position: relative;
                   max-width: 100%;
                   display: inline-block;
-                  height: .28rem;
-                  line-height: .28rem;
-                  margin-bottom: .08rem;
+                  height: 28px;
+                  line-height: 28px;
+                  margin-bottom: 8px;
                   border: 1px solid #F2F2F2;
                   background: #FAFAFA;
                   color: #333333;
@@ -1134,7 +1074,7 @@
                     vertical-align: middle;
                   }
                   span {
-                    padding: 0 .04rem;
+                    padding: 0 4px;
                   }
                 }
               }
@@ -1146,11 +1086,11 @@
     .vl_jfo_sim {
       color: #0C70F8;
       font-weight: bold;
-      font-size: .24rem;
+      font-size: 24px;
       margin-top: -4px;
       i {
         vertical-align: text-top;
-        margin-right: .1rem;
+        margin-right: 10px;
       }
       span {
         font-weight: normal;
@@ -1326,7 +1266,7 @@
         }
       }
     }
-    .struc_detail_dialog {
+    .struc_detail_dialog_ytsr {
       .el-dialog {
         max-width: 13.06rem;
         width: 100%!important;
@@ -1398,9 +1338,6 @@
               font-size: 12px;
               padding: 0 .1rem;
             }
-          }
-          .struc_c_d_qj {
-            margin-right: .3rem;
             &:before {
               display: block;
               content: '';
@@ -1408,8 +1345,8 @@
               top: -.5rem;
               left: -.5rem;
               transform: rotate(-45deg);
-              border: .5rem solid #0c70f8;
-              border-color: transparent transparent #0C70F8;
+              border: .5rem solid #50CC62;
+              border-color: transparent transparent #50CC62;
               z-index: 9;
             }
             span {
@@ -1428,6 +1365,13 @@
               -o-transform: rotate(-45deg);
               transform: rotate(-45deg);
               z-index: 99;
+            }
+          }
+          .struc_c_d_qj {
+            margin-right: .3rem;
+            &:before {
+              border: .5rem solid #0c70f8;
+              border-color: transparent transparent #0C70F8;
             }
           }
           .struc_c_d_box {
@@ -1462,7 +1406,7 @@
                 }
               }
               .struc_cdi_line {
-                span {
+                >span {
                   /*position: relative;*/
                   max-width: 100%;
                   display: inline-block;
@@ -1483,6 +1427,13 @@
                     vertical-align: middle;
                     margin-left: .1rem;
                   }
+                  font {
+                    color: #999999;
+                    margin-left: 20px;
+                  }
+                }
+                p {
+                  color: #999999;
                 }
               }
             }
@@ -1532,6 +1483,82 @@
             height: 100%;
           }
         }
+        .struc_c_video {
+          .struc_c_d_box {
+            background: #E9E7E8;
+            height: 100%;
+            text-align: center;
+            &:hover {
+              .play_btn {
+                display: block!important;
+              }
+            }
+            .play_btn {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto;
+              background: rgba(0, 0, 0, .4);
+              width: 1rem;
+              height: 1rem;
+              text-align: center;
+              line-height: 1rem;
+              -webkit-border-radius: 50%;
+              -moz-border-radius: 50%;
+              border-radius: 50%;
+              cursor: pointer;
+              i {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+                height: 22px!important;
+              }
+            }
+            >video {
+              width: auto;
+              height: 100%;
+            }
+            &:after {
+              content: none!important;
+            }
+            &:before {
+              content: none!important;
+            }
+            -webkit-box-shadow: 0 0 0!important;
+            -moz-box-shadow: 0 0 0!important;
+            box-shadow: 0 0 0!important;
+          }
+          .download_btn {
+            text-align: center;
+            width: 1.1rem;
+            height: .4rem;
+            float: right!important;
+            margin-top: .2rem;
+            background: rgba(246,248,249,1);
+            border: 1px solid rgba(211,211,211,1);
+            border-radius: 4px;
+            line-height: .4rem;
+            cursor: pointer;
+            color: #666666;
+            position: relative;
+            &:hover {
+              color: #FFFFFF;
+              background: #0C70F8;
+              border-color: #0C70F8;
+            }
+            a {
+              display: block;
+              position: absolute;
+              width: 100%;
+              height: 100%;
+            }
+          }
+        }
       }
       .struc-list {
         width: 12.46rem;
@@ -1573,6 +1600,10 @@
               cursor: pointer;
               border: 1px solid #FFFFFF;
               padding: 2px;
+              img {
+                width: 100%;
+                height: 100%;
+              }
               .vl_jfo_sim {
                 font-size: .14rem;
                 height: .3rem;
@@ -1588,6 +1619,7 @@
             }
             .active {
               border-color: #0C70F8;
+              box-shadow: inset 0px 3px 3px #c8c8c8;
               .vl_jfo_sim {
                 color: #0C70F8;
               }

@@ -29,9 +29,8 @@
               end-placeholder="结束日期">
             </el-date-picker>
           </el-form-item>
-
           <el-form-item prop="input3">
-            <el-input placeholder="请输入车牌号" v-model="ruleForm.input3" class="input-with-select">
+            <el-input placeholder="请输入车牌号" v-model="ruleForm.input3">
             </el-input>
           </el-form-item>
           <el-form-item label="区域：" label-width="60px" prop="input5">
@@ -89,29 +88,24 @@
             <div  @click="timeOrderS">时间排序 <span><i class="el-icon-caret-top" :class="{'active': !timeOrder}"></i><i :class="{'active': timeOrder}" class="el-icon-caret-bottom"></i></span></div>
             <div>抓拍地址</div>
           </div>
-          <div class="plane_main_box">
-            <vue-scroll>
-              <div class="plane_main">
-                <!--可以展开列表-->
-                <div class="p_main_list"  :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
-                  <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
-                  <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
-                    <div>{{sItem.shotTime.slice(-8)}}</div>
-                    <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
-                  </div>
-                </div>
-                <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
-                <el-pagination
-                  v-show="pagination.total > 10"
-                  class="cum_pagination th-center-pagination"
-                  @current-change="onPageChange"
-                  :current-page.sync="pagination.pageNum"
-                  :page-size="pagination.pageSize"
-                  layout="prev, pager, next"
-                  :total="pagination.total">
-                </el-pagination>
+          <div class="plane_main_box"  @scroll="scrollIt">
+            <div class="plane_main">
+              <!--可以展开列表-->
+              <div class="infinite-list-wrapper" v-if="leftEvData.length" >
+                <ul>
+                  <li class="p_main_list" :class="{'is_open': item.isOpen}" v-for="item in leftEvData" :key="item.id">
+                    <div class="p_main_head" @click="item.isOpen = !item.isOpen"><i :class="{'el-icon-caret-right': !item.isOpen, 'el-icon-caret-bottom': item.isOpen}"></i>{{item.label}}</div>
+                    <div class="p_main_item" v-for="sItem in item.list" :key="sItem.id" @click="showStrucInfo(sItem, evData.findIndex(function (u) {return u === sItem}))">
+                      <div>{{sItem.shotTime.slice(-8)}}</div>
+                      <div :title="sItem.address">{{sItem.address ? sItem.address : '无'}}</div>
+                    </div>
+                  </li>
+                </ul>
+                <p style="line-height: 40px;color: #0C70F8;text-align: center;" v-if="loading">加载中...</p>
+                <p style="line-height: 40px;color: #999999;text-align: center;" v-if="noMore">没有更多了</p>
               </div>
-            </vue-scroll>
+              <p v-show="leftEvData.length === 0" style="line-height: 40px;color: #999999;text-align: center;">暂无数据</p>
+            </div>
           </div>
           <div class="insetLeft2" @click="hideResult"></div>
       </div>
@@ -213,10 +207,14 @@
     components: {mapSelector},
     data() {
       return {
+        loading: false,
+        count: 10,
+        totalAddressNum: 0,
+        totalMapNum: 11,
         serarchLoading: false,
         rules: {
           input3:{
-            pattern:/^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]([A-Z0-9]{6}$)|(^[A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
+            pattern:/(^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z0-9]{6}$)|(^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z]{2}[A-Z0-9]{2}[A-Z0-9\u4E00-\u9FA5]{1}[A-Z0-9]{4}$)|(^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z0-9]{5}[挂学警军港澳]{1}$)|(^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-Z]{2}[0-9]{5}$)|(^(08|38){1}[A-Z0-9]{4}[A-Z0-9挂学警军港澳]{1}$)/,
             message: '常规格式：湘A12345',
             trigger: 'blur'
           }
@@ -291,6 +289,11 @@
         videoUrl: '' // 弹窗视频回放里的视频
       };
     },
+    computed: {
+      noMore () {
+        return this.count >= this.totalMapNum;
+      }
+    },
     mounted() {
       if (this.$route.query.plateNo) {
         this.ruleForm.input3 = this.$route.query.plateNo;
@@ -300,6 +303,18 @@
       this.setDTime();
     },
     methods: {
+      scrollIt (e) {
+        if(e.srcElement.scrollTop + e.srcElement.offsetHeight > e.srcElement.scrollHeight - 10){
+          if (!this.loading && !this.noMore) {
+            this.loading = true;
+            setTimeout(() => {
+              this.count += 2;
+              this.operData();
+              this.loading = false;
+            }, 2000)
+          }
+        }
+      },
       mapZoomSet (val) {
         if (this.amap) {
           this.amap.setZoom(this.amap.getZoom() + val);
@@ -328,10 +343,6 @@
         let _s = new Date(curDate - curS).getFullYear() + '-' + sM + '-' + sD;
 //        let _e = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() - 1;
         this.ruleForm.data1 = [_s, _s];
-      },
-      onPageChange (page) {
-        this.pagination.pageNum = page;
-        this.operData();
       },
       hideResult() {
         this.reselt = false;
@@ -421,10 +432,14 @@
                 where: {}
               }
               if (this.pointData.bayonetList.length === 0 && this.pointData.deviceList.length === 0 && this.ruleForm.input5 === "2") {
-                this.$message.info('选择的区域没有设备，请重新选择区域');
+                if (!document.querySelector('.el-message--info')) {
+                  this.$message.info('选择的区域没有设备，请重新选择区域');
+                }
                 return false;
               } else if (this.ruleForm.input5 === "1" && this.ruleForm.value1.length === 0) {
-                this.$message.info('您没有选择区域，请点击下拉框选择镇');
+                if (!document.querySelector('.el-message--info')) {
+                  this.$message.info('您没有选择区域，请点击下拉框选择镇');
+                }
                 return false;
               }
               console.log(this.ruleForm.data1);
@@ -441,7 +456,9 @@
               this.storeParam = objDeepCopy(pg);
               this.getVehicleShot(pg);
             }else{
-              this.$message.info("请输入开始时间和车牌号码。");
+              if (!document.querySelector('.el-message--info')) {
+                this.$message.info("请输入开始时间和车牌号码。");
+              }
             }
           } else {
             return false;
@@ -527,8 +544,11 @@
           }
         }
       },
-      getVehicleShot(d) {
-        this.serarchLoading = true;
+      getVehicleShot(d, bool) {
+        if (!bool) {
+          this.serarchLoading = true;
+        }
+        this.count = 10;
         InvestigateGetTrace(d).then(res => {
           this.serarchLoading = false;
           if (res) {
@@ -542,7 +562,7 @@
             this.reselt = true;
             this.evData = res.data.list;
             this.evData.sort(this.compare("shotTime", this.timeOrder ? false : true));
-            this.pagination.total = res.data.total;
+            this.totalMapNum = res.data.total;
             //  重组数据，给左边列表使用
             this.operData();
             this.amap.clearMap();
@@ -557,7 +577,7 @@
         this.leftEvData = [];
         let keyArr = [];
         this.evData.forEach((x, index) => {
-          if ((index + 1) <= this.pagination.pageNum * (this.pagination.pageSize) && (index + 1) > (this.pagination.pageNum - 1) * (this.pagination.pageSize)) {
+          if (index <= this.count) {
             let key = x.shotTime.slice(0, 10);
             if (!keyArr.includes(key)) {
               keyArr.push(key);
@@ -587,7 +607,7 @@
       //查询所有的卡口设备
       timeOrderS () {
         this.timeOrder = !this.timeOrder;
-        this.getVehicleShot(this.storeParam)
+        this.getVehicleShot(this.storeParam, true)
       },
       // 地图标记
       mapHoverInfo (data) {
@@ -881,6 +901,8 @@
   .plane_main_box {
     height: calc(100% - 100px);
     padding-top: 10px;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
   .plane_main {
     .p_main_list {
